@@ -6,7 +6,9 @@ module.exports = FhirClient;
 
 function Search(p) {
 
-  var search = this;
+  var search = function(){
+    return search.next();
+  };
 
   search.client = p.client;
   search.resource = p.resource;
@@ -18,8 +20,8 @@ function Search(p) {
   function gotFeed(d){
     return function(data, status) {
 
-      if(data.links) {
-        var next = data.links.filter(function(l){
+      if(data.link) {
+        var next = data.link.filter(function(l){
           return l.rel === "next";
         });
         if (next.length === 1) {
@@ -53,7 +55,7 @@ function Search(p) {
     };
 
     var ret = new $.Deferred();
-
+    console.log("Nexting", searchParams);
     $.ajax(search.client.authenticated(searchParams))
     .done(gotFeed(ret))
     .fail(failedFeed(ret));
@@ -82,6 +84,7 @@ function Search(p) {
     return ret;
   };
 
+  return search;
 }
 
 function absolute(id, server) {
@@ -280,7 +283,7 @@ function FhirClient(p) {
 
     client.search = function(p){
       // p.resource, p.count, p.searchTerms
-      var s = new Search({
+      var s = Search({
         client: client,
         resource: p.resource,
         searchTerms: p.searchTerms,
