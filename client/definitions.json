@@ -267,7 +267,7 @@
       "timingSchedule": {
         "next": "Schedule"
       }, 
-      "timingstring": {
+      "timingString": {
         "parser": "string"
       }
     }
@@ -349,10 +349,10 @@
       "abatementAge": {
         "next": "Age"
       }, 
-      "abatementboolean": {
+      "abatementBoolean": {
         "parser": "boolean"
       }, 
-      "abatementdate": {
+      "abatementDate": {
         "next": "date"
       }, 
       "asserter": {
@@ -391,7 +391,7 @@
       "onsetAge": {
         "next": "Age"
       }, 
-      "onsetdate": {
+      "onsetDate": {
         "next": "date"
       }, 
       "relatedItem": {
@@ -1457,7 +1457,7 @@
       "reasonCodeableConcept": {
         "next": "CodeableConcept"
       }, 
-      "reasonstring": {
+      "reasonString": {
         "parser": "string"
       }, 
       "serviceProvider": {
@@ -1590,13 +1590,13 @@
       "deceasedAge": {
         "next": "Age"
       }, 
+      "deceasedBoolean": {
+        "parser": "boolean"
+      }, 
       "deceasedRange": {
         "next": "Range"
       }, 
-      "deceasedboolean": {
-        "parser": "boolean"
-      }, 
-      "deceasedstring": {
+      "deceasedString": {
         "parser": "string"
       }, 
       "name": {
@@ -1621,7 +1621,7 @@
       "onsetRange": {
         "next": "Range"
       }, 
-      "onsetstring": {
+      "onsetString": {
         "parser": "string"
       }, 
       "outcome": {
@@ -1677,6 +1677,9 @@
       "type": {
         "next": "CodeableConcept"
       }, 
+      "valueBoolean": {
+        "parser": "boolean"
+      }, 
       "valueCodeableConcept": {
         "next": "CodeableConcept"
       }, 
@@ -1686,10 +1689,7 @@
       "valueRange": {
         "next": "Range"
       }, 
-      "valueboolean": {
-        "parser": "boolean"
-      }, 
-      "valuestring": {
+      "valueString": {
         "parser": "string"
       }
     }
@@ -2450,7 +2450,7 @@
       "additionalInstructionsCodeableConcept": {
         "next": "CodeableConcept"
       }, 
-      "additionalInstructionsstring": {
+      "additionalInstructionsString": {
         "parser": "string"
       }, 
       "maxDosePerPeriod": {
@@ -2471,14 +2471,14 @@
       "site": {
         "next": "CodeableConcept"
       }, 
+      "timingDateTime": {
+        "parser": "date"
+      }, 
       "timingPeriod": {
         "next": "Period"
       }, 
       "timingSchedule": {
         "next": "Schedule"
-      }, 
-      "timingdateTime": {
-        "parser": "date"
       }
     }
   }, 
@@ -2530,7 +2530,7 @@
       "reasonForPrescribingCodeableConcept": {
         "next": "CodeableConcept"
       }, 
-      "reasonForPrescribingstring": {
+      "reasonForPrescribingString": {
         "parser": "string"
       }, 
       "status": {
@@ -2568,7 +2568,7 @@
       "additionalInstructionsCodeableConcept": {
         "next": "CodeableConcept"
       }, 
-      "additionalInstructionsstring": {
+      "additionalInstructionsString": {
         "parser": "string"
       }, 
       "dosageInstructionsText": {
@@ -2592,14 +2592,14 @@
       "site": {
         "next": "CodeableConcept"
       }, 
+      "timingDateTime": {
+        "parser": "date"
+      }, 
       "timingPeriod": {
         "next": "Period"
       }, 
       "timingSchedule": {
         "next": "Schedule"
-      }, 
-      "timingdateTime": {
-        "parser": "date"
       }
     }
   }, 
@@ -2784,11 +2784,11 @@
   }, 
   "Observation": {
     "edges": {
+      "appliesDateTime": {
+        "parser": "date"
+      }, 
       "appliesPeriod": {
         "next": "Period"
-      }, 
-      "appliesdateTime": {
-        "parser": "date"
       }, 
       "bodySite": {
         "next": "CodeableConcept"
@@ -2859,7 +2859,7 @@
       "valueSampledData": {
         "next": "SampledData"
       }, 
-      "valuestring": {
+      "valueString": {
         "parser": "string"
       }
     }
@@ -2890,7 +2890,7 @@
       "valueSampledData": {
         "next": "SampledData"
       }, 
-      "valuestring": {
+      "valueString": {
         "parser": "string"
       }
     }
@@ -2906,7 +2906,7 @@
       "rangeRange": {
         "next": "Range"
       }, 
-      "rangestring": {
+      "rangeString": {
         "parser": "string"
       }
     }
@@ -3131,10 +3131,10 @@
       "contained": {
         "next": "Resource"
       }, 
-      "deceasedboolean": {
+      "deceasedBoolean": {
         "parser": "boolean"
       }, 
-      "deceaseddateTime": {
+      "deceasedDateTime": {
         "parser": "date"
       }, 
       "extension": {
@@ -3152,10 +3152,10 @@
       "maritalStatus": {
         "next": "CodeableConcept"
       }, 
-      "multipleBirthboolean": {
+      "multipleBirthBoolean": {
         "parser": "boolean"
       }, 
-      "multipleBirthinteger": {
+      "multipleBirthInteger": {
         "parser": "integer"
       }, 
       "name": {
@@ -3429,7 +3429,7 @@
       "referenceResourceReference": {
         "next": "ResourceReference"
       }, 
-      "referenceuri": {
+      "referenceUri": {
         "parser": "string"
       }
     }
@@ -3815,25 +3815,25 @@
   }, 
   "Questionnaire.question": {
     "edges": {
-      "answerboolean": {
+      "answerBoolean": {
         "parser": "boolean"
       }, 
-      "answerdate": {
+      "answerDate": {
         "next": "date"
       }, 
-      "answerdateTime": {
+      "answerDateTime": {
         "parser": "date"
       }, 
-      "answerdecimal": {
+      "answerDecimal": {
         "parser": "float"
       }, 
-      "answerinstant": {
+      "answerInstant": {
         "parser": "date"
       }, 
-      "answerinteger": {
+      "answerInteger": {
         "parser": "integer"
       }, 
-      "answerstring": {
+      "answerString": {
         "parser": "string"
       }, 
       "choice": {
@@ -3848,7 +3848,7 @@
       "optionsResourceReference": {
         "next": "ResourceReference"
       }, 
-      "optionsuri": {
+      "optionsUri": {
         "parser": "string"
       }, 
       "remarks": {

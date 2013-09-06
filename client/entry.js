@@ -1,0 +1,1 @@
+window.FhirClient = require('./client');

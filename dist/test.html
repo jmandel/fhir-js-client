@@ -1,0 +1,18 @@
+<script src='fhir-client.js'></script>
+<script>
+  var fhir = new FhirClient({
+    serviceUrl: 'http://hl7connect.healthintersections.com.au/svc/fhir',
+    auth: {
+      type: 'none'
+    }
+  });
+
+  fhir.search({
+    resource: 'observation',
+    searchTerms: {},
+    count: 20
+    }).done(function(r,s){
+    console.log(JSON.stringify(r,null,2));
+  });
+</script>
+See JS console for results...

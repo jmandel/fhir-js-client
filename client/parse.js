@@ -12,16 +12,20 @@ var parsers = {
   'boolean': function(v) {return v.value.toString() === "true";}
 };
 
-function parse(r, path) {
+function parse(r, path, parser) {
 
   if (Array.isArray(r)){
     return r.map(function(e){
-      return parse(e, path);
+      return parse(e, path, parser);
     });
   }
 
   if (typeof r !== 'object') {
     return r;
+  }
+
+  if (parser) {
+    return parser(r);
   }
 
   if (path === undefined || (path[0] == 'Resource')) {
@@ -33,12 +37,13 @@ function parse(r, path) {
     ret.resourceType = resourceType;
     return ret;
   }
+
   var context = defs[path.join(".")];
   var ret = {};
   Object.keys(r).forEach(function(k){
     var p = context && context.edges[k]
     if(p && parsers[p.parser]) {
-      ret[k] = parsers[p.parser](r[k])
+      ret[k] = parse(r[k], [k], parsers[p.parser]);
     } else {
       var nextContext = [k];
       if (p && p.next) {nextContext = p.next.split(".");}

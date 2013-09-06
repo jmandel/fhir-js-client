@@ -1,0 +1,92 @@
+{
+  "Observation": {
+    "text": {
+      "status": {
+        "value": "generated"
+      },
+      "div": "<div>2004-10-22: 137/85 mmHg</div>"
+    },
+    "name": {
+      "coding": [
+        {
+          "system": {
+            "value": "http://loinc.org"
+          },
+          "code": {
+            "value": "55284-4"
+          },
+          "display": {
+            "value": "Blood pressure systolic and diastolic"
+          }
+        }
+      ]
+    },
+    "appliesDateTime": {
+      "value": "2004-10-22"
+    },
+    "status": {
+      "value": "final"
+    },
+    "subject": {
+      "type": {
+        "value": "Patient"
+      },
+      "reference": {
+        "value": "server/fhir/patient/@5227b41ac25e6ac5061d69e1"
+      }
+    },
+    "component": [
+      {
+        "name": {
+          "coding": [
+            {
+              "system": {
+                "value": "http://loinc.org"
+              },
+              "code": {
+                "value": "8480-6"
+              },
+              "display": {
+                "value": "Systolic blood pressure"
+              }
+            }
+          ]
+        },
+        "valueQuantity": {
+          "value": {
+            "value": "137"
+          },
+          "units": {
+            "value": "mm[Hg]"
+          }
+        }
+      },
+      {
+        "name": {
+          "coding": [
+            {
+              "system": {
+                "value": "http://loinc.org"
+              },
+              "code": {
+                "value": "8462-4"
+              },
+              "display": {
+                "value": "Diastolic blood pressure"
+              }
+            }
+          ]
+        },
+        "valueQuantity": {
+          "value": {
+            "value": "85"
+          },
+          "units": {
+            "value": "mm[Hg]"
+          }
+        }
+      }
+    ]
+  }
+}
+

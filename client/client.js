@@ -1,5 +1,5 @@
 var btoa = require('btoa');
-var $ = jQuery = require('jquery');
+var $ = jQuery = process.browser ? require('jQuery-browser') : require('jquery');
 var parse = require('./parse');
 
 module.exports = FhirClient;
@@ -70,8 +70,7 @@ function Search(p) {
       type: 'GET',
       url: search.client.server.serviceUrl + '/' + search.resource + '/search',
       data: terms,
-      dataType: "json",
-      async: true
+      dataType: "json"
     };
 
     var ret = new $.Deferred();
@@ -147,11 +146,10 @@ function FhirClient(p) {
 
     client.indexFeed = function(atomResult) {
       var ret = [];
-      atomResult.entries.forEach(function(e){
+      atomResult.entry.forEach(function(e){
         var more = client.indexResource(e.id, e.content);
         [].push.apply(ret, more);
       });
-      console.log("Index: " + Object.keys(resources));
       return ret; 
     };
 

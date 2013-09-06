@@ -1,0 +1,120 @@
+{
+  "Patient": {
+    "text": {
+      "status": {
+        "value": "generated"
+      },
+      "div": "<div>\n        \n            <p>Amy E. Clark</p>\n      \n          </div>"
+    },
+    "identifier": [
+      {
+        "use": {
+          "value": "usual"
+        },
+        "label": {
+          "value": "SMART Hospiptal MRN"
+        },
+        "system": {
+          "value": "urn:oid:0.1.2.3.4.5.6.7"
+        },
+        "key": {
+          "value": "1540505"
+        }
+      }
+    ],
+    "name": [
+      {
+        "use": {
+          "value": "official"
+        },
+        "family": [
+          {
+            "value": "Clark"
+          }
+        ],
+        "given": [
+          {
+            "value": "Amy"
+          },
+          {
+            "value": "E."
+          }
+        ]
+      }
+    ],
+    "telecom": [
+      {
+        "system": {
+          "value": "phone"
+        },
+        "value": {
+          "value": "800-661-3584"
+        },
+        "use": {
+          "value": "home"
+        }
+      },
+      {
+        "system": {
+          "value": "phone"
+        },
+        "use": {
+          "value": "mobile"
+        }
+      },
+      {
+        "system": {
+          "value": "email"
+        },
+        "value": {
+          "value": "amy.clark@example.com"
+        }
+      }
+    ],
+    "gender": {
+      "coding": [
+        {
+          "system": {
+            "value": "http://hl7.org/fhir/v3/AdministrativeGender"
+          },
+          "code": {
+            "value": "F"
+          },
+          "display": {
+            "value": "Female"
+          }
+        }
+      ]
+    },
+    "birthDate": {
+      "value": "1964-01-21"
+    },
+    "address": [
+      {
+        "use": {
+          "value": "home"
+        },
+        "line": [
+          {
+            "value": "77 North St"
+          }
+        ],
+        "city": {
+          "value": "Bixby"
+        },
+        "state": {
+          "value": "OK"
+        },
+        "zip": {
+          "value": "74008"
+        },
+        "country": {
+          "value": "USA"
+        }
+      }
+    ],
+    "active": {
+      "value": true
+    }
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "text": {
+    "status": "generated",
+    "div": "<div>\n        \n            <p>Amy E. Clark</p>\n      \n          </div>"
+  },
+  "identifier": [
+    {
+      "use": "usual",
+      "label": "SMART Hospiptal MRN",
+      "system": "urn:oid:0.1.2.3.4.5.6.7",
+      "key": "1540505"
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "family": [
+        "Clark"
+      ],
+      "given": [
+        "Amy",
+        "E."
+      ]
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "800-661-3584",
+      "use": "home"
+    },
+    {
+      "system": "phone",
+      "use": "mobile"
+    },
+    {
+      "system": "email",
+      "value": "amy.clark@example.com"
+    }
+  ],
+  "gender": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/v3/AdministrativeGender",
+        "code": "F",
+        "display": "Female"
+      }
+    ]
+  },
+  "birthDate": "1964-01-21T00:00:00.000Z",
+  "address": [
+    {
+      "use": "home",
+      "line": [
+        "77 North St"
+      ],
+      "city": "Bixby",
+      "state": "OK",
+      "zip": "74008",
+      "country": "USA"
+    }
+  ],
+  "active": true,
+  "resourceType": "Patient"
+}

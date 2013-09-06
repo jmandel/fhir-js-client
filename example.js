@@ -1,7 +1,7 @@
 var FhirClient = require('./client');
 
 var fhir = new FhirClient({
-  serviceUrl: 'http://localhost:9090/fhir',
+  serviceUrl: 'http://localhost:8080/fhir-server/fhir',
   auth: {
     type: 'basic',
     username: 'client',
@@ -10,9 +10,9 @@ var fhir = new FhirClient({
 });
 
   fhir.search({
-    resource: 'diagnosticreport',
+    resource: 'observation',
     searchTerms: {},
-    count: 2
+    count: 20
   }).done(function(r,s){
     console.log(JSON.stringify(r,null,2));
     r.forEach(function(report, i){

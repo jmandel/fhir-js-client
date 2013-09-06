@@ -1,0 +1,25 @@
+{
+  "name": "fhir-js-client",
+  "version": "0.0.1",
+  "description": "JavaScript client for Fast Healthcare Interoperability Resources",
+  "author": "Josh Mandel <joshua.mandel@childrens.harvard.edu>",
+  "dependencies": {
+    "btoa": "*",
+    "browserify": "*",
+    "jquery": "*"
+  },
+  "scripts": {
+    "test": "mocha -c -R spec"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*",
+    "sinon": "*",
+    "grunt": "~0.4.1",
+    "grunt-browserify": "~1.2.4",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-shell": "~0.3.1"
+  },
+  "engine": "node >= 0.6.0"
+}

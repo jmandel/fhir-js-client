@@ -20,6 +20,11 @@ jsonParsers = {
     'boolean': 'boolean',
     'code': 'string'
 }
+
+def capitalizeFirstLetter(s):
+    if len(s) < 2: return s.upper()
+    return s[0].upper() + s[1:]
+
 def tree(FILES):
     paths = {}
     def process(file):
@@ -34,10 +39,11 @@ def tree(FILES):
             else: types = [None]
 
             for possibleValue in types:
+
                 valueType = possibleValue['code']['value']  if possibleValue else ""
                 valueType = valueType.replace("*", "").replace("@", "")
                 if (valueType.startswith("Resource(")): valueType = "ResourceReference"
-                p = propertyName.replace("[x]", valueType)
+                p = propertyName.replace("[x]", capitalizeFirstLetter(valueType))
                 parent = ".".join(p.split(".")[:-1])
                 paths[p] = {
                     'edges': {}
