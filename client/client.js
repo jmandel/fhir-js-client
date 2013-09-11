@@ -6,9 +6,7 @@ module.exports = FhirClient;
 
 function Search(p) {
 
-  var search = function(){
-    return search.next();
-  };
+  var search = {};
 
   search.client = p.client;
   search.resource = p.resource;
@@ -51,7 +49,8 @@ function Search(p) {
     var searchParams = {
       type: 'GET',
       url: nextPageUrl,
-      dataType: 'json'
+      dataType: 'json',
+      traditional: true
     };
 
     var ret = new $.Deferred();
@@ -72,7 +71,8 @@ function Search(p) {
       type: 'GET',
       url: search.client.server.serviceUrl + '/' + search.resource + '/search',
       data: terms,
-      dataType: "json"
+      dataType: "json",
+      traditional: true
     };
 
     var ret = new $.Deferred();
@@ -118,10 +118,10 @@ function relative(id, server) {
 function FhirClient(p) {
   // p.serviceUrl
   // p.auth {
-  //    type: 'none' | 'basic' | 'bearer'
-  //    basic --> username, password
-  //    bearer --> token
-  // }
+    //    type: 'none' | 'basic' | 'bearer'
+    //    basic --> username, password
+    //    bearer --> token
+    // }
 
     var resources = {};
     var client = {};
@@ -130,6 +130,19 @@ function FhirClient(p) {
       serviceUrl: p.serviceUrl,
       auth: p.auth
     }
+
+    client.patientId = p.patientId;
+
+    client.resources = {
+      get: function(p) {
+        var url = absolute(p.resource + '/@'+p.id, server);
+        if (url in resources) {
+          return getLocal(url);
+        }
+        return null;
+      }
+    };
+
 
     server.auth = server.auth ||  {
       type: 'none'
@@ -142,6 +155,8 @@ function FhirClient(p) {
 
     client.indexResource = function(id, r) {
       var parsed = parse(r);
+      parsed.resourceId = relative(id, server);
+
       var ret = [parsed];
       resources[absolute(id, server)] = parsed;
       return ret;
@@ -203,7 +218,7 @@ function FhirClient(p) {
       }
     };
 
-    client.lookup = handleReference({
+    client.followSync = handleReference({
       contained: getContained,
       local: getLocal,
     });

@@ -15,7 +15,7 @@ module.exports = function (grunt) {
 
     browserify: {
       vendor: {
-        src: ['vendor/jQuery.js', 'client/client.js'],
+        src: ['vendor/jQuery.js'],
         dest: 'dist/jQuery.js',
         options: {
           ignore: ['jquery'],
