@@ -18,14 +18,13 @@ function Search(p) {
   function gotFeed(d){
     return function(data, status) {
 
+      nextPageUrl = null; 
       if(data.link) {
         var next = data.link.filter(function(l){
           return l.rel === "next";
         });
         if (next.length === 1) {
           nextPageUrl = next[0].href 
-        } else {
-          nextPageUrl = null; 
         }
       }
 
@@ -38,6 +37,10 @@ function Search(p) {
     return function(failure){
       d.reject("Search failed.", arguments);
     }
+  };
+
+  search.hasNext = function(){
+    return nextPageUrl !== null;
   };
 
   search.next = function() {
@@ -115,6 +118,55 @@ function relative(id, server) {
   return params;
 }
 
+
+function hasCode(o, codeMap){
+  var codes = Object.keys(codeMap).forEach(function(c){return codeMap[c];});
+  return o.name.coding.filter(function(c){
+    return codes.indexOf(c.code) !== -1;
+  }).length > 0;
+};
+
+function ClientPrototype(){};
+ClientPrototype.prototype.byCode = function(observations, property){
+  var ret = {};
+  if (!Array.isArray(observations)){
+    observations = [observations];
+  }
+  observations.forEach(function(o){
+    o[property].coding.forEach(function(coding){
+      ret[coding.code] = ret[coding.code] || [];
+      ret[coding.code].push({observation: o, component: o});
+    });
+
+    o.component && o.component.forEach(function(c){
+      c[property].coding.forEach(function(coding){
+        ret[coding.code] = ret[coding.code] || [];
+        ret[coding.code].push({observation: o, component: c});
+      });
+    });
+  });
+  return ret;
+};
+
+ClientPrototype.prototype.units = {
+  cm: function(pq){
+    if(pq.units == "cm") return pq.value;
+    if(pq.units == "m") return 100*pq.value;
+    if(pq.units == "in") return 2.54*pq.value;
+    if(pq.units == "[in_us]") return 2.54*pq.value;
+    if(pq.units == "[in_i]") return 2.54*pq.value;
+    throw "Unrecognized length unit: " + pq.units
+  },
+  kg: function(pq){
+    if(pq.units == "kg") return pq.value;
+    if(pq.units.match(/lb/)) return pq.value / 2.20462;
+    throw "Unrecognized weight unit: " + pq.units
+  },
+  any: function(pq){
+    return pq.value
+  }
+};
+
 function FhirClient(p) {
   // p.serviceUrl
   // p.auth {
@@ -124,7 +176,7 @@ function FhirClient(p) {
     // }
 
     var resources = {};
-    var client = {};
+    var client = new ClientPrototype();
 
     var server = client.server = {
       serviceUrl: p.serviceUrl,
