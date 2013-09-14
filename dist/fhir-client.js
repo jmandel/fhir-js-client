@@ -9168,6 +9168,21 @@ function hasCode(o, codeMap){
 };
 
 function ClientPrototype(){};
+ClientPrototype.prototype.byCodes = function(observations, property){
+
+  var bank = this.byCode(observations, property);
+  function byCodes(){
+    var ret = [];
+    for (var i=0; i<arguments.length;i++){
+      var set = bank[arguments[i]];
+      if (set) {[].push.apply(ret, set);}
+    }
+    return ret;
+  }
+
+  return byCodes;
+};
+
 ClientPrototype.prototype.byCode = function(observations, property){
   var ret = {};
   if (!Array.isArray(observations)){
