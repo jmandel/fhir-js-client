@@ -188,7 +188,7 @@ var Guid = Guid || (function () {
 
   var create = function () {
     var hasCrypto = typeof (window.crypto) != 'undefined',
-    hasRandomValues = typeof (window.crypto.getRandomValues) != 'undefined';
+    hasRandomValues = hasCrypto && typeof (window.crypto.getRandomValues) != 'undefined';
     return (hasCrypto && hasRandomValues) ? _cryptoGuid() : _guid();
   };
 

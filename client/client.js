@@ -1,6 +1,5 @@
 var btoa = require('btoa');
 var $ = jQuery = process.browser ? require('jQuery-browser') : require('jquery');
-var parse = require('./parse');
 
 module.exports = FhirClient;
 
@@ -72,7 +71,7 @@ function Search(p) {
 
     var searchParams = {
       type: 'GET',
-      url: search.client.server.serviceUrl + '/' + search.resource + '/search',
+      url: search.client.server.serviceUrl + '/' + search.resource,
       data: terms,
       dataType: "json",
       traditional: true
@@ -103,7 +102,7 @@ function relative(id, server) {
     id = server.serviceUrl + '/' + id
   }
   var quotedBase = ( server.serviceUrl + '/' ).replace(regexpSpecialChars, '\\$1');
-  var matcher = new RegExp("^"+quotedBase + "([^/]+)/@([^/]+)(?:/history/@(.*))?$");
+  var matcher = new RegExp("^"+quotedBase + "([^/]+)/([^/]+)(?:/_history/(.*))?$");
   var match = id.match(matcher);
   if (match === null) {
     throw "Couldn't determine a relative URI for " + id;
@@ -202,7 +201,7 @@ function FhirClient(p) {
 
     client.resources = {
       get: function(p) {
-        var url = absolute(p.resource + '/@'+p.id, server);
+        var url = absolute(p.resource + '/'+p.id, server);
         if (url in resources) {
           return getLocal(url);
         }
@@ -221,17 +220,15 @@ function FhirClient(p) {
     }
 
     client.indexResource = function(id, r) {
-      var parsed = parse(r);
-      parsed.resourceId = relative(id, server);
-
-      var ret = [parsed];
-      resources[absolute(id, server)] = parsed;
+      r.resourceId = relative(id, server);
+      var ret = [r];
+      resources[absolute(id, server)] = r;
       return ret;
     };
 
     client.indexFeed = function(atomResult) {
       var ret = [];
-      atomResult.entry.forEach(function(e){
+      atomResult.feed.entry.forEach(function(e){
         var more = client.indexResource(e.id, e.content);
         [].push.apply(ret, more);
       });
@@ -343,7 +340,7 @@ function FhirClient(p) {
       // p.resource, p.id, ?p.version, p.include
 
       var ret = new $.Deferred();
-      var url = server.serviceUrl + '/' + p.resource + '/@' + p.id;
+      var url = server.serviceUrl + '/' + p.resource + '/' + p.id;
 
       $.ajax(client.authenticated({
         type: 'GET',
