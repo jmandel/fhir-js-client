@@ -9190,14 +9190,7 @@ ClientPrototype.prototype.byCode = function(observations, property){
   observations.forEach(function(o){
     o[property].coding.forEach(function(coding){
       ret[coding.code] = ret[coding.code] || [];
-      ret[coding.code].push({observation: o, component: o});
-    });
-
-    o.component && o.component.forEach(function(c){
-      c[property].coding.forEach(function(coding){
-        ret[coding.code] = ret[coding.code] || [];
-        ret[coding.code].push({observation: o, component: c});
-      });
+      ret[coding.code].push(o);
     });
   });
   return ret;
@@ -9269,7 +9262,7 @@ function FhirClient(p) {
 
     client.indexFeed = function(atomResult) {
       var ret = [];
-      atomResult.feed.entry.forEach(function(e){
+      (atomResult.feed.entry || []).forEach(function(e){
         var more = client.indexResource(e.id, e.content);
         [].push.apply(ret, more);
       });
