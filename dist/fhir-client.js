@@ -9318,7 +9318,7 @@ function FhirClient(p) {
 
     client.followSync = handleReference({
       contained: getContained,
-      local: getLocal,
+      local: getLocal
     });
 
     client.follow = handleReference({
