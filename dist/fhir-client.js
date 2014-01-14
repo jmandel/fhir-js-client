@@ -9198,17 +9198,17 @@ ClientPrototype.prototype.byCode = function(observations, property){
 
 ClientPrototype.prototype.units = {
   cm: function(pq){
-    if(pq.units == "cm") return pq.value;
-    if(pq.units == "m") return 100*pq.value;
-    if(pq.units == "in") return 2.54*pq.value;
-    if(pq.units == "[in_us]") return 2.54*pq.value;
-    if(pq.units == "[in_i]") return 2.54*pq.value;
-    throw "Unrecognized length unit: " + pq.units
+    if(pq.code == "cm") return pq.value;
+    if(pq.code == "m") return 100*pq.value;
+    if(pq.code == "in") return 2.54*pq.value;
+    if(pq.code == "[in_us]") return 2.54*pq.value;
+    if(pq.code == "[in_i]") return 2.54*pq.value;
+    throw "Unrecognized length unit: " + pq.code
   },
   kg: function(pq){
-    if(pq.units == "kg") return pq.value;
-    if(pq.units.match(/lb/)) return pq.value / 2.20462;
-    throw "Unrecognized weight unit: " + pq.units
+    if(pq.code == "kg") return pq.value;
+    if(pq.code.match(/lb/)) return pq.value / 2.20462;
+    throw "Unrecognized weight unit: " + pq.code
   },
   any: function(pq){
     return pq.value
