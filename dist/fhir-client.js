@@ -8843,10 +8843,18 @@ var process=require("__browserify_process");var $ = jQuery = process.browser ? r
 var FhirClient = require('./client');
 
 var BBClient = module.exports =  {debug: true}
+BBClient.jQuery = BBClient.$ = jQuery;
 
-BBClient.ready = function(callback){
+BBClient.ready = function(hash, callback){
 
-  var oauthResult = window.location.hash.match(/#(.*)/);
+  var mustClearHash = false;
+  if (arguments.length == 1){
+    mustClearHash = true;
+    callback = hash;
+    hash =  window.location.hash;
+  }
+
+  var oauthResult = hash.match(/#(.*)/);
   oauthResult = oauthResult ? oauthResult[1] : "";
   oauthResult = oauthResult.split(/&/);
 
@@ -8871,7 +8879,7 @@ BBClient.ready = function(callback){
   console.log(BBClient);
 
   // don't expose hash in the URL while in production mode
-  if (BBClient.debug !== true) {
+  if (mustClearHash && BBClient.debug !== true) {
     window.location.hash="";
   }
 
@@ -9405,6 +9413,30 @@ function FhirClient(p) {
 
       return s.execute();
     }
+
+  client.drain =  function(search, batch, db){
+      var d = $.Deferred();
+      if (batch === undefined){
+        batch = function(vs, db) {
+          db.__results = db.__results || [];
+          vs.forEach(function(v){
+            db.__results.push(v);
+          }); 
+        }
+      }
+      db = db || {};
+      client.search(search)
+      .done(function drain(vs, cursor){
+        batch(vs, db);
+        if (cursor.hasNext()){
+          cursor.next().done(drain);
+        } else {
+          d.resolve(db.__results || db);
+        } 
+      });
+      return d.promise();
+  };
+
 
     return client;
 }
