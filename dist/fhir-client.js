@@ -9204,8 +9204,14 @@ ClientPrototype.prototype.byCode = function(observations, property){
   return ret;
 };
 
+function ensureNumerical(pq) {
+  if (typeof pq.value !== "number") {
+    throw "Found a non-numerical unit: " + pq.value + " " + pq.code;
+  }
+};
 ClientPrototype.prototype.units = {
   cm: function(pq){
+    ensureNumerical(pq);
     if(pq.code == "cm") return pq.value;
     if(pq.code == "m") return 100*pq.value;
     if(pq.code == "in") return 2.54*pq.value;
@@ -9214,11 +9220,13 @@ ClientPrototype.prototype.units = {
     throw "Unrecognized length unit: " + pq.code
   },
   kg: function(pq){
+    ensureNumerical(pq);
     if(pq.code == "kg") return pq.value;
     if(pq.code.match(/lb/)) return pq.value / 2.20462;
     throw "Unrecognized weight unit: " + pq.code
   },
   any: function(pq){
+    ensureNumerical(pq);
     return pq.value
   }
 };
