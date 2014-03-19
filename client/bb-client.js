@@ -96,21 +96,15 @@ BBClient.noAuthFhirProvider = function(serviceUrl){
 BBClient.authorize = function(params){
 
   var state = Guid.newGuid();
-  params.state = params.state || {};
 
   if (params.provider.oauth2 == null) {
 
-    jQuery.extend(params.state, {
-      provider: params.provider,
-      patientId: params.patientId
-    });
-
-    if (params.state.patientId === undefined) {
+    if (params.patientId === undefined) {
       throw "For a FHIR server without OAuth, you must supply a patient id " + 
         "at launch time... otherwise we don't know how to search for data.";
     }
 
-    localStorage[state] = JSON.stringify(params.state);
+    localStorage[state] = JSON.stringify(params);
     return window.location.href = client.redirect_uris[0] + "#state="+state;
   }
 
@@ -130,14 +124,9 @@ BBClient.authorize = function(params){
   jQuery.ajax(post).success(function(client){
     console.log("Got client", JSON.stringify(client, null,2 ));
 
-    params.state = params.state || {};
-    jQuery.extend(params.state, {
-      client: client,
-      provider: params.provider,
-      patientId: params.patientId
-    });
+    params.client = client;
 
-    localStorage[state] = JSON.stringify(params.state);
+    localStorage[state] = JSON.stringify(params);
 
     var authScope;
     if (params.patientId) {
