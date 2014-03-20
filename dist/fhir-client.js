@@ -9394,7 +9394,7 @@ function FhirClient(p) {
         ret.resolve(ids[0]);
       })
       .fail(function(){
-        ret.reject("Could not fetch " + rel, arguments);
+        ret.reject("Could not fetch " + url, arguments);
       });
       return ret;
     };
