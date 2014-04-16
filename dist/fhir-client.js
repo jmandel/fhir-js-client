@@ -9270,7 +9270,7 @@ function FhirClient(p) {
     client.indexFeed = function(atomResult) {
       var ret = [];
       var feed = atomResult.feed || atomResult;
-      (feed.entries || []).forEach(function(e){
+      (feed.entry || []).forEach(function(e){
         var more = client.indexResource(e.id, e.content);
         [].push.apply(ret, more);
       });
