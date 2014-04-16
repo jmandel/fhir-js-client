@@ -18,8 +18,10 @@ function Search(p) {
     return function(data, status) {
 
       nextPageUrl = null; 
-      if(data.feed.link) {
-        var next = data.feed.link.filter(function(l){
+      var feed = data.feed || data;
+
+      if(feed.link) {
+        var next = feed.link.filter(function(l){
           return l.rel === "next";
         });
         if (next.length === 1) {
@@ -229,7 +231,8 @@ function FhirClient(p) {
 
     client.indexFeed = function(atomResult) {
       var ret = [];
-      (atomResult.feed.entry || []).forEach(function(e){
+      var feed = atomResult.feed || atomResult;
+      (feed.entries || []).forEach(function(e){
         var more = client.indexResource(e.id, e.content);
         [].push.apply(ret, more);
       });
