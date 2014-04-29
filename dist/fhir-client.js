@@ -1,5 +1,4 @@
-require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"rUASAf":[function(require,module,exports){
-var global=self;(function browserifyShim(module, exports, define, browserify_shim__define__module__export__) {
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.0.3
  * http://jquery.com/
@@ -8830,16 +8829,10 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 
 })( window );
 
-; browserify_shim__define__module__export__(typeof $ != "undefined" ? $ : window.$);
-
-}).call(global, undefined, undefined, undefined, function defineExport(ex) { module.exports = ex; });
-
-},{}],"jQuery-browser":[function(require,module,exports){
-module.exports=require('rUASAf');
-},{}]},{},["rUASAf"])
-;
-;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var process=require("__browserify_process");var $ = jQuery = process.browser ? require('jQuery-browser') : require('jquery');
+},{}]},{},[1])
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function (process){
+var $ = jQuery = process.browser ? require('jQuery-browser') : require('jquery');
 var FhirClient = require('./client');
 
 var BBClient = module.exports =  {debug: true}
@@ -9035,9 +9028,33 @@ var Guid = Guid || (function () {
     empty: EMPTY
   };})(); 
 
-},{"./client":2,"__browserify_process":7,"jquery":5}],2:[function(require,module,exports){
-var process=require("__browserify_process");var btoa = require('btoa');
-var $ = jQuery = process.browser ? require('jQuery-browser') : require('jquery');
+}).call(this,require("/home/jmandel/smart/fhir-js-client/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"./client":3,"/home/jmandel/smart/fhir-js-client/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":13,"jquery":8}],2:[function(require,module,exports){
+var c = require('../vendor/conformance.json');
+var definitions = {};
+var camelCased = function(s){
+  return s.replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
+};
+
+c.rest[0].resource.forEach(function(r){
+  var params = [];
+  definitions[r.type] = {
+    params: params
+  };
+
+  r.searchParam.forEach(function(sp){
+    params.push({
+      name: camelCased(sp.name),
+      type: sp.type
+    });
+  });
+});
+
+module.exports = definitions;
+
+},{"../vendor/conformance.json":17}],3:[function(require,module,exports){
+var btoa = require('btoa');
+var $ = jQuery = require('./jquery');
 
 module.exports = FhirClient;
 
@@ -9046,8 +9063,7 @@ function Search(p) {
   var search = {};
 
   search.client = p.client;
-  search.resource = p.resource;
-  search.searchTerms = p.searchTerms;
+  search.spec = p.spec;
   search.count = p.count || 50;
 
   var nextPageUrl = null;
@@ -9106,16 +9122,16 @@ function Search(p) {
 
   search.execute = function() {
 
-    var terms = search.searchTerms || {};
-    terms._count = search.count;
 
     var searchParams = {
       type: 'GET',
-      url: search.client.server.serviceUrl + '/' + search.resource,
-      data: terms,
+      url: search.client.server.serviceUrl + '/' + search.spec.resourceName + '/_search',
+      data: search.spec.queryParams(),
       dataType: "json",
       traditional: true
     };
+
+    console.log(JSON.stringify(searchParams,null,2));
 
     var ret = new $.Deferred();
 
@@ -9402,19 +9418,17 @@ function FhirClient(p) {
       return ret;
     };
 
-    client.search = function(p){
+    client.search = function(searchSpec){
       // p.resource, p.count, p.searchTerms
       var s = Search({
         client: client,
-        resource: p.resource,
-        searchTerms: p.searchTerms,
-        count: p.count
+        spec: searchSpec
       });
 
       return s.execute();
     }
 
-  client.drain =  function(search, batch, db){
+    client.drain =  function(search, batch, db){
       var d = $.Deferred();
       if (batch === undefined){
         batch = function(vs, db) {
@@ -9435,18 +9449,2294 @@ function FhirClient(p) {
         } 
       });
       return d.promise();
-  };
+    };
 
 
     return client;
 }
 
-},{"__browserify_process":7,"btoa":4,"jquery":5}],3:[function(require,module,exports){
+},{"./jquery":5,"btoa":16}],4:[function(require,module,exports){
 window.FhirClient = require('./client');
+window.SearchSpecification = require('./search-specification.js');
 window.BBClient = require('./bb-client');
 
-},{"./bb-client":1,"./client":2}],4:[function(require,module,exports){
-var Buffer=require("__browserify_Buffer").Buffer;(function () {
+},{"./bb-client":1,"./client":3,"./search-specification.js":7}],5:[function(require,module,exports){
+(function (process){
+if (process.browser) {
+  module.exports = require('jQuery-browser');
+} else {
+  var jq = require('jquery');
+  var window = require('jsdom').jsdom().createWindow();
+  module.exports = jq(window);
+}
+
+}).call(this,require("/home/jmandel/smart/fhir-js-client/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"/home/jmandel/smart/fhir-js-client/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":13,"jquery":8,"jsdom":8}],6:[function(require,module,exports){
+module.exports = {
+  any: 'special::any_namsace',
+  none: 'special::no_namespace',
+  loinc: 'http://loinc.org',
+  ucum: 'http://unitsofmeasure.org',
+  snomed: 'http://snomed.info/sct',
+  rxnorm: 'http://rxnav.nlm.nih.gov/REST/rxcui'
+}
+
+},{}],7:[function(require,module,exports){
+module.exports = specs = {};
+var util = require('util');
+var namespace = require('./namespace');
+var definitions = require('./build-definitions');
+
+var SearchParam = function SearchParam(name){
+  this.name = name;
+  this.handlers = { };
+
+  this.handlers[name+'In'] = function(){
+    var values = [];
+    for (var i=0;i<arguments.length;i++){
+      values.push(this.handlers[name].apply(this, [arguments[i]]).value);
+    }
+    return {
+      name: name,
+      oneOf: values
+    };
+  };
+
+  this.handlers[name] = function(value){
+    return {
+      name: name,
+      value: value
+    };
+  };
+
+  this.handlers[name+'Missing'] = function(value){
+    return {
+      name: name+':missing',
+      value: value === 'false' ? false : Boolean(value)
+    };
+  };
+
+}
+
+var ReferenceSearchParam = function ReferenceSearchParam(name){
+  SearchParam.apply(this, arguments);
+
+  this.handlers[name] = function(subSpec){
+    var clauseName = name + ':' + subSpec.constructor.resourceName;
+
+    if (typeof subSpec === 'string'){
+      return {
+        name: name,
+        value: subSpec
+      };
+    }
+    var clauses = subSpec.__getClauses();
+
+    var ret = clauses.map(function(clause){
+
+      var oneClause = {
+        name: clauseName + '.' + clause.name
+      };
+
+      if (clause.value) oneClause.value = clause.value;
+      if (clause.oneOf) oneClause.oneOf = clause.oneOf;
+
+      if (clause.name == '_id') {
+        oneClause = {
+          name: clauseName,
+          value: clause.value
+        }
+      }
+      return oneClause
+    });
+
+    return ret;
+  };
+
+};
+
+ReferenceSearchParam.prototype = new SearchParam();
+ReferenceSearchParam.prototype.constructor = ReferenceSearchParam;
+
+var StringSearchParam = function StringSearchParam(name){
+  SearchParam.apply(this, arguments);
+
+  this.handlers[name+'Exact'] = function(value){
+    return {
+      name: name+':exact',
+      value: value
+    };
+  };
+
+};
+StringSearchParam.prototype = new SearchParam();
+StringSearchParam.prototype.constructor = StringSearchParam;
+
+var TokenSearchParam = function TokenSearchParam(name){
+  SearchParam.apply(this, arguments);
+
+  this.handlers[name] = function(ns, value){
+
+    var ret = {
+      name: name,
+      value: ns + '|'+ value
+    }
+
+    if (value === undefined) {
+      ret.value = ns;
+    }
+
+    if (ns === namespace.any) {
+      ret.value = value;
+    }
+
+    if (ns === namespace.none) {
+      ret.value = '|'+value;
+    }
+
+    return ret;
+
+  };
+
+  this.handlers[name+'Text'] = function(value){
+    return {
+      name: name,
+      value: value
+    };
+  };
+
+
+
+}
+TokenSearchParam.prototype = new SearchParam();
+TokenSearchParam.prototype.constructor = TokenSearchParam;
+
+var DateSearchParam = function DateSearchParam(name){
+  SearchParam.apply(this, arguments);
+}
+DateSearchParam.prototype = new SearchParam();
+DateSearchParam.prototype.constructor = DateSearchParam;
+
+var NumberSearchParam = function NumberSearchParam(name){
+  SearchParam.apply(this, arguments);
+}
+NumberSearchParam();
+NumberSearchParam.prototype.constructor = NumberSearchParam;
+
+var QuantitySearchParam = function QuantitySearchParam(name){
+  SearchParam.apply(this, arguments);
+}
+QuantitySearchParam.prototype = new SearchParam();
+QuantitySearchParam.prototype.constructor = QuantitySearchParam;
+
+var CompositeSearchParam = function  CompositeSearchParam(name){
+  SearchParam.apply(this, arguments);
+}
+CompositeSearchParam.prototype = new SearchParam();
+CompositeSearchParam.prototype.constructor = CompositeSearchParam;
+
+
+var paramTypes = {
+  string: StringSearchParam,
+  reference: ReferenceSearchParam,
+  token: TokenSearchParam,
+  number: NumberSearchParam,
+  quantity: QuantitySearchParam,
+  date: DateSearchParam,
+  composite: CompositeSearchParam
+}
+
+Object.keys(definitions).forEach(function(tname){
+  var params = definitions[tname].params;
+
+  // Create a subclass of 'SearchSpecification'
+  // to track search parameters for each resource
+  // e.g. Patient knows about given name, family name, etc.
+  var resourceSpec = function(){
+    SearchSpecification.apply(this, arguments);
+  };
+
+  resourceSpec.prototype = new SearchSpecification();
+  resourceSpec.prototype.constructor = resourceSpec;
+  resourceSpec.resourceName = tname;
+
+  params.forEach(function(p){
+    defineSearchParam(resourceSpec, new paramTypes[p.type](p.name));
+  });
+
+  defineSearchParam(resourceSpec, new paramTypes['reference']('_id'));
+
+  specs[tname] = new resourceSpec();
+
+});
+
+function defineSearchParam(resourceSpec, searchParam) {
+  Object.keys(searchParam.handlers).forEach(function(handlerName){
+
+    resourceSpec.prototype[handlerName] = function(){
+
+      var clause = searchParam.handlers[handlerName].apply(
+        searchParam, arguments
+      );
+      return this.__addClause(clause);
+
+    }
+  });
+}
+
+function SearchSpecification(clauses){ 
+
+  if (clauses === undefined) {
+    clauses = [];
+  }
+
+  this.resourceName = this.constructor.resourceName;
+
+  this.__addClause = function(c){
+    var newClauses = JSON.parse(JSON.stringify(clauses));
+    if (!util.isArray(c)){
+      c = [c];
+    }
+
+    [].push.apply(newClauses, c);
+    return new (this.constructor)(newClauses);
+  }
+
+  this.__getClauses = function(){
+    return clauses;
+  }
+
+  this.__printClauses = function(){
+    console.log(clauses);
+  }
+
+  this.queryParams = function(){
+    var clauses = this.__getClauses();
+    var params = {};
+    clauses.forEach(function(c){
+      var name = encodeURIComponent(c.name);
+      params[name] = params[name] || [];
+      if (c.oneOf !== undefined) {
+        var joined = c.oneOf.join(',');
+        params[name].push(encodeURIComponent(joined));
+      } else {
+        params[name].push(encodeURIComponent(c.value));
+      }
+    });
+    return params;
+  }
+
+}
+
+},{"./build-definitions":2,"./namespace":6,"util":15}],8:[function(require,module,exports){
+
+},{}],9:[function(require,module,exports){
+/*!
+ * The buffer module from node.js, for the browser.
+ *
+ * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * @license  MIT
+ */
+
+var base64 = require('base64-js')
+var ieee754 = require('ieee754')
+
+exports.Buffer = Buffer
+exports.SlowBuffer = Buffer
+exports.INSPECT_MAX_BYTES = 50
+Buffer.poolSize = 8192
+
+/**
+ * If `Buffer._useTypedArrays`:
+ *   === true    Use Uint8Array implementation (fastest)
+ *   === false   Use Object implementation (compatible down to IE6)
+ */
+Buffer._useTypedArrays = (function () {
+  // Detect if browser supports Typed Arrays. Supported browsers are IE 10+, Firefox 4+,
+  // Chrome 7+, Safari 5.1+, Opera 11.6+, iOS 4.2+. If the browser does not support adding
+  // properties to `Uint8Array` instances, then that's the same as no `Uint8Array` support
+  // because we need to be able to add all the node Buffer API methods. This is an issue
+  // in Firefox 4-29. Now fixed: https://bugzilla.mozilla.org/show_bug.cgi?id=695438
+  try {
+    var buf = new ArrayBuffer(0)
+    var arr = new Uint8Array(buf)
+    arr.foo = function () { return 42 }
+    return 42 === arr.foo() &&
+        typeof arr.subarray === 'function' // Chrome 9-10 lack `subarray`
+  } catch (e) {
+    return false
+  }
+})()
+
+/**
+ * Class: Buffer
+ * =============
+ *
+ * The Buffer constructor returns instances of `Uint8Array` that are augmented
+ * with function properties for all the node `Buffer` API functions. We use
+ * `Uint8Array` so that square bracket notation works as expected -- it returns
+ * a single octet.
+ *
+ * By augmenting the instances, we can avoid modifying the `Uint8Array`
+ * prototype.
+ */
+function Buffer (subject, encoding, noZero) {
+  if (!(this instanceof Buffer))
+    return new Buffer(subject, encoding, noZero)
+
+  var type = typeof subject
+
+  // Workaround: node's base64 implementation allows for non-padded strings
+  // while base64-js does not.
+  if (encoding === 'base64' && type === 'string') {
+    subject = stringtrim(subject)
+    while (subject.length % 4 !== 0) {
+      subject = subject + '='
+    }
+  }
+
+  // Find the length
+  var length
+  if (type === 'number')
+    length = coerce(subject)
+  else if (type === 'string')
+    length = Buffer.byteLength(subject, encoding)
+  else if (type === 'object')
+    length = coerce(subject.length) // assume that object is array-like
+  else
+    throw new Error('First argument needs to be a number, array or string.')
+
+  var buf
+  if (Buffer._useTypedArrays) {
+    // Preferred: Return an augmented `Uint8Array` instance for best performance
+    buf = Buffer._augment(new Uint8Array(length))
+  } else {
+    // Fallback: Return THIS instance of Buffer (created by `new`)
+    buf = this
+    buf.length = length
+    buf._isBuffer = true
+  }
+
+  var i
+  if (Buffer._useTypedArrays && typeof subject.byteLength === 'number') {
+    // Speed optimization -- use set if we're copying from a typed array
+    buf._set(subject)
+  } else if (isArrayish(subject)) {
+    // Treat array-ish objects as a byte array
+    for (i = 0; i < length; i++) {
+      if (Buffer.isBuffer(subject))
+        buf[i] = subject.readUInt8(i)
+      else
+        buf[i] = subject[i]
+    }
+  } else if (type === 'string') {
+    buf.write(subject, 0, encoding)
+  } else if (type === 'number' && !Buffer._useTypedArrays && !noZero) {
+    for (i = 0; i < length; i++) {
+      buf[i] = 0
+    }
+  }
+
+  return buf
+}
+
+// STATIC METHODS
+// ==============
+
+Buffer.isEncoding = function (encoding) {
+  switch (String(encoding).toLowerCase()) {
+    case 'hex':
+    case 'utf8':
+    case 'utf-8':
+    case 'ascii':
+    case 'binary':
+    case 'base64':
+    case 'raw':
+    case 'ucs2':
+    case 'ucs-2':
+    case 'utf16le':
+    case 'utf-16le':
+      return true
+    default:
+      return false
+  }
+}
+
+Buffer.isBuffer = function (b) {
+  return !!(b !== null && b !== undefined && b._isBuffer)
+}
+
+Buffer.byteLength = function (str, encoding) {
+  var ret
+  str = str + ''
+  switch (encoding || 'utf8') {
+    case 'hex':
+      ret = str.length / 2
+      break
+    case 'utf8':
+    case 'utf-8':
+      ret = utf8ToBytes(str).length
+      break
+    case 'ascii':
+    case 'binary':
+    case 'raw':
+      ret = str.length
+      break
+    case 'base64':
+      ret = base64ToBytes(str).length
+      break
+    case 'ucs2':
+    case 'ucs-2':
+    case 'utf16le':
+    case 'utf-16le':
+      ret = str.length * 2
+      break
+    default:
+      throw new Error('Unknown encoding')
+  }
+  return ret
+}
+
+Buffer.concat = function (list, totalLength) {
+  assert(isArray(list), 'Usage: Buffer.concat(list, [totalLength])\n' +
+      'list should be an Array.')
+
+  if (list.length === 0) {
+    return new Buffer(0)
+  } else if (list.length === 1) {
+    return list[0]
+  }
+
+  var i
+  if (typeof totalLength !== 'number') {
+    totalLength = 0
+    for (i = 0; i < list.length; i++) {
+      totalLength += list[i].length
+    }
+  }
+
+  var buf = new Buffer(totalLength)
+  var pos = 0
+  for (i = 0; i < list.length; i++) {
+    var item = list[i]
+    item.copy(buf, pos)
+    pos += item.length
+  }
+  return buf
+}
+
+// BUFFER INSTANCE METHODS
+// =======================
+
+function _hexWrite (buf, string, offset, length) {
+  offset = Number(offset) || 0
+  var remaining = buf.length - offset
+  if (!length) {
+    length = remaining
+  } else {
+    length = Number(length)
+    if (length > remaining) {
+      length = remaining
+    }
+  }
+
+  // must be an even number of digits
+  var strLen = string.length
+  assert(strLen % 2 === 0, 'Invalid hex string')
+
+  if (length > strLen / 2) {
+    length = strLen / 2
+  }
+  for (var i = 0; i < length; i++) {
+    var byte = parseInt(string.substr(i * 2, 2), 16)
+    assert(!isNaN(byte), 'Invalid hex string')
+    buf[offset + i] = byte
+  }
+  Buffer._charsWritten = i * 2
+  return i
+}
+
+function _utf8Write (buf, string, offset, length) {
+  var charsWritten = Buffer._charsWritten =
+    blitBuffer(utf8ToBytes(string), buf, offset, length)
+  return charsWritten
+}
+
+function _asciiWrite (buf, string, offset, length) {
+  var charsWritten = Buffer._charsWritten =
+    blitBuffer(asciiToBytes(string), buf, offset, length)
+  return charsWritten
+}
+
+function _binaryWrite (buf, string, offset, length) {
+  return _asciiWrite(buf, string, offset, length)
+}
+
+function _base64Write (buf, string, offset, length) {
+  var charsWritten = Buffer._charsWritten =
+    blitBuffer(base64ToBytes(string), buf, offset, length)
+  return charsWritten
+}
+
+function _utf16leWrite (buf, string, offset, length) {
+  var charsWritten = Buffer._charsWritten =
+    blitBuffer(utf16leToBytes(string), buf, offset, length)
+  return charsWritten
+}
+
+Buffer.prototype.write = function (string, offset, length, encoding) {
+  // Support both (string, offset, length, encoding)
+  // and the legacy (string, encoding, offset, length)
+  if (isFinite(offset)) {
+    if (!isFinite(length)) {
+      encoding = length
+      length = undefined
+    }
+  } else {  // legacy
+    var swap = encoding
+    encoding = offset
+    offset = length
+    length = swap
+  }
+
+  offset = Number(offset) || 0
+  var remaining = this.length - offset
+  if (!length) {
+    length = remaining
+  } else {
+    length = Number(length)
+    if (length > remaining) {
+      length = remaining
+    }
+  }
+  encoding = String(encoding || 'utf8').toLowerCase()
+
+  var ret
+  switch (encoding) {
+    case 'hex':
+      ret = _hexWrite(this, string, offset, length)
+      break
+    case 'utf8':
+    case 'utf-8':
+      ret = _utf8Write(this, string, offset, length)
+      break
+    case 'ascii':
+      ret = _asciiWrite(this, string, offset, length)
+      break
+    case 'binary':
+      ret = _binaryWrite(this, string, offset, length)
+      break
+    case 'base64':
+      ret = _base64Write(this, string, offset, length)
+      break
+    case 'ucs2':
+    case 'ucs-2':
+    case 'utf16le':
+    case 'utf-16le':
+      ret = _utf16leWrite(this, string, offset, length)
+      break
+    default:
+      throw new Error('Unknown encoding')
+  }
+  return ret
+}
+
+Buffer.prototype.toString = function (encoding, start, end) {
+  var self = this
+
+  encoding = String(encoding || 'utf8').toLowerCase()
+  start = Number(start) || 0
+  end = (end !== undefined)
+    ? Number(end)
+    : end = self.length
+
+  // Fastpath empty strings
+  if (end === start)
+    return ''
+
+  var ret
+  switch (encoding) {
+    case 'hex':
+      ret = _hexSlice(self, start, end)
+      break
+    case 'utf8':
+    case 'utf-8':
+      ret = _utf8Slice(self, start, end)
+      break
+    case 'ascii':
+      ret = _asciiSlice(self, start, end)
+      break
+    case 'binary':
+      ret = _binarySlice(self, start, end)
+      break
+    case 'base64':
+      ret = _base64Slice(self, start, end)
+      break
+    case 'ucs2':
+    case 'ucs-2':
+    case 'utf16le':
+    case 'utf-16le':
+      ret = _utf16leSlice(self, start, end)
+      break
+    default:
+      throw new Error('Unknown encoding')
+  }
+  return ret
+}
+
+Buffer.prototype.toJSON = function () {
+  return {
+    type: 'Buffer',
+    data: Array.prototype.slice.call(this._arr || this, 0)
+  }
+}
+
+// copy(targetBuffer, targetStart=0, sourceStart=0, sourceEnd=buffer.length)
+Buffer.prototype.copy = function (target, target_start, start, end) {
+  var source = this
+
+  if (!start) start = 0
+  if (!end && end !== 0) end = this.length
+  if (!target_start) target_start = 0
+
+  // Copy 0 bytes; we're done
+  if (end === start) return
+  if (target.length === 0 || source.length === 0) return
+
+  // Fatal error conditions
+  assert(end >= start, 'sourceEnd < sourceStart')
+  assert(target_start >= 0 && target_start < target.length,
+      'targetStart out of bounds')
+  assert(start >= 0 && start < source.length, 'sourceStart out of bounds')
+  assert(end >= 0 && end <= source.length, 'sourceEnd out of bounds')
+
+  // Are we oob?
+  if (end > this.length)
+    end = this.length
+  if (target.length - target_start < end - start)
+    end = target.length - target_start + start
+
+  var len = end - start
+
+  if (len < 100 || !Buffer._useTypedArrays) {
+    for (var i = 0; i < len; i++)
+      target[i + target_start] = this[i + start]
+  } else {
+    target._set(this.subarray(start, start + len), target_start)
+  }
+}
+
+function _base64Slice (buf, start, end) {
+  if (start === 0 && end === buf.length) {
+    return base64.fromByteArray(buf)
+  } else {
+    return base64.fromByteArray(buf.slice(start, end))
+  }
+}
+
+function _utf8Slice (buf, start, end) {
+  var res = ''
+  var tmp = ''
+  end = Math.min(buf.length, end)
+
+  for (var i = start; i < end; i++) {
+    if (buf[i] <= 0x7F) {
+      res += decodeUtf8Char(tmp) + String.fromCharCode(buf[i])
+      tmp = ''
+    } else {
+      tmp += '%' + buf[i].toString(16)
+    }
+  }
+
+  return res + decodeUtf8Char(tmp)
+}
+
+function _asciiSlice (buf, start, end) {
+  var ret = ''
+  end = Math.min(buf.length, end)
+
+  for (var i = start; i < end; i++)
+    ret += String.fromCharCode(buf[i])
+  return ret
+}
+
+function _binarySlice (buf, start, end) {
+  return _asciiSlice(buf, start, end)
+}
+
+function _hexSlice (buf, start, end) {
+  var len = buf.length
+
+  if (!start || start < 0) start = 0
+  if (!end || end < 0 || end > len) end = len
+
+  var out = ''
+  for (var i = start; i < end; i++) {
+    out += toHex(buf[i])
+  }
+  return out
+}
+
+function _utf16leSlice (buf, start, end) {
+  var bytes = buf.slice(start, end)
+  var res = ''
+  for (var i = 0; i < bytes.length; i += 2) {
+    res += String.fromCharCode(bytes[i] + bytes[i+1] * 256)
+  }
+  return res
+}
+
+Buffer.prototype.slice = function (start, end) {
+  var len = this.length
+  start = clamp(start, len, 0)
+  end = clamp(end, len, len)
+
+  if (Buffer._useTypedArrays) {
+    return Buffer._augment(this.subarray(start, end))
+  } else {
+    var sliceLen = end - start
+    var newBuf = new Buffer(sliceLen, undefined, true)
+    for (var i = 0; i < sliceLen; i++) {
+      newBuf[i] = this[i + start]
+    }
+    return newBuf
+  }
+}
+
+// `get` will be removed in Node 0.13+
+Buffer.prototype.get = function (offset) {
+  console.log('.get() is deprecated. Access using array indexes instead.')
+  return this.readUInt8(offset)
+}
+
+// `set` will be removed in Node 0.13+
+Buffer.prototype.set = function (v, offset) {
+  console.log('.set() is deprecated. Access using array indexes instead.')
+  return this.writeUInt8(v, offset)
+}
+
+Buffer.prototype.readUInt8 = function (offset, noAssert) {
+  if (!noAssert) {
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset < this.length, 'Trying to read beyond buffer length')
+  }
+
+  if (offset >= this.length)
+    return
+
+  return this[offset]
+}
+
+function _readUInt16 (buf, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset + 1 < buf.length, 'Trying to read beyond buffer length')
+  }
+
+  var len = buf.length
+  if (offset >= len)
+    return
+
+  var val
+  if (littleEndian) {
+    val = buf[offset]
+    if (offset + 1 < len)
+      val |= buf[offset + 1] << 8
+  } else {
+    val = buf[offset] << 8
+    if (offset + 1 < len)
+      val |= buf[offset + 1]
+  }
+  return val
+}
+
+Buffer.prototype.readUInt16LE = function (offset, noAssert) {
+  return _readUInt16(this, offset, true, noAssert)
+}
+
+Buffer.prototype.readUInt16BE = function (offset, noAssert) {
+  return _readUInt16(this, offset, false, noAssert)
+}
+
+function _readUInt32 (buf, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset + 3 < buf.length, 'Trying to read beyond buffer length')
+  }
+
+  var len = buf.length
+  if (offset >= len)
+    return
+
+  var val
+  if (littleEndian) {
+    if (offset + 2 < len)
+      val = buf[offset + 2] << 16
+    if (offset + 1 < len)
+      val |= buf[offset + 1] << 8
+    val |= buf[offset]
+    if (offset + 3 < len)
+      val = val + (buf[offset + 3] << 24 >>> 0)
+  } else {
+    if (offset + 1 < len)
+      val = buf[offset + 1] << 16
+    if (offset + 2 < len)
+      val |= buf[offset + 2] << 8
+    if (offset + 3 < len)
+      val |= buf[offset + 3]
+    val = val + (buf[offset] << 24 >>> 0)
+  }
+  return val
+}
+
+Buffer.prototype.readUInt32LE = function (offset, noAssert) {
+  return _readUInt32(this, offset, true, noAssert)
+}
+
+Buffer.prototype.readUInt32BE = function (offset, noAssert) {
+  return _readUInt32(this, offset, false, noAssert)
+}
+
+Buffer.prototype.readInt8 = function (offset, noAssert) {
+  if (!noAssert) {
+    assert(offset !== undefined && offset !== null,
+        'missing offset')
+    assert(offset < this.length, 'Trying to read beyond buffer length')
+  }
+
+  if (offset >= this.length)
+    return
+
+  var neg = this[offset] & 0x80
+  if (neg)
+    return (0xff - this[offset] + 1) * -1
+  else
+    return this[offset]
+}
+
+function _readInt16 (buf, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset + 1 < buf.length, 'Trying to read beyond buffer length')
+  }
+
+  var len = buf.length
+  if (offset >= len)
+    return
+
+  var val = _readUInt16(buf, offset, littleEndian, true)
+  var neg = val & 0x8000
+  if (neg)
+    return (0xffff - val + 1) * -1
+  else
+    return val
+}
+
+Buffer.prototype.readInt16LE = function (offset, noAssert) {
+  return _readInt16(this, offset, true, noAssert)
+}
+
+Buffer.prototype.readInt16BE = function (offset, noAssert) {
+  return _readInt16(this, offset, false, noAssert)
+}
+
+function _readInt32 (buf, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset + 3 < buf.length, 'Trying to read beyond buffer length')
+  }
+
+  var len = buf.length
+  if (offset >= len)
+    return
+
+  var val = _readUInt32(buf, offset, littleEndian, true)
+  var neg = val & 0x80000000
+  if (neg)
+    return (0xffffffff - val + 1) * -1
+  else
+    return val
+}
+
+Buffer.prototype.readInt32LE = function (offset, noAssert) {
+  return _readInt32(this, offset, true, noAssert)
+}
+
+Buffer.prototype.readInt32BE = function (offset, noAssert) {
+  return _readInt32(this, offset, false, noAssert)
+}
+
+function _readFloat (buf, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset + 3 < buf.length, 'Trying to read beyond buffer length')
+  }
+
+  return ieee754.read(buf, offset, littleEndian, 23, 4)
+}
+
+Buffer.prototype.readFloatLE = function (offset, noAssert) {
+  return _readFloat(this, offset, true, noAssert)
+}
+
+Buffer.prototype.readFloatBE = function (offset, noAssert) {
+  return _readFloat(this, offset, false, noAssert)
+}
+
+function _readDouble (buf, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset + 7 < buf.length, 'Trying to read beyond buffer length')
+  }
+
+  return ieee754.read(buf, offset, littleEndian, 52, 8)
+}
+
+Buffer.prototype.readDoubleLE = function (offset, noAssert) {
+  return _readDouble(this, offset, true, noAssert)
+}
+
+Buffer.prototype.readDoubleBE = function (offset, noAssert) {
+  return _readDouble(this, offset, false, noAssert)
+}
+
+Buffer.prototype.writeUInt8 = function (value, offset, noAssert) {
+  if (!noAssert) {
+    assert(value !== undefined && value !== null, 'missing value')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset < this.length, 'trying to write beyond buffer length')
+    verifuint(value, 0xff)
+  }
+
+  if (offset >= this.length) return
+
+  this[offset] = value
+}
+
+function _writeUInt16 (buf, value, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(value !== undefined && value !== null, 'missing value')
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset + 1 < buf.length, 'trying to write beyond buffer length')
+    verifuint(value, 0xffff)
+  }
+
+  var len = buf.length
+  if (offset >= len)
+    return
+
+  for (var i = 0, j = Math.min(len - offset, 2); i < j; i++) {
+    buf[offset + i] =
+        (value & (0xff << (8 * (littleEndian ? i : 1 - i)))) >>>
+            (littleEndian ? i : 1 - i) * 8
+  }
+}
+
+Buffer.prototype.writeUInt16LE = function (value, offset, noAssert) {
+  _writeUInt16(this, value, offset, true, noAssert)
+}
+
+Buffer.prototype.writeUInt16BE = function (value, offset, noAssert) {
+  _writeUInt16(this, value, offset, false, noAssert)
+}
+
+function _writeUInt32 (buf, value, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(value !== undefined && value !== null, 'missing value')
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset + 3 < buf.length, 'trying to write beyond buffer length')
+    verifuint(value, 0xffffffff)
+  }
+
+  var len = buf.length
+  if (offset >= len)
+    return
+
+  for (var i = 0, j = Math.min(len - offset, 4); i < j; i++) {
+    buf[offset + i] =
+        (value >>> (littleEndian ? i : 3 - i) * 8) & 0xff
+  }
+}
+
+Buffer.prototype.writeUInt32LE = function (value, offset, noAssert) {
+  _writeUInt32(this, value, offset, true, noAssert)
+}
+
+Buffer.prototype.writeUInt32BE = function (value, offset, noAssert) {
+  _writeUInt32(this, value, offset, false, noAssert)
+}
+
+Buffer.prototype.writeInt8 = function (value, offset, noAssert) {
+  if (!noAssert) {
+    assert(value !== undefined && value !== null, 'missing value')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset < this.length, 'Trying to write beyond buffer length')
+    verifsint(value, 0x7f, -0x80)
+  }
+
+  if (offset >= this.length)
+    return
+
+  if (value >= 0)
+    this.writeUInt8(value, offset, noAssert)
+  else
+    this.writeUInt8(0xff + value + 1, offset, noAssert)
+}
+
+function _writeInt16 (buf, value, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(value !== undefined && value !== null, 'missing value')
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset + 1 < buf.length, 'Trying to write beyond buffer length')
+    verifsint(value, 0x7fff, -0x8000)
+  }
+
+  var len = buf.length
+  if (offset >= len)
+    return
+
+  if (value >= 0)
+    _writeUInt16(buf, value, offset, littleEndian, noAssert)
+  else
+    _writeUInt16(buf, 0xffff + value + 1, offset, littleEndian, noAssert)
+}
+
+Buffer.prototype.writeInt16LE = function (value, offset, noAssert) {
+  _writeInt16(this, value, offset, true, noAssert)
+}
+
+Buffer.prototype.writeInt16BE = function (value, offset, noAssert) {
+  _writeInt16(this, value, offset, false, noAssert)
+}
+
+function _writeInt32 (buf, value, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(value !== undefined && value !== null, 'missing value')
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset + 3 < buf.length, 'Trying to write beyond buffer length')
+    verifsint(value, 0x7fffffff, -0x80000000)
+  }
+
+  var len = buf.length
+  if (offset >= len)
+    return
+
+  if (value >= 0)
+    _writeUInt32(buf, value, offset, littleEndian, noAssert)
+  else
+    _writeUInt32(buf, 0xffffffff + value + 1, offset, littleEndian, noAssert)
+}
+
+Buffer.prototype.writeInt32LE = function (value, offset, noAssert) {
+  _writeInt32(this, value, offset, true, noAssert)
+}
+
+Buffer.prototype.writeInt32BE = function (value, offset, noAssert) {
+  _writeInt32(this, value, offset, false, noAssert)
+}
+
+function _writeFloat (buf, value, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(value !== undefined && value !== null, 'missing value')
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset + 3 < buf.length, 'Trying to write beyond buffer length')
+    verifIEEE754(value, 3.4028234663852886e+38, -3.4028234663852886e+38)
+  }
+
+  var len = buf.length
+  if (offset >= len)
+    return
+
+  ieee754.write(buf, value, offset, littleEndian, 23, 4)
+}
+
+Buffer.prototype.writeFloatLE = function (value, offset, noAssert) {
+  _writeFloat(this, value, offset, true, noAssert)
+}
+
+Buffer.prototype.writeFloatBE = function (value, offset, noAssert) {
+  _writeFloat(this, value, offset, false, noAssert)
+}
+
+function _writeDouble (buf, value, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(value !== undefined && value !== null, 'missing value')
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset + 7 < buf.length,
+        'Trying to write beyond buffer length')
+    verifIEEE754(value, 1.7976931348623157E+308, -1.7976931348623157E+308)
+  }
+
+  var len = buf.length
+  if (offset >= len)
+    return
+
+  ieee754.write(buf, value, offset, littleEndian, 52, 8)
+}
+
+Buffer.prototype.writeDoubleLE = function (value, offset, noAssert) {
+  _writeDouble(this, value, offset, true, noAssert)
+}
+
+Buffer.prototype.writeDoubleBE = function (value, offset, noAssert) {
+  _writeDouble(this, value, offset, false, noAssert)
+}
+
+// fill(value, start=0, end=buffer.length)
+Buffer.prototype.fill = function (value, start, end) {
+  if (!value) value = 0
+  if (!start) start = 0
+  if (!end) end = this.length
+
+  if (typeof value === 'string') {
+    value = value.charCodeAt(0)
+  }
+
+  assert(typeof value === 'number' && !isNaN(value), 'value is not a number')
+  assert(end >= start, 'end < start')
+
+  // Fill 0 bytes; we're done
+  if (end === start) return
+  if (this.length === 0) return
+
+  assert(start >= 0 && start < this.length, 'start out of bounds')
+  assert(end >= 0 && end <= this.length, 'end out of bounds')
+
+  for (var i = start; i < end; i++) {
+    this[i] = value
+  }
+}
+
+Buffer.prototype.inspect = function () {
+  var out = []
+  var len = this.length
+  for (var i = 0; i < len; i++) {
+    out[i] = toHex(this[i])
+    if (i === exports.INSPECT_MAX_BYTES) {
+      out[i + 1] = '...'
+      break
+    }
+  }
+  return '<Buffer ' + out.join(' ') + '>'
+}
+
+/**
+ * Creates a new `ArrayBuffer` with the *copied* memory of the buffer instance.
+ * Added in Node 0.12. Only available in browsers that support ArrayBuffer.
+ */
+Buffer.prototype.toArrayBuffer = function () {
+  if (typeof Uint8Array !== 'undefined') {
+    if (Buffer._useTypedArrays) {
+      return (new Buffer(this)).buffer
+    } else {
+      var buf = new Uint8Array(this.length)
+      for (var i = 0, len = buf.length; i < len; i += 1)
+        buf[i] = this[i]
+      return buf.buffer
+    }
+  } else {
+    throw new Error('Buffer.toArrayBuffer not supported in this browser')
+  }
+}
+
+// HELPER FUNCTIONS
+// ================
+
+function stringtrim (str) {
+  if (str.trim) return str.trim()
+  return str.replace(/^\s+|\s+$/g, '')
+}
+
+var BP = Buffer.prototype
+
+/**
+ * Augment a Uint8Array *instance* (not the Uint8Array class!) with Buffer methods
+ */
+Buffer._augment = function (arr) {
+  arr._isBuffer = true
+
+  // save reference to original Uint8Array get/set methods before overwriting
+  arr._get = arr.get
+  arr._set = arr.set
+
+  // deprecated, will be removed in node 0.13+
+  arr.get = BP.get
+  arr.set = BP.set
+
+  arr.write = BP.write
+  arr.toString = BP.toString
+  arr.toLocaleString = BP.toString
+  arr.toJSON = BP.toJSON
+  arr.copy = BP.copy
+  arr.slice = BP.slice
+  arr.readUInt8 = BP.readUInt8
+  arr.readUInt16LE = BP.readUInt16LE
+  arr.readUInt16BE = BP.readUInt16BE
+  arr.readUInt32LE = BP.readUInt32LE
+  arr.readUInt32BE = BP.readUInt32BE
+  arr.readInt8 = BP.readInt8
+  arr.readInt16LE = BP.readInt16LE
+  arr.readInt16BE = BP.readInt16BE
+  arr.readInt32LE = BP.readInt32LE
+  arr.readInt32BE = BP.readInt32BE
+  arr.readFloatLE = BP.readFloatLE
+  arr.readFloatBE = BP.readFloatBE
+  arr.readDoubleLE = BP.readDoubleLE
+  arr.readDoubleBE = BP.readDoubleBE
+  arr.writeUInt8 = BP.writeUInt8
+  arr.writeUInt16LE = BP.writeUInt16LE
+  arr.writeUInt16BE = BP.writeUInt16BE
+  arr.writeUInt32LE = BP.writeUInt32LE
+  arr.writeUInt32BE = BP.writeUInt32BE
+  arr.writeInt8 = BP.writeInt8
+  arr.writeInt16LE = BP.writeInt16LE
+  arr.writeInt16BE = BP.writeInt16BE
+  arr.writeInt32LE = BP.writeInt32LE
+  arr.writeInt32BE = BP.writeInt32BE
+  arr.writeFloatLE = BP.writeFloatLE
+  arr.writeFloatBE = BP.writeFloatBE
+  arr.writeDoubleLE = BP.writeDoubleLE
+  arr.writeDoubleBE = BP.writeDoubleBE
+  arr.fill = BP.fill
+  arr.inspect = BP.inspect
+  arr.toArrayBuffer = BP.toArrayBuffer
+
+  return arr
+}
+
+// slice(start, end)
+function clamp (index, len, defaultValue) {
+  if (typeof index !== 'number') return defaultValue
+  index = ~~index;  // Coerce to integer.
+  if (index >= len) return len
+  if (index >= 0) return index
+  index += len
+  if (index >= 0) return index
+  return 0
+}
+
+function coerce (length) {
+  // Coerce length to a number (possibly NaN), round up
+  // in case it's fractional (e.g. 123.456) then do a
+  // double negate to coerce a NaN to 0. Easy, right?
+  length = ~~Math.ceil(+length)
+  return length < 0 ? 0 : length
+}
+
+function isArray (subject) {
+  return (Array.isArray || function (subject) {
+    return Object.prototype.toString.call(subject) === '[object Array]'
+  })(subject)
+}
+
+function isArrayish (subject) {
+  return isArray(subject) || Buffer.isBuffer(subject) ||
+      subject && typeof subject === 'object' &&
+      typeof subject.length === 'number'
+}
+
+function toHex (n) {
+  if (n < 16) return '0' + n.toString(16)
+  return n.toString(16)
+}
+
+function utf8ToBytes (str) {
+  var byteArray = []
+  for (var i = 0; i < str.length; i++) {
+    var b = str.charCodeAt(i)
+    if (b <= 0x7F)
+      byteArray.push(str.charCodeAt(i))
+    else {
+      var start = i
+      if (b >= 0xD800 && b <= 0xDFFF) i++
+      var h = encodeURIComponent(str.slice(start, i+1)).substr(1).split('%')
+      for (var j = 0; j < h.length; j++)
+        byteArray.push(parseInt(h[j], 16))
+    }
+  }
+  return byteArray
+}
+
+function asciiToBytes (str) {
+  var byteArray = []
+  for (var i = 0; i < str.length; i++) {
+    // Node's code seems to be doing this and not & 0x7F..
+    byteArray.push(str.charCodeAt(i) & 0xFF)
+  }
+  return byteArray
+}
+
+function utf16leToBytes (str) {
+  var c, hi, lo
+  var byteArray = []
+  for (var i = 0; i < str.length; i++) {
+    c = str.charCodeAt(i)
+    hi = c >> 8
+    lo = c % 256
+    byteArray.push(lo)
+    byteArray.push(hi)
+  }
+
+  return byteArray
+}
+
+function base64ToBytes (str) {
+  return base64.toByteArray(str)
+}
+
+function blitBuffer (src, dst, offset, length) {
+  var pos
+  for (var i = 0; i < length; i++) {
+    if ((i + offset >= dst.length) || (i >= src.length))
+      break
+    dst[i + offset] = src[i]
+  }
+  return i
+}
+
+function decodeUtf8Char (str) {
+  try {
+    return decodeURIComponent(str)
+  } catch (err) {
+    return String.fromCharCode(0xFFFD) // UTF 8 invalid char
+  }
+}
+
+/*
+ * We have to make sure that the value is a valid integer. This means that it
+ * is non-negative. It has no fractional component and that it does not
+ * exceed the maximum allowed value.
+ */
+function verifuint (value, max) {
+  assert(typeof value === 'number', 'cannot write a non-number as a number')
+  assert(value >= 0, 'specified a negative value for writing an unsigned value')
+  assert(value <= max, 'value is larger than maximum value for type')
+  assert(Math.floor(value) === value, 'value has a fractional component')
+}
+
+function verifsint (value, max, min) {
+  assert(typeof value === 'number', 'cannot write a non-number as a number')
+  assert(value <= max, 'value larger than maximum allowed value')
+  assert(value >= min, 'value smaller than minimum allowed value')
+  assert(Math.floor(value) === value, 'value has a fractional component')
+}
+
+function verifIEEE754 (value, max, min) {
+  assert(typeof value === 'number', 'cannot write a non-number as a number')
+  assert(value <= max, 'value larger than maximum allowed value')
+  assert(value >= min, 'value smaller than minimum allowed value')
+}
+
+function assert (test, message) {
+  if (!test) throw new Error(message || 'Failed assertion')
+}
+
+},{"base64-js":10,"ieee754":11}],10:[function(require,module,exports){
+var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+;(function (exports) {
+	'use strict';
+
+  var Arr = (typeof Uint8Array !== 'undefined')
+    ? Uint8Array
+    : Array
+
+	var ZERO   = '0'.charCodeAt(0)
+	var PLUS   = '+'.charCodeAt(0)
+	var SLASH  = '/'.charCodeAt(0)
+	var NUMBER = '0'.charCodeAt(0)
+	var LOWER  = 'a'.charCodeAt(0)
+	var UPPER  = 'A'.charCodeAt(0)
+
+	function decode (elt) {
+		var code = elt.charCodeAt(0)
+		if (code === PLUS)
+			return 62 // '+'
+		if (code === SLASH)
+			return 63 // '/'
+		if (code < NUMBER)
+			return -1 //no match
+		if (code < NUMBER + 10)
+			return code - NUMBER + 26 + 26
+		if (code < UPPER + 26)
+			return code - UPPER
+		if (code < LOWER + 26)
+			return code - LOWER + 26
+	}
+
+	function b64ToByteArray (b64) {
+		var i, j, l, tmp, placeHolders, arr
+
+		if (b64.length % 4 > 0) {
+			throw new Error('Invalid string. Length must be a multiple of 4')
+		}
+
+		// the number of equal signs (place holders)
+		// if there are two placeholders, than the two characters before it
+		// represent one byte
+		// if there is only one, then the three characters before it represent 2 bytes
+		// this is just a cheap hack to not do indexOf twice
+		var len = b64.length
+		placeHolders = '=' === b64.charAt(len - 2) ? 2 : '=' === b64.charAt(len - 1) ? 1 : 0
+
+		// base64 is 4/3 + up to two characters of the original data
+		arr = new Arr(b64.length * 3 / 4 - placeHolders)
+
+		// if there are placeholders, only get up to the last complete 4 chars
+		l = placeHolders > 0 ? b64.length - 4 : b64.length
+
+		var L = 0
+
+		function push (v) {
+			arr[L++] = v
+		}
+
+		for (i = 0, j = 0; i < l; i += 4, j += 3) {
+			tmp = (decode(b64.charAt(i)) << 18) | (decode(b64.charAt(i + 1)) << 12) | (decode(b64.charAt(i + 2)) << 6) | decode(b64.charAt(i + 3))
+			push((tmp & 0xFF0000) >> 16)
+			push((tmp & 0xFF00) >> 8)
+			push(tmp & 0xFF)
+		}
+
+		if (placeHolders === 2) {
+			tmp = (decode(b64.charAt(i)) << 2) | (decode(b64.charAt(i + 1)) >> 4)
+			push(tmp & 0xFF)
+		} else if (placeHolders === 1) {
+			tmp = (decode(b64.charAt(i)) << 10) | (decode(b64.charAt(i + 1)) << 4) | (decode(b64.charAt(i + 2)) >> 2)
+			push((tmp >> 8) & 0xFF)
+			push(tmp & 0xFF)
+		}
+
+		return arr
+	}
+
+	function uint8ToBase64 (uint8) {
+		var i,
+			extraBytes = uint8.length % 3, // if we have 1 byte left, pad 2 bytes
+			output = "",
+			temp, length
+
+		function encode (num) {
+			return lookup.charAt(num)
+		}
+
+		function tripletToBase64 (num) {
+			return encode(num >> 18 & 0x3F) + encode(num >> 12 & 0x3F) + encode(num >> 6 & 0x3F) + encode(num & 0x3F)
+		}
+
+		// go through the array every three bytes, we'll deal with trailing stuff later
+		for (i = 0, length = uint8.length - extraBytes; i < length; i += 3) {
+			temp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2])
+			output += tripletToBase64(temp)
+		}
+
+		// pad the end with zeros, but make sure to not forget the extra bytes
+		switch (extraBytes) {
+			case 1:
+				temp = uint8[uint8.length - 1]
+				output += encode(temp >> 2)
+				output += encode((temp << 4) & 0x3F)
+				output += '=='
+				break
+			case 2:
+				temp = (uint8[uint8.length - 2] << 8) + (uint8[uint8.length - 1])
+				output += encode(temp >> 10)
+				output += encode((temp >> 4) & 0x3F)
+				output += encode((temp << 2) & 0x3F)
+				output += '='
+				break
+		}
+
+		return output
+	}
+
+	module.exports.toByteArray = b64ToByteArray
+	module.exports.fromByteArray = uint8ToBase64
+}())
+
+},{}],11:[function(require,module,exports){
+exports.read = function(buffer, offset, isLE, mLen, nBytes) {
+  var e, m,
+      eLen = nBytes * 8 - mLen - 1,
+      eMax = (1 << eLen) - 1,
+      eBias = eMax >> 1,
+      nBits = -7,
+      i = isLE ? (nBytes - 1) : 0,
+      d = isLE ? -1 : 1,
+      s = buffer[offset + i];
+
+  i += d;
+
+  e = s & ((1 << (-nBits)) - 1);
+  s >>= (-nBits);
+  nBits += eLen;
+  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8);
+
+  m = e & ((1 << (-nBits)) - 1);
+  e >>= (-nBits);
+  nBits += mLen;
+  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8);
+
+  if (e === 0) {
+    e = 1 - eBias;
+  } else if (e === eMax) {
+    return m ? NaN : ((s ? -1 : 1) * Infinity);
+  } else {
+    m = m + Math.pow(2, mLen);
+    e = e - eBias;
+  }
+  return (s ? -1 : 1) * m * Math.pow(2, e - mLen);
+};
+
+exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
+  var e, m, c,
+      eLen = nBytes * 8 - mLen - 1,
+      eMax = (1 << eLen) - 1,
+      eBias = eMax >> 1,
+      rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0),
+      i = isLE ? 0 : (nBytes - 1),
+      d = isLE ? 1 : -1,
+      s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0;
+
+  value = Math.abs(value);
+
+  if (isNaN(value) || value === Infinity) {
+    m = isNaN(value) ? 1 : 0;
+    e = eMax;
+  } else {
+    e = Math.floor(Math.log(value) / Math.LN2);
+    if (value * (c = Math.pow(2, -e)) < 1) {
+      e--;
+      c *= 2;
+    }
+    if (e + eBias >= 1) {
+      value += rt / c;
+    } else {
+      value += rt * Math.pow(2, 1 - eBias);
+    }
+    if (value * c >= 2) {
+      e++;
+      c /= 2;
+    }
+
+    if (e + eBias >= eMax) {
+      m = 0;
+      e = eMax;
+    } else if (e + eBias >= 1) {
+      m = (value * c - 1) * Math.pow(2, mLen);
+      e = e + eBias;
+    } else {
+      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen);
+      e = 0;
+    }
+  }
+
+  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8);
+
+  e = (e << mLen) | m;
+  eLen += mLen;
+  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8);
+
+  buffer[offset + i - d] |= s * 128;
+};
+
+},{}],12:[function(require,module,exports){
+if (typeof Object.create === 'function') {
+  // implementation from standard node.js 'util' module
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    ctor.prototype = Object.create(superCtor.prototype, {
+      constructor: {
+        value: ctor,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+  };
+} else {
+  // old school shim for old browsers
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    var TempCtor = function () {}
+    TempCtor.prototype = superCtor.prototype
+    ctor.prototype = new TempCtor()
+    ctor.prototype.constructor = ctor
+  }
+}
+
+},{}],13:[function(require,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+
+process.nextTick = (function () {
+    var canSetImmediate = typeof window !== 'undefined'
+    && window.setImmediate;
+    var canPost = typeof window !== 'undefined'
+    && window.postMessage && window.addEventListener
+    ;
+
+    if (canSetImmediate) {
+        return function (f) { return window.setImmediate(f) };
+    }
+
+    if (canPost) {
+        var queue = [];
+        window.addEventListener('message', function (ev) {
+            var source = ev.source;
+            if ((source === window || source === null) && ev.data === 'process-tick') {
+                ev.stopPropagation();
+                if (queue.length > 0) {
+                    var fn = queue.shift();
+                    fn();
+                }
+            }
+        }, true);
+
+        return function nextTick(fn) {
+            queue.push(fn);
+            window.postMessage('process-tick', '*');
+        };
+    }
+
+    return function nextTick(fn) {
+        setTimeout(fn, 0);
+    };
+})();
+
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+
+function noop() {}
+
+process.on = noop;
+process.once = noop;
+process.off = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+}
+
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+
+},{}],14:[function(require,module,exports){
+module.exports = function isBuffer(arg) {
+  return arg && typeof arg === 'object'
+    && typeof arg.copy === 'function'
+    && typeof arg.fill === 'function'
+    && typeof arg.readUInt8 === 'function';
+}
+},{}],15:[function(require,module,exports){
+(function (process,global){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+var formatRegExp = /%[sdj%]/g;
+exports.format = function(f) {
+  if (!isString(f)) {
+    var objects = [];
+    for (var i = 0; i < arguments.length; i++) {
+      objects.push(inspect(arguments[i]));
+    }
+    return objects.join(' ');
+  }
+
+  var i = 1;
+  var args = arguments;
+  var len = args.length;
+  var str = String(f).replace(formatRegExp, function(x) {
+    if (x === '%%') return '%';
+    if (i >= len) return x;
+    switch (x) {
+      case '%s': return String(args[i++]);
+      case '%d': return Number(args[i++]);
+      case '%j':
+        try {
+          return JSON.stringify(args[i++]);
+        } catch (_) {
+          return '[Circular]';
+        }
+      default:
+        return x;
+    }
+  });
+  for (var x = args[i]; i < len; x = args[++i]) {
+    if (isNull(x) || !isObject(x)) {
+      str += ' ' + x;
+    } else {
+      str += ' ' + inspect(x);
+    }
+  }
+  return str;
+};
+
+
+// Mark that a method should not be used.
+// Returns a modified function which warns once by default.
+// If --no-deprecation is set, then it is a no-op.
+exports.deprecate = function(fn, msg) {
+  // Allow for deprecating things in the process of starting up.
+  if (isUndefined(global.process)) {
+    return function() {
+      return exports.deprecate(fn, msg).apply(this, arguments);
+    };
+  }
+
+  if (process.noDeprecation === true) {
+    return fn;
+  }
+
+  var warned = false;
+  function deprecated() {
+    if (!warned) {
+      if (process.throwDeprecation) {
+        throw new Error(msg);
+      } else if (process.traceDeprecation) {
+        console.trace(msg);
+      } else {
+        console.error(msg);
+      }
+      warned = true;
+    }
+    return fn.apply(this, arguments);
+  }
+
+  return deprecated;
+};
+
+
+var debugs = {};
+var debugEnviron;
+exports.debuglog = function(set) {
+  if (isUndefined(debugEnviron))
+    debugEnviron = process.env.NODE_DEBUG || '';
+  set = set.toUpperCase();
+  if (!debugs[set]) {
+    if (new RegExp('\\b' + set + '\\b', 'i').test(debugEnviron)) {
+      var pid = process.pid;
+      debugs[set] = function() {
+        var msg = exports.format.apply(exports, arguments);
+        console.error('%s %d: %s', set, pid, msg);
+      };
+    } else {
+      debugs[set] = function() {};
+    }
+  }
+  return debugs[set];
+};
+
+
+/**
+ * Echos the value of a value. Trys to print the value out
+ * in the best way possible given the different types.
+ *
+ * @param {Object} obj The object to print out.
+ * @param {Object} opts Optional options object that alters the output.
+ */
+/* legacy: obj, showHidden, depth, colors*/
+function inspect(obj, opts) {
+  // default options
+  var ctx = {
+    seen: [],
+    stylize: stylizeNoColor
+  };
+  // legacy...
+  if (arguments.length >= 3) ctx.depth = arguments[2];
+  if (arguments.length >= 4) ctx.colors = arguments[3];
+  if (isBoolean(opts)) {
+    // legacy...
+    ctx.showHidden = opts;
+  } else if (opts) {
+    // got an "options" object
+    exports._extend(ctx, opts);
+  }
+  // set default options
+  if (isUndefined(ctx.showHidden)) ctx.showHidden = false;
+  if (isUndefined(ctx.depth)) ctx.depth = 2;
+  if (isUndefined(ctx.colors)) ctx.colors = false;
+  if (isUndefined(ctx.customInspect)) ctx.customInspect = true;
+  if (ctx.colors) ctx.stylize = stylizeWithColor;
+  return formatValue(ctx, obj, ctx.depth);
+}
+exports.inspect = inspect;
+
+
+// http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
+inspect.colors = {
+  'bold' : [1, 22],
+  'italic' : [3, 23],
+  'underline' : [4, 24],
+  'inverse' : [7, 27],
+  'white' : [37, 39],
+  'grey' : [90, 39],
+  'black' : [30, 39],
+  'blue' : [34, 39],
+  'cyan' : [36, 39],
+  'green' : [32, 39],
+  'magenta' : [35, 39],
+  'red' : [31, 39],
+  'yellow' : [33, 39]
+};
+
+// Don't use 'blue' not visible on cmd.exe
+inspect.styles = {
+  'special': 'cyan',
+  'number': 'yellow',
+  'boolean': 'yellow',
+  'undefined': 'grey',
+  'null': 'bold',
+  'string': 'green',
+  'date': 'magenta',
+  // "name": intentionally not styling
+  'regexp': 'red'
+};
+
+
+function stylizeWithColor(str, styleType) {
+  var style = inspect.styles[styleType];
+
+  if (style) {
+    return '\u001b[' + inspect.colors[style][0] + 'm' + str +
+           '\u001b[' + inspect.colors[style][1] + 'm';
+  } else {
+    return str;
+  }
+}
+
+
+function stylizeNoColor(str, styleType) {
+  return str;
+}
+
+
+function arrayToHash(array) {
+  var hash = {};
+
+  array.forEach(function(val, idx) {
+    hash[val] = true;
+  });
+
+  return hash;
+}
+
+
+function formatValue(ctx, value, recurseTimes) {
+  // Provide a hook for user-specified inspect functions.
+  // Check that value is an object with an inspect function on it
+  if (ctx.customInspect &&
+      value &&
+      isFunction(value.inspect) &&
+      // Filter out the util module, it's inspect function is special
+      value.inspect !== exports.inspect &&
+      // Also filter out any prototype objects using the circular check.
+      !(value.constructor && value.constructor.prototype === value)) {
+    var ret = value.inspect(recurseTimes, ctx);
+    if (!isString(ret)) {
+      ret = formatValue(ctx, ret, recurseTimes);
+    }
+    return ret;
+  }
+
+  // Primitive types cannot have properties
+  var primitive = formatPrimitive(ctx, value);
+  if (primitive) {
+    return primitive;
+  }
+
+  // Look up the keys of the object.
+  var keys = Object.keys(value);
+  var visibleKeys = arrayToHash(keys);
+
+  if (ctx.showHidden) {
+    keys = Object.getOwnPropertyNames(value);
+  }
+
+  // IE doesn't make error fields non-enumerable
+  // http://msdn.microsoft.com/en-us/library/ie/dww52sbt(v=vs.94).aspx
+  if (isError(value)
+      && (keys.indexOf('message') >= 0 || keys.indexOf('description') >= 0)) {
+    return formatError(value);
+  }
+
+  // Some type of object without properties can be shortcutted.
+  if (keys.length === 0) {
+    if (isFunction(value)) {
+      var name = value.name ? ': ' + value.name : '';
+      return ctx.stylize('[Function' + name + ']', 'special');
+    }
+    if (isRegExp(value)) {
+      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+    }
+    if (isDate(value)) {
+      return ctx.stylize(Date.prototype.toString.call(value), 'date');
+    }
+    if (isError(value)) {
+      return formatError(value);
+    }
+  }
+
+  var base = '', array = false, braces = ['{', '}'];
+
+  // Make Array say that they are Array
+  if (isArray(value)) {
+    array = true;
+    braces = ['[', ']'];
+  }
+
+  // Make functions say that they are functions
+  if (isFunction(value)) {
+    var n = value.name ? ': ' + value.name : '';
+    base = ' [Function' + n + ']';
+  }
+
+  // Make RegExps say that they are RegExps
+  if (isRegExp(value)) {
+    base = ' ' + RegExp.prototype.toString.call(value);
+  }
+
+  // Make dates with properties first say the date
+  if (isDate(value)) {
+    base = ' ' + Date.prototype.toUTCString.call(value);
+  }
+
+  // Make error with message first say the error
+  if (isError(value)) {
+    base = ' ' + formatError(value);
+  }
+
+  if (keys.length === 0 && (!array || value.length == 0)) {
+    return braces[0] + base + braces[1];
+  }
+
+  if (recurseTimes < 0) {
+    if (isRegExp(value)) {
+      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+    } else {
+      return ctx.stylize('[Object]', 'special');
+    }
+  }
+
+  ctx.seen.push(value);
+
+  var output;
+  if (array) {
+    output = formatArray(ctx, value, recurseTimes, visibleKeys, keys);
+  } else {
+    output = keys.map(function(key) {
+      return formatProperty(ctx, value, recurseTimes, visibleKeys, key, array);
+    });
+  }
+
+  ctx.seen.pop();
+
+  return reduceToSingleString(output, base, braces);
+}
+
+
+function formatPrimitive(ctx, value) {
+  if (isUndefined(value))
+    return ctx.stylize('undefined', 'undefined');
+  if (isString(value)) {
+    var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
+                                             .replace(/'/g, "\\'")
+                                             .replace(/\\"/g, '"') + '\'';
+    return ctx.stylize(simple, 'string');
+  }
+  if (isNumber(value))
+    return ctx.stylize('' + value, 'number');
+  if (isBoolean(value))
+    return ctx.stylize('' + value, 'boolean');
+  // For some reason typeof null is "object", so special case here.
+  if (isNull(value))
+    return ctx.stylize('null', 'null');
+}
+
+
+function formatError(value) {
+  return '[' + Error.prototype.toString.call(value) + ']';
+}
+
+
+function formatArray(ctx, value, recurseTimes, visibleKeys, keys) {
+  var output = [];
+  for (var i = 0, l = value.length; i < l; ++i) {
+    if (hasOwnProperty(value, String(i))) {
+      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+          String(i), true));
+    } else {
+      output.push('');
+    }
+  }
+  keys.forEach(function(key) {
+    if (!key.match(/^\d+$/)) {
+      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+          key, true));
+    }
+  });
+  return output;
+}
+
+
+function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
+  var name, str, desc;
+  desc = Object.getOwnPropertyDescriptor(value, key) || { value: value[key] };
+  if (desc.get) {
+    if (desc.set) {
+      str = ctx.stylize('[Getter/Setter]', 'special');
+    } else {
+      str = ctx.stylize('[Getter]', 'special');
+    }
+  } else {
+    if (desc.set) {
+      str = ctx.stylize('[Setter]', 'special');
+    }
+  }
+  if (!hasOwnProperty(visibleKeys, key)) {
+    name = '[' + key + ']';
+  }
+  if (!str) {
+    if (ctx.seen.indexOf(desc.value) < 0) {
+      if (isNull(recurseTimes)) {
+        str = formatValue(ctx, desc.value, null);
+      } else {
+        str = formatValue(ctx, desc.value, recurseTimes - 1);
+      }
+      if (str.indexOf('\n') > -1) {
+        if (array) {
+          str = str.split('\n').map(function(line) {
+            return '  ' + line;
+          }).join('\n').substr(2);
+        } else {
+          str = '\n' + str.split('\n').map(function(line) {
+            return '   ' + line;
+          }).join('\n');
+        }
+      }
+    } else {
+      str = ctx.stylize('[Circular]', 'special');
+    }
+  }
+  if (isUndefined(name)) {
+    if (array && key.match(/^\d+$/)) {
+      return str;
+    }
+    name = JSON.stringify('' + key);
+    if (name.match(/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/)) {
+      name = name.substr(1, name.length - 2);
+      name = ctx.stylize(name, 'name');
+    } else {
+      name = name.replace(/'/g, "\\'")
+                 .replace(/\\"/g, '"')
+                 .replace(/(^"|"$)/g, "'");
+      name = ctx.stylize(name, 'string');
+    }
+  }
+
+  return name + ': ' + str;
+}
+
+
+function reduceToSingleString(output, base, braces) {
+  var numLinesEst = 0;
+  var length = output.reduce(function(prev, cur) {
+    numLinesEst++;
+    if (cur.indexOf('\n') >= 0) numLinesEst++;
+    return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
+  }, 0);
+
+  if (length > 60) {
+    return braces[0] +
+           (base === '' ? '' : base + '\n ') +
+           ' ' +
+           output.join(',\n  ') +
+           ' ' +
+           braces[1];
+  }
+
+  return braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
+}
+
+
+// NOTE: These type checking functions intentionally don't use `instanceof`
+// because it is fragile and can be easily faked with `Object.create()`.
+function isArray(ar) {
+  return Array.isArray(ar);
+}
+exports.isArray = isArray;
+
+function isBoolean(arg) {
+  return typeof arg === 'boolean';
+}
+exports.isBoolean = isBoolean;
+
+function isNull(arg) {
+  return arg === null;
+}
+exports.isNull = isNull;
+
+function isNullOrUndefined(arg) {
+  return arg == null;
+}
+exports.isNullOrUndefined = isNullOrUndefined;
+
+function isNumber(arg) {
+  return typeof arg === 'number';
+}
+exports.isNumber = isNumber;
+
+function isString(arg) {
+  return typeof arg === 'string';
+}
+exports.isString = isString;
+
+function isSymbol(arg) {
+  return typeof arg === 'symbol';
+}
+exports.isSymbol = isSymbol;
+
+function isUndefined(arg) {
+  return arg === void 0;
+}
+exports.isUndefined = isUndefined;
+
+function isRegExp(re) {
+  return isObject(re) && objectToString(re) === '[object RegExp]';
+}
+exports.isRegExp = isRegExp;
+
+function isObject(arg) {
+  return typeof arg === 'object' && arg !== null;
+}
+exports.isObject = isObject;
+
+function isDate(d) {
+  return isObject(d) && objectToString(d) === '[object Date]';
+}
+exports.isDate = isDate;
+
+function isError(e) {
+  return isObject(e) &&
+      (objectToString(e) === '[object Error]' || e instanceof Error);
+}
+exports.isError = isError;
+
+function isFunction(arg) {
+  return typeof arg === 'function';
+}
+exports.isFunction = isFunction;
+
+function isPrimitive(arg) {
+  return arg === null ||
+         typeof arg === 'boolean' ||
+         typeof arg === 'number' ||
+         typeof arg === 'string' ||
+         typeof arg === 'symbol' ||  // ES6 symbol
+         typeof arg === 'undefined';
+}
+exports.isPrimitive = isPrimitive;
+
+exports.isBuffer = require('./support/isBuffer');
+
+function objectToString(o) {
+  return Object.prototype.toString.call(o);
+}
+
+
+function pad(n) {
+  return n < 10 ? '0' + n.toString(10) : n.toString(10);
+}
+
+
+var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
+              'Oct', 'Nov', 'Dec'];
+
+// 26 Feb 16:19:34
+function timestamp() {
+  var d = new Date();
+  var time = [pad(d.getHours()),
+              pad(d.getMinutes()),
+              pad(d.getSeconds())].join(':');
+  return [d.getDate(), months[d.getMonth()], time].join(' ');
+}
+
+
+// log is just a thin wrapper to console.log that prepends a timestamp
+exports.log = function() {
+  console.log('%s - %s', timestamp(), exports.format.apply(exports, arguments));
+};
+
+
+/**
+ * Inherit the prototype methods from one constructor into another.
+ *
+ * The Function.prototype.inherits from lang.js rewritten as a standalone
+ * function (not on Function.prototype). NOTE: If this file is to be loaded
+ * during bootstrapping this function needs to be rewritten using some native
+ * functions as prototype setup using normal JavaScript does not work as
+ * expected during bootstrapping (see mirror.js in r114903).
+ *
+ * @param {function} ctor Constructor function which needs to inherit the
+ *     prototype.
+ * @param {function} superCtor Constructor function to inherit prototype from.
+ */
+exports.inherits = require('inherits');
+
+exports._extend = function(origin, add) {
+  // Don't do anything if add isn't an object
+  if (!add || !isObject(add)) return origin;
+
+  var keys = Object.keys(add);
+  var i = keys.length;
+  while (i--) {
+    origin[keys[i]] = add[keys[i]];
+  }
+  return origin;
+};
+
+function hasOwnProperty(obj, prop) {
+  return Object.prototype.hasOwnProperty.call(obj, prop);
+}
+
+}).call(this,require("/home/jmandel/smart/fhir-js-client/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":14,"/home/jmandel/smart/fhir-js-client/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":13,"inherits":12}],16:[function(require,module,exports){
+(function (Buffer){
+(function () {
   "use strict";
 
   function btoa(str) {
@@ -9465,3923 +11755,5078 @@ var Buffer=require("__browserify_Buffer").Buffer;(function () {
   module.exports = btoa;
 }());
 
-},{"__browserify_Buffer":6}],5:[function(require,module,exports){
-
-},{}],6:[function(require,module,exports){
-require=(function(e,t,n,r){function i(r){if(!n[r]){if(!t[r]){if(e)return e(r);throw new Error("Cannot find module '"+r+"'")}var s=n[r]={exports:{}};t[r][0](function(e){var n=t[r][1][e];return i(n?n:e)},s,s.exports)}return n[r].exports}for(var s=0;s<r.length;s++)i(r[s]);return i})(typeof require!=="undefined"&&require,{1:[function(require,module,exports){
-// UTILITY
-var util = require('util');
-var Buffer = require("buffer").Buffer;
-var pSlice = Array.prototype.slice;
-
-function objectKeys(object) {
-  if (Object.keys) return Object.keys(object);
-  var result = [];
-  for (var name in object) {
-    if (Object.prototype.hasOwnProperty.call(object, name)) {
-      result.push(name);
-    }
-  }
-  return result;
-}
-
-// 1. The assert module provides functions that throw
-// AssertionError's when particular conditions are not met. The
-// assert module must conform to the following interface.
-
-var assert = module.exports = ok;
-
-// 2. The AssertionError is defined in assert.
-// new assert.AssertionError({ message: message,
-//                             actual: actual,
-//                             expected: expected })
-
-assert.AssertionError = function AssertionError(options) {
-  this.name = 'AssertionError';
-  this.message = options.message;
-  this.actual = options.actual;
-  this.expected = options.expected;
-  this.operator = options.operator;
-  var stackStartFunction = options.stackStartFunction || fail;
-
-  if (Error.captureStackTrace) {
-    Error.captureStackTrace(this, stackStartFunction);
-  }
-};
-util.inherits(assert.AssertionError, Error);
-
-function replacer(key, value) {
-  if (value === undefined) {
-    return '' + value;
-  }
-  if (typeof value === 'number' && (isNaN(value) || !isFinite(value))) {
-    return value.toString();
-  }
-  if (typeof value === 'function' || value instanceof RegExp) {
-    return value.toString();
-  }
-  return value;
-}
-
-function truncate(s, n) {
-  if (typeof s == 'string') {
-    return s.length < n ? s : s.slice(0, n);
-  } else {
-    return s;
-  }
-}
-
-assert.AssertionError.prototype.toString = function() {
-  if (this.message) {
-    return [this.name + ':', this.message].join(' ');
-  } else {
-    return [
-      this.name + ':',
-      truncate(JSON.stringify(this.actual, replacer), 128),
-      this.operator,
-      truncate(JSON.stringify(this.expected, replacer), 128)
-    ].join(' ');
-  }
-};
-
-// assert.AssertionError instanceof Error
-
-assert.AssertionError.__proto__ = Error.prototype;
-
-// At present only the three keys mentioned above are used and
-// understood by the spec. Implementations or sub modules can pass
-// other keys to the AssertionError's constructor - they will be
-// ignored.
-
-// 3. All of the following functions must throw an AssertionError
-// when a corresponding condition is not met, with a message that
-// may be undefined if not provided.  All assertion methods provide
-// both the actual and expected values to the assertion error for
-// display purposes.
-
-function fail(actual, expected, message, operator, stackStartFunction) {
-  throw new assert.AssertionError({
-    message: message,
-    actual: actual,
-    expected: expected,
-    operator: operator,
-    stackStartFunction: stackStartFunction
-  });
-}
-
-// EXTENSION! allows for well behaved errors defined elsewhere.
-assert.fail = fail;
-
-// 4. Pure assertion tests whether a value is truthy, as determined
-// by !!guard.
-// assert.ok(guard, message_opt);
-// This statement is equivalent to assert.equal(true, guard,
-// message_opt);. To test strictly for the value true, use
-// assert.strictEqual(true, guard, message_opt);.
-
-function ok(value, message) {
-  if (!!!value) fail(value, true, message, '==', assert.ok);
-}
-assert.ok = ok;
-
-// 5. The equality assertion tests shallow, coercive equality with
-// ==.
-// assert.equal(actual, expected, message_opt);
-
-assert.equal = function equal(actual, expected, message) {
-  if (actual != expected) fail(actual, expected, message, '==', assert.equal);
-};
-
-// 6. The non-equality assertion tests for whether two objects are not equal
-// with != assert.notEqual(actual, expected, message_opt);
-
-assert.notEqual = function notEqual(actual, expected, message) {
-  if (actual == expected) {
-    fail(actual, expected, message, '!=', assert.notEqual);
-  }
-};
-
-// 7. The equivalence assertion tests a deep equality relation.
-// assert.deepEqual(actual, expected, message_opt);
-
-assert.deepEqual = function deepEqual(actual, expected, message) {
-  if (!_deepEqual(actual, expected)) {
-    fail(actual, expected, message, 'deepEqual', assert.deepEqual);
-  }
-};
-
-function _deepEqual(actual, expected) {
-  // 7.1. All identical values are equivalent, as determined by ===.
-  if (actual === expected) {
-    return true;
-
-  } else if (Buffer.isBuffer(actual) && Buffer.isBuffer(expected)) {
-    if (actual.length != expected.length) return false;
-
-    for (var i = 0; i < actual.length; i++) {
-      if (actual[i] !== expected[i]) return false;
-    }
-
-    return true;
-
-  // 7.2. If the expected value is a Date object, the actual value is
-  // equivalent if it is also a Date object that refers to the same time.
-  } else if (actual instanceof Date && expected instanceof Date) {
-    return actual.getTime() === expected.getTime();
-
-  // 7.3. Other pairs that do not both pass typeof value == 'object',
-  // equivalence is determined by ==.
-  } else if (typeof actual != 'object' && typeof expected != 'object') {
-    return actual == expected;
-
-  // 7.4. For all other Object pairs, including Array objects, equivalence is
-  // determined by having the same number of owned properties (as verified
-  // with Object.prototype.hasOwnProperty.call), the same set of keys
-  // (although not necessarily the same order), equivalent values for every
-  // corresponding key, and an identical 'prototype' property. Note: this
-  // accounts for both named and indexed properties on Arrays.
-  } else {
-    return objEquiv(actual, expected);
-  }
-}
-
-function isUndefinedOrNull(value) {
-  return value === null || value === undefined;
-}
-
-function isArguments(object) {
-  return Object.prototype.toString.call(object) == '[object Arguments]';
-}
-
-function objEquiv(a, b) {
-  if (isUndefinedOrNull(a) || isUndefinedOrNull(b))
-    return false;
-  // an identical 'prototype' property.
-  if (a.prototype !== b.prototype) return false;
-  //~~~I've managed to break Object.keys through screwy arguments passing.
-  //   Converting to array solves the problem.
-  if (isArguments(a)) {
-    if (!isArguments(b)) {
-      return false;
-    }
-    a = pSlice.call(a);
-    b = pSlice.call(b);
-    return _deepEqual(a, b);
-  }
-  try {
-    var ka = objectKeys(a),
-        kb = objectKeys(b),
-        key, i;
-  } catch (e) {//happens when one is a string literal and the other isn't
-    return false;
-  }
-  // having the same number of owned properties (keys incorporates
-  // hasOwnProperty)
-  if (ka.length != kb.length)
-    return false;
-  //the same set of keys (although not necessarily the same order),
-  ka.sort();
-  kb.sort();
-  //~~~cheap key test
-  for (i = ka.length - 1; i >= 0; i--) {
-    if (ka[i] != kb[i])
-      return false;
-  }
-  //equivalent values for every corresponding key, and
-  //~~~possibly expensive deep test
-  for (i = ka.length - 1; i >= 0; i--) {
-    key = ka[i];
-    if (!_deepEqual(a[key], b[key])) return false;
-  }
-  return true;
-}
-
-// 8. The non-equivalence assertion tests for any deep inequality.
-// assert.notDeepEqual(actual, expected, message_opt);
-
-assert.notDeepEqual = function notDeepEqual(actual, expected, message) {
-  if (_deepEqual(actual, expected)) {
-    fail(actual, expected, message, 'notDeepEqual', assert.notDeepEqual);
-  }
-};
-
-// 9. The strict equality assertion tests strict equality, as determined by ===.
-// assert.strictEqual(actual, expected, message_opt);
-
-assert.strictEqual = function strictEqual(actual, expected, message) {
-  if (actual !== expected) {
-    fail(actual, expected, message, '===', assert.strictEqual);
-  }
-};
-
-// 10. The strict non-equality assertion tests for strict inequality, as
-// determined by !==.  assert.notStrictEqual(actual, expected, message_opt);
-
-assert.notStrictEqual = function notStrictEqual(actual, expected, message) {
-  if (actual === expected) {
-    fail(actual, expected, message, '!==', assert.notStrictEqual);
-  }
-};
-
-function expectedException(actual, expected) {
-  if (!actual || !expected) {
-    return false;
-  }
-
-  if (expected instanceof RegExp) {
-    return expected.test(actual);
-  } else if (actual instanceof expected) {
-    return true;
-  } else if (expected.call({}, actual) === true) {
-    return true;
-  }
-
-  return false;
-}
-
-function _throws(shouldThrow, block, expected, message) {
-  var actual;
-
-  if (typeof expected === 'string') {
-    message = expected;
-    expected = null;
-  }
-
-  try {
-    block();
-  } catch (e) {
-    actual = e;
-  }
-
-  message = (expected && expected.name ? ' (' + expected.name + ').' : '.') +
-            (message ? ' ' + message : '.');
-
-  if (shouldThrow && !actual) {
-    fail('Missing expected exception' + message);
-  }
-
-  if (!shouldThrow && expectedException(actual, expected)) {
-    fail('Got unwanted exception' + message);
-  }
-
-  if ((shouldThrow && actual && expected &&
-      !expectedException(actual, expected)) || (!shouldThrow && actual)) {
-    throw actual;
-  }
-}
-
-// 11. Expected to throw an error:
-// assert.throws(block, Error_opt, message_opt);
-
-assert.throws = function(block, /*optional*/error, /*optional*/message) {
-  _throws.apply(this, [true].concat(pSlice.call(arguments)));
-};
-
-// EXTENSION! This is annoying to write outside this module.
-assert.doesNotThrow = function(block, /*optional*/error, /*optional*/message) {
-  _throws.apply(this, [false].concat(pSlice.call(arguments)));
-};
-
-assert.ifError = function(err) { if (err) {throw err;}};
-
-},{"util":2,"buffer":3}],2:[function(require,module,exports){
-var events = require('events');
-
-exports.isArray = isArray;
-exports.isDate = function(obj){return Object.prototype.toString.call(obj) === '[object Date]'};
-exports.isRegExp = function(obj){return Object.prototype.toString.call(obj) === '[object RegExp]'};
-
-
-exports.print = function () {};
-exports.puts = function () {};
-exports.debug = function() {};
-
-exports.inspect = function(obj, showHidden, depth, colors) {
-  var seen = [];
-
-  var stylize = function(str, styleType) {
-    // http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
-    var styles =
-        { 'bold' : [1, 22],
-          'italic' : [3, 23],
-          'underline' : [4, 24],
-          'inverse' : [7, 27],
-          'white' : [37, 39],
-          'grey' : [90, 39],
-          'black' : [30, 39],
-          'blue' : [34, 39],
-          'cyan' : [36, 39],
-          'green' : [32, 39],
-          'magenta' : [35, 39],
-          'red' : [31, 39],
-          'yellow' : [33, 39] };
-
-    var style =
-        { 'special': 'cyan',
-          'number': 'blue',
-          'boolean': 'yellow',
-          'undefined': 'grey',
-          'null': 'bold',
-          'string': 'green',
-          'date': 'magenta',
-          // "name": intentionally not styling
-          'regexp': 'red' }[styleType];
-
-    if (style) {
-      return '\033[' + styles[style][0] + 'm' + str +
-             '\033[' + styles[style][1] + 'm';
-    } else {
-      return str;
-    }
-  };
-  if (! colors) {
-    stylize = function(str, styleType) { return str; };
-  }
-
-  function format(value, recurseTimes) {
-    // Provide a hook for user-specified inspect functions.
-    // Check that value is an object with an inspect function on it
-    if (value && typeof value.inspect === 'function' &&
-        // Filter out the util module, it's inspect function is special
-        value !== exports &&
-        // Also filter out any prototype objects using the circular check.
-        !(value.constructor && value.constructor.prototype === value)) {
-      return value.inspect(recurseTimes);
-    }
-
-    // Primitive types cannot have properties
-    switch (typeof value) {
-      case 'undefined':
-        return stylize('undefined', 'undefined');
-
-      case 'string':
-        var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
-                                                 .replace(/'/g, "\\'")
-                                                 .replace(/\\"/g, '"') + '\'';
-        return stylize(simple, 'string');
-
-      case 'number':
-        return stylize('' + value, 'number');
-
-      case 'boolean':
-        return stylize('' + value, 'boolean');
-    }
-    // For some reason typeof null is "object", so special case here.
-    if (value === null) {
-      return stylize('null', 'null');
-    }
-
-    // Look up the keys of the object.
-    var visible_keys = Object_keys(value);
-    var keys = showHidden ? Object_getOwnPropertyNames(value) : visible_keys;
-
-    // Functions without properties can be shortcutted.
-    if (typeof value === 'function' && keys.length === 0) {
-      if (isRegExp(value)) {
-        return stylize('' + value, 'regexp');
-      } else {
-        var name = value.name ? ': ' + value.name : '';
-        return stylize('[Function' + name + ']', 'special');
-      }
-    }
-
-    // Dates without properties can be shortcutted
-    if (isDate(value) && keys.length === 0) {
-      return stylize(value.toUTCString(), 'date');
-    }
-
-    var base, type, braces;
-    // Determine the object type
-    if (isArray(value)) {
-      type = 'Array';
-      braces = ['[', ']'];
-    } else {
-      type = 'Object';
-      braces = ['{', '}'];
-    }
-
-    // Make functions say that they are functions
-    if (typeof value === 'function') {
-      var n = value.name ? ': ' + value.name : '';
-      base = (isRegExp(value)) ? ' ' + value : ' [Function' + n + ']';
-    } else {
-      base = '';
-    }
-
-    // Make dates with properties first say the date
-    if (isDate(value)) {
-      base = ' ' + value.toUTCString();
-    }
-
-    if (keys.length === 0) {
-      return braces[0] + base + braces[1];
-    }
-
-    if (recurseTimes < 0) {
-      if (isRegExp(value)) {
-        return stylize('' + value, 'regexp');
-      } else {
-        return stylize('[Object]', 'special');
-      }
-    }
-
-    seen.push(value);
-
-    var output = keys.map(function(key) {
-      var name, str;
-      if (value.__lookupGetter__) {
-        if (value.__lookupGetter__(key)) {
-          if (value.__lookupSetter__(key)) {
-            str = stylize('[Getter/Setter]', 'special');
-          } else {
-            str = stylize('[Getter]', 'special');
-          }
-        } else {
-          if (value.__lookupSetter__(key)) {
-            str = stylize('[Setter]', 'special');
-          }
-        }
-      }
-      if (visible_keys.indexOf(key) < 0) {
-        name = '[' + key + ']';
-      }
-      if (!str) {
-        if (seen.indexOf(value[key]) < 0) {
-          if (recurseTimes === null) {
-            str = format(value[key]);
-          } else {
-            str = format(value[key], recurseTimes - 1);
-          }
-          if (str.indexOf('\n') > -1) {
-            if (isArray(value)) {
-              str = str.split('\n').map(function(line) {
-                return '  ' + line;
-              }).join('\n').substr(2);
-            } else {
-              str = '\n' + str.split('\n').map(function(line) {
-                return '   ' + line;
-              }).join('\n');
-            }
-          }
-        } else {
-          str = stylize('[Circular]', 'special');
-        }
-      }
-      if (typeof name === 'undefined') {
-        if (type === 'Array' && key.match(/^\d+$/)) {
-          return str;
-        }
-        name = JSON.stringify('' + key);
-        if (name.match(/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/)) {
-          name = name.substr(1, name.length - 2);
-          name = stylize(name, 'name');
-        } else {
-          name = name.replace(/'/g, "\\'")
-                     .replace(/\\"/g, '"')
-                     .replace(/(^"|"$)/g, "'");
-          name = stylize(name, 'string');
-        }
-      }
-
-      return name + ': ' + str;
-    });
-
-    seen.pop();
-
-    var numLinesEst = 0;
-    var length = output.reduce(function(prev, cur) {
-      numLinesEst++;
-      if (cur.indexOf('\n') >= 0) numLinesEst++;
-      return prev + cur.length + 1;
-    }, 0);
-
-    if (length > 50) {
-      output = braces[0] +
-               (base === '' ? '' : base + '\n ') +
-               ' ' +
-               output.join(',\n  ') +
-               ' ' +
-               braces[1];
-
-    } else {
-      output = braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
-    }
-
-    return output;
-  }
-  return format(obj, (typeof depth === 'undefined' ? 2 : depth));
-};
-
-
-function isArray(ar) {
-  return ar instanceof Array ||
-         Array.isArray(ar) ||
-         (ar && ar !== Object.prototype && isArray(ar.__proto__));
-}
-
-
-function isRegExp(re) {
-  return re instanceof RegExp ||
-    (typeof re === 'object' && Object.prototype.toString.call(re) === '[object RegExp]');
-}
-
-
-function isDate(d) {
-  if (d instanceof Date) return true;
-  if (typeof d !== 'object') return false;
-  var properties = Date.prototype && Object_getOwnPropertyNames(Date.prototype);
-  var proto = d.__proto__ && Object_getOwnPropertyNames(d.__proto__);
-  return JSON.stringify(proto) === JSON.stringify(properties);
-}
-
-function pad(n) {
-  return n < 10 ? '0' + n.toString(10) : n.toString(10);
-}
-
-var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
-              'Oct', 'Nov', 'Dec'];
-
-// 26 Feb 16:19:34
-function timestamp() {
-  var d = new Date();
-  var time = [pad(d.getHours()),
-              pad(d.getMinutes()),
-              pad(d.getSeconds())].join(':');
-  return [d.getDate(), months[d.getMonth()], time].join(' ');
-}
-
-exports.log = function (msg) {};
-
-exports.pump = null;
-
-var Object_keys = Object.keys || function (obj) {
-    var res = [];
-    for (var key in obj) res.push(key);
-    return res;
-};
-
-var Object_getOwnPropertyNames = Object.getOwnPropertyNames || function (obj) {
-    var res = [];
-    for (var key in obj) {
-        if (Object.hasOwnProperty.call(obj, key)) res.push(key);
-    }
-    return res;
-};
-
-var Object_create = Object.create || function (prototype, properties) {
-    // from es5-shim
-    var object;
-    if (prototype === null) {
-        object = { '__proto__' : null };
-    }
-    else {
-        if (typeof prototype !== 'object') {
-            throw new TypeError(
-                'typeof prototype[' + (typeof prototype) + '] != \'object\''
-            );
-        }
-        var Type = function () {};
-        Type.prototype = prototype;
-        object = new Type();
-        object.__proto__ = prototype;
-    }
-    if (typeof properties !== 'undefined' && Object.defineProperties) {
-        Object.defineProperties(object, properties);
-    }
-    return object;
-};
-
-exports.inherits = function(ctor, superCtor) {
-  ctor.super_ = superCtor;
-  ctor.prototype = Object_create(superCtor.prototype, {
-    constructor: {
-      value: ctor,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-};
-
-var formatRegExp = /%[sdj%]/g;
-exports.format = function(f) {
-  if (typeof f !== 'string') {
-    var objects = [];
-    for (var i = 0; i < arguments.length; i++) {
-      objects.push(exports.inspect(arguments[i]));
-    }
-    return objects.join(' ');
-  }
-
-  var i = 1;
-  var args = arguments;
-  var len = args.length;
-  var str = String(f).replace(formatRegExp, function(x) {
-    if (x === '%%') return '%';
-    if (i >= len) return x;
-    switch (x) {
-      case '%s': return String(args[i++]);
-      case '%d': return Number(args[i++]);
-      case '%j': return JSON.stringify(args[i++]);
-      default:
-        return x;
-    }
-  });
-  for(var x = args[i]; i < len; x = args[++i]){
-    if (x === null || typeof x !== 'object') {
-      str += ' ' + x;
-    } else {
-      str += ' ' + exports.inspect(x);
-    }
-  }
-  return str;
-};
-
-},{"events":4}],5:[function(require,module,exports){
-exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
-  var e, m,
-      eLen = nBytes * 8 - mLen - 1,
-      eMax = (1 << eLen) - 1,
-      eBias = eMax >> 1,
-      nBits = -7,
-      i = isBE ? 0 : (nBytes - 1),
-      d = isBE ? 1 : -1,
-      s = buffer[offset + i];
-
-  i += d;
-
-  e = s & ((1 << (-nBits)) - 1);
-  s >>= (-nBits);
-  nBits += eLen;
-  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8);
-
-  m = e & ((1 << (-nBits)) - 1);
-  e >>= (-nBits);
-  nBits += mLen;
-  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8);
-
-  if (e === 0) {
-    e = 1 - eBias;
-  } else if (e === eMax) {
-    return m ? NaN : ((s ? -1 : 1) * Infinity);
-  } else {
-    m = m + Math.pow(2, mLen);
-    e = e - eBias;
-  }
-  return (s ? -1 : 1) * m * Math.pow(2, e - mLen);
-};
-
-exports.writeIEEE754 = function(buffer, value, offset, isBE, mLen, nBytes) {
-  var e, m, c,
-      eLen = nBytes * 8 - mLen - 1,
-      eMax = (1 << eLen) - 1,
-      eBias = eMax >> 1,
-      rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0),
-      i = isBE ? (nBytes - 1) : 0,
-      d = isBE ? -1 : 1,
-      s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0;
-
-  value = Math.abs(value);
-
-  if (isNaN(value) || value === Infinity) {
-    m = isNaN(value) ? 1 : 0;
-    e = eMax;
-  } else {
-    e = Math.floor(Math.log(value) / Math.LN2);
-    if (value * (c = Math.pow(2, -e)) < 1) {
-      e--;
-      c *= 2;
-    }
-    if (e + eBias >= 1) {
-      value += rt / c;
-    } else {
-      value += rt * Math.pow(2, 1 - eBias);
-    }
-    if (value * c >= 2) {
-      e++;
-      c /= 2;
-    }
-
-    if (e + eBias >= eMax) {
-      m = 0;
-      e = eMax;
-    } else if (e + eBias >= 1) {
-      m = (value * c - 1) * Math.pow(2, mLen);
-      e = e + eBias;
-    } else {
-      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen);
-      e = 0;
-    }
-  }
-
-  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8);
-
-  e = (e << mLen) | m;
-  eLen += mLen;
-  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8);
-
-  buffer[offset + i - d] |= s * 128;
-};
-
-},{}],6:[function(require,module,exports){
-// shim for using process in browser
-
-var process = module.exports = {};
-
-process.nextTick = (function () {
-    var canSetImmediate = typeof window !== 'undefined'
-    && window.setImmediate;
-    var canPost = typeof window !== 'undefined'
-    && window.postMessage && window.addEventListener
-    ;
-
-    if (canSetImmediate) {
-        return function (f) { return window.setImmediate(f) };
-    }
-
-    if (canPost) {
-        var queue = [];
-        window.addEventListener('message', function (ev) {
-            if (ev.source === window && ev.data === 'process-tick') {
-                ev.stopPropagation();
-                if (queue.length > 0) {
-                    var fn = queue.shift();
-                    fn();
-                }
-            }
-        }, true);
-
-        return function nextTick(fn) {
-            queue.push(fn);
-            window.postMessage('process-tick', '*');
-        };
-    }
-
-    return function nextTick(fn) {
-        setTimeout(fn, 0);
-    };
-})();
-
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-}
-
-// TODO(shtylman)
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-
-},{}],4:[function(require,module,exports){
-(function(process){if (!process.EventEmitter) process.EventEmitter = function () {};
-
-var EventEmitter = exports.EventEmitter = process.EventEmitter;
-var isArray = typeof Array.isArray === 'function'
-    ? Array.isArray
-    : function (xs) {
-        return Object.prototype.toString.call(xs) === '[object Array]'
-    }
-;
-function indexOf (xs, x) {
-    if (xs.indexOf) return xs.indexOf(x);
-    for (var i = 0; i < xs.length; i++) {
-        if (x === xs[i]) return i;
-    }
-    return -1;
-}
-
-// By default EventEmitters will print a warning if more than
-// 10 listeners are added to it. This is a useful default which
-// helps finding memory leaks.
-//
-// Obviously not all Emitters should be limited to 10. This function allows
-// that to be increased. Set to zero for unlimited.
-var defaultMaxListeners = 10;
-EventEmitter.prototype.setMaxListeners = function(n) {
-  if (!this._events) this._events = {};
-  this._events.maxListeners = n;
-};
-
-
-EventEmitter.prototype.emit = function(type) {
-  // If there is no 'error' event listener then throw.
-  if (type === 'error') {
-    if (!this._events || !this._events.error ||
-        (isArray(this._events.error) && !this._events.error.length))
+}).call(this,require("buffer").Buffer)
+},{"buffer":9}],17:[function(require,module,exports){
+module.exports={
+  "resourceType": "Conformance",
+  "text": {
+    "status": "generated",
+    "div": "<div><h2>Base FHIR Conformance Statement (Full)</h2><p>This is the base conformance statement for FHIR. It represents a server that provides the full set of functionality defined by FHIR. It is provided to use as a template for system designers to build their own conformance statements from</p><table><tr><td>Mode</td><td>server</td></tr><tr><td>Description</td><td>All the functionality defined in FHIR</td></tr><tr><td>Transaction</td><td>y</td></tr><tr><td>System History</td><td>y</td></tr><tr><td>System Search</td><td>y</td></tr></table><table><tr><th><b>Resource Type</b></th><th><b>Profile</b></th><th><b>Read</b></th><th><b>V-Read</b></th><th><b>Search</b></th><th><b>Update</b></th><th><b>Updates</b></th><th><b>Create</b></th><th><b>Delete</b></th><th><b>History</b></th></tr><tr><td>AdverseReaction</td><td><a href=\"http://hl7.org/fhir/AdverseReaction\">http://hl7.org/fhir/AdverseReaction</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Alert</td><td><a href=\"http://hl7.org/fhir/Alert\">http://hl7.org/fhir/Alert</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>AllergyIntolerance</td><td><a href=\"http://hl7.org/fhir/AllergyIntolerance\">http://hl7.org/fhir/AllergyIntolerance</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Appointment</td><td><a href=\"http://hl7.org/fhir/Appointment\">http://hl7.org/fhir/Appointment</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>AppointmentResponse</td><td><a href=\"http://hl7.org/fhir/AppointmentResponse\">http://hl7.org/fhir/AppointmentResponse</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Availability</td><td><a href=\"http://hl7.org/fhir/Availability\">http://hl7.org/fhir/Availability</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>CarePlan</td><td><a href=\"http://hl7.org/fhir/CarePlan\">http://hl7.org/fhir/CarePlan</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Composition</td><td><a href=\"http://hl7.org/fhir/Composition\">http://hl7.org/fhir/Composition</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>ConceptMap</td><td><a href=\"http://hl7.org/fhir/ConceptMap\">http://hl7.org/fhir/ConceptMap</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Condition</td><td><a href=\"http://hl7.org/fhir/Condition\">http://hl7.org/fhir/Condition</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Conformance</td><td><a href=\"http://hl7.org/fhir/Conformance\">http://hl7.org/fhir/Conformance</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Device</td><td><a href=\"http://hl7.org/fhir/Device\">http://hl7.org/fhir/Device</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>DeviceObservationReport</td><td><a href=\"http://hl7.org/fhir/DeviceObservationReport\">http://hl7.org/fhir/DeviceObservationReport</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>DiagnosticOrder</td><td><a href=\"http://hl7.org/fhir/DiagnosticOrder\">http://hl7.org/fhir/DiagnosticOrder</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>DiagnosticReport</td><td><a href=\"http://hl7.org/fhir/DiagnosticReport\">http://hl7.org/fhir/DiagnosticReport</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>DocumentManifest</td><td><a href=\"http://hl7.org/fhir/DocumentManifest\">http://hl7.org/fhir/DocumentManifest</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>DocumentReference</td><td><a href=\"http://hl7.org/fhir/DocumentReference\">http://hl7.org/fhir/DocumentReference</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Encounter</td><td><a href=\"http://hl7.org/fhir/Encounter\">http://hl7.org/fhir/Encounter</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>FamilyHistory</td><td><a href=\"http://hl7.org/fhir/FamilyHistory\">http://hl7.org/fhir/FamilyHistory</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Group</td><td><a href=\"http://hl7.org/fhir/Group\">http://hl7.org/fhir/Group</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>ImagingStudy</td><td><a href=\"http://hl7.org/fhir/ImagingStudy\">http://hl7.org/fhir/ImagingStudy</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Immunization</td><td><a href=\"http://hl7.org/fhir/Immunization\">http://hl7.org/fhir/Immunization</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>ImmunizationRecommendation</td><td><a href=\"http://hl7.org/fhir/ImmunizationRecommendation\">http://hl7.org/fhir/ImmunizationRecommendation</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>List</td><td><a href=\"http://hl7.org/fhir/List\">http://hl7.org/fhir/List</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Location</td><td><a href=\"http://hl7.org/fhir/Location\">http://hl7.org/fhir/Location</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Media</td><td><a href=\"http://hl7.org/fhir/Media\">http://hl7.org/fhir/Media</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Medication</td><td><a href=\"http://hl7.org/fhir/Medication\">http://hl7.org/fhir/Medication</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>MedicationAdministration</td><td><a href=\"http://hl7.org/fhir/MedicationAdministration\">http://hl7.org/fhir/MedicationAdministration</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>MedicationDispense</td><td><a href=\"http://hl7.org/fhir/MedicationDispense\">http://hl7.org/fhir/MedicationDispense</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>MedicationPrescription</td><td><a href=\"http://hl7.org/fhir/MedicationPrescription\">http://hl7.org/fhir/MedicationPrescription</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>MedicationStatement</td><td><a href=\"http://hl7.org/fhir/MedicationStatement\">http://hl7.org/fhir/MedicationStatement</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>MessageHeader</td><td><a href=\"http://hl7.org/fhir/MessageHeader\">http://hl7.org/fhir/MessageHeader</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Namespace</td><td><a href=\"http://hl7.org/fhir/Namespace\">http://hl7.org/fhir/Namespace</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Observation</td><td><a href=\"http://hl7.org/fhir/Observation\">http://hl7.org/fhir/Observation</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>OperationOutcome</td><td><a href=\"http://hl7.org/fhir/OperationOutcome\">http://hl7.org/fhir/OperationOutcome</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Order</td><td><a href=\"http://hl7.org/fhir/Order\">http://hl7.org/fhir/Order</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>OrderResponse</td><td><a href=\"http://hl7.org/fhir/OrderResponse\">http://hl7.org/fhir/OrderResponse</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Organization</td><td><a href=\"http://hl7.org/fhir/Organization\">http://hl7.org/fhir/Organization</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Other</td><td><a href=\"http://hl7.org/fhir/Other\">http://hl7.org/fhir/Other</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Patient</td><td><a href=\"http://hl7.org/fhir/Patient\">http://hl7.org/fhir/Patient</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Practitioner</td><td><a href=\"http://hl7.org/fhir/Practitioner\">http://hl7.org/fhir/Practitioner</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Procedure</td><td><a href=\"http://hl7.org/fhir/Procedure\">http://hl7.org/fhir/Procedure</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Profile</td><td><a href=\"http://hl7.org/fhir/Profile\">http://hl7.org/fhir/Profile</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Provenance</td><td><a href=\"http://hl7.org/fhir/Provenance\">http://hl7.org/fhir/Provenance</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Query</td><td><a href=\"http://hl7.org/fhir/Query\">http://hl7.org/fhir/Query</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Questionnaire</td><td><a href=\"http://hl7.org/fhir/Questionnaire\">http://hl7.org/fhir/Questionnaire</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>RelatedPerson</td><td><a href=\"http://hl7.org/fhir/RelatedPerson\">http://hl7.org/fhir/RelatedPerson</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>SecurityEvent</td><td><a href=\"http://hl7.org/fhir/SecurityEvent\">http://hl7.org/fhir/SecurityEvent</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Slot</td><td><a href=\"http://hl7.org/fhir/Slot\">http://hl7.org/fhir/Slot</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Specimen</td><td><a href=\"http://hl7.org/fhir/Specimen\">http://hl7.org/fhir/Specimen</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Substance</td><td><a href=\"http://hl7.org/fhir/Substance\">http://hl7.org/fhir/Substance</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Supply</td><td><a href=\"http://hl7.org/fhir/Supply\">http://hl7.org/fhir/Supply</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>ValueSet</td><td><a href=\"http://hl7.org/fhir/ValueSet\">http://hl7.org/fhir/ValueSet</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr></table></div>"
+  },
+  "identifier": "http://hl7.org/fhir/conformance-base",
+  "version": "0.1.0-????",
+  "name": "Base FHIR Conformance Statement (Full)",
+  "publisher": "FHIR Project Team",
+  "telecom": [
     {
-      if (arguments[1] instanceof Error) {
-        throw arguments[1]; // Unhandled 'error' event
-      } else {
-        throw new Error("Uncaught, unspecified 'error' event.");
-      }
-      return false;
+      "system": "url",
+      "value": "http://hl7.org/fhir"
     }
-  }
-
-  if (!this._events) return false;
-  var handler = this._events[type];
-  if (!handler) return false;
-
-  if (typeof handler == 'function') {
-    switch (arguments.length) {
-      // fast cases
-      case 1:
-        handler.call(this);
-        break;
-      case 2:
-        handler.call(this, arguments[1]);
-        break;
-      case 3:
-        handler.call(this, arguments[1], arguments[2]);
-        break;
-      // slower
-      default:
-        var args = Array.prototype.slice.call(arguments, 1);
-        handler.apply(this, args);
-    }
-    return true;
-
-  } else if (isArray(handler)) {
-    var args = Array.prototype.slice.call(arguments, 1);
-
-    var listeners = handler.slice();
-    for (var i = 0, l = listeners.length; i < l; i++) {
-      listeners[i].apply(this, args);
-    }
-    return true;
-
-  } else {
-    return false;
-  }
-};
-
-// EventEmitter is defined in src/node_events.cc
-// EventEmitter.prototype.emit() is also defined there.
-EventEmitter.prototype.addListener = function(type, listener) {
-  if ('function' !== typeof listener) {
-    throw new Error('addListener only takes instances of Function');
-  }
-
-  if (!this._events) this._events = {};
-
-  // To avoid recursion in the case that type == "newListeners"! Before
-  // adding it to the listeners, first emit "newListeners".
-  this.emit('newListener', type, listener);
-
-  if (!this._events[type]) {
-    // Optimize the case of one listener. Don't need the extra array object.
-    this._events[type] = listener;
-  } else if (isArray(this._events[type])) {
-
-    // Check for listener leak
-    if (!this._events[type].warned) {
-      var m;
-      if (this._events.maxListeners !== undefined) {
-        m = this._events.maxListeners;
-      } else {
-        m = defaultMaxListeners;
-      }
-
-      if (m && m > 0 && this._events[type].length > m) {
-        this._events[type].warned = true;
-        console.error('(node) warning: possible EventEmitter memory ' +
-                      'leak detected. %d listeners added. ' +
-                      'Use emitter.setMaxListeners() to increase limit.',
-                      this._events[type].length);
-        console.trace();
-      }
-    }
-
-    // If we've already got an array, just append.
-    this._events[type].push(listener);
-  } else {
-    // Adding the second element, need to change to array.
-    this._events[type] = [this._events[type], listener];
-  }
-
-  return this;
-};
-
-EventEmitter.prototype.on = EventEmitter.prototype.addListener;
-
-EventEmitter.prototype.once = function(type, listener) {
-  var self = this;
-  self.on(type, function g() {
-    self.removeListener(type, g);
-    listener.apply(this, arguments);
-  });
-
-  return this;
-};
-
-EventEmitter.prototype.removeListener = function(type, listener) {
-  if ('function' !== typeof listener) {
-    throw new Error('removeListener only takes instances of Function');
-  }
-
-  // does not use listeners(), so no side effect of creating _events[type]
-  if (!this._events || !this._events[type]) return this;
-
-  var list = this._events[type];
-
-  if (isArray(list)) {
-    var i = indexOf(list, listener);
-    if (i < 0) return this;
-    list.splice(i, 1);
-    if (list.length == 0)
-      delete this._events[type];
-  } else if (this._events[type] === listener) {
-    delete this._events[type];
-  }
-
-  return this;
-};
-
-EventEmitter.prototype.removeAllListeners = function(type) {
-  if (arguments.length === 0) {
-    this._events = {};
-    return this;
-  }
-
-  // does not use listeners(), so no side effect of creating _events[type]
-  if (type && this._events && this._events[type]) this._events[type] = null;
-  return this;
-};
-
-EventEmitter.prototype.listeners = function(type) {
-  if (!this._events) this._events = {};
-  if (!this._events[type]) this._events[type] = [];
-  if (!isArray(this._events[type])) {
-    this._events[type] = [this._events[type]];
-  }
-  return this._events[type];
-};
-
-})(require("__browserify_process"))
-},{"__browserify_process":6}],"buffer-browserify":[function(require,module,exports){
-module.exports=require('q9TxCC');
-},{}],"q9TxCC":[function(require,module,exports){
-function SlowBuffer (size) {
-    this.length = size;
-};
-
-var assert = require('assert');
-
-exports.INSPECT_MAX_BYTES = 50;
-
-
-function toHex(n) {
-  if (n < 16) return '0' + n.toString(16);
-  return n.toString(16);
-}
-
-function utf8ToBytes(str) {
-  var byteArray = [];
-  for (var i = 0; i < str.length; i++)
-    if (str.charCodeAt(i) <= 0x7F)
-      byteArray.push(str.charCodeAt(i));
-    else {
-      var h = encodeURIComponent(str.charAt(i)).substr(1).split('%');
-      for (var j = 0; j < h.length; j++)
-        byteArray.push(parseInt(h[j], 16));
-    }
-
-  return byteArray;
-}
-
-function asciiToBytes(str) {
-  var byteArray = []
-  for (var i = 0; i < str.length; i++ )
-    // Node's code seems to be doing this and not & 0x7F..
-    byteArray.push( str.charCodeAt(i) & 0xFF );
-
-  return byteArray;
-}
-
-function base64ToBytes(str) {
-  return require("base64-js").toByteArray(str);
-}
-
-SlowBuffer.byteLength = function (str, encoding) {
-  switch (encoding || "utf8") {
-    case 'hex':
-      return str.length / 2;
-
-    case 'utf8':
-    case 'utf-8':
-      return utf8ToBytes(str).length;
-
-    case 'ascii':
-    case 'binary':
-      return str.length;
-
-    case 'base64':
-      return base64ToBytes(str).length;
-
-    default:
-      throw new Error('Unknown encoding');
-  }
-};
-
-function blitBuffer(src, dst, offset, length) {
-  var pos, i = 0;
-  while (i < length) {
-    if ((i+offset >= dst.length) || (i >= src.length))
-      break;
-
-    dst[i + offset] = src[i];
-    i++;
-  }
-  return i;
-}
-
-SlowBuffer.prototype.utf8Write = function (string, offset, length) {
-  var bytes, pos;
-  return SlowBuffer._charsWritten =  blitBuffer(utf8ToBytes(string), this, offset, length);
-};
-
-SlowBuffer.prototype.asciiWrite = function (string, offset, length) {
-  var bytes, pos;
-  return SlowBuffer._charsWritten =  blitBuffer(asciiToBytes(string), this, offset, length);
-};
-
-SlowBuffer.prototype.binaryWrite = SlowBuffer.prototype.asciiWrite;
-
-SlowBuffer.prototype.base64Write = function (string, offset, length) {
-  var bytes, pos;
-  return SlowBuffer._charsWritten = blitBuffer(base64ToBytes(string), this, offset, length);
-};
-
-SlowBuffer.prototype.base64Slice = function (start, end) {
-  var bytes = Array.prototype.slice.apply(this, arguments)
-  return require("base64-js").fromByteArray(bytes);
-}
-
-function decodeUtf8Char(str) {
-  try {
-    return decodeURIComponent(str);
-  } catch (err) {
-    return String.fromCharCode(0xFFFD); // UTF 8 invalid char
-  }
-}
-
-SlowBuffer.prototype.utf8Slice = function () {
-  var bytes = Array.prototype.slice.apply(this, arguments);
-  var res = "";
-  var tmp = "";
-  var i = 0;
-  while (i < bytes.length) {
-    if (bytes[i] <= 0x7F) {
-      res += decodeUtf8Char(tmp) + String.fromCharCode(bytes[i]);
-      tmp = "";
-    } else
-      tmp += "%" + bytes[i].toString(16);
-
-    i++;
-  }
-
-  return res + decodeUtf8Char(tmp);
-}
-
-SlowBuffer.prototype.asciiSlice = function () {
-  var bytes = Array.prototype.slice.apply(this, arguments);
-  var ret = "";
-  for (var i = 0; i < bytes.length; i++)
-    ret += String.fromCharCode(bytes[i]);
-  return ret;
-}
-
-SlowBuffer.prototype.binarySlice = SlowBuffer.prototype.asciiSlice;
-
-SlowBuffer.prototype.inspect = function() {
-  var out = [],
-      len = this.length;
-  for (var i = 0; i < len; i++) {
-    out[i] = toHex(this[i]);
-    if (i == exports.INSPECT_MAX_BYTES) {
-      out[i + 1] = '...';
-      break;
-    }
-  }
-  return '<SlowBuffer ' + out.join(' ') + '>';
-};
-
-
-SlowBuffer.prototype.hexSlice = function(start, end) {
-  var len = this.length;
-
-  if (!start || start < 0) start = 0;
-  if (!end || end < 0 || end > len) end = len;
-
-  var out = '';
-  for (var i = start; i < end; i++) {
-    out += toHex(this[i]);
-  }
-  return out;
-};
-
-
-SlowBuffer.prototype.toString = function(encoding, start, end) {
-  encoding = String(encoding || 'utf8').toLowerCase();
-  start = +start || 0;
-  if (typeof end == 'undefined') end = this.length;
-
-  // Fastpath empty strings
-  if (+end == start) {
-    return '';
-  }
-
-  switch (encoding) {
-    case 'hex':
-      return this.hexSlice(start, end);
-
-    case 'utf8':
-    case 'utf-8':
-      return this.utf8Slice(start, end);
-
-    case 'ascii':
-      return this.asciiSlice(start, end);
-
-    case 'binary':
-      return this.binarySlice(start, end);
-
-    case 'base64':
-      return this.base64Slice(start, end);
-
-    case 'ucs2':
-    case 'ucs-2':
-      return this.ucs2Slice(start, end);
-
-    default:
-      throw new Error('Unknown encoding');
-  }
-};
-
-
-SlowBuffer.prototype.hexWrite = function(string, offset, length) {
-  offset = +offset || 0;
-  var remaining = this.length - offset;
-  if (!length) {
-    length = remaining;
-  } else {
-    length = +length;
-    if (length > remaining) {
-      length = remaining;
-    }
-  }
-
-  // must be an even number of digits
-  var strLen = string.length;
-  if (strLen % 2) {
-    throw new Error('Invalid hex string');
-  }
-  if (length > strLen / 2) {
-    length = strLen / 2;
-  }
-  for (var i = 0; i < length; i++) {
-    var byte = parseInt(string.substr(i * 2, 2), 16);
-    if (isNaN(byte)) throw new Error('Invalid hex string');
-    this[offset + i] = byte;
-  }
-  SlowBuffer._charsWritten = i * 2;
-  return i;
-};
-
-
-SlowBuffer.prototype.write = function(string, offset, length, encoding) {
-  // Support both (string, offset, length, encoding)
-  // and the legacy (string, encoding, offset, length)
-  if (isFinite(offset)) {
-    if (!isFinite(length)) {
-      encoding = length;
-      length = undefined;
-    }
-  } else {  // legacy
-    var swap = encoding;
-    encoding = offset;
-    offset = length;
-    length = swap;
-  }
-
-  offset = +offset || 0;
-  var remaining = this.length - offset;
-  if (!length) {
-    length = remaining;
-  } else {
-    length = +length;
-    if (length > remaining) {
-      length = remaining;
-    }
-  }
-  encoding = String(encoding || 'utf8').toLowerCase();
-
-  switch (encoding) {
-    case 'hex':
-      return this.hexWrite(string, offset, length);
-
-    case 'utf8':
-    case 'utf-8':
-      return this.utf8Write(string, offset, length);
-
-    case 'ascii':
-      return this.asciiWrite(string, offset, length);
-
-    case 'binary':
-      return this.binaryWrite(string, offset, length);
-
-    case 'base64':
-      return this.base64Write(string, offset, length);
-
-    case 'ucs2':
-    case 'ucs-2':
-      return this.ucs2Write(string, offset, length);
-
-    default:
-      throw new Error('Unknown encoding');
-  }
-};
-
-
-// slice(start, end)
-SlowBuffer.prototype.slice = function(start, end) {
-  if (end === undefined) end = this.length;
-
-  if (end > this.length) {
-    throw new Error('oob');
-  }
-  if (start > end) {
-    throw new Error('oob');
-  }
-
-  return new Buffer(this, end - start, +start);
-};
-
-SlowBuffer.prototype.copy = function(target, targetstart, sourcestart, sourceend) {
-  var temp = [];
-  for (var i=sourcestart; i<sourceend; i++) {
-    assert.ok(typeof this[i] !== 'undefined', "copying undefined buffer bytes!");
-    temp.push(this[i]);
-  }
-
-  for (var i=targetstart; i<targetstart+temp.length; i++) {
-    target[i] = temp[i-targetstart];
-  }
-};
-
-SlowBuffer.prototype.fill = function(value, start, end) {
-  if (end > this.length) {
-    throw new Error('oob');
-  }
-  if (start > end) {
-    throw new Error('oob');
-  }
-
-  for (var i = start; i < end; i++) {
-    this[i] = value;
-  }
-}
-
-function coerce(length) {
-  // Coerce length to a number (possibly NaN), round up
-  // in case it's fractional (e.g. 123.456) then do a
-  // double negate to coerce a NaN to 0. Easy, right?
-  length = ~~Math.ceil(+length);
-  return length < 0 ? 0 : length;
-}
-
-
-// Buffer
-
-function Buffer(subject, encoding, offset) {
-  if (!(this instanceof Buffer)) {
-    return new Buffer(subject, encoding, offset);
-  }
-
-  var type;
-
-  // Are we slicing?
-  if (typeof offset === 'number') {
-    this.length = coerce(encoding);
-    this.parent = subject;
-    this.offset = offset;
-  } else {
-    // Find the length
-    switch (type = typeof subject) {
-      case 'number':
-        this.length = coerce(subject);
-        break;
-
-      case 'string':
-        this.length = Buffer.byteLength(subject, encoding);
-        break;
-
-      case 'object': // Assume object is an array
-        this.length = coerce(subject.length);
-        break;
-
-      default:
-        throw new Error('First argument needs to be a number, ' +
-                        'array or string.');
-    }
-
-    if (this.length > Buffer.poolSize) {
-      // Big buffer, just alloc one.
-      this.parent = new SlowBuffer(this.length);
-      this.offset = 0;
-
-    } else {
-      // Small buffer.
-      if (!pool || pool.length - pool.used < this.length) allocPool();
-      this.parent = pool;
-      this.offset = pool.used;
-      pool.used += this.length;
-    }
-
-    // Treat array-ish objects as a byte array.
-    if (isArrayIsh(subject)) {
-      for (var i = 0; i < this.length; i++) {
-        if (subject instanceof Buffer) {
-          this.parent[i + this.offset] = subject.readUInt8(i);
-        }
-        else {
-          this.parent[i + this.offset] = subject[i];
-        }
-      }
-    } else if (type == 'string') {
-      // We are a string
-      this.length = this.write(subject, 0, encoding);
-    }
-  }
-
-}
-
-function isArrayIsh(subject) {
-  return Array.isArray(subject) || Buffer.isBuffer(subject) ||
-         subject && typeof subject === 'object' &&
-         typeof subject.length === 'number';
-}
-
-exports.SlowBuffer = SlowBuffer;
-exports.Buffer = Buffer;
-
-Buffer.poolSize = 8 * 1024;
-var pool;
-
-function allocPool() {
-  pool = new SlowBuffer(Buffer.poolSize);
-  pool.used = 0;
-}
-
-
-// Static methods
-Buffer.isBuffer = function isBuffer(b) {
-  return b instanceof Buffer || b instanceof SlowBuffer;
-};
-
-Buffer.concat = function (list, totalLength) {
-  if (!Array.isArray(list)) {
-    throw new Error("Usage: Buffer.concat(list, [totalLength])\n \
-      list should be an Array.");
-  }
-
-  if (list.length === 0) {
-    return new Buffer(0);
-  } else if (list.length === 1) {
-    return list[0];
-  }
-
-  if (typeof totalLength !== 'number') {
-    totalLength = 0;
-    for (var i = 0; i < list.length; i++) {
-      var buf = list[i];
-      totalLength += buf.length;
-    }
-  }
-
-  var buffer = new Buffer(totalLength);
-  var pos = 0;
-  for (var i = 0; i < list.length; i++) {
-    var buf = list[i];
-    buf.copy(buffer, pos);
-    pos += buf.length;
-  }
-  return buffer;
-};
-
-// Inspect
-Buffer.prototype.inspect = function inspect() {
-  var out = [],
-      len = this.length;
-
-  for (var i = 0; i < len; i++) {
-    out[i] = toHex(this.parent[i + this.offset]);
-    if (i == exports.INSPECT_MAX_BYTES) {
-      out[i + 1] = '...';
-      break;
-    }
-  }
-
-  return '<Buffer ' + out.join(' ') + '>';
-};
-
-
-Buffer.prototype.get = function get(i) {
-  if (i < 0 || i >= this.length) throw new Error('oob');
-  return this.parent[this.offset + i];
-};
-
-
-Buffer.prototype.set = function set(i, v) {
-  if (i < 0 || i >= this.length) throw new Error('oob');
-  return this.parent[this.offset + i] = v;
-};
-
-
-// write(string, offset = 0, length = buffer.length-offset, encoding = 'utf8')
-Buffer.prototype.write = function(string, offset, length, encoding) {
-  // Support both (string, offset, length, encoding)
-  // and the legacy (string, encoding, offset, length)
-  if (isFinite(offset)) {
-    if (!isFinite(length)) {
-      encoding = length;
-      length = undefined;
-    }
-  } else {  // legacy
-    var swap = encoding;
-    encoding = offset;
-    offset = length;
-    length = swap;
-  }
-
-  offset = +offset || 0;
-  var remaining = this.length - offset;
-  if (!length) {
-    length = remaining;
-  } else {
-    length = +length;
-    if (length > remaining) {
-      length = remaining;
-    }
-  }
-  encoding = String(encoding || 'utf8').toLowerCase();
-
-  var ret;
-  switch (encoding) {
-    case 'hex':
-      ret = this.parent.hexWrite(string, this.offset + offset, length);
-      break;
-
-    case 'utf8':
-    case 'utf-8':
-      ret = this.parent.utf8Write(string, this.offset + offset, length);
-      break;
-
-    case 'ascii':
-      ret = this.parent.asciiWrite(string, this.offset + offset, length);
-      break;
-
-    case 'binary':
-      ret = this.parent.binaryWrite(string, this.offset + offset, length);
-      break;
-
-    case 'base64':
-      // Warning: maxLength not taken into account in base64Write
-      ret = this.parent.base64Write(string, this.offset + offset, length);
-      break;
-
-    case 'ucs2':
-    case 'ucs-2':
-      ret = this.parent.ucs2Write(string, this.offset + offset, length);
-      break;
-
-    default:
-      throw new Error('Unknown encoding');
-  }
-
-  Buffer._charsWritten = SlowBuffer._charsWritten;
-
-  return ret;
-};
-
-
-// toString(encoding, start=0, end=buffer.length)
-Buffer.prototype.toString = function(encoding, start, end) {
-  encoding = String(encoding || 'utf8').toLowerCase();
-
-  if (typeof start == 'undefined' || start < 0) {
-    start = 0;
-  } else if (start > this.length) {
-    start = this.length;
-  }
-
-  if (typeof end == 'undefined' || end > this.length) {
-    end = this.length;
-  } else if (end < 0) {
-    end = 0;
-  }
-
-  start = start + this.offset;
-  end = end + this.offset;
-
-  switch (encoding) {
-    case 'hex':
-      return this.parent.hexSlice(start, end);
-
-    case 'utf8':
-    case 'utf-8':
-      return this.parent.utf8Slice(start, end);
-
-    case 'ascii':
-      return this.parent.asciiSlice(start, end);
-
-    case 'binary':
-      return this.parent.binarySlice(start, end);
-
-    case 'base64':
-      return this.parent.base64Slice(start, end);
-
-    case 'ucs2':
-    case 'ucs-2':
-      return this.parent.ucs2Slice(start, end);
-
-    default:
-      throw new Error('Unknown encoding');
-  }
-};
-
-
-// byteLength
-Buffer.byteLength = SlowBuffer.byteLength;
-
-
-// fill(value, start=0, end=buffer.length)
-Buffer.prototype.fill = function fill(value, start, end) {
-  value || (value = 0);
-  start || (start = 0);
-  end || (end = this.length);
-
-  if (typeof value === 'string') {
-    value = value.charCodeAt(0);
-  }
-  if (!(typeof value === 'number') || isNaN(value)) {
-    throw new Error('value is not a number');
-  }
-
-  if (end < start) throw new Error('end < start');
-
-  // Fill 0 bytes; we're done
-  if (end === start) return 0;
-  if (this.length == 0) return 0;
-
-  if (start < 0 || start >= this.length) {
-    throw new Error('start out of bounds');
-  }
-
-  if (end < 0 || end > this.length) {
-    throw new Error('end out of bounds');
-  }
-
-  return this.parent.fill(value,
-                          start + this.offset,
-                          end + this.offset);
-};
-
-
-// copy(targetBuffer, targetStart=0, sourceStart=0, sourceEnd=buffer.length)
-Buffer.prototype.copy = function(target, target_start, start, end) {
-  var source = this;
-  start || (start = 0);
-  end || (end = this.length);
-  target_start || (target_start = 0);
-
-  if (end < start) throw new Error('sourceEnd < sourceStart');
-
-  // Copy 0 bytes; we're done
-  if (end === start) return 0;
-  if (target.length == 0 || source.length == 0) return 0;
-
-  if (target_start < 0 || target_start >= target.length) {
-    throw new Error('targetStart out of bounds');
-  }
-
-  if (start < 0 || start >= source.length) {
-    throw new Error('sourceStart out of bounds');
-  }
-
-  if (end < 0 || end > source.length) {
-    throw new Error('sourceEnd out of bounds');
-  }
-
-  // Are we oob?
-  if (end > this.length) {
-    end = this.length;
-  }
-
-  if (target.length - target_start < end - start) {
-    end = target.length - target_start + start;
-  }
-
-  return this.parent.copy(target.parent,
-                          target_start + target.offset,
-                          start + this.offset,
-                          end + this.offset);
-};
-
-
-// slice(start, end)
-Buffer.prototype.slice = function(start, end) {
-  if (end === undefined) end = this.length;
-  if (end > this.length) throw new Error('oob');
-  if (start > end) throw new Error('oob');
-
-  return new Buffer(this.parent, end - start, +start + this.offset);
-};
-
-
-// Legacy methods for backwards compatibility.
-
-Buffer.prototype.utf8Slice = function(start, end) {
-  return this.toString('utf8', start, end);
-};
-
-Buffer.prototype.binarySlice = function(start, end) {
-  return this.toString('binary', start, end);
-};
-
-Buffer.prototype.asciiSlice = function(start, end) {
-  return this.toString('ascii', start, end);
-};
-
-Buffer.prototype.utf8Write = function(string, offset) {
-  return this.write(string, offset, 'utf8');
-};
-
-Buffer.prototype.binaryWrite = function(string, offset) {
-  return this.write(string, offset, 'binary');
-};
-
-Buffer.prototype.asciiWrite = function(string, offset) {
-  return this.write(string, offset, 'ascii');
-};
-
-Buffer.prototype.readUInt8 = function(offset, noAssert) {
-  var buffer = this;
-
-  if (!noAssert) {
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset < buffer.length,
-        'Trying to read beyond buffer length');
-  }
-
-  if (offset >= buffer.length) return;
-
-  return buffer.parent[buffer.offset + offset];
-};
-
-function readUInt16(buffer, offset, isBigEndian, noAssert) {
-  var val = 0;
-
-
-  if (!noAssert) {
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset + 1 < buffer.length,
-        'Trying to read beyond buffer length');
-  }
-
-  if (offset >= buffer.length) return 0;
-
-  if (isBigEndian) {
-    val = buffer.parent[buffer.offset + offset] << 8;
-    if (offset + 1 < buffer.length) {
-      val |= buffer.parent[buffer.offset + offset + 1];
-    }
-  } else {
-    val = buffer.parent[buffer.offset + offset];
-    if (offset + 1 < buffer.length) {
-      val |= buffer.parent[buffer.offset + offset + 1] << 8;
-    }
-  }
-
-  return val;
-}
-
-Buffer.prototype.readUInt16LE = function(offset, noAssert) {
-  return readUInt16(this, offset, false, noAssert);
-};
-
-Buffer.prototype.readUInt16BE = function(offset, noAssert) {
-  return readUInt16(this, offset, true, noAssert);
-};
-
-function readUInt32(buffer, offset, isBigEndian, noAssert) {
-  var val = 0;
-
-  if (!noAssert) {
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset + 3 < buffer.length,
-        'Trying to read beyond buffer length');
-  }
-
-  if (offset >= buffer.length) return 0;
-
-  if (isBigEndian) {
-    if (offset + 1 < buffer.length)
-      val = buffer.parent[buffer.offset + offset + 1] << 16;
-    if (offset + 2 < buffer.length)
-      val |= buffer.parent[buffer.offset + offset + 2] << 8;
-    if (offset + 3 < buffer.length)
-      val |= buffer.parent[buffer.offset + offset + 3];
-    val = val + (buffer.parent[buffer.offset + offset] << 24 >>> 0);
-  } else {
-    if (offset + 2 < buffer.length)
-      val = buffer.parent[buffer.offset + offset + 2] << 16;
-    if (offset + 1 < buffer.length)
-      val |= buffer.parent[buffer.offset + offset + 1] << 8;
-    val |= buffer.parent[buffer.offset + offset];
-    if (offset + 3 < buffer.length)
-      val = val + (buffer.parent[buffer.offset + offset + 3] << 24 >>> 0);
-  }
-
-  return val;
-}
-
-Buffer.prototype.readUInt32LE = function(offset, noAssert) {
-  return readUInt32(this, offset, false, noAssert);
-};
-
-Buffer.prototype.readUInt32BE = function(offset, noAssert) {
-  return readUInt32(this, offset, true, noAssert);
-};
-
-
-/*
- * Signed integer types, yay team! A reminder on how two's complement actually
- * works. The first bit is the signed bit, i.e. tells us whether or not the
- * number should be positive or negative. If the two's complement value is
- * positive, then we're done, as it's equivalent to the unsigned representation.
- *
- * Now if the number is positive, you're pretty much done, you can just leverage
- * the unsigned translations and return those. Unfortunately, negative numbers
- * aren't quite that straightforward.
- *
- * At first glance, one might be inclined to use the traditional formula to
- * translate binary numbers between the positive and negative values in two's
- * complement. (Though it doesn't quite work for the most negative value)
- * Mainly:
- *  - invert all the bits
- *  - add one to the result
- *
- * Of course, this doesn't quite work in Javascript. Take for example the value
- * of -128. This could be represented in 16 bits (big-endian) as 0xff80. But of
- * course, Javascript will do the following:
- *
- * > ~0xff80
- * -65409
- *
- * Whoh there, Javascript, that's not quite right. But wait, according to
- * Javascript that's perfectly correct. When Javascript ends up seeing the
- * constant 0xff80, it has no notion that it is actually a signed number. It
- * assumes that we've input the unsigned value 0xff80. Thus, when it does the
- * binary negation, it casts it into a signed value, (positive 0xff80). Then
- * when you perform binary negation on that, it turns it into a negative number.
- *
- * Instead, we're going to have to use the following general formula, that works
- * in a rather Javascript friendly way. I'm glad we don't support this kind of
- * weird numbering scheme in the kernel.
- *
- * (BIT-MAX - (unsigned)val + 1) * -1
- *
- * The astute observer, may think that this doesn't make sense for 8-bit numbers
- * (really it isn't necessary for them). However, when you get 16-bit numbers,
- * you do. Let's go back to our prior example and see how this will look:
- *
- * (0xffff - 0xff80 + 1) * -1
- * (0x007f + 1) * -1
- * (0x0080) * -1
- */
-Buffer.prototype.readInt8 = function(offset, noAssert) {
-  var buffer = this;
-  var neg;
-
-  if (!noAssert) {
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset < buffer.length,
-        'Trying to read beyond buffer length');
-  }
-
-  if (offset >= buffer.length) return;
-
-  neg = buffer.parent[buffer.offset + offset] & 0x80;
-  if (!neg) {
-    return (buffer.parent[buffer.offset + offset]);
-  }
-
-  return ((0xff - buffer.parent[buffer.offset + offset] + 1) * -1);
-};
-
-function readInt16(buffer, offset, isBigEndian, noAssert) {
-  var neg, val;
-
-  if (!noAssert) {
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset + 1 < buffer.length,
-        'Trying to read beyond buffer length');
-  }
-
-  val = readUInt16(buffer, offset, isBigEndian, noAssert);
-  neg = val & 0x8000;
-  if (!neg) {
-    return val;
-  }
-
-  return (0xffff - val + 1) * -1;
-}
-
-Buffer.prototype.readInt16LE = function(offset, noAssert) {
-  return readInt16(this, offset, false, noAssert);
-};
-
-Buffer.prototype.readInt16BE = function(offset, noAssert) {
-  return readInt16(this, offset, true, noAssert);
-};
-
-function readInt32(buffer, offset, isBigEndian, noAssert) {
-  var neg, val;
-
-  if (!noAssert) {
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset + 3 < buffer.length,
-        'Trying to read beyond buffer length');
-  }
-
-  val = readUInt32(buffer, offset, isBigEndian, noAssert);
-  neg = val & 0x80000000;
-  if (!neg) {
-    return (val);
-  }
-
-  return (0xffffffff - val + 1) * -1;
-}
-
-Buffer.prototype.readInt32LE = function(offset, noAssert) {
-  return readInt32(this, offset, false, noAssert);
-};
-
-Buffer.prototype.readInt32BE = function(offset, noAssert) {
-  return readInt32(this, offset, true, noAssert);
-};
-
-function readFloat(buffer, offset, isBigEndian, noAssert) {
-  if (!noAssert) {
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset + 3 < buffer.length,
-        'Trying to read beyond buffer length');
-  }
-
-  return require('./buffer_ieee754').readIEEE754(buffer, offset, isBigEndian,
-      23, 4);
-}
-
-Buffer.prototype.readFloatLE = function(offset, noAssert) {
-  return readFloat(this, offset, false, noAssert);
-};
-
-Buffer.prototype.readFloatBE = function(offset, noAssert) {
-  return readFloat(this, offset, true, noAssert);
-};
-
-function readDouble(buffer, offset, isBigEndian, noAssert) {
-  if (!noAssert) {
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset + 7 < buffer.length,
-        'Trying to read beyond buffer length');
-  }
-
-  return require('./buffer_ieee754').readIEEE754(buffer, offset, isBigEndian,
-      52, 8);
-}
-
-Buffer.prototype.readDoubleLE = function(offset, noAssert) {
-  return readDouble(this, offset, false, noAssert);
-};
-
-Buffer.prototype.readDoubleBE = function(offset, noAssert) {
-  return readDouble(this, offset, true, noAssert);
-};
-
-
-/*
- * We have to make sure that the value is a valid integer. This means that it is
- * non-negative. It has no fractional component and that it does not exceed the
- * maximum allowed value.
- *
- *      value           The number to check for validity
- *
- *      max             The maximum value
- */
-function verifuint(value, max) {
-  assert.ok(typeof (value) == 'number',
-      'cannot write a non-number as a number');
-
-  assert.ok(value >= 0,
-      'specified a negative value for writing an unsigned value');
-
-  assert.ok(value <= max, 'value is larger than maximum value for type');
-
-  assert.ok(Math.floor(value) === value, 'value has a fractional component');
-}
-
-Buffer.prototype.writeUInt8 = function(value, offset, noAssert) {
-  var buffer = this;
-
-  if (!noAssert) {
-    assert.ok(value !== undefined && value !== null,
-        'missing value');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset < buffer.length,
-        'trying to write beyond buffer length');
-
-    verifuint(value, 0xff);
-  }
-
-  if (offset < buffer.length) {
-    buffer.parent[buffer.offset + offset] = value;
-  }
-};
-
-function writeUInt16(buffer, value, offset, isBigEndian, noAssert) {
-  if (!noAssert) {
-    assert.ok(value !== undefined && value !== null,
-        'missing value');
-
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset + 1 < buffer.length,
-        'trying to write beyond buffer length');
-
-    verifuint(value, 0xffff);
-  }
-
-  for (var i = 0; i < Math.min(buffer.length - offset, 2); i++) {
-    buffer.parent[buffer.offset + offset + i] =
-        (value & (0xff << (8 * (isBigEndian ? 1 - i : i)))) >>>
-            (isBigEndian ? 1 - i : i) * 8;
-  }
-
-}
-
-Buffer.prototype.writeUInt16LE = function(value, offset, noAssert) {
-  writeUInt16(this, value, offset, false, noAssert);
-};
-
-Buffer.prototype.writeUInt16BE = function(value, offset, noAssert) {
-  writeUInt16(this, value, offset, true, noAssert);
-};
-
-function writeUInt32(buffer, value, offset, isBigEndian, noAssert) {
-  if (!noAssert) {
-    assert.ok(value !== undefined && value !== null,
-        'missing value');
-
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset + 3 < buffer.length,
-        'trying to write beyond buffer length');
-
-    verifuint(value, 0xffffffff);
-  }
-
-  for (var i = 0; i < Math.min(buffer.length - offset, 4); i++) {
-    buffer.parent[buffer.offset + offset + i] =
-        (value >>> (isBigEndian ? 3 - i : i) * 8) & 0xff;
-  }
-}
-
-Buffer.prototype.writeUInt32LE = function(value, offset, noAssert) {
-  writeUInt32(this, value, offset, false, noAssert);
-};
-
-Buffer.prototype.writeUInt32BE = function(value, offset, noAssert) {
-  writeUInt32(this, value, offset, true, noAssert);
-};
-
-
-/*
- * We now move onto our friends in the signed number category. Unlike unsigned
- * numbers, we're going to have to worry a bit more about how we put values into
- * arrays. Since we are only worrying about signed 32-bit values, we're in
- * slightly better shape. Unfortunately, we really can't do our favorite binary
- * & in this system. It really seems to do the wrong thing. For example:
- *
- * > -32 & 0xff
- * 224
- *
- * What's happening above is really: 0xe0 & 0xff = 0xe0. However, the results of
- * this aren't treated as a signed number. Ultimately a bad thing.
- *
- * What we're going to want to do is basically create the unsigned equivalent of
- * our representation and pass that off to the wuint* functions. To do that
- * we're going to do the following:
- *
- *  - if the value is positive
- *      we can pass it directly off to the equivalent wuint
- *  - if the value is negative
- *      we do the following computation:
- *         mb + val + 1, where
- *         mb   is the maximum unsigned value in that byte size
- *         val  is the Javascript negative integer
- *
- *
- * As a concrete value, take -128. In signed 16 bits this would be 0xff80. If
- * you do out the computations:
- *
- * 0xffff - 128 + 1
- * 0xffff - 127
- * 0xff80
- *
- * You can then encode this value as the signed version. This is really rather
- * hacky, but it should work and get the job done which is our goal here.
- */
-
-/*
- * A series of checks to make sure we actually have a signed 32-bit number
- */
-function verifsint(value, max, min) {
-  assert.ok(typeof (value) == 'number',
-      'cannot write a non-number as a number');
-
-  assert.ok(value <= max, 'value larger than maximum allowed value');
-
-  assert.ok(value >= min, 'value smaller than minimum allowed value');
-
-  assert.ok(Math.floor(value) === value, 'value has a fractional component');
-}
-
-function verifIEEE754(value, max, min) {
-  assert.ok(typeof (value) == 'number',
-      'cannot write a non-number as a number');
-
-  assert.ok(value <= max, 'value larger than maximum allowed value');
-
-  assert.ok(value >= min, 'value smaller than minimum allowed value');
-}
-
-Buffer.prototype.writeInt8 = function(value, offset, noAssert) {
-  var buffer = this;
-
-  if (!noAssert) {
-    assert.ok(value !== undefined && value !== null,
-        'missing value');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset < buffer.length,
-        'Trying to write beyond buffer length');
-
-    verifsint(value, 0x7f, -0x80);
-  }
-
-  if (value >= 0) {
-    buffer.writeUInt8(value, offset, noAssert);
-  } else {
-    buffer.writeUInt8(0xff + value + 1, offset, noAssert);
-  }
-};
-
-function writeInt16(buffer, value, offset, isBigEndian, noAssert) {
-  if (!noAssert) {
-    assert.ok(value !== undefined && value !== null,
-        'missing value');
-
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset + 1 < buffer.length,
-        'Trying to write beyond buffer length');
-
-    verifsint(value, 0x7fff, -0x8000);
-  }
-
-  if (value >= 0) {
-    writeUInt16(buffer, value, offset, isBigEndian, noAssert);
-  } else {
-    writeUInt16(buffer, 0xffff + value + 1, offset, isBigEndian, noAssert);
-  }
-}
-
-Buffer.prototype.writeInt16LE = function(value, offset, noAssert) {
-  writeInt16(this, value, offset, false, noAssert);
-};
-
-Buffer.prototype.writeInt16BE = function(value, offset, noAssert) {
-  writeInt16(this, value, offset, true, noAssert);
-};
-
-function writeInt32(buffer, value, offset, isBigEndian, noAssert) {
-  if (!noAssert) {
-    assert.ok(value !== undefined && value !== null,
-        'missing value');
-
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset + 3 < buffer.length,
-        'Trying to write beyond buffer length');
-
-    verifsint(value, 0x7fffffff, -0x80000000);
-  }
-
-  if (value >= 0) {
-    writeUInt32(buffer, value, offset, isBigEndian, noAssert);
-  } else {
-    writeUInt32(buffer, 0xffffffff + value + 1, offset, isBigEndian, noAssert);
-  }
-}
-
-Buffer.prototype.writeInt32LE = function(value, offset, noAssert) {
-  writeInt32(this, value, offset, false, noAssert);
-};
-
-Buffer.prototype.writeInt32BE = function(value, offset, noAssert) {
-  writeInt32(this, value, offset, true, noAssert);
-};
-
-function writeFloat(buffer, value, offset, isBigEndian, noAssert) {
-  if (!noAssert) {
-    assert.ok(value !== undefined && value !== null,
-        'missing value');
-
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset + 3 < buffer.length,
-        'Trying to write beyond buffer length');
-
-    verifIEEE754(value, 3.4028234663852886e+38, -3.4028234663852886e+38);
-  }
-
-  require('./buffer_ieee754').writeIEEE754(buffer, value, offset, isBigEndian,
-      23, 4);
-}
-
-Buffer.prototype.writeFloatLE = function(value, offset, noAssert) {
-  writeFloat(this, value, offset, false, noAssert);
-};
-
-Buffer.prototype.writeFloatBE = function(value, offset, noAssert) {
-  writeFloat(this, value, offset, true, noAssert);
-};
-
-function writeDouble(buffer, value, offset, isBigEndian, noAssert) {
-  if (!noAssert) {
-    assert.ok(value !== undefined && value !== null,
-        'missing value');
-
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset + 7 < buffer.length,
-        'Trying to write beyond buffer length');
-
-    verifIEEE754(value, 1.7976931348623157E+308, -1.7976931348623157E+308);
-  }
-
-  require('./buffer_ieee754').writeIEEE754(buffer, value, offset, isBigEndian,
-      52, 8);
-}
-
-Buffer.prototype.writeDoubleLE = function(value, offset, noAssert) {
-  writeDouble(this, value, offset, false, noAssert);
-};
-
-Buffer.prototype.writeDoubleBE = function(value, offset, noAssert) {
-  writeDouble(this, value, offset, true, noAssert);
-};
-
-SlowBuffer.prototype.readUInt8 = Buffer.prototype.readUInt8;
-SlowBuffer.prototype.readUInt16LE = Buffer.prototype.readUInt16LE;
-SlowBuffer.prototype.readUInt16BE = Buffer.prototype.readUInt16BE;
-SlowBuffer.prototype.readUInt32LE = Buffer.prototype.readUInt32LE;
-SlowBuffer.prototype.readUInt32BE = Buffer.prototype.readUInt32BE;
-SlowBuffer.prototype.readInt8 = Buffer.prototype.readInt8;
-SlowBuffer.prototype.readInt16LE = Buffer.prototype.readInt16LE;
-SlowBuffer.prototype.readInt16BE = Buffer.prototype.readInt16BE;
-SlowBuffer.prototype.readInt32LE = Buffer.prototype.readInt32LE;
-SlowBuffer.prototype.readInt32BE = Buffer.prototype.readInt32BE;
-SlowBuffer.prototype.readFloatLE = Buffer.prototype.readFloatLE;
-SlowBuffer.prototype.readFloatBE = Buffer.prototype.readFloatBE;
-SlowBuffer.prototype.readDoubleLE = Buffer.prototype.readDoubleLE;
-SlowBuffer.prototype.readDoubleBE = Buffer.prototype.readDoubleBE;
-SlowBuffer.prototype.writeUInt8 = Buffer.prototype.writeUInt8;
-SlowBuffer.prototype.writeUInt16LE = Buffer.prototype.writeUInt16LE;
-SlowBuffer.prototype.writeUInt16BE = Buffer.prototype.writeUInt16BE;
-SlowBuffer.prototype.writeUInt32LE = Buffer.prototype.writeUInt32LE;
-SlowBuffer.prototype.writeUInt32BE = Buffer.prototype.writeUInt32BE;
-SlowBuffer.prototype.writeInt8 = Buffer.prototype.writeInt8;
-SlowBuffer.prototype.writeInt16LE = Buffer.prototype.writeInt16LE;
-SlowBuffer.prototype.writeInt16BE = Buffer.prototype.writeInt16BE;
-SlowBuffer.prototype.writeInt32LE = Buffer.prototype.writeInt32LE;
-SlowBuffer.prototype.writeInt32BE = Buffer.prototype.writeInt32BE;
-SlowBuffer.prototype.writeFloatLE = Buffer.prototype.writeFloatLE;
-SlowBuffer.prototype.writeFloatBE = Buffer.prototype.writeFloatBE;
-SlowBuffer.prototype.writeDoubleLE = Buffer.prototype.writeDoubleLE;
-SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
-
-},{"assert":1,"./buffer_ieee754":5,"base64-js":7}],7:[function(require,module,exports){
-(function (exports) {
-	'use strict';
-
-	var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-
-	function b64ToByteArray(b64) {
-		var i, j, l, tmp, placeHolders, arr;
-	
-		if (b64.length % 4 > 0) {
-			throw 'Invalid string. Length must be a multiple of 4';
-		}
-
-		// the number of equal signs (place holders)
-		// if there are two placeholders, than the two characters before it
-		// represent one byte
-		// if there is only one, then the three characters before it represent 2 bytes
-		// this is just a cheap hack to not do indexOf twice
-		placeHolders = b64.indexOf('=');
-		placeHolders = placeHolders > 0 ? b64.length - placeHolders : 0;
-
-		// base64 is 4/3 + up to two characters of the original data
-		arr = [];//new Uint8Array(b64.length * 3 / 4 - placeHolders);
-
-		// if there are placeholders, only get up to the last complete 4 chars
-		l = placeHolders > 0 ? b64.length - 4 : b64.length;
-
-		for (i = 0, j = 0; i < l; i += 4, j += 3) {
-			tmp = (lookup.indexOf(b64[i]) << 18) | (lookup.indexOf(b64[i + 1]) << 12) | (lookup.indexOf(b64[i + 2]) << 6) | lookup.indexOf(b64[i + 3]);
-			arr.push((tmp & 0xFF0000) >> 16);
-			arr.push((tmp & 0xFF00) >> 8);
-			arr.push(tmp & 0xFF);
-		}
-
-		if (placeHolders === 2) {
-			tmp = (lookup.indexOf(b64[i]) << 2) | (lookup.indexOf(b64[i + 1]) >> 4);
-			arr.push(tmp & 0xFF);
-		} else if (placeHolders === 1) {
-			tmp = (lookup.indexOf(b64[i]) << 10) | (lookup.indexOf(b64[i + 1]) << 4) | (lookup.indexOf(b64[i + 2]) >> 2);
-			arr.push((tmp >> 8) & 0xFF);
-			arr.push(tmp & 0xFF);
-		}
-
-		return arr;
-	}
-
-	function uint8ToBase64(uint8) {
-		var i,
-			extraBytes = uint8.length % 3, // if we have 1 byte left, pad 2 bytes
-			output = "",
-			temp, length;
-
-		function tripletToBase64 (num) {
-			return lookup[num >> 18 & 0x3F] + lookup[num >> 12 & 0x3F] + lookup[num >> 6 & 0x3F] + lookup[num & 0x3F];
-		};
-
-		// go through the array every three bytes, we'll deal with trailing stuff later
-		for (i = 0, length = uint8.length - extraBytes; i < length; i += 3) {
-			temp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2]);
-			output += tripletToBase64(temp);
-		}
-
-		// pad the end with zeros, but make sure to not forget the extra bytes
-		switch (extraBytes) {
-			case 1:
-				temp = uint8[uint8.length - 1];
-				output += lookup[temp >> 2];
-				output += lookup[(temp << 4) & 0x3F];
-				output += '==';
-				break;
-			case 2:
-				temp = (uint8[uint8.length - 2] << 8) + (uint8[uint8.length - 1]);
-				output += lookup[temp >> 10];
-				output += lookup[(temp >> 4) & 0x3F];
-				output += lookup[(temp << 2) & 0x3F];
-				output += '=';
-				break;
-		}
-
-		return output;
-	}
-
-	module.exports.toByteArray = b64ToByteArray;
-	module.exports.fromByteArray = uint8ToBase64;
-}());
-
-},{}],8:[function(require,module,exports){
-exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
-  var e, m,
-      eLen = nBytes * 8 - mLen - 1,
-      eMax = (1 << eLen) - 1,
-      eBias = eMax >> 1,
-      nBits = -7,
-      i = isBE ? 0 : (nBytes - 1),
-      d = isBE ? 1 : -1,
-      s = buffer[offset + i];
-
-  i += d;
-
-  e = s & ((1 << (-nBits)) - 1);
-  s >>= (-nBits);
-  nBits += eLen;
-  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8);
-
-  m = e & ((1 << (-nBits)) - 1);
-  e >>= (-nBits);
-  nBits += mLen;
-  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8);
-
-  if (e === 0) {
-    e = 1 - eBias;
-  } else if (e === eMax) {
-    return m ? NaN : ((s ? -1 : 1) * Infinity);
-  } else {
-    m = m + Math.pow(2, mLen);
-    e = e - eBias;
-  }
-  return (s ? -1 : 1) * m * Math.pow(2, e - mLen);
-};
-
-exports.writeIEEE754 = function(buffer, value, offset, isBE, mLen, nBytes) {
-  var e, m, c,
-      eLen = nBytes * 8 - mLen - 1,
-      eMax = (1 << eLen) - 1,
-      eBias = eMax >> 1,
-      rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0),
-      i = isBE ? (nBytes - 1) : 0,
-      d = isBE ? -1 : 1,
-      s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0;
-
-  value = Math.abs(value);
-
-  if (isNaN(value) || value === Infinity) {
-    m = isNaN(value) ? 1 : 0;
-    e = eMax;
-  } else {
-    e = Math.floor(Math.log(value) / Math.LN2);
-    if (value * (c = Math.pow(2, -e)) < 1) {
-      e--;
-      c *= 2;
-    }
-    if (e + eBias >= 1) {
-      value += rt / c;
-    } else {
-      value += rt * Math.pow(2, 1 - eBias);
-    }
-    if (value * c >= 2) {
-      e++;
-      c /= 2;
-    }
-
-    if (e + eBias >= eMax) {
-      m = 0;
-      e = eMax;
-    } else if (e + eBias >= 1) {
-      m = (value * c - 1) * Math.pow(2, mLen);
-      e = e + eBias;
-    } else {
-      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen);
-      e = 0;
-    }
-  }
-
-  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8);
-
-  e = (e << mLen) | m;
-  eLen += mLen;
-  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8);
-
-  buffer[offset + i - d] |= s * 128;
-};
-
-},{}],3:[function(require,module,exports){
-function SlowBuffer (size) {
-    this.length = size;
-};
-
-var assert = require('assert');
-
-exports.INSPECT_MAX_BYTES = 50;
-
-
-function toHex(n) {
-  if (n < 16) return '0' + n.toString(16);
-  return n.toString(16);
-}
-
-function utf8ToBytes(str) {
-  var byteArray = [];
-  for (var i = 0; i < str.length; i++)
-    if (str.charCodeAt(i) <= 0x7F)
-      byteArray.push(str.charCodeAt(i));
-    else {
-      var h = encodeURIComponent(str.charAt(i)).substr(1).split('%');
-      for (var j = 0; j < h.length; j++)
-        byteArray.push(parseInt(h[j], 16));
-    }
-
-  return byteArray;
-}
-
-function asciiToBytes(str) {
-  var byteArray = []
-  for (var i = 0; i < str.length; i++ )
-    // Node's code seems to be doing this and not & 0x7F..
-    byteArray.push( str.charCodeAt(i) & 0xFF );
-
-  return byteArray;
-}
-
-function base64ToBytes(str) {
-  return require("base64-js").toByteArray(str);
-}
-
-SlowBuffer.byteLength = function (str, encoding) {
-  switch (encoding || "utf8") {
-    case 'hex':
-      return str.length / 2;
-
-    case 'utf8':
-    case 'utf-8':
-      return utf8ToBytes(str).length;
-
-    case 'ascii':
-      return str.length;
-
-    case 'base64':
-      return base64ToBytes(str).length;
-
-    default:
-      throw new Error('Unknown encoding');
-  }
-};
-
-function blitBuffer(src, dst, offset, length) {
-  var pos, i = 0;
-  while (i < length) {
-    if ((i+offset >= dst.length) || (i >= src.length))
-      break;
-
-    dst[i + offset] = src[i];
-    i++;
-  }
-  return i;
-}
-
-SlowBuffer.prototype.utf8Write = function (string, offset, length) {
-  var bytes, pos;
-  return SlowBuffer._charsWritten =  blitBuffer(utf8ToBytes(string), this, offset, length);
-};
-
-SlowBuffer.prototype.asciiWrite = function (string, offset, length) {
-  var bytes, pos;
-  return SlowBuffer._charsWritten =  blitBuffer(asciiToBytes(string), this, offset, length);
-};
-
-SlowBuffer.prototype.base64Write = function (string, offset, length) {
-  var bytes, pos;
-  return SlowBuffer._charsWritten = blitBuffer(base64ToBytes(string), this, offset, length);
-};
-
-SlowBuffer.prototype.base64Slice = function (start, end) {
-  var bytes = Array.prototype.slice.apply(this, arguments)
-  return require("base64-js").fromByteArray(bytes);
-}
-
-function decodeUtf8Char(str) {
-  try {
-    return decodeURIComponent(str);
-  } catch (err) {
-    return String.fromCharCode(0xFFFD); // UTF 8 invalid char
-  }
-}
-
-SlowBuffer.prototype.utf8Slice = function () {
-  var bytes = Array.prototype.slice.apply(this, arguments);
-  var res = "";
-  var tmp = "";
-  var i = 0;
-  while (i < bytes.length) {
-    if (bytes[i] <= 0x7F) {
-      res += decodeUtf8Char(tmp) + String.fromCharCode(bytes[i]);
-      tmp = "";
-    } else
-      tmp += "%" + bytes[i].toString(16);
-
-    i++;
-  }
-
-  return res + decodeUtf8Char(tmp);
-}
-
-SlowBuffer.prototype.asciiSlice = function () {
-  var bytes = Array.prototype.slice.apply(this, arguments);
-  var ret = "";
-  for (var i = 0; i < bytes.length; i++)
-    ret += String.fromCharCode(bytes[i]);
-  return ret;
-}
-
-SlowBuffer.prototype.inspect = function() {
-  var out = [],
-      len = this.length;
-  for (var i = 0; i < len; i++) {
-    out[i] = toHex(this[i]);
-    if (i == exports.INSPECT_MAX_BYTES) {
-      out[i + 1] = '...';
-      break;
-    }
-  }
-  return '<SlowBuffer ' + out.join(' ') + '>';
-};
-
-
-SlowBuffer.prototype.hexSlice = function(start, end) {
-  var len = this.length;
-
-  if (!start || start < 0) start = 0;
-  if (!end || end < 0 || end > len) end = len;
-
-  var out = '';
-  for (var i = start; i < end; i++) {
-    out += toHex(this[i]);
-  }
-  return out;
-};
-
-
-SlowBuffer.prototype.toString = function(encoding, start, end) {
-  encoding = String(encoding || 'utf8').toLowerCase();
-  start = +start || 0;
-  if (typeof end == 'undefined') end = this.length;
-
-  // Fastpath empty strings
-  if (+end == start) {
-    return '';
-  }
-
-  switch (encoding) {
-    case 'hex':
-      return this.hexSlice(start, end);
-
-    case 'utf8':
-    case 'utf-8':
-      return this.utf8Slice(start, end);
-
-    case 'ascii':
-      return this.asciiSlice(start, end);
-
-    case 'binary':
-      return this.binarySlice(start, end);
-
-    case 'base64':
-      return this.base64Slice(start, end);
-
-    case 'ucs2':
-    case 'ucs-2':
-      return this.ucs2Slice(start, end);
-
-    default:
-      throw new Error('Unknown encoding');
-  }
-};
-
-
-SlowBuffer.prototype.hexWrite = function(string, offset, length) {
-  offset = +offset || 0;
-  var remaining = this.length - offset;
-  if (!length) {
-    length = remaining;
-  } else {
-    length = +length;
-    if (length > remaining) {
-      length = remaining;
-    }
-  }
-
-  // must be an even number of digits
-  var strLen = string.length;
-  if (strLen % 2) {
-    throw new Error('Invalid hex string');
-  }
-  if (length > strLen / 2) {
-    length = strLen / 2;
-  }
-  for (var i = 0; i < length; i++) {
-    var byte = parseInt(string.substr(i * 2, 2), 16);
-    if (isNaN(byte)) throw new Error('Invalid hex string');
-    this[offset + i] = byte;
-  }
-  SlowBuffer._charsWritten = i * 2;
-  return i;
-};
-
-
-SlowBuffer.prototype.write = function(string, offset, length, encoding) {
-  // Support both (string, offset, length, encoding)
-  // and the legacy (string, encoding, offset, length)
-  if (isFinite(offset)) {
-    if (!isFinite(length)) {
-      encoding = length;
-      length = undefined;
-    }
-  } else {  // legacy
-    var swap = encoding;
-    encoding = offset;
-    offset = length;
-    length = swap;
-  }
-
-  offset = +offset || 0;
-  var remaining = this.length - offset;
-  if (!length) {
-    length = remaining;
-  } else {
-    length = +length;
-    if (length > remaining) {
-      length = remaining;
-    }
-  }
-  encoding = String(encoding || 'utf8').toLowerCase();
-
-  switch (encoding) {
-    case 'hex':
-      return this.hexWrite(string, offset, length);
-
-    case 'utf8':
-    case 'utf-8':
-      return this.utf8Write(string, offset, length);
-
-    case 'ascii':
-      return this.asciiWrite(string, offset, length);
-
-    case 'binary':
-      return this.binaryWrite(string, offset, length);
-
-    case 'base64':
-      return this.base64Write(string, offset, length);
-
-    case 'ucs2':
-    case 'ucs-2':
-      return this.ucs2Write(string, offset, length);
-
-    default:
-      throw new Error('Unknown encoding');
-  }
-};
-
-
-// slice(start, end)
-SlowBuffer.prototype.slice = function(start, end) {
-  if (end === undefined) end = this.length;
-
-  if (end > this.length) {
-    throw new Error('oob');
-  }
-  if (start > end) {
-    throw new Error('oob');
-  }
-
-  return new Buffer(this, end - start, +start);
-};
-
-SlowBuffer.prototype.copy = function(target, targetstart, sourcestart, sourceend) {
-  var temp = [];
-  for (var i=sourcestart; i<sourceend; i++) {
-    assert.ok(typeof this[i] !== 'undefined', "copying undefined buffer bytes!");
-    temp.push(this[i]);
-  }
-
-  for (var i=targetstart; i<targetstart+temp.length; i++) {
-    target[i] = temp[i-targetstart];
-  }
-};
-
-function coerce(length) {
-  // Coerce length to a number (possibly NaN), round up
-  // in case it's fractional (e.g. 123.456) then do a
-  // double negate to coerce a NaN to 0. Easy, right?
-  length = ~~Math.ceil(+length);
-  return length < 0 ? 0 : length;
-}
-
-
-// Buffer
-
-function Buffer(subject, encoding, offset) {
-  if (!(this instanceof Buffer)) {
-    return new Buffer(subject, encoding, offset);
-  }
-
-  var type;
-
-  // Are we slicing?
-  if (typeof offset === 'number') {
-    this.length = coerce(encoding);
-    this.parent = subject;
-    this.offset = offset;
-  } else {
-    // Find the length
-    switch (type = typeof subject) {
-      case 'number':
-        this.length = coerce(subject);
-        break;
-
-      case 'string':
-        this.length = Buffer.byteLength(subject, encoding);
-        break;
-
-      case 'object': // Assume object is an array
-        this.length = coerce(subject.length);
-        break;
-
-      default:
-        throw new Error('First argument needs to be a number, ' +
-                        'array or string.');
-    }
-
-    if (this.length > Buffer.poolSize) {
-      // Big buffer, just alloc one.
-      this.parent = new SlowBuffer(this.length);
-      this.offset = 0;
-
-    } else {
-      // Small buffer.
-      if (!pool || pool.length - pool.used < this.length) allocPool();
-      this.parent = pool;
-      this.offset = pool.used;
-      pool.used += this.length;
-    }
-
-    // Treat array-ish objects as a byte array.
-    if (isArrayIsh(subject)) {
-      for (var i = 0; i < this.length; i++) {
-        this.parent[i + this.offset] = subject[i];
-      }
-    } else if (type == 'string') {
-      // We are a string
-      this.length = this.write(subject, 0, encoding);
-    }
-  }
-
-}
-
-function isArrayIsh(subject) {
-  return Array.isArray(subject) || Buffer.isBuffer(subject) ||
-         subject && typeof subject === 'object' &&
-         typeof subject.length === 'number';
-}
-
-exports.SlowBuffer = SlowBuffer;
-exports.Buffer = Buffer;
-
-Buffer.poolSize = 8 * 1024;
-var pool;
-
-function allocPool() {
-  pool = new SlowBuffer(Buffer.poolSize);
-  pool.used = 0;
-}
-
-
-// Static methods
-Buffer.isBuffer = function isBuffer(b) {
-  return b instanceof Buffer || b instanceof SlowBuffer;
-};
-
-Buffer.concat = function (list, totalLength) {
-  if (!Array.isArray(list)) {
-    throw new Error("Usage: Buffer.concat(list, [totalLength])\n \
-      list should be an Array.");
-  }
-
-  if (list.length === 0) {
-    return new Buffer(0);
-  } else if (list.length === 1) {
-    return list[0];
-  }
-
-  if (typeof totalLength !== 'number') {
-    totalLength = 0;
-    for (var i = 0; i < list.length; i++) {
-      var buf = list[i];
-      totalLength += buf.length;
-    }
-  }
-
-  var buffer = new Buffer(totalLength);
-  var pos = 0;
-  for (var i = 0; i < list.length; i++) {
-    var buf = list[i];
-    buf.copy(buffer, pos);
-    pos += buf.length;
-  }
-  return buffer;
-};
-
-// Inspect
-Buffer.prototype.inspect = function inspect() {
-  var out = [],
-      len = this.length;
-
-  for (var i = 0; i < len; i++) {
-    out[i] = toHex(this.parent[i + this.offset]);
-    if (i == exports.INSPECT_MAX_BYTES) {
-      out[i + 1] = '...';
-      break;
-    }
-  }
-
-  return '<Buffer ' + out.join(' ') + '>';
-};
-
-
-Buffer.prototype.get = function get(i) {
-  if (i < 0 || i >= this.length) throw new Error('oob');
-  return this.parent[this.offset + i];
-};
-
-
-Buffer.prototype.set = function set(i, v) {
-  if (i < 0 || i >= this.length) throw new Error('oob');
-  return this.parent[this.offset + i] = v;
-};
-
-
-// write(string, offset = 0, length = buffer.length-offset, encoding = 'utf8')
-Buffer.prototype.write = function(string, offset, length, encoding) {
-  // Support both (string, offset, length, encoding)
-  // and the legacy (string, encoding, offset, length)
-  if (isFinite(offset)) {
-    if (!isFinite(length)) {
-      encoding = length;
-      length = undefined;
-    }
-  } else {  // legacy
-    var swap = encoding;
-    encoding = offset;
-    offset = length;
-    length = swap;
-  }
-
-  offset = +offset || 0;
-  var remaining = this.length - offset;
-  if (!length) {
-    length = remaining;
-  } else {
-    length = +length;
-    if (length > remaining) {
-      length = remaining;
-    }
-  }
-  encoding = String(encoding || 'utf8').toLowerCase();
-
-  var ret;
-  switch (encoding) {
-    case 'hex':
-      ret = this.parent.hexWrite(string, this.offset + offset, length);
-      break;
-
-    case 'utf8':
-    case 'utf-8':
-      ret = this.parent.utf8Write(string, this.offset + offset, length);
-      break;
-
-    case 'ascii':
-      ret = this.parent.asciiWrite(string, this.offset + offset, length);
-      break;
-
-    case 'binary':
-      ret = this.parent.binaryWrite(string, this.offset + offset, length);
-      break;
-
-    case 'base64':
-      // Warning: maxLength not taken into account in base64Write
-      ret = this.parent.base64Write(string, this.offset + offset, length);
-      break;
-
-    case 'ucs2':
-    case 'ucs-2':
-      ret = this.parent.ucs2Write(string, this.offset + offset, length);
-      break;
-
-    default:
-      throw new Error('Unknown encoding');
-  }
-
-  Buffer._charsWritten = SlowBuffer._charsWritten;
-
-  return ret;
-};
-
-
-// toString(encoding, start=0, end=buffer.length)
-Buffer.prototype.toString = function(encoding, start, end) {
-  encoding = String(encoding || 'utf8').toLowerCase();
-
-  if (typeof start == 'undefined' || start < 0) {
-    start = 0;
-  } else if (start > this.length) {
-    start = this.length;
-  }
-
-  if (typeof end == 'undefined' || end > this.length) {
-    end = this.length;
-  } else if (end < 0) {
-    end = 0;
-  }
-
-  start = start + this.offset;
-  end = end + this.offset;
-
-  switch (encoding) {
-    case 'hex':
-      return this.parent.hexSlice(start, end);
-
-    case 'utf8':
-    case 'utf-8':
-      return this.parent.utf8Slice(start, end);
-
-    case 'ascii':
-      return this.parent.asciiSlice(start, end);
-
-    case 'binary':
-      return this.parent.binarySlice(start, end);
-
-    case 'base64':
-      return this.parent.base64Slice(start, end);
-
-    case 'ucs2':
-    case 'ucs-2':
-      return this.parent.ucs2Slice(start, end);
-
-    default:
-      throw new Error('Unknown encoding');
-  }
-};
-
-
-// byteLength
-Buffer.byteLength = SlowBuffer.byteLength;
-
-
-// fill(value, start=0, end=buffer.length)
-Buffer.prototype.fill = function fill(value, start, end) {
-  value || (value = 0);
-  start || (start = 0);
-  end || (end = this.length);
-
-  if (typeof value === 'string') {
-    value = value.charCodeAt(0);
-  }
-  if (!(typeof value === 'number') || isNaN(value)) {
-    throw new Error('value is not a number');
-  }
-
-  if (end < start) throw new Error('end < start');
-
-  // Fill 0 bytes; we're done
-  if (end === start) return 0;
-  if (this.length == 0) return 0;
-
-  if (start < 0 || start >= this.length) {
-    throw new Error('start out of bounds');
-  }
-
-  if (end < 0 || end > this.length) {
-    throw new Error('end out of bounds');
-  }
-
-  return this.parent.fill(value,
-                          start + this.offset,
-                          end + this.offset);
-};
-
-
-// copy(targetBuffer, targetStart=0, sourceStart=0, sourceEnd=buffer.length)
-Buffer.prototype.copy = function(target, target_start, start, end) {
-  var source = this;
-  start || (start = 0);
-  end || (end = this.length);
-  target_start || (target_start = 0);
-
-  if (end < start) throw new Error('sourceEnd < sourceStart');
-
-  // Copy 0 bytes; we're done
-  if (end === start) return 0;
-  if (target.length == 0 || source.length == 0) return 0;
-
-  if (target_start < 0 || target_start >= target.length) {
-    throw new Error('targetStart out of bounds');
-  }
-
-  if (start < 0 || start >= source.length) {
-    throw new Error('sourceStart out of bounds');
-  }
-
-  if (end < 0 || end > source.length) {
-    throw new Error('sourceEnd out of bounds');
-  }
-
-  // Are we oob?
-  if (end > this.length) {
-    end = this.length;
-  }
-
-  if (target.length - target_start < end - start) {
-    end = target.length - target_start + start;
-  }
-
-  return this.parent.copy(target.parent,
-                          target_start + target.offset,
-                          start + this.offset,
-                          end + this.offset);
-};
-
-
-// slice(start, end)
-Buffer.prototype.slice = function(start, end) {
-  if (end === undefined) end = this.length;
-  if (end > this.length) throw new Error('oob');
-  if (start > end) throw new Error('oob');
-
-  return new Buffer(this.parent, end - start, +start + this.offset);
-};
-
-
-// Legacy methods for backwards compatibility.
-
-Buffer.prototype.utf8Slice = function(start, end) {
-  return this.toString('utf8', start, end);
-};
-
-Buffer.prototype.binarySlice = function(start, end) {
-  return this.toString('binary', start, end);
-};
-
-Buffer.prototype.asciiSlice = function(start, end) {
-  return this.toString('ascii', start, end);
-};
-
-Buffer.prototype.utf8Write = function(string, offset) {
-  return this.write(string, offset, 'utf8');
-};
-
-Buffer.prototype.binaryWrite = function(string, offset) {
-  return this.write(string, offset, 'binary');
-};
-
-Buffer.prototype.asciiWrite = function(string, offset) {
-  return this.write(string, offset, 'ascii');
-};
-
-Buffer.prototype.readUInt8 = function(offset, noAssert) {
-  var buffer = this;
-
-  if (!noAssert) {
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset < buffer.length,
-        'Trying to read beyond buffer length');
-  }
-
-  return buffer.parent[buffer.offset + offset];
-};
-
-function readUInt16(buffer, offset, isBigEndian, noAssert) {
-  var val = 0;
-
-
-  if (!noAssert) {
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset + 1 < buffer.length,
-        'Trying to read beyond buffer length');
-  }
-
-  if (isBigEndian) {
-    val = buffer.parent[buffer.offset + offset] << 8;
-    val |= buffer.parent[buffer.offset + offset + 1];
-  } else {
-    val = buffer.parent[buffer.offset + offset];
-    val |= buffer.parent[buffer.offset + offset + 1] << 8;
-  }
-
-  return val;
-}
-
-Buffer.prototype.readUInt16LE = function(offset, noAssert) {
-  return readUInt16(this, offset, false, noAssert);
-};
-
-Buffer.prototype.readUInt16BE = function(offset, noAssert) {
-  return readUInt16(this, offset, true, noAssert);
-};
-
-function readUInt32(buffer, offset, isBigEndian, noAssert) {
-  var val = 0;
-
-  if (!noAssert) {
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset + 3 < buffer.length,
-        'Trying to read beyond buffer length');
-  }
-
-  if (isBigEndian) {
-    val = buffer.parent[buffer.offset + offset + 1] << 16;
-    val |= buffer.parent[buffer.offset + offset + 2] << 8;
-    val |= buffer.parent[buffer.offset + offset + 3];
-    val = val + (buffer.parent[buffer.offset + offset] << 24 >>> 0);
-  } else {
-    val = buffer.parent[buffer.offset + offset + 2] << 16;
-    val |= buffer.parent[buffer.offset + offset + 1] << 8;
-    val |= buffer.parent[buffer.offset + offset];
-    val = val + (buffer.parent[buffer.offset + offset + 3] << 24 >>> 0);
-  }
-
-  return val;
-}
-
-Buffer.prototype.readUInt32LE = function(offset, noAssert) {
-  return readUInt32(this, offset, false, noAssert);
-};
-
-Buffer.prototype.readUInt32BE = function(offset, noAssert) {
-  return readUInt32(this, offset, true, noAssert);
-};
-
-
-/*
- * Signed integer types, yay team! A reminder on how two's complement actually
- * works. The first bit is the signed bit, i.e. tells us whether or not the
- * number should be positive or negative. If the two's complement value is
- * positive, then we're done, as it's equivalent to the unsigned representation.
- *
- * Now if the number is positive, you're pretty much done, you can just leverage
- * the unsigned translations and return those. Unfortunately, negative numbers
- * aren't quite that straightforward.
- *
- * At first glance, one might be inclined to use the traditional formula to
- * translate binary numbers between the positive and negative values in two's
- * complement. (Though it doesn't quite work for the most negative value)
- * Mainly:
- *  - invert all the bits
- *  - add one to the result
- *
- * Of course, this doesn't quite work in Javascript. Take for example the value
- * of -128. This could be represented in 16 bits (big-endian) as 0xff80. But of
- * course, Javascript will do the following:
- *
- * > ~0xff80
- * -65409
- *
- * Whoh there, Javascript, that's not quite right. But wait, according to
- * Javascript that's perfectly correct. When Javascript ends up seeing the
- * constant 0xff80, it has no notion that it is actually a signed number. It
- * assumes that we've input the unsigned value 0xff80. Thus, when it does the
- * binary negation, it casts it into a signed value, (positive 0xff80). Then
- * when you perform binary negation on that, it turns it into a negative number.
- *
- * Instead, we're going to have to use the following general formula, that works
- * in a rather Javascript friendly way. I'm glad we don't support this kind of
- * weird numbering scheme in the kernel.
- *
- * (BIT-MAX - (unsigned)val + 1) * -1
- *
- * The astute observer, may think that this doesn't make sense for 8-bit numbers
- * (really it isn't necessary for them). However, when you get 16-bit numbers,
- * you do. Let's go back to our prior example and see how this will look:
- *
- * (0xffff - 0xff80 + 1) * -1
- * (0x007f + 1) * -1
- * (0x0080) * -1
- */
-Buffer.prototype.readInt8 = function(offset, noAssert) {
-  var buffer = this;
-  var neg;
-
-  if (!noAssert) {
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset < buffer.length,
-        'Trying to read beyond buffer length');
-  }
-
-  neg = buffer.parent[buffer.offset + offset] & 0x80;
-  if (!neg) {
-    return (buffer.parent[buffer.offset + offset]);
-  }
-
-  return ((0xff - buffer.parent[buffer.offset + offset] + 1) * -1);
-};
-
-function readInt16(buffer, offset, isBigEndian, noAssert) {
-  var neg, val;
-
-  if (!noAssert) {
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset + 1 < buffer.length,
-        'Trying to read beyond buffer length');
-  }
-
-  val = readUInt16(buffer, offset, isBigEndian, noAssert);
-  neg = val & 0x8000;
-  if (!neg) {
-    return val;
-  }
-
-  return (0xffff - val + 1) * -1;
-}
-
-Buffer.prototype.readInt16LE = function(offset, noAssert) {
-  return readInt16(this, offset, false, noAssert);
-};
-
-Buffer.prototype.readInt16BE = function(offset, noAssert) {
-  return readInt16(this, offset, true, noAssert);
-};
-
-function readInt32(buffer, offset, isBigEndian, noAssert) {
-  var neg, val;
-
-  if (!noAssert) {
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset + 3 < buffer.length,
-        'Trying to read beyond buffer length');
-  }
-
-  val = readUInt32(buffer, offset, isBigEndian, noAssert);
-  neg = val & 0x80000000;
-  if (!neg) {
-    return (val);
-  }
-
-  return (0xffffffff - val + 1) * -1;
-}
-
-Buffer.prototype.readInt32LE = function(offset, noAssert) {
-  return readInt32(this, offset, false, noAssert);
-};
-
-Buffer.prototype.readInt32BE = function(offset, noAssert) {
-  return readInt32(this, offset, true, noAssert);
-};
-
-function readFloat(buffer, offset, isBigEndian, noAssert) {
-  if (!noAssert) {
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset + 3 < buffer.length,
-        'Trying to read beyond buffer length');
-  }
-
-  return require('./buffer_ieee754').readIEEE754(buffer, offset, isBigEndian,
-      23, 4);
-}
-
-Buffer.prototype.readFloatLE = function(offset, noAssert) {
-  return readFloat(this, offset, false, noAssert);
-};
-
-Buffer.prototype.readFloatBE = function(offset, noAssert) {
-  return readFloat(this, offset, true, noAssert);
-};
-
-function readDouble(buffer, offset, isBigEndian, noAssert) {
-  if (!noAssert) {
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset + 7 < buffer.length,
-        'Trying to read beyond buffer length');
-  }
-
-  return require('./buffer_ieee754').readIEEE754(buffer, offset, isBigEndian,
-      52, 8);
-}
-
-Buffer.prototype.readDoubleLE = function(offset, noAssert) {
-  return readDouble(this, offset, false, noAssert);
-};
-
-Buffer.prototype.readDoubleBE = function(offset, noAssert) {
-  return readDouble(this, offset, true, noAssert);
-};
-
-
-/*
- * We have to make sure that the value is a valid integer. This means that it is
- * non-negative. It has no fractional component and that it does not exceed the
- * maximum allowed value.
- *
- *      value           The number to check for validity
- *
- *      max             The maximum value
- */
-function verifuint(value, max) {
-  assert.ok(typeof (value) == 'number',
-      'cannot write a non-number as a number');
-
-  assert.ok(value >= 0,
-      'specified a negative value for writing an unsigned value');
-
-  assert.ok(value <= max, 'value is larger than maximum value for type');
-
-  assert.ok(Math.floor(value) === value, 'value has a fractional component');
-}
-
-Buffer.prototype.writeUInt8 = function(value, offset, noAssert) {
-  var buffer = this;
-
-  if (!noAssert) {
-    assert.ok(value !== undefined && value !== null,
-        'missing value');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset < buffer.length,
-        'trying to write beyond buffer length');
-
-    verifuint(value, 0xff);
-  }
-
-  buffer.parent[buffer.offset + offset] = value;
-};
-
-function writeUInt16(buffer, value, offset, isBigEndian, noAssert) {
-  if (!noAssert) {
-    assert.ok(value !== undefined && value !== null,
-        'missing value');
-
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset + 1 < buffer.length,
-        'trying to write beyond buffer length');
-
-    verifuint(value, 0xffff);
-  }
-
-  if (isBigEndian) {
-    buffer.parent[buffer.offset + offset] = (value & 0xff00) >>> 8;
-    buffer.parent[buffer.offset + offset + 1] = value & 0x00ff;
-  } else {
-    buffer.parent[buffer.offset + offset + 1] = (value & 0xff00) >>> 8;
-    buffer.parent[buffer.offset + offset] = value & 0x00ff;
-  }
-}
-
-Buffer.prototype.writeUInt16LE = function(value, offset, noAssert) {
-  writeUInt16(this, value, offset, false, noAssert);
-};
-
-Buffer.prototype.writeUInt16BE = function(value, offset, noAssert) {
-  writeUInt16(this, value, offset, true, noAssert);
-};
-
-function writeUInt32(buffer, value, offset, isBigEndian, noAssert) {
-  if (!noAssert) {
-    assert.ok(value !== undefined && value !== null,
-        'missing value');
-
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset + 3 < buffer.length,
-        'trying to write beyond buffer length');
-
-    verifuint(value, 0xffffffff);
-  }
-
-  if (isBigEndian) {
-    buffer.parent[buffer.offset + offset] = (value >>> 24) & 0xff;
-    buffer.parent[buffer.offset + offset + 1] = (value >>> 16) & 0xff;
-    buffer.parent[buffer.offset + offset + 2] = (value >>> 8) & 0xff;
-    buffer.parent[buffer.offset + offset + 3] = value & 0xff;
-  } else {
-    buffer.parent[buffer.offset + offset + 3] = (value >>> 24) & 0xff;
-    buffer.parent[buffer.offset + offset + 2] = (value >>> 16) & 0xff;
-    buffer.parent[buffer.offset + offset + 1] = (value >>> 8) & 0xff;
-    buffer.parent[buffer.offset + offset] = value & 0xff;
-  }
-}
-
-Buffer.prototype.writeUInt32LE = function(value, offset, noAssert) {
-  writeUInt32(this, value, offset, false, noAssert);
-};
-
-Buffer.prototype.writeUInt32BE = function(value, offset, noAssert) {
-  writeUInt32(this, value, offset, true, noAssert);
-};
-
-
-/*
- * We now move onto our friends in the signed number category. Unlike unsigned
- * numbers, we're going to have to worry a bit more about how we put values into
- * arrays. Since we are only worrying about signed 32-bit values, we're in
- * slightly better shape. Unfortunately, we really can't do our favorite binary
- * & in this system. It really seems to do the wrong thing. For example:
- *
- * > -32 & 0xff
- * 224
- *
- * What's happening above is really: 0xe0 & 0xff = 0xe0. However, the results of
- * this aren't treated as a signed number. Ultimately a bad thing.
- *
- * What we're going to want to do is basically create the unsigned equivalent of
- * our representation and pass that off to the wuint* functions. To do that
- * we're going to do the following:
- *
- *  - if the value is positive
- *      we can pass it directly off to the equivalent wuint
- *  - if the value is negative
- *      we do the following computation:
- *         mb + val + 1, where
- *         mb   is the maximum unsigned value in that byte size
- *         val  is the Javascript negative integer
- *
- *
- * As a concrete value, take -128. In signed 16 bits this would be 0xff80. If
- * you do out the computations:
- *
- * 0xffff - 128 + 1
- * 0xffff - 127
- * 0xff80
- *
- * You can then encode this value as the signed version. This is really rather
- * hacky, but it should work and get the job done which is our goal here.
- */
-
-/*
- * A series of checks to make sure we actually have a signed 32-bit number
- */
-function verifsint(value, max, min) {
-  assert.ok(typeof (value) == 'number',
-      'cannot write a non-number as a number');
-
-  assert.ok(value <= max, 'value larger than maximum allowed value');
-
-  assert.ok(value >= min, 'value smaller than minimum allowed value');
-
-  assert.ok(Math.floor(value) === value, 'value has a fractional component');
-}
-
-function verifIEEE754(value, max, min) {
-  assert.ok(typeof (value) == 'number',
-      'cannot write a non-number as a number');
-
-  assert.ok(value <= max, 'value larger than maximum allowed value');
-
-  assert.ok(value >= min, 'value smaller than minimum allowed value');
-}
-
-Buffer.prototype.writeInt8 = function(value, offset, noAssert) {
-  var buffer = this;
-
-  if (!noAssert) {
-    assert.ok(value !== undefined && value !== null,
-        'missing value');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset < buffer.length,
-        'Trying to write beyond buffer length');
-
-    verifsint(value, 0x7f, -0x80);
-  }
-
-  if (value >= 0) {
-    buffer.writeUInt8(value, offset, noAssert);
-  } else {
-    buffer.writeUInt8(0xff + value + 1, offset, noAssert);
-  }
-};
-
-function writeInt16(buffer, value, offset, isBigEndian, noAssert) {
-  if (!noAssert) {
-    assert.ok(value !== undefined && value !== null,
-        'missing value');
-
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset + 1 < buffer.length,
-        'Trying to write beyond buffer length');
-
-    verifsint(value, 0x7fff, -0x8000);
-  }
-
-  if (value >= 0) {
-    writeUInt16(buffer, value, offset, isBigEndian, noAssert);
-  } else {
-    writeUInt16(buffer, 0xffff + value + 1, offset, isBigEndian, noAssert);
-  }
-}
-
-Buffer.prototype.writeInt16LE = function(value, offset, noAssert) {
-  writeInt16(this, value, offset, false, noAssert);
-};
-
-Buffer.prototype.writeInt16BE = function(value, offset, noAssert) {
-  writeInt16(this, value, offset, true, noAssert);
-};
-
-function writeInt32(buffer, value, offset, isBigEndian, noAssert) {
-  if (!noAssert) {
-    assert.ok(value !== undefined && value !== null,
-        'missing value');
-
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset + 3 < buffer.length,
-        'Trying to write beyond buffer length');
-
-    verifsint(value, 0x7fffffff, -0x80000000);
-  }
-
-  if (value >= 0) {
-    writeUInt32(buffer, value, offset, isBigEndian, noAssert);
-  } else {
-    writeUInt32(buffer, 0xffffffff + value + 1, offset, isBigEndian, noAssert);
-  }
-}
-
-Buffer.prototype.writeInt32LE = function(value, offset, noAssert) {
-  writeInt32(this, value, offset, false, noAssert);
-};
-
-Buffer.prototype.writeInt32BE = function(value, offset, noAssert) {
-  writeInt32(this, value, offset, true, noAssert);
-};
-
-function writeFloat(buffer, value, offset, isBigEndian, noAssert) {
-  if (!noAssert) {
-    assert.ok(value !== undefined && value !== null,
-        'missing value');
-
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset + 3 < buffer.length,
-        'Trying to write beyond buffer length');
-
-    verifIEEE754(value, 3.4028234663852886e+38, -3.4028234663852886e+38);
-  }
-
-  require('./buffer_ieee754').writeIEEE754(buffer, value, offset, isBigEndian,
-      23, 4);
-}
-
-Buffer.prototype.writeFloatLE = function(value, offset, noAssert) {
-  writeFloat(this, value, offset, false, noAssert);
-};
-
-Buffer.prototype.writeFloatBE = function(value, offset, noAssert) {
-  writeFloat(this, value, offset, true, noAssert);
-};
-
-function writeDouble(buffer, value, offset, isBigEndian, noAssert) {
-  if (!noAssert) {
-    assert.ok(value !== undefined && value !== null,
-        'missing value');
-
-    assert.ok(typeof (isBigEndian) === 'boolean',
-        'missing or invalid endian');
-
-    assert.ok(offset !== undefined && offset !== null,
-        'missing offset');
-
-    assert.ok(offset + 7 < buffer.length,
-        'Trying to write beyond buffer length');
-
-    verifIEEE754(value, 1.7976931348623157E+308, -1.7976931348623157E+308);
-  }
-
-  require('./buffer_ieee754').writeIEEE754(buffer, value, offset, isBigEndian,
-      52, 8);
-}
-
-Buffer.prototype.writeDoubleLE = function(value, offset, noAssert) {
-  writeDouble(this, value, offset, false, noAssert);
-};
-
-Buffer.prototype.writeDoubleBE = function(value, offset, noAssert) {
-  writeDouble(this, value, offset, true, noAssert);
-};
-
-SlowBuffer.prototype.readUInt8 = Buffer.prototype.readUInt8;
-SlowBuffer.prototype.readUInt16LE = Buffer.prototype.readUInt16LE;
-SlowBuffer.prototype.readUInt16BE = Buffer.prototype.readUInt16BE;
-SlowBuffer.prototype.readUInt32LE = Buffer.prototype.readUInt32LE;
-SlowBuffer.prototype.readUInt32BE = Buffer.prototype.readUInt32BE;
-SlowBuffer.prototype.readInt8 = Buffer.prototype.readInt8;
-SlowBuffer.prototype.readInt16LE = Buffer.prototype.readInt16LE;
-SlowBuffer.prototype.readInt16BE = Buffer.prototype.readInt16BE;
-SlowBuffer.prototype.readInt32LE = Buffer.prototype.readInt32LE;
-SlowBuffer.prototype.readInt32BE = Buffer.prototype.readInt32BE;
-SlowBuffer.prototype.readFloatLE = Buffer.prototype.readFloatLE;
-SlowBuffer.prototype.readFloatBE = Buffer.prototype.readFloatBE;
-SlowBuffer.prototype.readDoubleLE = Buffer.prototype.readDoubleLE;
-SlowBuffer.prototype.readDoubleBE = Buffer.prototype.readDoubleBE;
-SlowBuffer.prototype.writeUInt8 = Buffer.prototype.writeUInt8;
-SlowBuffer.prototype.writeUInt16LE = Buffer.prototype.writeUInt16LE;
-SlowBuffer.prototype.writeUInt16BE = Buffer.prototype.writeUInt16BE;
-SlowBuffer.prototype.writeUInt32LE = Buffer.prototype.writeUInt32LE;
-SlowBuffer.prototype.writeUInt32BE = Buffer.prototype.writeUInt32BE;
-SlowBuffer.prototype.writeInt8 = Buffer.prototype.writeInt8;
-SlowBuffer.prototype.writeInt16LE = Buffer.prototype.writeInt16LE;
-SlowBuffer.prototype.writeInt16BE = Buffer.prototype.writeInt16BE;
-SlowBuffer.prototype.writeInt32LE = Buffer.prototype.writeInt32LE;
-SlowBuffer.prototype.writeInt32BE = Buffer.prototype.writeInt32BE;
-SlowBuffer.prototype.writeFloatLE = Buffer.prototype.writeFloatLE;
-SlowBuffer.prototype.writeFloatBE = Buffer.prototype.writeFloatBE;
-SlowBuffer.prototype.writeDoubleLE = Buffer.prototype.writeDoubleLE;
-SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
-
-},{"assert":1,"./buffer_ieee754":8,"base64-js":9}],9:[function(require,module,exports){
-(function (exports) {
-	'use strict';
-
-	var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-
-	function b64ToByteArray(b64) {
-		var i, j, l, tmp, placeHolders, arr;
-	
-		if (b64.length % 4 > 0) {
-			throw 'Invalid string. Length must be a multiple of 4';
-		}
-
-		// the number of equal signs (place holders)
-		// if there are two placeholders, than the two characters before it
-		// represent one byte
-		// if there is only one, then the three characters before it represent 2 bytes
-		// this is just a cheap hack to not do indexOf twice
-		placeHolders = b64.indexOf('=');
-		placeHolders = placeHolders > 0 ? b64.length - placeHolders : 0;
-
-		// base64 is 4/3 + up to two characters of the original data
-		arr = [];//new Uint8Array(b64.length * 3 / 4 - placeHolders);
-
-		// if there are placeholders, only get up to the last complete 4 chars
-		l = placeHolders > 0 ? b64.length - 4 : b64.length;
-
-		for (i = 0, j = 0; i < l; i += 4, j += 3) {
-			tmp = (lookup.indexOf(b64[i]) << 18) | (lookup.indexOf(b64[i + 1]) << 12) | (lookup.indexOf(b64[i + 2]) << 6) | lookup.indexOf(b64[i + 3]);
-			arr.push((tmp & 0xFF0000) >> 16);
-			arr.push((tmp & 0xFF00) >> 8);
-			arr.push(tmp & 0xFF);
-		}
-
-		if (placeHolders === 2) {
-			tmp = (lookup.indexOf(b64[i]) << 2) | (lookup.indexOf(b64[i + 1]) >> 4);
-			arr.push(tmp & 0xFF);
-		} else if (placeHolders === 1) {
-			tmp = (lookup.indexOf(b64[i]) << 10) | (lookup.indexOf(b64[i + 1]) << 4) | (lookup.indexOf(b64[i + 2]) >> 2);
-			arr.push((tmp >> 8) & 0xFF);
-			arr.push(tmp & 0xFF);
-		}
-
-		return arr;
-	}
-
-	function uint8ToBase64(uint8) {
-		var i,
-			extraBytes = uint8.length % 3, // if we have 1 byte left, pad 2 bytes
-			output = "",
-			temp, length;
-
-		function tripletToBase64 (num) {
-			return lookup[num >> 18 & 0x3F] + lookup[num >> 12 & 0x3F] + lookup[num >> 6 & 0x3F] + lookup[num & 0x3F];
-		};
-
-		// go through the array every three bytes, we'll deal with trailing stuff later
-		for (i = 0, length = uint8.length - extraBytes; i < length; i += 3) {
-			temp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2]);
-			output += tripletToBase64(temp);
-		}
-
-		// pad the end with zeros, but make sure to not forget the extra bytes
-		switch (extraBytes) {
-			case 1:
-				temp = uint8[uint8.length - 1];
-				output += lookup[temp >> 2];
-				output += lookup[(temp << 4) & 0x3F];
-				output += '==';
-				break;
-			case 2:
-				temp = (uint8[uint8.length - 2] << 8) + (uint8[uint8.length - 1]);
-				output += lookup[temp >> 10];
-				output += lookup[(temp >> 4) & 0x3F];
-				output += lookup[(temp << 2) & 0x3F];
-				output += '=';
-				break;
-		}
-
-		return output;
-	}
-
-	module.exports.toByteArray = b64ToByteArray;
-	module.exports.fromByteArray = uint8ToBase64;
-}());
-
-},{}]},{},[])
-;;module.exports=require("buffer-browserify")
-
-},{}],7:[function(require,module,exports){
-// shim for using process in browser
-
-var process = module.exports = {};
-
-process.nextTick = (function () {
-    var canSetImmediate = typeof window !== 'undefined'
-    && window.setImmediate;
-    var canPost = typeof window !== 'undefined'
-    && window.postMessage && window.addEventListener
-    ;
-
-    if (canSetImmediate) {
-        return function (f) { return window.setImmediate(f) };
-    }
-
-    if (canPost) {
-        var queue = [];
-        window.addEventListener('message', function (ev) {
-            if (ev.source === window && ev.data === 'process-tick') {
-                ev.stopPropagation();
-                if (queue.length > 0) {
-                    var fn = queue.shift();
-                    fn();
-                }
+  ],
+  "description": "This is the base conformance statement for FHIR. It represents a server that provides the full set of functionality defined by FHIR. It is provided to use as a template for system designers to build their own conformance statements from",
+  "status": "draft",
+  "date": "2014-04-28T17:37:56.075-00:00",
+  "fhirVersion": "0.1.0",
+  "acceptUnknown": false,
+  "format": [
+    "xml",
+    "json"
+  ],
+  "rest": [
+    {
+      "mode": "server",
+      "documentation": "All the functionality defined in FHIR",
+      "resource": [
+        {
+          "type": "AdverseReaction",
+          "profile": {
+            "reference": "http://hl7.org/fhir/AdverseReaction"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
             }
-        }, true);
-
-        return function nextTick(fn) {
-            queue.push(fn);
-            window.postMessage('process-tick', '*');
-        };
+          ],
+          "searchParam": [
+            {
+              "name": "substance",
+              "definition": "http://hl7.org/fhir/profiles/AdverseReaction",
+              "type": "reference",
+              "documentation": "The name or code of the substance that produces the sensitivity"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/AdverseReaction",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/AdverseReaction",
+              "type": "reference",
+              "documentation": "The subject that the sensitivity is about"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/AdverseReaction",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/profiles/AdverseReaction",
+              "type": "date",
+              "documentation": "The date of the reaction"
+            },
+            {
+              "name": "symptom",
+              "definition": "http://hl7.org/fhir/profiles/AdverseReaction",
+              "type": "token",
+              "documentation": "One of the symptoms of the reaction"
+            }
+          ]
+        },
+        {
+          "type": "Alert",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Alert"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Alert",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/Alert",
+              "type": "reference",
+              "documentation": "The identity of a subject to list alerts for"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Alert",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            }
+          ]
+        },
+        {
+          "type": "AllergyIntolerance",
+          "profile": {
+            "reference": "http://hl7.org/fhir/AllergyIntolerance"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "substance",
+              "definition": "http://hl7.org/fhir/profiles/AllergyIntolerance",
+              "type": "reference",
+              "documentation": "The name or code of the substance that produces the sensitivity"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/AllergyIntolerance",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/profiles/AllergyIntolerance",
+              "type": "token",
+              "documentation": "The status of the sensitivity"
+            },
+            {
+              "name": "recorder",
+              "definition": "http://hl7.org/fhir/profiles/AllergyIntolerance",
+              "type": "reference",
+              "documentation": "Who recorded the sensitivity"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/AllergyIntolerance",
+              "type": "reference",
+              "documentation": "The subject that the sensitivity is about"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/AllergyIntolerance",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/profiles/AllergyIntolerance",
+              "type": "date",
+              "documentation": "Recorded date/time."
+            },
+            {
+              "name": "type",
+              "definition": "http://hl7.org/fhir/profiles/AllergyIntolerance",
+              "type": "token",
+              "documentation": "The type of sensitivity"
+            }
+          ]
+        },
+        {
+          "type": "Appointment",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Appointment"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "partstatus",
+              "definition": "http://hl7.org/fhir/profiles/Appointment",
+              "type": "token",
+              "documentation": "The Participation status of the subject, or other participant on the appointment"
+            },
+            {
+              "name": "individual",
+              "definition": "http://hl7.org/fhir/profiles/Appointment",
+              "type": "reference",
+              "documentation": "Any one of the individuals participating in the appointment"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Appointment",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/profiles/Appointment",
+              "type": "string",
+              "documentation": "The overall status of the appointment"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Appointment",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/profiles/Appointment",
+              "type": "date",
+              "documentation": "Appointment date/time."
+            }
+          ]
+        },
+        {
+          "type": "AppointmentResponse",
+          "profile": {
+            "reference": "http://hl7.org/fhir/AppointmentResponse"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "partstatus",
+              "definition": "http://hl7.org/fhir/profiles/AppointmentResponse",
+              "type": "string",
+              "documentation": "The overall status of the appointment"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/AppointmentResponse",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/AppointmentResponse",
+              "type": "reference",
+              "documentation": "The subject that the appointment response replies for"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/AppointmentResponse",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "appointment",
+              "definition": "http://hl7.org/fhir/profiles/AppointmentResponse",
+              "type": "reference",
+              "documentation": "The appointment that the response is attached to"
+            }
+          ]
+        },
+        {
+          "type": "Availability",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Availability"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "individual",
+              "definition": "http://hl7.org/fhir/profiles/Availability",
+              "type": "reference",
+              "documentation": "The individual to find an availability for"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Availability",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Availability",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/profiles/Availability",
+              "type": "date",
+              "documentation": "Search for availability resources that have a period that contains this date specified"
+            },
+            {
+              "name": "type",
+              "definition": "http://hl7.org/fhir/profiles/Availability",
+              "type": "token",
+              "documentation": "The type of appointments that can be booked into associated slot(s)"
+            }
+          ]
+        },
+        {
+          "type": "CarePlan",
+          "profile": {
+            "reference": "http://hl7.org/fhir/CarePlan"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "activitycode",
+              "definition": "http://hl7.org/fhir/profiles/CarePlan",
+              "type": "token",
+              "documentation": "Detail type of activity"
+            },
+            {
+              "name": "patient",
+              "definition": "http://hl7.org/fhir/profiles/CarePlan",
+              "type": "reference",
+              "documentation": "Who care plan is for"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/CarePlan",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "condition",
+              "definition": "http://hl7.org/fhir/profiles/CarePlan",
+              "type": "reference",
+              "documentation": "Health issues this plan addresses"
+            },
+            {
+              "name": "activitydetail",
+              "definition": "http://hl7.org/fhir/profiles/CarePlan",
+              "type": "reference",
+              "documentation": "Activity details defined in specific resource"
+            },
+            {
+              "name": "activitydate",
+              "definition": "http://hl7.org/fhir/profiles/CarePlan",
+              "type": "date",
+              "documentation": "Specified date occurs within period specified by CarePlan.activity.timingSchedule"
+            },
+            {
+              "name": "participant",
+              "definition": "http://hl7.org/fhir/profiles/CarePlan",
+              "type": "reference",
+              "documentation": "Who is involved"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/CarePlan",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/profiles/CarePlan",
+              "type": "date",
+              "documentation": "Time period plan covers"
+            }
+          ]
+        },
+        {
+          "type": "Composition",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Composition"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "author",
+              "definition": "http://hl7.org/fhir/profiles/Composition",
+              "type": "reference",
+              "documentation": "Who and/or what authored the composition"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Composition",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "attester",
+              "definition": "http://hl7.org/fhir/profiles/Composition",
+              "type": "reference",
+              "documentation": "Who attested the composition"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/Composition",
+              "type": "reference",
+              "documentation": "Who and/or what the composition is about"
+            },
+            {
+              "name": "section-content",
+              "definition": "http://hl7.org/fhir/profiles/Composition",
+              "type": "reference",
+              "documentation": "The actual data for the section"
+            },
+            {
+              "name": "context",
+              "definition": "http://hl7.org/fhir/profiles/Composition",
+              "type": "token",
+              "documentation": "Code(s) that apply to the event being documented"
+            },
+            {
+              "name": "class",
+              "definition": "http://hl7.org/fhir/profiles/Composition",
+              "type": "token",
+              "documentation": "Categorization of Composition"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Composition",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "section-type",
+              "definition": "http://hl7.org/fhir/profiles/Composition",
+              "type": "token",
+              "documentation": "Classification of section (recommended)"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/profiles/Composition",
+              "type": "date",
+              "documentation": "Composition editing time"
+            },
+            {
+              "name": "type",
+              "definition": "http://hl7.org/fhir/profiles/Composition",
+              "type": "token",
+              "documentation": "Kind of composition (LOINC if possible)"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/Composition",
+              "type": "token",
+              "documentation": "Logical identifier of composition (version-independent)"
+            }
+          ]
+        },
+        {
+          "type": "ConceptMap",
+          "profile": {
+            "reference": "http://hl7.org/fhir/ConceptMap"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "dependson",
+              "definition": "http://hl7.org/fhir/profiles/ConceptMap",
+              "type": "token",
+              "documentation": "Reference to element/field/valueset provides the context"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/profiles/ConceptMap",
+              "type": "token",
+              "documentation": "Status of the concept map"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/profiles/ConceptMap",
+              "type": "date",
+              "documentation": "The concept map publication date"
+            },
+            {
+              "name": "version",
+              "definition": "http://hl7.org/fhir/profiles/ConceptMap",
+              "type": "token",
+              "documentation": "The version identifier of the concept map"
+            },
+            {
+              "name": "publisher",
+              "definition": "http://hl7.org/fhir/profiles/ConceptMap",
+              "type": "string",
+              "documentation": "Name of the publisher of the concept map"
+            },
+            {
+              "name": "product",
+              "definition": "http://hl7.org/fhir/profiles/ConceptMap",
+              "type": "token",
+              "documentation": "Reference to element/field/valueset provides the context"
+            },
+            {
+              "name": "system",
+              "definition": "http://hl7.org/fhir/profiles/ConceptMap",
+              "type": "token",
+              "documentation": "The system for any destination concepts mapped by this map"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/ConceptMap",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "source",
+              "definition": "http://hl7.org/fhir/profiles/ConceptMap",
+              "type": "reference",
+              "documentation": "The system for any concepts mapped by this concept map"
+            },
+            {
+              "name": "description",
+              "definition": "http://hl7.org/fhir/profiles/ConceptMap",
+              "type": "string",
+              "documentation": "Text search in the description of the concept map"
+            },
+            {
+              "name": "name",
+              "definition": "http://hl7.org/fhir/profiles/ConceptMap",
+              "type": "string",
+              "documentation": "Name of the concept map"
+            },
+            {
+              "name": "target",
+              "definition": "http://hl7.org/fhir/profiles/ConceptMap",
+              "type": "reference",
+              "documentation": "Provides context to the mappings"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/ConceptMap",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/ConceptMap",
+              "type": "token",
+              "documentation": "The identifier of the concept map"
+            }
+          ]
+        },
+        {
+          "type": "Condition",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Condition"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "asserter",
+              "definition": "http://hl7.org/fhir/profiles/Condition",
+              "type": "reference",
+              "documentation": "Person who asserts this condition"
+            },
+            {
+              "name": "location",
+              "definition": "http://hl7.org/fhir/profiles/Condition",
+              "type": "token",
+              "documentation": "Location - may include laterality"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/profiles/Condition",
+              "type": "token",
+              "documentation": "The status of the condition"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/Condition",
+              "type": "reference",
+              "documentation": "Who has the condition?"
+            },
+            {
+              "name": "onset",
+              "definition": "http://hl7.org/fhir/profiles/Condition",
+              "type": "date",
+              "documentation": "When the Condition started (if started on a date)"
+            },
+            {
+              "name": "evidence",
+              "definition": "http://hl7.org/fhir/profiles/Condition",
+              "type": "token",
+              "documentation": "Manifestation/symptom"
+            },
+            {
+              "name": "severity",
+              "definition": "http://hl7.org/fhir/profiles/Condition",
+              "type": "token",
+              "documentation": "The severity of the condition"
+            },
+            {
+              "name": "code",
+              "definition": "http://hl7.org/fhir/profiles/Condition",
+              "type": "token",
+              "documentation": "Code for the condition"
+            },
+            {
+              "name": "encounter",
+              "definition": "http://hl7.org/fhir/profiles/Condition",
+              "type": "reference",
+              "documentation": "Encounter when condition first asserted"
+            },
+            {
+              "name": "date-asserted",
+              "definition": "http://hl7.org/fhir/profiles/Condition",
+              "type": "date",
+              "documentation": "When first detected/suspected/entered"
+            },
+            {
+              "name": "stage",
+              "definition": "http://hl7.org/fhir/profiles/Condition",
+              "type": "token",
+              "documentation": "Simple summary (disease specific)"
+            },
+            {
+              "name": "related-code",
+              "definition": "http://hl7.org/fhir/profiles/Condition",
+              "type": "token",
+              "documentation": "Relationship target by means of a predefined code"
+            },
+            {
+              "name": "category",
+              "definition": "http://hl7.org/fhir/profiles/Condition",
+              "type": "token",
+              "documentation": "The category of the condition"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Condition",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "related-item",
+              "definition": "http://hl7.org/fhir/profiles/Condition",
+              "type": "reference",
+              "documentation": "Relationship target resource"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Condition",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            }
+          ]
+        },
+        {
+          "type": "Conformance",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Conformance"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/profiles/Conformance",
+              "type": "token",
+              "documentation": "The current status of the conformance statement"
+            },
+            {
+              "name": "resource",
+              "definition": "http://hl7.org/fhir/profiles/Conformance",
+              "type": "token",
+              "documentation": "Name of a resource mentioned in a conformance statement"
+            },
+            {
+              "name": "security",
+              "definition": "http://hl7.org/fhir/profiles/Conformance",
+              "type": "token",
+              "documentation": "Information about security of implementation"
+            },
+            {
+              "name": "format",
+              "definition": "http://hl7.org/fhir/profiles/Conformance",
+              "type": "token",
+              "documentation": "formats supported (xml | json | mime type)"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/profiles/Conformance",
+              "type": "date",
+              "documentation": "The conformance statement publication date"
+            },
+            {
+              "name": "mode",
+              "definition": "http://hl7.org/fhir/profiles/Conformance",
+              "type": "token",
+              "documentation": "Mode - restful (server/client) or messaging (sender/receiver)"
+            },
+            {
+              "name": "version",
+              "definition": "http://hl7.org/fhir/profiles/Conformance",
+              "type": "token",
+              "documentation": "The version identifier of the conformance statement"
+            },
+            {
+              "name": "publisher",
+              "definition": "http://hl7.org/fhir/profiles/Conformance",
+              "type": "string",
+              "documentation": "Name of the publisher of the conformance statement"
+            },
+            {
+              "name": "software",
+              "definition": "http://hl7.org/fhir/profiles/Conformance",
+              "type": "string",
+              "documentation": "Part of a the name of a software application"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Conformance",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "event",
+              "definition": "http://hl7.org/fhir/profiles/Conformance",
+              "type": "token",
+              "documentation": "Event code in a conformance statement"
+            },
+            {
+              "name": "description",
+              "definition": "http://hl7.org/fhir/profiles/Conformance",
+              "type": "string",
+              "documentation": "Text search in the description of the conformance statement"
+            },
+            {
+              "name": "name",
+              "definition": "http://hl7.org/fhir/profiles/Conformance",
+              "type": "string",
+              "documentation": "Name of the conformance statement"
+            },
+            {
+              "name": "supported-profile",
+              "definition": "http://hl7.org/fhir/profiles/Conformance",
+              "type": "reference",
+              "documentation": "Profiles supported by the system"
+            },
+            {
+              "name": "fhirversion",
+              "definition": "http://hl7.org/fhir/profiles/Conformance",
+              "type": "token",
+              "documentation": "The version of FHIR"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Conformance",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/Conformance",
+              "type": "token",
+              "documentation": "The identifier of the conformance statement"
+            },
+            {
+              "name": "profile",
+              "definition": "http://hl7.org/fhir/profiles/Conformance",
+              "type": "reference",
+              "documentation": "A profile id invoked in a conformance statement"
+            }
+          ]
+        },
+        {
+          "type": "Device",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Device"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "organization",
+              "definition": "http://hl7.org/fhir/profiles/Device",
+              "type": "reference",
+              "documentation": "The organization responsible for the device"
+            },
+            {
+              "name": "model",
+              "definition": "http://hl7.org/fhir/profiles/Device",
+              "type": "string",
+              "documentation": "The model of the device"
+            },
+            {
+              "name": "patient",
+              "definition": "http://hl7.org/fhir/profiles/Device",
+              "type": "reference",
+              "documentation": "Patient information, if the resource is affixed to a person"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Device",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "location",
+              "definition": "http://hl7.org/fhir/profiles/Device",
+              "type": "reference",
+              "documentation": "A location, where the resource is found"
+            },
+            {
+              "name": "manufacturer",
+              "definition": "http://hl7.org/fhir/profiles/Device",
+              "type": "string",
+              "documentation": "The manufacturer of the device"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Device",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "udi",
+              "definition": "http://hl7.org/fhir/profiles/Device",
+              "type": "string",
+              "documentation": "FDA Mandated Unique Device Identifier"
+            },
+            {
+              "name": "type",
+              "definition": "http://hl7.org/fhir/profiles/Device",
+              "type": "token",
+              "documentation": "The type of the device"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/Device",
+              "type": "token",
+              "documentation": "Instance id from manufacturer, owner and others"
+            }
+          ]
+        },
+        {
+          "type": "DeviceObservationReport",
+          "profile": {
+            "reference": "http://hl7.org/fhir/DeviceObservationReport"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "observation",
+              "definition": "http://hl7.org/fhir/profiles/DeviceObservationReport",
+              "type": "reference",
+              "documentation": "The data for the metric"
+            },
+            {
+              "name": "source",
+              "definition": "http://hl7.org/fhir/profiles/DeviceObservationReport",
+              "type": "reference",
+              "documentation": "Identifies/describes where the data came from"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/DeviceObservationReport",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/DeviceObservationReport",
+              "type": "reference",
+              "documentation": "Subject of the measurement"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/DeviceObservationReport",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "code",
+              "definition": "http://hl7.org/fhir/profiles/DeviceObservationReport",
+              "type": "token",
+              "documentation": "The compatment code"
+            },
+            {
+              "name": "channel",
+              "definition": "http://hl7.org/fhir/profiles/DeviceObservationReport",
+              "type": "token",
+              "documentation": "The channel code"
+            }
+          ]
+        },
+        {
+          "type": "DiagnosticOrder",
+          "profile": {
+            "reference": "http://hl7.org/fhir/DiagnosticOrder"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "orderer",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticOrder",
+              "type": "reference",
+              "documentation": "Who ordered the test"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticOrder",
+              "type": "token",
+              "documentation": "requested | received | accepted | in progress | review | completed | suspended | rejected | failed"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticOrder",
+              "type": "reference",
+              "documentation": "Who and/or what test is about"
+            },
+            {
+              "name": "item-status",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticOrder",
+              "type": "token",
+              "documentation": "requested | received | accepted | in progress | review | completed | suspended | rejected | failed"
+            },
+            {
+              "name": "event-status",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticOrder",
+              "type": "token",
+              "documentation": "requested | received | accepted | in progress | review | completed | suspended | rejected | failed"
+            },
+            {
+              "name": "actor",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticOrder",
+              "type": "reference",
+              "documentation": "Who recorded or did this"
+            },
+            {
+              "name": "code",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticOrder",
+              "type": "token",
+              "documentation": "Code to indicate the item (test or panel) being ordered"
+            },
+            {
+              "name": "encounter",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticOrder",
+              "type": "reference",
+              "documentation": "The encounter that this diagnostic order is associated with"
+            },
+            {
+              "name": "item-past-status",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticOrder",
+              "type": "token",
+              "documentation": "requested | received | accepted | in progress | review | completed | suspended | rejected | failed"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticOrder",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "bodysite",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticOrder",
+              "type": "token",
+              "documentation": "Location of requested test (if applicable)"
+            },
+            {
+              "name": "item-date",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticOrder",
+              "type": "date",
+              "documentation": "The date at which the event happened"
+            },
+            {
+              "name": "specimen",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticOrder",
+              "type": "reference",
+              "documentation": "If the whole order relates to specific specimens"
+            },
+            {
+              "name": "event-status-date",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticOrder",
+              "type": "composite",
+              "documentation": "A combination of past-status and date"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticOrder",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "event-date",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticOrder",
+              "type": "date",
+              "documentation": "The date at which the event happened"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticOrder",
+              "type": "token",
+              "documentation": "Identifiers assigned to this order"
+            },
+            {
+              "name": "item-status-date",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticOrder",
+              "type": "composite",
+              "documentation": "A combination of item-past-status and item-date"
+            }
+          ]
+        },
+        {
+          "type": "DiagnosticReport",
+          "profile": {
+            "reference": "http://hl7.org/fhir/DiagnosticReport"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "result",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticReport",
+              "type": "reference",
+              "documentation": "Link to an atomic result (observation resource)"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticReport",
+              "type": "token",
+              "documentation": "The status of the report"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticReport",
+              "type": "reference",
+              "documentation": "The subject of the report"
+            },
+            {
+              "name": "issued",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticReport",
+              "type": "date",
+              "documentation": "When the report was issued"
+            },
+            {
+              "name": "diagnosis",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticReport",
+              "type": "token",
+              "documentation": "A coded diagnosis on the report"
+            },
+            {
+              "name": "image",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticReport",
+              "type": "reference",
+              "documentation": "Reference to the image source"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticReport",
+              "type": "date",
+              "documentation": "The clinically relevant time of the report"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticReport",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "request",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticReport",
+              "type": "reference",
+              "documentation": "What was requested"
+            },
+            {
+              "name": "specimen",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticReport",
+              "type": "reference",
+              "documentation": "The specimen details"
+            },
+            {
+              "name": "name",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticReport",
+              "type": "token",
+              "documentation": "The name of the report (e.g. the code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result)"
+            },
+            {
+              "name": "service",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticReport",
+              "type": "token",
+              "documentation": "Which diagnostic discipline/department created the report"
+            },
+            {
+              "name": "performer",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticReport",
+              "type": "reference",
+              "documentation": "Who was the source of the report (organization)"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticReport",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/DiagnosticReport",
+              "type": "token",
+              "documentation": "An identifier for the report"
+            }
+          ]
+        },
+        {
+          "type": "DocumentManifest",
+          "profile": {
+            "reference": "http://hl7.org/fhir/DocumentManifest"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "content",
+              "definition": "http://hl7.org/fhir/profiles/DocumentManifest",
+              "type": "reference",
+              "documentation": "Contents of this set of documents"
+            },
+            {
+              "name": "author",
+              "definition": "http://hl7.org/fhir/profiles/DocumentManifest",
+              "type": "reference",
+              "documentation": "Who and/or what authored the document"
+            },
+            {
+              "name": "supersedes",
+              "definition": "http://hl7.org/fhir/profiles/DocumentManifest",
+              "type": "reference",
+              "documentation": "If this document manifest replaces another"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/DocumentManifest",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/profiles/DocumentManifest",
+              "type": "token",
+              "documentation": "current | superceded | entered in error"
+            },
+            {
+              "name": "created",
+              "definition": "http://hl7.org/fhir/profiles/DocumentManifest",
+              "type": "date",
+              "documentation": "When this document manifest created"
+            },
+            {
+              "name": "confidentiality",
+              "definition": "http://hl7.org/fhir/profiles/DocumentManifest",
+              "type": "token",
+              "documentation": "Sensitivity of set of documents"
+            },
+            {
+              "name": "description",
+              "definition": "http://hl7.org/fhir/profiles/DocumentManifest",
+              "type": "string",
+              "documentation": "Human-readable description (title)"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/DocumentManifest",
+              "type": "reference",
+              "documentation": "The subject of the set of documents"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/DocumentManifest",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "type",
+              "definition": "http://hl7.org/fhir/profiles/DocumentManifest",
+              "type": "token",
+              "documentation": "What kind of document set this is"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/DocumentManifest",
+              "type": "token",
+              "documentation": "Unique Identifier for the set of documents"
+            },
+            {
+              "name": "recipient",
+              "definition": "http://hl7.org/fhir/profiles/DocumentManifest",
+              "type": "reference",
+              "documentation": "Intended to get notified about this set of documents"
+            }
+          ]
+        },
+        {
+          "type": "DocumentReference",
+          "profile": {
+            "reference": "http://hl7.org/fhir/DocumentReference"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "location",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "string",
+              "documentation": "Where to access the document"
+            },
+            {
+              "name": "indexed",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "date",
+              "documentation": "When this document reference created"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "token",
+              "documentation": "current | superceded | entered in error"
+            },
+            {
+              "name": "relatesto",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "reference",
+              "documentation": "Target of the relationship"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "reference",
+              "documentation": "Who|what is the subject of the document"
+            },
+            {
+              "name": "relation",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "token",
+              "documentation": "replaces | transforms | signs | appends"
+            },
+            {
+              "name": "class",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "token",
+              "documentation": "Categorization of Document"
+            },
+            {
+              "name": "format",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "token",
+              "documentation": "Format/content rules for the document"
+            },
+            {
+              "name": "period",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "date",
+              "documentation": "Time of service that is being documented"
+            },
+            {
+              "name": "type",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "token",
+              "documentation": "What kind of document this is (LOINC if possible)"
+            },
+            {
+              "name": "authenticator",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "reference",
+              "documentation": "Who/What authenticated the document"
+            },
+            {
+              "name": "size",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "number",
+              "documentation": "Size of the document in bytes"
+            },
+            {
+              "name": "relationship",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "composite",
+              "documentation": "Combination of relation and relatesTo"
+            },
+            {
+              "name": "author",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "reference",
+              "documentation": "Who and/or what authored the document"
+            },
+            {
+              "name": "custodian",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "reference",
+              "documentation": "Org which maintains the document"
+            },
+            {
+              "name": "facility",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "token",
+              "documentation": "Kind of facility where patient was seen"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "created",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "date",
+              "documentation": "Document creation time"
+            },
+            {
+              "name": "event",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "token",
+              "documentation": "Main Clinical Acts Documented"
+            },
+            {
+              "name": "confidentiality",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "token",
+              "documentation": "Sensitivity of source document"
+            },
+            {
+              "name": "description",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "string",
+              "documentation": "Human-readable description (title)"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "language",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "token",
+              "documentation": "The marked primary language for the document"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/DocumentReference",
+              "type": "token",
+              "documentation": "Master Version Specific Identifier"
+            }
+          ]
+        },
+        {
+          "type": "Encounter",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Encounter"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Encounter",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "location",
+              "definition": "http://hl7.org/fhir/profiles/Encounter",
+              "type": "reference",
+              "documentation": "Location the encounter takes place"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/profiles/Encounter",
+              "type": "token",
+              "documentation": "planned | in progress | onleave | finished | cancelled"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/Encounter",
+              "type": "reference",
+              "documentation": "The patient present at the encounter"
+            },
+            {
+              "name": "indication",
+              "definition": "http://hl7.org/fhir/profiles/Encounter",
+              "type": "reference",
+              "documentation": "Reason the encounter takes place (resource)"
+            },
+            {
+              "name": "length",
+              "definition": "http://hl7.org/fhir/profiles/Encounter",
+              "type": "number",
+              "documentation": "Length of encounter in days"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Encounter",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/profiles/Encounter",
+              "type": "date",
+              "documentation": "A date within the period the Encounter lasted"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/Encounter",
+              "type": "token",
+              "documentation": "Identifier(s) by which this encounter is known"
+            },
+            {
+              "name": "location-period",
+              "definition": "http://hl7.org/fhir/profiles/Encounter",
+              "type": "date",
+              "documentation": "Time period during which the patient was present at the location"
+            }
+          ]
+        },
+        {
+          "type": "FamilyHistory",
+          "profile": {
+            "reference": "http://hl7.org/fhir/FamilyHistory"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/FamilyHistory",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/FamilyHistory",
+              "type": "reference",
+              "documentation": "The identity of a subject to list family history items for"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/FamilyHistory",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            }
+          ]
+        },
+        {
+          "type": "Group",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Group"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "member",
+              "definition": "http://hl7.org/fhir/profiles/Group",
+              "type": "reference",
+              "documentation": "Who is in group"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Group",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "characteristic-value",
+              "definition": "http://hl7.org/fhir/profiles/Group",
+              "type": "composite",
+              "documentation": "A composite of both characteristic and value"
+            },
+            {
+              "name": "value",
+              "definition": "http://hl7.org/fhir/profiles/Group",
+              "type": "token",
+              "documentation": "Value held by characteristic"
+            },
+            {
+              "name": "actual",
+              "definition": "http://hl7.org/fhir/profiles/Group",
+              "type": "token",
+              "documentation": "Descriptive or actual"
+            },
+            {
+              "name": "exclude",
+              "definition": "http://hl7.org/fhir/profiles/Group",
+              "type": "token",
+              "documentation": "Group includes or excludes"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Group",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "code",
+              "definition": "http://hl7.org/fhir/profiles/Group",
+              "type": "token",
+              "documentation": "The kind of resources contained"
+            },
+            {
+              "name": "characteristic",
+              "definition": "http://hl7.org/fhir/profiles/Group",
+              "type": "token",
+              "documentation": "Kind of characteristic"
+            },
+            {
+              "name": "type",
+              "definition": "http://hl7.org/fhir/profiles/Group",
+              "type": "token",
+              "documentation": "The type of resources the group contains"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/Group",
+              "type": "token",
+              "documentation": "Unique id"
+            }
+          ]
+        },
+        {
+          "type": "ImagingStudy",
+          "profile": {
+            "reference": "http://hl7.org/fhir/ImagingStudy"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "uid",
+              "definition": "http://hl7.org/fhir/profiles/ImagingStudy",
+              "type": "token",
+              "documentation": "Formal identifier for this instance (0008,0018)"
+            },
+            {
+              "name": "series",
+              "definition": "http://hl7.org/fhir/profiles/ImagingStudy",
+              "type": "token",
+              "documentation": "The series id for the image"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/ImagingStudy",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "bodysite",
+              "definition": "http://hl7.org/fhir/profiles/ImagingStudy",
+              "type": "token",
+              "documentation": "Body part examined (Map from 0018,0015)"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/ImagingStudy",
+              "type": "reference",
+              "documentation": "Who the study is about"
+            },
+            {
+              "name": "accession",
+              "definition": "http://hl7.org/fhir/profiles/ImagingStudy",
+              "type": "token",
+              "documentation": "The accession id for the image"
+            },
+            {
+              "name": "study",
+              "definition": "http://hl7.org/fhir/profiles/ImagingStudy",
+              "type": "token",
+              "documentation": "The study id for the image"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/ImagingStudy",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "modality",
+              "definition": "http://hl7.org/fhir/profiles/ImagingStudy",
+              "type": "token",
+              "documentation": "The modality of the image"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/profiles/ImagingStudy",
+              "type": "date",
+              "documentation": "The date the study was done was taken"
+            },
+            {
+              "name": "dicom-class",
+              "definition": "http://hl7.org/fhir/profiles/ImagingStudy",
+              "type": "token",
+              "documentation": "DICOM class type (0008,0016)"
+            },
+            {
+              "name": "size",
+              "definition": "http://hl7.org/fhir/profiles/ImagingStudy",
+              "type": "number",
+              "documentation": "The size of the image in MB - may include > or < in the value"
+            }
+          ]
+        },
+        {
+          "type": "Immunization",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Immunization"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "reaction",
+              "definition": "http://hl7.org/fhir/profiles/Immunization",
+              "type": "reference",
+              "documentation": "Additional information on reaction"
+            },
+            {
+              "name": "requester",
+              "definition": "http://hl7.org/fhir/profiles/Immunization",
+              "type": "reference",
+              "documentation": "The practitioner who ordered the vaccination"
+            },
+            {
+              "name": "dose-sequence",
+              "definition": "http://hl7.org/fhir/profiles/Immunization",
+              "type": "number",
+              "documentation": "What dose number within series?"
+            },
+            {
+              "name": "vaccine-type",
+              "definition": "http://hl7.org/fhir/profiles/Immunization",
+              "type": "token",
+              "documentation": "Vaccine Product Type Administered"
+            },
+            {
+              "name": "location",
+              "definition": "http://hl7.org/fhir/profiles/Immunization",
+              "type": "reference",
+              "documentation": "The service delivery location or facility in which the vaccine was / was to be administered"
+            },
+            {
+              "name": "reason",
+              "definition": "http://hl7.org/fhir/profiles/Immunization",
+              "type": "token",
+              "documentation": "Why immunization occurred"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/Immunization",
+              "type": "reference",
+              "documentation": "The subject of the vaccination event / refusal"
+            },
+            {
+              "name": "reaction-date",
+              "definition": "http://hl7.org/fhir/profiles/Immunization",
+              "type": "date",
+              "documentation": "When did reaction start?"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/profiles/Immunization",
+              "type": "date",
+              "documentation": "Vaccination  Administration / Refusal Date"
+            },
+            {
+              "name": "lot-number",
+              "definition": "http://hl7.org/fhir/profiles/Immunization",
+              "type": "string",
+              "documentation": "Vaccine Lot Number"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Immunization",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "manufacturer",
+              "definition": "http://hl7.org/fhir/profiles/Immunization",
+              "type": "reference",
+              "documentation": "Vaccine Manufacturer"
+            },
+            {
+              "name": "performer",
+              "definition": "http://hl7.org/fhir/profiles/Immunization",
+              "type": "reference",
+              "documentation": "The practitioner who administered the vaccination"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Immunization",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "refused",
+              "definition": "http://hl7.org/fhir/profiles/Immunization",
+              "type": "token",
+              "documentation": "Was immunization refused?"
+            },
+            {
+              "name": "refusal-reason",
+              "definition": "http://hl7.org/fhir/profiles/Immunization",
+              "type": "token",
+              "documentation": "Explanation of refusal / exemption"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/Immunization",
+              "type": "token",
+              "documentation": "Business identifier"
+            }
+          ]
+        },
+        {
+          "type": "ImmunizationRecommendation",
+          "profile": {
+            "reference": "http://hl7.org/fhir/ImmunizationRecommendation"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "information",
+              "definition": "http://hl7.org/fhir/profiles/ImmunizationRecommendation",
+              "type": "reference",
+              "documentation": "Patient observations supporting recommendation"
+            },
+            {
+              "name": "dose-sequence",
+              "definition": "http://hl7.org/fhir/profiles/ImmunizationRecommendation",
+              "type": "token",
+              "documentation": "Number of dose within sequence"
+            },
+            {
+              "name": "support",
+              "definition": "http://hl7.org/fhir/profiles/ImmunizationRecommendation",
+              "type": "reference",
+              "documentation": "Past immunizations supporting recommendation"
+            },
+            {
+              "name": "vaccine-type",
+              "definition": "http://hl7.org/fhir/profiles/ImmunizationRecommendation",
+              "type": "token",
+              "documentation": "Vaccine recommendation applies to"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/ImmunizationRecommendation",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/profiles/ImmunizationRecommendation",
+              "type": "token",
+              "documentation": "Vaccine administration status"
+            },
+            {
+              "name": "dose-number",
+              "definition": "http://hl7.org/fhir/profiles/ImmunizationRecommendation",
+              "type": "number",
+              "documentation": "Recommended dose number"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/ImmunizationRecommendation",
+              "type": "reference",
+              "documentation": "Who this profile is for"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/ImmunizationRecommendation",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/profiles/ImmunizationRecommendation",
+              "type": "date",
+              "documentation": "Date recommendation created"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/ImmunizationRecommendation",
+              "type": "token",
+              "documentation": "Business identifier"
+            }
+          ]
+        },
+        {
+          "type": "List",
+          "profile": {
+            "reference": "http://hl7.org/fhir/List"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "source",
+              "definition": "http://hl7.org/fhir/profiles/List",
+              "type": "reference",
+              "documentation": "Who and/or what defined the list contents"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/List",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/List",
+              "type": "reference",
+              "documentation": "If all resources have the same subject"
+            },
+            {
+              "name": "item",
+              "definition": "http://hl7.org/fhir/profiles/List",
+              "type": "reference",
+              "documentation": "Actual entry"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/List",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "code",
+              "definition": "http://hl7.org/fhir/profiles/List",
+              "type": "token",
+              "documentation": "What the purpose of this list is"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/profiles/List",
+              "type": "date",
+              "documentation": "When the list was prepared"
+            },
+            {
+              "name": "empty-reason",
+              "definition": "http://hl7.org/fhir/profiles/List",
+              "type": "token",
+              "documentation": "Why list is empty"
+            }
+          ]
+        },
+        {
+          "type": "Location",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Location"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "near",
+              "definition": "http://hl7.org/fhir/profiles/Location",
+              "type": "token",
+              "documentation": "The coordinates expressed as [lat],[long] (using KML, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)"
+            },
+            {
+              "name": "partof",
+              "definition": "http://hl7.org/fhir/profiles/Location",
+              "type": "reference",
+              "documentation": "The location of which this location is a part"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Location",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/profiles/Location",
+              "type": "token",
+              "documentation": "Searches for locations with a specific kind of status"
+            },
+            {
+              "name": "address",
+              "definition": "http://hl7.org/fhir/profiles/Location",
+              "type": "string",
+              "documentation": "A (part of the) address of the location"
+            },
+            {
+              "name": "name",
+              "definition": "http://hl7.org/fhir/profiles/Location",
+              "type": "string",
+              "documentation": "A (portion of the) name of the location"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Location",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "near-distance",
+              "definition": "http://hl7.org/fhir/profiles/Location",
+              "type": "token",
+              "documentation": "A distance quantity to limit the near search to locations within a specific distance"
+            },
+            {
+              "name": "type",
+              "definition": "http://hl7.org/fhir/profiles/Location",
+              "type": "token",
+              "documentation": "A code for the type of location"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/Location",
+              "type": "token",
+              "documentation": "Unique code or number identifying the location to its users"
+            }
+          ]
+        },
+        {
+          "type": "Media",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Media"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Media",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/Media",
+              "type": "reference",
+              "documentation": "Who/What this Media is a record of"
+            },
+            {
+              "name": "subtype",
+              "definition": "http://hl7.org/fhir/profiles/Media",
+              "type": "token",
+              "documentation": "The type of acquisition equipment/process"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Media",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "view",
+              "definition": "http://hl7.org/fhir/profiles/Media",
+              "type": "token",
+              "documentation": "Imaging view e.g Lateral or Antero-posterior"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/profiles/Media",
+              "type": "date",
+              "documentation": "When the media was taken/recorded (end)"
+            },
+            {
+              "name": "type",
+              "definition": "http://hl7.org/fhir/profiles/Media",
+              "type": "token",
+              "documentation": "photo | video | audio"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/Media",
+              "type": "token",
+              "documentation": "Identifier(s) for the image"
+            },
+            {
+              "name": "operator",
+              "definition": "http://hl7.org/fhir/profiles/Media",
+              "type": "reference",
+              "documentation": "The person who generated the image"
+            }
+          ]
+        },
+        {
+          "type": "Medication",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Medication"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "content",
+              "definition": "http://hl7.org/fhir/profiles/Medication",
+              "type": "reference",
+              "documentation": "A product in the package"
+            },
+            {
+              "name": "form",
+              "definition": "http://hl7.org/fhir/profiles/Medication",
+              "type": "token",
+              "documentation": "powder | tablets | carton +"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Medication",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "container",
+              "definition": "http://hl7.org/fhir/profiles/Medication",
+              "type": "token",
+              "documentation": "E.g. box, vial, blister-pack"
+            },
+            {
+              "name": "manufacturer",
+              "definition": "http://hl7.org/fhir/profiles/Medication",
+              "type": "reference",
+              "documentation": "Manufacturer of the item"
+            },
+            {
+              "name": "name",
+              "definition": "http://hl7.org/fhir/profiles/Medication",
+              "type": "string",
+              "documentation": "Common / Commercial name"
+            },
+            {
+              "name": "ingredient",
+              "definition": "http://hl7.org/fhir/profiles/Medication",
+              "type": "reference",
+              "documentation": "The product contained"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Medication",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "code",
+              "definition": "http://hl7.org/fhir/profiles/Medication",
+              "type": "token",
+              "documentation": "Codes that identify this medication"
+            }
+          ]
+        },
+        {
+          "type": "MedicationAdministration",
+          "profile": {
+            "reference": "http://hl7.org/fhir/MedicationAdministration"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "medication",
+              "definition": "http://hl7.org/fhir/profiles/MedicationAdministration",
+              "type": "reference",
+              "documentation": "Return administrations of this medication"
+            },
+            {
+              "name": "patient",
+              "definition": "http://hl7.org/fhir/profiles/MedicationAdministration",
+              "type": "reference",
+              "documentation": "The identity of a patient to list administrations  for"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/MedicationAdministration",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/profiles/MedicationAdministration",
+              "type": "token",
+              "documentation": "MedicationAdministration event status (for example one of active/paused/completed/nullified)"
+            },
+            {
+              "name": "prescription",
+              "definition": "http://hl7.org/fhir/profiles/MedicationAdministration",
+              "type": "reference",
+              "documentation": "The identity of a prescription to list administrations from"
+            },
+            {
+              "name": "device",
+              "definition": "http://hl7.org/fhir/profiles/MedicationAdministration",
+              "type": "reference",
+              "documentation": "Return administrations with this administration device identity"
+            },
+            {
+              "name": "notgiven",
+              "definition": "http://hl7.org/fhir/profiles/MedicationAdministration",
+              "type": "token",
+              "documentation": "Administrations that were not made"
+            },
+            {
+              "name": "whengiven",
+              "definition": "http://hl7.org/fhir/profiles/MedicationAdministration",
+              "type": "date",
+              "documentation": "Date of administration"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/MedicationAdministration",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "encounter",
+              "definition": "http://hl7.org/fhir/profiles/MedicationAdministration",
+              "type": "reference",
+              "documentation": "Return administrations that share this encounter"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/MedicationAdministration",
+              "type": "token",
+              "documentation": "Return administrations with this external identity"
+            }
+          ]
+        },
+        {
+          "type": "MedicationDispense",
+          "profile": {
+            "reference": "http://hl7.org/fhir/MedicationDispense"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "medication",
+              "definition": "http://hl7.org/fhir/profiles/MedicationDispense",
+              "type": "reference",
+              "documentation": "Returns dispenses of this medicine"
+            },
+            {
+              "name": "prescription",
+              "definition": "http://hl7.org/fhir/profiles/MedicationDispense",
+              "type": "reference",
+              "documentation": "The identity of a prescription to list dispenses from"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/profiles/MedicationDispense",
+              "type": "token",
+              "documentation": "Status of the dispense"
+            },
+            {
+              "name": "type",
+              "definition": "http://hl7.org/fhir/profiles/MedicationDispense",
+              "type": "token",
+              "documentation": "Return all dispenses of a specific type"
+            },
+            {
+              "name": "destination",
+              "definition": "http://hl7.org/fhir/profiles/MedicationDispense",
+              "type": "reference",
+              "documentation": "Return dispenses that should be sent to a secific destination"
+            },
+            {
+              "name": "patient",
+              "definition": "http://hl7.org/fhir/profiles/MedicationDispense",
+              "type": "reference",
+              "documentation": "The identity of a patient to list dispenses  for"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/MedicationDispense",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "responsibleparty",
+              "definition": "http://hl7.org/fhir/profiles/MedicationDispense",
+              "type": "reference",
+              "documentation": "Return all dispenses with the specified responsible party"
+            },
+            {
+              "name": "dispenser",
+              "definition": "http://hl7.org/fhir/profiles/MedicationDispense",
+              "type": "reference",
+              "documentation": "Return all dispenses performed by a specific indiividual"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/MedicationDispense",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/MedicationDispense",
+              "type": "token",
+              "documentation": "Return dispenses with this external identity"
+            },
+            {
+              "name": "whenprepared",
+              "definition": "http://hl7.org/fhir/profiles/MedicationDispense",
+              "type": "date",
+              "documentation": "Date when medication prepared"
+            },
+            {
+              "name": "whenhandedover",
+              "definition": "http://hl7.org/fhir/profiles/MedicationDispense",
+              "type": "date",
+              "documentation": "Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)"
+            }
+          ]
+        },
+        {
+          "type": "MedicationPrescription",
+          "profile": {
+            "reference": "http://hl7.org/fhir/MedicationPrescription"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "medication",
+              "definition": "http://hl7.org/fhir/profiles/MedicationPrescription",
+              "type": "reference",
+              "documentation": "Code for medicine or text in medicine name"
+            },
+            {
+              "name": "datewritten",
+              "definition": "http://hl7.org/fhir/profiles/MedicationPrescription",
+              "type": "date",
+              "documentation": "Return prescriptions written on this date"
+            },
+            {
+              "name": "patient",
+              "definition": "http://hl7.org/fhir/profiles/MedicationPrescription",
+              "type": "reference",
+              "documentation": "The identity of a patient to list dispenses  for"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/MedicationPrescription",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/profiles/MedicationPrescription",
+              "type": "token",
+              "documentation": "Status of the prescription"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/MedicationPrescription",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "encounter",
+              "definition": "http://hl7.org/fhir/profiles/MedicationPrescription",
+              "type": "reference",
+              "documentation": "Return prescriptions with this encounter identity"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/MedicationPrescription",
+              "type": "token",
+              "documentation": "Return prescriptions with this external identity"
+            }
+          ]
+        },
+        {
+          "type": "MedicationStatement",
+          "profile": {
+            "reference": "http://hl7.org/fhir/MedicationStatement"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "medication",
+              "definition": "http://hl7.org/fhir/profiles/MedicationStatement",
+              "type": "reference",
+              "documentation": "Code for medicine or text in medicine name"
+            },
+            {
+              "name": "patient",
+              "definition": "http://hl7.org/fhir/profiles/MedicationStatement",
+              "type": "reference",
+              "documentation": "The identity of a patient to list administrations  for"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/MedicationStatement",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "device",
+              "definition": "http://hl7.org/fhir/profiles/MedicationStatement",
+              "type": "reference",
+              "documentation": "Return administrations with this administration device identity"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/MedicationStatement",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "when-given",
+              "definition": "http://hl7.org/fhir/profiles/MedicationStatement",
+              "type": "date",
+              "documentation": "Date of administration"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/MedicationStatement",
+              "type": "token",
+              "documentation": "Return administrations with this external identity"
+            }
+          ]
+        },
+        {
+          "type": "MessageHeader",
+          "profile": {
+            "reference": "http://hl7.org/fhir/MessageHeader"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/MessageHeader",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/MessageHeader",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            }
+          ]
+        },
+        {
+          "type": "Namespace",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Namespace"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Namespace",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Namespace",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            }
+          ]
+        },
+        {
+          "type": "Observation",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Observation"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "value-string",
+              "definition": "http://hl7.org/fhir/profiles/Observation",
+              "type": "string",
+              "documentation": "The value of the observation, if the value is a string, and also searches in CodeableConcept.text"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/profiles/Observation",
+              "type": "token",
+              "documentation": "The status of the observation"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/Observation",
+              "type": "reference",
+              "documentation": "The subject that the observation is about"
+            },
+            {
+              "name": "value-concept",
+              "definition": "http://hl7.org/fhir/profiles/Observation",
+              "type": "token",
+              "documentation": "The value of the observation, if the value is a CodeableConcept"
+            },
+            {
+              "name": "reliability",
+              "definition": "http://hl7.org/fhir/profiles/Observation",
+              "type": "token",
+              "documentation": "The reliability of the observation"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/profiles/Observation",
+              "type": "date",
+              "documentation": "Obtained date/time. If the obtained element is a period, a date that falls in the period"
+            },
+            {
+              "name": "name-value-[x]",
+              "definition": "http://hl7.org/fhir/profiles/Observation",
+              "type": "composite",
+              "documentation": "Both name and one of the value parameters"
+            },
+            {
+              "name": "related-target",
+              "definition": "http://hl7.org/fhir/profiles/Observation",
+              "type": "reference",
+              "documentation": "Observation that is related to this one"
+            },
+            {
+              "name": "related",
+              "definition": "http://hl7.org/fhir/profiles/Observation",
+              "type": "composite",
+              "documentation": "Related Observations - search on related-type and related-target together"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Observation",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "specimen",
+              "definition": "http://hl7.org/fhir/profiles/Observation",
+              "type": "reference",
+              "documentation": "Specimen used for this observation"
+            },
+            {
+              "name": "name",
+              "definition": "http://hl7.org/fhir/profiles/Observation",
+              "type": "token",
+              "documentation": "The name of the observation type"
+            },
+            {
+              "name": "related-type",
+              "definition": "http://hl7.org/fhir/profiles/Observation",
+              "type": "token",
+              "documentation": "has-component | has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by"
+            },
+            {
+              "name": "performer",
+              "definition": "http://hl7.org/fhir/profiles/Observation",
+              "type": "reference",
+              "documentation": "Who and/or what performed the observation"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Observation",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "value-quantity",
+              "definition": "http://hl7.org/fhir/profiles/Observation",
+              "type": "quantity",
+              "documentation": "The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)"
+            },
+            {
+              "name": "value-date",
+              "definition": "http://hl7.org/fhir/profiles/Observation",
+              "type": "date",
+              "documentation": "The value of the observation, if the value is a Period"
+            }
+          ]
+        },
+        {
+          "type": "OperationOutcome",
+          "profile": {
+            "reference": "http://hl7.org/fhir/OperationOutcome"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/OperationOutcome",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/OperationOutcome",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            }
+          ]
+        },
+        {
+          "type": "Order",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Order"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "authority",
+              "definition": "http://hl7.org/fhir/profiles/Order",
+              "type": "reference",
+              "documentation": "If required by policy"
+            },
+            {
+              "name": "detail",
+              "definition": "http://hl7.org/fhir/profiles/Order",
+              "type": "reference",
+              "documentation": "What action is being ordered"
+            },
+            {
+              "name": "source",
+              "definition": "http://hl7.org/fhir/profiles/Order",
+              "type": "reference",
+              "documentation": "Who initiated the order"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Order",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/Order",
+              "type": "reference",
+              "documentation": "Patient this order is about"
+            },
+            {
+              "name": "when",
+              "definition": "http://hl7.org/fhir/profiles/Order",
+              "type": "date",
+              "documentation": "A formal schedule"
+            },
+            {
+              "name": "target",
+              "definition": "http://hl7.org/fhir/profiles/Order",
+              "type": "reference",
+              "documentation": "Who is intended to fulfill the order"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Order",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "when_code",
+              "definition": "http://hl7.org/fhir/profiles/Order",
+              "type": "token",
+              "documentation": "Code specifies when request should be done. The code may simply be a priority code"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/profiles/Order",
+              "type": "date",
+              "documentation": "When the order was made"
+            }
+          ]
+        },
+        {
+          "type": "OrderResponse",
+          "profile": {
+            "reference": "http://hl7.org/fhir/OrderResponse"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/OrderResponse",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "fulfillment",
+              "definition": "http://hl7.org/fhir/profiles/OrderResponse",
+              "type": "reference",
+              "documentation": "Details of the outcome of performing the order"
+            },
+            {
+              "name": "request",
+              "definition": "http://hl7.org/fhir/profiles/OrderResponse",
+              "type": "reference",
+              "documentation": "The order that this is a response to"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/OrderResponse",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "code",
+              "definition": "http://hl7.org/fhir/profiles/OrderResponse",
+              "type": "token",
+              "documentation": "pending | review | rejected | error | accepted | cancelled | replaced | aborted | complete"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/profiles/OrderResponse",
+              "type": "date",
+              "documentation": "When the response was made"
+            },
+            {
+              "name": "who",
+              "definition": "http://hl7.org/fhir/profiles/OrderResponse",
+              "type": "reference",
+              "documentation": "Who made the response"
+            }
+          ]
+        },
+        {
+          "type": "Organization",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Organization"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "phonetic",
+              "definition": "http://hl7.org/fhir/profiles/Organization",
+              "type": "string",
+              "documentation": "A portion of the organization's name using some kind of phonetic matching algorithm"
+            },
+            {
+              "name": "partof",
+              "definition": "http://hl7.org/fhir/profiles/Organization",
+              "type": "reference",
+              "documentation": "Search all organizations that are part of the given organization"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Organization",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "name",
+              "definition": "http://hl7.org/fhir/profiles/Organization",
+              "type": "string",
+              "documentation": "A portion of the organization's name"
+            },
+            {
+              "name": "active",
+              "definition": "http://hl7.org/fhir/profiles/Organization",
+              "type": "token",
+              "documentation": "Whether the organization's record is active"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Organization",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "type",
+              "definition": "http://hl7.org/fhir/profiles/Organization",
+              "type": "token",
+              "documentation": "A code for the type of organization"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/Organization",
+              "type": "token",
+              "documentation": "Any identifier for the organization (not the accreditation issuer's identifier)"
+            }
+          ]
+        },
+        {
+          "type": "Other",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Other"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Other",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "created",
+              "definition": "http://hl7.org/fhir/profiles/Other",
+              "type": "date",
+              "documentation": "When created"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/Other",
+              "type": "reference",
+              "documentation": "Identifies the"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Other",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "code",
+              "definition": "http://hl7.org/fhir/profiles/Other",
+              "type": "token",
+              "documentation": "Kind of Resource"
+            }
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Patient"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "animal-breed",
+              "definition": "http://hl7.org/fhir/profiles/Patient",
+              "type": "token",
+              "documentation": "The breed for animal patients"
+            },
+            {
+              "name": "phonetic",
+              "definition": "http://hl7.org/fhir/profiles/Patient",
+              "type": "string",
+              "documentation": "A portion of either family or given name using some kind of phonetic matching algorithm"
+            },
+            {
+              "name": "link",
+              "definition": "http://hl7.org/fhir/profiles/Patient",
+              "type": "reference",
+              "documentation": "All patients linked to the given patient"
+            },
+            {
+              "name": "provider",
+              "definition": "http://hl7.org/fhir/profiles/Patient",
+              "type": "reference",
+              "documentation": "The organization at which this person is a patient"
+            },
+            {
+              "name": "animal-species",
+              "definition": "http://hl7.org/fhir/profiles/Patient",
+              "type": "token",
+              "documentation": "The species for animal patients"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Patient",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "given",
+              "definition": "http://hl7.org/fhir/profiles/Patient",
+              "type": "string",
+              "documentation": "A portion of the given name of the patient"
+            },
+            {
+              "name": "address",
+              "definition": "http://hl7.org/fhir/profiles/Patient",
+              "type": "string",
+              "documentation": "An address in any kind of address/part of the patient"
+            },
+            {
+              "name": "family",
+              "definition": "http://hl7.org/fhir/profiles/Patient",
+              "type": "string",
+              "documentation": "A portion of the family name of the patient"
+            },
+            {
+              "name": "name",
+              "definition": "http://hl7.org/fhir/profiles/Patient",
+              "type": "string",
+              "documentation": "A portion of either family or given name of the patient"
+            },
+            {
+              "name": "telecom",
+              "definition": "http://hl7.org/fhir/profiles/Patient",
+              "type": "string",
+              "documentation": "The value in any kind of telecom details of the patient"
+            },
+            {
+              "name": "birthdate",
+              "definition": "http://hl7.org/fhir/profiles/Patient",
+              "type": "date",
+              "documentation": "The patient's date of birth"
+            },
+            {
+              "name": "active",
+              "definition": "http://hl7.org/fhir/profiles/Patient",
+              "type": "token",
+              "documentation": "Whether the patient record is active"
+            },
+            {
+              "name": "gender",
+              "definition": "http://hl7.org/fhir/profiles/Patient",
+              "type": "token",
+              "documentation": "Gender of the patient"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Patient",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "language",
+              "definition": "http://hl7.org/fhir/profiles/Patient",
+              "type": "token",
+              "documentation": "Language code (irrespective of use value)"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/Patient",
+              "type": "token",
+              "documentation": "A patient identifier"
+            }
+          ]
+        },
+        {
+          "type": "Practitioner",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Practitioner"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "organization",
+              "definition": "http://hl7.org/fhir/profiles/Practitioner",
+              "type": "reference",
+              "documentation": "The identity of the organization the practitioner represents / acts on behalf of"
+            },
+            {
+              "name": "phonetic",
+              "definition": "http://hl7.org/fhir/profiles/Practitioner",
+              "type": "string",
+              "documentation": "A portion of either family or given name using some kind of phonetic matching algorithm"
+            },
+            {
+              "name": "given",
+              "definition": "http://hl7.org/fhir/profiles/Practitioner",
+              "type": "string",
+              "documentation": "A portion of the given name"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Practitioner",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "address",
+              "definition": "http://hl7.org/fhir/profiles/Practitioner",
+              "type": "string",
+              "documentation": "An address in any kind of address/part"
+            },
+            {
+              "name": "family",
+              "definition": "http://hl7.org/fhir/profiles/Practitioner",
+              "type": "string",
+              "documentation": "A portion of the family name"
+            },
+            {
+              "name": "name",
+              "definition": "http://hl7.org/fhir/profiles/Practitioner",
+              "type": "string",
+              "documentation": "A portion of either family or given name"
+            },
+            {
+              "name": "telecom",
+              "definition": "http://hl7.org/fhir/profiles/Practitioner",
+              "type": "string",
+              "documentation": "The value in any kind of contact"
+            },
+            {
+              "name": "gender",
+              "definition": "http://hl7.org/fhir/profiles/Practitioner",
+              "type": "token",
+              "documentation": "Gender of the practitioner"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Practitioner",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/Practitioner",
+              "type": "token",
+              "documentation": "A practitioner's Identifier"
+            }
+          ]
+        },
+        {
+          "type": "Procedure",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Procedure"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Procedure",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/Procedure",
+              "type": "reference",
+              "documentation": "The identity of a patient to list procedures  for"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Procedure",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/profiles/Procedure",
+              "type": "date",
+              "documentation": "The date the procedure was performed on"
+            },
+            {
+              "name": "type",
+              "definition": "http://hl7.org/fhir/profiles/Procedure",
+              "type": "token",
+              "documentation": "Type of procedure"
+            }
+          ]
+        },
+        {
+          "type": "Profile",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Profile"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/profiles/Profile",
+              "type": "token",
+              "documentation": "The current status of the profile"
+            },
+            {
+              "name": "code",
+              "definition": "http://hl7.org/fhir/profiles/Profile",
+              "type": "token",
+              "documentation": "A code for the profile in the format uri::code (server may choose to do subsumption)"
+            },
+            {
+              "name": "type",
+              "definition": "http://hl7.org/fhir/profiles/Profile",
+              "type": "token",
+              "documentation": "Type of resource that is constrained in the profile"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/profiles/Profile",
+              "type": "date",
+              "documentation": "The profile publication date"
+            },
+            {
+              "name": "version",
+              "definition": "http://hl7.org/fhir/profiles/Profile",
+              "type": "token",
+              "documentation": "The version identifier of the profile"
+            },
+            {
+              "name": "publisher",
+              "definition": "http://hl7.org/fhir/profiles/Profile",
+              "type": "string",
+              "documentation": "Name of the publisher of the profile"
+            },
+            {
+              "name": "extension",
+              "definition": "http://hl7.org/fhir/profiles/Profile",
+              "type": "token",
+              "documentation": "An extension code (use or definition)"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Profile",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "valueset",
+              "definition": "http://hl7.org/fhir/profiles/Profile",
+              "type": "reference",
+              "documentation": "A vocabulary binding code"
+            },
+            {
+              "name": "description",
+              "definition": "http://hl7.org/fhir/profiles/Profile",
+              "type": "string",
+              "documentation": "Text search in the description of the profile"
+            },
+            {
+              "name": "name",
+              "definition": "http://hl7.org/fhir/profiles/Profile",
+              "type": "string",
+              "documentation": "Name of the profile"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Profile",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/Profile",
+              "type": "token",
+              "documentation": "The identifier of the profile"
+            }
+          ]
+        },
+        {
+          "type": "Provenance",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Provenance"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Provenance",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "location",
+              "definition": "http://hl7.org/fhir/profiles/Provenance",
+              "type": "reference",
+              "documentation": "Where the activity occurred, if relevant"
+            },
+            {
+              "name": "start",
+              "definition": "http://hl7.org/fhir/profiles/Provenance",
+              "type": "date",
+              "documentation": "Starting time with inclusive boundary"
+            },
+            {
+              "name": "partytype",
+              "definition": "http://hl7.org/fhir/profiles/Provenance",
+              "type": "token",
+              "documentation": "e.g. Resource | Person | Application | Record | Document +"
+            },
+            {
+              "name": "target",
+              "definition": "http://hl7.org/fhir/profiles/Provenance",
+              "type": "reference",
+              "documentation": "Target resource(s) (usually version specific)"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Provenance",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "party",
+              "definition": "http://hl7.org/fhir/profiles/Provenance",
+              "type": "token",
+              "documentation": "Identity of agent (urn or url)"
+            },
+            {
+              "name": "end",
+              "definition": "http://hl7.org/fhir/profiles/Provenance",
+              "type": "date",
+              "documentation": "End time with inclusive boundary, if not ongoing"
+            }
+          ]
+        },
+        {
+          "type": "Query",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Query"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "response",
+              "definition": "http://hl7.org/fhir/profiles/Query",
+              "type": "token",
+              "documentation": "Links response to source query"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Query",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Query",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/Query",
+              "type": "token",
+              "documentation": "Links query and its response(s)"
+            }
+          ]
+        },
+        {
+          "type": "Questionnaire",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Questionnaire"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "author",
+              "definition": "http://hl7.org/fhir/profiles/Questionnaire",
+              "type": "reference",
+              "documentation": "The author of the questionnaire"
+            },
+            {
+              "name": "authored",
+              "definition": "http://hl7.org/fhir/profiles/Questionnaire",
+              "type": "date",
+              "documentation": "When the questionnaire was authored"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Questionnaire",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/profiles/Questionnaire",
+              "type": "token",
+              "documentation": "The status of the questionnaire"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/Questionnaire",
+              "type": "reference",
+              "documentation": "The subject of the questionnaire"
+            },
+            {
+              "name": "name",
+              "definition": "http://hl7.org/fhir/profiles/Questionnaire",
+              "type": "token",
+              "documentation": "Name of the questionnaire"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Questionnaire",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "encounter",
+              "definition": "http://hl7.org/fhir/profiles/Questionnaire",
+              "type": "reference",
+              "documentation": "Encounter during which questionnaire was authored"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/Questionnaire",
+              "type": "token",
+              "documentation": "An identifier for the questionnaire"
+            }
+          ]
+        },
+        {
+          "type": "RelatedPerson",
+          "profile": {
+            "reference": "http://hl7.org/fhir/RelatedPerson"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "patient",
+              "definition": "http://hl7.org/fhir/profiles/RelatedPerson",
+              "type": "reference",
+              "documentation": "The patient this person is related to"
+            },
+            {
+              "name": "phonetic",
+              "definition": "http://hl7.org/fhir/profiles/RelatedPerson",
+              "type": "string",
+              "documentation": "A portion of name using some kind of phonetic matching algorithm"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/RelatedPerson",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "address",
+              "definition": "http://hl7.org/fhir/profiles/RelatedPerson",
+              "type": "string",
+              "documentation": "An address in any kind of address/part"
+            },
+            {
+              "name": "name",
+              "definition": "http://hl7.org/fhir/profiles/RelatedPerson",
+              "type": "string",
+              "documentation": "A portion of name in any name part"
+            },
+            {
+              "name": "telecom",
+              "definition": "http://hl7.org/fhir/profiles/RelatedPerson",
+              "type": "string",
+              "documentation": "The value in any kind of contact"
+            },
+            {
+              "name": "gender",
+              "definition": "http://hl7.org/fhir/profiles/RelatedPerson",
+              "type": "token",
+              "documentation": "Gender of the person"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/RelatedPerson",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/RelatedPerson",
+              "type": "token",
+              "documentation": "A patient Identifier"
+            }
+          ]
+        },
+        {
+          "type": "SecurityEvent",
+          "profile": {
+            "reference": "http://hl7.org/fhir/SecurityEvent"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "site",
+              "definition": "http://hl7.org/fhir/profiles/SecurityEvent",
+              "type": "token",
+              "documentation": "Logical source location within the enterprise"
+            },
+            {
+              "name": "desc",
+              "definition": "http://hl7.org/fhir/profiles/SecurityEvent",
+              "type": "string",
+              "documentation": "Instance-specific descriptor for Object"
+            },
+            {
+              "name": "type",
+              "definition": "http://hl7.org/fhir/profiles/SecurityEvent",
+              "type": "token",
+              "documentation": "Type/identifier of event"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/profiles/SecurityEvent",
+              "type": "date",
+              "documentation": "Time when the event occurred on source"
+            },
+            {
+              "name": "reference",
+              "definition": "http://hl7.org/fhir/profiles/SecurityEvent",
+              "type": "reference",
+              "documentation": "Specific instance of resource (e.g. versioned)"
+            },
+            {
+              "name": "identity",
+              "definition": "http://hl7.org/fhir/profiles/SecurityEvent",
+              "type": "token",
+              "documentation": "Specific instance of object (e.g. versioned)"
+            },
+            {
+              "name": "altid",
+              "definition": "http://hl7.org/fhir/profiles/SecurityEvent",
+              "type": "token",
+              "documentation": "Alternative User id e.g. authentication"
+            },
+            {
+              "name": "patientid",
+              "definition": "http://hl7.org/fhir/profiles/SecurityEvent",
+              "type": "token",
+              "documentation": "The id of the patient (one of multiple kinds of participations)"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/SecurityEvent",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "source",
+              "definition": "http://hl7.org/fhir/profiles/SecurityEvent",
+              "type": "token",
+              "documentation": "The id of source where event originated"
+            },
+            {
+              "name": "address",
+              "definition": "http://hl7.org/fhir/profiles/SecurityEvent",
+              "type": "token",
+              "documentation": "Identifier for the network access point of the user device"
+            },
+            {
+              "name": "subtype",
+              "definition": "http://hl7.org/fhir/profiles/SecurityEvent",
+              "type": "token",
+              "documentation": "More specific type/id for the event"
+            },
+            {
+              "name": "name",
+              "definition": "http://hl7.org/fhir/profiles/SecurityEvent",
+              "type": "string",
+              "documentation": "Human-meaningful name for the user"
+            },
+            {
+              "name": "action",
+              "definition": "http://hl7.org/fhir/profiles/SecurityEvent",
+              "type": "token",
+              "documentation": "Type of action performed during the event"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/SecurityEvent",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "object-type",
+              "definition": "http://hl7.org/fhir/profiles/SecurityEvent",
+              "type": "token",
+              "documentation": "Object type being audited"
+            },
+            {
+              "name": "user",
+              "definition": "http://hl7.org/fhir/profiles/SecurityEvent",
+              "type": "token",
+              "documentation": "Unique identifier for the user"
+            }
+          ]
+        },
+        {
+          "type": "Slot",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Slot"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Slot",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "start",
+              "definition": "http://hl7.org/fhir/profiles/Slot",
+              "type": "date",
+              "documentation": "Appointment date/time."
+            },
+            {
+              "name": "slottype",
+              "definition": "http://hl7.org/fhir/profiles/Slot",
+              "type": "token",
+              "documentation": "The type of appointments that can be booked into the slot"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Slot",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "fbtype",
+              "definition": "http://hl7.org/fhir/profiles/Slot",
+              "type": "token",
+              "documentation": "The free/busy status of the appointment"
+            },
+            {
+              "name": "availability",
+              "definition": "http://hl7.org/fhir/profiles/Slot",
+              "type": "reference",
+              "documentation": "The Availability Resource that we are seeking a slot within"
+            }
+          ]
+        },
+        {
+          "type": "Specimen",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Specimen"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Specimen",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "subject",
+              "definition": "http://hl7.org/fhir/profiles/Specimen",
+              "type": "reference",
+              "documentation": "The subject of the specimen"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Specimen",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            }
+          ]
+        },
+        {
+          "type": "Substance",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Substance"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "substance",
+              "definition": "http://hl7.org/fhir/profiles/Substance",
+              "type": "reference",
+              "documentation": "A component of the substance"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Substance",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "quantity",
+              "definition": "http://hl7.org/fhir/profiles/Substance",
+              "type": "number",
+              "documentation": "Amount of substance in the package"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Substance",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "type",
+              "definition": "http://hl7.org/fhir/profiles/Substance",
+              "type": "token",
+              "documentation": "The type of the substance"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/Substance",
+              "type": "token",
+              "documentation": "Identifier of the package/container"
+            },
+            {
+              "name": "expiry",
+              "definition": "http://hl7.org/fhir/profiles/Substance",
+              "type": "date",
+              "documentation": "When no longer valid to use"
+            }
+          ]
+        },
+        {
+          "type": "Supply",
+          "profile": {
+            "reference": "http://hl7.org/fhir/Supply"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "patient",
+              "definition": "http://hl7.org/fhir/profiles/Supply",
+              "type": "reference",
+              "documentation": "Patient for whom the item is supplied"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/Supply",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/profiles/Supply",
+              "type": "token",
+              "documentation": "requested | dispensed | received | failed | cancelled"
+            },
+            {
+              "name": "dispenseid",
+              "definition": "http://hl7.org/fhir/profiles/Supply",
+              "type": "token",
+              "documentation": "External identifier"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/Supply",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/Supply",
+              "type": "token",
+              "documentation": "Unique identifier"
+            },
+            {
+              "name": "supplier",
+              "definition": "http://hl7.org/fhir/profiles/Supply",
+              "type": "reference",
+              "documentation": "Dispenser"
+            },
+            {
+              "name": "kind",
+              "definition": "http://hl7.org/fhir/profiles/Supply",
+              "type": "token",
+              "documentation": "The kind of supply (central, non-stock, etc)"
+            },
+            {
+              "name": "dispensestatus",
+              "definition": "http://hl7.org/fhir/profiles/Supply",
+              "type": "token",
+              "documentation": "in progress | dispensed | abandoned"
+            }
+          ]
+        },
+        {
+          "type": "ValueSet",
+          "profile": {
+            "reference": "http://hl7.org/fhir/ValueSet"
+          },
+          "operation": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "vread"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "history-instance"
+            },
+            {
+              "code": "validate"
+            },
+            {
+              "code": "history-type"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "system",
+              "definition": "http://hl7.org/fhir/profiles/ValueSet",
+              "type": "token",
+              "documentation": "The system for any codes defined by this value set"
+            },
+            {
+              "name": "_id",
+              "definition": "http://hl7.org/fhir/profiles/ValueSet",
+              "type": "token",
+              "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/profiles/ValueSet",
+              "type": "token",
+              "documentation": "The status of the value set"
+            },
+            {
+              "name": "description",
+              "definition": "http://hl7.org/fhir/profiles/ValueSet",
+              "type": "string",
+              "documentation": "Text search in the description of the value set"
+            },
+            {
+              "name": "name",
+              "definition": "http://hl7.org/fhir/profiles/ValueSet",
+              "type": "string",
+              "documentation": "The name of the value set"
+            },
+            {
+              "name": "_language",
+              "definition": "http://hl7.org/fhir/profiles/ValueSet",
+              "type": "token",
+              "documentation": "The stated language of the resource"
+            },
+            {
+              "name": "code",
+              "definition": "http://hl7.org/fhir/profiles/ValueSet",
+              "type": "token",
+              "documentation": "A code defined in the value set"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/profiles/ValueSet",
+              "type": "date",
+              "documentation": "The value set publication date"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/profiles/ValueSet",
+              "type": "token",
+              "documentation": "The identifier of the value set"
+            },
+            {
+              "name": "reference",
+              "definition": "http://hl7.org/fhir/profiles/ValueSet",
+              "type": "token",
+              "documentation": "A code system included or excluded in the value set or an imported value set"
+            },
+            {
+              "name": "publisher",
+              "definition": "http://hl7.org/fhir/profiles/ValueSet",
+              "type": "string",
+              "documentation": "Name of the publisher of the value set"
+            },
+            {
+              "name": "version",
+              "definition": "http://hl7.org/fhir/profiles/ValueSet",
+              "type": "token",
+              "documentation": "The version identifier of the value set"
+            }
+          ]
+        }
+      ],
+      "operation": [
+        {
+          "code": "transaction"
+        },
+        {
+          "code": "history-system"
+        },
+        {
+          "code": "search-system"
+        }
+      ]
     }
-
-    return function nextTick(fn) {
-        setTimeout(fn, 0);
-    };
-})();
-
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
+  ]
 }
-
-// TODO(shtylman)
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-
-},{}]},{},[3])
-;
+},{}]},{},[4])

@@ -1,55 +1,151 @@
 var FhirClient = require('../client/client');
+var SearchSpecification = require('../client/search-specification.js');
 var sinon = require('sinon');
-var parse = require('../client/parse');
-var $ = require('jquery');
+var window = require('jsdom').jsdom().createWindow();
+var ns = require('../client/namespace');
 
-function clean(x){
-  return JSON.parse(JSON.stringify(x));
-}
+var $ = jQuery = require('../client/jquery');
+var search = SearchSpecification;
+var Condition = search.Condition,
+Patient = search.Patient;
 
-describe('parse', function(){
 
-  describe('a patient record', function(){
+describe('Search Specification', function(){
 
-    var patientFixture = require('./fixtures/patient.json');
-    var simplifiedPatientFixture = require('./fixtures/patient.simplified.json');
-    var patient = parse(patientFixture);
+  var partial = Patient.given('John');
 
-    it('should produce the expected simplified JSON representation', function(){
-      clean(patient).should.eql(simplifiedPatientFixture);
+  it('should have one clause for each term', function(){
+    partial.__getClauses().should.have.lengthOf(1);
+  });
+
+  it('should allow partial searches to be extended', function(){
+    var extended = partial.family('Smith');
+    extended.__getClauses().should.have.lengthOf(2);
+  });
+
+  it('should represent clauses as name:value dictionaries', function(){
+    var first = partial.__getClauses()[0];
+    first.should.have.properties({
+      'name': 'given',
+      'value': 'John'
     })
+  });
 
-    it('should have a JS Date (not a string) for a birthdate', function(){
-      patient.birthDate.should.be.an.instanceof(Date);
+  it('should support FHIR disjunction parameters', function(){
+    var first = Patient.givenIn('John', 'Bob').__getClauses()[0];
+    first.should.have.properties({
+      'name': 'given',
+      'oneOf': ['John', 'Bob']
     })
+  });
 
-  })
+  it('should support the :missing modifer universally', function(){
+    var q = Patient.familyMissing(true);
+    q.__getClauses().should.eql([{
+      name: 'family:missing',
+      value: true
+    }]);
+  });
 
-  describe('an observation', function(){
+  describe('searching on token params', function(){
 
-    var observationFixture = require('./fixtures/observation.json');
-    var simplifiedObservationFixture = require('./fixtures/observation.simplified.json');
-    var observation = parse(observationFixture);
+    it('should work via exact string', function(){
+      var q = Patient.identifier('http://myhospital|123');
+        q.__getClauses().should.eql([{
+          name: 'identifier',
+          value: 'http://myhospital|123'
+        }]);
+    });
 
-    it('should produce the expected simplified JSON representation', function(){
-      clean(observation).should.eql(simplifiedObservationFixture);
-    })
+    it('should work via two-argument ns + code', function(){
+      var q = Patient.identifier(ns.rxnorm, '123');
+      q.__getClauses().should.eql([{
+        name: 'identifier',
+        value: 'http://rxnav.nlm.nih.gov/REST/rxcui|123'
+      }]);
+    });
 
-    it('should have a JS \'Date\' (not a string) for appliesDateTime', function(){
-      observation.appliesDateTime.should.be.an.instanceof(Date);
-    })
+    it('should allow searching with wildcard namespace', function(){
+      var q = Patient.identifier(ns.any, '123');
+      q.__getClauses().should.eql([{
+        name: 'identifier',
+        value: '123'
+      }]);
+    });
 
-    it('should have a JS \'number\' (not a string) for valueQuantity.value', function(){
-      observation.component[0].valueQuantity.value.should.be.a('number');
-    })
+    it('should allow searching with null namespace specified', function(){
+      var q = Patient.identifier(ns.none, '123');
+      q.__getClauses().should.eql([{
+        name: 'identifier',
+        value: '|123'
+      }]);
+    });
 
-  })
 
-})
+  });
+
+  describe('Nesting search params', function(){
+
+    it('should produce chained queries', function(){
+      var q = Condition.onset('>=2010')
+      .subject(
+        Patient.given('John').family('Smith')
+      );
+
+
+      var clauses = q.__getClauses();
+      clauses.should.eql([{
+        'name': 'onset',
+        'value': '>=2010'
+      },{
+        name:'subject:Patient.given',
+        value:'John'
+      },{
+        name:'subject:Patient.family', 
+        value:'Smith'
+      }]);
+    });
+
+    it('should optimize _id references to avoid unnecessary chaining', function(){
+      var q = Condition.subject( Patient._id("123") );
+      var clauses = q.__getClauses();
+      clauses.should.eql([{
+        'name': 'subject:Patient',
+        'value': '123'
+      }]);
+    });
+
+    it('should work with "or clauses"', function(){
+      var q = Condition.subject( Patient._id("123").nameIn("john", "smith") );
+      var clauses = q.__getClauses();
+      clauses.should.eql([{
+        'name': 'subject:Patient',
+        'value': '123'
+      },{
+        'name': 'subject:Patient.name',
+        'oneOf': ["john", "smith"]
+      }]);
+    });
+
+  });
+
+
+});
+
 
 describe('client', function(){
+  var sandbox;
 
-  describe('initialization', function(){
+  beforeEach(function(){
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(function(){
+    sandbox = sinon.sandbox.restore();
+  });
+
+
+  describe('Initialization', function(){
 
     it('should require a well-formatted serviceUrl', function(){
 
@@ -74,7 +170,7 @@ describe('client', function(){
   })
 
   function stubAjax(req, doneArgs, failArgs) {
-    sinon.stub($, 'ajax', function(){
+    sandbox.stub($, 'ajax', function(){
       req.apply(this, arguments);
       return {
         done: function(cb){
@@ -92,20 +188,19 @@ describe('client', function(){
       };
     });
   }
+  describe('Search Operation', function(){
 
-  describe('search', function(){
-
-    var client = FhirClient({serviceUrl: 'https://myservice.com/fhir'});
+    var client = FhirClient({serviceUrl: 'http://localhost'});
 
       it('should issue a search command', function(done){
         stubAjax(function(p){
           p.type.should.equal('GET');
-          p.url.should.match(/search$/);
+          p.url.should.match(/\/_search$/);
         }, [
           require('./fixtures/patient.search.json'), 200
         ]);
 
-        client.search({resource: 'patient'}).done(function(results, s){
+        client.search(Patient._idIn("123", "456")).done(function(results, s){
           results.should.have.lengthOf(2);
           done()
         });
@@ -113,4 +208,5 @@ describe('client', function(){
       })
   });
 
-})
+});
+

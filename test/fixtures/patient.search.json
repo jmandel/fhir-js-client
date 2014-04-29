@@ -1,301 +1,165 @@
 {
-  "title" : "Search results for resource type Patient",
-  "id" : "urn:uuid:2d6138cf-b6ad-4de5-9475-9d049236f6",
-  "totalResults" : "564",
-  "link" : [
+  "resourceType": "Bundle",
+  "title": "FHIR Atom Feed",
+  "id": "http://localhost/Patient?_format=json&_count=2",
+  "link": [
     {
-      "href" : "http://hl7connect.healthintersections.com.au/svc/fhir/patient/search?_format=application/json+fhir&search-id=549e9c20-11da-4d1b-9ec6-bdb9d95435&search-sort=_id",
-      "rel" : "self"
+      "rel": "self",
+      "href": "http://localhost/Patient?_format=json&_count=2"
     },
     {
-      "href" : "http://hl7connect.healthintersections.com.au/svc/fhir/patient/search?_format=application/json+fhir&search-id=549e9c20-11da-4d1b-9ec6-bdb9d95435&search-sort=_id&search-offset=0&_count=2",
-      "rel" : "first"
-    },
-    {
-      "href" : "http://hl7connect.healthintersections.com.au/svc/fhir/patient/search?_format=application/json+fhir&search-id=549e9c20-11da-4d1b-9ec6-bdb9d95435&search-sort=_id&search-offset=2&_count=2",
-      "rel" : "next"
-    },
-    {
-      "href" : "http://hl7connect.healthintersections.com.au/svc/fhir/patient/search?_format=application/json+fhir&search-id=549e9c20-11da-4d1b-9ec6-bdb9d95435&search-sort=_id&search-offset=562&_count=2",
-      "rel" : "last"
+      "rel": "next",
+      "href": "http://localhost/Patient?_format=json&_count=2&_skip=2"
     }
   ],
-  "updated" : "2013-09-06T02:12:35Z",
-  "entry" : [
+  "totalResults": 59,
+  "updated": "2014-04-28T12:34:19.742-07:00",
+  "author": [
     {
-      "title" : "Patient \"1\" Version \"6\"",
-      "id" : "http://hl7connect.healthintersections.com.au/svc/fhir/patient/@1",
-      "link" : [
-        {
-          "href" : "http://hl7connect.healthintersections.com.au/svc/fhir/patient/@1/history/@6",
-          "rel" : "self"
-        }
-      ],
-      "updated" : "2013-08-29T12:21:02Z",
-      "published" : "2013-09-06T02:12:35Z",
-      "author" : [
-        {
-          "name" : "24.130.240.238"
-        }
-      ],
-      "content" : {
-        "Patient" : {
-          "text" : {
-            "status" : {
-              "value" : "generated"
-            },
-            "div" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<div xmlns=\"http://www.w3.org/1999/xhtml\">Everywoman, Eve. SSN:&#x0A;            444222222</div>"
-          },
-          "identifier" : [
-            {
-              "label" : {
-                "value" : "SSN"
-              },
-              "system" : {
-                "value" : "http://hl7.org/fhir/sid/us-ssn"
-              },
-              "key" : {
-                "value" : "444222222"
-              }
-            }
-          ],
-          "name" : [
-            {
-              "use" : {
-                "value" : "official"
-              },
-              "family" : [
-                {
-                  "value" : "Everywoman"
-                }
-              ],
-              "given" : [
-                {
-                  "value" : "Eve"
-                }
-              ]
-            },
-            {
-              "family" : [
-                {
-                  "value" : "Kramer"
-                }
-              ],
-              "given" : [
-                {
-                  "value" : "Ewout"
-                }
-              ]
-            },
-            {
-              "family" : [
-                {
-                  "value" : "Kramer"
-                }
-              ],
-              "given" : [
-                {
-                  "value" : "Ewout"
-                }
-              ]
-            },
-            {
-              "family" : [
-                {
-                  "value" : "Kramer"
-                }
-              ],
-              "given" : [
-                {
-                  "value" : "Ewout"
-                }
-              ]
-            },
-            {
-              "family" : [
-                {
-                  "value" : "Kramer"
-                }
-              ],
-              "given" : [
-                {
-                  "value" : "Ewout"
-                }
-              ]
-            },
-            {
-              "family" : [
-                {
-                  "value" : "Kramer"
-                }
-              ],
-              "given" : [
-                {
-                  "value" : "Ewout"
-                }
-              ]
-            }
-          ],
-          "telecom" : [
-            {
-              "system" : {
-                "value" : "phone"
-              },
-              "value" : {
-                "value" : "555-555-2003"
-              },
-              "use" : {
-                "value" : "work"
-              }
-            }
-          ],
-          "gender" : {
-            "coding" : [
-              {
-                "system" : {
-                  "value" : "http://hl7.org/fhir/v3/AdministrativeGender"
-                },
-                "code" : {
-                  "value" : "F"
-                }
-              }
-            ]
-          },
-          "birthDate" : {
-            "value" : "1973-05-31"
-          },
-          "address" : [
-            {
-              "use" : {
-                "value" : "home"
-              },
-              "line" : [
-                {
-                  "value" : "2222 Home Street"
-                }
-              ]
-            }
-          ],
-          "provider" : {
-            "type" : {
-              "value" : "Organization"
-            },
-            "reference" : {
-              "value" : "organization/@hl7"
-            }
-          },
-          "active" : {
-            "value" : true
+      "name": "groovy.config.atom.author-name",
+      "uri": "groovy.config.atom.author-uri"
+    }
+  ],
+  "entry": [
+    {
+      "title": "Patient/1032702",
+      "id": "http://localhost/Patient/1032702",
+      "updated": "2014-04-28T12:34:19.742-07:00",
+      "content": {
+        "resourceType": "Patient",
+        "text": {
+          "status": "generated",
+          "div": "<div>\n        \n            <p>Amy V. Shaw</p>\n      \n          </div>"
+        },
+        "identifier": [
+          {
+            "use": "usual",
+            "label": "SMART Hospiptal MRN",
+            "system": "urn:oid:0.1.2.3.4.5.6.7",
+            "value": "1032702"
           }
-        }
-      },
-      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<div xmlns=\"http://www.w3.org/1999/xhtml\">Everywoman, Eve. SSN:&#x0A;            444222222</div>"
+        ],
+        "name": [
+          {
+            "use": "official",
+            "family": [
+              "Shaw"
+            ],
+            "given": [
+              "Amy",
+              "V."
+            ]
+          }
+        ],
+        "telecom": [
+          {
+            "system": "phone",
+            "use": "home"
+          },
+          {
+            "system": "phone",
+            "value": "800-782-6765",
+            "use": "mobile"
+          },
+          {
+            "system": "email",
+            "value": "amy.shaw@example.com"
+          }
+        ],
+        "gender": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/v3/AdministrativeGender",
+              "code": "F",
+              "display": "Female"
+            }
+          ]
+        },
+        "birthDate": "2007-03-20",
+        "address": [
+          {
+            "use": "home",
+            "line": [
+              "49 Meadow St"
+            ],
+            "city": "Mounds",
+            "state": "OK",
+            "zip": "74047",
+            "country": "USA"
+          }
+        ],
+        "active": true
+      }
     },
     {
-      "title" : "Patient \"10\" Version \"1\"",
-      "id" : "http://hl7connect.healthintersections.com.au/svc/fhir/patient/@10",
-      "link" : [
-        {
-          "href" : "http://hl7connect.healthintersections.com.au/svc/fhir/patient/@10/history/@1",
-          "rel" : "self"
-        }
-      ],
-      "updated" : "2013-08-26T01:27:04Z",
-      "published" : "2013-09-06T02:12:35Z",
-      "author" : [
-        {
-          "name" : "110.143.187.242"
-        }
-      ],
-      "content" : {
-        "Patient" : {
-          "text" : {
-            "status" : {
-              "value" : "generated"
-            },
-            "div" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<div xmlns=\"http://www.w3.org/1999/xhtml\">Betterhalf, Boris. SSN:&#x0A;            444888888</div>"
-          },
-          "identifier" : [
-            {
-              "label" : {
-                "value" : "SSN"
-              },
-              "system" : {
-                "value" : "http://hl7.org/fhir/sid/us-ssn"
-              },
-              "key" : {
-                "value" : "444888888"
-              }
-            }
-          ],
-          "name" : [
-            {
-              "use" : {
-                "value" : "official"
-              },
-              "family" : [
-                {
-                  "value" : "Betterhalf"
-                }
-              ],
-              "given" : [
-                {
-                  "value" : "Boris"
-                }
-              ]
-            }
-          ],
-          "telecom" : [
-            {
-              "system" : {
-                "value" : "phone"
-              },
-              "value" : {
-                "value" : "555-555-2008"
-              },
-              "use" : {
-                "value" : "work"
-              }
-            }
-          ],
-          "gender" : {
-            "coding" : [
-              {
-                "system" : {
-                  "value" : "http://hl7.org/fhir/v3/AdministrativeGender"
-                },
-                "code" : {
-                  "value" : "M"
-                }
-              }
-            ]
-          },
-          "address" : [
-            {
-              "use" : {
-                "value" : "home"
-              },
-              "line" : [
-                {
-                  "value" : "2222 Home Street"
-                }
-              ]
-            }
-          ],
-          "provider" : {
-            "type" : {
-              "value" : "Organization"
-            },
-            "reference" : {
-              "value" : "organization/@hl7"
-            }
-          },
-          "active" : {
-            "value" : true
+      "title": "Patient/1081332",
+      "id": "http://localhost/Patient/1081332",
+      "updated": "2014-04-28T12:34:19.742-07:00",
+      "content": {
+        "resourceType": "Patient",
+        "text": {
+          "status": "generated",
+          "div": "<div>\n        \n            <p>Joseph I. Ross</p>\n      \n          </div>"
+        },
+        "identifier": [
+          {
+            "use": "usual",
+            "label": "SMART Hospiptal MRN",
+            "system": "urn:oid:0.1.2.3.4.5.6.7",
+            "value": "1081332"
           }
-        }
-      },
-      "summary" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<div xmlns=\"http://www.w3.org/1999/xhtml\">Betterhalf, Boris. SSN:&#x0A;            444888888</div>"
+        ],
+        "name": [
+          {
+            "use": "official",
+            "family": [
+              "Ross"
+            ],
+            "given": [
+              "Joseph",
+              "I."
+            ]
+          }
+        ],
+        "telecom": [
+          {
+            "system": "phone",
+            "use": "home"
+          },
+          {
+            "system": "phone",
+            "value": "800-960-9294",
+            "use": "mobile"
+          },
+          {
+            "system": "email",
+            "value": "joseph.ross@example.com"
+          }
+        ],
+        "gender": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/v3/AdministrativeGender",
+              "code": "M",
+              "display": "Male"
+            }
+          ]
+        },
+        "birthDate": "2003-10-02",
+        "address": [
+          {
+            "use": "home",
+            "line": [
+              "19 Church StApt 29"
+            ],
+            "city": "Tulsa",
+            "state": "OK",
+            "zip": "74108",
+            "country": "USA"
+          }
+        ],
+        "active": true
+      }
     }
   ]
 }

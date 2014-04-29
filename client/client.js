@@ -1,5 +1,5 @@
 var btoa = require('btoa');
-var $ = jQuery = process.browser ? require('jQuery-browser') : require('jquery');
+var $ = jQuery = require('./jquery');
 
 module.exports = FhirClient;
 
@@ -8,8 +8,7 @@ function Search(p) {
   var search = {};
 
   search.client = p.client;
-  search.resource = p.resource;
-  search.searchTerms = p.searchTerms;
+  search.spec = p.spec;
   search.count = p.count || 50;
 
   var nextPageUrl = null;
@@ -68,16 +67,16 @@ function Search(p) {
 
   search.execute = function() {
 
-    var terms = search.searchTerms || {};
-    terms._count = search.count;
 
     var searchParams = {
       type: 'GET',
-      url: search.client.server.serviceUrl + '/' + search.resource,
-      data: terms,
+      url: search.client.server.serviceUrl + '/' + search.spec.resourceName + '/_search',
+      data: search.spec.queryParams(),
       dataType: "json",
       traditional: true
     };
+
+    console.log(JSON.stringify(searchParams,null,2));
 
     var ret = new $.Deferred();
 
@@ -364,19 +363,17 @@ function FhirClient(p) {
       return ret;
     };
 
-    client.search = function(p){
+    client.search = function(searchSpec){
       // p.resource, p.count, p.searchTerms
       var s = Search({
         client: client,
-        resource: p.resource,
-        searchTerms: p.searchTerms,
-        count: p.count
+        spec: searchSpec
       });
 
       return s.execute();
     }
 
-  client.drain =  function(search, batch, db){
+    client.drain =  function(search, batch, db){
       var d = $.Deferred();
       if (batch === undefined){
         batch = function(vs, db) {
@@ -397,7 +394,7 @@ function FhirClient(p) {
         } 
       });
       return d.promise();
-  };
+    };
 
 
     return client;
