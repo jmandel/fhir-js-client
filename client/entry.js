@@ -1,6 +1,6 @@
 window.FHIR = {
   client: require('./client'),
-  query: require('./search-specification.js'),
+  query: require('./search-specification.js')(),
   jQuery: require('./jquery')
 };
 

@@ -396,6 +396,20 @@ function FhirClient(p) {
       return d.promise();
     };
 
+    var specs = require('./search-specification')({
+      "search": client,
+      "drain": client
+    });
+
+    Object.keys(specs).forEach(function(r){
+      client[r] = {
+        get: undefined,
+        post: undefined,
+        put: undefined,
+        delete: undefined,
+        where: specs[r]
+      };
+    });
 
     return client;
 }
