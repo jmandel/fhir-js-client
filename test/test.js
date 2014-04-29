@@ -1,5 +1,5 @@
 var FhirClient = require('../client/client');
-var SearchSpecification = require('../client/search-specification.js');
+var SearchSpecification = require('../client/search-specification.js')();
 var sinon = require('sinon');
 var window = require('jsdom').jsdom().createWindow();
 var ns = require('../client/namespace');

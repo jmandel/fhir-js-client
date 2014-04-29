@@ -76,8 +76,6 @@ function Search(p) {
       traditional: true
     };
 
-    console.log(JSON.stringify(searchParams,null,2));
-
     var ret = new $.Deferred();
 
     $.ajax(search.client.authenticated(searchParams))
