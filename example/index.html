@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <script src="../dist/fhir-client.js"></script>
+    <script>
+
+      var demo = {
+        serviceUrl: "https://open-api.fhir.me",
+        patientId: "1137192"
+      };
+
+      var smart = FHIR.client(demo), $ = FHIR.jQuery;
+
+      var pq = FHIR.query.Patient._id(demo.patientId);
+      var rxq = FHIR.query.MedicationPrescription.status("active").patient(pq);
+
+      /* Create a patient welcome banner */
+      smart.search(pq).then(function(p) {
+        var name = p[0].name[0];
+        var formatted = name.given.join(" ") + " " + name.family;
+        $("#patient_name").text(formatted);
+      });
+
+      /* Create a medication list */
+      smart.search(rxq).then(function(prescriptions) {
+        prescriptions.forEach(function(rx) {
+          var med = smart.followSync(rx, rx.medication).name;
+          var row = $("<li> " + med + "</li>");
+          $("#med_list").append(row);
+        });
+
+      });
+    </script>
+  </head>
+
+  <body>
+
+    <h1>Hello <span id="patient_name">...</span>!</h1>
+    <ul id="med_list"></ul>
+
+  </body>
+
+
+</html>

@@ -230,13 +230,12 @@ function SearchSpecification(clauses){
     var clauses = this.__getClauses();
     var params = {};
     clauses.forEach(function(c){
-      var name = encodeURIComponent(c.name);
-      params[name] = params[name] || [];
+      params[c.name] = params[c.name] || [];
       if (c.oneOf !== undefined) {
         var joined = c.oneOf.join(',');
-        params[name].push(encodeURIComponent(joined));
+        params[c.name].push(joined);
       } else {
-        params[name].push(encodeURIComponent(c.value));
+        params[c.name].push(c.value);
       }
     });
     return params;

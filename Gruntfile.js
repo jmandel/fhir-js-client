@@ -14,54 +14,14 @@ module.exports = function (grunt) {
       }
     },
     shell: {
-      definitions: {
-        command: 'python tasks/generate_js_client.py > client/definitions.json',
+      browserify: {
+        command: "./node_modules/.bin/browserify  -d  -e client/entry.js  -i './node_modules/jsdom/**'   > dist/fhir-client.js",
       }
     },
-
-    browserify: {
-      vendor: {
-        src: ['vendor/jQuery.js'],
-        dest: 'dist/jQuery.js',
-        options: {
-          ignore: ['jquery'],
-          shim: {
-            'jQuery-browser': {
-              path: 'vendor/jQuery.js',
-              exports: '$'
-            }
-          }
-        }
-      },
-      client: {
-        src: ['client/entry.js'],
-        dest: 'dist/client.js',
-        options: {
-          ignore: ['./node_modules/jquery/**', './node_modules/jsdom/**'],
-          external: ['jQuery-browser']
-        }
-      },
-    },
-
-    concat: {
-      'dist/fhir-client.js': ['dist/jQuery.js', 'dist/client.js']
-    },
-
-    clean: {  
-      src : [ 'dist/jQuery.js', 'dist/client.js' ]
-    }
-
   });
 
-
-
+  grunt.registerTask('browserify', 'Browserify to create window.FHIR', ['shell:browserify']);
   grunt.registerTask('conformance', 'Download conformance base', ['curl:conformance']);
-  grunt.registerTask('definitions', 'Build definitions.json', function(){
-    var buildDefs = require('./client/build-definitions');
-    buidDefs();
-  
-  });
-
-  grunt.registerTask('default', ['browserify', 'concat', 'clean']);
+  grunt.registerTask('default', ['browserify']);
   grunt.registerTask('all', ['definitions', 'default']);
 };

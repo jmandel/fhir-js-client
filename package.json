@@ -21,7 +21,8 @@
     "grunt-contrib-clean": "~0.5.0",
     "grunt-shell": "~0.3.1",
     "jsdom": "*",
-    "grunt-curl": "~1.5.1"
+    "grunt-curl": "~1.5.1",
+    "browserify-shim": "~3.4.1"
   },
   "engine": "node >= 0.6.0"
 }

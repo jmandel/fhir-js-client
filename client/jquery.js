@@ -1,7 +1,8 @@
+var $ = require('jquery');
+
 if (process.browser) {
-  module.exports = require('jQuery-browser');
+  module.exports = $;
 } else {
-  var jq = require('jquery');
   var window = require('jsdom').jsdom().createWindow();
-  module.exports = jq(window);
+  module.exports = $(window);
 }

@@ -1,4 +1,4 @@
-var $ = jQuery = process.browser ? require('jQuery-browser') : require('jquery');
+var $ = jQuery = require('./jquery');
 var FhirClient = require('./client');
 
 var BBClient = module.exports =  {debug: true}
