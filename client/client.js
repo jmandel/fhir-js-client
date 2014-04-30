@@ -70,7 +70,7 @@ function Search(p) {
 
     var searchParams = {
       type: 'GET',
-      url: search.client.server.serviceUrl + '/' + search.spec.resourceName + '/_search',
+      url: search.client.urlFor(search.spec),
       data: search.spec.queryParams(),
       dataType: "json",
       traditional: true
@@ -361,6 +361,10 @@ function FhirClient(p) {
       return ret;
     };
 
+    client.urlFor = function(searchSpec){
+      return client.server.serviceUrl+searchSpec.queryUrl();
+    }
+
     client.search = function(searchSpec){
       // p.resource, p.count, p.searchTerms
       var s = Search({
@@ -371,7 +375,7 @@ function FhirClient(p) {
       return s.execute();
     }
 
-    client.drain =  function(search, batch, db){
+    client.drain =  function(searchSpec, batch, db){
       var d = $.Deferred();
       if (batch === undefined){
         batch = function(vs, db) {
@@ -382,7 +386,7 @@ function FhirClient(p) {
         }
       }
       db = db || {};
-      client.search(search)
+      client.search(searchSpec)
       .done(function drain(vs, cursor){
         batch(vs, db);
         if (cursor.hasNext()){
@@ -399,13 +403,55 @@ function FhirClient(p) {
       "drain": client
     });
 
+    function withDefaultPatient(searchSpec){
+      var propertyName = null;
+      ['patient', 'subject'].forEach(function(pname){
+        if (typeof searchSpec[pname] === 'function'){
+          propertyName = pname;
+        }
+      });
+      if (propertyName !== null && client.patientId !== undefined){
+        searchSpec = searchSpec[propertyName](specs.Patient._id(client.patientId));
+      }
+      if (searchSpec.resourceName === 'Patient'){
+        console.log("Confine to", client.patientId);
+        searchSpec = searchSpec._id(client.patientId);
+      }
+
+      return searchSpec;
+    }
+
+    function getterFor(r){
+      return function(id){
+      
+        if (r.resourceName === 'Patient' && id === undefined){
+          id = client.patientId
+        }
+
+        return client.get({
+          resource: r.resourceName,
+          id: id
+        });
+      }
+    };
+
+    function writeTodo(){
+      console.log("Write functionality not implemented.");
+    };
+
     Object.keys(specs).forEach(function(r){
       client[r] = {
-        get: undefined,
-        post: undefined,
-        put: undefined,
-        delete: undefined,
-        where: specs[r]
+        read: getterFor(specs[r]),
+        post: writeTodo,
+        put: writeTodo,
+        delete: writeTodo,
+        drain: function(){
+          return client[r].where.drain();
+        },
+        search: function(){
+          return client[r].where.search();
+        },
+        where: withDefaultPatient(specs[r])
       };
     });
 

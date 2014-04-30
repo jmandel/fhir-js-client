@@ -15,7 +15,11 @@ module.exports = function (grunt) {
     },
     shell: {
       browserify: {
-        command: "./node_modules/.bin/browserify  -d  -e client/entry.js  -i './node_modules/jsdom/**'   > dist/fhir-client.js",
+        command: "./node_modules/.bin/browserify  -d  -e client/entry.js  -i './node_modules/jsdom/**' > dist/fhir-client.js",
+        options: {
+        failOnError: true,
+        stderr: true
+        }
       }
     },
   });

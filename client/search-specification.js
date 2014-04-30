@@ -6,25 +6,109 @@ module.exports = function(mixins) {
   var namespace = require('./namespace');
   var definitions = require('./build-definitions');
 
-  var SearchParam = function SearchParam(name){
+  function defineSearchParam(resourceSpec, searchParam) {
+    Object.keys(searchParam.handlers).forEach(function(handlerName){
+
+      resourceSpec.prototype[handlerName] = function(){
+
+        var clause = searchParam.handlers[handlerName].apply(
+          searchParam, arguments
+        );
+        return this.__addClause(clause);
+
+      }
+    });
+  }
+
+
+  function SearchSpecification(clauses){ 
+
+    if (clauses === undefined) {
+      clauses = [];
+    }
+
+    this.resourceName = this.constructor.resourceName;
+
+    this.__addClause = function(c){
+      var newClauses = JSON.parse(JSON.stringify(clauses));
+      if (!util.isArray(c)){
+        c = [c];
+      }
+
+      [].push.apply(newClauses, c);
+      return new (this.constructor)(newClauses);
+    }
+
+    this.__getClauses = function(){
+      return clauses;
+    }
+
+    this.__printClauses = function(){
+      console.log(clauses);
+    }
+
+    this.queryUrl = function(){
+      return '/'+this.resourceName+'/_search';
+    };
+ 
+    this.queryParams = function(){
+      var clauses = this.__getClauses();
+      var params = {};
+      clauses.forEach(function(c){
+        params[c.name] = params[c.name] || [];
+        if (c.oneOf !== undefined) {
+          var joined = c.oneOf.join(',');
+          params[c.name].push(joined);
+        } else {
+          params[c.name].push(c.value);
+        }
+      });
+      return params;
+    }
+
+  }
+
+  defineSearchParam(SearchSpecification, new ReferenceSearchParam('_id'));
+  defineSearchParam(SearchSpecification, new SearchParam('_count', '_count', true));
+  defineSearchParam(SearchSpecification, new SearchParam('_sortAsc', '_sort:asc', true));
+  defineSearchParam(SearchSpecification, new SearchParam('_sortDesc', '_sort:desc', true));
+  defineSearchParam(SearchSpecification, new SearchParam('_include', '_include', true));
+
+
+  function SearchParam(name, wireName, onlyOneHandler){
+    wireName = wireName || name;
     this.name = name;
     this.handlers = { };
-
-    this.handlers[name+'In'] = function(){
-      var values = [];
-      for (var i=0;i<arguments.length;i++){
-        values.push(this.handlers[name].apply(this, [arguments[i]]).value);
-      }
-      return {
-        name: name,
-        oneOf: values
-      };
-    };
+    var that = this;
 
     this.handlers[name] = function(value){
       return {
-        name: name,
+        name: wireName,
         value: value
+      };
+    };
+
+    if (onlyOneHandler) {
+      return;
+    }
+    this.handlers[name+'In'] = function(){
+      var values = [];
+      var singleArgHandler = this.handlers[name];
+
+      Array.prototype.slice.call(arguments, 0).forEach(function(arg){
+        if (!util.isArray(arg)){
+          arg = [arg];
+        }
+        arg.forEach(function(arg){
+          values.push(singleArgHandler.call(that, arg).value);
+        });
+      });
+
+      for (var i=0;i<arguments.length;i++){
+      }
+      return {
+        name: wireName,
+        oneOf: values
       };
     };
 
@@ -36,7 +120,7 @@ module.exports = function(mixins) {
     };
   }
 
-  var ReferenceSearchParam = function ReferenceSearchParam(name){
+  function ReferenceSearchParam(name){
     SearchParam.apply(this, arguments);
 
     this.handlers[name] = function(subSpec){
@@ -76,7 +160,7 @@ module.exports = function(mixins) {
   ReferenceSearchParam.prototype = new SearchParam();
   ReferenceSearchParam.prototype.constructor = ReferenceSearchParam;
 
-  var StringSearchParam = function StringSearchParam(name){
+  function StringSearchParam(name){
     SearchParam.apply(this, arguments);
 
     this.handlers[name+'Exact'] = function(value){
@@ -90,7 +174,7 @@ module.exports = function(mixins) {
   StringSearchParam.prototype = new SearchParam();
   StringSearchParam.prototype.constructor = StringSearchParam;
 
-  var TokenSearchParam = function TokenSearchParam(name){
+  function TokenSearchParam(name){
     SearchParam.apply(this, arguments);
 
     this.handlers[name] = function(ns, value){
@@ -129,25 +213,25 @@ module.exports = function(mixins) {
   TokenSearchParam.prototype = new SearchParam();
   TokenSearchParam.prototype.constructor = TokenSearchParam;
 
-  var DateSearchParam = function DateSearchParam(name){
+  function DateSearchParam(name){
     SearchParam.apply(this, arguments);
   }
   DateSearchParam.prototype = new SearchParam();
   DateSearchParam.prototype.constructor = DateSearchParam;
 
-  var NumberSearchParam = function NumberSearchParam(name){
+  function NumberSearchParam(name){
     SearchParam.apply(this, arguments);
   }
   NumberSearchParam();
   NumberSearchParam.prototype.constructor = NumberSearchParam;
 
-  var QuantitySearchParam = function QuantitySearchParam(name){
+  function QuantitySearchParam(name){
     SearchParam.apply(this, arguments);
   }
   QuantitySearchParam.prototype = new SearchParam();
   QuantitySearchParam.prototype.constructor = QuantitySearchParam;
 
-  var CompositeSearchParam = function  CompositeSearchParam(name){
+  function  CompositeSearchParam(name){
     SearchParam.apply(this, arguments);
   }
   CompositeSearchParam.prototype = new SearchParam();
@@ -182,72 +266,16 @@ module.exports = function(mixins) {
       defineSearchParam(resourceSpec, new paramTypes[p.type](p.name));
     });
 
-    defineSearchParam(resourceSpec, new paramTypes['reference']('_id'));
-
     specs[tname] = new resourceSpec();
 
   });
 
-  function defineSearchParam(resourceSpec, searchParam) {
-    Object.keys(searchParam.handlers).forEach(function(handlerName){
-
-      resourceSpec.prototype[handlerName] = function(){
-
-        var clause = searchParam.handlers[handlerName].apply(
-          searchParam, arguments
-        );
-        return this.__addClause(clause);
-
-      }
-    });
-  }
-
-  function SearchSpecification(clauses){ 
-
-    if (clauses === undefined) {
-      clauses = [];
-    }
-
-    this.resourceName = this.constructor.resourceName;
-
-    this.__addClause = function(c){
-      var newClauses = JSON.parse(JSON.stringify(clauses));
-      if (!util.isArray(c)){
-        c = [c];
-      }
-
-      [].push.apply(newClauses, c);
-      return new (this.constructor)(newClauses);
-    }
-
-    this.__getClauses = function(){
-      return clauses;
-    }
-
-    this.__printClauses = function(){
-      console.log(clauses);
-    }
-
-    this.queryParams = function(){
-      var clauses = this.__getClauses();
-      var params = {};
-      clauses.forEach(function(c){
-        params[c.name] = params[c.name] || [];
-        if (c.oneOf !== undefined) {
-          var joined = c.oneOf.join(',');
-          params[c.name].push(joined);
-        } else {
-          params[c.name].push(c.value);
-        }
-      });
-      return params;
-    }
-
-  }
 
   Object.keys(mixins).forEach(function(m){
     SearchSpecification.prototype[m] = function(){
-      return mixins[m][m](this);
+      var args = Array.prototype.slice.call(arguments, 0);
+      args.unshift(this);
+      return mixins[m][m].apply(mixins[m], args);
     };
   });
 
