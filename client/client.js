@@ -263,19 +263,24 @@ function FhirClient(p) {
       "drain": client
     });
 
-    function withDefaultPatient(searchSpec){
+    function patientPropertyName(searchSpec){
       var propertyName = null;
       ['patient', 'subject'].forEach(function(pname){
         if (typeof searchSpec[pname] === 'function'){
           propertyName = pname;
         }
       });
+      return propertyName;
+    }
+
+    function withDefaultPatient(searchSpec){
+      var propertyName = patientPropertyName(searchSpec);
       if (propertyName !== null && client.patientId !== undefined){
         searchSpec = searchSpec[propertyName](specs.Patient._id(client.patientId));
-      }
-      if (searchSpec.resourceName === 'Patient'){
-        console.log("Confine to", client.patientId);
+      } else if (searchSpec.resourceName === 'Patient'){
         searchSpec = searchSpec._id(client.patientId);
+      } else {
+        searchSpec = null;
       }
 
       return searchSpec;
@@ -315,6 +320,9 @@ function FhirClient(p) {
 
     client.api = {};
 
+    // Create SearchSpec-specific handlers
+    // as properties on some target object
+    // e.g. target.Alert, target.Condition, etc.
     function decorateWithApi(target, tweaks){
       tweaks = tweaks || {};
       Object.keys(specs).forEach(function(r){
@@ -333,7 +341,15 @@ function FhirClient(p) {
         };
 
         if (tweaks.where){
-          target[r].where = tweaks.where(target[r].where);
+          var tweaked = tweaks.where(target[r].where);
+
+          // if this is not a patient-related resource
+          // don't decorate the patient object with it
+          if (tweaked === null) {
+            delete target[r];
+          } else {
+            target[r].where = tweaked;
+          }
         }
       });
     }

@@ -3,6 +3,7 @@ var SearchSpecification = require('../client/search-specification.js')();
 var sinon = require('sinon');
 var window = require('jsdom').jsdom().createWindow();
 var ns = require('../client/namespace');
+var assert = require('assert');
 
 var $ = jQuery = require('../client/jquery');
 var search = SearchSpecification;
@@ -236,6 +237,23 @@ describe('client', function(){
 
       })
   });
+
+  describe('A client with patient context', function(){
+
+    var client = FhirClient({serviceUrl: 'http://localhost', patientId:'123'});
+
+      it('should have a patient-specific Conditions api object', function(){
+        client.context.patient.Condition.should.be.ok;
+      });
+      it('should not have a patient-specific Practitioner api object', function(){
+        assert(undefined === client.context.patient.Practitioner);
+      });
+      it('should have generic Practitioner api object', function(){
+        client.api.Practitioner.should.be.ok;
+      });
+
+  });
+
 
 });
 
