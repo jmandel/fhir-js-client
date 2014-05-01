@@ -1,92 +1,8 @@
 var btoa = require('btoa');
+var Search = require('./search');
 var $ = jQuery = require('./jquery');
 
 module.exports = FhirClient;
-
-function Search(p) {
-
-  var search = {};
-
-  search.client = p.client;
-  search.spec = p.spec;
-  search.count = p.count || 50;
-
-  var nextPageUrl = null;
-
-  function gotFeed(d){
-    return function(data, status) {
-
-      nextPageUrl = null; 
-      var feed = data.feed || data;
-
-      if(feed.link) {
-        var next = feed.link.filter(function(l){
-          return l.rel === "next";
-        });
-        if (next.length === 1) {
-          nextPageUrl = next[0].href 
-        }
-      }
-
-      var results = search.client.indexFeed(data); 
-      d.resolve(results, search);
-    }
-  };
-
-  function failedFeed(d){
-    return function(failure){
-      d.reject("Search failed.", arguments);
-    }
-  };
-
-  search.hasNext = function(){
-    return nextPageUrl !== null;
-  };
-
-  search.next = function() {
-
-    if (nextPageUrl === null) {
-      throw "Next page of search not available!";
-    }
-
-    var searchParams = {
-      type: 'GET',
-      url: nextPageUrl,
-      dataType: 'json',
-      traditional: true
-    };
-
-    var ret = new $.Deferred();
-    console.log("Nexting", searchParams);
-    $.ajax(search.client.authenticated(searchParams))
-    .done(gotFeed(ret))
-    .fail(failedFeed(ret));
-
-    return ret;
-  };
-
-  search.execute = function() {
-
-
-    var searchParams = {
-      type: 'GET',
-      url: search.client.urlFor(search.spec),
-      data: search.spec.queryParams(),
-      dataType: "json",
-      traditional: true
-    };
-
-    var ret = new $.Deferred();
-
-    $.ajax(search.client.authenticated(searchParams))
-    .done(gotFeed(ret))
-    .fail(failedFeed(ret));
-
-    return ret;
-  };
-
-  return search;
-}
 
 function absolute(id, server) {
   if (id.match(/^http/)) return id;
@@ -116,70 +32,11 @@ function relative(id, server) {
   return params;
 }
 
-
-function hasCode(o, codeMap){
-  var codes = Object.keys(codeMap).forEach(function(c){return codeMap[c];});
-  return o.name.coding.filter(function(c){
-    return codes.indexOf(c.code) !== -1;
-  }).length > 0;
-};
-
 function ClientPrototype(){};
-ClientPrototype.prototype.byCodes = function(observations, property){
-
-  var bank = this.byCode(observations, property);
-  function byCodes(){
-    var ret = [];
-    for (var i=0; i<arguments.length;i++){
-      var set = bank[arguments[i]];
-      if (set) {[].push.apply(ret, set);}
-    }
-    return ret;
-  }
-
-  return byCodes;
-};
-
-ClientPrototype.prototype.byCode = function(observations, property){
-  var ret = {};
-  if (!Array.isArray(observations)){
-    observations = [observations];
-  }
-  observations.forEach(function(o){
-    o[property].coding.forEach(function(coding){
-      ret[coding.code] = ret[coding.code] || [];
-      ret[coding.code].push(o);
-    });
-  });
-  return ret;
-};
-
-function ensureNumerical(pq) {
-  if (typeof pq.value !== "number") {
-    throw "Found a non-numerical unit: " + pq.value + " " + pq.code;
-  }
-};
-ClientPrototype.prototype.units = {
-  cm: function(pq){
-    ensureNumerical(pq);
-    if(pq.code == "cm") return pq.value;
-    if(pq.code == "m") return 100*pq.value;
-    if(pq.code == "in") return 2.54*pq.value;
-    if(pq.code == "[in_us]") return 2.54*pq.value;
-    if(pq.code == "[in_i]") return 2.54*pq.value;
-    throw "Unrecognized length unit: " + pq.code
-  },
-  kg: function(pq){
-    ensureNumerical(pq);
-    if(pq.code == "kg") return pq.value;
-    if(pq.code.match(/lb/)) return pq.value / 2.20462;
-    throw "Unrecognized weight unit: " + pq.code
-  },
-  any: function(pq){
-    ensureNumerical(pq);
-    return pq.value
-  }
-};
+var clientUtils = require('./utils');
+Object.keys(clientUtils).forEach(function(k){
+  ClientPrototype.prototype[k] = clientUtils[k];
+});
 
 function FhirClient(p) {
   // p.serviceUrl
@@ -189,7 +46,7 @@ function FhirClient(p) {
     //    bearer --> token
     // }
 
-    var resources = {};
+    var cache = {};
     var client = new ClientPrototype();
 
     var server = client.server = {
@@ -198,11 +55,12 @@ function FhirClient(p) {
     }
 
     client.patientId = p.patientId;
+    client.practitionerId = p.practitionerId;
 
-    client.resources = {
+    client.cache = {
       get: function(p) {
         var url = absolute(typeof p === 'string' ? p : (p.resource + '/'+p.id), server);
-        if (url in resources) {
+        if (url in cache) {
           return getLocal(url);
         }
         return null;
@@ -222,7 +80,7 @@ function FhirClient(p) {
     client.indexResource = function(id, r) {
       r.resourceId = relative(id, server);
       var ret = [r];
-      resources[absolute(id, server)] = r;
+      cache[absolute(id, server)] = r;
       return ret;
     };
 
@@ -271,7 +129,7 @@ function FhirClient(p) {
         } 
 
         var url = absolute(to.reference, server);
-        if (url in resources) {
+        if (url in cache) {
           return p.local(url);
         }
 
@@ -283,12 +141,12 @@ function FhirClient(p) {
       }
     };
 
-    client.followSync = handleReference({
+    client.cachedLink = handleReference({
       contained: getContained,
       local: getLocal
     });
 
-    client.follow = handleReference({
+    client.followLink = handleReference({
       contained: followContained,
       local: followLocal,
       remote: followRemote
@@ -305,7 +163,7 @@ function FhirClient(p) {
     }
 
     function getLocal(url) {
-      return resources[url];
+      return cache[url];
     }
 
     function followContained(from, id) {
@@ -375,24 +233,26 @@ function FhirClient(p) {
       return s.execute();
     }
 
-    client.drain =  function(searchSpec, batch, db){
+    client.drain =  function(searchSpec, batch){
       var d = $.Deferred();
+
       if (batch === undefined){
-        batch = function(vs, db) {
-          db.__results = db.__results || [];
+        var db = [];
+        batch = function(vs) {
           vs.forEach(function(v){
-            db.__results.push(v);
+            db.push(v);
           }); 
         }
       }
+
       db = db || {};
       client.search(searchSpec)
       .done(function drain(vs, cursor){
-        batch(vs, db);
+        batch(vs);
         if (cursor.hasNext()){
           cursor.next().done(drain);
         } else {
-          d.resolve(db.__results || db);
+          d.resolve();
         } 
       });
       return d.promise();
@@ -423,7 +283,7 @@ function FhirClient(p) {
 
     function getterFor(r){
       return function(id){
-      
+
         if (r.resourceName === 'Patient' && id === undefined){
           id = client.patientId
         }
@@ -436,24 +296,50 @@ function FhirClient(p) {
     };
 
     function writeTodo(){
-      console.log("Write functionality not implemented.");
+      throw "Write functionality not implemented.";
     };
 
-    Object.keys(specs).forEach(function(r){
-      client[r] = {
-        read: getterFor(specs[r]),
-        post: writeTodo,
-        put: writeTodo,
-        delete: writeTodo,
-        drain: function(){
-          return client[r].where.drain();
-        },
-        search: function(){
-          return client[r].where.search();
-        },
-        where: withDefaultPatient(specs[r])
-      };
-    });
+    client.context = {};
+
+    client.context.practitioner = {
+      'read': function(){
+        return client.api.Practitioner.read(client.practitionerId);
+      }
+    };
+
+    client.context.patient = {
+      'read': function(){
+        return client.api.Patient.read(client.practitionerId);
+      }
+    };
+
+    client.api = {};
+
+    function decorateWithApi(target, tweaks){
+      tweaks = tweaks || {};
+      Object.keys(specs).forEach(function(r){
+        target[r] = {
+          read: getterFor(specs[r]),
+          post: writeTodo,
+          put: writeTodo,
+          delete: writeTodo,
+          drain: function(){
+            return target[r].where.drain();
+          },
+          search: function(){
+            return target[r].where.search();
+          },
+          where: specs[r]
+        };
+
+        if (tweaks.where){
+          target[r].where = tweaks.where(target[r].where);
+        }
+      });
+    }
+
+    decorateWithApi(client.api);
+    decorateWithApi(client.context.patient, {where: withDefaultPatient});
 
     return client;
 }

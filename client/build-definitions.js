@@ -13,6 +13,7 @@ c.rest[0].resource.forEach(function(r){
   r.searchParam.forEach(function(sp){
     params.push({
       name: camelCased(sp.name),
+      wireName: sp.name,
       type: sp.type
     });
   });

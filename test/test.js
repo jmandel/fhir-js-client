@@ -18,6 +18,17 @@ describe('Search Specification', function(){
     partial.__getClauses().should.have.lengthOf(1);
   });
 
+  it('should do camelCase function names and dash-erized wire calls', function(){
+  
+    var q = search.Observation .relatedTarget(search.Observation._id("123"));
+    q.__getClauses()[0].should.eql({
+     name: 'related-target:Observation',
+     value: '123'
+     });
+
+  });
+
+
   it('should allow partial searches to be extended', function(){
     var extended = partial.family('Smith');
     extended.__getClauses().should.have.lengthOf(2);
@@ -32,12 +43,30 @@ describe('Search Specification', function(){
   });
 
   it('should support FHIR disjunction parameters', function(){
-    var first = Patient.givenIn('John', 'Bob').__getClauses()[0];
+    var first = Patient.givenIn('John', 'Bob', ['Paul', 'Fred']).__getClauses()[0];
     first.should.have.properties({
       'name': 'given',
-      'oneOf': ['John', 'Bob']
+      'oneOf': ['John', 'Bob', 'Paul', 'Fred']
     })
   });
+
+  it('should support FHIR conjunction parameters', function(){
+    var first = Patient.givenAll('John', 'Bob', ['Paul', 'Fred']).__getClauses();
+    first.should.eql([{
+      'name': 'given',
+      'value': 'John'
+    },{
+      'name': 'given',
+      'value': 'Bob'
+    },{
+      'name': 'given',
+      'value': 'Paul'
+    },{
+      'name': 'given',
+      'value': 'Fred'
+    }])
+  });
+
 
   it('should support the :missing modifer universally', function(){
     var q = Patient.familyMissing(true);

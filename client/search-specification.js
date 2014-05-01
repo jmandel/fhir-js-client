@@ -50,7 +50,7 @@ module.exports = function(mixins) {
     this.queryUrl = function(){
       return '/'+this.resourceName+'/_search';
     };
- 
+
     this.queryParams = function(){
       var clauses = this.__getClauses();
       var params = {};
@@ -76,14 +76,19 @@ module.exports = function(mixins) {
 
 
   function SearchParam(name, wireName, onlyOneHandler){
-    wireName = wireName || name;
     this.name = name;
+    this.wireName = wireName || name;
     this.handlers = { };
     var that = this;
 
     this.handlers[name] = function(value){
+
+      if (util.isArray(value) || arguments.length > 1){
+        throw "only expected one argument to " + name;
+      }
+
       return {
-        name: wireName,
+        name: this.wireName,
         value: value
       };
     };
@@ -91,11 +96,37 @@ module.exports = function(mixins) {
     if (onlyOneHandler) {
       return;
     }
-    this.handlers[name+'In'] = function(){
-      var values = [];
-      var singleArgHandler = this.handlers[name];
 
-      Array.prototype.slice.call(arguments, 0).forEach(function(arg){
+    var singleArgHandler = this.handlers[name];
+
+    this.handlers[name+'All'] = function(){
+      var values = flatten(arguments);
+      return values.map(function(v){
+        return {
+          name: this.wireName,
+          value: v
+        }
+      }, this);
+    };
+
+    this.handlers[name+'In'] = function(){
+      var values = flatten(arguments);
+      return {
+        name: this.wireName,
+        oneOf: values
+      };
+    };
+
+    this.handlers[name+'Missing'] = function(value){
+      return {
+        name: this.wireName+':missing',
+        value: value === 'false' ? false : Boolean(value)
+      };
+    };
+
+    function flatten(args){
+      var values = [];
+      Array.prototype.slice.call(args, 0).forEach(function(arg){
         if (!util.isArray(arg)){
           arg = [arg];
         }
@@ -103,32 +134,20 @@ module.exports = function(mixins) {
           values.push(singleArgHandler.call(that, arg).value);
         });
       });
+      return values;
+    }
 
-      for (var i=0;i<arguments.length;i++){
-      }
-      return {
-        name: wireName,
-        oneOf: values
-      };
-    };
-
-    this.handlers[name+'Missing'] = function(value){
-      return {
-        name: name+':missing',
-        value: value === 'false' ? false : Boolean(value)
-      };
-    };
   }
 
   function ReferenceSearchParam(name){
     SearchParam.apply(this, arguments);
 
     this.handlers[name] = function(subSpec){
-      var clauseName = name + ':' + subSpec.constructor.resourceName;
+      var clauseName = this.wireName + ':' + subSpec.constructor.resourceName;
 
       if (typeof subSpec === 'string'){
         return {
-          name: name,
+          name: this.wireName,
           value: subSpec
         };
       }
@@ -165,7 +184,7 @@ module.exports = function(mixins) {
 
     this.handlers[name+'Exact'] = function(value){
       return {
-        name: name+':exact',
+        name: this.wireName+':exact',
         value: value
       };
     };
@@ -180,7 +199,7 @@ module.exports = function(mixins) {
     this.handlers[name] = function(ns, value){
 
       var ret = {
-        name: name,
+        name: this.wireName,
         value: ns + '|'+ value
       }
 
@@ -202,7 +221,7 @@ module.exports = function(mixins) {
 
     this.handlers[name+'Text'] = function(value){
       return {
-        name: name,
+        name: this.wireName,
         value: value
       };
     };
@@ -263,7 +282,7 @@ module.exports = function(mixins) {
     resourceSpec.resourceName = tname;
 
     params.forEach(function(p){
-      defineSearchParam(resourceSpec, new paramTypes[p.type](p.name));
+      defineSearchParam(resourceSpec, new paramTypes[p.type](p.name, p.wireName));
     });
 
     specs[tname] = new resourceSpec();
