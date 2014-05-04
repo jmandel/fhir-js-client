@@ -324,8 +324,15 @@ function FhirClient(p) {
     // as properties on some target object
     // e.g. target.Alert, target.Condition, etc.
     function decorateWithApi(target, tweaks){
-      tweaks = tweaks || {};
+
+      tweaks = tweaks || {filter:function(){return true;}};
+
       Object.keys(specs).forEach(function(r){
+
+        if (!tweaks.filter(specs[r])){
+          return;
+        }
+
         target[r] = {
           read: getterFor(specs[r]),
           post: writeTodo,
@@ -341,21 +348,17 @@ function FhirClient(p) {
         };
 
         if (tweaks.where){
-          var tweaked = tweaks.where(target[r].where);
-
-          // if this is not a patient-related resource
-          // don't decorate the patient object with it
-          if (tweaked === null) {
-            delete target[r];
-          } else {
-            target[r].where = tweaked;
-          }
+           target[r].where = tweaks.where(target[r].where);
         }
+
       });
     }
 
     decorateWithApi(client.api);
-    decorateWithApi(client.context.patient, {where: withDefaultPatient});
+    decorateWithApi(client.context.patient, {
+      filter: withDefaultPatient,
+      where: withDefaultPatient
+    });
 
     return client;
 }

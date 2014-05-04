@@ -87,7 +87,7 @@ BBClient.noAuthFhirProvider = function(serviceUrl){
   return  {
     "oauth2": null,
     "bb_api":{
-      "fhir_service_uri": fhirServiceUrl
+      "fhir_service_uri": serviceUrl
     }
   }
 };
@@ -96,14 +96,9 @@ BBClient.noAuthFhirProvider = function(serviceUrl){
 BBClient.authorize = function(params){
 
   var state = Guid.newGuid();
+  var client = params.client;
 
   if (params.provider.oauth2 == null) {
-
-    if (params.patientId === undefined) {
-      throw "For a FHIR server without OAuth, you must supply a patient id " + 
-        "at launch time... otherwise we don't know how to search for data.";
-    }
-
     localStorage[state] = JSON.stringify(params);
     return window.location.href = client.redirect_uris[0] + "#state="+state;
   }
@@ -114,7 +109,7 @@ BBClient.authorize = function(params){
     headers: {"Authorization" : "Bearer " + params.preregistration_token},
     contentType: "application/json",
     url: params.provider.oauth2.registration_uri,
-    data:JSON.stringify(params.client)
+    data:JSON.stringify(client)
   }
   if (!params.preregistration_token){
     delete post.headers;
