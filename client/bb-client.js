@@ -58,29 +58,43 @@ BBClient.ready = function(hash, callback){
   });
 }
 
-BBClient.providers = function(registries, callback){
+BBClient.providers = function(fhirServiceUrl, callback){
+    jQuery.get(
+      fhirServiceUrl+"/metadata",
+      function(r){
+          var res = {
+              "name": "SMART on FHIR Testing Server",
+              "description": "Dev server for SMART on FHIR",
+              "url": null,
+              "oauth2": {
+                "registration_uri": null,
+                "authorize_uri": null,
+                "token_uri": null
+              },
+              "bb_api":{
+                "fhir_service_uri": fhirServiceUrl,
+                "search": fhirServiceUrl + "/DocumentReference"
+              }
+          };
+          
+          try {
+                jQuery.each(r.rest[0].security.extension, function(responseNum, arg){
+                    if (arg.url === "http://fhir-registry.smartplatforms.org/Profile/oauth-uris#register") {
+                        res.oauth2.registration_uri = arg.valueUri;
+                    } else if (arg.url === "http://fhir-registry.smartplatforms.org/Profile/oauth-uris#authorize") {
+                        res.oauth2.authorize_uri = arg.valueUri;
+                    } else if (arg.url === "http://fhir-registry.smartplatforms.org/Profile/oauth-uris#token") {
+                        res.oauth2.token_uri = arg.valueUri;
+                    }
+                });
+          }
+          catch (err) {
+          }
 
-  var requests = [];
-  jQuery.each(registries, function(i, r){
-    requests.push(jQuery.ajax({
-      type: "GET",
-      url: r+"/.well-known/bb/providers.json"
-    }));
-  });
-
-  var providers = [];
-  jQuery.when.apply(null, requests).then(function(){
-    jQuery.each(arguments, function(responseNum, arg){
-      if (responseNum>=requests.length) {
-        return;
-      }
-      jQuery.each(arg, function(i, provider){
-        providers.push(provider);
-      });
-    });
-    callback && callback(providers);
-  });
-
+          callback && callback(res);
+      },
+      "json"
+    );
 };
 
 BBClient.noAuthFhirProvider = function(serviceUrl){
