@@ -154,7 +154,7 @@ function FhirClient(p) {
 
     function getContained(from, id) {
       var matches = from.contained.filter(function(c){
-        return c._id === id; 
+        return c.id === id; 
       });
       if (matches.length !== 1)  {
         return null;

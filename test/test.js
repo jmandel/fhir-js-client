@@ -180,6 +180,10 @@ describe('client', function(){
     it('should require a well-formatted serviceUrl', function(){
 
       (function(){
+        var client = FhirClient({serviceUrl: 'https://myservice.com/fhir'});
+      }).should.not.throw;
+
+      (function(){
         var client = FhirClient({});
       }).should.throw;
 
@@ -191,9 +195,6 @@ describe('client', function(){
         var client = FhirClient({serviceUrl: 'https://myservice.com/fhir/'});
       }).should.throw;
 
-      (function(){
-        var client = FhirClient({serviceUrl: 'https://myservice.com/fhir'});
-      }).should.not.throw;
 
     });
 
