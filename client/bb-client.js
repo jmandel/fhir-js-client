@@ -1,5 +1,6 @@
 var $ = jQuery = require('./jquery');
 var FhirClient = require('./client');
+var Guid = require('./guid');
 
 var BBClient = module.exports =  {debug: true}
 BBClient.jQuery = BBClient.$ = jQuery;
@@ -44,7 +45,7 @@ BBClient.ready = function(hash, callback){
 
   var fhirClientParams = BBClient.fhirAuth = {
     serviceUrl: BBClient.state.provider.bb_api.fhir_service_uri,
-    patientId: BBClient.state.patientId
+    patientId: authorization.patient
   };
 
   if (BBClient.authorization.access_token !== undefined) {
@@ -58,43 +59,43 @@ BBClient.ready = function(hash, callback){
   });
 }
 
-BBClient.providers = function(fhirServiceUrl, callback){
-    jQuery.get(
-      fhirServiceUrl+"/metadata",
-      function(r){
-          var res = {
-              "name": "SMART on FHIR Testing Server",
-              "description": "Dev server for SMART on FHIR",
-              "url": null,
-              "oauth2": {
-                "registration_uri": null,
-                "authorize_uri": null,
-                "token_uri": null
-              },
-              "bb_api":{
-                "fhir_service_uri": fhirServiceUrl,
-                "search": fhirServiceUrl + "/DocumentReference"
-              }
-          };
-          
-          try {
-                jQuery.each(r.rest[0].security.extension, function(responseNum, arg){
-                    if (arg.url === "http://fhir-registry.smartplatforms.org/Profile/oauth-uris#register") {
-                        res.oauth2.registration_uri = arg.valueUri;
-                    } else if (arg.url === "http://fhir-registry.smartplatforms.org/Profile/oauth-uris#authorize") {
-                        res.oauth2.authorize_uri = arg.valueUri;
-                    } else if (arg.url === "http://fhir-registry.smartplatforms.org/Profile/oauth-uris#token") {
-                        res.oauth2.token_uri = arg.valueUri;
-                    }
-                });
-          }
-          catch (err) {
-          }
+function providers(fhirServiceUrl, callback){
+  jQuery.get(
+    fhirServiceUrl+"/metadata",
+    function(r){
+      var res = {
+        "name": "SMART on FHIR Testing Server",
+        "description": "Dev server for SMART on FHIR",
+        "url": null,
+        "oauth2": {
+          "registration_uri": null,
+          "authorize_uri": null,
+          "token_uri": null
+        },
+        "bb_api":{
+          "fhir_service_uri": fhirServiceUrl,
+          "search": fhirServiceUrl + "/DocumentReference"
+        }
+      };
 
-          callback && callback(res);
-      },
-      "json"
-    );
+      try {
+        jQuery.each(r.rest[0].security.extension, function(responseNum, arg){
+          if (arg.url === "http://fhir-registry.smartplatforms.org/Profile/oauth-uris#register") {
+            res.oauth2.registration_uri = arg.valueUri;
+          } else if (arg.url === "http://fhir-registry.smartplatforms.org/Profile/oauth-uris#authorize") {
+            res.oauth2.authorize_uri = arg.valueUri;
+          } else if (arg.url === "http://fhir-registry.smartplatforms.org/Profile/oauth-uris#token") {
+            res.oauth2.token_uri = arg.valueUri;
+          }
+        });
+      }
+      catch (err) {
+      }
+
+      callback && callback(res);
+    },
+    "json"
+  );
 };
 
 BBClient.noAuthFhirProvider = function(serviceUrl){
@@ -106,99 +107,77 @@ BBClient.noAuthFhirProvider = function(serviceUrl){
   }
 };
 
+function relative(url){
+  return (window.location.protocol + "//" + window.location.host + window.location.pathname).match(/(.*\/)[^\/]*/)[1] + url;
+}
+
+function getParameterByName(name) {
+  name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+  var regexS = "[\\?&]" + name + "=([^&#]*)";
+  var regex = new RegExp(regexS);
+  var results = regex.exec(window.location.search);
+  if(results == null)
+    return "";
+  else
+    return decodeURIComponent(results[1].replace(/\+/g, " "));
+}
 
 BBClient.authorize = function(params){
+
+  if (!params.client){
+    params = {
+      client: params
+    };
+  }
+  
+  if (!params.client.redirect_uri){
+    params.client.redirect_uri = relative("");
+  }
+
+  if (!params.client.redirect_uri.match(/:\/\//)){
+    params.client.redirect_uri = relative(params.client.redirect_uri);
+  }
+
+  var launch = getParameterByName("launch");
+  if (launch){
+    if (!params.client.scope.match(/launch:/)){
+      params.client.scope += " launch:"+launch;
+    }
+  }
+
+  var server = getParameterByName("iss");
+  if (server){
+    if (!params.server){
+      params.server = server;
+    }
+  }
+
+  providers(params.server, function(provider){
+
+  params.provider = provider;
 
   var state = Guid.newGuid();
   var client = params.client;
 
   if (params.provider.oauth2 == null) {
     localStorage[state] = JSON.stringify(params);
-    return window.location.href = client.redirect_uris[0] + "#state="+state;
+    window.location.href = client.redirect_uri + "#state="+state;
+    return;
   }
 
-  // 1. register to obtain a client_id
-  var post = {
-    type: "POST",
-    headers: {"Authorization" : "Bearer " + params.preregistration_token},
-    contentType: "application/json",
-    url: params.provider.oauth2.registration_uri,
-    data:JSON.stringify(client)
-  }
-  if (!params.preregistration_token){
-    delete post.headers;
-  }
+  localStorage[state] = JSON.stringify(params);
 
-  // 2. then authorize to access records
-  jQuery.ajax(post).success(function(client){
-    console.log("Got client", JSON.stringify(client, null,2 ));
+  console.log("sending client reg", params.client);
 
-    params.client = client;
+  var redirect_to=params.provider.oauth2.authorize_uri + "?" + 
+    "client_id="+client.client_id+"&"+
+    "response_type=token&"+
+    "scope="+client.scope+"&"+
+    "redirect_uri="+client.redirect_uri+"&"+
+    "state="+state;
 
-    localStorage[state] = JSON.stringify(params);
-
-    var authScope;
-    if (params.patientId) {
-      authScope = encodeURIComponent("search:"+params.patientId);
-    } else {
-      authScope = client.scope
-    }
-    console.log("sending client reg", params.client);
-
-    var redirect_to=params.provider.oauth2.authorize_uri + "?" + 
-      "client_id="+client.client_id+"&"+
-      "response_type=token&"+
-      "scope="+authScope+"&"+
-      "redirect_uri="+client.redirect_uris[0]+"&"+
-      "state="+state;
-    window.location.href = redirect_to;
+  window.location.href = redirect_to;
   });
 };
 
-BBClient.summary = function(){
-  return jQuery.ajax({
-    type: "GET",
-    dataType: "text",
-    headers: {"Authorization" : "Bearer " + BBClient.authorization.access_token},
-    url: BBClient.state.provider.bb_api.summary
-  });
-};
 
-var Guid = Guid || (function () {
-
-  var EMPTY = '00000000-0000-0000-0000-000000000000';
-
-  var _padLeft = function (paddingString, width, replacementChar) {
-    return paddingString.length >= width ? paddingString : _padLeft(replacementChar + paddingString, width, replacementChar || ' ');
-  };
-
-  var _s4 = function (number) {
-    var hexadecimalResult = number.toString(16);
-    return _padLeft(hexadecimalResult, 4, '0');
-  };
-
-  var _cryptoGuid = function () {
-    var buffer = new window.Uint16Array(8);
-    window.crypto.getRandomValues(buffer);
-    return [_s4(buffer[0]) + _s4(buffer[1]), _s4(buffer[2]), _s4(buffer[3]), _s4(buffer[4]), _s4(buffer[5]) + _s4(buffer[6]) + _s4(buffer[7])].join('-');
-  };
-
-  var _guid = function () {
-    var currentDateMilliseconds = new Date().getTime();
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (currentChar) {
-      var randomChar = (currentDateMilliseconds + Math.random() * 16) % 16 | 0;
-      currentDateMilliseconds = Math.floor(currentDateMilliseconds / 16);
-      return (currentChar === 'x' ? randomChar : (randomChar & 0x7 | 0x8)).toString(16);
-    });
-  };
-
-  var create = function () {
-    var hasCrypto = typeof (window.crypto) != 'undefined',
-    hasRandomValues = hasCrypto && typeof (window.crypto.getRandomValues) != 'undefined';
-    return (hasCrypto && hasRandomValues) ? _cryptoGuid() : _guid();
-  };
-
-  return {
-    newGuid: create,
-    empty: EMPTY
-  };})(); 
