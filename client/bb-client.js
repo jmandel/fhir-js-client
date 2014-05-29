@@ -55,7 +55,9 @@ BBClient.ready = function(hash, callback){
     };
   }
   process.nextTick(function(){
-    callback && callback(FhirClient(fhirClientParams))
+    var ret = FhirClient(fhirClientParams);
+    ret.state = JSON.parse(JSON.stringify(BBClient.state));
+    callback && callback(ret);
   });
 }
 
