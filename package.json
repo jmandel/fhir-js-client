@@ -5,7 +5,7 @@
   "author": "Josh Mandel <joshua.mandel@childrens.harvard.edu>",
   "dependencies": {
     "btoa": "*",
-    "browserify": "*",
+    "browserify": "<4.0.0",
     "jquery": "*"
   },
   "scripts": {
