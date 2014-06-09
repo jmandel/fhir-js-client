@@ -3,62 +3,109 @@ var FhirClient = require('./client');
 var Guid = require('./guid');
 
 var BBClient = module.exports =  {debug: true}
-BBClient.jQuery = BBClient.$ = jQuery;
+
+function urlParam(p, forceArray) {
+  if (forceArray === undefined) {
+    forceArray = false;
+  }
+
+  var query = location.search.substr(1);
+  var data = query.split("&");
+  var result = [];
+
+  for(var i=0; i<data.length; i++) {
+    var item = data[i].split("=");
+    if (item[0] === p) {
+      result.push(item[1]);
+    }
+  }
+
+  if (forceArray) {
+    return result;
+  }
+  if (result.length === 0){
+    return null;
+  }
+  return result[0];
+}
+
+function completeTokenFlow(hash){
+  var ret =  $.Deferred();
+
+  process.nextTick(function(){
+    var oauthResult = hash.match(/#(.*)/);
+    oauthResult = oauthResult ? oauthResult[1] : "";
+    oauthResult = oauthResult.split(/&/);
+    var authorization = {};
+    for (var i = 0; i < oauthResult.length; i++){
+      var kv = oauthResult[i].split(/=/);
+      if (kv[0].length > 0) {
+        authorization[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
+      }
+    }
+    ret.resolve(authorization);
+  });
+
+  return ret.promise();
+};
+
+function completeCodeFlow(){
+  var ret =  $.Deferred();
+
+  var code = urlParam("code");
+  var stateGuid = urlParam("state");
+  var state = JSON.parse(sessionStorage[stateGuid]);
+
+  $.ajax({
+
+    url: state.provider.oauth2.token_uri,
+    data: {
+      code: code,
+      grant_type: 'authorization_code',
+      redirect_uri: state.client.redirect_uri,
+      client_id: state.client.client_id
+    },
+  }).then(function(authz){
+    authz.state = stateGuid;
+    ret.resolve(authz);
+  });
+
+  return ret.promise();
+};
+
 
 BBClient.ready = function(hash, callback){
 
-  var mustClearHash = false;
-  if (arguments.length == 1){
-    mustClearHash = true;
+  if (arguments.length === 1){
     callback = hash;
     hash =  window.location.hash;
   }
 
-  var oauthResult = hash.match(/#(.*)/);
-  oauthResult = oauthResult ? oauthResult[1] : "";
-  oauthResult = oauthResult.split(/&/);
+  // decide between token flow (implicit grant) and code flow (authorization code grant)
+  var code = urlParam('code');
+  var accessTokenResolver = code ? completeCodeFlow() : completeTokenFlow(hash);
 
-  BBClient.authorization = null;
-  BBClient.state = null;
-
-  var authorization = {};
-  for (var i = 0; i < oauthResult.length; i++){
-    var kv = oauthResult[i].split(/=/);
-    if (kv[0].length > 0) {
-      authorization[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
-    }
-  }
-
-  if (Object.keys(authorization).length > 0 && authorization.state){
-    BBClient.authorization = authorization;
-    BBClient.state = JSON.parse(localStorage[BBClient.authorization.state]);
-  } else {
-    return;
-  }
-
-  console.log(BBClient);
-
-  // don't expose hash in the URL while in production mode
-  if (mustClearHash && BBClient.debug !== true) {
-    window.location.hash="";
-  }
-
-  var fhirClientParams = BBClient.fhirAuth = {
-    serviceUrl: BBClient.state.provider.bb_api.fhir_service_uri,
-    patientId: authorization.patient
-  };
-
-  if (BBClient.authorization.access_token !== undefined) {
-    fhirClientParams.auth = {
-      type: 'bearer',
-      token: BBClient.authorization.access_token
+  accessTokenResolver.then(function(tokenResponse){
+    var state = JSON.parse(sessionStorage[tokenResponse.state]);
+    var fhirClientParams = {
+      serviceUrl: state.provider.url,
+      patientId: tokenResponse.patient
     };
-  }
-  process.nextTick(function(){
+
+    if (tokenResponse.access_token !== undefined) {
+      fhirClientParams.auth = {
+        type: 'bearer',
+        token: tokenResponse.access_token
+      };
+    }
+
     var ret = FhirClient(fhirClientParams);
-    ret.state = JSON.parse(JSON.stringify(BBClient.state));
+    ret.state = JSON.parse(JSON.stringify(state));
+    ret.tokenResponse = JSON.parse(JSON.stringify(tokenResponse));
     callback && callback(ret);
+
   });
+
 }
 
 function providers(fhirServiceUrl, callback){
@@ -68,15 +115,11 @@ function providers(fhirServiceUrl, callback){
       var res = {
         "name": "SMART on FHIR Testing Server",
         "description": "Dev server for SMART on FHIR",
-        "url": null,
+        "url": fhirServiceUrl,
         "oauth2": {
           "registration_uri": null,
           "authorize_uri": null,
           "token_uri": null
-        },
-        "bb_api":{
-          "fhir_service_uri": fhirServiceUrl,
-          "search": fhirServiceUrl + "/DocumentReference"
         }
       };
 
@@ -103,9 +146,7 @@ function providers(fhirServiceUrl, callback){
 BBClient.noAuthFhirProvider = function(serviceUrl){
   return  {
     "oauth2": null,
-    "bb_api":{
-      "fhir_service_uri": serviceUrl
-    }
+    "url": serviceUrl
   }
 };
 
@@ -113,26 +154,19 @@ function relative(url){
   return (window.location.protocol + "//" + window.location.host + window.location.pathname).match(/(.*\/)[^\/]*/)[1] + url;
 }
 
-function getParameterByName(name) {
-  name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-  var regexS = "[\\?&]" + name + "=([^&#]*)";
-  var regex = new RegExp(regexS);
-  var results = regex.exec(window.location.search);
-  if(results == null)
-    return "";
-  else
-    return decodeURIComponent(results[1].replace(/\+/g, " "));
-}
-
 BBClient.authorize = function(params){
 
-  if (!params.client){
+ if (!params.client){
     params = {
       client: params
     };
   }
-  
-  if (!params.client.redirect_uri){
+
+  if (!params.response_type){
+    params.response_type = 'code';
+  }
+
+   if (!params.client.redirect_uri){
     params.client.redirect_uri = relative("");
   }
 
@@ -140,14 +174,14 @@ BBClient.authorize = function(params){
     params.client.redirect_uri = relative(params.client.redirect_uri);
   }
 
-  var launch = getParameterByName("launch");
+  var launch = urlParam("launch");
   if (launch){
     if (!params.client.scope.match(/launch:/)){
       params.client.scope += " launch:"+launch;
     }
   }
 
-  var server = getParameterByName("iss");
+  var server = urlParam("iss");
   if (server){
     if (!params.server){
       params.server = server;
@@ -156,29 +190,29 @@ BBClient.authorize = function(params){
 
   providers(params.server, function(provider){
 
-  params.provider = provider;
+    params.provider = provider;
 
-  var state = Guid.newGuid();
-  var client = params.client;
+    var state = Guid.newGuid();
+    var client = params.client;
 
-  if (params.provider.oauth2 == null) {
-    localStorage[state] = JSON.stringify(params);
-    window.location.href = client.redirect_uri + "#state="+state;
-    return;
-  }
+    if (params.provider.oauth2 == null) {
+      sessionStorage[state] = JSON.stringify(params);
+      window.location.href = client.redirect_uri + "#state="+state;
+      return;
+    }
 
-  localStorage[state] = JSON.stringify(params);
+    sessionStorage[state] = JSON.stringify(params);
 
-  console.log("sending client reg", params.client);
+    console.log("sending client reg", params.client);
 
-  var redirect_to=params.provider.oauth2.authorize_uri + "?" + 
-    "client_id="+client.client_id+"&"+
-    "response_type=token&"+
-    "scope="+client.scope+"&"+
-    "redirect_uri="+client.redirect_uri+"&"+
-    "state="+state;
+    var redirect_to=params.provider.oauth2.authorize_uri + "?" + 
+      "client_id="+client.client_id+"&"+
+      "response_type="+params.response_type+"&"+
+      "scope="+client.scope+"&"+
+      "redirect_uri="+client.redirect_uri+"&"+
+      "state="+state;
 
-  window.location.href = redirect_to;
+    window.location.href = redirect_to;
   });
 };
 
