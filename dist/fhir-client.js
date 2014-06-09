@@ -32,6 +32,9 @@ function urlParam(p, forceArray) {
 }
 
 function completeTokenFlow(hash){
+  if (!hash){
+    hash = winow.location.hash;
+  }
   var ret =  $.Deferred();
 
   process.nextTick(function(){
@@ -51,24 +54,32 @@ function completeTokenFlow(hash){
   return ret.promise();
 };
 
-function completeCodeFlow(){
+function completeCodeFlow(params){
+  if (!params){
+    params = {
+      code: urlParam('code'),
+      state: urlParam('state')
+    };
+  }
+  
   var ret =  $.Deferred();
+  var state = JSON.parse(sessionStorage[params.state]);
 
-  var code = urlParam("code");
-  var stateGuid = urlParam("state");
-  var state = JSON.parse(sessionStorage[stateGuid]);
+  if (window.history.replaceState){
+    window.history.replaceState({}, "", window.location.toString().replace(window.location.search, ""));
+  }
 
   $.ajax({
 
     url: state.provider.oauth2.token_uri,
     data: {
-      code: code,
+      code: params.code,
       grant_type: 'authorization_code',
       redirect_uri: state.client.redirect_uri,
       client_id: state.client.client_id
     },
   }).then(function(authz){
-    authz.state = stateGuid;
+    authz = $.extend(authz, params);
     ret.resolve(authz);
   });
 
@@ -76,16 +87,16 @@ function completeCodeFlow(){
 };
 
 
-BBClient.ready = function(hash, callback){
+BBClient.ready = function(input, callback){
 
   if (arguments.length === 1){
-    callback = hash;
-    hash =  window.location.hash;
+    callback = input;
+    input = null;
   }
 
   // decide between token flow (implicit grant) and code flow (authorization code grant)
-  var code = urlParam('code');
-  var accessTokenResolver = code ? completeCodeFlow() : completeTokenFlow(hash);
+  var isCode = urlParam('code') || (input && input.code);
+  var accessTokenResolver = isCode ? completeCodeFlow(input) : completeTokenFlow(input);
 
   accessTokenResolver.then(function(tokenResponse){
     var state = JSON.parse(sessionStorage[tokenResponse.state]);
