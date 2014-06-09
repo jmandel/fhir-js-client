@@ -5,6 +5,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-curl');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
 
   grunt.initConfig({
     curl: {
@@ -15,17 +16,24 @@ module.exports = function (grunt) {
     },
     shell: {
       browserify: {
-        command: "./node_modules/.bin/browserify  -d  -e client/entry.js  -i './node_modules/jsdom/**' > dist/fhir-client.js",
+        command: "./node_modules/.bin/browserify  -e client/entry.js  -i './node_modules/jsdom/**' > dist/fhir-client.js",
         options: {
-        failOnError: true,
-        stderr: true
+          failOnError: true,
+          stderr: true
         }
       }
     },
+    uglify: {
+      minifiedLib: {
+        files: {
+          'dist/fhir-client.min.js': ['dist/fhir-client.js']
+        }
+      }
+    }
   });
 
   grunt.registerTask('browserify', 'Browserify to create window.FHIR', ['shell:browserify']);
   grunt.registerTask('conformance', 'Download conformance base', ['curl:conformance']);
-  grunt.registerTask('default', ['browserify']);
-  grunt.registerTask('all', ['definitions', 'default']);
+  grunt.registerTask('default', ['browserify',  'uglify:minifiedLib']);
+  grunt.registerTask('all', ['conformance', 'default']);
 };
