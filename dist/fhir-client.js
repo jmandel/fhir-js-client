@@ -33,7 +33,7 @@ function urlParam(p, forceArray) {
 
 function completeTokenFlow(hash){
   if (!hash){
-    hash = winow.location.hash;
+    hash = window.location.hash;
   }
   var ret =  $.Deferred();
 
