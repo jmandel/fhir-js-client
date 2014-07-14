@@ -94,10 +94,21 @@ BBClient.ready = function(input, callback){
 
   // decide between token flow (implicit grant) and code flow (authorization code grant)
   var isCode = urlParam('code') || (input && input.code);
-  var accessTokenResolver = isCode ? completeCodeFlow(input) : completeTokenFlow(input);
+
+  var accessTokenResolver = null;
+  if (isCode) {
+    accessTokenResolver = completeCodeFlow(input);
+  } else if (!isCode) {
+    accessTokenResolver = completeTokenFlow(input);
+  }
 
   accessTokenResolver.then(function(tokenResponse){
+
     var state = JSON.parse(sessionStorage[tokenResponse.state]);
+    if (state.fake_token_response) {
+      tokenResponse = state.fake_token_response;
+    }
+
     var fhirClientParams = {
       serviceUrl: state.provider.url,
       patientId: tokenResponse.patient
@@ -109,7 +120,6 @@ BBClient.ready = function(input, callback){
         token: tokenResponse.access_token
       };
     }
-
     var ret = FhirClient(fhirClientParams);
     ret.state = JSON.parse(JSON.stringify(state));
     ret.tokenResponse = JSON.parse(JSON.stringify(tokenResponse));
@@ -120,6 +130,16 @@ BBClient.ready = function(input, callback){
 }
 
 function providers(fhirServiceUrl, callback){
+
+  // Shim for pre-OAuth2 launch parameters
+  if (isBypassOAuth()){
+    process.nextTick(function(){
+      bypassOAuth(fhirServiceUrl, callback);
+    });
+    return;
+  }
+
+
   jQuery.get(
     fhirServiceUrl+"/metadata",
     function(r){
@@ -154,8 +174,8 @@ function providers(fhirServiceUrl, callback){
   );
 };
 
-BBClient.noAuthFhirProvider = function(serviceUrl){
-  return  {
+var noAuthFhirProvider = function(serviceUrl){
+  return {
     "oauth2": null,
     "url": serviceUrl
   }
@@ -163,6 +183,17 @@ BBClient.noAuthFhirProvider = function(serviceUrl){
 
 function relative(url){
   return (window.location.protocol + "//" + window.location.host + window.location.pathname).match(/(.*\/)[^\/]*/)[1] + url;
+}
+
+function isBypassOAuth(){
+  return (urlParam("fhirServiceUrl") && !(urlParam("iss")));
+}
+
+function bypassOAuth(fhirServiceUrl, callback){
+  callback && callback({
+    "oauth2": null,
+    "url": fhirServiceUrl || urlParam("fhirServiceUrl")
+  });
 }
 
 BBClient.authorize = function(params){
@@ -192,11 +223,16 @@ BBClient.authorize = function(params){
     }
   }
 
-  var server = urlParam("iss");
+  var server = urlParam("iss") || urlParam("fhirServiceUrl");
   if (server){
     if (!params.server){
       params.server = server;
     }
+  }
+
+  if (urlParam("patientId")){
+    params.fake_token_response = params.fake_token_response || {};
+    params.fake_token_response.patient = urlParam("patientId");
   }
 
   providers(params.server, function(provider){
