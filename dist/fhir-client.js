@@ -609,7 +609,7 @@ function FhirClient(p) {
 
     client.context.patient = {
       'read': function(){
-        return client.api.Patient.read(client.practitionerId);
+        return client.api.Patient.read(client.patientId);
       }
     };
 
