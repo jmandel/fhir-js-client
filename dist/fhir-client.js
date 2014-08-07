@@ -44,7 +44,7 @@ function completeTokenFlow(hash){
     var authorization = {};
     for (var i = 0; i < oauthResult.length; i++){
       var kv = oauthResult[i].split(/=/);
-      if (kv[0].length > 0) {
+      if (kv[0].length > 0 && kv[1]) {
         authorization[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
       }
     }
@@ -78,33 +78,72 @@ function completeCodeFlow(params){
       redirect_uri: state.client.redirect_uri,
       client_id: state.client.client_id
     },
-  }).then(function(authz){
+  }).done(function(authz){
     authz = $.extend(authz, params);
     ret.resolve(authz);
-  });
+  }).fail(function(){
+    console.log("failed to exchange code for access_token", arguments);
+    ret.reject();
+  });;
 
   return ret.promise();
 };
 
+function readyArgs(){
 
-BBClient.ready = function(input, callback){
+  var input = null;
+  var callback = function(){};
+  var errback = function(){};
 
-  if (arguments.length === 1){
-    callback = input;
-    input = null;
+  if (arguments.length === 0){
+    throw "Can't call 'ready' without arguments";
+  } else if (arguments.length === 1){
+    callback = arguments[0];
+  } else if (arguments.length === 2){
+    if (typeof arguments[0] === 'function'){
+      callback = arguments[0];
+      errback = arguments[1];
+    } else if (typeof arguments[0] === 'object'){
+      input = arguments[0];
+      callback = arguments[1];
+    } else {
+      throw "ready called with invalid arguments";
+    }
+  } else if (arguments.length === 3){
+    input = arguments[0];
+    callback = arguments[1];
+    errback = arguments[2];
+  } else {
+    throw "ready called with invalid arguments";
   }
 
+  return {
+    input: input,
+    callback: callback,
+    errback: errback
+  };
+}
+
+
+BBClient.ready = function(input, callback, errback){
+
+  var args = readyArgs.apply(this, arguments);
+
   // decide between token flow (implicit grant) and code flow (authorization code grant)
-  var isCode = urlParam('code') || (input && input.code);
+  var isCode = urlParam('code') || (args.input && args.input.code);
 
   var accessTokenResolver = null;
   if (isCode) {
-    accessTokenResolver = completeCodeFlow(input);
+    accessTokenResolver = completeCodeFlow(args.input);
   } else if (!isCode) {
-    accessTokenResolver = completeTokenFlow(input);
+    accessTokenResolver = completeTokenFlow(args.input);
   }
 
-  accessTokenResolver.then(function(tokenResponse){
+  accessTokenResolver.done(function(tokenResponse){
+
+    if (!tokenResponse || !tokenResponse.state) {
+      return args.errback("No 'state' parameter found in authorization response.");
+    }
 
     var state = JSON.parse(sessionStorage[tokenResponse.state]);
     if (state.fake_token_response) {
@@ -121,17 +160,22 @@ BBClient.ready = function(input, callback){
         type: 'bearer',
         token: tokenResponse.access_token
       };
+    } else if (!state.fake_token_response){
+      return args.errback("Failed to obtain access token.");
     }
+
     var ret = FhirClient(fhirClientParams);
     ret.state = JSON.parse(JSON.stringify(state));
     ret.tokenResponse = JSON.parse(JSON.stringify(tokenResponse));
-    callback && callback(ret);
+    args.callback(ret);
 
-  });
+  }).fail(function(){
+    args.errback("Failed to obtain access token.");
+  });;
 
 }
 
-function providers(fhirServiceUrl, callback){
+function providers(fhirServiceUrl, callback, errback){
 
   // Shim for pre-OAuth2 launch parameters
   if (isBypassOAuth()){
@@ -168,6 +212,7 @@ function providers(fhirServiceUrl, callback){
         });
       }
       catch (err) {
+        return errback && errback(err);
       }
 
       callback && callback(res);
@@ -198,7 +243,13 @@ function bypassOAuth(fhirServiceUrl, callback){
   });
 }
 
-BBClient.authorize = function(params){
+BBClient.authorize = function(params, errback){
+
+ if (!errback){
+   errback = function(){
+     console.log("Failed to discover authorization URL given", params);
+   };
+ }
 
  if (!params.client){
     params = {
@@ -262,7 +313,7 @@ BBClient.authorize = function(params){
       "state="+state;
 
     window.location.href = redirect_to;
-  });
+  }, errback);
 };
 
 
