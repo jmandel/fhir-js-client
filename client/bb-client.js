@@ -29,6 +29,12 @@ function urlParam(p, forceArray) {
   return result[0];
 }
 
+function getPreviousToken(){
+  var ret = sessionStorage.tokenResponse;
+  if (ret) ret = JSON.parse(ret);
+  return ret;
+}
+
 function completeTokenFlow(hash){
   if (!hash){
     hash = window.location.hash;
@@ -50,7 +56,7 @@ function completeTokenFlow(hash){
   });
 
   return ret.promise();
-};
+}
 
 function completeCodeFlow(params){
   if (!params){
@@ -85,7 +91,15 @@ function completeCodeFlow(params){
   });;
 
   return ret.promise();
-};
+}
+
+function completePageReload(){
+  var d = $.Deferred();
+  process.nextTick(function(){
+    d.resolve(getPreviousToken());
+  });
+  return d;
+}
 
 function readyArgs(){
 
@@ -131,17 +145,21 @@ BBClient.ready = function(input, callback, errback){
   var isCode = urlParam('code') || (args.input && args.input.code);
 
   var accessTokenResolver = null;
-  if (isCode) {
-    accessTokenResolver = completeCodeFlow(args.input);
-  } else if (!isCode) {
-    accessTokenResolver = completeTokenFlow(args.input);
+  var tokenResponse = getPreviousToken();
+  if (tokenResponse && tokenResponse.patient) { // we're reloading after successful completion
+    accessTokenResolver = completePageReload();
+  } else if (isCode) { // code flow
+    accessTokenResolver = completeCodeFlow(input);
+  } else { // token flow
+    accessTokenResolver = completeTokenFlow(input);
   }
-
   accessTokenResolver.done(function(tokenResponse){
 
     if (!tokenResponse || !tokenResponse.state) {
       return args.errback("No 'state' parameter found in authorization response.");
     }
+    
+    sessionStorage.tokenResponse = JSON.stringify(tokenResponse);
 
     var state = JSON.parse(sessionStorage[tokenResponse.state]);
     if (state.fake_token_response) {
