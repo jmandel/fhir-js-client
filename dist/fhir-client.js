@@ -148,8 +148,7 @@ BBClient.ready = function(input, callback, errback){
   var isCode = urlParam('code') || (args.input && args.input.code);
 
   var accessTokenResolver = null;
-  var tokenResponse = getPreviousToken();
-  if (tokenResponse && tokenResponse.patient) { // we're reloading after successful completion
+  if (sessionStorage.tokenResponse) { // we're reloading after successful completion
     accessTokenResolver = completePageReload();
   } else if (isCode) { // code flow
     accessTokenResolver = completeCodeFlow(input);
