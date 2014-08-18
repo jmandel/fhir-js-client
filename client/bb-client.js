@@ -149,9 +149,9 @@ BBClient.ready = function(input, callback, errback){
   if (sessionStorage.tokenResponse) { // we're reloading after successful completion
     accessTokenResolver = completePageReload();
   } else if (isCode) { // code flow
-    accessTokenResolver = completeCodeFlow(input);
+    accessTokenResolver = completeCodeFlow(args.input);
   } else { // token flow
-    accessTokenResolver = completeTokenFlow(input);
+    accessTokenResolver = completeTokenFlow(args.input);
   }
   accessTokenResolver.done(function(tokenResponse){
 
