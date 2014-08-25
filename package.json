@@ -5,7 +5,7 @@
   "author": "Josh Mandel <joshua.mandel@childrens.harvard.edu>",
   "dependencies": {
     "btoa": "*",
-    "browserify": "<4.0.0",
+    "browserify": "^5.0",
     "jquery": "*"
   },
   "scripts": {
@@ -16,13 +16,11 @@
     "should": "*",
     "sinon": "*",
     "grunt": "~0.4.1",
-    "grunt-browserify": "~2.0.8",
     "grunt-contrib-concat": "~0.3.0",
     "grunt-contrib-clean": "~0.5.0",
     "grunt-shell": "~0.3.1",
     "jsdom": "*",
     "grunt-curl": "~1.5.1",
-    "browserify-shim": "~3.4.1",
     "grunt-contrib-uglify": "~0.4.0"
   },
   "engine": "node >= 0.6.0"

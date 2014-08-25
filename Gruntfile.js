@@ -2,7 +2,6 @@ module.exports = function (grunt) {
 
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-concat');
-  grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-curl');
   grunt.loadNpmTasks('grunt-contrib-uglify');
@@ -16,7 +15,7 @@ module.exports = function (grunt) {
     },
     shell: {
       browserify: {
-        command: "./node_modules/.bin/browserify  -e client/entry.js  -i './node_modules/jsdom/**' > dist/fhir-client.js",
+        command: "./node_modules/.bin/browserify  -e client/entry.js  -i 'jsdom' > dist/fhir-client.js",
         options: {
           failOnError: true,
           stderr: true
