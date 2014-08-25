@@ -154,7 +154,10 @@ function FhirClient(p) {
 
     function getContained(from, id) {
       var matches = from.contained.filter(function(c){
-        return c.id === id; 
+       // Note: `.id` is correct, but `._id` was a longtime (incorrect)
+       // production of the FHIR Java RI serialization routine. We checl
+       // both here for compatibility.
+        return (c.id === id || c._id === id); 
       });
       if (matches.length !== 1)  {
         return null;
