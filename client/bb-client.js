@@ -69,7 +69,7 @@ function completeCodeFlow(params){
   var ret =  $.Deferred();
   var state = JSON.parse(sessionStorage[params.state]);
 
-  if (window.history.replaceState){
+  if (window.history.replaceState && BBClient.settings.replaceBrowserHistory){
     window.history.replaceState({}, "", window.location.toString().replace(window.location.search, ""));
   }
 
@@ -137,6 +137,10 @@ function readyArgs(){
   };
 }
 
+// Client settings
+BBClient.settings = {
+    replaceBrowserHistory: true
+};
 
 BBClient.ready = function(input, callback, errback){
 
