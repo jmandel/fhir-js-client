@@ -7,6 +7,10 @@ module.exports = FhirClient;
 function absolute(id, server) {
   if (id.match(/^http/)) return id;
   if (id.match(/^urn/)) return id;
+
+  // strip leading slash
+  if (id.charAt(0) == "/") id = id.substr(1);
+
   return server.serviceUrl + '/' + id;
 }
 
@@ -140,6 +144,22 @@ function FhirClient(p) {
         return p.remote(url);
       }
     };
+    
+    function handleBinary(p){
+      return function(from, to) {
+
+        var url = absolute(to, server);
+        if (url in cache) {
+          return p.local(url);
+        }
+
+        if (!p.remote) {
+          throw "Can't look up unfetched resource " + url;
+        }
+
+        return p.remote(url);
+      }
+    };
 
     client.cachedLink = handleReference({
       contained: getContained,
@@ -150,6 +170,11 @@ function FhirClient(p) {
       contained: followContained,
       local: followLocal,
       remote: followRemote
+    });
+    
+    client.followBinary = handleBinary({
+      local: followLocal,
+      remote: followRemoteBinary
     });
 
     function getContained(from, id) {
@@ -197,6 +222,11 @@ function FhirClient(p) {
       var getParams = relative(url, server);
       return client.get(getParams);
     };
+    
+    function followRemoteBinary(url) {
+      var getParams = relative(url, server);
+      return client.getBinary(getParams);
+    };
 
     client.get = function(p) {
       // p.resource, p.id, ?p.version, p.include
@@ -215,6 +245,25 @@ function FhirClient(p) {
           ret.reject("Didn't get exactly one result for " + url);
         }
         ret.resolve(ids[0]);
+      })
+      .fail(function(){
+        ret.reject("Could not fetch " + url, arguments);
+      });
+      return ret;
+    };
+    
+    client.getBinary = function(p) {
+
+      var ret = new $.Deferred();
+      var url = server.serviceUrl + '/' + p.resource + '/' + p.id;
+
+      $.ajax(client.authenticated({
+        type: 'GET',
+        url: url,
+        dataType: 'blob'
+      }))
+      .done(function(blob){
+        ret.resolve(blob);
       })
       .fail(function(){
         ret.reject("Could not fetch " + url, arguments);
@@ -365,3 +414,78 @@ function FhirClient(p) {
 
     return client;
 }
+
+// Patch jQuery AJAX mechanism to receive blob objects via XMLHttpRequest 2. Based on:
+//    https://gist.github.com/aaronk6/bff7cc600d863d31a7bf
+//    http://www.artandlogic.com/blog/2013/11/jquery-ajax-blobs-and-array-buffers/
+
+/**
+ * Register ajax transports for blob send/recieve and array buffer send/receive via XMLHttpRequest Level 2
+ * within the comfortable framework of the jquery ajax request, with full support for promises.
+ *
+ * Notice the +* in the dataType string? The + indicates we want this transport to be prepended to the list
+ * of potential transports (so it gets first dibs if the request passes the conditions within to provide the
+ * ajax transport, preventing the standard transport from hogging the request), and the * indicates that
+ * potentially any request with any dataType might want to use the transports provided herein.
+ *
+ * Remember to specify 'processData:false' in the ajax options when attempting to send a blob or arraybuffer -
+ * otherwise jquery will try (and fail) to convert the blob or buffer into a query string.
+ */
+jQuery.ajaxTransport("+*", function(options, originalOptions, jqXHR){
+    // Test for the conditions that mean we can/want to send/receive blobs or arraybuffers - we need XMLHttpRequest
+    // level 2 (so feature-detect against window.FormData), feature detect against window.Blob or window.ArrayBuffer,
+    // and then check to see if the dataType is blob/arraybuffer or the data itself is a Blob/ArrayBuffer
+    if (window.FormData && ((options.dataType && (options.dataType === 'blob' || options.dataType === 'arraybuffer')) ||
+        (options.data && ((window.Blob && options.data instanceof Blob) ||
+            (window.ArrayBuffer && options.data instanceof ArrayBuffer)))
+        ))
+    {
+        return {
+            /**
+             * Return a transport capable of sending and/or receiving blobs - in this case, we instantiate
+             * a new XMLHttpRequest and use it to actually perform the request, and funnel the result back
+             * into the jquery complete callback (such as the success function, done blocks, etc.)
+             *
+             * @param headers
+             * @param completeCallback
+             */
+            send: function(headers, completeCallback){
+                var xhr = new XMLHttpRequest(),
+                    url = options.url || window.location.href,
+                    type = options.type || 'GET',
+                    dataType = options.dataType || 'text',
+                    data = options.data || null,
+                    async = options.async || true,
+                    key;
+
+                xhr.addEventListener('load', function(){
+                    var response = {}, status, isSuccess;
+
+                    isSuccess = xhr.status >= 200 && xhr.status < 300 || xhr.status === 304;
+
+                    if (isSuccess) {
+                        response[dataType] = xhr.response;
+                    } else {
+                        // In case an error occured we assume that the response body contains
+                        // text data - so let's convert the binary data to a string which we can
+                        // pass to the complete callback.
+                        response.text = String.fromCharCode.apply(null, new Uint8Array(xhr.response));
+                    }
+
+                    completeCallback(xhr.status, xhr.statusText, response, xhr.getAllResponseHeaders());
+                });
+
+                xhr.open(type, url, async);
+                xhr.responseType = dataType;
+
+                for (key in headers) {
+                    if (headers.hasOwnProperty(key)) xhr.setRequestHeader(key, headers[key]);
+                }
+                xhr.send(data);
+            },
+            abort: function(){
+                jqXHR.abort();
+            }
+        };
+    }
+});
