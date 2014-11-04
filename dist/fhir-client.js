@@ -240,7 +240,9 @@ function providers(fhirServiceUrl, callback, errback){
       callback && callback(res);
     },
     "json"
-  );
+  ).fail(function() {
+    errback && errback("Unable to fetch conformance statement");
+  });
 };
 
 var noAuthFhirProvider = function(serviceUrl){
