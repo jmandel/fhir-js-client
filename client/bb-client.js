@@ -1,6 +1,7 @@
 var $ = jQuery = require('./jquery');
 var FhirClient = require('./client');
 var Guid = require('./guid');
+var jwt = require('jsonwebtoken');
 
 var BBClient = module.exports =  {debug: true}
 
@@ -174,6 +175,12 @@ BBClient.ready = function(input, callback, errback){
       serviceUrl: state.provider.url,
       patientId: tokenResponse.patient
     };
+    
+    if (tokenResponse.id_token) {
+        var id_token = tokenResponse.id_token;
+        var payload = jwt.decode(id_token);
+        fhirClientParams["userId"] = payload["profile"]; 
+    }
 
     if (tokenResponse.access_token !== undefined) {
       fhirClientParams.auth = {
@@ -191,9 +198,9 @@ BBClient.ready = function(input, callback, errback){
 
   }).fail(function(){
     args.errback("Failed to obtain access token.");
-  });;
+  });
 
-}
+};
 
 function providers(fhirServiceUrl, callback, errback){
 

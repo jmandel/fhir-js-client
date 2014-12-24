@@ -6,7 +6,8 @@
   "dependencies": {
     "btoa": "*",
     "browserify": "^5.0",
-    "jquery": "*"
+    "jquery": "*",
+    "jsonwebtoken": "*"
   },
   "scripts": {
     "test": "mocha -c -R spec"

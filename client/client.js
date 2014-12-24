@@ -59,7 +59,7 @@ function FhirClient(p) {
     }
 
     client.patientId = p.patientId;
-    client.practitionerId = p.practitionerId;
+    client.userId = p.userId;
 
     client.cache = {
       get: function(p) {
@@ -358,9 +358,19 @@ function FhirClient(p) {
 
     client.context = {};
 
-    client.context.practitioner = {
+    client.context.user = {
       'read': function(){
-        return client.api.Practitioner.read(client.practitionerId);
+        var userId = client.userId;
+        var ret;
+        if (userId) {
+            $.each(["Practitioner", "Patient", "RelatedPerson"], function (id, type) {
+                if (userId.indexOf(type) >= 0) {
+                    userId = userId.split(type + "/")[1];
+                    ret = client.api[type].read(userId);
+                }
+            });
+        }
+        return ret;
       }
     };
 
