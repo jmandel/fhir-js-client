@@ -276,13 +276,16 @@ function bypassOAuth(fhirServiceUrl, callback){
 
 BBClient.authorize = function(params, errback){
 
- if (!errback){
-   errback = function(){
-     console.log("Failed to discover authorization URL given", params);
-   };
- }
+  if (!errback){
+    errback = function(){
+        console.log("Failed to discover authorization URL given", params);
+    };
+  }
+  
+  // prevent inheritance of tokenResponse from parent window
+  delete sessionStorage.tokenResponse;
 
- if (!params.client){
+  if (!params.client){
     params = {
       client: params
     };
