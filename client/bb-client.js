@@ -311,7 +311,7 @@ BBClient.authorize = function(params, errback){
   var server = urlParam("iss") || urlParam("fhirServiceUrl");
   if (server){
     if (!params.server){
-      params.server = server;
+      params.server = decodeURIComponent(server);
     }
   }
 
