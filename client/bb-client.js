@@ -17,7 +17,7 @@ function urlParam(p, forceArray) {
   for(var i=0; i<data.length; i++) {
     var item = data[i].split("=");
     if (item[0] === p) {
-      result.push(item[1]);
+      result.push(decodeURIComponent(item[1]));
     }
   }
 
@@ -311,7 +311,7 @@ BBClient.authorize = function(params, errback){
   var server = urlParam("iss") || urlParam("fhirServiceUrl");
   if (server){
     if (!params.server){
-      params.server = decodeURIComponent(server);
+      params.server = server;
     }
   }
 
@@ -329,7 +329,7 @@ BBClient.authorize = function(params, errback){
 
     if (params.provider.oauth2 == null) {
       sessionStorage[state] = JSON.stringify(params);
-      window.location.href = client.redirect_uri + "#state="+state;
+      window.location.href = client.redirect_uri + "#state="+encodeURIComponent(state);
       return;
     }
 
@@ -338,11 +338,11 @@ BBClient.authorize = function(params, errback){
     console.log("sending client reg", params.client);
 
     var redirect_to=params.provider.oauth2.authorize_uri + "?" + 
-      "client_id="+client.client_id+"&"+
-      "response_type="+params.response_type+"&"+
-      "scope="+client.scope+"&"+
-      "redirect_uri="+client.redirect_uri+"&"+
-      "state="+state;
+      "client_id="+encodeURIComponent(client.client_id)+"&"+
+      "response_type="+encodeURIComponent(params.response_type)+"&"+
+      "scope="+encodeURIComponent(client.scope)+"&"+
+      "redirect_uri="+encodeURIComponent(client.redirect_uri)+"&"+
+      "state="+encodeURIComponent(state);
 
     window.location.href = redirect_to;
   }, errback);
