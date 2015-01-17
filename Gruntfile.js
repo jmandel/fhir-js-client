@@ -20,6 +20,13 @@ module.exports = function (grunt) {
           failOnError: true,
           stderr: true
         }
+      },
+      '6to5': {
+        command: "sed -i '' 's/const /var /g' dist/fhir-client.js",
+        options: {
+          failOnError: true,
+          stderr: true
+        }
       }
     },
     uglify: {
@@ -32,7 +39,8 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('browserify', 'Browserify to create window.FHIR', ['shell:browserify']);
+  grunt.registerTask('6to5', 'Transcode ES6 to ES5', ['shell:6to5']);
   grunt.registerTask('conformance', 'Download conformance base', ['curl:conformance']);
-  grunt.registerTask('default', ['browserify',  'uglify:minifiedLib']);
+  grunt.registerTask('default', ['browserify', '6to5', 'uglify:minifiedLib']);
   grunt.registerTask('all', ['conformance', 'default']);
 };
