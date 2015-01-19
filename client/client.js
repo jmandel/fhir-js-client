@@ -82,17 +82,17 @@ function FhirClient(p) {
     }
 
     client.indexResource = function(id, r) {
-      r.resourceId = relative(id, server);
       var ret = [r];
       cache[absolute(id, server)] = r;
       return ret;
     };
 
-    client.indexFeed = function(atomResult) {
+    client.indexBundle = function(data) {
       var ret = [];
-      var feed = atomResult.feed || atomResult;
-      (feed.entry || []).forEach(function(e){
-        var more = client.indexResource(e.id, e.content);
+      (data.entry || []).forEach(function(e){
+        var r = e.resource;
+        var id = r.resourceType + "/" + r.id;
+        var more = client.indexResource(id, r);
         [].push.apply(ret, more);
       });
       return ret; 

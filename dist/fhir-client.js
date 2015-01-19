@@ -230,15 +230,10 @@ function providers(fhirServiceUrl, callback, errback){
       };
 
       try {
-        jQuery.each(r.rest[0].security.extension, function(responseNum, arg){
-          if (arg.url === "http://fhir-registry.smarthealthit.org/Profile/oauth-uris#register") {
-            res.oauth2.registration_uri = arg.valueUri;
-          } else if (arg.url === "http://fhir-registry.smarthealthit.org/Profile/oauth-uris#authorize") {
-            res.oauth2.authorize_uri = arg.valueUri;
-          } else if (arg.url === "http://fhir-registry.smarthealthit.org/Profile/oauth-uris#token") {
-            res.oauth2.token_uri = arg.valueUri;
-          }
-        });
+        var security = r.rest[0].security;
+        res.oauth2.registration_uri = security["http://fhir-registry.smarthealthit.org/Profile/oauth-uris#register"].valueUri;
+        res.oauth2.authorize_uri = security["http://fhir-registry.smarthealthit.org/Profile/oauth-uris#authorize"].valueUri;
+        res.oauth2.token_uri = security["http://fhir-registry.smarthealthit.org/Profile/oauth-uris#token"].valueUri;
       }
       catch (err) {
         return errback && errback(err);
@@ -486,17 +481,17 @@ function FhirClient(p) {
     }
 
     client.indexResource = function(id, r) {
-      r.resourceId = relative(id, server);
       var ret = [r];
       cache[absolute(id, server)] = r;
       return ret;
     };
 
-    client.indexFeed = function(atomResult) {
+    client.indexBundle = function(data) {
       var ret = [];
-      var feed = atomResult.feed || atomResult;
-      (feed.entry || []).forEach(function(e){
-        var more = client.indexResource(e.id, e.content);
+      (data.entry || []).forEach(function(e){
+        var r = e.resource;
+        var id = r.resourceType + "/" + r.id;
+        var more = client.indexResource(id, r);
         [].push.apply(ret, more);
       });
       return ret; 
@@ -1293,14 +1288,13 @@ function Search(p) {
 
   var nextPageUrl = null;
 
-  function gotFeed(d){
-    return function(data, status) {
+  function gotBundle(d){
+    return function(bundle, status) {
 
       nextPageUrl = null; 
-      var feed = data.feed || data;
 
-      if(feed.link) {
-        var next = feed.link.filter(function(l){
+      if(bundle.link) {
+        var next = bundle.link.filter(function(l){
           return l.rel === "next";
         });
         if (next.length === 1) {
@@ -1308,16 +1302,16 @@ function Search(p) {
         }
       }
 
-      var results = search.client.indexFeed(data); 
+      var results = search.client.indexBundle(bundle); 
       d.resolve(results, search);
     }
-  };
+  }
 
-  function failedFeed(d){
+  function failedBundle(d){
     return function(failure){
       d.reject("Search failed.", arguments);
     }
-  };
+  }
 
   search.hasNext = function(){
     return nextPageUrl !== null;
@@ -1339,8 +1333,8 @@ function Search(p) {
     var ret = new $.Deferred();
     console.log("Nexting", searchParams);
     $.ajax(search.client.authenticated(searchParams))
-    .done(gotFeed(ret))
-    .fail(failedFeed(ret));
+    .done(gotBundle(ret))
+    .fail(failedBundle(ret));
 
     return ret;
   };
@@ -1359,8 +1353,8 @@ function Search(p) {
     var ret = new $.Deferred();
 
     $.ajax(search.client.authenticated(searchParams))
-    .done(gotFeed(ret))
-    .fail(failedFeed(ret));
+    .done(gotBundle(ret))
+    .fail(failedBundle(ret));
 
     return ret;
   };
