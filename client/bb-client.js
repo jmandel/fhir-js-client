@@ -324,6 +324,7 @@ BBClient.authorize = function(params, errback){
 
     if (params.provider.oauth2 == null) {
       sessionStorage[state] = JSON.stringify(params);
+      sessionStorage.tokenResponse = JSON.stringify({state: state});
       window.location.href = client.redirect_uri + "#state="+encodeURIComponent(state);
       return;
     }
