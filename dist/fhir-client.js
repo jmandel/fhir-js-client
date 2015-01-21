@@ -231,9 +231,9 @@ function providers(fhirServiceUrl, callback, errback){
 
       try {
         var security = r.rest[0].security;
-        res.oauth2.registration_uri = security["http://fhir-registry.smarthealthit.org/Profile/oauth-uris#register"].valueUri;
-        res.oauth2.authorize_uri = security["http://fhir-registry.smarthealthit.org/Profile/oauth-uris#authorize"].valueUri;
-        res.oauth2.token_uri = security["http://fhir-registry.smarthealthit.org/Profile/oauth-uris#token"].valueUri;
+        res.oauth2.registration_uri = security["http://fhir-registry.smarthealthit.org/Profile/oauth-uris#register"][0].valueUri;
+        res.oauth2.authorize_uri = security["http://fhir-registry.smarthealthit.org/Profile/oauth-uris#authorize"][0].valueUri;
+        res.oauth2.token_uri = security["http://fhir-registry.smarthealthit.org/Profile/oauth-uris#token"][0].valueUri;
       }
       catch (err) {
         return errback && errback(err);
