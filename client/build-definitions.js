@@ -10,13 +10,16 @@ c.rest[0].resource.forEach(function(r){
     params: params
   };
 
-  r.searchParam.forEach(function(sp){
-    params.push({
-      name: camelCased(sp.name),
-      wireName: sp.name,
-      type: sp.type
+  if (r.searchParam) {
+    r.searchParam.forEach(function(sp){
+      params.push({
+        name: camelCased(sp.name),
+        wireName: sp.name,
+        type: sp.type
+      });
     });
-  });
+  }
+
 });
 
 module.exports = definitions;
