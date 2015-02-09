@@ -21,10 +21,12 @@ utils.byCode = function(observations, property){
     observations = [observations];
   }
   observations.forEach(function(o){
-    o[property].coding.forEach(function(coding){
-      ret[coding.code] = ret[coding.code] || [];
-      ret[coding.code].push(o);
-    });
+    if (o.resourceType === "Observation") {
+        o[property].coding.forEach(function(coding){
+          ret[coding.code] = ret[coding.code] || [];
+          ret[coding.code].push(o);
+        });
+    }
   });
   return ret;
 };
