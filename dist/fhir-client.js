@@ -350,7 +350,28 @@ BBClient.authorize = function(params, errback){
   }, errback);
 };
 
+BBClient.resolveAuthType = function (fhirServiceUrl, callback, errback) {
 
+      jQuery.get(
+        fhirServiceUrl+"/metadata",
+        function(r){
+          var type = "none";
+          
+          try {
+            if (r.rest[0].security.service[0].coding[0].code.toLowerCase() === "oauth2") {
+                type = "oauth2";
+            }
+          }
+          catch (err) {
+          }
+
+          callback && callback(type);
+        },
+        "json"
+      ).fail(function() {
+        errback && errback("Unable to fetch conformance statement");
+      });
+};
 
 }).call(this,require('_process'))
 },{"./client":3,"./guid":5,"./jquery":6,"_process":31,"jsonwebtoken":49}],2:[function(require,module,exports){
