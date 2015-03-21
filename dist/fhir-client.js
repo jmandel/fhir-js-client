@@ -710,6 +710,8 @@ function FhirClient(p) {
         } else {
           d.resolve();
         } 
+      }).fail(function (err){
+          d.reject(err);
       });
       return d.promise();
     };
