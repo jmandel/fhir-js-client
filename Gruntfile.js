@@ -15,7 +15,7 @@ module.exports = function (grunt) {
     },
     shell: {
       browserify: {
-        command: "./node_modules/.bin/browserify  -e client/entry.js  -i 'jsdom' -g 6to5ify > dist/fhir-client.js",
+        command: "./node_modules/.bin/browserify  -e client/entry.js  -i 'jsdom' -g varify > dist/fhir-client.js",
         options: {
           failOnError: true,
           stderr: true

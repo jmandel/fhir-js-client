@@ -8,13 +8,13 @@
     "browserify": "^5.0",
     "jquery": "*",
     "jsonwebtoken": "*",
-    "6to5ify": "^3.1.2"
+    "varify": "^0.1.1"
   },
   "scripts": {
     "test": "mocha -c -R spec"
   },
   "devDependencies": {
-    "6to5ify": "^3.1.2",
+    "varify": "^0.1.1",
     "grunt": "~0.4.1",
     "grunt-contrib-clean": "~0.5.0",
     "grunt-contrib-concat": "~0.3.0",
