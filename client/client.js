@@ -1,6 +1,7 @@
 var btoa = require('btoa');
 var Search = require('./search');
-var $ = jQuery = require('./jquery');
+var jQuery = require('./jquery');
+var $ = jQuery;
 
 module.exports = FhirClient;
 
