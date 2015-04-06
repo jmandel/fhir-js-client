@@ -10,7 +10,7 @@ module.exports = function (grunt) {
     curl: {
       conformance: {
         dest: 'vendor/conformance.json',
-        src: 'http://hl7-fhir.github.io/conformance-base.json'
+        src: 'http://hl7.org/fhir/2015May/conformance-base.json'
       }
     },
     shell: {

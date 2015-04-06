@@ -229,9 +229,16 @@ function providers(fhirServiceUrl, callback, errback){
 
       try {
         var security = r.rest[0].security;
-        res.oauth2.registration_uri = security["http://fhir-registry.smarthealthit.org/Profile/oauth-uris#register"][0].valueUri;
-        res.oauth2.authorize_uri = security["http://fhir-registry.smarthealthit.org/Profile/oauth-uris#authorize"][0].valueUri;
-        res.oauth2.token_uri = security["http://fhir-registry.smarthealthit.org/Profile/oauth-uris#token"][0].valueUri;
+
+        jQuery.each(r.rest[0].security.extension, function(responseNum, arg){
+          if (arg.url === "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris#register") {
+            res.oauth2.registration_uri = arg.valueUri;
+          } else if (arg.url === "http://fhir-registry.smarthealthitplatforms.org/StructureDefinition/oauth-uris#authorize") {
+            res.oauth2.authorize_uri = arg.valueUri;
+          } else if (arg.url === "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris#token") {
+            res.oauth2.token_uri = arg.valueUri;
+          }
+        });
       }
       catch (err) {
         return errback && errback(err);
