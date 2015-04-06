@@ -1,4 +1,5 @@
-var $ = jQuery = require('./jquery');
+var jQuery = require('./jquery');
+var $ = jQuery;
 var FhirClient = require('./client');
 var Guid = require('./guid');
 var jwt = require('jsonwebtoken');

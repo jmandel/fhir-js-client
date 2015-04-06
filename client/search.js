@@ -1,5 +1,6 @@
 module.exports = Search;
-var $ = jQuery = require('./jquery');
+var jQuery = require('./jquery');
+var $ = jQuery;
 
 function Search(p) {
 
