@@ -234,7 +234,7 @@ function providers(fhirServiceUrl, callback, errback){
         jQuery.each(r.rest[0].security.extension, function(responseNum, arg){
           if (arg.url === "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris#register") {
             res.oauth2.registration_uri = arg.valueUri;
-          } else if (arg.url === "http://fhir-registry.smarthealthitplatforms.org/StructureDefinition/oauth-uris#authorize") {
+          } else if (arg.url === "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris#authorize") {
             res.oauth2.authorize_uri = arg.valueUri;
           } else if (arg.url === "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris#token") {
             res.oauth2.token_uri = arg.valueUri;

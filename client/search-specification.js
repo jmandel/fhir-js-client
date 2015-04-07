@@ -193,6 +193,13 @@ module.exports = function(mixins) {
   StringSearchParam.prototype = new SearchParam();
   StringSearchParam.prototype.constructor = StringSearchParam;
 
+  function UriSearchParam(name){
+    SearchParam.apply(this, arguments);
+  };
+  UriSearchParam.prototype = new SearchParam();
+  UriSearchParam.prototype.constructor = UriSearchParam;
+
+
   function TokenSearchParam(name){
     SearchParam.apply(this, arguments);
 
@@ -259,6 +266,7 @@ module.exports = function(mixins) {
 
   var paramTypes = {
     string: StringSearchParam,
+    uri: UriSearchParam,
     reference: ReferenceSearchParam,
     token: TokenSearchParam,
     number: NumberSearchParam,
