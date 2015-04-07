@@ -330,9 +330,9 @@ function FhirClient(p) {
 
     function withDefaultPatient(searchSpec){
       var propertyName = patientPropertyName(searchSpec);
-      if (propertyName !== null && client.patientId !== undefined){
+      if (propertyName !== null && client.patientId){
         searchSpec = searchSpec[propertyName](specs.Patient._id(client.patientId));
-      } else if (searchSpec.resourceName === 'Patient'){
+      } else if (searchSpec.resourceName === 'Patient' && client.patientId){
         searchSpec = searchSpec._id(client.patientId);
       } else {
         searchSpec = null;

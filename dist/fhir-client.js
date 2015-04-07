@@ -738,9 +738,9 @@ function FhirClient(p) {
 
     function withDefaultPatient(searchSpec){
       var propertyName = patientPropertyName(searchSpec);
-      if (propertyName !== null && client.patientId !== undefined){
+      if (propertyName !== null && client.patientId){
         searchSpec = searchSpec[propertyName](specs.Patient._id(client.patientId));
-      } else if (searchSpec.resourceName === 'Patient'){
+      } else if (searchSpec.resourceName === 'Patient' && client.patientId){
         searchSpec = searchSpec._id(client.patientId);
       } else {
         searchSpec = null;
@@ -910,6 +910,7 @@ jQuery.ajaxTransport("+*", function(options, originalOptions, jqXHR){
         };
     }
 });
+
 },{"./jquery":6,"./search":9,"./search-specification":8,"./utils":10,"btoa":173}],4:[function(require,module,exports){
 window.FHIR = {
   client: require('./client'),
