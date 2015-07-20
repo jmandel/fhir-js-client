@@ -241,7 +241,7 @@ module.exports = function(mixins) {
   function NumberSearchParam(name){
     SearchParam.apply(this, arguments);
   }
-  NumberSearchParam();
+  NumberSearchParam.prototype = new SearchParam();
   NumberSearchParam.prototype.constructor = NumberSearchParam;
 
   function QuantitySearchParam(name){
