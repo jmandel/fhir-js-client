@@ -348,8 +348,11 @@ BBClient.authorize = function(params, errback){
       "scope="+encodeURIComponent(client.scope)+"&"+
       "redirect_uri="+encodeURIComponent(client.redirect_uri)+"&"+
       "state="+encodeURIComponent(state)+"&"+
-      "aud="+encodeURIComponent(server)+"&"+
-      "launch="+encodeURIComponent(client.launch);
+      "aud="+encodeURIComponent(params.server);
+    
+    if (typeof client.launch !== 'undefined' && client.launch) {
+       redirect_to += "&launch="+encodeURIComponent(client.launch);
+    }
 
     window.location.href = redirect_to;
   }, errback);
