@@ -48,7 +48,7 @@ module.exports = function(mixins) {
     }
 
     this.queryUrl = function(){
-      return '/'+this.resourceName+'/_search';
+      return '/'+this.resourceName;
     };
 
     this.queryParams = function(){
