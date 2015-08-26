@@ -448,8 +448,8 @@ function FhirClient(p) {
         var ret = new $.Deferred();
           
         client.fhir.search({type: p.resource, query: {id: {$exact: p.id}}})
-            .then(function(data){
-                ret.resolve(data);
+            .then(function(res){
+                ret.resolve(res.data.entry[0].resource);
             }, function(){
                 ret.reject("Could not fetch " + p.resource + " " + p.id);
             });
