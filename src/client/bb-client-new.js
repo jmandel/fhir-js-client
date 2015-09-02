@@ -1,8 +1,9 @@
-var jQuery = require('./jquery');
-var $ = jQuery;
+//var jQuery = require('./jquery');
+//var $ = jQuery;
 var FhirClient = require('./client');
 var Guid = require('./guid');
 var jwt = require('jsonwebtoken');
+var adapter;
 
 var BBClient = module.exports =  {debug: true}
 
@@ -41,7 +42,7 @@ function completeTokenFlow(hash){
   if (!hash){
     hash = window.location.hash;
   }
-  var ret =  $.Deferred();
+  var ret = adapter.defer();
 
   process.nextTick(function(){
     var oauthResult = hash.match(/#(.*)/);
@@ -57,7 +58,7 @@ function completeTokenFlow(hash){
     ret.resolve(authorization);
   });
 
-  return ret.promise();
+  return ret.promise;
 }
 
 function completeCodeFlow(params){
@@ -68,36 +69,35 @@ function completeCodeFlow(params){
     };
   }
   
-  var ret =  $.Deferred();
+  var ret = adapter.defer();
   var state = JSON.parse(sessionStorage[params.state]);
 
   if (window.history.replaceState && BBClient.settings.replaceBrowserHistory){
     window.history.replaceState({}, "", window.location.toString().replace(window.location.search, ""));
   }
 
-  $.ajax({
-
+  $.when(adapter.http({
+    method: 'POST',
     url: state.provider.oauth2.token_uri,
-    type: 'POST',
     data: {
       code: params.code,
       grant_type: 'authorization_code',
       redirect_uri: state.client.redirect_uri,
       client_id: state.client.client_id
     },
-  }).done(function(authz){
+  })).then(function(authz){
     authz = $.extend(authz, params);
     ret.resolve(authz);
-  }).fail(function(){
+  }, function(){
     console.log("failed to exchange code for access_token", arguments);
     ret.reject();
-  });;
+  });
 
-  return ret.promise();
+  return ret.promise;
 }
 
 function completePageReload(){
-  var d = $.Deferred();
+  var d = adapter.defer();
   process.nextTick(function(){
     d.resolve(getPreviousToken());
   });
@@ -214,8 +214,10 @@ function providers(fhirServiceUrl, callback, errback){
   }
 
 
-  jQuery.get(
-    fhirServiceUrl+"/metadata",
+  $.when(adapter.http({
+    method: "GET",
+    url: fhirServiceUrl+"/metadata"
+  })).then(
     function(r){
       var res = {
         "name": "SMART on FHIR Testing Server",
@@ -248,11 +250,10 @@ function providers(fhirServiceUrl, callback, errback){
       }
 
       callback && callback(res);
-    },
-    "json"
-  ).fail(function() {
-    errback && errback("Unable to fetch conformance statement");
-  });
+    }, function() {
+        errback && errback("Unable to fetch conformance statement");
+    }
+  );
 };
 
 var noAuthFhirProvider = function(serviceUrl){
@@ -362,9 +363,10 @@ BBClient.authorize = function(params, errback){
 
 BBClient.resolveAuthType = function (fhirServiceUrl, callback, errback) {
 
-      jQuery.get(
-        fhirServiceUrl+"/metadata",
-        function(r){
+      $.when(adapter.http({
+         method: "GET",
+         url: fhirServiceUrl+"/metadata"
+      })).then(function(r){
           var type = "none";
           
           try {
@@ -376,9 +378,11 @@ BBClient.resolveAuthType = function (fhirServiceUrl, callback, errback) {
           }
 
           callback && callback(type);
-        },
-        "json"
-      ).fail(function() {
-        errback && errback("Unable to fetch conformance statement");
+        }, function() {
+           errback && errback("Unable to fetch conformance statement");
       });
+};
+
+BBClient.setAdapter = function (newAdapter) {
+    adapter = newAdapter;
 };

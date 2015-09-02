@@ -1,6 +1,5 @@
 var btoa = require('btoa');
-var jQuery = require('./jquery');
-var $ = jQuery;
+var Adapter = require('./adapter');
 
 module.exports = FhirClient;
 
@@ -56,7 +55,7 @@ function FhirClient(p) {
     }
 
     client.get = function(p) {
-        var ret = new $.Deferred();
+        var ret = Adapter.get().defer();
           
         client.fhir.search({type: p.resource, query: {id: {$exact: p.id}}})
             .then(function(res){
@@ -65,7 +64,7 @@ function FhirClient(p) {
                 ret.reject("Could not fetch " + p.resource + " " + p.id);
             });
           
-        return ret;
+        return ret.promise;
     };
 
     client.context = {};

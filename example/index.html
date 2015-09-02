@@ -2,39 +2,41 @@
 <html>
 
   <head>
-    <script src="../dist/fhir-client.js"></script>
+    <script src='http://code.jquery.com/jquery-2.1.4.min.js'></script>
+    <script src="../dist/jqFhir.js"></script>
+    <script src='../dist/fhir-client-jquery.js'></script>
     <script>
 
       var demo = {
-        serviceUrl: "https://open-api.fhir.me",
-        patientId: "1137192"
+        serviceUrl: "https://fhir-open-api-dstu2.smarthealthit.org",
+        patientId: "99912345",
+        auth: {
+          type: 'none'
+        }
       };
 
-      var smart = FHIR.client(demo), $ = FHIR.jQuery;
+      var smart = FHIR.client(demo);
 
       /* Create a patient welcome banner */
-      var pq = smart.Patient.where._id(demo.patientId)
+      var pq = smart.context.patient.read();
       
-      pq.search().then(function(p) {
-        var name = p[0].name[0];
-        var formatted = name.given.join(" ") + " " + name.family;
+      pq.then(function(p) {
+        var name = p.name[0];
+        var formatted = name.given.join(" ") + " " + name.family.join(" ");
         $("#patient_name").text(formatted);
       });
 
       /* Create a medication list */
-      smart.MedicationPrescription
-      .where
-      .status("active")
-      .patient(pq)
-      .search()
-      .then(function(prescriptions) {
-        prescriptions.forEach(function(rx) {
-          var med = smart.followSync(rx, rx.medication).name;
-          var row = $("<li> " + med + "</li>");
-          $("#med_list").append(row);
+      smart.fhir.search({type: "MedicationPrescription", query: {subject: {$type: 'Patient', id: {$exact: demo.patientId}}}
+        }).then(function(r){
+            r.data.entry.forEach(function(rxr) {
+              var rx = rxr.resource;
+              smart.fhir.resolve({bundle:r.data, resource:rx, reference:rx.medication}).then(function(med) {
+                  var row = $("<li> " + med.content.name + "</li>");
+                  $("#med_list").append(row);
+              });
+            });
         });
-
-      });
     </script>
   </head>
 
