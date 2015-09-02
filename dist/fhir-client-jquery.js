@@ -6756,7 +6756,7 @@ function FhirClient(p) {
     client.get = function(p) {
         var ret = Adapter.get().defer();
           
-        client.fhir.search({type: p.resource, query: {id: {$exact: p.id}}})
+        client.fhir.search({type: p.resource, query: {_id: p.id}})
             .then(function(res){
                 ret.resolve(res.data.entry[0].resource);
             }, function(){
