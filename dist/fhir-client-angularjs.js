@@ -6712,15 +6712,26 @@ function FhirClient(p) {
         auth = {
     		bearer: server.auth.token
     	};
-    } 
+    }
     
-    client.fhir = fhir({
+    client.api = fhir({
         baseUrl: server.serviceUrl,
-        auth: auth,
-        patient: p.patientId
+        auth: auth
     });
+    
+    if (p.patientId) {
+        client.patient = {};
+        client.patient.id = p.patientId;
+        client.patient.api = fhir({
+            baseUrl: server.serviceUrl,
+            auth: auth,
+            patient: p.patientId
+        });
+        client.patient.read = function(){
+            return client.get({resource: 'Patient'});
+        };
+    }
 
-    client.patientId = p.patientId;
     client.userId = p.userId;
 
     server.auth = server.auth ||  {
@@ -6735,12 +6746,13 @@ function FhirClient(p) {
     client.get = function(p) {
         var ret = Adapter.get().defer();
         var params = {type: p.resource};
+        var fhirAPI = (client.patient)?client.patient.api:client.api;
         
         if (p.id) {
             params["id"] = p.id;
         }
           
-        client.fhir.read(params)
+        fhirAPI.read(params)
             .then(function(res){
                 ret.resolve(res.data);
             }, function(){
@@ -6750,20 +6762,12 @@ function FhirClient(p) {
         return ret.promise;
     };
 
-    client.context = {};
-
-    client.context.user = {
+    client.user = {
       'read': function(){
         var userId = client.userId;
         resource = userId.split("/")[0];
         uid = userId.split("/")[1];
         return client.get({resource: resource, id: uid});
-      }
-    };
-
-    client.context.patient = {
-      'read': function(){
-          return client.get({resource: 'Patient'});
       }
     };
 

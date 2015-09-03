@@ -9,7 +9,7 @@
     }
   });
 
-  smart.fhir.search({type: "Observation", query: {subject: "99912345"}
+  smart.api.search({type: "Observation", query: {subject: "99912345"}
     }).then(function(r){
        console.log(JSON.stringify(r,null,2));
     });

@@ -18,7 +18,7 @@
       var smart = FHIR.client(demo);
 
       /* Create a patient welcome banner */
-      var pq = smart.context.patient.read();
+      var pq = smart.patient.read();
       
       pq.then(function(p) {
         var name = p.name[0];
@@ -27,11 +27,11 @@
       });
 
       /* Create a medication list */
-      smart.fhir.search({type: "MedicationPrescription", query: {patient: demo.patientId}
+      smart.patient.api.search({type: "MedicationPrescription", query: {patient: demo.patientId}
         }).then(function(r){
             r.data.entry.forEach(function(re) {
               var rx = re.resource;
-              smart.fhir.resolve({bundle:r.data, resource:rx, reference:rx.medication}).then(function(med) {
+              smart.patient.api.resolve({bundle:r.data, resource:rx, reference:rx.medication}).then(function(med) {
                   var row = $("<li> " + med.content.name + "</li>");
                   $("#med_list").append(row);
               });
