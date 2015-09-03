@@ -6716,7 +6716,8 @@ function FhirClient(p) {
     
     client.fhir = fhir({
         baseUrl: server.serviceUrl,
-        auth: auth
+        auth: auth,
+        patient: p.patientId
     });
 
     client.patientId = p.patientId;
@@ -6733,10 +6734,15 @@ function FhirClient(p) {
 
     client.get = function(p) {
         var ret = Adapter.get().defer();
+        var params = {type: p.resource};
+        
+        if (p.id) {
+            params["id"] = p.id;
+        }
           
-        client.fhir.search({type: p.resource, query: {_id: p.id}})
+        client.fhir.read(params)
             .then(function(res){
-                ret.resolve(res.data.entry[0].resource);
+                ret.resolve(res.data);
             }, function(){
                 ret.reject("Could not fetch " + p.resource + " " + p.id);
             });
@@ -6757,7 +6763,7 @@ function FhirClient(p) {
 
     client.context.patient = {
       'read': function(){
-          return client.get({resource: 'Patient', id: client.patientId});
+          return client.get({resource: 'Patient'});
       }
     };
 

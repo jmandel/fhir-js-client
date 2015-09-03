@@ -1,13 +1,13 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("jQuery"));
+		module.exports = factory();
 	else if(typeof define === 'function' && define.amd)
-		define(["jQuery"], factory);
+		define([], factory);
 	else if(typeof exports === 'object')
-		exports["fhir"] = factory(require("jQuery"));
+		exports["fhir"] = factory();
 	else
-		root["fhir"] = factory(root["jQuery"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_16__) {
+		root["fhir"] = factory();
+})(this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -56,7 +56,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	(function() {
 	    var mkFhir = __webpack_require__(1);
-	    var jQuery = __webpack_require__(16);
 
 	    var defer = function(){
 	        pr = jQuery.Deferred();
@@ -156,12 +155,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            history: GET.and(BaseUrl.slash("_history")).and($Paging).end(http),
 	            typeHistory: GET.and(resourceTypeHxPath).and($Paging).end(http),
 	            resourceHistory: GET.and(resourceHxPath).and($Paging).end(http),
-	            read: GET.and(resourcePath).end(http),
+	            read: GET.and(pt.$WithPatient).and(resourcePath).end(http),
 	            vread: GET.and(vreadPath).end(http),
 	            "delete": DELETE.and(resourcePath).and(ReturnHeader).end(http),
 	            create: POST.and(resourceTypePath).and(ReturnHeader).end(http),
 	            validate: POST.and(resourceTypePath.slash("_validate")).end(http),
-	            search: GET.and(searchPath).and(pt.$WithPatient).and(query.$SearchParams).and($Paging).end(http),
+	            search: GET.and(resourceTypePath).and(pt.$WithPatient).and(query.$SearchParams).and($Paging).end(http),
 	            update: PUT.and(resourcePath).and(ReturnHeader).end(http),
 	            nextPage: GET.and(bundle.$$BundleLinkUrl("next")).end(http),
 	            prevPage: GET.and(bundle.$$BundleLinkUrl("prev")).end(http),
@@ -947,18 +946,25 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var keyFor = {
 	        "Observation": "subject",
-	        "MedicationPrescription": "patient"
+	        "MedicationPrescription": "patient",
+	        "Encounter": "patient"
 	    };
 
 	    exports.$WithPatient = mw.$$Simple(function(args){
 	        var type  = args.type;
 	        var param = keyFor[type];
-	        if (args.patient && param){
-	            args.query = args.query || {};
-	            args.query[param] = {
-	                $type: "Patient",
-	                _id: args.patient
-	            };
+	        if (args.patient) {
+	            if (param){
+	                args.query = args.query || {};
+	                args.query[param] = {
+	                    $type: "Patient",
+	                    _id: args.patient
+	                };
+	            } else if (type === "Patient") {
+	                args.query = args.query || {};
+	                args.query["_id"] = args.patient;
+	                args["id"] = args.patient;
+	            }
 	        }
 	        return args;
 	    });
@@ -1083,12 +1089,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    exports.Path = Path;
 	}).call(this);
 
-
-/***/ },
-/* 16 */
-/***/ function(module, exports) {
-
-	module.exports = __WEBPACK_EXTERNAL_MODULE_16__;
 
 /***/ }
 /******/ ])
