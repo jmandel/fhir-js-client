@@ -6700,7 +6700,6 @@ BBClient.resolveAuthType = function (fhirServiceUrl, callback, errback) {
 },{"./adapter":43,"./client":45,"./guid":47,"_process":21,"jsonwebtoken":38}],45:[function(require,module,exports){
 var btoa = require('btoa');
 var Adapter = require('./adapter');
-var fhir = Adapter.get().fhirjs;
 
 module.exports = FhirClient;
 
@@ -6719,6 +6718,7 @@ function FhirClient(p) {
     // }
 
     var client = new ClientPrototype();
+    var fhir = Adapter.get().fhirjs;
 
     var server = client.server = {
       serviceUrl: p.serviceUrl,
