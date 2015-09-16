@@ -6264,13 +6264,14 @@ module.exports = function jwa(algorithm) {
         var prov;
         return prov = {
             $get: function($http, $q) {
-                var adapter = {http: $http, defer: $q.defer};
+                var adapter = {http: $http, defer: $q.defer, fhirjs: fhir};
                 return smart(adapter);
             }
         };
     });
 
 }).call(this);
+
 },{"../client/entry":45}],42:[function(require,module,exports){
 var adapter;
 
@@ -6677,6 +6678,7 @@ BBClient.resolveAuthType = function (fhirServiceUrl, callback, errback) {
 },{"./adapter":42,"./client":44,"./guid":46,"_process":20,"jsonwebtoken":37}],44:[function(require,module,exports){
 var btoa = require('btoa');
 var Adapter = require('./adapter');
+var fhir = Adapter.get().fhirjs;
 
 module.exports = FhirClient;
 

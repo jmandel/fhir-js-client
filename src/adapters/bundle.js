@@ -1,5 +1,7 @@
 (function() {
     var smart = require('../client/entry');
+    var jQuery = require('jquery');
+    var $ = jQuery;
     
     if (!process.browser) {
       var window = require('jsdom').jsdom().createWindow();
@@ -26,7 +28,7 @@
                 .fail(ret.reject);
             return ret.promise();
         },
-        fhirjs: fhir
+        fhirjs: require('../../lib/jqFhir.js')
     };
 
     smart(adapter);

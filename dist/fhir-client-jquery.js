@@ -6259,7 +6259,6 @@ module.exports = function jwa(algorithm) {
 (function (process){
 (function() {
     var smart = require('../client/entry');
-    var jquery = jQuery;
     
     if (!process.browser) {
       var window = require('jsdom').jsdom().createWindow();
@@ -6267,25 +6266,26 @@ module.exports = function jwa(algorithm) {
     }
     
     var defer = function(){
-        pr = jquery.Deferred();
+        pr = jQuery.Deferred();
         pr.promise = pr.promise();
         return pr;
     };
     var adapter = {
         defer: defer,
         http: function(args) {
-            var ret = jquery.Deferred();
+            var ret = jQuery.Deferred();
             var opts = {
                 type: args.method,
                 url: args.url,
                 dataType: "json",
                 data: args.data
             };
-            jquery.ajax(opts)
+            jQuery.ajax(opts)
                 .done(ret.resolve)
                 .fail(ret.reject);
             return ret.promise();
-        }
+        },
+        fhirjs: fhir
     };
 
     smart(adapter);
@@ -6699,6 +6699,7 @@ BBClient.resolveAuthType = function (fhirServiceUrl, callback, errback) {
 },{"./adapter":43,"./client":45,"./guid":47,"_process":21,"jsonwebtoken":38}],45:[function(require,module,exports){
 var btoa = require('btoa');
 var Adapter = require('./adapter');
+var fhir = Adapter.get().fhirjs;
 
 module.exports = FhirClient;
 

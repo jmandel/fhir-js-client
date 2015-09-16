@@ -8,7 +8,7 @@
         var prov;
         return prov = {
             $get: function($http, $q) {
-                var adapter = {http: $http, defer: $q.defer};
+                var adapter = {http: $http, defer: $q.defer, fhirjs: fhir};
                 return smart(adapter);
             }
         };

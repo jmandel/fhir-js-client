@@ -1,5 +1,6 @@
 var btoa = require('btoa');
 var Adapter = require('./adapter');
+var fhir = Adapter.get().fhirjs;
 
 module.exports = FhirClient;
 

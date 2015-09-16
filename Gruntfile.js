@@ -8,7 +8,7 @@ module.exports = function (grunt) {
   grunt.initConfig({
     shell: {
       browserify: {
-        command: "./node_modules/.bin/browserify  -e src/adapters/jquery.js  -i 'jsdom' -g varify > dist/fhir-client-jquery.js; ./node_modules/.bin/browserify  -e src/adapters/angularjs.js  -i 'jsdom' -g varify > dist/fhir-client-angularjs.js",
+        command: "./node_modules/.bin/browserify  -e src/adapters/jquery.js  -i 'jsdom' -g varify > dist/fhir-client-jquery.js; ./node_modules/.bin/browserify  -e src/adapters/angularjs.js  -i 'jsdom' -g varify > dist/fhir-client-angularjs.js; ./node_modules/.bin/browserify  -e src/adapters/bundle.js  -i 'jsdom' -g varify > dist/fhir-client.js",
         options: {
           failOnError: true,
           stderr: true
@@ -19,7 +19,8 @@ module.exports = function (grunt) {
       minifiedLib: {
         files: {
           'dist/fhir-client-jquery.min.js': ['dist/fhir-client-jquery.js'],
-          'dist/fhir-client-angularjs.min.js': ['dist/fhir-client-angularjs.js']
+          'dist/fhir-client-angularjs.min.js': ['dist/fhir-client-angularjs.js'],
+          'dist/fhir-client.min.js': ['dist/fhir-client.js']
         }
       }
     }
