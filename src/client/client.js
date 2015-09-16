@@ -27,14 +27,14 @@ function FhirClient(p) {
     var auth = {};
     
     if (server.auth.type === 'basic') {
-    	auth = {
-    		user: server.auth.username,
-    		pass: server.auth.password
-    	};
+        auth = {
+            user: server.auth.username,
+            pass: server.auth.password
+        };
     } else if (server.auth.type === 'bearer') {
         auth = {
-    		bearer: server.auth.token
-    	};
+            bearer: server.auth.token
+        };
     }
     
     client.api = fhir({
@@ -54,6 +54,8 @@ function FhirClient(p) {
             return client.get({resource: 'Patient'});
         };
     }
+    
+    var fhirAPI = (client.patient)?client.patient.api:client.api;
 
     client.userId = p.userId;
 
@@ -69,7 +71,6 @@ function FhirClient(p) {
     client.get = function(p) {
         var ret = Adapter.get().defer();
         var params = {type: p.resource};
-        var fhirAPI = (client.patient)?client.patient.api:client.api;
         
         if (p.id) {
             params["id"] = p.id;
@@ -81,6 +82,54 @@ function FhirClient(p) {
             }, function(){
                 ret.reject("Could not fetch " + p.resource + " " + p.id);
             });
+          
+        return ret.promise;
+    };
+    
+    function getNext (bundle, process) {
+        var i;
+        var d = bundle.data.entry;
+        var entries = [];
+        for (i = 0; i < d.length; i++) {
+            entries.push(d[i].resource);
+        }
+        process(entries);
+        var def = Adapter.get().defer();
+        fhirAPI.nextPage({bundle:bundle.data}).then(function (r) {
+            $.when(getNext(r, process)).then(function (t) {
+                def.resolve();
+            });
+        }, function(err) {def.resolve()});
+        return def.promise;
+    }
+    
+    client.drain = function(searchParams, process, done, fail) {
+        var ret = Adapter.get().defer();
+        
+        fhirAPI.search(searchParams).then(function(data){
+            $.when(getNext(data, process)).then(function() {
+                done();
+            }, function(err) {
+                fail(err);
+            });
+        });
+    };
+    
+    client.fetchAll = function (searchParams){
+        var ret = Adapter.get().defer();
+        var results = [];
+        
+        client.drain(
+            searchParams,
+            function(entries) {
+                entries.forEach(function(entry) {
+                    results.push(entry);
+                });
+            },
+            function () {
+                ret.resolve(results);
+            }
+        );
           
         return ret.promise;
     };
