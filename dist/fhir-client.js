@@ -17100,6 +17100,24 @@ function FhirClient(p) {
       throw "Must supply a `server` propery whose `serviceUrl` begins with http(s) " + 
         "and does NOT include a trailing slash. E.g. `https://fhir.aws.af.cm/fhir`";
     }
+    
+    client.authenticated = function(p) {
+      if (server.auth.type === 'none') {
+        return p;
+      }
+
+      var h;
+      if (server.auth.type === 'basic') {
+        h = "Basic " + btoa(server.auth.username + ":" + server.auth.password);
+      } else if (server.auth.type === 'bearer') {
+        h = "Bearer " + server.auth.token;
+      }
+      if (!p.headers) {p.headers = {};}
+      p.headers['Authorization'] = h
+      //p.beforeSend = function (xhr) { xhr.setRequestHeader ("Authorization", h); }
+
+      return p;
+    };
 
     client.get = function(p) {
         var ret = Adapter.get().defer();
