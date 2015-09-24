@@ -937,21 +937,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	};
 
-<<<<<<< HEAD
-function stripTrailingSlash(str) {
-    if(str.substr(-1) === '/') {
-        return str.substr(0, str.length - 1);
-    }
-    return str;
-}
-
-function getPreviousToken(){
-  var ret = sessionStorage.tokenResponse;
-  if (ret) ret = JSON.parse(ret);
-  return ret;
-}
-=======
->>>>>>> fhir_js
 
 /***/ },
 /* 13 */
@@ -1357,21 +1342,6 @@ Buffer.concat = function (list, totalLength) {
   return buf
 }
 
-<<<<<<< HEAD
-  jQuery.get(
-    stripTrailingSlash(fhirServiceUrl)+"/metadata",
-    function(r){
-      var res = {
-        "name": "SMART on FHIR Testing Server",
-        "description": "Dev server for SMART on FHIR",
-        "url": fhirServiceUrl,
-        "oauth2": {
-          "registration_uri": null,
-          "authorize_uri": null,
-          "token_uri": null
-        }
-      };
-=======
 Buffer.compare = function (a, b) {
   assert(Buffer.isBuffer(a) && Buffer.isBuffer(b), 'Arguments must be Buffers')
   var x = a.length
@@ -1389,7 +1359,6 @@ Buffer.compare = function (a, b) {
   }
   return 0
 }
->>>>>>> fhir_js
 
 // BUFFER INSTANCE METHODS
 // =======================
@@ -1568,24 +1537,9 @@ Buffer.prototype.copy = function (target, target_start, start, end) {
   if (!end && end !== 0) end = this.length
   if (!target_start) target_start = 0
 
-<<<<<<< HEAD
-      jQuery.get(
-        stripTrailingSlash(fhirServiceUrl)+"/metadata",
-        function(r){
-          var type = "none";
-          
-          try {
-            if (r.rest[0].security.service[0].coding[0].code.toLowerCase() === "oauth2") {
-                type = "oauth2";
-            }
-          }
-          catch (err) {
-          }
-=======
   // Copy 0 bytes; we're done
   if (end === start) return
   if (target.length === 0 || source.length === 0) return
->>>>>>> fhir_js
 
   // Fatal error conditions
   assert(end >= start, 'sourceEnd < sourceStart')
@@ -2117,14 +2071,8 @@ Buffer.prototype.fill = function (value, start, end) {
   if (end === start) return
   if (this.length === 0) return
 
-<<<<<<< HEAD
-    this.queryUrl = function(){
-      return '/'+this.resourceName;
-    };
-=======
   assert(start >= 0 && start < this.length, 'start out of bounds')
   assert(end >= 0 && end <= this.length, 'end out of bounds')
->>>>>>> fhir_js
 
   var i
   if (typeof value === 'number') {
@@ -16725,6 +16673,13 @@ function urlParam(p, forceArray) {
   return result[0];
 }
 
+function stripTrailingSlash(str) {
+    if(str.substr(-1) === '/') {
+        return str.substr(0, str.length - 1);
+    }
+    return str;
+}
+
 function getPreviousToken(){
   var ret = sessionStorage.tokenResponse;
   if (ret) ret = JSON.parse(ret);
@@ -17191,7 +17146,7 @@ function FhirClient(p) {
     
     function getNext (bundle, process) {
         var i;
-        var d = bundle.data.entry;
+        var d = bundle.data.entry || [];
         var entries = [];
         for (i = 0; i < d.length; i++) {
             entries.push(d[i].resource);

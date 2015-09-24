@@ -223,15 +223,10 @@ function providers(fhirServiceUrl, callback, errback){
   }
 
 
-<<<<<<< HEAD:client/bb-client.js
-  jQuery.get(
-    stripTrailingSlash(fhirServiceUrl)+"/metadata",
-=======
   Adapter.get().http({
     method: "GET",
     url: fhirServiceUrl+"/metadata"
   }).then(
->>>>>>> fhir_js:src/client/bb-client.js
     function(r){
       var res = {
         "name": "SMART on FHIR Testing Server",
@@ -377,16 +372,10 @@ BBClient.authorize = function(params, errback){
 
 BBClient.resolveAuthType = function (fhirServiceUrl, callback, errback) {
 
-<<<<<<< HEAD:client/bb-client.js
-      jQuery.get(
-        stripTrailingSlash(fhirServiceUrl)+"/metadata",
-        function(r){
-=======
       Adapter.get().http({
          method: "GET",
          url: fhirServiceUrl+"/metadata"
       }).then(function(r){
->>>>>>> fhir_js:src/client/bb-client.js
           var type = "none";
           
           try {
