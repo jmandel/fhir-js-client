@@ -107,7 +107,7 @@ function FhirClient(p) {
     
     function getNext (bundle, process) {
         var i;
-        var d = bundle.data.entry;
+        var d = bundle.data.entry || [];
         var entries = [];
         for (i = 0; i < d.length; i++) {
             entries.push(d[i].resource);
