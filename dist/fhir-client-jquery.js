@@ -6536,7 +6536,7 @@ function providers(fhirServiceUrl, callback, errback){
 
   Adapter.get().http({
     method: "GET",
-    url: fhirServiceUrl+"/metadata"
+    url: stripTrailingSlash(fhirServiceUrl) + "/metadata"
   }).then(
     function(r){
       var res = {
@@ -6685,7 +6685,7 @@ BBClient.resolveAuthType = function (fhirServiceUrl, callback, errback) {
 
       Adapter.get().http({
          method: "GET",
-         url: fhirServiceUrl+"/metadata"
+         url: stripTrailingSlash(fhirServiceUrl) + "/metadata"
       }).then(function(r){
           var type = "none";
           
