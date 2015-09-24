@@ -3,19 +3,12 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-shell');
-  grunt.loadNpmTasks('grunt-curl');
   grunt.loadNpmTasks('grunt-contrib-uglify');
 
   grunt.initConfig({
-    curl: {
-      conformance: {
-        dest: 'vendor/conformance.json',
-        src: 'http://hl7.org/fhir/2015May/conformance-base.json'
-      }
-    },
     shell: {
       browserify: {
-        command: "./node_modules/.bin/browserify  -e client/entry.js  -i 'jsdom' -g varify > dist/fhir-client.js",
+        command: "./node_modules/.bin/browserify  -e src/adapters/jquery.js  -i 'jsdom' -g varify > dist/fhir-client-jquery.js; ./node_modules/.bin/browserify  -e src/adapters/angularjs.js  -i 'jsdom' -g varify > dist/fhir-client-angularjs.js; ./node_modules/.bin/browserify  -e src/adapters/bundle.js  -i 'jsdom' -g varify > dist/fhir-client.js",
         options: {
           failOnError: true,
           stderr: true
@@ -25,6 +18,8 @@ module.exports = function (grunt) {
     uglify: {
       minifiedLib: {
         files: {
+          'dist/fhir-client-jquery.min.js': ['dist/fhir-client-jquery.js'],
+          'dist/fhir-client-angularjs.min.js': ['dist/fhir-client-angularjs.js'],
           'dist/fhir-client.min.js': ['dist/fhir-client.js']
         }
       }
@@ -32,7 +27,5 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('browserify', 'Browserify to create window.FHIR', ['shell:browserify']);
-  grunt.registerTask('conformance', 'Download conformance base', ['curl:conformance']);
   grunt.registerTask('default', ['browserify', 'uglify:minifiedLib']);
-  grunt.registerTask('all', ['conformance', 'default']);
 };

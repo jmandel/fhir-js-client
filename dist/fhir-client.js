@@ -1,38 +1,943 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-(function (process){
-var jQuery = require('./jquery');
-var $ = jQuery;
-var FhirClient = require('./client');
-var Guid = require('./guid');
-var jwt = require('jsonwebtoken');
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["fhir"] = factory();
+	else
+		root["fhir"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
 
-var BBClient = module.exports =  {debug: true}
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
 
-function urlParam(p, forceArray) {
-  if (forceArray === undefined) {
-    forceArray = false;
-  }
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
 
-  var query = location.search.substr(1);
-  var data = query.split("&");
-  var result = [];
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
 
-  for(var i=0; i<data.length; i++) {
-    var item = data[i].split("=");
-    if (item[0] === p) {
-      result.push(decodeURIComponent(item[1]));
-    }
-  }
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
 
-  if (forceArray) {
-    return result;
-  }
-  if (result.length === 0){
-    return null;
-  }
-  return result[0];
-}
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
 
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+
+
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ function(module, exports, __webpack_require__) {
+
+	(function() {
+	    var mkFhir = __webpack_require__(1);
+
+	    var defer = function(){
+	        pr = jQuery.Deferred();
+	        pr.promise = pr.promise();
+	        return pr;
+	    };
+	    var adapter = {
+	        defer: defer,
+	        http: function(args) {
+	            var ret = jQuery.Deferred();
+	            var opts = {
+	                type: args.method,
+	                url: args.url,
+	                headers: args.headers,
+	                dataType: "json",
+	                contentType: "application/json",
+	                data: args.data || args.params
+	            };
+	            jQuery.ajax(opts)
+	                .done(function(data, status, xhr) {ret.resolve({data: data, status: status, headers: xhr.getResponseHeader, config: args});})
+	                .fail(function(err) {ret.reject({error: err, data: err, config: args});});
+	            return ret.promise();
+	        }
+	    };
+
+	    var fhir = function(config) {
+	        return mkFhir(config, adapter);
+	    };
+	    fhir.defer = defer;
+	    module.exports = fhir;
+
+	}).call(this);
+
+
+/***/ },
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	(function() {
+	    var utils = __webpack_require__(2);
+	    var M = __webpack_require__(5);
+	    var query = __webpack_require__(6);
+	    var auth = __webpack_require__(7);
+	    var transport = __webpack_require__(9);
+	    var errors = __webpack_require__(10);
+	    var config = __webpack_require__(11);
+	    var bundle = __webpack_require__(12);
+	    var pt = __webpack_require__(13);
+	    var refs = __webpack_require__(14);
+	    var url = __webpack_require__(15);
+
+	    var cache = {};
+
+
+	    var fhir = function(cfg, adapter){
+	        var Middleware = M.Middleware;
+	        var $$Attr = M.$$Attr;
+
+	        var $$Method = function(m){ return $$Attr('method', m);};
+	        var $$Header = function(h,v) {return $$Attr('headers.' + h, v);};
+
+	        var $Errors = Middleware(errors);
+	        var Defaults = Middleware(config(cfg, adapter))
+	                .and($Errors)
+	                .and(auth.$Basic)
+	                .and(auth.$Bearer)
+	                .and(transport.$JsonData)
+	                .and($$Header('Accept', 'application/json'))
+	                .and($$Header('Content-Type', 'application/json'));
+
+	        var GET = Defaults.and($$Method('GET'));
+	        var POST = Defaults.and($$Method('POST'));
+	        var PUT = Defaults.and($$Method('PUT'));
+	        var DELETE = Defaults.and($$Method('DELETE'));
+
+	        var http = transport.Http(cfg, adapter);
+
+	        var Path = url.Path;
+	        var BaseUrl = Path(cfg.baseUrl);
+	        var resourceTypePath = BaseUrl.slash(":type || :resource.resourceType");
+	        var searchPath = resourceTypePath.slash("_search");
+	        var resourceTypeHxPath = resourceTypePath.slash("_history");
+	        var resourcePath = resourceTypePath.slash(":id || :resource.id");
+	        var resourceHxPath = resourcePath.slash("_history");
+	        var vreadPath =  resourceHxPath.slash(":versionId || :resource.meta.versionId");
+	        var resourceVersionPath = resourceHxPath.slash(":versionId || :resource.meta.versionId");
+
+	        var ReturnHeader = $$Header('Prefer', 'return=representation');
+
+	        var $Paging = Middleware(query.$Paging);
+
+	        return {
+	            conformance: GET.and(BaseUrl.slash("metadata")).end(http),
+	            document: POST.and(BaseUrl.slash("Document")).end(http),
+	            profile:  GET.and(BaseUrl.slash("Profile").slash(":type")).end(http),
+	            transaction: POST.and(BaseUrl).end(http),
+	            history: GET.and(BaseUrl.slash("_history")).and($Paging).end(http),
+	            typeHistory: GET.and(resourceTypeHxPath).and($Paging).end(http),
+	            resourceHistory: GET.and(resourceHxPath).and($Paging).end(http),
+	            read: GET.and(pt.$WithPatient).and(resourcePath).end(http),
+	            vread: GET.and(vreadPath).end(http),
+	            "delete": DELETE.and(resourcePath).and(ReturnHeader).end(http),
+	            create: POST.and(resourceTypePath).and(ReturnHeader).end(http),
+	            validate: POST.and(resourceTypePath.slash("_validate")).end(http),
+	            search: GET.and(resourceTypePath).and(pt.$WithPatient).and(query.$SearchParams).and($Paging).end(http),
+	            update: PUT.and(resourcePath).and(ReturnHeader).end(http),
+	            nextPage: GET.and(bundle.$$BundleLinkUrl("next")).end(http),
+	            prevPage: GET.and(bundle.$$BundleLinkUrl("prev")).end(http),
+	            resolve: GET.and(refs.resolve).end(http)
+	        };
+
+	    };
+	    module.exports = fhir;
+	}).call(this);
+
+
+/***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	(function() {
+	  var merge = __webpack_require__(3);
+
+	  var RTRIM = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;
+
+	  var trim = function(text) {
+	    return text ? text.toString().replace(RTRIM, "")  : "";
+	  };
+
+	  exports.trim = trim;
+
+	  var addKey = function(acc, str) {
+	    var pair, val;
+	    if (!str) {
+	      return null;
+	    }
+	    pair = str.split("=").map(trim);
+	    val = pair[1].replace(/(^"|"$)/g, '');
+	    if (val) {
+	      acc[pair[0]] = val;
+	    }
+	    return acc;
+	  };
+
+	  var type = function(obj) {
+	    var classToType;
+	    if (obj == null && obj === undefined) {
+	      return String(obj);
+	    }
+	    classToType = {
+	      '[object Boolean]': 'boolean',
+	      '[object Number]': 'number',
+	      '[object String]': 'string',
+	      '[object Function]': 'function',
+	      '[object Array]': 'array',
+	      '[object Date]': 'date',
+	      '[object RegExp]': 'regexp',
+	      '[object Object]': 'object'
+	    };
+	    return classToType[Object.prototype.toString.call(obj)];
+	  };
+
+	  exports.type = type;
+
+	  var assertArray = function(a) {
+	    if (type(a) !== 'array') {
+	      throw 'not array';
+	    }
+	    return a;
+	  };
+
+	  exports.assertArray = assertArray;
+
+	  var assertObject = function(a) {
+	    if (type(a) !== 'object') {
+	      throw 'not object';
+	    }
+	    return a;
+	  };
+
+	  exports.assertObject = assertObject;
+
+	  var reduceMap = function(m, fn, acc) {
+	    var k, v;
+	    acc || (acc = []);
+	    assertObject(m);
+	    return ((function() {
+	      var results;
+	      results = [];
+	      for (k in m) {
+	        v = m[k];
+	        results.push([k, v]);
+	      }
+	      return results;
+	    })()).reduce(fn, acc);
+	  };
+
+	  exports.reduceMap = reduceMap;
+
+	  var identity = function(x) {return x;};
+
+	  exports.identity = identity;
+
+	  var argsArray = function() {
+	     return Array.prototype.slice.call(arguments)
+	  };
+
+	  exports.argsArray = argsArray;
+
+	  var mergeLists = function() {
+	    var reduce;
+	    reduce = function(merged, nextMap) {
+	      var k, ret, v;
+	      ret = merge(true, merged);
+	      for (k in nextMap) {
+	        v = nextMap[k];
+	        ret[k] = (ret[k] || []).concat(v);
+	      }
+	      return ret;
+	    };
+	    return argsArray.apply(null, arguments).reduce(reduce, {});
+	  };
+
+	  exports.mergeLists = mergeLists;
+
+	  var absoluteUrl = function(baseUrl, ref) {
+	    if (ref.slice(ref, baseUrl.length + 1) !== baseUrl + "/") {
+	      return baseUrl + "/" + ref;
+	    } else {
+	      return ref;
+	    }
+	  };
+
+	  exports.absoluteUrl = absoluteUrl;
+
+	  var relativeUrl = function(baseUrl, ref) {
+	    if (ref.slice(ref, baseUrl.length + 1) === baseUrl + "/") {
+	      return ref.slice(baseUrl.length + 1);
+	    } else {
+	      return ref;
+	    }
+	  };
+
+	  exports.relativeUrl = relativeUrl;
+
+	  exports.resourceIdToUrl = function(id, baseUrl, type) {
+	    baseUrl = baseUrl.replace(/\/$/, '');
+	    id = id.replace(/^\//, '');
+	    if (id.indexOf('/') < 0) {
+	      return baseUrl + "/" + type + "/" + id;
+	    } else if (id.indexOf(baseUrl) !== 0) {
+	      return baseUrl + "/" + id;
+	    } else {
+	      return id;
+	    }
+	  };
+
+	  var walk = function(inner, outer, data, context) {
+	    var keysToMap, remapped;
+	    switch (type(data)) {
+	      case 'array':
+	        return outer(data.map(function(item) {
+	          return inner(item, [data, context]);
+	        }), context);
+	      case 'object':
+	        keysToMap = function(acc, arg) {
+	          var k, v;
+	          k = arg[0], v = arg[1];
+	          acc[k] = inner(v, [data].concat(context));
+	          return acc;
+	        };
+	        remapped = reduceMap(data, keysToMap, {});
+	        return outer(remapped, context);
+	      default:
+	        return outer(data, context);
+	    }
+	  };
+
+	  exports.walk = walk;
+
+	  var postwalk = function(f, data, context) {
+	    if (!data) {
+	      return function(data, context) {
+	        return postwalk(f, data, context);
+	      };
+	    } else {
+	      return walk(postwalk(f), f, data, context);
+	    }
+	  };
+
+	  exports.postwalk = postwalk;
+
+	}).call(this);
+
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(module) {/*!
+	 * @name JavaScript/NodeJS Merge v1.1.3
+	 * @author yeikos
+	 * @repository https://github.com/yeikos/js.merge
+
+	 * Copyright 2014 yeikos - MIT license
+	 * https://raw.github.com/yeikos/js.merge/master/LICENSE
+	 */
+
+	;(function(isNode) {
+
+		function merge() {
+
+			var items = Array.prototype.slice.call(arguments),
+				result = items.shift(),
+				deep = (result === true),
+				size = items.length,
+				item, index, key;
+
+			if (deep || typeOf(result) !== 'object')
+
+				result = {};
+
+			for (index=0;index<size;++index)
+
+				if (typeOf(item = items[index]) === 'object')
+
+					for (key in item)
+
+						result[key] = deep ? clone(item[key]) : item[key];
+
+			return result;
+
+		}
+
+		function clone(input) {
+
+			var output = input,
+				type = typeOf(input),
+				index, size;
+
+			if (type === 'array') {
+
+				output = [];
+				size = input.length;
+
+				for (index=0;index<size;++index)
+
+					output[index] = clone(input[index]);
+
+			} else if (type === 'object') {
+
+				output = {};
+
+				for (index in input)
+
+					output[index] = clone(input[index]);
+
+			}
+
+			return output;
+
+		}
+
+		function typeOf(input) {
+
+			return ({}).toString.call(input).match(/\s([\w]+)/)[1].toLowerCase();
+
+		}
+
+		if (isNode) {
+
+			module.exports = merge;
+
+		} else {
+
+			window.merge = merge;
+
+		}
+
+	})(typeof module === 'object' && module && typeof module.exports === 'object' && module.exports);
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	module.exports = function(module) {
+		if(!module.webpackPolyfill) {
+			module.deprecate = function() {};
+			module.paths = [];
+			// module.parent = undefined by default
+			module.children = [];
+			module.webpackPolyfill = 1;
+		}
+		return module;
+	}
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	(function() {
+	    var utils = __webpack_require__(2);
+
+	    var id = function(x){return x;};
+	    var constantly = function(x){return function(){return x;};};
+
+	    var mwComposition = function(mw1, mw2){
+	        return function(h){ return mw1(mw2(h)); };
+	    };
+
+	    var Middleware = function(mw){
+	        mw.and = function(nmw){
+	            return Middleware(mwComposition(mw, nmw));
+	        };
+	        mw.end = function(h){
+	            return mw(h);
+	        };
+	        return mw;
+	    };
+
+	    // generate wm from function
+	    exports.$$Simple = function(f){
+	        return function(h){
+	            return function(args){
+	                return h(f(args));
+	            };
+	        };
+	    };
+
+	    var setAttr = function(args, attr, value){
+	        var path = attr.split('.');
+	        var obj = args;
+	        for(var i = 0; i < (path.length - 1); i++){
+	            var k = path[i];
+	            obj = args[k];
+	            if(!obj){
+	                obj = {};
+	                args[k] = obj;
+	            }
+	        }
+	        obj[path[path.length - 1]] = value;
+	        return args;
+	    };
+
+	    // generate wm from function
+	    exports.$$Attr = function(attr, fn){
+	        return Middleware(function(h){
+	            return function(args) {
+	                var value = null;
+	                if(utils.type(fn) == 'function'){
+	                   value = fn(args);
+	                } else {
+	                    value = fn;
+	                }
+	                if(value == null && value == undefined){
+	                    return h(args);
+	                }else {
+	                    return h(setAttr(args, attr, value));
+	                }
+	            };
+	        });
+	    };
+
+	    var Attribute = function(attr, fn){
+	        return Middleware(function(h){
+	            return function(args) {
+	                args[attr] = fn(args);
+	                return h(args);
+	            };
+	        });
+	    };
+
+	    var Method = function(method){
+	        return Attribute('method', constantly(method));
+	    };
+
+	    exports.Middleware = Middleware;
+	    exports.Attribute = Attribute;
+	    exports.Method = Method;
+
+	}).call(this);
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	(function() {
+	    var utils = __webpack_require__(2);
+
+	    var type = utils.type;
+
+	    var assertArray = utils.assertArray;
+
+	    var assertObject = utils.assertObject;
+
+	    var reduceMap = utils.reduceMap;
+
+	    var identity = utils.identity;
+
+	    var OPERATORS = {
+	        $gt: '>',
+	        $lt: '<',
+	        $lte: '<=',
+	        $gte: '>='
+	    };
+
+	    var MODIFIERS = {
+	        $asc: ':asc',
+	        $desc: ':desc',
+	        $exact: ':exact',
+	        $missing: ':missing',
+	        $null: ':missing',
+	        $text: ':text'
+	    };
+
+	    var isOperator = function(v) {
+	        return v.indexOf('$') === 0;
+	    };
+
+	    var expandParam = function(k, v) {
+	        return reduceMap(v, function(acc, arg) {
+	            var kk, o, res, vv;
+	            kk = arg[0], vv = arg[1];
+	            return acc.concat(kk === '$and' ? assertArray(vv).reduce((function(a, vvv) {
+	                return a.concat(linearizeOne(k, vvv));
+	            }), []) : kk === '$type' ? [] : isOperator(kk) ? (o = {
+	                param: k
+	            }, kk === '$or' ? o.value = vv : (OPERATORS[kk] ? o.operator = OPERATORS[kk] : void 0, MODIFIERS[kk] ? o.modifier = MODIFIERS[kk] : void 0, type(vv) === 'object' && vv.$or ? o.value = vv.$or : o.value = [vv]), [o]) : (v.$type ? res = ":" + v.$type : void 0, linearizeOne("" + k + (res || '') + "." + kk, vv)));
+	        });
+	    };
+
+	    var handleSort = function(xs) {
+	        var i, len, results, x;
+	        assertArray(xs);
+	        results = [];
+	        for (i = 0, len = xs.length; i < len; i++) {
+	            x = xs[i];
+	            switch (type(x)) {
+	            case 'array':
+	                results.push({
+	                    param: '_sort',
+	                    value: x[0],
+	                    modifier: ":" + x[1]
+	                });
+	                break;
+	            case 'string':
+	                results.push({
+	                    param: '_sort',
+	                    value: x
+	                });
+	                break;
+	            default:
+	                results.push(void 0);
+	            }
+	        }
+	        return results;
+	    };
+
+	    var handleInclude = function(includes) {
+	        return reduceMap(includes, function(acc, arg) {
+	            var k, v;
+	            k = arg[0], v = arg[1];
+	            return acc.concat((function() {
+	                switch (type(v)) {
+	                case 'array':
+	                    return v.map(function(x) {
+	                        return {
+	                            param: '_include',
+	                            value: k + "." + x
+	                        };
+	                    });
+	                case 'string':
+	                    return [
+	                        {
+	                            param: '_include',
+	                            value: k + "." + v
+	                        }
+	                    ];
+	                }
+	            })());
+	        });
+	    };
+
+	    var linearizeOne = function(k, v) {
+	        if (k === '$sort') {
+	            return handleSort(v);
+	        } else if (k === '$include') {
+	            return handleInclude(v);
+	        } else {
+	            switch (type(v)) {
+	            case 'object':
+	                return expandParam(k, v);
+	            case 'string':
+	                return [
+	                    {
+	                        param: k,
+	                        value: [v]
+	                    }
+	                ];
+	            case 'number':
+	                return [
+	                    {
+	                        param: k,
+	                        value: [v]
+	                    }
+	                ];
+	            case 'array':
+	                return [
+	                    {
+	                        param: k,
+	                        value: [v.join("|")]
+	                    }
+	                ];
+	            default:
+	                throw "could not linearizeParams " + (type(v));
+	            }
+	        }
+	    };
+
+	    var linearizeParams = function(query) {
+	        return reduceMap(query, function(acc, arg) {
+	            var k, v;
+	            k = arg[0], v = arg[1];
+	            return acc.concat(linearizeOne(k, v));
+	        });
+	    };
+
+	    var buildSearchParams = function(query) {
+	        var p, ps;
+	        ps = (function() {
+	            var i, len, ref, results;
+	            ref = linearizeParams(query);
+	            results = [];
+	            for (i = 0, len = ref.length; i < len; i++) {
+	                p = ref[i];
+	                results.push([p.param, p.modifier, '=', p.operator, encodeURIComponent(p.value)].filter(identity).join(''));
+	            }
+	            return results;
+	        })();
+	        return ps.join("&");
+	    };
+
+	    exports._query = linearizeParams;
+
+	    exports.query = buildSearchParams;
+
+	    var mw = __webpack_require__(5);
+
+	    exports.$SearchParams = mw.$$Attr('url', function(args){
+	        var url = args.url;
+	        if(args.query){
+	             var queryStr = buildSearchParams(args.query);
+	             return url + "?" + queryStr;
+	        }
+	        return url;
+	    });
+
+
+	    exports.$Paging = function(h){
+	        return function(args){
+	            var params = args.params || {};
+	            if(args.since){params._since = args.since;}
+	            if(args.count){params._count = args.count;}
+	            args.params = params;
+	            return h(args);
+	        };
+	    };
+
+
+	}).call(this);
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	(function() {
+	    var mw = __webpack_require__(5);
+
+	    var btoa = __webpack_require__(8).btoa;
+
+	    exports.$Basic = mw.$$Attr('headers.Authorization', function(args){
+	        if(args.auth && args.auth.user && args.auth.pass){
+	            return "Basic " + btoa(args.auth.user + ":" + args.auth.pass);
+	        }
+	    });
+
+	    exports.$Bearer = mw.$$Attr('headers.Authorization', function(args){
+	        if(args.auth && args.auth.bearer){
+	            return "Bearer " + args.auth.bearer;
+	        }
+	    });
+
+	}).call(this);
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	;(function () {
+
+	  var object =  true ? exports : this; // #8: web workers
+	  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+
+	  function InvalidCharacterError(message) {
+	    this.message = message;
+	  }
+	  InvalidCharacterError.prototype = new Error;
+	  InvalidCharacterError.prototype.name = 'InvalidCharacterError';
+
+	  // encoder
+	  // [https://gist.github.com/999166] by [https://github.com/nignag]
+	  object.btoa || (
+	  object.btoa = function (input) {
+	    var str = String(input);
+	    for (
+	      // initialize result and counter
+	      var block, charCode, idx = 0, map = chars, output = '';
+	      // if the next str index does not exist:
+	      //   change the mapping table to "="
+	      //   check if d has no fractional digits
+	      str.charAt(idx | 0) || (map = '=', idx % 1);
+	      // "8 - idx % 1 * 8" generates the sequence 2, 4, 6, 8
+	      output += map.charAt(63 & block >> 8 - idx % 1 * 8)
+	    ) {
+	      charCode = str.charCodeAt(idx += 3/4);
+	      if (charCode > 0xFF) {
+	        throw new InvalidCharacterError("'btoa' failed: The string to be encoded contains characters outside of the Latin1 range.");
+	      }
+	      block = block << 8 | charCode;
+	    }
+	    return output;
+	  });
+
+	  // decoder
+	  // [https://gist.github.com/1020396] by [https://github.com/atk]
+	  object.atob || (
+	  object.atob = function (input) {
+	    var str = String(input).replace(/=+$/, '');
+	    if (str.length % 4 == 1) {
+	      throw new InvalidCharacterError("'atob' failed: The string to be decoded is not correctly encoded.");
+	    }
+	    for (
+	      // initialize result and counters
+	      var bc = 0, bs, buffer, idx = 0, output = '';
+	      // get next character
+	      buffer = str.charAt(idx++);
+	      // character found in table? initialize bit storage and add its ascii value;
+	      ~buffer && (bs = bc % 4 ? bs * 64 + buffer : buffer,
+	        // and if not first of each 4 characters,
+	        // convert the first 8 bits to one ascii character
+	        bc++ % 4) ? output += String.fromCharCode(255 & bs >> (-2 * bc & 6)) : 0
+	    ) {
+	      // try to find character in table (0-63, not found => -1)
+	      buffer = chars.indexOf(buffer);
+	    }
+	    return output;
+	  });
+
+	}());
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	(function() {
+	    var utils = __webpack_require__(2);
+
+	    exports.Http = function(cfg, adapter){
+	        return function(args){
+	            if(args.debug){
+	                console.log("\nDEBUG (request):", args.method, args.url, args);
+	            }
+	            var promise = (args.http || adapter.http  || cfg.http)(args);
+	            if (args.debug && promise && promise.then){
+	                promise.then(function(x){ console.log("\nDEBUG: (responce)", x);});
+	            }
+	            return promise;
+	        };
+	    };
+
+	    var toJson = function(x){
+	        return (utils.type(x) == 'object') ? JSON.stringify(x) : x;
+	    };
+
+	    exports.$JsonData = function(h){
+	        return function(args){
+	            var data = args.bundle || args.data || args.resource;
+	            if(data){
+	                args.data = toJson(data);
+	            }
+	            return h(args);
+	        };
+	    };
+
+	}).call(this);
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports) {
+
+	module.exports = function(h){
+	    return function(args){
+	        try{
+	            return h(args);
+	        }catch(e){
+	            if(args.debug){
+	               console.log("\nDEBUG: (ERROR in middleware)");
+	               console.log(e.message);
+	               console.log(e.stack);
+	            }
+	            if(!args.defer) {
+	                console.log("\nDEBUG: (ERROR in middleware)");
+	                console.log(e.message);
+	                console.log(e.stack);
+	                throw new Error("I need adapter.defer");
+	            }
+	            var deff = args.defer();
+	            deff.reject(e);
+	            return deff.promise;
+	        }
+	    };
+	};
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports) {
+
+	(function() {
+	    var copyAttr = function(from, to, attr){
+	        var v =  from[attr];
+	        if(v && !to[attr]) {to[attr] = v;}
+	        return from;
+	    };
+
+	    module.exports = function(cfg, adapter){
+	        return function(h){
+	            return function(args){
+	                copyAttr(cfg, args, 'baseUrl');
+	                copyAttr(cfg, args, 'cache');
+	                copyAttr(cfg, args, 'auth');
+	                copyAttr(cfg, args, 'patient');
+	                copyAttr(cfg, args, 'debug');
+	                copyAttr(adapter, args, 'defer');
+	                copyAttr(adapter, args, 'http');
+	                return h(args);
+	            };
+	        };
+	    };
+	}).call(this);
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+	exports.$$BundleLinkUrl =  function(rel){
+	    return function(h) {
+	        return function(args){
+	            var matched = function(x){return x.relation && x.relation === rel;};
+	            var res =  args.bundle && (args.bundle.link || []).filter(matched)[0];
+	            if(res && res.url){
+	                args.url = res.url;
+	                args.data = null;
+	                return h(args);
+	            }
+	            else{
+	                throw new Error("No " + rel + " link found in bundle");
+	            }
+	        };
+	    };
+	};
+
+<<<<<<< HEAD
 function stripTrailingSlash(str) {
     if(str.substr(-1) === '/') {
         return str.substr(0, str.length - 1);
@@ -45,1426 +950,211 @@ function getPreviousToken(){
   if (ret) ret = JSON.parse(ret);
   return ret;
 }
+=======
+>>>>>>> fhir_js
 
-function completeTokenFlow(hash){
-  if (!hash){
-    hash = window.location.hash;
-  }
-  var ret =  $.Deferred();
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
 
-  process.nextTick(function(){
-    var oauthResult = hash.match(/#(.*)/);
-    oauthResult = oauthResult ? oauthResult[1] : "";
-    oauthResult = oauthResult.split(/&/);
-    var authorization = {};
-    for (var i = 0; i < oauthResult.length; i++){
-      var kv = oauthResult[i].split(/=/);
-      if (kv[0].length > 0 && kv[1]) {
-        authorization[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
-      }
-    }
-    ret.resolve(authorization);
-  });
+	(function() {
+	    var mw = __webpack_require__(5);
 
-  return ret.promise();
-}
+	    // List of resources with 'patient' or 'subject' properties (as of FHIR DSTU2 1.0.0)
+	    var targets = [
+	        "Account",
+	        "AllergyIntolerance",
+	        "BodySite",
+	        "CarePlan",
+	        "Claim",
+	        "ClinicalImpression",
+	        "Communication",
+	        "CommunicationRequest",
+	        "Composition",
+	        "Condition",
+	        "Contract",
+	        "DetectedIssue",
+	        "Device",
+	        "DeviceUseRequest",
+	        "DeviceUseStatement",
+	        "DiagnosticOrder",
+	        "DiagnosticReport",
+	        "DocumentManifest",
+	        "DocumentReference",
+	        "Encounter",
+	        "EnrollmentRequest",
+	        "EpisodeOfCare",
+	        "FamilyMemberHistory",
+	        "Flag",
+	        "Goal",
+	        "ImagingObjectSelection",
+	        "ImagingStudy",
+	        "Immunization",
+	        "ImmunizationRecommendation",
+	        "List",
+	        "Media",
+	        "MedicationAdministration",
+	        "MedicationDispense",
+	        "MedicationOrder",
+	        "MedicationStatement",
+	        "NutritionOrder",
+	        "Observation",
+	        "Order",
+	        "Procedure",
+	        "ProcedureRequest",
+	        "QuestionnaireResponse",
+	        "ReferralRequest",
+	        "RelatedPerson",
+	        "RiskAssessment",
+	        "Specimen",
+	        "SupplyDelivery",
+	        "SupplyRequest",
+	        "VisionPrescription"
+	    ];
 
-function completeCodeFlow(params){
-  if (!params){
-    params = {
-      code: urlParam('code'),
-      state: urlParam('state')
-    };
-  }
-  
-  var ret =  $.Deferred();
-  var state = JSON.parse(sessionStorage[params.state]);
-
-  if (window.history.replaceState && BBClient.settings.replaceBrowserHistory){
-    window.history.replaceState({}, "", window.location.toString().replace(window.location.search, ""));
-  }
-
-  $.ajax({
-
-    url: state.provider.oauth2.token_uri,
-    type: 'POST',
-    data: {
-      code: params.code,
-      grant_type: 'authorization_code',
-      redirect_uri: state.client.redirect_uri,
-      client_id: state.client.client_id
-    },
-  }).done(function(authz){
-    authz = $.extend(authz, params);
-    ret.resolve(authz);
-  }).fail(function(){
-    console.log("failed to exchange code for access_token", arguments);
-    ret.reject();
-  });;
-
-  return ret.promise();
-}
-
-function completePageReload(){
-  var d = $.Deferred();
-  process.nextTick(function(){
-    d.resolve(getPreviousToken());
-  });
-  return d;
-}
-
-function readyArgs(){
-
-  var input = null;
-  var callback = function(){};
-  var errback = function(){};
-
-  if (arguments.length === 0){
-    throw "Can't call 'ready' without arguments";
-  } else if (arguments.length === 1){
-    callback = arguments[0];
-  } else if (arguments.length === 2){
-    if (typeof arguments[0] === 'function'){
-      callback = arguments[0];
-      errback = arguments[1];
-    } else if (typeof arguments[0] === 'object'){
-      input = arguments[0];
-      callback = arguments[1];
-    } else {
-      throw "ready called with invalid arguments";
-    }
-  } else if (arguments.length === 3){
-    input = arguments[0];
-    callback = arguments[1];
-    errback = arguments[2];
-  } else {
-    throw "ready called with invalid arguments";
-  }
-
-  return {
-    input: input,
-    callback: callback,
-    errback: errback
-  };
-}
-
-// Client settings
-BBClient.settings = {
-    replaceBrowserHistory: true
-};
-
-BBClient.ready = function(input, callback, errback){
-
-  var args = readyArgs.apply(this, arguments);
-
-  // decide between token flow (implicit grant) and code flow (authorization code grant)
-  var isCode = urlParam('code') || (args.input && args.input.code);
-
-  var accessTokenResolver = null;
-  if (sessionStorage.tokenResponse) { // we're reloading after successful completion
-    accessTokenResolver = completePageReload();
-  } else if (isCode) { // code flow
-    accessTokenResolver = completeCodeFlow(args.input);
-  } else { // token flow
-    accessTokenResolver = completeTokenFlow(args.input);
-  }
-  accessTokenResolver.done(function(tokenResponse){
-
-    if (!tokenResponse || !tokenResponse.state) {
-      return args.errback("No 'state' parameter found in authorization response.");
-    }
-    
-    sessionStorage.tokenResponse = JSON.stringify(tokenResponse);
-
-    var state = JSON.parse(sessionStorage[tokenResponse.state]);
-    if (state.fake_token_response) {
-      tokenResponse = state.fake_token_response;
-    }
-
-    var fhirClientParams = {
-      serviceUrl: state.provider.url,
-      patientId: tokenResponse.patient
-    };
-    
-    if (tokenResponse.id_token) {
-        var id_token = tokenResponse.id_token;
-        var payload = jwt.decode(id_token);
-        fhirClientParams["userId"] = payload["profile"]; 
-    }
-
-    if (tokenResponse.access_token !== undefined) {
-      fhirClientParams.auth = {
-        type: 'bearer',
-        token: tokenResponse.access_token
-      };
-    } else if (!state.fake_token_response){
-      return args.errback("Failed to obtain access token.");
-    }
-
-    var ret = FhirClient(fhirClientParams);
-    ret.state = JSON.parse(JSON.stringify(state));
-    ret.tokenResponse = JSON.parse(JSON.stringify(tokenResponse));
-    args.callback(ret);
-
-  }).fail(function(){
-    args.errback("Failed to obtain access token.");
-  });
-
-};
-
-function providers(fhirServiceUrl, callback, errback){
-
-  // Shim for pre-OAuth2 launch parameters
-  if (isBypassOAuth()){
-    process.nextTick(function(){
-      bypassOAuth(fhirServiceUrl, callback);
-    });
-    return;
-  }
+	    exports.$WithPatient = mw.$$Simple(function(args){
+	        var type = args.type;
+	        if (args.patient) {
+	            if (type === "Patient") {
+	                args.query = args.query || {};
+	                args.query["_id"] = args.patient;
+	                args["id"] = args.patient;
+	            } else if (targets.indexOf(type) >= 0){
+	                args.query = args.query || {};
+	                args.query["patient"] = args.patient;
+	            }
+	        }
+	        return args;
+	    });
+	}).call(this);
 
 
-  jQuery.get(
-    stripTrailingSlash(fhirServiceUrl)+"/metadata",
-    function(r){
-      var res = {
-        "name": "SMART on FHIR Testing Server",
-        "description": "Dev server for SMART on FHIR",
-        "url": fhirServiceUrl,
-        "oauth2": {
-          "registration_uri": null,
-          "authorize_uri": null,
-          "token_uri": null
-        }
-      };
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
 
-      try {
-        var smartExtension = jQuery.grep(r.rest[0].security.extension, function (e,i) {
-           return (e.url === "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris");
-        });
+	(function() {
+	    var utils = __webpack_require__(2);
 
-        jQuery.each(smartExtension[0].extension, function(responseNum, arg){
-          if (arg.url === "register") {
-            res.oauth2.registration_uri = arg.valueUri;
-          } else if (arg.url === "authorize") {
-            res.oauth2.authorize_uri = arg.valueUri;
-          } else if (arg.url === "token") {
-            res.oauth2.token_uri = arg.valueUri;
-          }
-        });
-      }
-      catch (err) {
-        return errback && errback(err);
-      }
+	    var CONTAINED = /^#(.*)/;
+	    var resolveContained = function(ref, resource) {
+	        var cid = ref.match(CONTAINED)[1];
+	        var ret = (resource.contained || []).filter(function(r){
+	            return (r.id || r._id) == cid;
+	        })[0];
+	        return (ret && {content: ret}) || null;
+	    };
 
-      callback && callback(res);
-    },
-    "json"
-  ).fail(function() {
-    errback && errback("Unable to fetch conformance statement");
-  });
-};
+	    var sync = function(arg) {
+	        var cache = arg.cache;
+	        var reference = arg.reference;
+	        var bundle = arg.bundle;
+	        var ref = reference;
+	        if (!ref.reference) {return null;}
+	        if (ref.reference.match(CONTAINED)) {return resolveContained(ref.reference, arg.resource);}
+	        var abs = utils.absoluteUrl(arg.baseUrl, ref.reference);
+	        var bundled = ((bundle && bundle.entry) || []).filter( function(e){
+	            return e.id === abs;
+	        })[0];
+	        return bundled || (cache != null ? cache[abs] : void 0) || null;
+	    };
 
-var noAuthFhirProvider = function(serviceUrl){
-  return {
-    "oauth2": null,
-    "url": serviceUrl
-  }
-};
+	    var resolve = function(h){
+	        return function(args) {
+	            var cacheMatched = sync(args);
+	            var ref = args.reference;
+	            var def = args.defer();
+	            if (cacheMatched) {
+	                if(!args.defer){ throw new Error("I need promise constructor 'adapter.defer' in adapter"); }
+	                def.resolve(cacheMatched);
+	                return def.promise;
+	            }
+	            if (!ref) {
+	                throw new Error("No reference found");
+	            }
+	            if (ref && ref.reference.match(CONTAINED)) {
+	                throw new Error("Contained resource not found");
+	            }
+	            args.url = utils.absoluteUrl(args.baseUrl, ref.reference);
+	            args.data = null;
+	            return h(args);
+	        };
+	    };
 
-function relative(url){
-  return (window.location.protocol + "//" + window.location.host + window.location.pathname).match(/(.*\/)[^\/]*/)[1] + url;
-}
+	    module.exports.sync = sync;
+	    module.exports.resolve = resolve;
 
-function isBypassOAuth(){
-  return (urlParam("fhirServiceUrl") && !(urlParam("iss")));
-}
+	}).call(this);
 
-function bypassOAuth(fhirServiceUrl, callback){
-  callback && callback({
-    "oauth2": null,
-    "url": fhirServiceUrl || urlParam("fhirServiceUrl")
-  });
-}
 
-BBClient.authorize = function(params, errback){
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
 
-  if (!errback){
-    errback = function(){
-        console.log("Failed to discover authorization URL given", params);
-    };
-  }
-  
-  // prevent inheritance of tokenResponse from parent window
-  delete sessionStorage.tokenResponse;
+	(function() {
+	    var utils = __webpack_require__(2);
+	    var core = __webpack_require__(5);
 
-  if (!params.client){
-    params = {
-      client: params
-    };
-  }
+	    var id = function(x){return x;};
+	    var constantly = function(x){return function(){return x;};};
 
-  if (!params.response_type){
-    params.response_type = 'code';
-  }
+	    var get_in = function(obj, path){
+	        return path.split('.').reduce(function(acc,x){
+	            if(acc == null || acc == undefined) { return null; }
+	            return acc[x];
+	        }, obj);
+	    };
 
-   if (!params.client.redirect_uri){
-    params.client.redirect_uri = relative("");
-  }
+	    var evalPropsExpr = function(exp, args){
+	        var exps =  exp.split('||').map(function(x){return x.trim().substring(1);});
+	        for(var i = 0; i < exps.length; i++){
+	            var res = get_in(args, exps[i]);
+	            if(res){ return res; }
+	        }
+	        return null;
+	    };
 
-  if (!params.client.redirect_uri.match(/:\/\//)){
-    params.client.redirect_uri = relative(params.client.redirect_uri);
-  }
+	    var evalExpr = function(exp, args){
+	        if (exp.indexOf(":") == 0){
+	            return evalPropsExpr(exp, args);
+	        } else {
+	            return exp;
+	        }
+	    };
 
-  var launch = urlParam("launch");
-  if (launch){
-    if (!params.client.scope.match(/launch/)){
-      params.client.scope += " launch";
-    }
-    params.client.launch = launch;
-  }
+	    var buildPathPart = function(pth, args){
+	        var k = evalExpr(pth.trim(), args);
+	        if(k==null || k === undefined){ throw new Error("Parameter "+pth+" is required: " + JSON.stringify(args)); }
+	        return k;
+	    };
 
-  var server = urlParam("iss") || urlParam("fhirServiceUrl");
-  if (server){
-    if (!params.server){
-      params.server = server;
-    }
-  }
+	    // path chaining function
+	    // which return haldler wrapper: (h, cfg)->(args -> promise)
+	    // it's chainable Path("baseUrl").slash(":type").slash(":id").slash("_history")(id, {})({id: 5, type: 'Patient'})
+	    // and composable p0 = Path("baseUrl); p1 = p0.slash("path)
+	    var Path = function(tkn, chain){
+	        //Chainable
+	        var new_chain = function(args){
+	            return ((chain && (chain(args) + "/")) || "") +  buildPathPart(tkn, args);
+	        };
+	        var ch = core.Attribute('url', new_chain);
+	        ch.slash = function(tkn){
+	            return Path(tkn, new_chain);
+	        };
+	        return ch;
+	    };
 
-  if (urlParam("patientId")){
-    params.fake_token_response = params.fake_token_response || {};
-    params.fake_token_response.patient = urlParam("patientId");
-  }
+	    exports.Path = Path;
+	}).call(this);
 
-  providers(params.server, function(provider){
 
-    params.provider = provider;
-
-    var state = params.client.state || Guid.newGuid();
-    var client = params.client;
-
-    if (params.provider.oauth2 == null) {
-      sessionStorage[state] = JSON.stringify(params);
-      sessionStorage.tokenResponse = JSON.stringify({state: state});
-      window.location.href = client.redirect_uri + "#state="+encodeURIComponent(state);
-      return;
-    }
-
-    sessionStorage[state] = JSON.stringify(params);
-
-    console.log("sending client reg", params.client);
-
-    var redirect_to=params.provider.oauth2.authorize_uri + "?" + 
-      "client_id="+encodeURIComponent(client.client_id)+"&"+
-      "response_type="+encodeURIComponent(params.response_type)+"&"+
-      "scope="+encodeURIComponent(client.scope)+"&"+
-      "redirect_uri="+encodeURIComponent(client.redirect_uri)+"&"+
-      "state="+encodeURIComponent(state)+"&"+
-      "aud="+encodeURIComponent(params.server);
-    
-    if (typeof client.launch !== 'undefined' && client.launch) {
-       redirect_to += "&launch="+encodeURIComponent(client.launch);
-    }
-
-    window.location.href = redirect_to;
-  }, errback);
-};
-
-BBClient.resolveAuthType = function (fhirServiceUrl, callback, errback) {
-
-      jQuery.get(
-        stripTrailingSlash(fhirServiceUrl)+"/metadata",
-        function(r){
-          var type = "none";
-          
-          try {
-            if (r.rest[0].security.service[0].coding[0].code.toLowerCase() === "oauth2") {
-                type = "oauth2";
-            }
-          }
-          catch (err) {
-          }
-
-          callback && callback(type);
-        },
-        "json"
-      ).fail(function() {
-        errback && errback("Unable to fetch conformance statement");
-      });
-};
-
-}).call(this,require('_process'))
-},{"./client":3,"./guid":5,"./jquery":6,"_process":31,"jsonwebtoken":49}],2:[function(require,module,exports){
-var c = require('../vendor/conformance.json');
-var definitions = {};
-var camelCased = function(s){
-  return s.replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
-};
-
-c.rest[0].resource.forEach(function(r){
-  var params = [];
-  definitions[r.type] = {
-    params: params
-  };
-
-  if (r.searchParam) {
-    r.searchParam.forEach(function(sp){
-      params.push({
-        name: camelCased(sp.name),
-        wireName: sp.name,
-        type: sp.type
-      });
-    });
-  }
-
+/***/ }
+/******/ ])
 });
+;
+},{}],2:[function(require,module,exports){
 
-module.exports = definitions;
-
-},{"../vendor/conformance.json":53}],3:[function(require,module,exports){
-var btoa = require('btoa');
-var Search = require('./search');
-var jQuery = require('./jquery');
-var $ = jQuery;
-
-module.exports = FhirClient;
-
-function absolute(id, server) {
-  if (id.match(/^http/)) return id;
-  if (id.match(/^urn/)) return id;
-
-  // strip leading slash
-  if (id.charAt(0) == "/") id = id.substr(1);
-
-  return server.serviceUrl + '/' + id;
-}
-
-var regexpSpecialChars = /([\[\]\^\$\|\(\)\\\+\*\?\{\}\=\!])/gi;
-
-function relative(id, server) {
-  if (!id.match(/^http/)) {
-    id = server.serviceUrl + '/' + id
-  }
-  var quotedBase = ( server.serviceUrl + '/' ).replace(regexpSpecialChars, '\\$1');
-  var matcher = new RegExp("^"+quotedBase + "([^/]+)/([^/]+)(?:/_history/(.*))?$");
-  var match = id.match(matcher);
-  if (match === null) {
-    throw "Couldn't determine a relative URI for " + id;
-  }
-
-  var params = {
-    resource: match[1],
-    id: match[2],
-    version: match[3]
-  };
-
-  return params;
-}
-
-function ClientPrototype(){};
-var clientUtils = require('./utils');
-Object.keys(clientUtils).forEach(function(k){
-  ClientPrototype.prototype[k] = clientUtils[k];
-});
-
-function FhirClient(p) {
-  // p.serviceUrl
-  // p.auth {
-    //    type: 'none' | 'basic' | 'bearer'
-    //    basic --> username, password
-    //    bearer --> token
-    // }
-
-    var cache = {};
-    var client = new ClientPrototype();
-
-    var server = client.server = {
-      serviceUrl: p.serviceUrl,
-      auth: p.auth
-    }
-
-    client.patientId = p.patientId;
-    client.userId = p.userId;
-
-    client.cache = {
-      get: function(p) {
-        var url = absolute(typeof p === 'string' ? p : (p.resource + '/'+p.id), server);
-        if (url in cache) {
-          return getLocal(url);
-        }
-        return null;
-      }
-    };
-
-
-    server.auth = server.auth ||  {
-      type: 'none'
-    };
-
-    if (!client.server.serviceUrl || !client.server.serviceUrl.match(/https?:\/\/.+[^\/]$/)) {
-      throw "Must supply a `server` propery whose `serviceUrl` begins with http(s) " + 
-        "and does NOT include a trailing slash. E.g. `https://fhir.aws.af.cm/fhir`";
-    }
-
-    client.indexResource = function(id, r) {
-      var ret = [r];
-      cache[absolute(id, server)] = r;
-      return ret;
-    };
-
-    client.indexBundle = function(data) {
-      var ret = [];
-      (data.entry || []).forEach(function(e){
-        var r = e.resource;
-        var id = r.resourceType + "/" + r.id;
-        var more = client.indexResource(id, r);
-        [].push.apply(ret, more);
-      });
-      return ret; 
-    };
-
-    client.authenticated = function(p) {
-      if (server.auth.type === 'none') {
-        return p;
-      }
-
-      var h;
-      if (server.auth.type === 'basic') {
-        h = "Basic " + btoa(server.auth.username + ":" + server.auth.password);
-      } else if (server.auth.type === 'bearer') {
-        h = "Bearer " + server.auth.token;
-      }
-      if (!p.headers) {p.headers = {};}
-      p.headers['Authorization'] = h
-      //p.beforeSend = function (xhr) { xhr.setRequestHeader ("Authorization", h); }
-
-      return p;
-    };
-
-    function handleReference(p){
-      return function(from, to) {
-
-        // Resolve any of the following:
-        // 1. contained resource
-        // 2. already-fetched resource
-        // 3. not-yet-fetched resource
-
-        if (to.reference === undefined) {
-          throw "Can't follow a non-reference: " + to;
-        }
-
-        if (to.reference.match(/^#/)) {
-          return p.contained(from, to.reference.slice(1));
-        } 
-
-        var url = absolute(to.reference, server);
-        if (url in cache) {
-          return p.local(url);
-        }
-
-        if (!p.remote) {
-          throw "Can't look up unfetched resource " + url;
-        }
-
-        return p.remote(url);
-      }
-    };
-    
-    function handleBinary(p){
-      return function(from, to) {
-
-        var url = absolute(to, server);
-        if (url in cache) {
-          return p.local(url);
-        }
-
-        if (!p.remote) {
-          throw "Can't look up unfetched resource " + url;
-        }
-
-        return p.remote(url);
-      }
-    };
-
-    client.cachedLink = handleReference({
-      contained: getContained,
-      local: getLocal
-    });
-
-    client.followLink = handleReference({
-      contained: followContained,
-      local: followLocal,
-      remote: followRemote
-    });
-    
-    client.followBinary = handleBinary({
-      local: followLocal,
-      remote: followRemoteBinary
-    });
-
-    function getContained(from, id) {
-      var matches = from.contained.filter(function(c){
-       // Note: `.id` is correct, but `._id` was a longtime (incorrect)
-       // production of the FHIR Java RI serialization routine. We checl
-       // both here for compatibility.
-        return (c.id === id || c._id === id); 
-      });
-      if (matches.length !== 1)  {
-        return null;
-      }
-      return matches[0];
-    }
-
-    function getLocal(url) {
-      return cache[url];
-    }
-
-    function followContained(from, id) {
-      var ret = new $.Deferred();
-      var val = getContained(from, id);
-      setTimeout(function(){
-        if (val === null) {
-          return ret.reject("No contained resource matches #"+id);
-        }
-        return ret.resolve(val);
-      }, 0);
-      return ret;
-    };
-
-    function followLocal(url) {
-      var ret = new $.Deferred();
-      var val = getLocal(url);
-      setTimeout(function(){
-        if (val === null) {
-          return ret.reject("No local resource matches #"+id);
-        }
-        return ret.resolve(val);
-      }, 0);
-      return ret;
-    };
-
-    function followRemote(url) {
-      var getParams = relative(url, server);
-      return client.get(getParams);
-    };
-    
-    function followRemoteBinary(url) {
-      var getParams = relative(url, server);
-      return client.getBinary(getParams);
-    };
-
-    client.get = function(p) {
-      // p.resource, p.id, ?p.version, p.include
-
-      var ret = new $.Deferred();
-      var url = server.serviceUrl + '/' + p.resource + '/' + p.id;
-
-      $.ajax(client.authenticated({
-        type: 'GET',
-        url: url,
-        dataType: 'json'
-      }))
-      .done(function(data, status){
-        var ids = client.indexResource(url, data);
-        if (ids.length !== 1) {
-          ret.reject("Didn't get exactly one result for " + url);
-        }
-        ret.resolve(ids[0]);
-      })
-      .fail(function(){
-        ret.reject("Could not fetch " + url, arguments);
-      });
-      return ret;
-    };
-    
-    client.getBinary = function(p) {
-
-      var ret = new $.Deferred();
-      var url = server.serviceUrl + '/' + p.resource + '/' + p.id;
-
-      $.ajax(client.authenticated({
-        type: 'GET',
-        url: url,
-        dataType: 'blob'
-      }))
-      .done(function(blob){
-        ret.resolve(blob);
-      })
-      .fail(function(){
-        ret.reject("Could not fetch " + url, arguments);
-      });
-      return ret;
-    };
-
-    client.urlFor = function(searchSpec){
-      return client.server.serviceUrl+searchSpec.queryUrl();
-    }
-
-    client.search = function(searchSpec){
-      // p.resource, p.count, p.searchTerms
-      var s = Search({
-        client: client,
-        spec: searchSpec
-      });
-
-      return s.execute();
-    }
-
-    client.drain =  function(searchSpec, batch){
-      var d = $.Deferred();
-
-      if (batch === undefined){
-        var db = [];
-        batch = function(vs) {
-          vs.forEach(function(v){
-            db.push(v);
-          }); 
-        }
-      }
-
-      db = db || {};
-      client.search(searchSpec)
-      .done(function drain(vs, cursor){
-        batch(vs);
-        if (cursor.hasNext()){
-          cursor.next().done(drain);
-        } else {
-          d.resolve();
-        } 
-      }).fail(function (err){
-          d.reject(err);
-      });
-      return d.promise();
-    };
-
-    var specs = require('./search-specification')({
-      "search": client,
-      "drain": client
-    });
-
-    function patientPropertyName(searchSpec){
-      var propertyName = null;
-      ['patient', 'subject'].forEach(function(pname){
-        if (typeof searchSpec[pname] === 'function'){
-          propertyName = pname;
-        }
-      });
-      return propertyName;
-    }
-
-    function withDefaultPatient(searchSpec){
-      var propertyName = patientPropertyName(searchSpec);
-      if (propertyName !== null && client.patientId){
-        searchSpec = searchSpec[propertyName](specs.Patient._id(client.patientId));
-      } else if (searchSpec.resourceName === 'Patient' && client.patientId){
-        searchSpec = searchSpec._id(client.patientId);
-      } else {
-        searchSpec = null;
-      }
-
-      return searchSpec;
-    }
-
-    function getterFor(r){
-      return function(id){
-
-        if (r.resourceName === 'Patient' && id === undefined){
-          id = client.patientId
-        }
-
-        return client.get({
-          resource: r.resourceName,
-          id: id
-        });
-      }
-    };
-
-    function writeTodo(){
-      throw "Write functionality not implemented.";
-    };
-
-    client.context = {};
-
-    client.context.user = {
-      'read': function(){
-        var userId = client.userId;
-        var ret;
-        if (userId) {
-            $.each(["Practitioner", "Patient", "RelatedPerson"], function (id, type) {
-                if (userId.indexOf(type) >= 0) {
-                    userId = userId.split(type + "/")[1];
-                    ret = client.api[type].read(userId);
-                }
-            });
-        }
-        return ret;
-      }
-    };
-
-    client.context.patient = {
-      'read': function(){
-        return client.api.Patient.read(client.patientId);
-      }
-    };
-
-    client.api = {};
-
-    // Create SearchSpec-specific handlers
-    // as properties on some target object
-    // e.g. target.Alert, target.Condition, etc.
-    function decorateWithApi(target, tweaks){
-
-      tweaks = tweaks || {filter:function(){return true;}};
-
-      Object.keys(specs).forEach(function(r){
-
-        if (!tweaks.filter(specs[r])){
-          return;
-        }
-
-        target[r] = {
-          read: getterFor(specs[r]),
-          post: writeTodo,
-          put: writeTodo,
-          delete: writeTodo,
-          drain: function(){
-            return target[r].where.drain();
-          },
-          search: function(){
-            return target[r].where.search();
-          },
-          where: specs[r]
-        };
-
-        if (tweaks.where){
-           target[r].where = tweaks.where(target[r].where);
-        }
-
-      });
-    }
-
-    decorateWithApi(client.api);
-    decorateWithApi(client.context.patient, {
-      filter: withDefaultPatient,
-      where: withDefaultPatient
-    });
-
-    return client;
-}
-
-// Patch jQuery AJAX mechanism to receive blob objects via XMLHttpRequest 2. Based on:
-//    https://gist.github.com/aaronk6/bff7cc600d863d31a7bf
-//    http://www.artandlogic.com/blog/2013/11/jquery-ajax-blobs-and-array-buffers/
-
-/**
- * Register ajax transports for blob send/recieve and array buffer send/receive via XMLHttpRequest Level 2
- * within the comfortable framework of the jquery ajax request, with full support for promises.
- *
- * Notice the +* in the dataType string? The + indicates we want this transport to be prepended to the list
- * of potential transports (so it gets first dibs if the request passes the conditions within to provide the
- * ajax transport, preventing the standard transport from hogging the request), and the * indicates that
- * potentially any request with any dataType might want to use the transports provided herein.
- *
- * Remember to specify 'processData:false' in the ajax options when attempting to send a blob or arraybuffer -
- * otherwise jquery will try (and fail) to convert the blob or buffer into a query string.
- */
-jQuery.ajaxTransport("+*", function(options, originalOptions, jqXHR){
-    // Test for the conditions that mean we can/want to send/receive blobs or arraybuffers - we need XMLHttpRequest
-    // level 2 (so feature-detect against window.FormData), feature detect against window.Blob or window.ArrayBuffer,
-    // and then check to see if the dataType is blob/arraybuffer or the data itself is a Blob/ArrayBuffer
-    if (window.FormData && ((options.dataType && (options.dataType === 'blob' || options.dataType === 'arraybuffer')) ||
-        (options.data && ((window.Blob && options.data instanceof Blob) ||
-            (window.ArrayBuffer && options.data instanceof ArrayBuffer)))
-        ))
-    {
-        return {
-            /**
-             * Return a transport capable of sending and/or receiving blobs - in this case, we instantiate
-             * a new XMLHttpRequest and use it to actually perform the request, and funnel the result back
-             * into the jquery complete callback (such as the success function, done blocks, etc.)
-             *
-             * @param headers
-             * @param completeCallback
-             */
-            send: function(headers, completeCallback){
-                var xhr = new XMLHttpRequest(),
-                    url = options.url || window.location.href,
-                    type = options.type || 'GET',
-                    dataType = options.dataType || 'text',
-                    data = options.data || null,
-                    async = options.async || true,
-                    key;
-
-                xhr.addEventListener('load', function(){
-                    var response = {}, status, isSuccess;
-
-                    isSuccess = xhr.status >= 200 && xhr.status < 300 || xhr.status === 304;
-
-                    if (isSuccess) {
-                        response[dataType] = xhr.response;
-                    } else {
-                        // In case an error occured we assume that the response body contains
-                        // text data - so let's convert the binary data to a string which we can
-                        // pass to the complete callback.
-                        response.text = String.fromCharCode.apply(null, new Uint8Array(xhr.response));
-                    }
-
-                    completeCallback(xhr.status, xhr.statusText, response, xhr.getAllResponseHeaders());
-                });
-
-                xhr.open(type, url, async);
-                xhr.responseType = dataType;
-
-                for (key in headers) {
-                    if (headers.hasOwnProperty(key)) xhr.setRequestHeader(key, headers[key]);
-                }
-                xhr.send(data);
-            },
-            abort: function(){
-                jqXHR.abort();
-            }
-        };
-    }
-});
-
-},{"./jquery":6,"./search":9,"./search-specification":8,"./utils":10,"btoa":47}],4:[function(require,module,exports){
-window.FHIR = {
-  client: require('./client'),
-  query: require('./search-specification.js')(),
-  jQuery: require('./jquery'),
-  oauth2: require('./bb-client')
-};
-
-},{"./bb-client":1,"./client":3,"./jquery":6,"./search-specification.js":8}],5:[function(require,module,exports){
-var EMPTY = '00000000-0000-0000-0000-000000000000';
-
-var _padLeft = function (paddingString, width, replacementChar) {
-  return paddingString.length >= width ? paddingString : _padLeft(replacementChar + paddingString, width, replacementChar || ' ');
-};
-
-var _s4 = function (number) {
-  var hexadecimalResult = number.toString(16);
-  return _padLeft(hexadecimalResult, 4, '0');
-};
-
-var _cryptoGuid = function () {
-  var buffer = new window.Uint16Array(8);
-  window.crypto.getRandomValues(buffer);
-  return [_s4(buffer[0]) + _s4(buffer[1]), _s4(buffer[2]), _s4(buffer[3]), _s4(buffer[4]), _s4(buffer[5]) + _s4(buffer[6]) + _s4(buffer[7])].join('-');
-};
-
-var _guid = function () {
-  var currentDateMilliseconds = new Date().getTime();
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (currentChar) {
-    var randomChar = (currentDateMilliseconds + Math.random() * 16) % 16 | 0;
-    currentDateMilliseconds = Math.floor(currentDateMilliseconds / 16);
-    return (currentChar === 'x' ? randomChar : (randomChar & 0x7 | 0x8)).toString(16);
-  });
-};
-
-var create = function () {
-  var hasCrypto = typeof (window.crypto) != 'undefined',
-  hasRandomValues = hasCrypto && typeof (window.crypto.getRandomValues) != 'undefined';
-  return (hasCrypto && hasRandomValues) ? _cryptoGuid() : _guid();
-};
-
-module.exports =  {
-  newGuid: create,
-  empty: EMPTY
-};
-
-},{}],6:[function(require,module,exports){
-(function (process){
-var $ = require('jquery');
-
-if (process.browser) {
-  module.exports = $;
-} else {
-  var window = require('jsdom').jsdom().createWindow();
-  module.exports = $(window);
-}
-
-}).call(this,require('_process'))
-},{"_process":31,"jquery":48,"jsdom":11}],7:[function(require,module,exports){
-module.exports = {
-  any: 'special::any_namsace',
-  none: 'special::no_namespace',
-  loinc: 'http://loinc.org',
-  ucum: 'http://unitsofmeasure.org',
-  snomed: 'http://snomed.info/sct',
-  rxnorm: 'http://rxnav.nlm.nih.gov/REST/rxcui'
-}
-
-},{}],8:[function(require,module,exports){
-module.exports = function(mixins) {
-  mixins = mixins || {};
-
-  var specs = {};
-  var util = require('util');
-  var namespace = require('./namespace');
-  var definitions = require('./build-definitions');
-
-  function defineSearchParam(resourceSpec, searchParam) {
-    Object.keys(searchParam.handlers).forEach(function(handlerName){
-
-      resourceSpec.prototype[handlerName] = function(){
-
-        var clause = searchParam.handlers[handlerName].apply(
-          searchParam, arguments
-        );
-        return this.__addClause(clause);
-
-      }
-    });
-  }
-
-
-  function SearchSpecification(clauses){ 
-
-    if (clauses === undefined) {
-      clauses = [];
-    }
-
-    this.resourceName = this.constructor.resourceName;
-
-    this.__addClause = function(c){
-      var newClauses = JSON.parse(JSON.stringify(clauses));
-      if (!util.isArray(c)){
-        c = [c];
-      }
-
-      [].push.apply(newClauses, c);
-      return new (this.constructor)(newClauses);
-    }
-
-    this.__getClauses = function(){
-      return clauses;
-    }
-
-    this.__printClauses = function(){
-      console.log(clauses);
-    }
-
-    this.queryUrl = function(){
-      return '/'+this.resourceName;
-    };
-
-    this.queryParams = function(){
-      var clauses = this.__getClauses();
-      var params = {};
-      clauses.forEach(function(c){
-        params[c.name] = params[c.name] || [];
-        if (c.oneOf !== undefined) {
-          var joined = c.oneOf.join(',');
-          params[c.name].push(joined);
-        } else {
-          params[c.name].push(c.value);
-        }
-      });
-      return params;
-    }
-
-  }
-
-  defineSearchParam(SearchSpecification, new ReferenceSearchParam('_id'));
-  defineSearchParam(SearchSpecification, new SearchParam('_count', '_count', true));
-  defineSearchParam(SearchSpecification, new SearchParam('_sortAsc', '_sort:asc', true));
-  defineSearchParam(SearchSpecification, new SearchParam('_sortDesc', '_sort:desc', true));
-  defineSearchParam(SearchSpecification, new SearchParam('_include', '_include', true));
-
-
-  function SearchParam(name, wireName, onlyOneHandler){
-    this.name = name;
-    this.wireName = wireName || name;
-    this.handlers = { };
-    var that = this;
-
-    this.handlers[name] = function(value){
-
-      if (util.isArray(value) || arguments.length > 1){
-        throw "only expected one argument to " + name;
-      }
-
-      return {
-        name: this.wireName,
-        value: value
-      };
-    };
-
-    if (onlyOneHandler) {
-      return;
-    }
-
-    var singleArgHandler = this.handlers[name];
-
-    this.handlers[name+'All'] = function(){
-      var values = flatten(arguments);
-      return values.map(function(v){
-        return {
-          name: this.wireName,
-          value: v
-        }
-      }, this);
-    };
-
-    this.handlers[name+'In'] = function(){
-      var values = flatten(arguments);
-      return {
-        name: this.wireName,
-        oneOf: values
-      };
-    };
-
-    this.handlers[name+'Missing'] = function(value){
-      return {
-        name: this.wireName+':missing',
-        value: value === 'false' ? false : Boolean(value)
-      };
-    };
-
-    function flatten(args){
-      var values = [];
-      Array.prototype.slice.call(args, 0).forEach(function(arg){
-        if (!util.isArray(arg)){
-          arg = [arg];
-        }
-        arg.forEach(function(arg){
-          values.push(singleArgHandler.call(that, arg).value);
-        });
-      });
-      return values;
-    }
-
-  }
-
-  function ReferenceSearchParam(name){
-    SearchParam.apply(this, arguments);
-
-    this.handlers[name] = function(subSpec){
-      var clauseName = this.wireName + ':' + subSpec.constructor.resourceName;
-
-      if (typeof subSpec === 'string'){
-        return {
-          name: this.wireName,
-          value: subSpec
-        };
-      }
-      var clauses = subSpec.__getClauses();
-
-      var ret = clauses.map(function(clause){
-
-        var oneClause = {
-          name: clauseName + '.' + clause.name
-        };
-
-        if (clause.value) oneClause.value = clause.value;
-        if (clause.oneOf) oneClause.oneOf = clause.oneOf;
-
-        if (clause.name == '_id') {
-          oneClause = {
-            name: clauseName,
-            value: clause.value
-          }
-        }
-        return oneClause
-      });
-
-      return ret;
-    };
-
-  };
-
-  ReferenceSearchParam.prototype = new SearchParam();
-  ReferenceSearchParam.prototype.constructor = ReferenceSearchParam;
-
-  function StringSearchParam(name){
-    SearchParam.apply(this, arguments);
-
-    this.handlers[name+'Exact'] = function(value){
-      return {
-        name: this.wireName+':exact',
-        value: value
-      };
-    };
-
-  };
-  StringSearchParam.prototype = new SearchParam();
-  StringSearchParam.prototype.constructor = StringSearchParam;
-
-  function UriSearchParam(name){
-    SearchParam.apply(this, arguments);
-  };
-  UriSearchParam.prototype = new SearchParam();
-  UriSearchParam.prototype.constructor = UriSearchParam;
-
-
-  function TokenSearchParam(name){
-    SearchParam.apply(this, arguments);
-
-    this.handlers[name] = function(ns, value){
-
-      var ret = {
-        name: this.wireName,
-        value: ns + '|'+ value
-      }
-
-      if (value === undefined) {
-        ret.value = ns;
-      }
-
-      if (ns === namespace.any) {
-        ret.value = value;
-      }
-
-      if (ns === namespace.none) {
-        ret.value = '|'+value;
-      }
-
-      return ret;
-
-    };
-
-    this.handlers[name+'Text'] = function(value){
-      return {
-        name: this.wireName,
-        value: value
-      };
-    };
-
-
-
-  }
-  TokenSearchParam.prototype = new SearchParam();
-  TokenSearchParam.prototype.constructor = TokenSearchParam;
-
-  function DateSearchParam(name){
-    SearchParam.apply(this, arguments);
-  }
-  DateSearchParam.prototype = new SearchParam();
-  DateSearchParam.prototype.constructor = DateSearchParam;
-
-  function NumberSearchParam(name){
-    SearchParam.apply(this, arguments);
-  }
-  NumberSearchParam();
-  NumberSearchParam.prototype.constructor = NumberSearchParam;
-
-  function QuantitySearchParam(name){
-    SearchParam.apply(this, arguments);
-  }
-  QuantitySearchParam.prototype = new SearchParam();
-  QuantitySearchParam.prototype.constructor = QuantitySearchParam;
-
-  function  CompositeSearchParam(name){
-    SearchParam.apply(this, arguments);
-  }
-  CompositeSearchParam.prototype = new SearchParam();
-  CompositeSearchParam.prototype.constructor = CompositeSearchParam;
-
-
-  var paramTypes = {
-    string: StringSearchParam,
-    uri: UriSearchParam,
-    reference: ReferenceSearchParam,
-    token: TokenSearchParam,
-    number: NumberSearchParam,
-    quantity: QuantitySearchParam,
-    date: DateSearchParam,
-    composite: CompositeSearchParam
-  }
-
-  Object.keys(definitions).forEach(function(tname){
-    var params = definitions[tname].params;
-
-    // Create a subclass of 'SearchSpecification'
-    // to track search parameters for each resource
-    // e.g. Patient knows about given name, family name, etc.
-    var resourceSpec = function(){
-      SearchSpecification.apply(this, arguments);
-    };
-
-    resourceSpec.prototype = new SearchSpecification();
-    resourceSpec.prototype.constructor = resourceSpec;
-    resourceSpec.resourceName = tname;
-
-    params.forEach(function(p){
-      defineSearchParam(resourceSpec, new paramTypes[p.type](p.name, p.wireName));
-    });
-
-    specs[tname] = new resourceSpec();
-
-  });
-
-
-  Object.keys(mixins).forEach(function(m){
-    SearchSpecification.prototype[m] = function(){
-      var args = Array.prototype.slice.call(arguments, 0);
-      args.unshift(this);
-      return mixins[m][m].apply(mixins[m], args);
-    };
-  });
-
-
-  return specs;
-
-};
-
-},{"./build-definitions":2,"./namespace":7,"util":46}],9:[function(require,module,exports){
-module.exports = Search;
-var jQuery = require('./jquery');
-var $ = jQuery;
-
-function Search(p) {
-
-  var search = {};
-
-  search.client = p.client;
-  search.spec = p.spec;
-  search.count = p.count || 50;
-
-  var nextPageUrl = null;
-
-  function gotBundle(d){
-    return function(bundle, status) {
-
-      nextPageUrl = null; 
-
-      if(bundle.link) {
-        var next = bundle.link.filter(function(l){
-          return l.relation === "next";
-        });
-        if (next.length === 1) {
-          nextPageUrl = next[0].url 
-        }
-      }
-
-      var results = search.client.indexBundle(bundle); 
-      d.resolve(results, search);
-    }
-  }
-
-  function failedBundle(d){
-    return function(failure){
-      d.reject("Search failed.", arguments);
-    }
-  }
-
-  search.hasNext = function(){
-    return nextPageUrl !== null;
-  };
-
-  search.next = function() {
-
-    if (nextPageUrl === null) {
-      throw "Next page of search not available!";
-    }
-
-    var searchParams = {
-      type: 'GET',
-      url: nextPageUrl,
-      dataType: 'json',
-      traditional: true
-    };
-
-    var ret = new $.Deferred();
-    console.log("Nexting", searchParams);
-    $.ajax(search.client.authenticated(searchParams))
-    .done(gotBundle(ret))
-    .fail(failedBundle(ret));
-
-    return ret;
-  };
-
-  search.execute = function() {
-
-
-    var searchParams = {
-      type: 'GET',
-      url: search.client.urlFor(search.spec),
-      data: search.spec.queryParams(),
-      dataType: "json",
-      traditional: true
-    };
-
-    var ret = new $.Deferred();
-
-    $.ajax(search.client.authenticated(searchParams))
-    .done(gotBundle(ret))
-    .fail(failedBundle(ret));
-
-    return ret;
-  };
-
-  return search;
-}
-
-
-},{"./jquery":6}],10:[function(require,module,exports){
-var utils = module.exports =  {};
-
-utils.byCodes = function(observations, property){
-
-  var bank = utils.byCode(observations, property);
-  function byCodes(){
-    var ret = [];
-    for (var i=0; i<arguments.length;i++){
-      var set = bank[arguments[i]];
-      if (set) {[].push.apply(ret, set);}
-    }
-    return ret;
-  }
-
-  return byCodes;
-};
-
-utils.byCode = function(observations, property){
-  var ret = {};
-  if (!Array.isArray(observations)){
-    observations = [observations];
-  }
-  observations.forEach(function(o){
-    if (o.resourceType === "Observation") {
-        o[property].coding.forEach(function(coding){
-          ret[coding.code] = ret[coding.code] || [];
-          ret[coding.code].push(o);
-        });
-    }
-  });
-  return ret;
-};
-
-function ensureNumerical(pq) {
-  if (typeof pq.value !== "number") {
-    throw "Found a non-numerical unit: " + pq.value + " " + pq.code;
-  }
-};
-
-utils.units = {
-  cm: function(pq){
-    ensureNumerical(pq);
-    if(pq.code == "cm") return pq.value;
-    if(pq.code == "m") return 100*pq.value;
-    if(pq.code == "in") return 2.54*pq.value;
-    if(pq.code == "[in_us]") return 2.54*pq.value;
-    if(pq.code == "[in_i]") return 2.54*pq.value;
-    throw "Unrecognized length unit: " + pq.code
-  },
-  kg: function(pq){
-    ensureNumerical(pq);
-    if(pq.code == "kg") return pq.value;
-    if(pq.code.match(/lb/)) return pq.value / 2.20462;
-    throw "Unrecognized weight unit: " + pq.code
-  },
-  any: function(pq){
-    ensureNumerical(pq);
-    return pq.value
-  }
-};
-
-
-
-},{}],11:[function(require,module,exports){
-
-},{}],12:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -1667,6 +1357,21 @@ Buffer.concat = function (list, totalLength) {
   return buf
 }
 
+<<<<<<< HEAD
+  jQuery.get(
+    stripTrailingSlash(fhirServiceUrl)+"/metadata",
+    function(r){
+      var res = {
+        "name": "SMART on FHIR Testing Server",
+        "description": "Dev server for SMART on FHIR",
+        "url": fhirServiceUrl,
+        "oauth2": {
+          "registration_uri": null,
+          "authorize_uri": null,
+          "token_uri": null
+        }
+      };
+=======
 Buffer.compare = function (a, b) {
   assert(Buffer.isBuffer(a) && Buffer.isBuffer(b), 'Arguments must be Buffers')
   var x = a.length
@@ -1684,6 +1389,7 @@ Buffer.compare = function (a, b) {
   }
   return 0
 }
+>>>>>>> fhir_js
 
 // BUFFER INSTANCE METHODS
 // =======================
@@ -1862,9 +1568,24 @@ Buffer.prototype.copy = function (target, target_start, start, end) {
   if (!end && end !== 0) end = this.length
   if (!target_start) target_start = 0
 
+<<<<<<< HEAD
+      jQuery.get(
+        stripTrailingSlash(fhirServiceUrl)+"/metadata",
+        function(r){
+          var type = "none";
+          
+          try {
+            if (r.rest[0].security.service[0].coding[0].code.toLowerCase() === "oauth2") {
+                type = "oauth2";
+            }
+          }
+          catch (err) {
+          }
+=======
   // Copy 0 bytes; we're done
   if (end === start) return
   if (target.length === 0 || source.length === 0) return
+>>>>>>> fhir_js
 
   // Fatal error conditions
   assert(end >= start, 'sourceEnd < sourceStart')
@@ -2396,8 +2117,14 @@ Buffer.prototype.fill = function (value, start, end) {
   if (end === start) return
   if (this.length === 0) return
 
+<<<<<<< HEAD
+    this.queryUrl = function(){
+      return '/'+this.resourceName;
+    };
+=======
   assert(start >= 0 && start < this.length, 'start out of bounds')
   assert(end >= 0 && end <= this.length, 'end out of bounds')
+>>>>>>> fhir_js
 
   var i
   if (typeof value === 'number') {
@@ -2635,7 +2362,7 @@ function assert (test, message) {
   if (!test) throw new Error(message || 'Failed assertion')
 }
 
-},{"base64-js":13,"ieee754":14}],13:[function(require,module,exports){
+},{"base64-js":4,"ieee754":5}],4:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -2757,7 +2484,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	exports.fromByteArray = uint8ToBase64
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
-},{}],14:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -2843,7 +2570,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],15:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 (function (Buffer){
 var createHash = require('sha.js')
 
@@ -2877,7 +2604,7 @@ module.exports = function (alg) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./md5":19,"buffer":12,"ripemd160":20,"sha.js":22}],16:[function(require,module,exports){
+},{"./md5":10,"buffer":3,"ripemd160":11,"sha.js":13}],7:[function(require,module,exports){
 (function (Buffer){
 var createHash = require('./create-hash')
 
@@ -2922,7 +2649,7 @@ Hmac.prototype.digest = function (enc) {
 
 
 }).call(this,require("buffer").Buffer)
-},{"./create-hash":15,"buffer":12}],17:[function(require,module,exports){
+},{"./create-hash":6,"buffer":3}],8:[function(require,module,exports){
 (function (Buffer){
 var intSize = 4;
 var zeroBuffer = new Buffer(intSize); zeroBuffer.fill(0);
@@ -2960,7 +2687,7 @@ function hash(buf, fn, hashSize, bigEndian) {
 module.exports = { hash: hash };
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":12}],18:[function(require,module,exports){
+},{"buffer":3}],9:[function(require,module,exports){
 (function (Buffer){
 var rng = require('./rng')
 
@@ -3018,7 +2745,7 @@ each(['createCredentials'
 })
 
 }).call(this,require("buffer").Buffer)
-},{"./create-hash":15,"./create-hmac":16,"./pbkdf2":26,"./rng":27,"buffer":12}],19:[function(require,module,exports){
+},{"./create-hash":6,"./create-hmac":7,"./pbkdf2":17,"./rng":18,"buffer":3}],10:[function(require,module,exports){
 /*
  * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
  * Digest Algorithm, as defined in RFC 1321.
@@ -3175,7 +2902,7 @@ module.exports = function md5(buf) {
   return helpers.hash(buf, core_md5, 16);
 };
 
-},{"./helpers":17}],20:[function(require,module,exports){
+},{"./helpers":8}],11:[function(require,module,exports){
 (function (Buffer){
 
 module.exports = ripemd160
@@ -3384,7 +3111,7 @@ function ripemd160(message) {
 
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":12}],21:[function(require,module,exports){
+},{"buffer":3}],12:[function(require,module,exports){
 var u = require('./util')
 var write = u.write
 var fill = u.zeroFill
@@ -3484,7 +3211,7 @@ module.exports = function (Buffer) {
   return Hash
 }
 
-},{"./util":25}],22:[function(require,module,exports){
+},{"./util":16}],13:[function(require,module,exports){
 var exports = module.exports = function (alg) {
   var Alg = exports[alg]
   if(!Alg) throw new Error(alg + ' is not supported (we accept pull requests)')
@@ -3498,7 +3225,7 @@ exports.sha =
 exports.sha1 = require('./sha1')(Buffer, Hash)
 exports.sha256 = require('./sha256')(Buffer, Hash)
 
-},{"./hash":21,"./sha1":23,"./sha256":24,"buffer":12}],23:[function(require,module,exports){
+},{"./hash":12,"./sha1":14,"./sha256":15,"buffer":3}],14:[function(require,module,exports){
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
  * in FIPS PUB 180-1
@@ -3659,7 +3386,7 @@ module.exports = function (Buffer, Hash) {
   return Sha1
 }
 
-},{"util":46}],24:[function(require,module,exports){
+},{"util":37}],15:[function(require,module,exports){
 
 /**
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
@@ -3824,7 +3551,7 @@ module.exports = function (Buffer, Hash) {
 
 }
 
-},{"./util":25,"util":46}],25:[function(require,module,exports){
+},{"./util":16,"util":37}],16:[function(require,module,exports){
 exports.write = write
 exports.zeroFill = zeroFill
 
@@ -3862,7 +3589,7 @@ function zeroFill(buf, from) {
 }
 
 
-},{}],26:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 (function (Buffer){
 // JavaScript PBKDF2 Implementation
 // Based on http://git.io/qsv2zw
@@ -3948,7 +3675,7 @@ module.exports = function (createHmac, exports) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":12}],27:[function(require,module,exports){
+},{"buffer":3}],18:[function(require,module,exports){
 (function (Buffer){
 (function() {
   module.exports = function(size) {
@@ -3962,7 +3689,7 @@ module.exports = function (createHmac, exports) {
 }())
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":12}],28:[function(require,module,exports){
+},{"buffer":3}],19:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -4267,7 +3994,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],29:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -4292,12 +4019,12 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],30:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],31:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -4362,10 +4089,10 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],32:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 module.exports = require("./lib/_stream_duplex.js")
 
-},{"./lib/_stream_duplex.js":33}],33:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":24}],24:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -4458,7 +4185,7 @@ function forEach (xs, f) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_readable":35,"./_stream_writable":37,"_process":31,"core-util-is":38,"inherits":29}],34:[function(require,module,exports){
+},{"./_stream_readable":26,"./_stream_writable":28,"_process":22,"core-util-is":29,"inherits":20}],25:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -4506,7 +4233,7 @@ PassThrough.prototype._transform = function(chunk, encoding, cb) {
   cb(null, chunk);
 };
 
-},{"./_stream_transform":36,"core-util-is":38,"inherits":29}],35:[function(require,module,exports){
+},{"./_stream_transform":27,"core-util-is":29,"inherits":20}],26:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -5492,7 +5219,7 @@ function indexOf (xs, x) {
 }
 
 }).call(this,require('_process'))
-},{"_process":31,"buffer":12,"core-util-is":38,"events":28,"inherits":29,"isarray":30,"stream":44,"string_decoder/":39}],36:[function(require,module,exports){
+},{"_process":22,"buffer":3,"core-util-is":29,"events":19,"inherits":20,"isarray":21,"stream":35,"string_decoder/":30}],27:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -5704,7 +5431,7 @@ function done(stream, er) {
   return stream.push(null);
 }
 
-},{"./_stream_duplex":33,"core-util-is":38,"inherits":29}],37:[function(require,module,exports){
+},{"./_stream_duplex":24,"core-util-is":29,"inherits":20}],28:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -6094,7 +5821,7 @@ function endWritable(stream, state, cb) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":33,"_process":31,"buffer":12,"core-util-is":38,"inherits":29,"stream":44}],38:[function(require,module,exports){
+},{"./_stream_duplex":24,"_process":22,"buffer":3,"core-util-is":29,"inherits":20,"stream":35}],29:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -6204,7 +5931,7 @@ function objectToString(o) {
   return Object.prototype.toString.call(o);
 }
 }).call(this,require("buffer").Buffer)
-},{"buffer":12}],39:[function(require,module,exports){
+},{"buffer":3}],30:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6427,10 +6154,10 @@ function base64DetectIncompleteChar(buffer) {
   this.charLength = this.charReceived ? 3 : 0;
 }
 
-},{"buffer":12}],40:[function(require,module,exports){
+},{"buffer":3}],31:[function(require,module,exports){
 module.exports = require("./lib/_stream_passthrough.js")
 
-},{"./lib/_stream_passthrough.js":34}],41:[function(require,module,exports){
+},{"./lib/_stream_passthrough.js":25}],32:[function(require,module,exports){
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Readable = exports;
 exports.Writable = require('./lib/_stream_writable.js');
@@ -6438,13 +6165,13 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":33,"./lib/_stream_passthrough.js":34,"./lib/_stream_readable.js":35,"./lib/_stream_transform.js":36,"./lib/_stream_writable.js":37}],42:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":24,"./lib/_stream_passthrough.js":25,"./lib/_stream_readable.js":26,"./lib/_stream_transform.js":27,"./lib/_stream_writable.js":28}],33:[function(require,module,exports){
 module.exports = require("./lib/_stream_transform.js")
 
-},{"./lib/_stream_transform.js":36}],43:[function(require,module,exports){
+},{"./lib/_stream_transform.js":27}],34:[function(require,module,exports){
 module.exports = require("./lib/_stream_writable.js")
 
-},{"./lib/_stream_writable.js":37}],44:[function(require,module,exports){
+},{"./lib/_stream_writable.js":28}],35:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6573,14 +6300,14 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":28,"inherits":29,"readable-stream/duplex.js":32,"readable-stream/passthrough.js":40,"readable-stream/readable.js":41,"readable-stream/transform.js":42,"readable-stream/writable.js":43}],45:[function(require,module,exports){
+},{"events":19,"inherits":20,"readable-stream/duplex.js":23,"readable-stream/passthrough.js":31,"readable-stream/readable.js":32,"readable-stream/transform.js":33,"readable-stream/writable.js":34}],36:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],46:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -7170,7 +6897,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":45,"_process":31,"inherits":29}],47:[function(require,module,exports){
+},{"./support/isBuffer":36,"_process":22,"inherits":20}],38:[function(require,module,exports){
 (function (Buffer){
 (function () {
   "use strict";
@@ -7192,7 +6919,7 @@ function hasOwnProperty(obj, prop) {
 }());
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":12}],48:[function(require,module,exports){
+},{"buffer":3}],39:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.1
  * http://jquery.com/
@@ -16384,7 +16111,7 @@ return jQuery;
 
 }));
 
-},{}],49:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 (function (process){
 var jws = require('jws');
 
@@ -16522,7 +16249,7 @@ TokenExpiredError.prototype = Object.create(JsonWebTokenError.prototype);
 TokenExpiredError.prototype.constructor = TokenExpiredError;
 
 }).call(this,require('_process'))
-},{"_process":31,"jws":50}],50:[function(require,module,exports){
+},{"_process":22,"jws":41}],41:[function(require,module,exports){
 (function (process){
 /*global process, exports*/
 var Buffer = require('buffer').Buffer;
@@ -16750,7 +16477,7 @@ exports.createVerify = function createVerify(opts) {
 };
 
 }).call(this,require('_process'))
-},{"_process":31,"base64url":51,"buffer":12,"jwa":52,"stream":44,"util":46}],51:[function(require,module,exports){
+},{"_process":22,"base64url":42,"buffer":3,"jwa":43,"stream":35,"util":37}],42:[function(require,module,exports){
 (function (Buffer){
 function fromBase64(base64string) {
   return (
@@ -16807,7 +16534,7 @@ base64url.toBuffer = toBuffer;
 module.exports = base64url;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":12}],52:[function(require,module,exports){
+},{"buffer":3}],43:[function(require,module,exports){
 (function (Buffer){
 var base64url = require('base64url');
 var crypto = require('crypto');
@@ -16911,7840 +16638,727 @@ module.exports = function jwa(algorithm) {
   }
 };
 }).call(this,require("buffer").Buffer)
-},{"base64url":51,"buffer":12,"crypto":18,"util":46}],53:[function(require,module,exports){
-module.exports={
-  "resourceType": "Conformance",
-  "id": "base",
-  "text": {
-    "status": "generated",
-    "div": "<div><h2>Base FHIR Conformance Statement (Full)</h2><p>This is the base conformance statement for FHIR. It represents a server that provides the full set of functionality defined by FHIR. It is provided to use as a template for system designers to build their own conformance statements from</p><table><tr><td>Mode</td><td>SERVER</td></tr><tr><td>Description</td><td>All the functionality defined in FHIR</td></tr><tr><td>Transaction</td><td>y</td></tr><tr><td>System History</td><td>y</td></tr><tr><td>System Search</td><td>y</td></tr></table><table><tr><th><b>Resource Type</b></th><th><b>Profile</b></th><th><b>Read</b></th><th><b>V-Read</b></th><th><b>Search</b></th><th><b>Update</b></th><th><b>Updates</b></th><th><b>Create</b></th><th><b>Delete</b></th><th><b>History</b></th></tr><tr><td>AllergyIntolerance</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/AllergyIntolerance\">http://hl7.org/fhir/StructureDefinition/AllergyIntolerance</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Appointment</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Appointment\">http://hl7.org/fhir/StructureDefinition/Appointment</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>AppointmentResponse</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/AppointmentResponse\">http://hl7.org/fhir/StructureDefinition/AppointmentResponse</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>AuditEvent</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/AuditEvent\">http://hl7.org/fhir/StructureDefinition/AuditEvent</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Basic</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Basic\">http://hl7.org/fhir/StructureDefinition/Basic</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Binary</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Binary\">http://hl7.org/fhir/StructureDefinition/Binary</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>BodySite</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/BodySite\">http://hl7.org/fhir/StructureDefinition/BodySite</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Bundle</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Bundle\">http://hl7.org/fhir/StructureDefinition/Bundle</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>CarePlan</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/CarePlan\">http://hl7.org/fhir/StructureDefinition/CarePlan</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Claim</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Claim\">http://hl7.org/fhir/StructureDefinition/Claim</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>ClaimResponse</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/ClaimResponse\">http://hl7.org/fhir/StructureDefinition/ClaimResponse</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>ClinicalImpression</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/ClinicalImpression\">http://hl7.org/fhir/StructureDefinition/ClinicalImpression</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Communication</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Communication\">http://hl7.org/fhir/StructureDefinition/Communication</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>CommunicationRequest</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/CommunicationRequest\">http://hl7.org/fhir/StructureDefinition/CommunicationRequest</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Composition</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Composition\">http://hl7.org/fhir/StructureDefinition/Composition</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>ConceptMap</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/ConceptMap\">http://hl7.org/fhir/StructureDefinition/ConceptMap</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Condition</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Condition\">http://hl7.org/fhir/StructureDefinition/Condition</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Conformance</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Conformance\">http://hl7.org/fhir/StructureDefinition/Conformance</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Contract</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Contract\">http://hl7.org/fhir/StructureDefinition/Contract</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Contraindication</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Contraindication\">http://hl7.org/fhir/StructureDefinition/Contraindication</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Coverage</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Coverage\">http://hl7.org/fhir/StructureDefinition/Coverage</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>DataElement</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/DataElement\">http://hl7.org/fhir/StructureDefinition/DataElement</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Device</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Device\">http://hl7.org/fhir/StructureDefinition/Device</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>DeviceComponent</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/DeviceComponent\">http://hl7.org/fhir/StructureDefinition/DeviceComponent</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>DeviceMetric</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/DeviceMetric\">http://hl7.org/fhir/StructureDefinition/DeviceMetric</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>DeviceUseRequest</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/DeviceUseRequest\">http://hl7.org/fhir/StructureDefinition/DeviceUseRequest</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>DeviceUseStatement</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/DeviceUseStatement\">http://hl7.org/fhir/StructureDefinition/DeviceUseStatement</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>DiagnosticOrder</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/DiagnosticOrder\">http://hl7.org/fhir/StructureDefinition/DiagnosticOrder</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>DiagnosticReport</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/DiagnosticReport\">http://hl7.org/fhir/StructureDefinition/DiagnosticReport</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>DocumentManifest</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/DocumentManifest\">http://hl7.org/fhir/StructureDefinition/DocumentManifest</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>DocumentReference</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/DocumentReference\">http://hl7.org/fhir/StructureDefinition/DocumentReference</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>EligibilityRequest</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/EligibilityRequest\">http://hl7.org/fhir/StructureDefinition/EligibilityRequest</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>EligibilityResponse</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/EligibilityResponse\">http://hl7.org/fhir/StructureDefinition/EligibilityResponse</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Encounter</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Encounter\">http://hl7.org/fhir/StructureDefinition/Encounter</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>EnrollmentRequest</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/EnrollmentRequest\">http://hl7.org/fhir/StructureDefinition/EnrollmentRequest</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>EnrollmentResponse</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/EnrollmentResponse\">http://hl7.org/fhir/StructureDefinition/EnrollmentResponse</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>EpisodeOfCare</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/EpisodeOfCare\">http://hl7.org/fhir/StructureDefinition/EpisodeOfCare</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>ExplanationOfBenefit</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit\">http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>FamilyMemberHistory</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/FamilyMemberHistory\">http://hl7.org/fhir/StructureDefinition/FamilyMemberHistory</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Flag</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Flag\">http://hl7.org/fhir/StructureDefinition/Flag</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Goal</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Goal\">http://hl7.org/fhir/StructureDefinition/Goal</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Group</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Group\">http://hl7.org/fhir/StructureDefinition/Group</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>HealthcareService</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/HealthcareService\">http://hl7.org/fhir/StructureDefinition/HealthcareService</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>ImagingObjectSelection</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/ImagingObjectSelection\">http://hl7.org/fhir/StructureDefinition/ImagingObjectSelection</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>ImagingStudy</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/ImagingStudy\">http://hl7.org/fhir/StructureDefinition/ImagingStudy</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Immunization</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Immunization\">http://hl7.org/fhir/StructureDefinition/Immunization</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>ImmunizationRecommendation</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/ImmunizationRecommendation\">http://hl7.org/fhir/StructureDefinition/ImmunizationRecommendation</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>List</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/List\">http://hl7.org/fhir/StructureDefinition/List</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Location</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Location\">http://hl7.org/fhir/StructureDefinition/Location</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Media</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Media\">http://hl7.org/fhir/StructureDefinition/Media</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Medication</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Medication\">http://hl7.org/fhir/StructureDefinition/Medication</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>MedicationAdministration</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/MedicationAdministration\">http://hl7.org/fhir/StructureDefinition/MedicationAdministration</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>MedicationDispense</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/MedicationDispense\">http://hl7.org/fhir/StructureDefinition/MedicationDispense</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>MedicationPrescription</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/MedicationPrescription\">http://hl7.org/fhir/StructureDefinition/MedicationPrescription</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>MedicationStatement</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/MedicationStatement\">http://hl7.org/fhir/StructureDefinition/MedicationStatement</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>MessageHeader</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/MessageHeader\">http://hl7.org/fhir/StructureDefinition/MessageHeader</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>NamingSystem</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/NamingSystem\">http://hl7.org/fhir/StructureDefinition/NamingSystem</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>NutritionOrder</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/NutritionOrder\">http://hl7.org/fhir/StructureDefinition/NutritionOrder</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Observation</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Observation\">http://hl7.org/fhir/StructureDefinition/Observation</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>OperationDefinition</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/OperationDefinition\">http://hl7.org/fhir/StructureDefinition/OperationDefinition</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>OperationOutcome</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/OperationOutcome\">http://hl7.org/fhir/StructureDefinition/OperationOutcome</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Order</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Order\">http://hl7.org/fhir/StructureDefinition/Order</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>OrderResponse</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/OrderResponse\">http://hl7.org/fhir/StructureDefinition/OrderResponse</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Organization</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Organization\">http://hl7.org/fhir/StructureDefinition/Organization</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Patient</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Patient\">http://hl7.org/fhir/StructureDefinition/Patient</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>PaymentNotice</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/PaymentNotice\">http://hl7.org/fhir/StructureDefinition/PaymentNotice</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>PaymentReconciliation</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/PaymentReconciliation\">http://hl7.org/fhir/StructureDefinition/PaymentReconciliation</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Person</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Person\">http://hl7.org/fhir/StructureDefinition/Person</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Practitioner</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Practitioner\">http://hl7.org/fhir/StructureDefinition/Practitioner</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Procedure</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Procedure\">http://hl7.org/fhir/StructureDefinition/Procedure</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>ProcedureRequest</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/ProcedureRequest\">http://hl7.org/fhir/StructureDefinition/ProcedureRequest</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>ProcessRequest</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/ProcessRequest\">http://hl7.org/fhir/StructureDefinition/ProcessRequest</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>ProcessResponse</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/ProcessResponse\">http://hl7.org/fhir/StructureDefinition/ProcessResponse</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Provenance</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Provenance\">http://hl7.org/fhir/StructureDefinition/Provenance</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Questionnaire</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Questionnaire\">http://hl7.org/fhir/StructureDefinition/Questionnaire</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>QuestionnaireAnswers</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/QuestionnaireAnswers\">http://hl7.org/fhir/StructureDefinition/QuestionnaireAnswers</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>ReferralRequest</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/ReferralRequest\">http://hl7.org/fhir/StructureDefinition/ReferralRequest</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>RelatedPerson</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/RelatedPerson\">http://hl7.org/fhir/StructureDefinition/RelatedPerson</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>RiskAssessment</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/RiskAssessment\">http://hl7.org/fhir/StructureDefinition/RiskAssessment</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Schedule</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Schedule\">http://hl7.org/fhir/StructureDefinition/Schedule</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>SearchParameter</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/SearchParameter\">http://hl7.org/fhir/StructureDefinition/SearchParameter</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Slot</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Slot\">http://hl7.org/fhir/StructureDefinition/Slot</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Specimen</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Specimen\">http://hl7.org/fhir/StructureDefinition/Specimen</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>StructureDefinition</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/StructureDefinition\">http://hl7.org/fhir/StructureDefinition/StructureDefinition</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Subscription</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Subscription\">http://hl7.org/fhir/StructureDefinition/Subscription</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Substance</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Substance\">http://hl7.org/fhir/StructureDefinition/Substance</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Supply</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/Supply\">http://hl7.org/fhir/StructureDefinition/Supply</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>ValueSet</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/ValueSet\">http://hl7.org/fhir/StructureDefinition/ValueSet</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>VisionPrescription</td><td><a href=\"http://hl7.org/fhir/StructureDefinition/VisionPrescription\">http://hl7.org/fhir/StructureDefinition/VisionPrescription</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr></table></div>"
-  },
-  "url": "http://hl7.org/fhir/Conformance/base",
-  "version": "0.5.0-5149",
-  "name": "Base FHIR Conformance Statement (Full)",
-  "publisher": "FHIR Project Team",
-  "contact": [
-    {
-      "telecom": [
-        {
-          "system": "url",
-          "value": "http://hl7.org/fhir"
-        }
-      ]
+},{"base64url":42,"buffer":3,"crypto":9,"util":37}],44:[function(require,module,exports){
+(function (process){
+(function() {
+    var smart = require('../client/entry');
+    var jQuery = require('jquery');
+    var $ = jQuery;
+    
+    if (!process.browser) {
+      var window = require('jsdom').jsdom().createWindow();
+      jquery = jQuery(window);
     }
-  ],
-  "description": "This is the base conformance statement for FHIR. It represents a server that provides the full set of functionality defined by FHIR. It is provided to use as a template for system designers to build their own conformance statements from",
-  "status": "draft",
-  "date": "2015-04-03T14:24:32+11:00",
-  "fhirVersion": "0.5.0",
-  "acceptUnknown": false,
-  "format": [
-    "xml",
-    "json"
-  ],
-  "rest": [
-    {
-      "mode": "server",
-      "documentation": "All the functionality defined in FHIR",
-      "resource": [
-        {
-          "type": "AllergyIntolerance",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/AllergyIntolerance"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/allergyintolerance-status",
-              "type": "token",
-              "documentation": "unconfirmed | confirmed | resolved | refuted | entered-in-error"
-            },
-            {
-              "name": "onset",
-              "definition": "http://hl7.org/fhir/SearchParameter/allergyintolerance-onset",
-              "type": "date",
-              "documentation": "Date(/time) when manifestations showed"
-            },
-            {
-              "name": "last-date",
-              "definition": "http://hl7.org/fhir/SearchParameter/allergyintolerance-last-date",
-              "type": "date",
-              "documentation": "Date(/time) of last known occurence of a reaction"
-            },
-            {
-              "name": "severity",
-              "definition": "http://hl7.org/fhir/SearchParameter/allergyintolerance-severity",
-              "type": "token",
-              "documentation": "mild | moderate | severe (of event as a whole)"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/allergyintolerance-type",
-              "type": "token",
-              "documentation": "immune | non-immune - Underlying mechanism (if known)"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/allergyintolerance-date",
-              "type": "date",
-              "documentation": "When recorded"
-            },
-            {
-              "name": "reporter",
-              "definition": "http://hl7.org/fhir/SearchParameter/allergyintolerance-reporter",
-              "type": "reference",
-              "documentation": "Source of the information about the allergy"
-            },
-            {
-              "name": "substance",
-              "definition": "http://hl7.org/fhir/SearchParameter/allergyintolerance-substance",
-              "type": "token",
-              "documentation": "Substance, (or class) considered to be responsible for risk"
-            },
-            {
-              "name": "criticality",
-              "definition": "http://hl7.org/fhir/SearchParameter/allergyintolerance-criticality",
-              "type": "token",
-              "documentation": "low | high | unassessible - Estimated potential clinical harm"
-            },
-            {
-              "name": "category",
-              "definition": "http://hl7.org/fhir/SearchParameter/allergyintolerance-category",
-              "type": "token",
-              "documentation": "food | medication | environment - Category of Substance"
-            },
-            {
-              "name": "duration",
-              "definition": "http://hl7.org/fhir/SearchParameter/allergyintolerance-duration",
-              "type": "quantity",
-              "documentation": "How long Manifestations persisted"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/allergyintolerance-patient",
-              "type": "reference",
-              "documentation": "Who the sensitivity is for"
-            },
-            {
-              "name": "recorder",
-              "definition": "http://hl7.org/fhir/SearchParameter/allergyintolerance-recorder",
-              "type": "reference",
-              "documentation": "Who recorded the sensitivity"
-            },
-            {
-              "name": "route",
-              "definition": "http://hl7.org/fhir/SearchParameter/allergyintolerance-route",
-              "type": "token",
-              "documentation": "How the subject was exposed to the substance"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/allergyintolerance-identifier",
-              "type": "token",
-              "documentation": "External Ids for this item"
-            },
-            {
-              "name": "manifestation",
-              "definition": "http://hl7.org/fhir/SearchParameter/allergyintolerance-manifestation",
-              "type": "token",
-              "documentation": "Clinical symptoms/signs associated with the Event"
-            }
-          ]
-        },
-        {
-          "type": "Appointment",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Appointment"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "partstatus",
-              "definition": "http://hl7.org/fhir/SearchParameter/appointment-partstatus",
-              "type": "token",
-              "documentation": "The Participation status of the subject, or other participant on the appointment. Can be used to locate participants that have not responded to meeting requests."
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/appointment-patient",
-              "type": "reference",
-              "documentation": "One of the individuals of the appointment is this patient"
-            },
-            {
-              "name": "practitioner",
-              "definition": "http://hl7.org/fhir/SearchParameter/appointment-practitioner",
-              "type": "reference",
-              "documentation": "One of the individuals of the appointment is this practitioner"
-            },
-            {
-              "name": "location",
-              "definition": "http://hl7.org/fhir/SearchParameter/appointment-location",
-              "type": "reference",
-              "documentation": "This location is listed in the participants of the appointment"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/appointment-status",
-              "type": "token",
-              "documentation": "The overall status of the appointment"
-            },
-            {
-              "name": "actor",
-              "definition": "http://hl7.org/fhir/SearchParameter/appointment-actor",
-              "type": "reference",
-              "documentation": "Any one of the individuals participating in the appointment"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/appointment-date",
-              "type": "date",
-              "documentation": "Appointment date/time."
-            }
-          ]
-        },
-        {
-          "type": "AppointmentResponse",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/AppointmentResponse"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "partstatus",
-              "definition": "http://hl7.org/fhir/SearchParameter/appointmentresponse-partstatus",
-              "type": "token",
-              "documentation": "The participants acceptance status for this appointment"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/appointmentresponse-patient",
-              "type": "reference",
-              "documentation": "This Response is for this Patient"
-            },
-            {
-              "name": "practitioner",
-              "definition": "http://hl7.org/fhir/SearchParameter/appointmentresponse-practitioner",
-              "type": "reference",
-              "documentation": "This Response is for this Practitioner"
-            },
-            {
-              "name": "location",
-              "definition": "http://hl7.org/fhir/SearchParameter/appointmentresponse-location",
-              "type": "reference",
-              "documentation": "This Response is for this Location"
-            },
-            {
-              "name": "actor",
-              "definition": "http://hl7.org/fhir/SearchParameter/appointmentresponse-actor",
-              "type": "reference",
-              "documentation": "The Person, Location/HealthcareService or Device that this appointment response replies for"
-            },
-            {
-              "name": "appointment",
-              "definition": "http://hl7.org/fhir/SearchParameter/appointmentresponse-appointment",
-              "type": "reference",
-              "documentation": "The appointment that the response is attached to"
-            }
-          ]
-        },
-        {
-          "type": "AuditEvent",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/AuditEvent"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "site",
-              "definition": "http://hl7.org/fhir/SearchParameter/auditevent-site",
-              "type": "token",
-              "documentation": "Logical source location within the enterprise"
-            },
-            {
-              "name": "desc",
-              "definition": "http://hl7.org/fhir/SearchParameter/auditevent-desc",
-              "type": "string",
-              "documentation": "Instance-specific descriptor for Object"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/auditevent-type",
-              "type": "token",
-              "documentation": "Type/identifier of event"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/auditevent-date",
-              "type": "date",
-              "documentation": "Time when the event occurred on source"
-            },
-            {
-              "name": "reference",
-              "definition": "http://hl7.org/fhir/SearchParameter/auditevent-reference",
-              "type": "reference",
-              "documentation": "Specific instance of resource (e.g. versioned)"
-            },
-            {
-              "name": "identity",
-              "definition": "http://hl7.org/fhir/SearchParameter/auditevent-identity",
-              "type": "token",
-              "documentation": "Specific instance of object (e.g. versioned)"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/auditevent-patient",
-              "type": "reference",
-              "documentation": "A patient that the .object.reference refers to"
-            },
-            {
-              "name": "altid",
-              "definition": "http://hl7.org/fhir/SearchParameter/auditevent-altid",
-              "type": "token",
-              "documentation": "Alternative User id e.g. authentication"
-            },
-            {
-              "name": "patientid",
-              "definition": "http://hl7.org/fhir/SearchParameter/auditevent-patientid",
-              "type": "token",
-              "documentation": "The id of the patient (one of multiple kinds of participations)"
-            },
-            {
-              "name": "source",
-              "definition": "http://hl7.org/fhir/SearchParameter/auditevent-source",
-              "type": "token",
-              "documentation": "The id of source where event originated"
-            },
-            {
-              "name": "address",
-              "definition": "http://hl7.org/fhir/SearchParameter/auditevent-address",
-              "type": "token",
-              "documentation": "Identifier for the network access point of the user device"
-            },
-            {
-              "name": "subtype",
-              "definition": "http://hl7.org/fhir/SearchParameter/auditevent-subtype",
-              "type": "token",
-              "documentation": "More specific type/id for the event"
-            },
-            {
-              "name": "name",
-              "definition": "http://hl7.org/fhir/SearchParameter/auditevent-name",
-              "type": "string",
-              "documentation": "Human-meaningful name for the user"
-            },
-            {
-              "name": "action",
-              "definition": "http://hl7.org/fhir/SearchParameter/auditevent-action",
-              "type": "token",
-              "documentation": "Type of action performed during the event"
-            },
-            {
-              "name": "participant",
-              "definition": "http://hl7.org/fhir/SearchParameter/auditevent-participant",
-              "type": "reference",
-              "documentation": "Direct reference to resource"
-            },
-            {
-              "name": "policy",
-              "definition": "http://hl7.org/fhir/SearchParameter/auditevent-policy",
-              "type": "uri",
-              "documentation": "Policy that authorized event"
-            },
-            {
-              "name": "object-type",
-              "definition": "http://hl7.org/fhir/SearchParameter/auditevent-object-type",
-              "type": "token",
-              "documentation": "Type of object involved"
-            },
-            {
-              "name": "user",
-              "definition": "http://hl7.org/fhir/SearchParameter/auditevent-user",
-              "type": "token",
-              "documentation": "Unique identifier for the user"
-            }
-          ]
-        },
-        {
-          "type": "Basic",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Basic"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "author",
-              "definition": "http://hl7.org/fhir/SearchParameter/basic-author",
-              "type": "reference",
-              "documentation": "Who created"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/basic-patient",
-              "type": "reference",
-              "documentation": "Identifies the"
-            },
-            {
-              "name": "created",
-              "definition": "http://hl7.org/fhir/SearchParameter/basic-created",
-              "type": "date",
-              "documentation": "When created"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/basic-subject",
-              "type": "reference",
-              "documentation": "Identifies the"
-            },
-            {
-              "name": "code",
-              "definition": "http://hl7.org/fhir/SearchParameter/basic-code",
-              "type": "token",
-              "documentation": "Kind of Resource"
-            }
-          ]
-        },
-        {
-          "type": "Binary",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Binary"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "contenttype",
-              "definition": "http://hl7.org/fhir/SearchParameter/binary-contenttype",
-              "type": "token",
-              "documentation": "MimeType of the binary content"
-            }
-          ]
-        },
-        {
-          "type": "BodySite",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/BodySite"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/bodysite-patient",
-              "type": "reference",
-              "documentation": "Patient to whom bodysite belongs"
-            },
-            {
-              "name": "code",
-              "definition": "http://hl7.org/fhir/SearchParameter/bodysite-code",
-              "type": "token",
-              "documentation": "Named anatomical location"
-            }
-          ]
-        },
-        {
-          "type": "Bundle",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Bundle"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "message",
-              "definition": "http://hl7.org/fhir/SearchParameter/bundle-message",
-              "type": "reference",
-              "documentation": "The first resource in the bundle, if the bundle type is \"message\" - this is a message header, and this parameter provides access to search its contents"
-            },
-            {
-              "name": "composition",
-              "definition": "http://hl7.org/fhir/SearchParameter/bundle-composition",
-              "type": "reference",
-              "documentation": "The first resource in the bundle, if the bundle type is \"document\" - this is a composition, and this parameter provides access to searches its contents"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/bundle-type",
-              "type": "token",
-              "documentation": "document | message | transaction | transaction-response | history | searchset | collection"
-            }
-          ]
-        },
-        {
-          "type": "CarePlan",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/CarePlan"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "activitycode",
-              "definition": "http://hl7.org/fhir/SearchParameter/careplan-activitycode",
-              "type": "token",
-              "documentation": "Detail type of activity"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/careplan-patient",
-              "type": "reference",
-              "documentation": "Who care plan is for"
-            },
-            {
-              "name": "condition",
-              "definition": "http://hl7.org/fhir/SearchParameter/careplan-condition",
-              "type": "reference",
-              "documentation": "Health issues this plan addresses"
-            },
-            {
-              "name": "activitydate",
-              "definition": "http://hl7.org/fhir/SearchParameter/careplan-activitydate",
-              "type": "date",
-              "documentation": "Specified date occurs within period specified by CarePlan.activity.timingSchedule"
-            },
-            {
-              "name": "performer",
-              "definition": "http://hl7.org/fhir/SearchParameter/careplan-performer",
-              "type": "reference",
-              "documentation": "Matches if the practitioner is listed as a performer in any of the \"simple\" activities.  (For performers of the detailed activities, chain through the activitydetail search parameter.)"
-            },
-            {
-              "name": "participant",
-              "definition": "http://hl7.org/fhir/SearchParameter/careplan-participant",
-              "type": "reference",
-              "documentation": "Who is involved"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/careplan-date",
-              "type": "date",
-              "documentation": "Time period plan covers"
-            },
-            {
-              "name": "goal",
-              "definition": "http://hl7.org/fhir/SearchParameter/careplan-goal",
-              "type": "reference",
-              "documentation": "Desired outcome of plan"
-            },
-            {
-              "name": "activityreference",
-              "definition": "http://hl7.org/fhir/SearchParameter/careplan-activityreference",
-              "type": "reference",
-              "documentation": "Activity details defined in specific resource"
-            }
-          ]
-        },
-        {
-          "type": "Claim",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Claim"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/claim-patient",
-              "type": "reference",
-              "documentation": "Patient"
-            },
-            {
-              "name": "priority",
-              "definition": "http://hl7.org/fhir/SearchParameter/claim-priority",
-              "type": "token",
-              "documentation": "Processing priority requested"
-            },
-            {
-              "name": "use",
-              "definition": "http://hl7.org/fhir/SearchParameter/claim-use",
-              "type": "token",
-              "documentation": "The kind of financial resource"
-            },
-            {
-              "name": "provider",
-              "definition": "http://hl7.org/fhir/SearchParameter/claim-provider",
-              "type": "reference",
-              "documentation": "Provider responsible for the claim"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/claim-identifier",
-              "type": "token",
-              "documentation": "The primary identifier of the financial resource"
-            }
-          ]
-        },
-        {
-          "type": "ClaimResponse",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/ClaimResponse"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/claimresponse-identifier",
-              "type": "token",
-              "documentation": "The identity of the insurer"
-            }
-          ]
-        },
-        {
-          "type": "ClinicalImpression",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/ClinicalImpression"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "trigger",
-              "definition": "http://hl7.org/fhir/SearchParameter/clinicalimpression-trigger",
-              "type": "reference",
-              "documentation": "Request or event that necessitated this assessment"
-            },
-            {
-              "name": "previous",
-              "definition": "http://hl7.org/fhir/SearchParameter/clinicalimpression-previous",
-              "type": "reference",
-              "documentation": "Reference to last assessment"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/clinicalimpression-status",
-              "type": "token",
-              "documentation": "in-progress | completed | entered-in-error"
-            },
-            {
-              "name": "problem",
-              "definition": "http://hl7.org/fhir/SearchParameter/clinicalimpression-problem",
-              "type": "reference",
-              "documentation": "General assessment of patient state"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/clinicalimpression-date",
-              "type": "date",
-              "documentation": "When the assessment occurred"
-            },
-            {
-              "name": "ruledout",
-              "definition": "http://hl7.org/fhir/SearchParameter/clinicalimpression-ruledout",
-              "type": "token",
-              "documentation": "Specific text of code for diagnosis"
-            },
-            {
-              "name": "assessor",
-              "definition": "http://hl7.org/fhir/SearchParameter/clinicalimpression-assessor",
-              "type": "reference",
-              "documentation": "The clinician performing the assessment"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/clinicalimpression-patient",
-              "type": "reference",
-              "documentation": "The patient being asssesed"
-            },
-            {
-              "name": "trigger-code",
-              "definition": "http://hl7.org/fhir/SearchParameter/clinicalimpression-trigger-code",
-              "type": "token",
-              "documentation": "Request or event that necessitated this assessment"
-            },
-            {
-              "name": "resolved",
-              "definition": "http://hl7.org/fhir/SearchParameter/clinicalimpression-resolved",
-              "type": "token",
-              "documentation": "Diagnosies/conditions resolved since previous assessment"
-            },
-            {
-              "name": "plan",
-              "definition": "http://hl7.org/fhir/SearchParameter/clinicalimpression-plan",
-              "type": "reference",
-              "documentation": "Plan of action after assessment"
-            },
-            {
-              "name": "finding",
-              "definition": "http://hl7.org/fhir/SearchParameter/clinicalimpression-finding",
-              "type": "token",
-              "documentation": "Specific text or code for finding"
-            },
-            {
-              "name": "action",
-              "definition": "http://hl7.org/fhir/SearchParameter/clinicalimpression-action",
-              "type": "reference",
-              "documentation": "Actions taken during assessment"
-            },
-            {
-              "name": "investigation",
-              "definition": "http://hl7.org/fhir/SearchParameter/clinicalimpression-investigation",
-              "type": "reference",
-              "documentation": "Record of a specific investigation"
-            }
-          ]
-        },
-        {
-          "type": "Communication",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Communication"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "sender",
-              "definition": "http://hl7.org/fhir/SearchParameter/communication-sender",
-              "type": "reference",
-              "documentation": "Message sender"
-            },
-            {
-              "name": "sent",
-              "definition": "http://hl7.org/fhir/SearchParameter/communication-sent",
-              "type": "date",
-              "documentation": "When sent"
-            },
-            {
-              "name": "category",
-              "definition": "http://hl7.org/fhir/SearchParameter/communication-category",
-              "type": "token",
-              "documentation": "Message category"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/communication-patient",
-              "type": "reference",
-              "documentation": "Focus of message"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/communication-status",
-              "type": "token",
-              "documentation": "in-progress | completed | suspended | rejected | failed"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/communication-subject",
-              "type": "reference",
-              "documentation": "Focus of message"
-            },
-            {
-              "name": "received",
-              "definition": "http://hl7.org/fhir/SearchParameter/communication-received",
-              "type": "date",
-              "documentation": "When received"
-            },
-            {
-              "name": "encounter",
-              "definition": "http://hl7.org/fhir/SearchParameter/communication-encounter",
-              "type": "reference",
-              "documentation": "Encounter leading to message"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/communication-identifier",
-              "type": "token",
-              "documentation": "Unique identifier"
-            },
-            {
-              "name": "medium",
-              "definition": "http://hl7.org/fhir/SearchParameter/communication-medium",
-              "type": "token",
-              "documentation": "Communication medium"
-            },
-            {
-              "name": "recipient",
-              "definition": "http://hl7.org/fhir/SearchParameter/communication-recipient",
-              "type": "reference",
-              "documentation": "Message recipient"
-            }
-          ]
-        },
-        {
-          "type": "CommunicationRequest",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/CommunicationRequest"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "requester",
-              "definition": "http://hl7.org/fhir/SearchParameter/communicationrequest-requester",
-              "type": "reference",
-              "documentation": "Requester of communication"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/communicationrequest-status",
-              "type": "token",
-              "documentation": "proposed | planned | requested | received | accepted | in-progress | completed | suspended | rejected | failed"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/communicationrequest-subject",
-              "type": "reference",
-              "documentation": "Focus of message"
-            },
-            {
-              "name": "encounter",
-              "definition": "http://hl7.org/fhir/SearchParameter/communicationrequest-encounter",
-              "type": "reference",
-              "documentation": "Encounter leading to message"
-            },
-            {
-              "name": "recipient",
-              "definition": "http://hl7.org/fhir/SearchParameter/communicationrequest-recipient",
-              "type": "reference",
-              "documentation": "Message recipient"
-            },
-            {
-              "name": "medium",
-              "definition": "http://hl7.org/fhir/SearchParameter/communicationrequest-medium",
-              "type": "token",
-              "documentation": "Communication medium"
-            },
-            {
-              "name": "sender",
-              "definition": "http://hl7.org/fhir/SearchParameter/communicationrequest-sender",
-              "type": "reference",
-              "documentation": "Message sender"
-            },
-            {
-              "name": "category",
-              "definition": "http://hl7.org/fhir/SearchParameter/communicationrequest-category",
-              "type": "token",
-              "documentation": "Message category"
-            },
-            {
-              "name": "time",
-              "definition": "http://hl7.org/fhir/SearchParameter/communicationrequest-time",
-              "type": "date",
-              "documentation": "When scheduled"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/communicationrequest-patient",
-              "type": "reference",
-              "documentation": "Focus of message"
-            },
-            {
-              "name": "ordered",
-              "definition": "http://hl7.org/fhir/SearchParameter/communicationrequest-ordered",
-              "type": "date",
-              "documentation": "When ordered or proposed"
-            },
-            {
-              "name": "priority",
-              "definition": "http://hl7.org/fhir/SearchParameter/communicationrequest-priority",
-              "type": "token",
-              "documentation": "Message urgency"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/communicationrequest-identifier",
-              "type": "token",
-              "documentation": "Unique identifier"
-            }
-          ]
-        },
-        {
-          "type": "Composition",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Composition"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "section-code",
-              "definition": "http://hl7.org/fhir/SearchParameter/composition-section-code",
-              "type": "token",
-              "documentation": "Classification of section (recommended)"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/composition-status",
-              "type": "token",
-              "documentation": "preliminary | final | appended | amended | entered-in-error"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/composition-subject",
-              "type": "reference",
-              "documentation": "Who and/or what the composition is about"
-            },
-            {
-              "name": "class",
-              "definition": "http://hl7.org/fhir/SearchParameter/composition-class",
-              "type": "token",
-              "documentation": "Categorization of Composition"
-            },
-            {
-              "name": "encounter",
-              "definition": "http://hl7.org/fhir/SearchParameter/composition-encounter",
-              "type": "reference",
-              "documentation": "Context of the conposition"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/composition-type",
-              "type": "token",
-              "documentation": "Kind of composition (LOINC if possible)"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/composition-date",
-              "type": "date",
-              "documentation": "Composition editing time"
-            },
-            {
-              "name": "period",
-              "definition": "http://hl7.org/fhir/SearchParameter/composition-period",
-              "type": "date",
-              "documentation": "The period covered by the documentation"
-            },
-            {
-              "name": "section",
-              "definition": "http://hl7.org/fhir/SearchParameter/composition-section",
-              "type": "reference",
-              "documentation": "The Content of the section (narrative + data entries)"
-            },
-            {
-              "name": "author",
-              "definition": "http://hl7.org/fhir/SearchParameter/composition-author",
-              "type": "reference",
-              "documentation": "Who and/or what authored the composition"
-            },
-            {
-              "name": "title",
-              "definition": "http://hl7.org/fhir/SearchParameter/composition-title",
-              "type": "string",
-              "documentation": "Human Readable name/title"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/composition-patient",
-              "type": "reference",
-              "documentation": "Who and/or what the composition is about"
-            },
-            {
-              "name": "attester",
-              "definition": "http://hl7.org/fhir/SearchParameter/composition-attester",
-              "type": "reference",
-              "documentation": "Who attested the composition"
-            },
-            {
-              "name": "confidentiality",
-              "definition": "http://hl7.org/fhir/SearchParameter/composition-confidentiality",
-              "type": "token",
-              "documentation": "As defined by affinity domain"
-            },
-            {
-              "name": "context",
-              "definition": "http://hl7.org/fhir/SearchParameter/composition-context",
-              "type": "token",
-              "documentation": "Code(s) that apply to the event being documented"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/composition-identifier",
-              "type": "token",
-              "documentation": "Logical identifier of composition (version-independent)"
-            }
-          ]
-        },
-        {
-          "type": "ConceptMap",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/ConceptMap"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "dependson",
-              "definition": "http://hl7.org/fhir/SearchParameter/conceptmap-dependson",
-              "type": "uri",
-              "documentation": "Reference to element/field/valueset mapping depends on"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/conceptmap-status",
-              "type": "token",
-              "documentation": "Status of the concept map"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/conceptmap-date",
-              "type": "date",
-              "documentation": "The concept map publication date"
-            },
-            {
-              "name": "url",
-              "definition": "http://hl7.org/fhir/SearchParameter/conceptmap-url",
-              "type": "uri",
-              "documentation": "The url of the concept map"
-            },
-            {
-              "name": "version",
-              "definition": "http://hl7.org/fhir/SearchParameter/conceptmap-version",
-              "type": "token",
-              "documentation": "The version identifier of the concept map"
-            },
-            {
-              "name": "publisher",
-              "definition": "http://hl7.org/fhir/SearchParameter/conceptmap-publisher",
-              "type": "string",
-              "documentation": "Name of the publisher of the concept map"
-            },
-            {
-              "name": "product",
-              "definition": "http://hl7.org/fhir/SearchParameter/conceptmap-product",
-              "type": "uri",
-              "documentation": "Reference to element/field/valueset mapping depends on"
-            },
-            {
-              "name": "system",
-              "definition": "http://hl7.org/fhir/SearchParameter/conceptmap-system",
-              "type": "uri",
-              "documentation": "The system for any destination concepts mapped by this map"
-            },
-            {
-              "name": "source",
-              "definition": "http://hl7.org/fhir/SearchParameter/conceptmap-source",
-              "type": "reference",
-              "documentation": "The system for any concepts mapped by this concept map"
-            },
-            {
-              "name": "description",
-              "definition": "http://hl7.org/fhir/SearchParameter/conceptmap-description",
-              "type": "string",
-              "documentation": "Text search in the description of the concept map"
-            },
-            {
-              "name": "name",
-              "definition": "http://hl7.org/fhir/SearchParameter/conceptmap-name",
-              "type": "string",
-              "documentation": "Name of the concept map"
-            },
-            {
-              "name": "context",
-              "definition": "http://hl7.org/fhir/SearchParameter/conceptmap-context",
-              "type": "token",
-              "documentation": "A use context assigned to the concept map"
-            },
-            {
-              "name": "target",
-              "definition": "http://hl7.org/fhir/SearchParameter/conceptmap-target",
-              "type": "reference",
-              "documentation": "Provides context to the mappings"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/conceptmap-identifier",
-              "type": "token",
-              "documentation": "Additional identifier for the concept map"
-            }
-          ]
-        },
-        {
-          "type": "Condition",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Condition"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "asserter",
-              "definition": "http://hl7.org/fhir/SearchParameter/condition-asserter",
-              "type": "reference",
-              "documentation": "Person who asserts this condition"
-            },
-            {
-              "name": "following-code",
-              "definition": "http://hl7.org/fhir/SearchParameter/condition-following-code",
-              "type": "token",
-              "documentation": "Relationship target by means of a predefined code"
-            },
-            {
-              "name": "dueto-code",
-              "definition": "http://hl7.org/fhir/SearchParameter/condition-dueto-code",
-              "type": "token",
-              "documentation": "Relationship target by means of a predefined code"
-            },
-            {
-              "name": "location",
-              "definition": "http://hl7.org/fhir/SearchParameter/condition-location",
-              "type": "token",
-              "documentation": "Location - may include laterality"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/condition-subject",
-              "type": "reference",
-              "documentation": "Who has the condition?"
-            },
-            {
-              "name": "onset",
-              "definition": "http://hl7.org/fhir/SearchParameter/condition-onset",
-              "type": "date",
-              "documentation": "Date related onsets (dateTime and Period)"
-            },
-            {
-              "name": "evidence",
-              "definition": "http://hl7.org/fhir/SearchParameter/condition-evidence",
-              "type": "token",
-              "documentation": "Manifestation/symptom"
-            },
-            {
-              "name": "onset-info",
-              "definition": "http://hl7.org/fhir/SearchParameter/condition-onset-info",
-              "type": "string",
-              "documentation": "Other onsets (boolean, age, range, string)"
-            },
-            {
-              "name": "following-item",
-              "definition": "http://hl7.org/fhir/SearchParameter/condition-following-item",
-              "type": "reference",
-              "documentation": "Relationship target resource"
-            },
-            {
-              "name": "severity",
-              "definition": "http://hl7.org/fhir/SearchParameter/condition-severity",
-              "type": "token",
-              "documentation": "The severity of the condition"
-            },
-            {
-              "name": "code",
-              "definition": "http://hl7.org/fhir/SearchParameter/condition-code",
-              "type": "token",
-              "documentation": "Code for the condition"
-            },
-            {
-              "name": "encounter",
-              "definition": "http://hl7.org/fhir/SearchParameter/condition-encounter",
-              "type": "reference",
-              "documentation": "Encounter when condition first asserted"
-            },
-            {
-              "name": "date-asserted",
-              "definition": "http://hl7.org/fhir/SearchParameter/condition-date-asserted",
-              "type": "date",
-              "documentation": "When first detected/suspected/entered"
-            },
-            {
-              "name": "stage",
-              "definition": "http://hl7.org/fhir/SearchParameter/condition-stage",
-              "type": "token",
-              "documentation": "Simple summary (disease specific)"
-            },
-            {
-              "name": "category",
-              "definition": "http://hl7.org/fhir/SearchParameter/condition-category",
-              "type": "token",
-              "documentation": "The category of the condition"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/condition-patient",
-              "type": "reference",
-              "documentation": "Who has the condition?"
-            },
-            {
-              "name": "dueto-item",
-              "definition": "http://hl7.org/fhir/SearchParameter/condition-dueto-item",
-              "type": "reference",
-              "documentation": "Relationship target resource"
-            },
-            {
-              "name": "clinicalstatus",
-              "definition": "http://hl7.org/fhir/SearchParameter/condition-clinicalstatus",
-              "type": "token",
-              "documentation": "The clinical status of the condition"
-            }
-          ]
-        },
-        {
-          "type": "Conformance",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Conformance"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/conformance-status",
-              "type": "token",
-              "documentation": "The current status of the conformance statement"
-            },
-            {
-              "name": "resource",
-              "definition": "http://hl7.org/fhir/SearchParameter/conformance-resource",
-              "type": "token",
-              "documentation": "Name of a resource mentioned in a conformance statement"
-            },
-            {
-              "name": "security",
-              "definition": "http://hl7.org/fhir/SearchParameter/conformance-security",
-              "type": "token",
-              "documentation": "Information about security of implementation"
-            },
-            {
-              "name": "format",
-              "definition": "http://hl7.org/fhir/SearchParameter/conformance-format",
-              "type": "token",
-              "documentation": "formats supported (xml | json | mime type)"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/conformance-date",
-              "type": "date",
-              "documentation": "The conformance statement publication date"
-            },
-            {
-              "name": "url",
-              "definition": "http://hl7.org/fhir/SearchParameter/conformance-url",
-              "type": "uri",
-              "documentation": "The uri that identifies the conformance statement"
-            },
-            {
-              "name": "version",
-              "definition": "http://hl7.org/fhir/SearchParameter/conformance-version",
-              "type": "token",
-              "documentation": "The version identifier of the conformance statement"
-            },
-            {
-              "name": "publisher",
-              "definition": "http://hl7.org/fhir/SearchParameter/conformance-publisher",
-              "type": "string",
-              "documentation": "Name of the publisher of the conformance statement"
-            },
-            {
-              "name": "mode",
-              "definition": "http://hl7.org/fhir/SearchParameter/conformance-mode",
-              "type": "token",
-              "documentation": "Mode - restful (server/client) or messaging (sender/receiver)"
-            },
-            {
-              "name": "software",
-              "definition": "http://hl7.org/fhir/SearchParameter/conformance-software",
-              "type": "string",
-              "documentation": "Part of a the name of a software application"
-            },
-            {
-              "name": "description",
-              "definition": "http://hl7.org/fhir/SearchParameter/conformance-description",
-              "type": "string",
-              "documentation": "Text search in the description of the conformance statement"
-            },
-            {
-              "name": "event",
-              "definition": "http://hl7.org/fhir/SearchParameter/conformance-event",
-              "type": "token",
-              "documentation": "Event code in a conformance statement"
-            },
-            {
-              "name": "name",
-              "definition": "http://hl7.org/fhir/SearchParameter/conformance-name",
-              "type": "string",
-              "documentation": "Name of the conformance statement"
-            },
-            {
-              "name": "supported-profile",
-              "definition": "http://hl7.org/fhir/SearchParameter/conformance-supported-profile",
-              "type": "reference",
-              "documentation": "Profiles supported by the system"
-            },
-            {
-              "name": "fhirversion",
-              "definition": "http://hl7.org/fhir/SearchParameter/conformance-fhirversion",
-              "type": "token",
-              "documentation": "The version of FHIR"
-            },
-            {
-              "name": "profile",
-              "definition": "http://hl7.org/fhir/SearchParameter/conformance-profile",
-              "type": "reference",
-              "documentation": "A profile id invoked in a conformance statement"
-            }
-          ]
-        },
-        {
-          "type": "Contract",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Contract"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "signer",
-              "definition": "http://hl7.org/fhir/SearchParameter/contract-signer",
-              "type": "reference",
-              "documentation": "Contract Signatory Party"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/contract-patient",
-              "type": "reference",
-              "documentation": "The identity of the target of the contract (if a patient)"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/contract-subject",
-              "type": "reference",
-              "documentation": "The identity of the target of the contract"
-            },
-            {
-              "name": "actor",
-              "definition": "http://hl7.org/fhir/SearchParameter/contract-actor",
-              "type": "reference",
-              "documentation": "Contract Actor Type"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/contract-identifier",
-              "type": "token",
-              "documentation": "The identity of the contract"
-            }
-          ]
-        },
-        {
-          "type": "Contraindication",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Contraindication"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "author",
-              "definition": "http://hl7.org/fhir/SearchParameter/contraindication-author",
-              "type": "reference",
-              "documentation": "Who found issue?"
-            },
-            {
-              "name": "category",
-              "definition": "http://hl7.org/fhir/SearchParameter/contraindication-category",
-              "type": "token",
-              "documentation": "E.g. Drug-drug, duplicate therapy, etc."
-            },
-            {
-              "name": "implicated",
-              "definition": "http://hl7.org/fhir/SearchParameter/contraindication-implicated",
-              "type": "reference",
-              "documentation": "Problem resource"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/contraindication-patient",
-              "type": "reference",
-              "documentation": "Associated patient"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/contraindication-date",
-              "type": "date",
-              "documentation": "When identified"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/contraindication-identifier",
-              "type": "token",
-              "documentation": "Unique id for the contraindication"
-            }
-          ]
-        },
-        {
-          "type": "Coverage",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Coverage"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "plan",
-              "definition": "http://hl7.org/fhir/SearchParameter/coverage-plan",
-              "type": "token",
-              "documentation": "A plan or policy identifier"
-            },
-            {
-              "name": "issuer",
-              "definition": "http://hl7.org/fhir/SearchParameter/coverage-issuer",
-              "type": "reference",
-              "documentation": "The identity of the insurer"
-            },
-            {
-              "name": "sequence",
-              "definition": "http://hl7.org/fhir/SearchParameter/coverage-sequence",
-              "type": "token",
-              "documentation": "Sequence number"
-            },
-            {
-              "name": "dependent",
-              "definition": "http://hl7.org/fhir/SearchParameter/coverage-dependent",
-              "type": "token",
-              "documentation": "Dependent number"
-            },
-            {
-              "name": "group",
-              "definition": "http://hl7.org/fhir/SearchParameter/coverage-group",
-              "type": "token",
-              "documentation": "Group identifier"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/coverage-type",
-              "type": "token",
-              "documentation": "The kind of coverage"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/coverage-identifier",
-              "type": "token",
-              "documentation": "The primary identifier of the insured"
-            },
-            {
-              "name": "subplan",
-              "definition": "http://hl7.org/fhir/SearchParameter/coverage-subplan",
-              "type": "token",
-              "documentation": "Sub-plan identifier"
-            }
-          ]
-        },
-        {
-          "type": "DataElement",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/DataElement"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/dataelement-status",
-              "type": "token",
-              "documentation": "The current status of the data element"
-            },
-            {
-              "name": "description",
-              "definition": "http://hl7.org/fhir/SearchParameter/dataelement-description",
-              "type": "string",
-              "documentation": "Text search in the description of the data element.  This corresponds to the definition of the first DataElement.element."
-            },
-            {
-              "name": "name",
-              "definition": "http://hl7.org/fhir/SearchParameter/dataelement-name",
-              "type": "string",
-              "documentation": "Name of the data element"
-            },
-            {
-              "name": "context",
-              "definition": "http://hl7.org/fhir/SearchParameter/dataelement-context",
-              "type": "token",
-              "documentation": "A use context assigned to the data element"
-            },
-            {
-              "name": "code",
-              "definition": "http://hl7.org/fhir/SearchParameter/dataelement-code",
-              "type": "token",
-              "documentation": "A code for the data element (server may choose to do subsumption)"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/dataelement-date",
-              "type": "date",
-              "documentation": "The data element publication date"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/dataelement-identifier",
-              "type": "token",
-              "documentation": "The identifier of the data element"
-            },
-            {
-              "name": "url",
-              "definition": "http://hl7.org/fhir/SearchParameter/dataelement-url",
-              "type": "uri",
-              "documentation": "The official URL for the data element"
-            },
-            {
-              "name": "publisher",
-              "definition": "http://hl7.org/fhir/SearchParameter/dataelement-publisher",
-              "type": "string",
-              "documentation": "Name of the publisher of the data element"
-            },
-            {
-              "name": "version",
-              "definition": "http://hl7.org/fhir/SearchParameter/dataelement-version",
-              "type": "string",
-              "documentation": "The version identifier of the data element"
-            }
-          ]
-        },
-        {
-          "type": "Device",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Device"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "organization",
-              "definition": "http://hl7.org/fhir/SearchParameter/device-organization",
-              "type": "reference",
-              "documentation": "The organization responsible for the device"
-            },
-            {
-              "name": "model",
-              "definition": "http://hl7.org/fhir/SearchParameter/device-model",
-              "type": "string",
-              "documentation": "The model of the device"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/device-patient",
-              "type": "reference",
-              "documentation": "Patient information, if the resource is affixed to a person"
-            },
-            {
-              "name": "location",
-              "definition": "http://hl7.org/fhir/SearchParameter/device-location",
-              "type": "reference",
-              "documentation": "A location, where the resource is found"
-            },
-            {
-              "name": "manufacturer",
-              "definition": "http://hl7.org/fhir/SearchParameter/device-manufacturer",
-              "type": "string",
-              "documentation": "The manufacturer of the device"
-            },
-            {
-              "name": "udi",
-              "definition": "http://hl7.org/fhir/SearchParameter/device-udi",
-              "type": "string",
-              "documentation": "FDA Mandated Unique Device Identifier"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/device-type",
-              "type": "token",
-              "documentation": "The type of the device"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/device-identifier",
-              "type": "token",
-              "documentation": "Instance id from manufacturer, owner, and others"
-            }
-          ]
-        },
-        {
-          "type": "DeviceComponent",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/DeviceComponent"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "source",
-              "definition": "http://hl7.org/fhir/SearchParameter/devicecomponent-source",
-              "type": "reference",
-              "documentation": "The device source"
-            },
-            {
-              "name": "parent",
-              "definition": "http://hl7.org/fhir/SearchParameter/devicecomponent-parent",
-              "type": "reference",
-              "documentation": "The parent DeviceComponent resource"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/devicecomponent-type",
-              "type": "token",
-              "documentation": "The device component type"
-            }
-          ]
-        },
-        {
-          "type": "DeviceMetric",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/DeviceMetric"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "category",
-              "definition": "http://hl7.org/fhir/SearchParameter/devicemetric-category",
-              "type": "token",
-              "documentation": "The category of the metric"
-            },
-            {
-              "name": "source",
-              "definition": "http://hl7.org/fhir/SearchParameter/devicemetric-source",
-              "type": "reference",
-              "documentation": "The device resource"
-            },
-            {
-              "name": "parent",
-              "definition": "http://hl7.org/fhir/SearchParameter/devicemetric-parent",
-              "type": "reference",
-              "documentation": "The parent DeviceMetric resource"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/devicemetric-type",
-              "type": "token",
-              "documentation": "The component type"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/devicemetric-identifier",
-              "type": "token",
-              "documentation": "The identifier of the metric"
-            }
-          ]
-        },
-        {
-          "type": "DeviceUseRequest",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/DeviceUseRequest"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/deviceuserequest-patient",
-              "type": "reference",
-              "documentation": "Search by subject - a patient"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/deviceuserequest-subject",
-              "type": "reference",
-              "documentation": "Search by subject"
-            },
-            {
-              "name": "device",
-              "definition": "http://hl7.org/fhir/SearchParameter/deviceuserequest-device",
-              "type": "reference",
-              "documentation": "Device requested"
-            }
-          ]
-        },
-        {
-          "type": "DeviceUseStatement",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/DeviceUseStatement"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/deviceusestatement-patient",
-              "type": "reference",
-              "documentation": "Search by subject - a patient"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/deviceusestatement-subject",
-              "type": "reference",
-              "documentation": "Search by subject"
-            },
-            {
-              "name": "device",
-              "definition": "http://hl7.org/fhir/SearchParameter/deviceusestatement-device",
-              "type": "reference",
-              "documentation": "Search by device"
-            }
-          ]
-        },
-        {
-          "type": "DiagnosticOrder",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/DiagnosticOrder"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "orderer",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticorder-orderer",
-              "type": "reference",
-              "documentation": "Who ordered the test"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticorder-status",
-              "type": "token",
-              "documentation": "proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticorder-subject",
-              "type": "reference",
-              "documentation": "Who and/or what test is about"
-            },
-            {
-              "name": "item-status",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticorder-item-status",
-              "type": "token",
-              "documentation": "proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed"
-            },
-            {
-              "name": "event-status",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticorder-event-status",
-              "type": "token",
-              "documentation": "proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed"
-            },
-            {
-              "name": "actor",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticorder-actor",
-              "type": "reference",
-              "documentation": "Who recorded or did this"
-            },
-            {
-              "name": "code",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticorder-code",
-              "type": "token",
-              "documentation": "Code to indicate the item (test or panel) being ordered"
-            },
-            {
-              "name": "encounter",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticorder-encounter",
-              "type": "reference",
-              "documentation": "The encounter that this diagnostic order is associated with"
-            },
-            {
-              "name": "item-past-status",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticorder-item-past-status",
-              "type": "token",
-              "documentation": "proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticorder-patient",
-              "type": "reference",
-              "documentation": "Who and/or what test is about"
-            },
-            {
-              "name": "bodysite",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticorder-bodysite",
-              "type": "token",
-              "documentation": "Location of requested test (if applicable)"
-            },
-            {
-              "name": "item-date",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticorder-item-date",
-              "type": "date",
-              "documentation": "The date at which the event happened"
-            },
-            {
-              "name": "specimen",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticorder-specimen",
-              "type": "reference",
-              "documentation": "If the whole order relates to specific specimens"
-            },
-            {
-              "name": "event-status-date",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticorder-event-status-date",
-              "type": "composite",
-              "documentation": "A combination of past-status and date"
-            },
-            {
-              "name": "event-date",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticorder-event-date",
-              "type": "date",
-              "documentation": "The date at which the event happened"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticorder-identifier",
-              "type": "token",
-              "documentation": "Identifiers assigned to this order"
-            },
-            {
-              "name": "item-status-date",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticorder-item-status-date",
-              "type": "composite",
-              "documentation": "A combination of item-past-status and item-date"
-            }
-          ]
-        },
-        {
-          "type": "DiagnosticReport",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/DiagnosticReport"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "result",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticreport-result",
-              "type": "reference",
-              "documentation": "Link to an atomic result (observation resource)"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticreport-status",
-              "type": "token",
-              "documentation": "The status of the report"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticreport-subject",
-              "type": "reference",
-              "documentation": "The subject of the report"
-            },
-            {
-              "name": "issued",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticreport-issued",
-              "type": "date",
-              "documentation": "When the report was issued"
-            },
-            {
-              "name": "diagnosis",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticreport-diagnosis",
-              "type": "token",
-              "documentation": "A coded diagnosis on the report"
-            },
-            {
-              "name": "image",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticreport-image",
-              "type": "reference",
-              "documentation": "Reference to the image source"
-            },
-            {
-              "name": "encounter",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticreport-encounter",
-              "type": "reference",
-              "documentation": "The Encounter when the order was made"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticreport-date",
-              "type": "date",
-              "documentation": "The clinically relevant time of the report"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticreport-patient",
-              "type": "reference",
-              "documentation": "The subject of the report if a patient"
-            },
-            {
-              "name": "specimen",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticreport-specimen",
-              "type": "reference",
-              "documentation": "The specimen details"
-            },
-            {
-              "name": "name",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticreport-name",
-              "type": "token",
-              "documentation": "The name of the report (e.g. the code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result)"
-            },
-            {
-              "name": "request",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticreport-request",
-              "type": "reference",
-              "documentation": "What was requested"
-            },
-            {
-              "name": "service",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticreport-service",
-              "type": "token",
-              "documentation": "Which diagnostic discipline/department created the report"
-            },
-            {
-              "name": "performer",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticreport-performer",
-              "type": "reference",
-              "documentation": "Who was the source of the report (organization)"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/diagnosticreport-identifier",
-              "type": "token",
-              "documentation": "An identifier for the report"
-            }
-          ]
-        },
-        {
-          "type": "DocumentManifest",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/DocumentManifest"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentmanifest-status",
-              "type": "token",
-              "documentation": "current | superceded | entered-in-error"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentmanifest-subject",
-              "type": "reference",
-              "documentation": "The subject of the set of documents"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentmanifest-type",
-              "type": "token",
-              "documentation": "What kind of document set this is"
-            },
-            {
-              "name": "recipient",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentmanifest-recipient",
-              "type": "reference",
-              "documentation": "Intended to get notified about this set of documents"
-            },
-            {
-              "name": "relatedid",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentmanifest-relatedid",
-              "type": "token",
-              "documentation": "Related Identifier"
-            },
-            {
-              "name": "author",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentmanifest-author",
-              "type": "reference",
-              "documentation": "Who and/or what authored the document"
-            },
-            {
-              "name": "relatedref",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentmanifest-relatedref",
-              "type": "reference",
-              "documentation": "Related Resource"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentmanifest-patient",
-              "type": "reference",
-              "documentation": "The subject of the set of documents"
-            },
-            {
-              "name": "source",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentmanifest-source",
-              "type": "uri",
-              "documentation": "The source system/application/software"
-            },
-            {
-              "name": "created",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentmanifest-created",
-              "type": "date",
-              "documentation": "When this document manifest created"
-            },
-            {
-              "name": "description",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentmanifest-description",
-              "type": "string",
-              "documentation": "Human-readable description (title)"
-            },
-            {
-              "name": "contentref",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentmanifest-contentref",
-              "type": "reference",
-              "documentation": "Contents of this set of documents"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentmanifest-identifier",
-              "type": "token",
-              "documentation": "Unique Identifier for the set of documents"
-            }
-          ]
-        },
-        {
-          "type": "DocumentReference",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/DocumentReference"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "indexed",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-indexed",
-              "type": "date",
-              "documentation": "When this document reference created"
-            },
-            {
-              "name": "location",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-location",
-              "type": "uri",
-              "documentation": "Uri where the data can be found"
-            },
-            {
-              "name": "relatesto",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-relatesto",
-              "type": "reference",
-              "documentation": "Target of the relationship"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-subject",
-              "type": "reference",
-              "documentation": "Who|what is the subject of the document"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-type",
-              "type": "token",
-              "documentation": "Kind of document"
-            },
-            {
-              "name": "relatedid",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-relatedid",
-              "type": "token",
-              "documentation": "Related Identifier"
-            },
-            {
-              "name": "setting",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-setting",
-              "type": "token",
-              "documentation": "Additional details about where the content was created (e.g. clinical specialty)"
-            },
-            {
-              "name": "author",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-author",
-              "type": "reference",
-              "documentation": "Who and/or what authored the document"
-            },
-            {
-              "name": "custodian",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-custodian",
-              "type": "reference",
-              "documentation": "Org which maintains the document"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-patient",
-              "type": "reference",
-              "documentation": "Who|what is the subject of the document"
-            },
-            {
-              "name": "facility",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-facility",
-              "type": "token",
-              "documentation": "Kind of facility where patient was seen"
-            },
-            {
-              "name": "created",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-created",
-              "type": "date",
-              "documentation": "Document creation time"
-            },
-            {
-              "name": "description",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-description",
-              "type": "string",
-              "documentation": "Human-readable description (title)"
-            },
-            {
-              "name": "event",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-event",
-              "type": "token",
-              "documentation": "Main Clinical Acts Documented"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-status",
-              "type": "token",
-              "documentation": "current | superceded | entered-in-error"
-            },
-            {
-              "name": "relation",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-relation",
-              "type": "token",
-              "documentation": "replaces | transforms | signs | appends"
-            },
-            {
-              "name": "class",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-class",
-              "type": "token",
-              "documentation": "Categorization of document"
-            },
-            {
-              "name": "format",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-format",
-              "type": "uri",
-              "documentation": "Format/content rules for the document"
-            },
-            {
-              "name": "period",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-period",
-              "type": "date",
-              "documentation": "Time of service that is being documented"
-            },
-            {
-              "name": "authenticator",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-authenticator",
-              "type": "reference",
-              "documentation": "Who/What authenticated the document"
-            },
-            {
-              "name": "relationship",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-relationship",
-              "type": "composite",
-              "documentation": "Combination of relation and relatesTo"
-            },
-            {
-              "name": "relatedref",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-relatedref",
-              "type": "reference",
-              "documentation": "Related Resource"
-            },
-            {
-              "name": "confidentiality",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-confidentiality",
-              "type": "token",
-              "documentation": "Document security-tags"
-            },
-            {
-              "name": "language",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-language",
-              "type": "token",
-              "documentation": "Human language of the content (BCP-47)"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/documentreference-identifier",
-              "type": "token",
-              "documentation": "Master Version Specific Identifier"
-            }
-          ]
-        },
-        {
-          "type": "EligibilityRequest",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/EligibilityRequest"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/eligibilityrequest-identifier",
-              "type": "token",
-              "documentation": "The business identifier of the Eligibility"
-            }
-          ]
-        },
-        {
-          "type": "EligibilityResponse",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/EligibilityResponse"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/eligibilityresponse-identifier",
-              "type": "token",
-              "documentation": "The business identifier of the Explanation of Benefit"
-            }
-          ]
-        },
-        {
-          "type": "Encounter",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Encounter"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "participant-type",
-              "definition": "http://hl7.org/fhir/SearchParameter/encounter-participant-type",
-              "type": "token",
-              "documentation": "Role of participant in encounter"
-            },
-            {
-              "name": "episodeofcare",
-              "definition": "http://hl7.org/fhir/SearchParameter/encounter-episodeofcare",
-              "type": "reference",
-              "documentation": "An episode of care that this encounter should be recorded against"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/encounter-status",
-              "type": "token",
-              "documentation": "planned | arrived | in-progress | onleave | finished | cancelled"
-            },
-            {
-              "name": "reason",
-              "definition": "http://hl7.org/fhir/SearchParameter/encounter-reason",
-              "type": "token",
-              "documentation": "Reason the encounter takes place (code)"
-            },
-            {
-              "name": "location",
-              "definition": "http://hl7.org/fhir/SearchParameter/encounter-location",
-              "type": "reference",
-              "documentation": "Location the encounter takes place"
-            },
-            {
-              "name": "fulfills",
-              "definition": "http://hl7.org/fhir/SearchParameter/encounter-fulfills",
-              "type": "reference",
-              "documentation": "The appointment that scheduled this encounter"
-            },
-            {
-              "name": "indication",
-              "definition": "http://hl7.org/fhir/SearchParameter/encounter-indication",
-              "type": "reference",
-              "documentation": "Reason the encounter takes place (resource)"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/encounter-date",
-              "type": "date",
-              "documentation": "A date within the period the Encounter lasted"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/encounter-type",
-              "type": "token",
-              "documentation": "Specific type of encounter"
-            },
-            {
-              "name": "special-arrangement",
-              "definition": "http://hl7.org/fhir/SearchParameter/encounter-special-arrangement",
-              "type": "token",
-              "documentation": "Wheelchair, translator, stretcher, etc"
-            },
-            {
-              "name": "part-of",
-              "definition": "http://hl7.org/fhir/SearchParameter/encounter-part-of",
-              "type": "reference",
-              "documentation": "Another Encounter this encounter is part of"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/encounter-patient",
-              "type": "reference",
-              "documentation": "The patient present at the encounter"
-            },
-            {
-              "name": "practitioner",
-              "definition": "http://hl7.org/fhir/SearchParameter/encounter-practitioner",
-              "type": "reference",
-              "documentation": "Persons involved in the encounter other than the patient"
-            },
-            {
-              "name": "length",
-              "definition": "http://hl7.org/fhir/SearchParameter/encounter-length",
-              "type": "number",
-              "documentation": "Length of encounter in days"
-            },
-            {
-              "name": "participant",
-              "definition": "http://hl7.org/fhir/SearchParameter/encounter-participant",
-              "type": "reference",
-              "documentation": "Persons involved in the encounter other than the patient"
-            },
-            {
-              "name": "incomingreferral",
-              "definition": "http://hl7.org/fhir/SearchParameter/encounter-incomingreferral",
-              "type": "reference",
-              "documentation": "Incoming Referral Request"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/encounter-identifier",
-              "type": "token",
-              "documentation": "Identifier(s) by which this encounter is known"
-            },
-            {
-              "name": "location-period",
-              "definition": "http://hl7.org/fhir/SearchParameter/encounter-location-period",
-              "type": "date",
-              "documentation": "Time period during which the patient was present at the location"
-            }
-          ]
-        },
-        {
-          "type": "EnrollmentRequest",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/EnrollmentRequest"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/enrollmentrequest-patient",
-              "type": "reference",
-              "documentation": "The party to be enrolled"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/enrollmentrequest-subject",
-              "type": "reference",
-              "documentation": "The party to be enrolled"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/enrollmentrequest-identifier",
-              "type": "token",
-              "documentation": "The business identifier of the Enrollment"
-            }
-          ]
-        },
-        {
-          "type": "EnrollmentResponse",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/EnrollmentResponse"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/enrollmentresponse-identifier",
-              "type": "token",
-              "documentation": "The business identifier of the Explanation of Benefit"
-            }
-          ]
-        },
-        {
-          "type": "EpisodeOfCare",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/EpisodeOfCare"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "organization",
-              "definition": "http://hl7.org/fhir/SearchParameter/episodeofcare-organization",
-              "type": "reference",
-              "documentation": "The organization that has assumed the specific responsibilities of this EpisodeOfCare"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/episodeofcare-patient",
-              "type": "reference",
-              "documentation": "The patient that this EpisodeOfCare applies to"
-            },
-            {
-              "name": "condition",
-              "definition": "http://hl7.org/fhir/SearchParameter/episodeofcare-condition",
-              "type": "reference",
-              "documentation": "A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/episodeofcare-status",
-              "type": "token",
-              "documentation": "The current status of the Episode of Care as provided (does not check the status history collection)"
-            },
-            {
-              "name": "care-manager",
-              "definition": "http://hl7.org/fhir/SearchParameter/episodeofcare-care-manager",
-              "type": "reference",
-              "documentation": "The practitioner that is the care manager/care co-ordinator for this patient"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/episodeofcare-type",
-              "type": "token",
-              "documentation": "Specific type of EpisodeOfCare"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/episodeofcare-date",
-              "type": "date",
-              "documentation": "The provided date search value falls within the episode of care's period"
-            },
-            {
-              "name": "incomingreferral",
-              "definition": "http://hl7.org/fhir/SearchParameter/episodeofcare-incomingreferral",
-              "type": "reference",
-              "documentation": "Incoming Referral Request"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/episodeofcare-identifier",
-              "type": "token",
-              "documentation": "Identifier(s) by which this EpisodeOfCare is known"
-            },
-            {
-              "name": "team-member",
-              "definition": "http://hl7.org/fhir/SearchParameter/episodeofcare-team-member",
-              "type": "reference",
-              "documentation": "A Practitioner or Organization allocated to the care team for this EpisodeOfCare"
-            }
-          ]
-        },
-        {
-          "type": "ExplanationOfBenefit",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/explanationofbenefit-identifier",
-              "type": "token",
-              "documentation": "The business identifier of the Explanation of Benefit"
-            }
-          ]
-        },
-        {
-          "type": "FamilyMemberHistory",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/FamilyMemberHistory"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/familymemberhistory-patient",
-              "type": "reference",
-              "documentation": "The identity of a subject to list family member history items for"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/familymemberhistory-date",
-              "type": "date",
-              "documentation": "When history was captured/updated"
-            }
-          ]
-        },
-        {
-          "type": "Flag",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Flag"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "author",
-              "definition": "http://hl7.org/fhir/SearchParameter/flag-author",
-              "type": "reference",
-              "documentation": "Flag creator"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/flag-patient",
-              "type": "reference",
-              "documentation": "The identity of a subject to list flags for"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/flag-subject",
-              "type": "reference",
-              "documentation": "The identity of a subject to list flags for"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/flag-date",
-              "type": "date",
-              "documentation": "Time period when flag is active"
-            }
-          ]
-        },
-        {
-          "type": "Goal",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Goal"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/goal-patient",
-              "type": "reference",
-              "documentation": "The patient for whom this goal is intended for"
-            }
-          ]
-        },
-        {
-          "type": "Group",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Group"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "member",
-              "definition": "http://hl7.org/fhir/SearchParameter/group-member",
-              "type": "reference",
-              "documentation": "Who or what is in group"
-            },
-            {
-              "name": "characteristic-value",
-              "definition": "http://hl7.org/fhir/SearchParameter/group-characteristic-value",
-              "type": "composite",
-              "documentation": "A composite of both characteristic and value"
-            },
-            {
-              "name": "value",
-              "definition": "http://hl7.org/fhir/SearchParameter/group-value",
-              "type": "token",
-              "documentation": "Value held by characteristic"
-            },
-            {
-              "name": "actual",
-              "definition": "http://hl7.org/fhir/SearchParameter/group-actual",
-              "type": "token",
-              "documentation": "Descriptive or actual"
-            },
-            {
-              "name": "exclude",
-              "definition": "http://hl7.org/fhir/SearchParameter/group-exclude",
-              "type": "token",
-              "documentation": "Group includes or excludes"
-            },
-            {
-              "name": "code",
-              "definition": "http://hl7.org/fhir/SearchParameter/group-code",
-              "type": "token",
-              "documentation": "The kind of resources contained"
-            },
-            {
-              "name": "characteristic",
-              "definition": "http://hl7.org/fhir/SearchParameter/group-characteristic",
-              "type": "token",
-              "documentation": "Kind of characteristic"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/group-type",
-              "type": "token",
-              "documentation": "The type of resources the group contains"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/group-identifier",
-              "type": "token",
-              "documentation": "Unique id"
-            }
-          ]
-        },
-        {
-          "type": "HealthcareService",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/HealthcareService"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "servicecategory",
-              "definition": "http://hl7.org/fhir/SearchParameter/healthcareservice-servicecategory",
-              "type": "token",
-              "documentation": "Service Category of the Healthcare Service"
-            },
-            {
-              "name": "organization",
-              "definition": "http://hl7.org/fhir/SearchParameter/healthcareservice-organization",
-              "type": "reference",
-              "documentation": "The organization that provides this Healthcare Service"
-            },
-            {
-              "name": "servicetype",
-              "definition": "http://hl7.org/fhir/SearchParameter/healthcareservice-servicetype",
-              "type": "token",
-              "documentation": "The type of service provided by this healthcare service"
-            },
-            {
-              "name": "location",
-              "definition": "http://hl7.org/fhir/SearchParameter/healthcareservice-location",
-              "type": "reference",
-              "documentation": "The location of the Healthcare Service"
-            },
-            {
-              "name": "name",
-              "definition": "http://hl7.org/fhir/SearchParameter/healthcareservice-name",
-              "type": "string",
-              "documentation": "A portion of the Healthcare service name"
-            },
-            {
-              "name": "programname",
-              "definition": "http://hl7.org/fhir/SearchParameter/healthcareservice-programname",
-              "type": "string",
-              "documentation": "One of the Program Names serviced by this HealthcareService"
-            },
-            {
-              "name": "characteristic",
-              "definition": "http://hl7.org/fhir/SearchParameter/healthcareservice-characteristic",
-              "type": "token",
-              "documentation": "One of the HealthcareService's characteristics"
-            }
-          ]
-        },
-        {
-          "type": "ImagingObjectSelection",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/ImagingObjectSelection"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "selected-study",
-              "definition": "http://hl7.org/fhir/SearchParameter/imagingobjectselection-selected-study",
-              "type": "token",
-              "documentation": "Study selected in key DICOM object selection"
-            },
-            {
-              "name": "author",
-              "definition": "http://hl7.org/fhir/SearchParameter/imagingobjectselection-author",
-              "type": "reference",
-              "documentation": "Author of key DICOM object selection"
-            },
-            {
-              "name": "title",
-              "definition": "http://hl7.org/fhir/SearchParameter/imagingobjectselection-title",
-              "type": "token",
-              "documentation": "Title of key DICOM object selection"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/imagingobjectselection-patient",
-              "type": "reference",
-              "documentation": "Subject of key DICOM object selection"
-            },
-            {
-              "name": "authoring-time",
-              "definition": "http://hl7.org/fhir/SearchParameter/imagingobjectselection-authoring-time",
-              "type": "date",
-              "documentation": "Time of key DICOM object selection authoring"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/imagingobjectselection-identifier",
-              "type": "token",
-              "documentation": "UID of key DICOM object selection"
-            }
-          ]
-        },
-        {
-          "type": "ImagingStudy",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/ImagingStudy"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "uid",
-              "definition": "http://hl7.org/fhir/SearchParameter/imagingstudy-uid",
-              "type": "token",
-              "documentation": "Formal identifier for this instance (0008,0018)"
-            },
-            {
-              "name": "series",
-              "definition": "http://hl7.org/fhir/SearchParameter/imagingstudy-series",
-              "type": "token",
-              "documentation": "The series id for the image"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/imagingstudy-patient",
-              "type": "reference",
-              "documentation": "Who the study is about"
-            },
-            {
-              "name": "order",
-              "definition": "http://hl7.org/fhir/SearchParameter/imagingstudy-order",
-              "type": "reference",
-              "documentation": "The order for the image"
-            },
-            {
-              "name": "bodysite",
-              "definition": "http://hl7.org/fhir/SearchParameter/imagingstudy-bodysite",
-              "type": "token",
-              "documentation": "Body part examined (Map from 0018,0015)"
-            },
-            {
-              "name": "accession",
-              "definition": "http://hl7.org/fhir/SearchParameter/imagingstudy-accession",
-              "type": "token",
-              "documentation": "The accession id for the image"
-            },
-            {
-              "name": "study",
-              "definition": "http://hl7.org/fhir/SearchParameter/imagingstudy-study",
-              "type": "token",
-              "documentation": "The study id for the image"
-            },
-            {
-              "name": "modality",
-              "definition": "http://hl7.org/fhir/SearchParameter/imagingstudy-modality",
-              "type": "token",
-              "documentation": "The modality of the image"
-            },
-            {
-              "name": "started",
-              "definition": "http://hl7.org/fhir/SearchParameter/imagingstudy-started",
-              "type": "date",
-              "documentation": "When the study was started"
-            },
-            {
-              "name": "dicom-class",
-              "definition": "http://hl7.org/fhir/SearchParameter/imagingstudy-dicom-class",
-              "type": "token",
-              "documentation": "DICOM class type (0008,0016)"
-            }
-          ]
-        },
-        {
-          "type": "Immunization",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Immunization"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "reaction",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunization-reaction",
-              "type": "reference",
-              "documentation": "Additional information on reaction"
-            },
-            {
-              "name": "dose-sequence",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunization-dose-sequence",
-              "type": "number",
-              "documentation": "What dose number within series?"
-            },
-            {
-              "name": "requester",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunization-requester",
-              "type": "reference",
-              "documentation": "The practitioner who ordered the vaccination"
-            },
-            {
-              "name": "vaccine-type",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunization-vaccine-type",
-              "type": "token",
-              "documentation": "Vaccine Product Type Administered"
-            },
-            {
-              "name": "location",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunization-location",
-              "type": "reference",
-              "documentation": "The service delivery location or facility in which the vaccine was / was to be administered"
-            },
-            {
-              "name": "reason",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunization-reason",
-              "type": "token",
-              "documentation": "Why immunization occurred"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunization-subject",
-              "type": "reference",
-              "documentation": "The patient for the vaccination record"
-            },
-            {
-              "name": "reaction-date",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunization-reaction-date",
-              "type": "date",
-              "documentation": "When did reaction start?"
-            },
-            {
-              "name": "notgiven",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunization-notgiven",
-              "type": "token",
-              "documentation": "Administrations which were not given"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunization-date",
-              "type": "date",
-              "documentation": "Vaccination  (non)-Administration Date"
-            },
-            {
-              "name": "reason-not-given",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunization-reason-not-given",
-              "type": "token",
-              "documentation": "Explanation of reason vaccination was not administered"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunization-patient",
-              "type": "reference",
-              "documentation": "The patient for the vaccination record"
-            },
-            {
-              "name": "lot-number",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunization-lot-number",
-              "type": "string",
-              "documentation": "Vaccine Lot Number"
-            },
-            {
-              "name": "manufacturer",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunization-manufacturer",
-              "type": "reference",
-              "documentation": "Vaccine Manufacturer"
-            },
-            {
-              "name": "performer",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunization-performer",
-              "type": "reference",
-              "documentation": "The practitioner who administered the vaccination"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunization-identifier",
-              "type": "token",
-              "documentation": "Business identifier"
-            }
-          ]
-        },
-        {
-          "type": "ImmunizationRecommendation",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/ImmunizationRecommendation"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "information",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunizationrecommendation-information",
-              "type": "reference",
-              "documentation": "Patient observations supporting recommendation"
-            },
-            {
-              "name": "dose-sequence",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunizationrecommendation-dose-sequence",
-              "type": "token",
-              "documentation": "Number of dose within sequence"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunizationrecommendation-patient",
-              "type": "reference",
-              "documentation": "Who this profile is for"
-            },
-            {
-              "name": "support",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunizationrecommendation-support",
-              "type": "reference",
-              "documentation": "Past immunizations supporting recommendation"
-            },
-            {
-              "name": "vaccine-type",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunizationrecommendation-vaccine-type",
-              "type": "token",
-              "documentation": "Vaccine recommendation applies to"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunizationrecommendation-status",
-              "type": "token",
-              "documentation": "Vaccine administration status"
-            },
-            {
-              "name": "dose-number",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunizationrecommendation-dose-number",
-              "type": "number",
-              "documentation": "Recommended dose number"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunizationrecommendation-subject",
-              "type": "reference",
-              "documentation": "Who this profile is for"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunizationrecommendation-date",
-              "type": "date",
-              "documentation": "Date recommendation created"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/immunizationrecommendation-identifier",
-              "type": "token",
-              "documentation": "Business identifier"
-            }
-          ]
-        },
-        {
-          "type": "List",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/List"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "title",
-              "definition": "http://hl7.org/fhir/SearchParameter/list-title",
-              "type": "string",
-              "documentation": "Descriptive name for the list"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/list-patient",
-              "type": "reference",
-              "documentation": "If all resources have the same subject"
-            },
-            {
-              "name": "source",
-              "definition": "http://hl7.org/fhir/SearchParameter/list-source",
-              "type": "reference",
-              "documentation": "Who and/or what defined the list contents"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/list-status",
-              "type": "token",
-              "documentation": "current | retired | entered-in-error"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/list-subject",
-              "type": "reference",
-              "documentation": "If all resources have the same subject"
-            },
-            {
-              "name": "item",
-              "definition": "http://hl7.org/fhir/SearchParameter/list-item",
-              "type": "reference",
-              "documentation": "Actual entry"
-            },
-            {
-              "name": "code",
-              "definition": "http://hl7.org/fhir/SearchParameter/list-code",
-              "type": "token",
-              "documentation": "What the purpose of this list is"
-            },
-            {
-              "name": "notes",
-              "definition": "http://hl7.org/fhir/SearchParameter/list-notes",
-              "type": "string",
-              "documentation": "Comments about the note"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/list-date",
-              "type": "date",
-              "documentation": "When the list was prepared"
-            },
-            {
-              "name": "empty-reason",
-              "definition": "http://hl7.org/fhir/SearchParameter/list-empty-reason",
-              "type": "token",
-              "documentation": "Why list is empty"
-            }
-          ]
-        },
-        {
-          "type": "Location",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Location"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "organization",
-              "definition": "http://hl7.org/fhir/SearchParameter/location-organization",
-              "type": "reference",
-              "documentation": "Searches for locations that are managed by the provided organization"
-            },
-            {
-              "name": "near",
-              "definition": "http://hl7.org/fhir/SearchParameter/location-near",
-              "type": "token",
-              "documentation": "The coordinates expressed as [lat],[long] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)"
-            },
-            {
-              "name": "partof",
-              "definition": "http://hl7.org/fhir/SearchParameter/location-partof",
-              "type": "reference",
-              "documentation": "The location of which this location is a part"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/location-status",
-              "type": "token",
-              "documentation": "Searches for locations with a specific kind of status"
-            },
-            {
-              "name": "address",
-              "definition": "http://hl7.org/fhir/SearchParameter/location-address",
-              "type": "string",
-              "documentation": "A (part of the) address of the location"
-            },
-            {
-              "name": "name",
-              "definition": "http://hl7.org/fhir/SearchParameter/location-name",
-              "type": "string",
-              "documentation": "A (portion of the) name of the location"
-            },
-            {
-              "name": "near-distance",
-              "definition": "http://hl7.org/fhir/SearchParameter/location-near-distance",
-              "type": "token",
-              "documentation": "A distance quantity to limit the near search to locations within a specific distance"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/location-type",
-              "type": "token",
-              "documentation": "A code for the type of location"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/location-identifier",
-              "type": "token",
-              "documentation": "Unique code or number identifying the location to its users"
-            }
-          ]
-        },
-        {
-          "type": "Media",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Media"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/media-patient",
-              "type": "reference",
-              "documentation": "Who/What this Media is a record of"
-            },
-            {
-              "name": "created",
-              "definition": "http://hl7.org/fhir/SearchParameter/media-created",
-              "type": "date",
-              "documentation": "Date attachment was first created"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/media-subject",
-              "type": "reference",
-              "documentation": "Who/What this Media is a record of"
-            },
-            {
-              "name": "subtype",
-              "definition": "http://hl7.org/fhir/SearchParameter/media-subtype",
-              "type": "token",
-              "documentation": "The type of acquisition equipment/process"
-            },
-            {
-              "name": "view",
-              "definition": "http://hl7.org/fhir/SearchParameter/media-view",
-              "type": "token",
-              "documentation": "Imaging view e.g Lateral or Antero-posterior"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/media-type",
-              "type": "token",
-              "documentation": "photo | video | audio"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/media-identifier",
-              "type": "token",
-              "documentation": "Identifier(s) for the image"
-            },
-            {
-              "name": "operator",
-              "definition": "http://hl7.org/fhir/SearchParameter/media-operator",
-              "type": "reference",
-              "documentation": "The person who generated the image"
-            }
-          ]
-        },
-        {
-          "type": "Medication",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Medication"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "content",
-              "definition": "http://hl7.org/fhir/SearchParameter/medication-content",
-              "type": "reference",
-              "documentation": "A product in the package"
-            },
-            {
-              "name": "form",
-              "definition": "http://hl7.org/fhir/SearchParameter/medication-form",
-              "type": "token",
-              "documentation": "powder | tablets | carton +"
-            },
-            {
-              "name": "container",
-              "definition": "http://hl7.org/fhir/SearchParameter/medication-container",
-              "type": "token",
-              "documentation": "E.g. box, vial, blister-pack"
-            },
-            {
-              "name": "manufacturer",
-              "definition": "http://hl7.org/fhir/SearchParameter/medication-manufacturer",
-              "type": "reference",
-              "documentation": "Manufacturer of the item"
-            },
-            {
-              "name": "name",
-              "definition": "http://hl7.org/fhir/SearchParameter/medication-name",
-              "type": "string",
-              "documentation": "Common / Commercial name"
-            },
-            {
-              "name": "ingredient",
-              "definition": "http://hl7.org/fhir/SearchParameter/medication-ingredient",
-              "type": "reference",
-              "documentation": "The product contained"
-            },
-            {
-              "name": "code",
-              "definition": "http://hl7.org/fhir/SearchParameter/medication-code",
-              "type": "token",
-              "documentation": "Codes that identify this medication"
-            }
-          ]
-        },
-        {
-          "type": "MedicationAdministration",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/MedicationAdministration"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "medication",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationadministration-medication",
-              "type": "reference",
-              "documentation": "Return administrations of this medication"
-            },
-            {
-              "name": "effectivetime",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationadministration-effectivetime",
-              "type": "date",
-              "documentation": "Date administration happened (or did not happen)"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationadministration-patient",
-              "type": "reference",
-              "documentation": "The identity of a patient to list administrations  for"
-            },
-            {
-              "name": "practitioner",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationadministration-practitioner",
-              "type": "reference",
-              "documentation": "Who administered substance?"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationadministration-status",
-              "type": "token",
-              "documentation": "MedicationAdministration event status (for example one of active/paused/completed/nullified)"
-            },
-            {
-              "name": "prescription",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationadministration-prescription",
-              "type": "reference",
-              "documentation": "The identity of a prescription to list administrations from"
-            },
-            {
-              "name": "device",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationadministration-device",
-              "type": "reference",
-              "documentation": "Return administrations with this administration device identity"
-            },
-            {
-              "name": "notgiven",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationadministration-notgiven",
-              "type": "token",
-              "documentation": "Administrations that were not made"
-            },
-            {
-              "name": "encounter",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationadministration-encounter",
-              "type": "reference",
-              "documentation": "Return administrations that share this encounter"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationadministration-identifier",
-              "type": "token",
-              "documentation": "Return administrations with this external identity"
-            }
-          ]
-        },
-        {
-          "type": "MedicationDispense",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/MedicationDispense"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "medication",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationdispense-medication",
-              "type": "reference",
-              "documentation": "Returns dispenses of this medicine"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationdispense-patient",
-              "type": "reference",
-              "documentation": "The identity of a patient to list dispenses  for"
-            },
-            {
-              "name": "receiver",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationdispense-receiver",
-              "type": "reference",
-              "documentation": "Who collected the medication"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationdispense-status",
-              "type": "token",
-              "documentation": "Status of the dispense"
-            },
-            {
-              "name": "prescription",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationdispense-prescription",
-              "type": "reference",
-              "documentation": "The identity of a prescription to list dispenses from"
-            },
-            {
-              "name": "responsibleparty",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationdispense-responsibleparty",
-              "type": "reference",
-              "documentation": "Return all dispenses with the specified responsible party"
-            },
-            {
-              "name": "dispenser",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationdispense-dispenser",
-              "type": "reference",
-              "documentation": "Return all dispenses performed by a specific indiividual"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationdispense-type",
-              "type": "token",
-              "documentation": "Return all dispenses of a specific type"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationdispense-identifier",
-              "type": "token",
-              "documentation": "Return dispenses with this external identity"
-            },
-            {
-              "name": "whenprepared",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationdispense-whenprepared",
-              "type": "date",
-              "documentation": "Date when medication prepared"
-            },
-            {
-              "name": "whenhandedover",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationdispense-whenhandedover",
-              "type": "date",
-              "documentation": "Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)"
-            },
-            {
-              "name": "destination",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationdispense-destination",
-              "type": "reference",
-              "documentation": "Return dispenses that should be sent to a secific destination"
-            }
-          ]
-        },
-        {
-          "type": "MedicationPrescription",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/MedicationPrescription"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "medication",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationprescription-medication",
-              "type": "reference",
-              "documentation": "Code for medicine or text in medicine name"
-            },
-            {
-              "name": "datewritten",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationprescription-datewritten",
-              "type": "date",
-              "documentation": "Return prescriptions written on this date"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationprescription-patient",
-              "type": "reference",
-              "documentation": "The identity of a patient to list dispenses  for"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationprescription-status",
-              "type": "token",
-              "documentation": "Status of the prescription"
-            },
-            {
-              "name": "prescriber",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationprescription-prescriber",
-              "type": "reference",
-              "documentation": "Who ordered the medication(s)"
-            },
-            {
-              "name": "encounter",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationprescription-encounter",
-              "type": "reference",
-              "documentation": "Return prescriptions with this encounter identity"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationprescription-identifier",
-              "type": "token",
-              "documentation": "Return prescriptions with this external identity"
-            }
-          ]
-        },
-        {
-          "type": "MedicationStatement",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/MedicationStatement"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "medication",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationstatement-medication",
-              "type": "reference",
-              "documentation": "Code for medicine or text in medicine name"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationstatement-patient",
-              "type": "reference",
-              "documentation": "The identity of a patient to list statements  for"
-            },
-            {
-              "name": "source",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationstatement-source",
-              "type": "reference",
-              "documentation": "Who the information in the statement came from"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationstatement-status",
-              "type": "token",
-              "documentation": "Return statements that match the given status"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationstatement-identifier",
-              "type": "token",
-              "documentation": "Return statements with this external identity"
-            },
-            {
-              "name": "effectivedate",
-              "definition": "http://hl7.org/fhir/SearchParameter/medicationstatement-effectivedate",
-              "type": "date",
-              "documentation": "Date when patient was taking (or not taking) the medication"
-            }
-          ]
-        },
-        {
-          "type": "MessageHeader",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/MessageHeader"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "destination-uri",
-              "definition": "http://hl7.org/fhir/SearchParameter/messageheader-destination-uri",
-              "type": "uri",
-              "documentation": "Actual destination address or id"
-            },
-            {
-              "name": "receiver",
-              "definition": "http://hl7.org/fhir/SearchParameter/messageheader-receiver",
-              "type": "reference",
-              "documentation": "Intended \"real-world\" recipient for the data"
-            },
-            {
-              "name": "responsible",
-              "definition": "http://hl7.org/fhir/SearchParameter/messageheader-responsible",
-              "type": "reference",
-              "documentation": "Final responsibility for event"
-            },
-            {
-              "name": "data",
-              "definition": "http://hl7.org/fhir/SearchParameter/messageheader-data",
-              "type": "reference",
-              "documentation": "The actual content of the message"
-            },
-            {
-              "name": "code",
-              "definition": "http://hl7.org/fhir/SearchParameter/messageheader-code",
-              "type": "token",
-              "documentation": "ok | transient-error | fatal-error"
-            },
-            {
-              "name": "response-id",
-              "definition": "http://hl7.org/fhir/SearchParameter/messageheader-response-id",
-              "type": "token",
-              "documentation": "Id of original message"
-            },
-            {
-              "name": "src-id",
-              "definition": "http://hl7.org/fhir/SearchParameter/messageheader-src-id",
-              "type": "token",
-              "documentation": "Id of this message"
-            },
-            {
-              "name": "destination",
-              "definition": "http://hl7.org/fhir/SearchParameter/messageheader-destination",
-              "type": "string",
-              "documentation": "Name of system"
-            },
-            {
-              "name": "timestamp",
-              "definition": "http://hl7.org/fhir/SearchParameter/messageheader-timestamp",
-              "type": "date",
-              "documentation": "Time that the message was sent"
-            },
-            {
-              "name": "author",
-              "definition": "http://hl7.org/fhir/SearchParameter/messageheader-author",
-              "type": "reference",
-              "documentation": "The source of the decision"
-            },
-            {
-              "name": "source-uri",
-              "definition": "http://hl7.org/fhir/SearchParameter/messageheader-source-uri",
-              "type": "uri",
-              "documentation": "Actual message source address or id"
-            },
-            {
-              "name": "source",
-              "definition": "http://hl7.org/fhir/SearchParameter/messageheader-source",
-              "type": "string",
-              "documentation": "Name of system"
-            },
-            {
-              "name": "enterer",
-              "definition": "http://hl7.org/fhir/SearchParameter/messageheader-enterer",
-              "type": "reference",
-              "documentation": "The source of the data entry"
-            },
-            {
-              "name": "event",
-              "definition": "http://hl7.org/fhir/SearchParameter/messageheader-event",
-              "type": "token",
-              "documentation": "Code for the event this message represents"
-            },
-            {
-              "name": "target",
-              "definition": "http://hl7.org/fhir/SearchParameter/messageheader-target",
-              "type": "reference",
-              "documentation": "Particular delivery destination within the destination"
-            }
-          ]
-        },
-        {
-          "type": "NamingSystem",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/NamingSystem"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "responsible",
-              "definition": "http://hl7.org/fhir/SearchParameter/namingsystem-responsible",
-              "type": "string",
-              "documentation": "Who maintains system namespace?"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/namingsystem-status",
-              "type": "token",
-              "documentation": "draft | active | retired"
-            },
-            {
-              "name": "idtype",
-              "definition": "http://hl7.org/fhir/SearchParameter/namingsystem-idtype",
-              "type": "token",
-              "documentation": "oid | uuid | uri | other"
-            },
-            {
-              "name": "replacedby",
-              "definition": "http://hl7.org/fhir/SearchParameter/namingsystem-replacedby",
-              "type": "reference",
-              "documentation": "Use this instead"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/namingsystem-type",
-              "type": "token",
-              "documentation": "codesystem | identifier | root"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/namingsystem-date",
-              "type": "date",
-              "documentation": "Publication Date(/time)"
-            },
-            {
-              "name": "period",
-              "definition": "http://hl7.org/fhir/SearchParameter/namingsystem-period",
-              "type": "date",
-              "documentation": "When is identifier valid?"
-            },
-            {
-              "name": "contact",
-              "definition": "http://hl7.org/fhir/SearchParameter/namingsystem-contact",
-              "type": "string",
-              "documentation": "Name of a individual to contact"
-            },
-            {
-              "name": "country",
-              "definition": "http://hl7.org/fhir/SearchParameter/namingsystem-country",
-              "type": "token",
-              "documentation": "ISO 3-char country code"
-            },
-            {
-              "name": "publisher",
-              "definition": "http://hl7.org/fhir/SearchParameter/namingsystem-publisher",
-              "type": "string",
-              "documentation": "Name of the publisher (Organization or individual)"
-            },
-            {
-              "name": "category",
-              "definition": "http://hl7.org/fhir/SearchParameter/namingsystem-category",
-              "type": "token",
-              "documentation": "e.g. driver,  provider,  patient, bank etc"
-            },
-            {
-              "name": "name",
-              "definition": "http://hl7.org/fhir/SearchParameter/namingsystem-name",
-              "type": "string",
-              "documentation": "Human-readable label"
-            },
-            {
-              "name": "value",
-              "definition": "http://hl7.org/fhir/SearchParameter/namingsystem-value",
-              "type": "string",
-              "documentation": "The unique identifier"
-            },
-            {
-              "name": "telecom",
-              "definition": "http://hl7.org/fhir/SearchParameter/namingsystem-telecom",
-              "type": "token",
-              "documentation": "Contact details for individual or publisher"
-            }
-          ]
-        },
-        {
-          "type": "NutritionOrder",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/NutritionOrder"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/nutritionorder-patient",
-              "type": "reference",
-              "documentation": "The identity of the person who requires the diet, formula or nutritional supplement"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/nutritionorder-status",
-              "type": "token",
-              "documentation": "Status of the nutrition order."
-            },
-            {
-              "name": "supplement",
-              "definition": "http://hl7.org/fhir/SearchParameter/nutritionorder-supplement",
-              "type": "token",
-              "documentation": "Type of supplement product requested"
-            },
-            {
-              "name": "oraldiet",
-              "definition": "http://hl7.org/fhir/SearchParameter/nutritionorder-oraldiet",
-              "type": "token",
-              "documentation": "Type of diet that can be consumed orally (i.e., take via the mouth)."
-            },
-            {
-              "name": "provider",
-              "definition": "http://hl7.org/fhir/SearchParameter/nutritionorder-provider",
-              "type": "reference",
-              "documentation": "The identify of the provider who placed the nutrition order"
-            },
-            {
-              "name": "encounter",
-              "definition": "http://hl7.org/fhir/SearchParameter/nutritionorder-encounter",
-              "type": "reference",
-              "documentation": "Return nutrition orders with this encounter identity"
-            },
-            {
-              "name": "datetime",
-              "definition": "http://hl7.org/fhir/SearchParameter/nutritionorder-datetime",
-              "type": "date",
-              "documentation": "Return nutrition orders requested on this date"
-            },
-            {
-              "name": "additive",
-              "definition": "http://hl7.org/fhir/SearchParameter/nutritionorder-additive",
-              "type": "token",
-              "documentation": "Type of module component to add to the feeding"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/nutritionorder-identifier",
-              "type": "token",
-              "documentation": "Return nutrition orders with this external identity"
-            },
-            {
-              "name": "formula",
-              "definition": "http://hl7.org/fhir/SearchParameter/nutritionorder-formula",
-              "type": "token",
-              "documentation": "Type of enteral or infant formula"
-            }
-          ]
-        },
-        {
-          "type": "Observation",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Observation"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "value-string",
-              "definition": "http://hl7.org/fhir/SearchParameter/observation-value-string",
-              "type": "string",
-              "documentation": "The value of the observation, if the value is a string, and also searches in CodeableConcept.text"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/observation-status",
-              "type": "token",
-              "documentation": "The status of the observation"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/observation-subject",
-              "type": "reference",
-              "documentation": "The subject that the observation is about"
-            },
-            {
-              "name": "value-concept",
-              "definition": "http://hl7.org/fhir/SearchParameter/observation-value-concept",
-              "type": "token",
-              "documentation": "The value of the observation, if the value is a CodeableConcept"
-            },
-            {
-              "name": "reliability",
-              "definition": "http://hl7.org/fhir/SearchParameter/observation-reliability",
-              "type": "token",
-              "documentation": "The reliability of the observation"
-            },
-            {
-              "name": "encounter",
-              "definition": "http://hl7.org/fhir/SearchParameter/observation-encounter",
-              "type": "reference",
-              "documentation": "Healthcare event related to the observation"
-            },
-            {
-              "name": "code",
-              "definition": "http://hl7.org/fhir/SearchParameter/observation-code",
-              "type": "token",
-              "documentation": "The code of the observation type"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/observation-date",
-              "type": "date",
-              "documentation": "Obtained date/time. If the obtained element is a period, a date that falls in the period"
-            },
-            {
-              "name": "related-target",
-              "definition": "http://hl7.org/fhir/SearchParameter/observation-related-target",
-              "type": "reference",
-              "documentation": "Observation that is related to this one"
-            },
-            {
-              "name": "data-absent-reason",
-              "definition": "http://hl7.org/fhir/SearchParameter/observation-data-absent-reason",
-              "type": "token",
-              "documentation": "The reason why the expected value in the element Observation.value[x] is missing."
-            },
-            {
-              "name": "related",
-              "definition": "http://hl7.org/fhir/SearchParameter/observation-related",
-              "type": "composite",
-              "documentation": "Related Observations - search on related-type and related-target together"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/observation-patient",
-              "type": "reference",
-              "documentation": "The subject that the observation is about (if patient)"
-            },
-            {
-              "name": "specimen",
-              "definition": "http://hl7.org/fhir/SearchParameter/observation-specimen",
-              "type": "reference",
-              "documentation": "Specimen used for this observation"
-            },
-            {
-              "name": "device",
-              "definition": "http://hl7.org/fhir/SearchParameter/observation-device",
-              "type": "reference",
-              "documentation": "The Device that generated the observation data."
-            },
-            {
-              "name": "related-type",
-              "definition": "http://hl7.org/fhir/SearchParameter/observation-related-type",
-              "type": "token",
-              "documentation": "has-component | has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by"
-            },
-            {
-              "name": "performer",
-              "definition": "http://hl7.org/fhir/SearchParameter/observation-performer",
-              "type": "reference",
-              "documentation": "Who performed the observation"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/observation-identifier",
-              "type": "token",
-              "documentation": "The unique Id for a particular observation"
-            },
-            {
-              "name": "value-quantity",
-              "definition": "http://hl7.org/fhir/SearchParameter/observation-value-quantity",
-              "type": "quantity",
-              "documentation": "The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)"
-            },
-            {
-              "name": "code-value-[x]",
-              "definition": "http://hl7.org/fhir/SearchParameter/observation-code-value",
-              "type": "composite",
-              "documentation": "Both code and one of the value parameters"
-            },
-            {
-              "name": "value-date",
-              "definition": "http://hl7.org/fhir/SearchParameter/observation-value-date",
-              "type": "date",
-              "documentation": "The value of the observation, if the value is a Period"
-            }
-          ]
-        },
-        {
-          "type": "OperationDefinition",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/OperationDefinition"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/operationdefinition-status",
-              "type": "token",
-              "documentation": "draft | active | retired"
-            },
-            {
-              "name": "code",
-              "definition": "http://hl7.org/fhir/SearchParameter/operationdefinition-code",
-              "type": "token",
-              "documentation": "Name used to invoke the operation"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/operationdefinition-date",
-              "type": "date",
-              "documentation": "Date for this version of the operation definition"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/operationdefinition-type",
-              "type": "token",
-              "documentation": "Invoke at resource level for these type"
-            },
-            {
-              "name": "url",
-              "definition": "http://hl7.org/fhir/SearchParameter/operationdefinition-url",
-              "type": "uri",
-              "documentation": "Logical url to reference this operation definition"
-            },
-            {
-              "name": "kind",
-              "definition": "http://hl7.org/fhir/SearchParameter/operationdefinition-kind",
-              "type": "token",
-              "documentation": "operation | query"
-            },
-            {
-              "name": "version",
-              "definition": "http://hl7.org/fhir/SearchParameter/operationdefinition-version",
-              "type": "token",
-              "documentation": "Logical id for this version of the operation definition"
-            },
-            {
-              "name": "publisher",
-              "definition": "http://hl7.org/fhir/SearchParameter/operationdefinition-publisher",
-              "type": "string",
-              "documentation": "Name of the publisher (Organization or individual)"
-            },
-            {
-              "name": "system",
-              "definition": "http://hl7.org/fhir/SearchParameter/operationdefinition-system",
-              "type": "token",
-              "documentation": "Invoke at the system level?"
-            },
-            {
-              "name": "name",
-              "definition": "http://hl7.org/fhir/SearchParameter/operationdefinition-name",
-              "type": "string",
-              "documentation": "Informal name for this profile"
-            },
-            {
-              "name": "base",
-              "definition": "http://hl7.org/fhir/SearchParameter/operationdefinition-base",
-              "type": "reference",
-              "documentation": "Marks this as a profile of the base"
-            },
-            {
-              "name": "instance",
-              "definition": "http://hl7.org/fhir/SearchParameter/operationdefinition-instance",
-              "type": "token",
-              "documentation": "Invoke on an instance?"
-            },
-            {
-              "name": "profile",
-              "definition": "http://hl7.org/fhir/SearchParameter/operationdefinition-profile",
-              "type": "reference",
-              "documentation": "Profile on the type"
-            }
-          ]
-        },
-        {
-          "type": "OperationOutcome",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/OperationOutcome"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ]
-        },
-        {
-          "type": "Order",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Order"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "authority",
-              "definition": "http://hl7.org/fhir/SearchParameter/order-authority",
-              "type": "reference",
-              "documentation": "If required by policy"
-            },
-            {
-              "name": "detail",
-              "definition": "http://hl7.org/fhir/SearchParameter/order-detail",
-              "type": "reference",
-              "documentation": "What action is being ordered"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/order-patient",
-              "type": "reference",
-              "documentation": "Patient this order is about"
-            },
-            {
-              "name": "source",
-              "definition": "http://hl7.org/fhir/SearchParameter/order-source",
-              "type": "reference",
-              "documentation": "Who initiated the order"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/order-subject",
-              "type": "reference",
-              "documentation": "Patient this order is about"
-            },
-            {
-              "name": "when",
-              "definition": "http://hl7.org/fhir/SearchParameter/order-when",
-              "type": "date",
-              "documentation": "A formal schedule"
-            },
-            {
-              "name": "target",
-              "definition": "http://hl7.org/fhir/SearchParameter/order-target",
-              "type": "reference",
-              "documentation": "Who is intended to fulfill the order"
-            },
-            {
-              "name": "when_code",
-              "definition": "http://hl7.org/fhir/SearchParameter/order-when_code",
-              "type": "token",
-              "documentation": "Code specifies when request should be done. The code may simply be a priority code"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/order-date",
-              "type": "date",
-              "documentation": "When the order was made"
-            }
-          ]
-        },
-        {
-          "type": "OrderResponse",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/OrderResponse"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/orderresponse-patient",
-              "type": "reference",
-              "documentation": "The patient the reuqest order is related to"
-            },
-            {
-              "name": "fulfillment",
-              "definition": "http://hl7.org/fhir/SearchParameter/orderresponse-fulfillment",
-              "type": "reference",
-              "documentation": "Details of the outcome of performing the order"
-            },
-            {
-              "name": "request",
-              "definition": "http://hl7.org/fhir/SearchParameter/orderresponse-request",
-              "type": "reference",
-              "documentation": "The order that this is a response to"
-            },
-            {
-              "name": "code",
-              "definition": "http://hl7.org/fhir/SearchParameter/orderresponse-code",
-              "type": "token",
-              "documentation": "pending | review | rejected | error | accepted | cancelled | replaced | aborted | completed"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/orderresponse-date",
-              "type": "date",
-              "documentation": "When the response was made"
-            },
-            {
-              "name": "who",
-              "definition": "http://hl7.org/fhir/SearchParameter/orderresponse-who",
-              "type": "reference",
-              "documentation": "Who made the response"
-            }
-          ]
-        },
-        {
-          "type": "Organization",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Organization"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "phonetic",
-              "definition": "http://hl7.org/fhir/SearchParameter/organization-phonetic",
-              "type": "string",
-              "documentation": "A portion of the organization's name using some kind of phonetic matching algorithm"
-            },
-            {
-              "name": "partof",
-              "definition": "http://hl7.org/fhir/SearchParameter/organization-partof",
-              "type": "reference",
-              "documentation": "Search all organizations that are part of the given organization"
-            },
-            {
-              "name": "address",
-              "definition": "http://hl7.org/fhir/SearchParameter/organization-address",
-              "type": "string",
-              "documentation": "A (part of the) address of the Organization"
-            },
-            {
-              "name": "name",
-              "definition": "http://hl7.org/fhir/SearchParameter/organization-name",
-              "type": "string",
-              "documentation": "A portion of the organization's name"
-            },
-            {
-              "name": "active",
-              "definition": "http://hl7.org/fhir/SearchParameter/organization-active",
-              "type": "token",
-              "documentation": "Whether the organization's record is active"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/organization-type",
-              "type": "token",
-              "documentation": "A code for the type of organization"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/organization-identifier",
-              "type": "token",
-              "documentation": "Any identifier for the organization (not the accreditation issuer's identifier)"
-            }
-          ]
-        },
-        {
-          "type": "Patient",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Patient"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "animal-breed",
-              "definition": "http://hl7.org/fhir/SearchParameter/patient-animal-breed",
-              "type": "token",
-              "documentation": "The breed for animal patients"
-            },
-            {
-              "name": "phonetic",
-              "definition": "http://hl7.org/fhir/SearchParameter/patient-phonetic",
-              "type": "string",
-              "documentation": "A portion of either family or given name using some kind of phonetic matching algorithm"
-            },
-            {
-              "name": "link",
-              "definition": "http://hl7.org/fhir/SearchParameter/patient-link",
-              "type": "reference",
-              "documentation": "All patients linked to the given patient"
-            },
-            {
-              "name": "animal-species",
-              "definition": "http://hl7.org/fhir/SearchParameter/patient-animal-species",
-              "type": "token",
-              "documentation": "The species for animal patients"
-            },
-            {
-              "name": "deathdate",
-              "definition": "http://hl7.org/fhir/SearchParameter/patient-deathdate",
-              "type": "date",
-              "documentation": "The date of death has been provided and satisfies this search value"
-            },
-            {
-              "name": "organization",
-              "definition": "http://hl7.org/fhir/SearchParameter/patient-organization",
-              "type": "reference",
-              "documentation": "The organization at which this person is a patient"
-            },
-            {
-              "name": "given",
-              "definition": "http://hl7.org/fhir/SearchParameter/patient-given",
-              "type": "string",
-              "documentation": "A portion of the given name of the patient"
-            },
-            {
-              "name": "careprovider",
-              "definition": "http://hl7.org/fhir/SearchParameter/patient-careprovider",
-              "type": "reference",
-              "documentation": "Patient's nominated care provider, could be a care manager, not the organization that manages the record"
-            },
-            {
-              "name": "address",
-              "definition": "http://hl7.org/fhir/SearchParameter/patient-address",
-              "type": "string",
-              "documentation": "An address in any kind of address/part of the patient"
-            },
-            {
-              "name": "family",
-              "definition": "http://hl7.org/fhir/SearchParameter/patient-family",
-              "type": "string",
-              "documentation": "A portion of the family name of the patient"
-            },
-            {
-              "name": "name",
-              "definition": "http://hl7.org/fhir/SearchParameter/patient-name",
-              "type": "string",
-              "documentation": "A portion of either family or given name of the patient"
-            },
-            {
-              "name": "telecom",
-              "definition": "http://hl7.org/fhir/SearchParameter/patient-telecom",
-              "type": "token",
-              "documentation": "The value in any kind of telecom details of the patient"
-            },
-            {
-              "name": "birthdate",
-              "definition": "http://hl7.org/fhir/SearchParameter/patient-birthdate",
-              "type": "date",
-              "documentation": "The patient's date of birth"
-            },
-            {
-              "name": "gender",
-              "definition": "http://hl7.org/fhir/SearchParameter/patient-gender",
-              "type": "token",
-              "documentation": "Gender of the patient"
-            },
-            {
-              "name": "active",
-              "definition": "http://hl7.org/fhir/SearchParameter/patient-active",
-              "type": "token",
-              "documentation": "Whether the patient record is active"
-            },
-            {
-              "name": "deceased",
-              "definition": "http://hl7.org/fhir/SearchParameter/patient-deceased",
-              "type": "token",
-              "documentation": "This patient has been marked as deceased, or as a death date entered"
-            },
-            {
-              "name": "language",
-              "definition": "http://hl7.org/fhir/SearchParameter/patient-language",
-              "type": "token",
-              "documentation": "Language code (irrespective of use value)"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/patient-identifier",
-              "type": "token",
-              "documentation": "A patient identifier"
-            }
-          ]
-        },
-        {
-          "type": "PaymentNotice",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/PaymentNotice"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/paymentnotice-identifier",
-              "type": "token",
-              "documentation": "The business identifier of the Eligibility"
-            }
-          ]
-        },
-        {
-          "type": "PaymentReconciliation",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/PaymentReconciliation"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/paymentreconciliation-identifier",
-              "type": "token",
-              "documentation": "The business identifier of the Explanation of Benefit"
-            }
-          ]
-        },
-        {
-          "type": "Person",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Person"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "organization",
-              "definition": "http://hl7.org/fhir/SearchParameter/person-organization",
-              "type": "reference",
-              "documentation": "The organization at which this person record is being managed"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/person-patient",
-              "type": "reference",
-              "documentation": "The Person links to this Patient"
-            },
-            {
-              "name": "phonetic",
-              "definition": "http://hl7.org/fhir/SearchParameter/person-phonetic",
-              "type": "string",
-              "documentation": "A portion of name using some kind of phonetic matching algorithm"
-            },
-            {
-              "name": "practitioner",
-              "definition": "http://hl7.org/fhir/SearchParameter/person-practitioner",
-              "type": "reference",
-              "documentation": "The Person links to this Practitioner"
-            },
-            {
-              "name": "address",
-              "definition": "http://hl7.org/fhir/SearchParameter/person-address",
-              "type": "string",
-              "documentation": "An address in any kind of address/part"
-            },
-            {
-              "name": "link",
-              "definition": "http://hl7.org/fhir/SearchParameter/person-link",
-              "type": "reference",
-              "documentation": "Any link has this Patient, Person, RelatedPerson or Practitioner reference"
-            },
-            {
-              "name": "name",
-              "definition": "http://hl7.org/fhir/SearchParameter/person-name",
-              "type": "string",
-              "documentation": "A portion of name in any name part"
-            },
-            {
-              "name": "birthdate",
-              "definition": "http://hl7.org/fhir/SearchParameter/person-birthdate",
-              "type": "date",
-              "documentation": "The person's date of birth"
-            },
-            {
-              "name": "telecom",
-              "definition": "http://hl7.org/fhir/SearchParameter/person-telecom",
-              "type": "token",
-              "documentation": "The value in any kind of contact"
-            },
-            {
-              "name": "gender",
-              "definition": "http://hl7.org/fhir/SearchParameter/person-gender",
-              "type": "token",
-              "documentation": "The gender of the person"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/person-identifier",
-              "type": "token",
-              "documentation": "A person Identifier"
-            },
-            {
-              "name": "relatedperson",
-              "definition": "http://hl7.org/fhir/SearchParameter/person-relatedperson",
-              "type": "reference",
-              "documentation": "The Person links to this RelatedPerson"
-            }
-          ]
-        },
-        {
-          "type": "Practitioner",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Practitioner"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "phonetic",
-              "definition": "http://hl7.org/fhir/SearchParameter/practitioner-phonetic",
-              "type": "string",
-              "documentation": "A portion of either family or given name using some kind of phonetic matching algorithm"
-            },
-            {
-              "name": "communication",
-              "definition": "http://hl7.org/fhir/SearchParameter/practitioner-communication",
-              "type": "token",
-              "documentation": "One of the languages that the practitioner can communicate with"
-            },
-            {
-              "name": "location",
-              "definition": "http://hl7.org/fhir/SearchParameter/practitioner-location",
-              "type": "reference",
-              "documentation": "One of the locations at which this practitioner provides care"
-            },
-            {
-              "name": "organization",
-              "definition": "http://hl7.org/fhir/SearchParameter/practitioner-organization",
-              "type": "reference",
-              "documentation": "The identity of the organization the practitioner represents / acts on behalf of"
-            },
-            {
-              "name": "given",
-              "definition": "http://hl7.org/fhir/SearchParameter/practitioner-given",
-              "type": "string",
-              "documentation": "A portion of the given name"
-            },
-            {
-              "name": "address",
-              "definition": "http://hl7.org/fhir/SearchParameter/practitioner-address",
-              "type": "string",
-              "documentation": "An address in any kind of address/part"
-            },
-            {
-              "name": "family",
-              "definition": "http://hl7.org/fhir/SearchParameter/practitioner-family",
-              "type": "string",
-              "documentation": "A portion of the family name"
-            },
-            {
-              "name": "name",
-              "definition": "http://hl7.org/fhir/SearchParameter/practitioner-name",
-              "type": "string",
-              "documentation": "A portion of either family or given name"
-            },
-            {
-              "name": "telecom",
-              "definition": "http://hl7.org/fhir/SearchParameter/practitioner-telecom",
-              "type": "token",
-              "documentation": "The value in any kind of contact"
-            },
-            {
-              "name": "gender",
-              "definition": "http://hl7.org/fhir/SearchParameter/practitioner-gender",
-              "type": "token",
-              "documentation": "Gender of the practitioner"
-            },
-            {
-              "name": "role",
-              "definition": "http://hl7.org/fhir/SearchParameter/practitioner-role",
-              "type": "token",
-              "documentation": "The practitioner can perform this role at for the organization"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/practitioner-identifier",
-              "type": "token",
-              "documentation": "A practitioner's Identifier"
-            },
-            {
-              "name": "specialty",
-              "definition": "http://hl7.org/fhir/SearchParameter/practitioner-specialty",
-              "type": "token",
-              "documentation": "The practitioner has this specailty at an organization"
-            }
-          ]
-        },
-        {
-          "type": "Procedure",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Procedure"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/procedure-patient",
-              "type": "reference",
-              "documentation": "The identity of a patient to list procedures  for"
-            },
-            {
-              "name": "location",
-              "definition": "http://hl7.org/fhir/SearchParameter/procedure-location",
-              "type": "reference",
-              "documentation": "Where the procedure happened"
-            },
-            {
-              "name": "performer",
-              "definition": "http://hl7.org/fhir/SearchParameter/procedure-performer",
-              "type": "reference",
-              "documentation": "The reference to the practitioner"
-            },
-            {
-              "name": "encounter",
-              "definition": "http://hl7.org/fhir/SearchParameter/procedure-encounter",
-              "type": "reference",
-              "documentation": "The encounter when procedure performed"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/procedure-date",
-              "type": "date",
-              "documentation": "Date/Period the procedure was performed"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/procedure-type",
-              "type": "token",
-              "documentation": "Type of procedure"
-            }
-          ]
-        },
-        {
-          "type": "ProcedureRequest",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/ProcedureRequest"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "orderer",
-              "definition": "http://hl7.org/fhir/SearchParameter/procedurerequest-orderer",
-              "type": "reference",
-              "documentation": "Ordering Party"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/procedurerequest-patient",
-              "type": "reference",
-              "documentation": "Search by subject - a patient"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/procedurerequest-subject",
-              "type": "reference",
-              "documentation": "Search by subject"
-            },
-            {
-              "name": "performer",
-              "definition": "http://hl7.org/fhir/SearchParameter/procedurerequest-performer",
-              "type": "reference",
-              "documentation": "Performer"
-            },
-            {
-              "name": "encounter",
-              "definition": "http://hl7.org/fhir/SearchParameter/procedurerequest-encounter",
-              "type": "reference",
-              "documentation": "Encounter"
-            }
-          ]
-        },
-        {
-          "type": "ProcessRequest",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/ProcessRequest"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "organization",
-              "definition": "http://hl7.org/fhir/SearchParameter/processrequest-organization",
-              "type": "reference",
-              "documentation": "The organization who generated this request"
-            },
-            {
-              "name": "action",
-              "definition": "http://hl7.org/fhir/SearchParameter/processrequest-action",
-              "type": "token",
-              "documentation": "The action requested by this resource"
-            },
-            {
-              "name": "provider",
-              "definition": "http://hl7.org/fhir/SearchParameter/processrequest-provider",
-              "type": "reference",
-              "documentation": "The provider who renerated this request"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/processrequest-identifier",
-              "type": "token",
-              "documentation": "The business identifier of the ProcessRequest"
-            }
-          ]
-        },
-        {
-          "type": "ProcessResponse",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/ProcessResponse"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "organization",
-              "definition": "http://hl7.org/fhir/SearchParameter/processresponse-organization",
-              "type": "reference",
-              "documentation": "The organization who generated this resource"
-            },
-            {
-              "name": "requestprovider",
-              "definition": "http://hl7.org/fhir/SearchParameter/processresponse-requestprovider",
-              "type": "reference",
-              "documentation": "The Provider who is responsible the request transaction"
-            },
-            {
-              "name": "request",
-              "definition": "http://hl7.org/fhir/SearchParameter/processresponse-request",
-              "type": "reference",
-              "documentation": "The reference to the claim"
-            },
-            {
-              "name": "requestorganization",
-              "definition": "http://hl7.org/fhir/SearchParameter/processresponse-requestorganization",
-              "type": "reference",
-              "documentation": "The Organization who is responsible the request transaction"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/processresponse-identifier",
-              "type": "token",
-              "documentation": "The business identifier of the Explanation of Benefit"
-            }
-          ]
-        },
-        {
-          "type": "Provenance",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Provenance"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "sigtype",
-              "definition": "http://hl7.org/fhir/SearchParameter/provenance-sigtype",
-              "type": "token",
-              "documentation": "Indication of the reason the entity signed the object(s)"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/provenance-patient",
-              "type": "reference",
-              "documentation": "A patient that the target resource(s) refer to"
-            },
-            {
-              "name": "location",
-              "definition": "http://hl7.org/fhir/SearchParameter/provenance-location",
-              "type": "reference",
-              "documentation": "Where the activity occurred, if relevant"
-            },
-            {
-              "name": "start",
-              "definition": "http://hl7.org/fhir/SearchParameter/provenance-start",
-              "type": "date",
-              "documentation": "Starting time with inclusive boundary"
-            },
-            {
-              "name": "partytype",
-              "definition": "http://hl7.org/fhir/SearchParameter/provenance-partytype",
-              "type": "token",
-              "documentation": "Agent Type"
-            },
-            {
-              "name": "target",
-              "definition": "http://hl7.org/fhir/SearchParameter/provenance-target",
-              "type": "reference",
-              "documentation": "Target Reference(s) (usually version specific)"
-            },
-            {
-              "name": "party",
-              "definition": "http://hl7.org/fhir/SearchParameter/provenance-party",
-              "type": "reference",
-              "documentation": "Identity of agent"
-            },
-            {
-              "name": "end",
-              "definition": "http://hl7.org/fhir/SearchParameter/provenance-end",
-              "type": "date",
-              "documentation": "End time with inclusive boundary, if not ongoing"
-            }
-          ]
-        },
-        {
-          "type": "Questionnaire",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Questionnaire"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "title",
-              "definition": "http://hl7.org/fhir/SearchParameter/questionnaire-title",
-              "type": "string",
-              "documentation": "All or part of the name of the questionnaire (title for the root group of the questionnaire)"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/questionnaire-status",
-              "type": "token",
-              "documentation": "The status of the questionnaire"
-            },
-            {
-              "name": "code",
-              "definition": "http://hl7.org/fhir/SearchParameter/questionnaire-code",
-              "type": "token",
-              "documentation": "A code that corresponds to the questionnaire or one of its groups"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/questionnaire-date",
-              "type": "date",
-              "documentation": "When the questionnaire was last changed"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/questionnaire-identifier",
-              "type": "token",
-              "documentation": "An identifier for the questionnaire"
-            },
-            {
-              "name": "version",
-              "definition": "http://hl7.org/fhir/SearchParameter/questionnaire-version",
-              "type": "string",
-              "documentation": "The business version of the questionnaire"
-            },
-            {
-              "name": "publisher",
-              "definition": "http://hl7.org/fhir/SearchParameter/questionnaire-publisher",
-              "type": "string",
-              "documentation": "The author of the questionnaire"
-            }
-          ]
-        },
-        {
-          "type": "QuestionnaireAnswers",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/QuestionnaireAnswers"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "author",
-              "definition": "http://hl7.org/fhir/SearchParameter/questionnaireanswers-author",
-              "type": "reference",
-              "documentation": "The author of the questionnaire"
-            },
-            {
-              "name": "questionnaire",
-              "definition": "http://hl7.org/fhir/SearchParameter/questionnaireanswers-questionnaire",
-              "type": "reference",
-              "documentation": "The questionnaire the answers are provided for"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/questionnaireanswers-patient",
-              "type": "reference",
-              "documentation": "The patient that is the subject of the questionnaire"
-            },
-            {
-              "name": "authored",
-              "definition": "http://hl7.org/fhir/SearchParameter/questionnaireanswers-authored",
-              "type": "date",
-              "documentation": "When the questionnaire was authored"
-            },
-            {
-              "name": "source",
-              "definition": "http://hl7.org/fhir/SearchParameter/questionnaireanswers-source",
-              "type": "reference",
-              "documentation": "The person who answered the questions"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/questionnaireanswers-status",
-              "type": "token",
-              "documentation": "The status of the questionnaire answers"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/questionnaireanswers-subject",
-              "type": "reference",
-              "documentation": "The subject of the questionnaire"
-            },
-            {
-              "name": "encounter",
-              "definition": "http://hl7.org/fhir/SearchParameter/questionnaireanswers-encounter",
-              "type": "reference",
-              "documentation": "Encounter during which questionnaire was authored"
-            }
-          ]
-        },
-        {
-          "type": "ReferralRequest",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/ReferralRequest"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "requester",
-              "definition": "http://hl7.org/fhir/SearchParameter/referralrequest-requester",
-              "type": "reference",
-              "documentation": "Requester of referral / transfer of care"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/referralrequest-patient",
-              "type": "reference",
-              "documentation": "Who the referral is about"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/referralrequest-status",
-              "type": "token",
-              "documentation": "The status of the referral"
-            },
-            {
-              "name": "priority",
-              "definition": "http://hl7.org/fhir/SearchParameter/referralrequest-priority",
-              "type": "token",
-              "documentation": "The priority assigned to the referral"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/referralrequest-type",
-              "type": "token",
-              "documentation": "The type of the referral"
-            },
-            {
-              "name": "specialty",
-              "definition": "http://hl7.org/fhir/SearchParameter/referralrequest-specialty",
-              "type": "token",
-              "documentation": "The specialty that the referral is for"
-            },
-            {
-              "name": "recipient",
-              "definition": "http://hl7.org/fhir/SearchParameter/referralrequest-recipient",
-              "type": "reference",
-              "documentation": "The person that the referral was sent to"
-            }
-          ]
-        },
-        {
-          "type": "RelatedPerson",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/relatedperson-patient",
-              "type": "reference",
-              "documentation": "The patient this person is related to"
-            },
-            {
-              "name": "phonetic",
-              "definition": "http://hl7.org/fhir/SearchParameter/relatedperson-phonetic",
-              "type": "string",
-              "documentation": "A portion of name using some kind of phonetic matching algorithm"
-            },
-            {
-              "name": "address",
-              "definition": "http://hl7.org/fhir/SearchParameter/relatedperson-address",
-              "type": "string",
-              "documentation": "An address in any kind of address/part"
-            },
-            {
-              "name": "name",
-              "definition": "http://hl7.org/fhir/SearchParameter/relatedperson-name",
-              "type": "string",
-              "documentation": "A portion of name in any name part"
-            },
-            {
-              "name": "telecom",
-              "definition": "http://hl7.org/fhir/SearchParameter/relatedperson-telecom",
-              "type": "token",
-              "documentation": "The value in any kind of contact"
-            },
-            {
-              "name": "gender",
-              "definition": "http://hl7.org/fhir/SearchParameter/relatedperson-gender",
-              "type": "token",
-              "documentation": "Gender of the person"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/relatedperson-identifier",
-              "type": "token",
-              "documentation": "A patient Identifier"
-            }
-          ]
-        },
-        {
-          "type": "RiskAssessment",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/RiskAssessment"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/riskassessment-patient",
-              "type": "reference",
-              "documentation": "Who/what does assessment apply to?"
-            },
-            {
-              "name": "condition",
-              "definition": "http://hl7.org/fhir/SearchParameter/riskassessment-condition",
-              "type": "reference",
-              "documentation": "Condition assessed"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/riskassessment-subject",
-              "type": "reference",
-              "documentation": "Who/what does assessment apply to?"
-            },
-            {
-              "name": "performer",
-              "definition": "http://hl7.org/fhir/SearchParameter/riskassessment-performer",
-              "type": "reference",
-              "documentation": "Who did assessment?"
-            },
-            {
-              "name": "method",
-              "definition": "http://hl7.org/fhir/SearchParameter/riskassessment-method",
-              "type": "token",
-              "documentation": "Evaluation mechanism"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/riskassessment-date",
-              "type": "date",
-              "documentation": "When was assessment made?"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/riskassessment-identifier",
-              "type": "token",
-              "documentation": "Unique identifier for the assessment"
-            }
-          ]
-        },
-        {
-          "type": "Schedule",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Schedule"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "actor",
-              "definition": "http://hl7.org/fhir/SearchParameter/schedule-actor",
-              "type": "reference",
-              "documentation": "The individual(HealthcareService, Practitioner, Location, ...) to find a Schedule for"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/schedule-date",
-              "type": "date",
-              "documentation": "Search for Schedule resources that have a period that contains this date specified"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/schedule-type",
-              "type": "token",
-              "documentation": "The type of appointments that can be booked into associated slot(s)"
-            }
-          ]
-        },
-        {
-          "type": "SearchParameter",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/SearchParameter"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "description",
-              "definition": "http://hl7.org/fhir/SearchParameter/searchparameter-description",
-              "type": "string",
-              "documentation": "Documentation for  search parameter"
-            },
-            {
-              "name": "name",
-              "definition": "http://hl7.org/fhir/SearchParameter/searchparameter-name",
-              "type": "string",
-              "documentation": "Name of search parameter"
-            },
-            {
-              "name": "target",
-              "definition": "http://hl7.org/fhir/SearchParameter/searchparameter-target",
-              "type": "token",
-              "documentation": "Types of resource (if a resource reference)"
-            },
-            {
-              "name": "base",
-              "definition": "http://hl7.org/fhir/SearchParameter/searchparameter-base",
-              "type": "token",
-              "documentation": "The resource type this search parameter applies to"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/searchparameter-type",
-              "type": "token",
-              "documentation": "number | date | string | token | reference | composite | quantity | uri"
-            },
-            {
-              "name": "url",
-              "definition": "http://hl7.org/fhir/SearchParameter/searchparameter-url",
-              "type": "uri",
-              "documentation": "Literal URL used to reference this search parameter"
-            }
-          ]
-        },
-        {
-          "type": "Slot",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Slot"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "schedule",
-              "definition": "http://hl7.org/fhir/SearchParameter/slot-schedule",
-              "type": "reference",
-              "documentation": "The Schedule Resource that we are seeking a slot within"
-            },
-            {
-              "name": "start",
-              "definition": "http://hl7.org/fhir/SearchParameter/slot-start",
-              "type": "date",
-              "documentation": "Appointment date/time."
-            },
-            {
-              "name": "slottype",
-              "definition": "http://hl7.org/fhir/SearchParameter/slot-slottype",
-              "type": "token",
-              "documentation": "The type of appointments that can be booked into the slot"
-            },
-            {
-              "name": "fbtype",
-              "definition": "http://hl7.org/fhir/SearchParameter/slot-fbtype",
-              "type": "token",
-              "documentation": "The free/busy status of the appointment"
-            }
-          ]
-        },
-        {
-          "type": "Specimen",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Specimen"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "collector",
-              "definition": "http://hl7.org/fhir/SearchParameter/specimen-collector",
-              "type": "reference",
-              "documentation": "Who collected the specimen"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/specimen-patient",
-              "type": "reference",
-              "documentation": "The patient the specimen comes from"
-            },
-            {
-              "name": "site-code",
-              "definition": "http://hl7.org/fhir/SearchParameter/specimen-site-code",
-              "type": "token",
-              "documentation": "The code for the body site from where the specimen originated"
-            },
-            {
-              "name": "container",
-              "definition": "http://hl7.org/fhir/SearchParameter/specimen-container",
-              "type": "token",
-              "documentation": "The kind of specimen container"
-            },
-            {
-              "name": "collected",
-              "definition": "http://hl7.org/fhir/SearchParameter/specimen-collected",
-              "type": "date",
-              "documentation": "The date the specimen was collected"
-            },
-            {
-              "name": "subject",
-              "definition": "http://hl7.org/fhir/SearchParameter/specimen-subject",
-              "type": "reference",
-              "documentation": "The subject of the specimen"
-            },
-            {
-              "name": "containerid",
-              "definition": "http://hl7.org/fhir/SearchParameter/specimen-containerid",
-              "type": "token",
-              "documentation": "The unique identifier associated with the specimen container"
-            },
-            {
-              "name": "site-reference",
-              "definition": "http://hl7.org/fhir/SearchParameter/specimen-site-reference",
-              "type": "reference",
-              "documentation": "BodySite resource for the body site from where the specimen originated"
-            },
-            {
-              "name": "accession",
-              "definition": "http://hl7.org/fhir/SearchParameter/specimen-accession",
-              "type": "token",
-              "documentation": "The accession number associated with the specimen"
-            },
-            {
-              "name": "parent",
-              "definition": "http://hl7.org/fhir/SearchParameter/specimen-parent",
-              "type": "reference",
-              "documentation": "The parent of the specimen"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/specimen-type",
-              "type": "token",
-              "documentation": "The specimen type"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/specimen-identifier",
-              "type": "token",
-              "documentation": "The unique identifier associated with the specimen"
-            }
-          ]
-        },
-        {
-          "type": "StructureDefinition",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/StructureDefinition"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "abstract",
-              "definition": "http://hl7.org/fhir/SearchParameter/structuredefinition-abstract",
-              "type": "token",
-              "documentation": "Whether the structure is abstract"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/structuredefinition-status",
-              "type": "token",
-              "documentation": "The current status of the profile"
-            },
-            {
-              "name": "experimental",
-              "definition": "http://hl7.org/fhir/SearchParameter/structuredefinition-experimental",
-              "type": "token",
-              "documentation": "If for testing purposes, not real usage"
-            },
-            {
-              "name": "display",
-              "definition": "http://hl7.org/fhir/SearchParameter/structuredefinition-display",
-              "type": "string",
-              "documentation": "Use this name when displaying the value"
-            },
-            {
-              "name": "ext-context",
-              "definition": "http://hl7.org/fhir/SearchParameter/structuredefinition-ext-context",
-              "type": "string",
-              "documentation": "Where the extension can be used in instances"
-            },
-            {
-              "name": "code",
-              "definition": "http://hl7.org/fhir/SearchParameter/structuredefinition-code",
-              "type": "token",
-              "documentation": "A code for the profile"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/structuredefinition-date",
-              "type": "date",
-              "documentation": "The profile publication date"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/structuredefinition-type",
-              "type": "token",
-              "documentation": "type | resource | constraint | extension"
-            },
-            {
-              "name": "url",
-              "definition": "http://hl7.org/fhir/SearchParameter/structuredefinition-url",
-              "type": "uri",
-              "documentation": "Literal URL used to reference this StructureDefinition"
-            },
-            {
-              "name": "version",
-              "definition": "http://hl7.org/fhir/SearchParameter/structuredefinition-version",
-              "type": "token",
-              "documentation": "The version identifier of the profile"
-            },
-            {
-              "name": "publisher",
-              "definition": "http://hl7.org/fhir/SearchParameter/structuredefinition-publisher",
-              "type": "string",
-              "documentation": "Name of the publisher of the profile"
-            },
-            {
-              "name": "valueset",
-              "definition": "http://hl7.org/fhir/SearchParameter/structuredefinition-valueset",
-              "type": "reference",
-              "documentation": "A vocabulary binding reference"
-            },
-            {
-              "name": "context-type",
-              "definition": "http://hl7.org/fhir/SearchParameter/structuredefinition-context-type",
-              "type": "token",
-              "documentation": "resource | datatype | mapping | extension"
-            },
-            {
-              "name": "description",
-              "definition": "http://hl7.org/fhir/SearchParameter/structuredefinition-description",
-              "type": "string",
-              "documentation": "Text search in the description of the profile"
-            },
-            {
-              "name": "name",
-              "definition": "http://hl7.org/fhir/SearchParameter/structuredefinition-name",
-              "type": "string",
-              "documentation": "Name of the profile"
-            },
-            {
-              "name": "base",
-              "definition": "http://hl7.org/fhir/SearchParameter/structuredefinition-base",
-              "type": "uri",
-              "documentation": "Structure that this set of constraints applies to"
-            },
-            {
-              "name": "path",
-              "definition": "http://hl7.org/fhir/SearchParameter/structuredefinition-path",
-              "type": "token",
-              "documentation": "A path that is constrained in the profile"
-            },
-            {
-              "name": "context",
-              "definition": "http://hl7.org/fhir/SearchParameter/structuredefinition-context",
-              "type": "token",
-              "documentation": "A use context assigned to the structure"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/structuredefinition-identifier",
-              "type": "token",
-              "documentation": "The identifier of the profile"
-            }
-          ]
-        },
-        {
-          "type": "Subscription",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Subscription"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "criteria",
-              "definition": "http://hl7.org/fhir/SearchParameter/subscription-criteria",
-              "type": "string",
-              "documentation": "Rule for server push criteria"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/subscription-status",
-              "type": "token",
-              "documentation": "requested | active | error | off"
-            },
-            {
-              "name": "tag",
-              "definition": "http://hl7.org/fhir/SearchParameter/subscription-tag",
-              "type": "token",
-              "documentation": "A tag to add to matching resources"
-            },
-            {
-              "name": "payload",
-              "definition": "http://hl7.org/fhir/SearchParameter/subscription-payload",
-              "type": "string",
-              "documentation": "Mimetype to send, or blank for no payload"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/subscription-type",
-              "type": "token",
-              "documentation": "rest-hook | websocket | email | sms | message"
-            },
-            {
-              "name": "contact",
-              "definition": "http://hl7.org/fhir/SearchParameter/subscription-contact",
-              "type": "token",
-              "documentation": "Contact details for source (e.g. troubleshooting)"
-            },
-            {
-              "name": "url",
-              "definition": "http://hl7.org/fhir/SearchParameter/subscription-url",
-              "type": "uri",
-              "documentation": "Where the channel points to"
-            }
-          ]
-        },
-        {
-          "type": "Substance",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Substance"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "substance",
-              "definition": "http://hl7.org/fhir/SearchParameter/substance-substance",
-              "type": "reference",
-              "documentation": "A component of the substance"
-            },
-            {
-              "name": "quantity",
-              "definition": "http://hl7.org/fhir/SearchParameter/substance-quantity",
-              "type": "number",
-              "documentation": "Amount of substance in the package"
-            },
-            {
-              "name": "type",
-              "definition": "http://hl7.org/fhir/SearchParameter/substance-type",
-              "type": "token",
-              "documentation": "The type of the substance"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/substance-identifier",
-              "type": "token",
-              "documentation": "Identifier of the package/container"
-            },
-            {
-              "name": "expiry",
-              "definition": "http://hl7.org/fhir/SearchParameter/substance-expiry",
-              "type": "date",
-              "documentation": "When no longer valid to use"
-            }
-          ]
-        },
-        {
-          "type": "Supply",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Supply"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/supply-patient",
-              "type": "reference",
-              "documentation": "Patient for whom the item is supplied"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/supply-status",
-              "type": "token",
-              "documentation": "requested | dispensed | received | failed | cancelled"
-            },
-            {
-              "name": "dispenseid",
-              "definition": "http://hl7.org/fhir/SearchParameter/supply-dispenseid",
-              "type": "token",
-              "documentation": "External identifier"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/supply-identifier",
-              "type": "token",
-              "documentation": "Unique identifier"
-            },
-            {
-              "name": "supplier",
-              "definition": "http://hl7.org/fhir/SearchParameter/supply-supplier",
-              "type": "reference",
-              "documentation": "Dispenser"
-            },
-            {
-              "name": "kind",
-              "definition": "http://hl7.org/fhir/SearchParameter/supply-kind",
-              "type": "token",
-              "documentation": "The kind of supply (central, non-stock, etc)"
-            },
-            {
-              "name": "dispensestatus",
-              "definition": "http://hl7.org/fhir/SearchParameter/supply-dispensestatus",
-              "type": "token",
-              "documentation": "in-progress | dispensed | abandoned"
-            }
-          ]
-        },
-        {
-          "type": "ValueSet",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/ValueSet"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "expansion",
-              "definition": "http://hl7.org/fhir/SearchParameter/valueset-expansion",
-              "type": "uri",
-              "documentation": "Uniquely identifies this expansion"
-            },
-            {
-              "name": "status",
-              "definition": "http://hl7.org/fhir/SearchParameter/valueset-status",
-              "type": "token",
-              "documentation": "The status of the value set"
-            },
-            {
-              "name": "code",
-              "definition": "http://hl7.org/fhir/SearchParameter/valueset-code",
-              "type": "token",
-              "documentation": "A code defined in the value set"
-            },
-            {
-              "name": "date",
-              "definition": "http://hl7.org/fhir/SearchParameter/valueset-date",
-              "type": "date",
-              "documentation": "The value set publication date"
-            },
-            {
-              "name": "url",
-              "definition": "http://hl7.org/fhir/SearchParameter/valueset-url",
-              "type": "uri",
-              "documentation": "The logical url for the value set"
-            },
-            {
-              "name": "reference",
-              "definition": "http://hl7.org/fhir/SearchParameter/valueset-reference",
-              "type": "uri",
-              "documentation": "A code system included or excluded in the value set or an imported value set"
-            },
-            {
-              "name": "version",
-              "definition": "http://hl7.org/fhir/SearchParameter/valueset-version",
-              "type": "token",
-              "documentation": "The version identifier of the value set"
-            },
-            {
-              "name": "publisher",
-              "definition": "http://hl7.org/fhir/SearchParameter/valueset-publisher",
-              "type": "string",
-              "documentation": "Name of the publisher of the value set"
-            },
-            {
-              "name": "system",
-              "definition": "http://hl7.org/fhir/SearchParameter/valueset-system",
-              "type": "uri",
-              "documentation": "The system for any codes defined by this value set"
-            },
-            {
-              "name": "description",
-              "definition": "http://hl7.org/fhir/SearchParameter/valueset-description",
-              "type": "string",
-              "documentation": "Text search in the description of the value set"
-            },
-            {
-              "name": "name",
-              "definition": "http://hl7.org/fhir/SearchParameter/valueset-name",
-              "type": "string",
-              "documentation": "The name of the value set"
-            },
-            {
-              "name": "context",
-              "definition": "http://hl7.org/fhir/SearchParameter/valueset-context",
-              "type": "token",
-              "documentation": "A use context assigned to the value set"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/valueset-identifier",
-              "type": "token",
-              "documentation": "The identifier for the value set"
-            }
-          ]
-        },
-        {
-          "type": "VisionPrescription",
-          "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/VisionPrescription"
-          },
-          "interaction": [
-            {
-              "code": "read"
-            },
-            {
-              "code": "vread"
-            },
-            {
-              "code": "update"
-            },
-            {
-              "code": "delete"
-            },
-            {
-              "code": "history-instance"
-            },
-            {
-              "code": "validate"
-            },
-            {
-              "code": "history-type"
-            },
-            {
-              "code": "create"
-            },
-            {
-              "code": "search-type"
-            }
-          ],
-          "searchParam": [
-            {
-              "name": "datewritten",
-              "definition": "http://hl7.org/fhir/SearchParameter/visionprescription-datewritten",
-              "type": "date",
-              "documentation": "Return prescriptions written on this date"
-            },
-            {
-              "name": "patient",
-              "definition": "http://hl7.org/fhir/SearchParameter/visionprescription-patient",
-              "type": "reference",
-              "documentation": "The identity of a patient to list dispenses  for"
-            },
-            {
-              "name": "prescriber",
-              "definition": "http://hl7.org/fhir/SearchParameter/visionprescription-prescriber",
-              "type": "reference",
-              "documentation": "Who authorizes the Vision product"
-            },
-            {
-              "name": "encounter",
-              "definition": "http://hl7.org/fhir/SearchParameter/visionprescription-encounter",
-              "type": "reference",
-              "documentation": "Return prescriptions with this encounter identity"
-            },
-            {
-              "name": "identifier",
-              "definition": "http://hl7.org/fhir/SearchParameter/visionprescription-identifier",
-              "type": "token",
-              "documentation": "Return prescriptions with this external identity"
-            }
-          ]
-        }
-      ],
-      "interaction": [
-        {
-          "code": "transaction"
-        },
-        {
-          "code": "history-system"
-        },
-        {
-          "code": "search-system"
-        }
-      ]
+    
+    var defer = function(){
+        pr = jQuery.Deferred();
+        pr.promise = pr.promise();
+        return pr;
+    };
+    var adapter = {
+        defer: defer,
+        http: function(args) {
+            var ret = jQuery.Deferred();
+            var opts = {
+                type: args.method,
+                url: args.url,
+                dataType: "json",
+                data: args.data
+            };
+            jQuery.ajax(opts)
+                .done(ret.resolve)
+                .fail(ret.reject);
+            return ret.promise();
+        },
+        fhirjs: require('../../lib/jqFhir.js')
+    };
+
+    smart(adapter);
+
+}).call(this);
+
+}).call(this,require('_process'))
+},{"../../lib/jqFhir.js":1,"../client/entry":48,"_process":22,"jquery":39,"jsdom":2}],45:[function(require,module,exports){
+var adapter;
+
+var Adapter = module.exports =  {debug: true}
+
+Adapter.set = function (newAdapter) {
+    adapter = newAdapter;
+};
+
+Adapter.get = function () {
+    return adapter;
+};
+
+},{}],46:[function(require,module,exports){
+(function (process){
+var Adapter = require('./adapter');
+var FhirClient = require('./client');
+var Guid = require('./guid');
+var jwt = require('jsonwebtoken');
+
+var BBClient = module.exports =  {debug: true}
+
+function urlParam(p, forceArray) {
+  if (forceArray === undefined) {
+    forceArray = false;
+  }
+
+  var query = location.search.substr(1);
+  var data = query.split("&");
+  var result = [];
+
+  for(var i=0; i<data.length; i++) {
+    var item = data[i].split("=");
+    if (item[0] === p) {
+      result.push(decodeURIComponent(item[1]));
     }
-  ]
+  }
+
+  if (forceArray) {
+    return result;
+  }
+  if (result.length === 0){
+    return null;
+  }
+  return result[0];
 }
-},{}]},{},[4]);
+
+function getPreviousToken(){
+  var ret = sessionStorage.tokenResponse;
+  if (ret) ret = JSON.parse(ret);
+  return ret;
+}
+
+function completeTokenFlow(hash){
+  if (!hash){
+    hash = window.location.hash;
+  }
+  var ret = Adapter.get().defer();
+
+  process.nextTick(function(){
+    var oauthResult = hash.match(/#(.*)/);
+    oauthResult = oauthResult ? oauthResult[1] : "";
+    oauthResult = oauthResult.split(/&/);
+    var authorization = {};
+    for (var i = 0; i < oauthResult.length; i++){
+      var kv = oauthResult[i].split(/=/);
+      if (kv[0].length > 0 && kv[1]) {
+        authorization[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
+      }
+    }
+    ret.resolve(authorization);
+  });
+
+  return ret.promise;
+}
+
+function completeCodeFlow(params){
+  if (!params){
+    params = {
+      code: urlParam('code'),
+      state: urlParam('state')
+    };
+  }
+  
+  var ret = Adapter.get().defer();
+  var state = JSON.parse(sessionStorage[params.state]);
+
+  if (window.history.replaceState && BBClient.settings.replaceBrowserHistory){
+    window.history.replaceState({}, "", window.location.toString().replace(window.location.search, ""));
+  }
+
+  Adapter.get().http({
+    method: 'POST',
+    url: state.provider.oauth2.token_uri,
+    data: {
+      code: params.code,
+      grant_type: 'authorization_code',
+      redirect_uri: state.client.redirect_uri,
+      client_id: state.client.client_id
+    },
+  }).then(function(authz){
+       for (var i in params) {
+          if (params.hasOwnProperty(i)) {
+             authz[i] = params[i];
+          }
+       }
+       ret.resolve(authz);
+  }, function(){
+    console.log("failed to exchange code for access_token", arguments);
+    ret.reject();
+  });
+
+  return ret.promise;
+}
+
+function completePageReload(){
+  var d = Adapter.get().defer();
+  process.nextTick(function(){
+    d.resolve(getPreviousToken());
+  });
+  return d;
+}
+
+function readyArgs(){
+
+  var input = null;
+  var callback = function(){};
+  var errback = function(){};
+
+  if (arguments.length === 0){
+    throw "Can't call 'ready' without arguments";
+  } else if (arguments.length === 1){
+    callback = arguments[0];
+  } else if (arguments.length === 2){
+    if (typeof arguments[0] === 'function'){
+      callback = arguments[0];
+      errback = arguments[1];
+    } else if (typeof arguments[0] === 'object'){
+      input = arguments[0];
+      callback = arguments[1];
+    } else {
+      throw "ready called with invalid arguments";
+    }
+  } else if (arguments.length === 3){
+    input = arguments[0];
+    callback = arguments[1];
+    errback = arguments[2];
+  } else {
+    throw "ready called with invalid arguments";
+  }
+
+  return {
+    input: input,
+    callback: callback,
+    errback: errback
+  };
+}
+
+// Client settings
+BBClient.settings = {
+    replaceBrowserHistory: true
+};
+
+BBClient.ready = function(input, callback, errback){
+
+  var args = readyArgs.apply(this, arguments);
+
+  // decide between token flow (implicit grant) and code flow (authorization code grant)
+  var isCode = urlParam('code') || (args.input && args.input.code);
+
+  var accessTokenResolver = null;
+  if (sessionStorage.tokenResponse) { // we're reloading after successful completion
+    accessTokenResolver = completePageReload();
+  } else if (isCode) { // code flow
+    accessTokenResolver = completeCodeFlow(args.input);
+  } else { // token flow
+    accessTokenResolver = completeTokenFlow(args.input);
+  }
+  accessTokenResolver.done(function(tokenResponse){
+
+    if (!tokenResponse || !tokenResponse.state) {
+      return args.errback("No 'state' parameter found in authorization response.");
+    }
+    
+    sessionStorage.tokenResponse = JSON.stringify(tokenResponse);
+
+    var state = JSON.parse(sessionStorage[tokenResponse.state]);
+    if (state.fake_token_response) {
+      tokenResponse = state.fake_token_response;
+    }
+
+    var fhirClientParams = {
+      serviceUrl: state.provider.url,
+      patientId: tokenResponse.patient
+    };
+    
+    if (tokenResponse.id_token) {
+        var id_token = tokenResponse.id_token;
+        var payload = jwt.decode(id_token);
+        fhirClientParams["userId"] = payload["profile"]; 
+    }
+
+    if (tokenResponse.access_token !== undefined) {
+      fhirClientParams.auth = {
+        type: 'bearer',
+        token: tokenResponse.access_token
+      };
+    } else if (!state.fake_token_response){
+      return args.errback("Failed to obtain access token.");
+    }
+
+    var ret = FhirClient(fhirClientParams);
+    ret.state = JSON.parse(JSON.stringify(state));
+    ret.tokenResponse = JSON.parse(JSON.stringify(tokenResponse));
+    args.callback(ret);
+
+  }).fail(function(){
+    args.errback("Failed to obtain access token.");
+  });
+
+};
+
+function providers(fhirServiceUrl, callback, errback){
+
+  // Shim for pre-OAuth2 launch parameters
+  if (isBypassOAuth()){
+    process.nextTick(function(){
+      bypassOAuth(fhirServiceUrl, callback);
+    });
+    return;
+  }
+
+
+  Adapter.get().http({
+    method: "GET",
+    url: fhirServiceUrl+"/metadata"
+  }).then(
+    function(r){
+      var res = {
+        "name": "SMART on FHIR Testing Server",
+        "description": "Dev server for SMART on FHIR",
+        "url": fhirServiceUrl,
+        "oauth2": {
+          "registration_uri": null,
+          "authorize_uri": null,
+          "token_uri": null
+        }
+      };
+
+      try {
+        var smartExtension = r.rest[0].security.extension.filter(function (e) {
+           return (e.url === "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris");
+        });
+
+        smartExtension[0].extension.forEach(function(arg, index, array){
+          if (arg.url === "register") {
+            res.oauth2.registration_uri = arg.valueUri;
+          } else if (arg.url === "authorize") {
+            res.oauth2.authorize_uri = arg.valueUri;
+          } else if (arg.url === "token") {
+            res.oauth2.token_uri = arg.valueUri;
+          }
+        });
+      }
+      catch (err) {
+        return errback && errback(err);
+      }
+
+      callback && callback(res);
+    }, function() {
+        errback && errback("Unable to fetch conformance statement");
+    }
+  );
+};
+
+var noAuthFhirProvider = function(serviceUrl){
+  return {
+    "oauth2": null,
+    "url": serviceUrl
+  }
+};
+
+function relative(url){
+  return (window.location.protocol + "//" + window.location.host + window.location.pathname).match(/(.*\/)[^\/]*/)[1] + url;
+}
+
+function isBypassOAuth(){
+  return (urlParam("fhirServiceUrl") && !(urlParam("iss")));
+}
+
+function bypassOAuth(fhirServiceUrl, callback){
+  callback && callback({
+    "oauth2": null,
+    "url": fhirServiceUrl || urlParam("fhirServiceUrl")
+  });
+}
+
+BBClient.authorize = function(params, errback){
+
+  if (!errback){
+    errback = function(){
+        console.log("Failed to discover authorization URL given", params);
+    };
+  }
+  
+  // prevent inheritance of tokenResponse from parent window
+  delete sessionStorage.tokenResponse;
+
+  if (!params.client){
+    params = {
+      client: params
+    };
+  }
+
+  if (!params.response_type){
+    params.response_type = 'code';
+  }
+
+   if (!params.client.redirect_uri){
+    params.client.redirect_uri = relative("");
+  }
+
+  if (!params.client.redirect_uri.match(/:\/\//)){
+    params.client.redirect_uri = relative(params.client.redirect_uri);
+  }
+
+  var launch = urlParam("launch");
+  if (launch){
+    if (!params.client.scope.match(/launch/)){
+      params.client.scope += " launch";
+    }
+    params.client.launch = launch;
+  }
+
+  var server = urlParam("iss") || urlParam("fhirServiceUrl");
+  if (server){
+    if (!params.server){
+      params.server = server;
+    }
+  }
+
+  if (urlParam("patientId")){
+    params.fake_token_response = params.fake_token_response || {};
+    params.fake_token_response.patient = urlParam("patientId");
+  }
+
+  providers(params.server, function(provider){
+
+    params.provider = provider;
+
+    var state = params.client.state || Guid.newGuid();
+    var client = params.client;
+
+    if (params.provider.oauth2 == null) {
+      sessionStorage[state] = JSON.stringify(params);
+      sessionStorage.tokenResponse = JSON.stringify({state: state});
+      window.location.href = client.redirect_uri + "#state="+encodeURIComponent(state);
+      return;
+    }
+
+    sessionStorage[state] = JSON.stringify(params);
+
+    console.log("sending client reg", params.client);
+
+    var redirect_to=params.provider.oauth2.authorize_uri + "?" + 
+      "client_id="+encodeURIComponent(client.client_id)+"&"+
+      "response_type="+encodeURIComponent(params.response_type)+"&"+
+      "scope="+encodeURIComponent(client.scope)+"&"+
+      "redirect_uri="+encodeURIComponent(client.redirect_uri)+"&"+
+      "state="+encodeURIComponent(state)+"&"+
+      "aud="+encodeURIComponent(params.server);
+    
+    if (typeof client.launch !== 'undefined' && client.launch) {
+       redirect_to += "&launch="+encodeURIComponent(client.launch);
+    }
+
+    window.location.href = redirect_to;
+  }, errback);
+};
+
+BBClient.resolveAuthType = function (fhirServiceUrl, callback, errback) {
+
+      Adapter.get().http({
+         method: "GET",
+         url: fhirServiceUrl+"/metadata"
+      }).then(function(r){
+          var type = "none";
+          
+          try {
+            if (r.rest[0].security.service[0].coding[0].code.toLowerCase() === "oauth2") {
+                type = "oauth2";
+            }
+          }
+          catch (err) {
+          }
+
+          callback && callback(type);
+        }, function() {
+           errback && errback("Unable to fetch conformance statement");
+      });
+};
+
+}).call(this,require('_process'))
+},{"./adapter":45,"./client":47,"./guid":49,"_process":22,"jsonwebtoken":40}],47:[function(require,module,exports){
+var btoa = require('btoa');
+var Adapter = require('./adapter');
+
+module.exports = FhirClient;
+
+function ClientPrototype(){};
+var clientUtils = require('./utils');
+Object.keys(clientUtils).forEach(function(k){
+  ClientPrototype.prototype[k] = clientUtils[k];
+});
+
+function FhirClient(p) {
+  // p.serviceUrl
+  // p.auth {
+    //    type: 'none' | 'basic' | 'bearer'
+    //    basic --> username, password
+    //    bearer --> token
+    // }
+
+    var client = new ClientPrototype();
+    var fhir = Adapter.get().fhirjs;
+
+    var server = client.server = {
+      serviceUrl: p.serviceUrl,
+      auth: p.auth
+    }
+    
+    var auth = {};
+    
+    if (server.auth.type === 'basic') {
+        auth = {
+            user: server.auth.username,
+            pass: server.auth.password
+        };
+    } else if (server.auth.type === 'bearer') {
+        auth = {
+            bearer: server.auth.token
+        };
+    }
+    
+    client.api = fhir({
+        baseUrl: server.serviceUrl,
+        auth: auth
+    });
+    
+    if (p.patientId) {
+        client.patient = {};
+        client.patient.id = p.patientId;
+        client.patient.api = fhir({
+            baseUrl: server.serviceUrl,
+            auth: auth,
+            patient: p.patientId
+        });
+        client.patient.read = function(){
+            return client.get({resource: 'Patient'});
+        };
+    }
+    
+    var fhirAPI = (client.patient)?client.patient.api:client.api;
+
+    client.userId = p.userId;
+
+    server.auth = server.auth ||  {
+      type: 'none'
+    };
+
+    if (!client.server.serviceUrl || !client.server.serviceUrl.match(/https?:\/\/.+[^\/]$/)) {
+      throw "Must supply a `server` propery whose `serviceUrl` begins with http(s) " + 
+        "and does NOT include a trailing slash. E.g. `https://fhir.aws.af.cm/fhir`";
+    }
+    
+    client.authenticated = function(p) {
+      if (server.auth.type === 'none') {
+        return p;
+      }
+
+      var h;
+      if (server.auth.type === 'basic') {
+        h = "Basic " + btoa(server.auth.username + ":" + server.auth.password);
+      } else if (server.auth.type === 'bearer') {
+        h = "Bearer " + server.auth.token;
+      }
+      if (!p.headers) {p.headers = {};}
+      p.headers['Authorization'] = h
+      //p.beforeSend = function (xhr) { xhr.setRequestHeader ("Authorization", h); }
+
+      return p;
+    };
+
+    client.get = function(p) {
+        var ret = Adapter.get().defer();
+        var params = {type: p.resource};
+        
+        if (p.id) {
+            params["id"] = p.id;
+        }
+          
+        fhirAPI.read(params)
+            .then(function(res){
+                ret.resolve(res.data);
+            }, function(){
+                ret.reject("Could not fetch " + p.resource + " " + p.id);
+            });
+          
+        return ret.promise;
+    };
+    
+    function getNext (bundle, process) {
+        var i;
+        var d = bundle.data.entry;
+        var entries = [];
+        for (i = 0; i < d.length; i++) {
+            entries.push(d[i].resource);
+        }
+        process(entries);
+        var def = Adapter.get().defer();
+        fhirAPI.nextPage({bundle:bundle.data}).then(function (r) {
+            $.when(getNext(r, process)).then(function (t) {
+                def.resolve();
+            });
+        }, function(err) {def.resolve()});
+        return def.promise;
+    }
+    
+    client.drain = function(searchParams, process, done, fail) {
+        var ret = Adapter.get().defer();
+        
+        fhirAPI.search(searchParams).then(function(data){
+            $.when(getNext(data, process)).then(function() {
+                done();
+            }, function(err) {
+                fail(err);
+            });
+        });
+    };
+    
+    client.fetchAll = function (searchParams){
+        var ret = Adapter.get().defer();
+        var results = [];
+        
+        client.drain(
+            searchParams,
+            function(entries) {
+                entries.forEach(function(entry) {
+                    results.push(entry);
+                });
+            },
+            function () {
+                ret.resolve(results);
+            }
+        );
+          
+        return ret.promise;
+    };
+
+    client.user = {
+      'read': function(){
+        var userId = client.userId;
+        resource = userId.split("/")[0];
+        uid = userId.split("/")[1];
+        return client.get({resource: resource, id: uid});
+      }
+    };
+
+    return client;
+}
+},{"./adapter":45,"./utils":50,"btoa":38}],48:[function(require,module,exports){
+var client = require('./client');
+var oauth2 = require('./bb-client');
+var adapter = require('./adapter');
+
+window.FHIR = {
+  client: client,
+  oauth2: oauth2
+};
+
+module.exports = adapter.set;
+},{"./adapter":45,"./bb-client":46,"./client":47}],49:[function(require,module,exports){
+var EMPTY = '00000000-0000-0000-0000-000000000000';
+
+var _padLeft = function (paddingString, width, replacementChar) {
+  return paddingString.length >= width ? paddingString : _padLeft(replacementChar + paddingString, width, replacementChar || ' ');
+};
+
+var _s4 = function (number) {
+  var hexadecimalResult = number.toString(16);
+  return _padLeft(hexadecimalResult, 4, '0');
+};
+
+var _cryptoGuid = function () {
+  var buffer = new window.Uint16Array(8);
+  window.crypto.getRandomValues(buffer);
+  return [_s4(buffer[0]) + _s4(buffer[1]), _s4(buffer[2]), _s4(buffer[3]), _s4(buffer[4]), _s4(buffer[5]) + _s4(buffer[6]) + _s4(buffer[7])].join('-');
+};
+
+var _guid = function () {
+  var currentDateMilliseconds = new Date().getTime();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (currentChar) {
+    var randomChar = (currentDateMilliseconds + Math.random() * 16) % 16 | 0;
+    currentDateMilliseconds = Math.floor(currentDateMilliseconds / 16);
+    return (currentChar === 'x' ? randomChar : (randomChar & 0x7 | 0x8)).toString(16);
+  });
+};
+
+var create = function () {
+  var hasCrypto = typeof (window.crypto) != 'undefined',
+  hasRandomValues = hasCrypto && typeof (window.crypto.getRandomValues) != 'undefined';
+  return (hasCrypto && hasRandomValues) ? _cryptoGuid() : _guid();
+};
+
+module.exports =  {
+  newGuid: create,
+  empty: EMPTY
+};
+
+},{}],50:[function(require,module,exports){
+var utils = module.exports =  {};
+
+utils.byCodes = function(observations, property){
+
+  var bank = utils.byCode(observations, property);
+  function byCodes(){
+    var ret = [];
+    for (var i=0; i<arguments.length;i++){
+      var set = bank[arguments[i]];
+      if (set) {[].push.apply(ret, set);}
+    }
+    return ret;
+  }
+
+  return byCodes;
+};
+
+utils.byCode = function(observations, property){
+  var ret = {};
+  if (!Array.isArray(observations)){
+    observations = [observations];
+  }
+  observations.forEach(function(o){
+    if (o.resourceType === "Observation") {
+        o[property].coding.forEach(function(coding){
+          ret[coding.code] = ret[coding.code] || [];
+          ret[coding.code].push(o);
+        });
+    }
+  });
+  return ret;
+};
+
+function ensureNumerical(pq) {
+  if (typeof pq.value !== "number") {
+    throw "Found a non-numerical unit: " + pq.value + " " + pq.code;
+  }
+};
+
+utils.units = {
+  cm: function(pq){
+    ensureNumerical(pq);
+    if(pq.code == "cm") return pq.value;
+    if(pq.code == "m") return 100*pq.value;
+    if(pq.code == "in") return 2.54*pq.value;
+    if(pq.code == "[in_us]") return 2.54*pq.value;
+    if(pq.code == "[in_i]") return 2.54*pq.value;
+    throw "Unrecognized length unit: " + pq.code
+  },
+  kg: function(pq){
+    ensureNumerical(pq);
+    if(pq.code == "kg") return pq.value;
+    if(pq.code.match(/lb/)) return pq.value / 2.20462;
+    throw "Unrecognized weight unit: " + pq.code
+  },
+  any: function(pq){
+    ensureNumerical(pq);
+    return pq.value
+  }
+};
+
+
+
+},{}]},{},[44]);

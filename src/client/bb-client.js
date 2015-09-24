@@ -1,5 +1,4 @@
-var jQuery = require('./jquery');
-var $ = jQuery;
+var Adapter = require('./adapter');
 var FhirClient = require('./client');
 var Guid = require('./guid');
 var jwt = require('jsonwebtoken');
@@ -48,7 +47,7 @@ function completeTokenFlow(hash){
   if (!hash){
     hash = window.location.hash;
   }
-  var ret =  $.Deferred();
+  var ret = Adapter.get().defer();
 
   process.nextTick(function(){
     var oauthResult = hash.match(/#(.*)/);
@@ -64,7 +63,7 @@ function completeTokenFlow(hash){
     ret.resolve(authorization);
   });
 
-  return ret.promise();
+  return ret.promise;
 }
 
 function completeCodeFlow(params){
@@ -75,36 +74,39 @@ function completeCodeFlow(params){
     };
   }
   
-  var ret =  $.Deferred();
+  var ret = Adapter.get().defer();
   var state = JSON.parse(sessionStorage[params.state]);
 
   if (window.history.replaceState && BBClient.settings.replaceBrowserHistory){
     window.history.replaceState({}, "", window.location.toString().replace(window.location.search, ""));
   }
 
-  $.ajax({
-
+  Adapter.get().http({
+    method: 'POST',
     url: state.provider.oauth2.token_uri,
-    type: 'POST',
     data: {
       code: params.code,
       grant_type: 'authorization_code',
       redirect_uri: state.client.redirect_uri,
       client_id: state.client.client_id
     },
-  }).done(function(authz){
-    authz = $.extend(authz, params);
-    ret.resolve(authz);
-  }).fail(function(){
+  }).then(function(authz){
+       for (var i in params) {
+          if (params.hasOwnProperty(i)) {
+             authz[i] = params[i];
+          }
+       }
+       ret.resolve(authz);
+  }, function(){
     console.log("failed to exchange code for access_token", arguments);
     ret.reject();
-  });;
+  });
 
-  return ret.promise();
+  return ret.promise;
 }
 
 function completePageReload(){
-  var d = $.Deferred();
+  var d = Adapter.get().defer();
   process.nextTick(function(){
     d.resolve(getPreviousToken());
   });
@@ -221,8 +223,15 @@ function providers(fhirServiceUrl, callback, errback){
   }
 
 
+<<<<<<< HEAD:client/bb-client.js
   jQuery.get(
     stripTrailingSlash(fhirServiceUrl)+"/metadata",
+=======
+  Adapter.get().http({
+    method: "GET",
+    url: fhirServiceUrl+"/metadata"
+  }).then(
+>>>>>>> fhir_js:src/client/bb-client.js
     function(r){
       var res = {
         "name": "SMART on FHIR Testing Server",
@@ -236,11 +245,11 @@ function providers(fhirServiceUrl, callback, errback){
       };
 
       try {
-        var smartExtension = jQuery.grep(r.rest[0].security.extension, function (e,i) {
+        var smartExtension = r.rest[0].security.extension.filter(function (e) {
            return (e.url === "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris");
         });
 
-        jQuery.each(smartExtension[0].extension, function(responseNum, arg){
+        smartExtension[0].extension.forEach(function(arg, index, array){
           if (arg.url === "register") {
             res.oauth2.registration_uri = arg.valueUri;
           } else if (arg.url === "authorize") {
@@ -255,11 +264,10 @@ function providers(fhirServiceUrl, callback, errback){
       }
 
       callback && callback(res);
-    },
-    "json"
-  ).fail(function() {
-    errback && errback("Unable to fetch conformance statement");
-  });
+    }, function() {
+        errback && errback("Unable to fetch conformance statement");
+    }
+  );
 };
 
 var noAuthFhirProvider = function(serviceUrl){
@@ -369,9 +377,16 @@ BBClient.authorize = function(params, errback){
 
 BBClient.resolveAuthType = function (fhirServiceUrl, callback, errback) {
 
+<<<<<<< HEAD:client/bb-client.js
       jQuery.get(
         stripTrailingSlash(fhirServiceUrl)+"/metadata",
         function(r){
+=======
+      Adapter.get().http({
+         method: "GET",
+         url: fhirServiceUrl+"/metadata"
+      }).then(function(r){
+>>>>>>> fhir_js:src/client/bb-client.js
           var type = "none";
           
           try {
@@ -383,9 +398,7 @@ BBClient.resolveAuthType = function (fhirServiceUrl, callback, errback) {
           }
 
           callback && callback(type);
-        },
-        "json"
-      ).fail(function() {
-        errback && errback("Unable to fetch conformance statement");
+        }, function() {
+           errback && errback("Unable to fetch conformance statement");
       });
 };
