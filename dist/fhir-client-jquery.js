@@ -6811,54 +6811,6 @@ function FhirClient(p) {
           
         return ret.promise;
     };
-    
-    function getNext (bundle, process) {
-        var i;
-        var d = bundle.data.entry || [];
-        var entries = [];
-        for (i = 0; i < d.length; i++) {
-            entries.push(d[i].resource);
-        }
-        process(entries);
-        var def = Adapter.get().defer();
-        fhirAPI.nextPage({bundle:bundle.data}).then(function (r) {
-            $.when(getNext(r, process)).then(function (t) {
-                def.resolve();
-            });
-        }, function(err) {def.resolve()});
-        return def.promise;
-    }
-    
-    client.drain = function(searchParams, process, done, fail) {
-        var ret = Adapter.get().defer();
-        
-        fhirAPI.search(searchParams).then(function(data){
-            $.when(getNext(data, process)).then(function() {
-                done();
-            }, function(err) {
-                fail(err);
-            });
-        });
-    };
-    
-    client.fetchAll = function (searchParams){
-        var ret = Adapter.get().defer();
-        var results = [];
-        
-        client.drain(
-            searchParams,
-            function(entries) {
-                entries.forEach(function(entry) {
-                    results.push(entry);
-                });
-            },
-            function () {
-                ret.resolve(results);
-            }
-        );
-          
-        return ret.promise;
-    };
 
     client.user = {
       'read': function(){
