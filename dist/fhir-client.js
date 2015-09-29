@@ -57,16 +57,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	(function() {
 	    var mkFhir = __webpack_require__(1);
+	    var jquery = _jQuery || jQuery;
 
 	    var defer = function(){
-	        pr = jQuery.Deferred();
+	        pr = jquery.Deferred();
 	        pr.promise = pr.promise();
 	        return pr;
 	    };
 	    var adapter = {
 	        defer: defer,
 	        http: function(args) {
-	            var ret = jQuery.Deferred();
+	            var ret = jquery.Deferred();
 	            var opts = {
 	                type: args.method,
 	                url: args.url,
@@ -75,7 +76,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                contentType: "application/json",
 	                data: args.data || args.params
 	            };
-	            jQuery.ajax(opts)
+	            jquery.ajax(opts)
 	                .done(function(data, status, xhr) {ret.resolve({data: data, status: status, headers: xhr.getResponseHeader, config: args});})
 	                .fail(function(err) {ret.reject({error: err, data: err, config: args});});
 	            return ret.promise();
@@ -16658,30 +16659,29 @@ module.exports = function jwa(algorithm) {
 (function (process){
 (function() {
     var smart = require('../client/entry');
-    var jQuery = require('jquery');
-    var $ = jQuery;
+    var jquery = _jQuery = require('jquery');
     
     if (!process.browser) {
       var window = require('jsdom').jsdom().createWindow();
-      jquery = jQuery(window);
+      jquery = jquery(window);
     }
     
     var defer = function(){
-        pr = jQuery.Deferred();
+        pr = jquery.Deferred();
         pr.promise = pr.promise();
         return pr;
     };
     var adapter = {
         defer: defer,
         http: function(args) {
-            var ret = jQuery.Deferred();
+            var ret = jquery.Deferred();
             var opts = {
                 type: args.method,
                 url: args.url,
                 dataType: "json",
                 data: args.data
             };
-            jQuery.ajax(opts)
+            jquery.ajax(opts)
                 .done(ret.resolve)
                 .fail(ret.reject);
             return ret.promise();
