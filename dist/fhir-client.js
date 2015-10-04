@@ -17129,7 +17129,7 @@ function FhirClient(p) {
 
     var server = client.server = {
       serviceUrl: p.serviceUrl,
-      auth: p.auth
+      auth: p.auth || {type: 'none'}
     }
     
     var auth = {};
