@@ -6690,7 +6690,7 @@ BBClient.resolveAuthType = function (fhirServiceUrl, callback, errback) {
           var type = "none";
           
           try {
-            if (r.rest[0].security.service[0].coding[0].code.toLowerCase() === "oauth2") {
+            if (r.rest[0].security.service[0].coding[0].code.toLowerCase() === "smart-on-fhir") {
                 type = "oauth2";
             }
           }
