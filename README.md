@@ -27,3 +27,7 @@ The client library will now be available in the
 * `fhir-client.js` - complete client library with jQuery and fhir.js included (no external dependencies)
 * `fhir-client-jquery.js` - client library for jQuery, but without jQuery inside
 * `fhir-client-angularjs.js` - client library for AngularJS
+
+## Usage
+
+For usage examples and further documentation, please visit http://docs.smarthealthit.org/clients/javascript/
