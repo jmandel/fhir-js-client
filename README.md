@@ -7,7 +7,7 @@ To build the library, you will need Grunt and NPM. Once you
 have all the dependencies in place, you can build the library
 with the `grunt` command.
 
-Here are the exact steps to build the build the client library
+Here are the exact steps to build the client library
 on Ubuntu 14.04:
 
 ```
@@ -21,7 +21,7 @@ sudo npm install -g grunt-cli
 grunt
 ```
 
-The client library will now be available in the
+If all goes well, the client library will be available in the
 `dist` directory in multiple variants as follows:
 
 * `fhir-client.js` - complete client library with jQuery and fhir.js included (no external dependencies)
