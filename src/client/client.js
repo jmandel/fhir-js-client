@@ -114,5 +114,38 @@ function FhirClient(p) {
       }
     };
 
+    function absolute(path, server) {
+      if (path.match(/^http/)) return path;
+      if (path.match(/^urn/)) return path;
+
+      // strip leading slash
+      if (path.charAt(0) == "/") path = path.substr(1);
+
+      return server.serviceUrl + '/' + path;
+    }
+
+    client.getBinary = function(url) {
+
+      var ret = Adapter.get().defer();
+
+      Adapter.get().http(client.authenticated({
+        type: 'GET',
+        url: url,
+        dataType: 'blob'
+      }))
+      .done(function(blob){
+        ret.resolve(blob);
+      })
+      .fail(function(){
+        ret.reject("Could not fetch " + url, arguments);
+      });
+      return ret.promise;
+    };
+
+    client.fetchBinary = function(path) {
+        var url = absolute(path, server);
+        return client.getBinary(url);
+    };
+
     return client;
 }
