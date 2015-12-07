@@ -50,6 +50,7 @@ utils.units = {
   kg: function(pq){
     ensureNumerical(pq);
     if(pq.code == "kg") return pq.value;
+    if(pq.code == "g") return pq.value / 1000;
     if(pq.code.match(/lb/)) return pq.value / 2.20462;
     throw "Unrecognized weight unit: " + pq.code
   },
