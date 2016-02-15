@@ -16929,15 +16929,25 @@ function completeCodeFlow(params){
     window.history.replaceState({}, "", window.location.toString().replace(window.location.search, ""));
   }
 
+  var data = {
+      code: params.code,
+      grant_type: 'authorization_code',
+      redirect_uri: state.client.redirect_uri
+  };
+
+  var headers = {};
+
+  if (state.client.secret) {
+    headers['Authorization'] = 'Basic ' + btoa(state.client.client_id + ':' + state.client.secret);
+  } else {
+    data['client_id'] = state.client.client_id;
+  }
+
   Adapter.get().http({
     method: 'POST',
     url: state.provider.oauth2.token_uri,
-    data: {
-      code: params.code,
-      grant_type: 'authorization_code',
-      redirect_uri: state.client.redirect_uri,
-      client_id: state.client.client_id
-    },
+    data: data,
+    headers: headers
   }).then(function(authz){
        for (var i in params) {
           if (params.hasOwnProperty(i)) {
