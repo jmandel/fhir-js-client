@@ -222,7 +222,7 @@ BBClient.ready = function(input, callback, errback){
 
 };
 
-function providers(fhirServiceUrl, callback, errback){
+function providers(fhirServiceUrl, provider, callback, errback){
 
   // Shim for pre-OAuth2 launch parameters
   if (isBypassOAuth()){
@@ -232,6 +232,14 @@ function providers(fhirServiceUrl, callback, errback){
     return;
   }
 
+  // Skip conformance statement introspection when overriding provider setting are available
+  if (provider) {
+    provider['url'] = fhirServiceUrl;
+    process.nextTick(function(){
+      callback && callback(provider);
+    });
+    return;
+  }
 
   Adapter.get().http({
     method: "GET",
@@ -346,7 +354,7 @@ BBClient.authorize = function(params, errback){
     params.fake_token_response.patient = urlParam("patientId");
   }
 
-  providers(params.server, function(provider){
+  providers(params.server, params.provider, function(provider){
 
     params.provider = provider;
 
