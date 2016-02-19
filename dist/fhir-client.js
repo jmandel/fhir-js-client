@@ -285,7 +285,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  exports.mergeLists = mergeLists;
 
 	  var absoluteUrl = function(baseUrl, ref) {
-	    if (ref.slice(ref, baseUrl.length + 1) !== baseUrl + "/") {
+	    if (!ref.match(/https?:\/\/./)) {
 	      return baseUrl + "/" + ref;
 	    } else {
 	      return ref;
@@ -1199,7 +1199,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function fetchAllWithReferences (searchParams, resolveParams) {
 	        var ret = adapter.defer();
 	          
-	        fhirAPI.search(searchParams)
+	        fhirAPI.fetchAll(searchParams)  // TODO: THIS IS NOT CORRECT
 	            .then(function(results){
 
 	                var resolvedReferences = {};
