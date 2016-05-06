@@ -57,7 +57,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	(function() {
 	    var mkFhir = __webpack_require__(1);
-	    var jquery = _jQuery || jQuery;
+	    var jquery = window['_jQuery'] || window['jQuery'];
 
 	    var defer = function(){
 	        pr = jquery.Deferred();
@@ -74,7 +74,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                headers: args.headers,
 	                dataType: "json",
 	                contentType: "application/json",
-	                data: args.data || args.params
+	                data: args.data || args.params,
+	                withCredentials: args.credentials === 'include',
 	            };
 	            jquery.ajax(opts)
 	                .done(function(data, status, xhr) {ret.resolve({data: data, status: status, headers: xhr.getResponseHeader, config: args});})
@@ -125,6 +126,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                .and($Errors)
 	                .and(auth.$Basic)
 	                .and(auth.$Bearer)
+	                .and(auth.$Credentials)
 	                .and(transport.$JsonData)
 	                .and($$Header('Accept', 'application/json'))
 	                .and($$Header('Content-Type', 'application/json'));
@@ -139,7 +141,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var Path = url.Path;
 	        var BaseUrl = Path(cfg.baseUrl);
 	        var resourceTypePath = BaseUrl.slash(":type || :resource.resourceType");
-	        var searchPath = resourceTypePath.slash("_search");
+	        var searchPath = resourceTypePath;
 	        var resourceTypeHxPath = resourceTypePath.slash("_history");
 	        var resourcePath = resourceTypePath.slash(":id || :resource.id");
 	        var resourceHxPath = resourcePath.slash("_history");
@@ -562,10 +564,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var identity = utils.identity;
 
 	    var OPERATORS = {
-	        $gt: '>',
-	        $lt: '<',
-	        $lte: '<=',
-	        $gte: '>='
+	        $gt: 'gt',
+	        $lt: 'lt',
+	        $lte: 'lte',
+	        $gte: 'gte'
 	    };
 
 	    var MODIFIERS = {
@@ -754,6 +756,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return "Bearer " + args.auth.bearer;
 	        }
 	    });
+
+	    var credentials;
+	    // this first middleware sets the credentials attribute to empty, so
+	    // adapters cannot use it directly, thus enforcing a valid value to be parsed in.
+	    exports.$Credentials = mw.Middleware(mw.$$Attr('credentials', function(args){
+	      // Assign value for later checking
+	      credentials = args.credentials
+
+	      // Needs to return non-null and not-undefined
+	      // in order for value to be (un)set
+	      return '';
+	    })).and(mw.$$Attr('credentials', function(args){
+	        // check credentials for valid options, valid for fetch
+	        if(['same-origin', 'include'].indexOf(credentials) > -1 ){
+	            return credentials;
+	        }
+	    }));
 
 	}).call(this);
 
