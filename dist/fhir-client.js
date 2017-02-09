@@ -17527,11 +17527,13 @@ utils.byCode = function(observations, property){
     observations = [observations];
   }
   observations.forEach(function(o){
-    if (o.resourceType === "Observation") {
-        o[property].coding.forEach(function(coding){
+    if (o.resourceType === "Observation"){
+      if (o[property] && Array.isArray(o[property].coding)) {
+        o[property].coding.forEach(function (coding){
           ret[coding.code] = ret[coding.code] || [];
           ret[coding.code].push(o);
         });
+      }
     }
   });
   return ret;
