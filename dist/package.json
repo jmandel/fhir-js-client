@@ -1,6 +1,6 @@
 {
   "name": "fhirclient",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "SMART FHIR JS Client",
   "main": "fhir-client.js",
   "scripts": {
