@@ -17703,6 +17703,8 @@ utils.units = {
     if(pq.code == "in") return 2.54*pq.value;
     if(pq.code == "[in_us]") return 2.54*pq.value;
     if(pq.code == "[in_i]") return 2.54*pq.value;
+    if(pq.code == "ft") return 30.48*pq.value;
+    if(pq.code == "[ft_us]") return 30.48*pq.value;
     throw "Unrecognized length unit: " + pq.code
   },
   kg: function(pq){
