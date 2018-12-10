@@ -76,14 +76,14 @@
             };
         }
     });
-    
+
     if (!process.browser) {
       var windowObj = require('jsdom').jsdom().createWindow();
       jquery = jquery(windowObj);
     }
-    
+
     var defer = function(){
-        pr = jquery.Deferred();
+        var pr = jquery.Deferred();
         pr.promise = pr.promise();
         return pr;
     };
