@@ -17561,10 +17561,8 @@ function FhirClient(p) {
 
     client.user = {
       'read': function(){
-        var userId = client.userId;
-        var resource = userId.split("/")[userId.split("/").length - 2];
-        var uid = userId.split("/")[userId.split("/").length - 1];
-        return client.get({resource: resource, id: uid});
+        var tokens = client.userId.split("/");
+        return client.get({id: tokens.pop(), resource: tokens.pop()});
       }
     };
 
