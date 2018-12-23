@@ -16837,14 +16837,14 @@ module.exports = function jwa(algorithm) {
             };
         }
     });
-    
+
     if (!process.browser) {
       var windowObj = require('jsdom').jsdom().createWindow();
       jquery = jquery(windowObj);
     }
-    
+
     var defer = function(){
-        pr = jquery.Deferred();
+        var pr = jquery.Deferred();
         pr.promise = pr.promise();
         return pr;
     };
@@ -17478,9 +17478,9 @@ function FhirClient(p) {
       serviceUrl: p.serviceUrl,
       auth: p.auth || {type: 'none'}
     }
-    
+
     var auth = {};
-    
+
     if (server.auth.type === 'basic') {
         auth = {
             user: server.auth.username,
@@ -17491,12 +17491,12 @@ function FhirClient(p) {
             bearer: server.auth.token
         };
     }
-    
+
     client.api = fhir({
         baseUrl: server.serviceUrl,
         auth: auth
     });
-    
+
     if (p.patientId) {
         client.patient = {};
         client.patient.id = p.patientId;
@@ -17509,7 +17509,7 @@ function FhirClient(p) {
             return client.get({resource: 'Patient'});
         };
     }
-    
+
     var fhirAPI = (client.patient)?client.patient.api:client.api;
 
     client.userId = p.userId;
@@ -17519,10 +17519,10 @@ function FhirClient(p) {
     };
 
     if (!client.server.serviceUrl || !client.server.serviceUrl.match(/https?:\/\/.+[^\/]$/)) {
-      throw "Must supply a `server` property whose `serviceUrl` begins with http(s) " + 
+      throw "Must supply a `server` property whose `serviceUrl` begins with http(s) " +
         "and does NOT include a trailing slash. E.g. `https://fhir.aws.af.cm/fhir`";
     }
-    
+
     client.authenticated = function(p) {
       if (server.auth.type === 'none') {
         return p;
@@ -17544,27 +17544,25 @@ function FhirClient(p) {
     client.get = function(p) {
         var ret = Adapter.get().defer();
         var params = {type: p.resource};
-        
+
         if (p.id) {
             params["id"] = p.id;
         }
-          
+
         fhirAPI.read(params)
             .then(function(res){
                 ret.resolve(res.data);
             }, function(){
                 ret.reject("Could not fetch " + p.resource + " " + p.id);
             });
-          
+
         return ret.promise;
     };
 
     client.user = {
       'read': function(){
-        var userId = client.userId;
-        resource = userId.split("/")[0];
-        uid = userId.split("/")[1];
-        return client.get({resource: resource, id: uid});
+        var tokens = client.userId.split("/");
+        return client.get({id: tokens.pop(), resource: tokens.pop()});
       }
     };
 
