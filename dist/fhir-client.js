@@ -38333,7 +38333,7 @@ BBClient.ready = function(input, callback, errback){
     if (tokenResponse.id_token) {
         var id_token = tokenResponse.id_token;
         var payload = jwt.decode(id_token);
-        fhirClientParams["userId"] = payload["profile"]; 
+        fhirClientParams.userId = payload.fhirUser || payload.profile;
     }
 
     if (tokenResponse.access_token !== undefined) {
