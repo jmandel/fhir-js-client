@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.14
+- Fixed the structure of the released package broken in `0.1.13`. Only the `dist`
+  folder is released now.
+
 ## v0.1.13
 - The profile claim can be absolute URL
 - Examples use existing server and patient ID
