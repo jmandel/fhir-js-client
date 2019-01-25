@@ -26171,10 +26171,11 @@ function urlParam(p, forceArray) {
 }
 
 function stripTrailingSlash(str) {
-    if(str.substr(-1) === '/') {
-        return str.substr(0, str.length - 1);
+    var _str = String(str || "");
+    if(_str.substr(-1) === '/') {
+        return _str.substr(0, _str.length - 1);
     }
-    return str;
+    return _str;
 }
 
 /**
@@ -26629,6 +26630,16 @@ BBClient.authorize = function(params, errback){
     if (!params.server){
       params.server = server;
     }
+  }
+
+  if (!params.server) {
+    console.warn(
+      'No server provided. For EHR launch, the EHR should provide that as "iss" ' +
+      'parameter. For standalone launch you should pass a ""server" option ' +
+      'to the authorize function. Alternatively, you can also pass ' +
+      '"fhirServiceUrl" parameter to your launch url.'
+    );
+    return errback();
   }
 
   if (urlParam("patientId")){

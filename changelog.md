@@ -6,6 +6,7 @@
     - Added getBundleByUrl api method
     - Added support for `le` and `ge` search parameters
     - Added support for `_include` and `_revinclude`
+- Added a warning if the launch URL is not loaded properly
 
 ## v0.1.14
 - Fixed the structure of the released package broken in `0.1.13`. Only the `dist`
