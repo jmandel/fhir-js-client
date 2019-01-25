@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.1.15
+- Included the last version of fhir.js
+    - For previous page, bundle.link.relation can either   have 'previous' or 'prev' value
+    - Added getBundleByUrl api method
+    - Added support for `le` and `ge` search parameters
+    - Added support for `_include` and `_revinclude`
+
 ## v0.1.14
 - Fixed the structure of the released package broken in `0.1.13`. Only the `dist`
   folder is released now.
