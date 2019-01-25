@@ -32,10 +32,11 @@ function urlParam(p, forceArray) {
 }
 
 function stripTrailingSlash(str) {
-    if(str.substr(-1) === '/') {
-        return str.substr(0, str.length - 1);
+    var _str = String(str || "");
+    if(_str.substr(-1) === '/') {
+        return _str.substr(0, _str.length - 1);
     }
-    return str;
+    return _str;
 }
 
 /**
