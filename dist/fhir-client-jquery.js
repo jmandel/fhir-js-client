@@ -26733,7 +26733,7 @@ BBClient.authorize = function(params, errback){
   if (!params.server) {
     console.warn(
       'No server provided. For EHR launch, the EHR should provide that as "iss" ' +
-      'parameter. For standalone launch you should pass a ""server" option ' +
+      'parameter. For standalone launch you should pass a "server" option ' +
       'to the authorize function. Alternatively, you can also pass ' +
       '"fhirServiceUrl" parameter to your launch url.'
     );
