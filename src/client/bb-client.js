@@ -1,43 +1,11 @@
-var Adapter = require('./adapter');
-var FhirClient = require('./client');
-var Guid = require('./guid');
-var jwt = require('jsonwebtoken');
+var Adapter    = require("./adapter");
+var FhirClient = require("./client");
+var Guid       = require("./guid");
+var jwt        = require("jsonwebtoken");
+var Lib        = require("../lib");
 
 var BBClient = module.exports =  {debug: true}
 
-function urlParam(p, forceArray) {
-  if (forceArray === undefined) {
-    forceArray = false;
-  }
-
-  var query = location.search.substr(1);
-  var data = query.split("&");
-  var result = [];
-
-  for(var i=0; i<data.length; i++) {
-    var item = data[i].split("=");
-    if (item[0] === p) {
-      var res = item[1].replace(/\+/g, '%20');
-      result.push(decodeURIComponent(res));
-    }
-  }
-
-  if (forceArray) {
-    return result;
-  }
-  if (result.length === 0){
-    return null;
-  }
-  return result[0];
-}
-
-function stripTrailingSlash(str) {
-    var _str = String(str || "");
-    if(_str.substr(-1) === '/') {
-        return _str.substr(0, _str.length - 1);
-    }
-    return _str;
-}
 
 /**
 * Get the previous token stored in sessionStorage
@@ -51,7 +19,7 @@ function getPreviousToken(){
     token = sessionStorage.tokenResponse;
     return JSON.parse(token);
   } else {
-    var state = urlParam('state');
+    var state = Lib.urlParam('state');
     return JSON.parse(sessionStorage[state]).tokenResponse;
   }
 }
@@ -82,8 +50,8 @@ function completeTokenFlow(hash){
 function completeCodeFlow(params){
   if (!params){
     params = {
-      code: urlParam('code'),
-      state: urlParam('state')
+      code: Lib.urlParam('code'),
+      state: Lib.urlParam('state')
     };
   }
   
@@ -235,7 +203,7 @@ BBClient.settings = {
   // When set to true, this variable will fully utilize
   // HTML5 sessionStorage API.
   // Default to true
-  // This variable can be overriden to false by setting
+  // This variable can be overridden to false by setting
   // FHIR.oauth2.settings.fullSessionStorageSupport = false.
   // When set to false, the sessionStorage will be keyed 
   // by a state variable. This is to allow the embedded IE browser
@@ -256,7 +224,7 @@ function validTokenResponse() {
     return true;
   } else {
     if (!BBClient.settings.fullSessionStorageSupport) {
-      var state = urlParam('state') || (args.input && args.input.state);
+      var state = Lib.urlParam('state') || (args.input && args.input.state);
       return (state && sessionStorage[state] && JSON.parse(sessionStorage[state]).tokenResponse);
     }
   }
@@ -279,7 +247,7 @@ BBClient.ready = function(input, callback, errback){
   var args = readyArgs.apply(this, arguments);
 
   // decide between token flow (implicit grant) and code flow (authorization code grant)
-  var isCode = urlParam('code') || (args.input && args.input.code);
+  var isCode = Lib.urlParam('code') || (args.input && args.input.code);
 
   var accessTokenResolver = null;
 
@@ -321,7 +289,7 @@ BBClient.ready = function(input, callback, errback){
       return args.errback("No 'state' parameter found in authorization response.");
     }
 
-    // Save the tokenReponse object into sessionStorage
+    // Save the tokenResponse object into sessionStorage
     if (BBClient.settings.fullSessionStorageSupport) {
       sessionStorage.tokenResponse = JSON.stringify(tokenResponse);
     } else {
@@ -387,7 +355,7 @@ function providers(fhirServiceUrl, provider, callback, errback){
 
   Adapter.get().http({
     method: "GET",
-    url: stripTrailingSlash(fhirServiceUrl) + "/metadata"
+    url: Lib.stripTrailingSlash(fhirServiceUrl) + "/metadata"
   }).then(
     function(r){
       var res = {
@@ -434,18 +402,14 @@ var noAuthFhirProvider = function(serviceUrl){
   }
 };
 
-function relative(url){
-  return (window.location.protocol + "//" + window.location.host + window.location.pathname).match(/(.*\/)[^\/]*/)[1] + url;
-}
-
 function isBypassOAuth(){
-  return (urlParam("fhirServiceUrl") && !(urlParam("iss")));
+  return (Lib.urlParam("fhirServiceUrl") && !(Lib.urlParam("iss")));
 }
 
 function bypassOAuth(fhirServiceUrl, callback){
   callback && callback({
     "oauth2": null,
-    "url": fhirServiceUrl || urlParam("fhirServiceUrl")
+    "url": fhirServiceUrl || Lib.urlParam("fhirServiceUrl")
   });
 }
 
@@ -471,14 +435,14 @@ BBClient.authorize = function(params, errback){
   }
 
    if (!params.client.redirect_uri){
-    params.client.redirect_uri = relative("");
+    params.client.redirect_uri = Lib.relative("");
   }
 
   if (!params.client.redirect_uri.match(/:\/\//)){
-    params.client.redirect_uri = relative(params.client.redirect_uri);
+    params.client.redirect_uri = Lib.relative(params.client.redirect_uri);
   }
 
-  var launch = urlParam("launch");
+  var launch = Lib.urlParam("launch");
   if (launch){
     if (!params.client.scope.match(/launch/)){
       params.client.scope += " launch";
@@ -486,7 +450,7 @@ BBClient.authorize = function(params, errback){
     params.client.launch = launch;
   }
 
-  var server = urlParam("iss") || urlParam("fhirServiceUrl");
+  var server = Lib.urlParam("iss") || Lib.urlParam("fhirServiceUrl");
   if (server){
     if (!params.server){
       params.server = server;
@@ -503,9 +467,9 @@ BBClient.authorize = function(params, errback){
     return errback();
   }
 
-  if (urlParam("patientId")){
+  if (Lib.urlParam("patientId")){
     params.fake_token_response = params.fake_token_response || {};
-    params.fake_token_response.patient = urlParam("patientId");
+    params.fake_token_response.patient = Lib.urlParam("patientId");
   }
 
   providers(params.server, params.provider, function(provider){
@@ -554,7 +518,7 @@ BBClient.resolveAuthType = function (fhirServiceUrl, callback, errback) {
 
       Adapter.get().http({
          method: "GET",
-         url: stripTrailingSlash(fhirServiceUrl) + "/metadata"
+         url: Lib.stripTrailingSlash(fhirServiceUrl) + "/metadata"
       }).then(function(r){
           var type = "none";
           
