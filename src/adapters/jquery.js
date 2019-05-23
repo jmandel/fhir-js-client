@@ -77,11 +77,6 @@
         }
     });
 
-    if (!process.browser) {
-      var windowObj = require('jsdom').jsdom().createWindow();
-      jquery = jQuery(windowObj);
-    }
-
     var defer = function(){
         var pr = jquery.Deferred();
         pr.promise = pr.promise();
