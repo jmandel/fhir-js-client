@@ -1,33 +1,51 @@
 SMART on FHIR JavaScript Client Library
 =======================================
 
-## Building
+## NPM Scripts
 
-To build the library, you will need Grunt and NPM. Once you
-have all the dependencies in place, you can build the library
-with the `grunt` command.
+After `cd` into to the project folder and running `npm i`, you can use npm scripts to handle any project-related task:
 
-Here are the exact steps to build the client library
-on Ubuntu 14.04:
-
-```
-sudo apt-get update
-sudo apt-get -y install git npm
-sudo ln -s "$(which nodejs)" /usr/bin/node
-git clone https://github.com/smart-on-fhir/client-js
-cd client-js
-npm install
-sudo npm install -g grunt-cli
-grunt
+### Testing
+```sh
+npm test
 ```
 
-If all goes well, the client library will be available in the
-`dist` directory in multiple variants as follows:
+### Building
+```sh
 
-* `fhir-client.js` - complete client library with jQuery and fhir.js included (no external dependencies)
-* `fhir-client-jquery.js` - client library using jQuery, jQuery and fhir.js not included
-* `fhir-client-angularjs.js` - client library using AngularJS, AngularJS and fhir.js not included
+# Build everything
+npm run build
+
+# Only build minified scripts for production
+npm run pack:prod
+
+# Only build non-minified scripts for development
+npm run pack:dev
+
+# Only build non-minified scripts for development and watch them for changes
+npm run build:dev
+```
+
+### Run examples locally
+```sh
+npm run examples
+```
+
+### Deploy documentation to github pages
+```sh
+npm run deploy:gh
+```
+
+The client library will be available in the `build` directory in multiple variants as follows:
+
+* Files starting with `fhir-client`           - complete client library with jQuery and fhir included (no external dependencies)
+* Files starting with `fhir-client-jquery`    - client library using jQuery, jQuery and fhir.js not included
+* Files starting with `fhir-client-angularjs` - client library using AngularJS, AngularJS and fhir.js not included
 
 ## Usage
+The documentation is work in progress. For usage examples and further documentation, please visit:
+- http://docs.smarthealthit.org/client-js/index.html
+- http://docs.smarthealthit.org/client-js/api.html
+<!-- - http://docs.smarthealthit.org/client-js/request.html -->
+- http://docs.smarthealthit.org/clients/javascript/
 
-For usage examples and further documentation, please visit http://docs.smarthealthit.org/clients/javascript/
