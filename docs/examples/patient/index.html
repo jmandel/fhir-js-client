@@ -8,13 +8,16 @@
     <h1>Using patient.read() to display the patient</h1>
     <pre id="output">Loading...</pre>
     <script type="text/javascript">
-        function display(data) {
-            document.getElementById('output').innerText = JSON.stringify(data, null, 4);
+        function display(data, append) {
+            const output = document.getElementById("output");
+            output.innerText = data instanceof Error ?
+                String(data) :
+                JSON.stringify(data, null, 4);
         }
 
-        FHIR.oauth2.ready(function(smart){
-            smart.patient.read().then(display);
-        });
+        FHIR.oauth2.ready(function(client) {
+            client.patient.read().then(display, display);
+        }, display);
     </script>
  </body>
 </html>

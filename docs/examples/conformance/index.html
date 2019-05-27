@@ -8,17 +8,16 @@
     <h1>Using api.conformance() to display the conformance statement</h1>
     <pre id="output">Loading...</pre>
     <script type="text/javascript">
-        function display(data) {
-            document.getElementById('output').innerText = JSON.stringify(data, null, 4);
-        }
-
-        function displayError(error) {
-            display(String(error));
+        function display(data, append) {
+            const output = document.getElementById("output");
+            output.innerText = data instanceof Error ?
+                String(data) :
+                JSON.stringify(data, null, 4);
         }
 
         FHIR.oauth2.ready(function(smart){
-            smart.api.conformance({}).then(display, displayError);
-        }, displayError);
+            smart.api.conformance({}).then(display, display);
+        }, display);
     </script>
  </body>
 </html>

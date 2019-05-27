@@ -9,67 +9,18 @@
     <pre id="output">Loading...</pre>
     
     <script type="text/javascript">
-        function display(data) {
-            document.getElementById('output').innerText = JSON.stringify(data, null, 4);
+        function display(data, append) {
+            const output = document.getElementById("output");
+            output.innerText = data instanceof Error ?
+                String(data) :
+                JSON.stringify(data, null, 4);
         }
 
-        function displayError(error) {
-            display(String(error));
-        }
-
-        // FHIR.oauth2.ready(
-        //     function(smart) {
-        //         smart.user.read().then(display, displayError);
-        //     },
-        //     displayError
-        // );
-
-        const client = new FHIR.client({
-            serviceUrl: "https://r3.smarthealthit.org"
-        });
-
-        // client.api.search({ type: "Patient" }).then(display, displayError);
-        
-        
-        // Get all patients ----------------------------------------------------
-        // let count = 0;
-        client.request("/Encounter", {
-            resolveReferences: [
-                "serviceProvider"
-            ],
-            // graph: false,
-            pageLimit: 2,
-            // onPage: (data, refs) => {
-            //     console.log(data, refs)
-            //     // return Promise.reject()
-            //     // if (pageNumber > 3) {
-            //     //     return Promise.reject();
-            //     // }
-            // }
-        //         return new Promise(resolve => {
-        //             // console.log(data);
-        //             count += data.entry.length
-        //             // if (count >= 100) {
-        //             //     return Promise.reject();
-        //             // }
-        //             display({ count })
-        //             resolve()
-        //         })
-        //     },
-        })
-        // .then(() => display({ count }), displayError);
-        .then(console.log, displayError);
-        // .then(() => {}, displayError);
-
-        // Get patient medications ---------------------------------------------
-        // client.request("/MedicationRequest?patient=2c4c5104-6d23-4c0a-97e9-bd229fc3559c", {
-        //     resolveReferences: [
-        //         "medicationReference",
-        //         "context",
-        //         "context.serviceProvider"
-        //     ],
-        //     graph: true
-        // }).then(display, displayError);
+        const client = new FHIR.client("https://r3.smarthealthit.org");
+        FHIR.oauth2.ready(
+            client => client.request(client.userId).then(display, display),
+            display
+        );
     </script>
  </body>
 </html>
