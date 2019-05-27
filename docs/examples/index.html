@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>SMART Examples</title>
+    </head>
+    <body>
+        <h1>SMART Examples</h1>
+        <ul>
+            <li>
+                <a href="http://127.0.0.1:9090/example/patient/launch.html?launch=eyJhIjoiMSJ9&iss=http%3A%2F%2Flaunch.smarthealthit.org%2Fv%2Fr3%2Ffhir" target="_blank">Patient</a>
+            </li>
+            <li>
+                <a href="http://127.0.0.1:9090/example/user/launch.html?launch=eyJhIjoiMSIsImIiOiI3Mjc1ZDJhOC05Y2FiLTQxODctODBkZC01MGY0YTAxNzEwOTkifQ&iss=http%3A%2F%2Flaunch.smarthealthit.org%2Fv%2Fr3%2Ffhir" target="_blank">User</a>
+            </li>
+            <li>
+                <a href="http://127.0.0.1:9090/example/conformance/launch.html?launch=eyJhIjoiMSIsImIiOiIyYzRjNTEwNC02ZDIzLTRjMGEtOTdlOS1iZDIyOWZjMzU1OWMifQ&iss=http%3A%2F%2Flaunch.smarthealthit.org%2Fv%2Fr3%2Ffhir" target="_blank">Conformance</a>
+            </li>
+            <li>
+                <a href="http://127.0.0.1:9090/example/medications/launch.html?launch=eyJhIjoiMSIsImIiOiIyYzRjNTEwNC02ZDIzLTRjMGEtOTdlOS1iZDIyOWZjMzU1OWMifQ&iss=http%3A%2F%2Flaunch.smarthealthit.org%2Fv%2Fr3%2Ffhir" target="_blank">Medications</a>
+            </li>
+        </ul>
+        <script>
+            if (location.protocol == "file:") {
+                document.body.innerHTML = (
+                    "This page should not be opened directly!<br/>" +
+                    "To try the examples, start the examples server by doing:" +
+                    "<ol>" +
+                        "<li>Open a terminal and go to the project root</li>" +
+                        "<li>Type \"<code>npm run examples</code>\" and hit <kbd>Enter</kbd></li>" +
+                    "</ol>"
+                );
+            }
+        </script>
+    </body>
+</html>

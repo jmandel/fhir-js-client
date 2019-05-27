@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+ <head>
+     <title>Medications List</title>
+    <script src="/build/fhir-client.js"></script>
+ </head>
+ <body>
+    <h1>Medications for <span id="name">Loading...</span></h1>
+    <ul id="med_list">Loading...</ul>
+    <script type="text/javascript">
+
+        function getPatientName (pt) {
+            if (pt.name) {
+                var names = pt.name.map(function(name) {
+                    return name.given.join(" ") + " " + name.family;
+                });
+                return names.join(" / ");
+            } else {
+                return "anonymous";
+            }
+        }
+
+        function getMedicationName (medCodings) {
+            var coding = medCodings.find(function(c){
+                return c.system == "http://www.nlm.nih.gov/research/umls/rxnorm";
+            });
+            return coding && coding.display || "Unnamed Medication(TM)";
+        }
+
+        function displayPatient (pt) {
+            document.getElementById('name').innerHTML = getPatientName(pt);
+        }
+
+        function displayError(error) {
+            med_list.innerHTML = "<li> " + String(error) + "</li>";
+        }
+
+        var med_list = document.getElementById('med_list');
+
+        function displayMedication (medCodings) {
+            med_list.innerHTML += "<li> " + getMedicationName(medCodings) + "</li>";
+        }
+
+        FHIR.oauth2.ready(function(smart){
+            smart.patient.read().then(function(pt) {
+                displayPatient (pt);
+
+                // smart.api.search({ 
+                //     type: "MedicationRequest",
+                //     query: {
+                //         patient: pt.id
+                //     }
+                // }).then(console.log, console.error);
+
+                // smart.api.patient.fetcAllWithReferences(...) does not work
+                // with fhir-client.js. MedicationRequest is not listed in 
+                // https://github.com/FHIR/fhir.js/blob/master/src/middlewares/patient.js#L5
+                // and we have to explicitly search with patient id
+                // smart.api.fetchAllWithReferences(
+                //     { 
+                //         type: "MedicationRequest",
+                //         query: {
+                //             patient: pt.id
+                //         }
+                //     },
+                //     [
+                //         "MedicationRequest.medicationReference"
+                //     ]
+                // ).then(
+                //     function({ data }, refs) {
+                //         if (data.entry && data.entry.length) {
+                //             med_list.innerHTML = "";
+                //             data.entry.forEach(({ resource }) => {
+                //                 if (resource.medicationCodeableConcept) {
+                //                     displayMedication(resource.medicationCodeableConcept.coding);
+                //                 } else if (resource.medicationReference) {
+                //                     var med = refs[resource.medicationReference.reference];
+                //                     displayMedication(med && med.code.coding || []);
+                //                 }
+                //             });
+                //         }
+                //         else {
+                //             med_list.innerHTML = "No medications found for the selected patient";
+                //         }
+                //     },
+                //     displayError
+                // );
+
+                smart.request(`/MedicationRequest?patient=${pt.id}`, {
+                    resolveReferences: [ "medicationReference" ],
+                    graph: true
+                }).then(data => {
+                    if (data.entry && data.entry.length) {
+                        med_list.innerHTML = "";
+                        data.entry.forEach(item  => displayMedication(
+                            smart.getPath(item, "resource.medicationCodeableConcept.coding") ||
+                            smart.getPath(item, "resource.medicationReference.code.coding")
+                        ));
+                    }
+                    else {
+                        med_list.innerHTML = "No medications found for the selected patient";
+                    }
+                }, displayError);
+                
+            }, displayError);
+        });
+
+    </script>
+ </body>
+</html>

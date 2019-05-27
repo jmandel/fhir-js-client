@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+ <head>
+     <title>Display Patient</title>
+    <script src="/build/fhir-client.js"></script>
+ </head>
+ <body>
+    <h1>Using patient.read() to display the patient</h1>
+    <pre id="output">Loading...</pre>
+    <script type="text/javascript">
+        function display(data) {
+            document.getElementById('output').innerText = JSON.stringify(data, null, 4);
+        }
+
+        FHIR.oauth2.ready(function(smart){
+            smart.patient.read().then(display);
+        });
+    </script>
+ </body>
+</html>
