@@ -1,31 +1,48 @@
 {
   "name": "fhir-js-client",
-  "version": "0.1.16",
+  "version": "0.2.0",
   "description": "JavaScript client for Fast Healthcare Interoperability Resources",
   "author": "Josh Mandel <joshua.mandel@childrens.harvard.edu>",
   "license": "ISC",
   "dependencies": {
-    "browserify": "^16.2.3",
     "btoa": "*",
+    "fhir.js": "0.0.20",
+    "gh-pages": "^2.0.1",
     "jquery": "^3.3.1",
     "jsonwebtoken": "^8.4.0"
   },
   "scripts": {
-    "test": "lab test/tests.js -v"
+    "test": "lab test/tests.js -v --timeout 5000",
+    
+    "clean": "rm -rf build",
+
+    "pack:prod": "webpack --config webpack.config.js --mode production",
+    "pack:dev" : "webpack --config webpack.config.js --mode development",
+    "pack"     : "npm run pack:dev && npm run pack:prod",
+    
+    "build"    : "npm run pack",
+    "build:dev": "npm run pack:dev -- --watch",
+    
+    "examples": "http-server . -o docs/examples/index.html -p 9090 -a 127.0.0.1 -c-1",
+    
+    "deploy:gh": "cp -r build docs && gh-pages -d docs"
   },
   "devDependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/preset-env": "^7.4.5",
     "@hapi/code": "^5.3.1",
     "@hapi/lab": "^19.0.1",
-    "grunt": "^1.0.3",
-    "grunt-contrib-clean": "^1.1.0",
-    "grunt-contrib-concat": "^1.0.1",
-    "grunt-contrib-uglify": "^3.4.0",
-    "grunt-shell": "^2.1.0",
+    "babel-loader": "^8.0.6",
+    "babel-polyfill": "^6.26.0",
+    "cors": "^2.8.5",
+    "eslint": "^5.16.0",
+    "express": "^4.17.0",
+    "http-server": "^0.11.1",
     "jsdom": "*",
-    "mocha": "*",
-    "should": "*",
-    "sinon": "*",
-    "varify": "^0.1.1"
+    "webpack": "^4.32.2",
+    "webpack-bundle-analyzer": "^3.3.2",
+    "webpack-cli": "^3.3.2"
   },
   "engine": "node >= 0.6.0",
   "repository": {
