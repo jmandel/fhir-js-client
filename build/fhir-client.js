@@ -51219,12 +51219,18 @@ Object.keys(clientUtils).forEach(function (k) {
  */
 
 function FhirClient(p) {
-  // p.serviceUrl
+  if (typeof p == "string") {
+    p = {
+      serviceUrl: p
+    };
+  } // p.serviceUrl
   // p.auth {
   //    type: 'none' | 'basic' | 'bearer'
   //    basic --> username, password
   //    bearer --> token
   // }
+
+
   var client = new ClientPrototype();
   var fhir = Adapter.get().fhirjs;
   var server = client.server = {
