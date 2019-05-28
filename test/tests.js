@@ -59,36 +59,9 @@ after(() => {
     }
 });
 
-// beforeEach(() => {
-//     const dom = new JSDOM("", { url: "http://localhost" });
-//     global.window = dom.window;
-//     global.sessionStorage = window.sessionStorage;
-//     global.location = window.location;
-//     // window.jQuery = requireUncached("jquery");
-//     // global.jQuery = window.jQuery = require("jquery");
-//     // global.fhir   = window.fhir   = require("fhir.js");
-//     // requireUncached("../src/adapters/bundle.js");
-    
-//     // global.window.FHIR = require("../src/adapters/bundle").FHIR;
-//     // global.window.FHIR = require("../src/client/entry").FHIR;
-//     // require("../src/adapters/jquery");
-//     require("../src/adapters/bundle");
-    
-//     // entry(window);
-
-//     // const client       = require("../src/client/client");
-//     // const { BBClient } = require("../src/client/bb-client");
-//     // window.FHIR = {
-//     //     client,
-//     //     oauth2: BBClient
-//     // };
-//     // console.log(window.FHIR)
-    
-//     // console.log(bundlePath, require.cache[bundlePath], require.cache["../src/adapters/bundle"]);
-// // console.log();
-// });
 afterEach(() => {
     sessionStorage.clear();
+    mockServer.clear();
     // global.location = window.location;
 //     global.window.close();
 //     delete global.window;
@@ -192,20 +165,6 @@ describe("Lib", () => {
 
 describe("FHIR.oauth2", () => {
 
-    // before(() => {
-    //     const dom = new JSDOM("", { url: "http://localhost" });
-    //     global.window = dom.window;
-    //     window.jQuery = require("jquery");
-    //     require("../src/adapters/bundle");
-    // });
-
-    // after(() => {
-    //     global.window.close();
-    //     delete global.window;
-    // });
-
-    // oauthStuff
-
     describe("authorize", () => {
         
         it ("throws if called without params", () => {
@@ -283,19 +242,16 @@ describe("FHIR.oauth2", () => {
 
         function expectClient(client) {
             expect(client).to.include([
-                "server",
+                "options",
                 "api",
                 "patient",
-                "userId",
-                "authenticated",
-                "get",
                 "user",
                 "getBinary",
                 "fetchBinary",
                 "state",
                 "tokenResponse"
             ]);
-            expect(client.server).to.equal({
+            expect(client.options).to.include({
                 serviceUrl: "https://r3.smarthealthit.org",
                 auth: {
                     type: "bearer",
@@ -320,7 +276,7 @@ describe("FHIR.oauth2", () => {
                 "read"
             ]);
             expect(client.patient.id).to.equal("eb3271e1-ae1b-4644-9332-41e32c829486");
-            expect(client.userId).to.equal("Practitioner/smart-Practitioner-71482713");
+            expect(client.user).to.include({ id: "Practitioner/smart-Practitioner-71482713" });
             expect(client.user).to.include("read");
         }
 
@@ -1363,11 +1319,11 @@ describe("FHIR.client", () => {
         it ("can not refresh if useRefreshToken is false");
     });
 
-    it ("client.server", () => {
+    it ("client.options", () => {
         const client1 = new window.FHIR.client({
             serviceUrl: "http://localhost"
         });
-        expect(client1.server).to.equal({
+        expect(client1.options).to.include({
             serviceUrl: "http://localhost",
             auth: { type: "none" }
         });
@@ -1380,12 +1336,12 @@ describe("FHIR.client", () => {
                 password: "test-password"
             }
         });
-        expect(client2.server).to.equal({
+        expect(client2.options).to.include({
             serviceUrl: "http://localhost",
             auth: {
                 type: "basic",
-                username: "test-username",
-                password: "test-password"
+                user: "test-username",
+                pass: "test-password"
             }
         });
 
@@ -1396,7 +1352,7 @@ describe("FHIR.client", () => {
                 token: "test-token"
             }
         });
-        expect(client3.server).to.equal({
+        expect(client3.options).to.include({
             serviceUrl: "http://localhost",
             auth: {
                 type: "bearer",
@@ -1405,24 +1361,101 @@ describe("FHIR.client", () => {
         });
     });
 
-    it ("client.userId", () => {
+    it ("client.user.id", () => {
         const client1 = new window.FHIR.client({
             serviceUrl: "http://localhost"
         });
-        expect(client1.userId).to.equal(undefined);
+        expect(client1.user.id).to.equal(null);
         const client2 = new window.FHIR.client({
             serviceUrl: "http://localhost",
             userId: "test-userId"
         });
-        expect(client2.userId).to.equal("test-userId");
+        expect(client2.user.id).to.equal("test-userId");
     });
 
     it ("client.patient");
     it ("client.user");
-    it ("client.authenticated");
-    it ("client.get");
-    it ("client.getBinary");
-    it ("client.fetchBinary");
+
+    it ("client.refresh", async () => {
+        const client = new window.FHIR.client(mockUrl);
+
+        client.tokenResponse = {
+            "refresh_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjb250ZXh0Ijp7Im5lZWRfcGF0aWVudF9iYW5uZXIiOnRydWUsInNtYXJ0X3N0eWxlX3VybCI6Imh0dHBzOi8vbGF1bmNoLnNtYXJ0aGVhbHRoaXQub3JnL3NtYXJ0LXN0eWxlLmpzb24iLCJwYXRpZW50IjoiZWIzMjcxZTEtYWUxYi00NjQ0LTkzMzItNDFlMzJjODI5NDg2IiwiZW5jb3VudGVyIjoiMzFiMThhYTAtMGRhNy00NDYwLTk2MzMtMDRhZjQxNDY2ZDc2In0sImNsaWVudF9pZCI6Im15X3dlYl9hcHAiLCJzY29wZSI6Im9wZW5pZCBmaGlyVXNlciBvZmZsaW5lX2FjY2VzcyB1c2VyLyouKiBwYXRpZW50LyouKiBsYXVuY2gvZW5jb3VudGVyIGxhdW5jaC9wYXRpZW50IHByb2ZpbGUiLCJ1c2VyIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MTQ4MjcxMyIsImlhdCI6MTU1ODcxMDk2NCwiZXhwIjoxNTkwMjQ2OTY1fQ.f5yNY-yKKDe0a59_eFgp6s0rHSgPLXgmAWDPz_hEUgs",
+            "expires_in"   : 1,
+            "access_token" : "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJuZWVkX3BhdGllbnRfYmFubmVyIjp0cnVlLCJzbWFydF9zdHlsZV91cmwiOiJodHRwczovL2xhdW5jaC5zbWFydGhlYWx0aGl0Lm9yZy9zbWFydC1zdHlsZS5qc29uIiwicGF0aWVudCI6ImViMzI3MWUxLWFlMWItNDY0NC05MzMyLTQxZTMyYzgyOTQ4NiIsImVuY291bnRlciI6IjMxYjE4YWEwLTBkYTctNDQ2MC05NjMzLTA0YWY0MTQ2NmQ3NiIsInJlZnJlc2hfdG9rZW4iOiJleUowZVhBaU9pSktWMVFpTENKaGJHY2lPaUpJVXpJMU5pSjkuZXlKamIyNTBaWGgwSWpwN0ltNWxaV1JmY0dGMGFXVnVkRjlpWVc1dVpYSWlPblJ5ZFdVc0luTnRZWEowWDNOMGVXeGxYM1Z5YkNJNkltaDBkSEJ6T2k4dmJHRjFibU5vTG5OdFlYSjBhR1ZoYkhSb2FYUXViM0puTDNOdFlYSjBMWE4wZVd4bExtcHpiMjRpTENKd1lYUnBaVzUwSWpvaVpXSXpNamN4WlRFdFlXVXhZaTAwTmpRMExUa3pNekl0TkRGbE16SmpPREk1TkRnMklpd2laVzVqYjNWdWRHVnlJam9pTXpGaU1UaGhZVEF0TUdSaE55MDBORFl3TFRrMk16TXRNRFJoWmpReE5EWTJaRGMySW4wc0ltTnNhV1Z1ZEY5cFpDSTZJbTE1WDNkbFlsOWhjSEFpTENKelkyOXdaU0k2SW05d1pXNXBaQ0JtYUdseVZYTmxjaUJ2Wm1ac2FXNWxYMkZqWTJWemN5QjFjMlZ5THlvdUtpQndZWFJwWlc1MEx5b3VLaUJzWVhWdVkyZ3ZaVzVqYjNWdWRHVnlJR3hoZFc1amFDOXdZWFJwWlc1MElIQnliMlpwYkdVaUxDSjFjMlZ5SWpvaVVISmhZM1JwZEdsdmJtVnlMM050WVhKMExWQnlZV04wYVhScGIyNWxjaTAzTVRRNE1qY3hNeUlzSW1saGRDSTZNVFUxT0RjeE1EazJOQ3dpWlhod0lqb3hOVGt3TWpRMk9UWTFmUS5mNXlOWS15S0tEZTBhNTlfZUZncDZzMHJIU2dQTFhnbUFXRFB6X2hFVWdzIiwidG9rZW5fdHlwZSI6ImJlYXJlciIsInNjb3BlIjoib3BlbmlkIGZoaXJVc2VyIG9mZmxpbmVfYWNjZXNzIHVzZXIvKi4qIHBhdGllbnQvKi4qIGxhdW5jaC9lbmNvdW50ZXIgbGF1bmNoL3BhdGllbnQgcHJvZmlsZSIsImNsaWVudF9pZCI6Im15X3dlYl9hcHAiLCJleHBpcmVzX2luIjozNjAwLCJpZF90b2tlbiI6ImV5SjBlWEFpT2lKS1YxUWlMQ0poYkdjaU9pSlNVekkxTmlKOS5leUp3Y205bWFXeGxJam9pVUhKaFkzUnBkR2x2Ym1WeUwzTnRZWEowTFZCeVlXTjBhWFJwYjI1bGNpMDNNVFE0TWpjeE15SXNJbVpvYVhKVmMyVnlJam9pVUhKaFkzUnBkR2x2Ym1WeUwzTnRZWEowTFZCeVlXTjBhWFJwYjI1bGNpMDNNVFE0TWpjeE15SXNJbUYxWkNJNkltMTVYM2RsWWw5aGNIQWlMQ0p6ZFdJaU9pSmtZakl6WkRCa1pUSTFOamM0WlRZM01EazVZbU0wTXpRek1qTmtZekJrT1RZMU1UTmlOVFV5TW1RMFlqYzBNV05pWVRNNVpqZGpPVEprTUdNME5tRmxJaXdpYVhOeklqb2lhSFIwY0RvdkwyeGhkVzVqYUM1emJXRnlkR2hsWVd4MGFHbDBMbTl5WnlJc0ltbGhkQ0k2TVRVMU9EY3hNRGsyTlN3aVpYaHdJam94TlRVNE56RTBOVFkxZlEuVzFPSmdWUl9wOTdERlRaSmZhLWI2aWRmNktZMTUtbE81WU9nNHROZkJ5X3dmUHVpbHBUeXZBcDFHRnc2TFpGMnFhNkFWYV9oc1BoXy1GSTJKNkN6MGlqZkFZbVMzdFZwYVZYSGhpMjZsUG5QdUIxVjFUbWJ6YVhDWmJYaC1pdjl4WTNZQXFFRTgyMjFjTXRzQ3FXUFM3aUlMYmJJZmozQnlNMm04aXNRVS1pOGhxLUdTV2ZKNTlwczRGMFZNdlI0QmlPUUdIOXQ5TFQ0TDVxNnNsLU9ONUpJVnJFdnEweFJQVjBrTnpqbUVheklLbV9MMllZM09yMVYwbE02Q0otM2U4RkdkUElIRlRpMjJXcVc1dXhBU2NDVm1hZ1h4S2l5T2xNRWc3dGtjUHA3MjJtS3B0MTMwT3lzaUZyOGpZaElYZkdhX3VGN0tDVFhTZ0RrZEV1WlNRIiwiaWF0IjoxNTU4NzEwOTY1LCJleHAiOjE1NTg3MTQ1NjV9.FDRzViWLg4rMfDzr7Bx01pt5t7CapzcJwQcaFTVcu3E"
+        };
+
+        client.state = {
+            provider: {
+                oauth2: {
+                    token_uri: mockUrl
+                }
+            }
+        };
+
+        const fakeTokenResponse = {
+            headers: {
+                "content-type": "application/json"
+            },
+            status: 200,
+            body: {
+                "expires_in": 3600,
+                "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJuZWVkX3BhdGllbnRfYmFubmVyIjp0cnVlLCJzbWFydF9zdHlsZV91cmwiOiJodHRwczovL2xhdW5jaC5zbWFydGhlYWx0aGl0Lm9yZy9zbWFydC1zdHlsZS5qc29uIiwicGF0aWVudCI6ImViMzI3MWUxLWFlMWItNDY0NC05MzMyLTQxZTMyYzgyOTQ4NiIsImVuY291bnRlciI6IjMxYjE4YWEwLTBkYTctNDQ2MC05NjMzLTA0YWY0MTQ2NmQ3NiIsInJlZnJlc2hfdG9rZW4iOiJleUowZVhBaU9pSktWMVFpTENKaGJHY2lPaUpJVXpJMU5pSjkuZXlKamIyNTBaWGgwSWpwN0ltNWxaV1JmY0dGMGFXVnVkRjlpWVc1dVpYSWlPblJ5ZFdVc0luTnRZWEowWDNOMGVXeGxYM1Z5YkNJNkltaDBkSEJ6T2k4dmJHRjFibU5vTG5OdFlYSjBhR1ZoYkhSb2FYUXViM0puTDNOdFlYSjBMWE4wZVd4bExtcHpiMjRpTENKd1lYUnBaVzUwSWpvaVpXSXpNamN4WlRFdFlXVXhZaTAwTmpRMExUa3pNekl0TkRGbE16SmpPREk1TkRnMklpd2laVzVqYjNWdWRHVnlJam9pTXpGaU1UaGhZVEF0TUdSaE55MDBORFl3TFRrMk16TXRNRFJoWmpReE5EWTJaRGMySW4wc0ltTnNhV1Z1ZEY5cFpDSTZJbTE1WDNkbFlsOWhjSEFpTENKelkyOXdaU0k2SW05d1pXNXBaQ0JtYUdseVZYTmxjaUJ2Wm1ac2FXNWxYMkZqWTJWemN5QjFjMlZ5THlvdUtpQndZWFJwWlc1MEx5b3VLaUJzWVhWdVkyZ3ZaVzVqYjNWdWRHVnlJR3hoZFc1amFDOXdZWFJwWlc1MElIQnliMlpwYkdVaUxDSjFjMlZ5SWpvaVVISmhZM1JwZEdsdmJtVnlMM050WVhKMExWQnlZV04wYVhScGIyNWxjaTAzTVRRNE1qY3hNeUlzSW1saGRDSTZNVFUxT0RjeE1EazJOQ3dpWlhod0lqb3hOVGt3TWpRMk9UWTFmUS5mNXlOWS15S0tEZTBhNTlfZUZncDZzMHJIU2dQTFhnbUFXRFB6X2hFVWdzIiwidG9rZW5fdHlwZSI6ImJlYXJlciIsInNjb3BlIjoib3BlbmlkIGZoaXJVc2VyIG9mZmxpbmVfYWNjZXNzIHVzZXIvKi4qIHBhdGllbnQvKi4qIGxhdW5jaC9lbmNvdW50ZXIgbGF1bmNoL3BhdGllbnQgcHJvZmlsZSIsImNsaWVudF9pZCI6Im15X3dlYl9hcHAiLCJleHBpcmVzX2luIjozNjAwLCJpZF90b2tlbiI6ImV5SjBlWEFpT2lKS1YxUWlMQ0poYkdjaU9pSlNVekkxTmlKOS5leUp3Y205bWFXeGxJam9pVUhKaFkzUnBkR2x2Ym1WeUwzTnRZWEowTFZCeVlXTjBhWFJwYjI1bGNpMDNNVFE0TWpjeE15SXNJbVpvYVhKVmMyVnlJam9pVUhKaFkzUnBkR2x2Ym1WeUwzTnRZWEowTFZCeVlXTjBhWFJwYjI1bGNpMDNNVFE0TWpjeE15SXNJbUYxWkNJNkltMTVYM2RsWWw5aGNIQWlMQ0p6ZFdJaU9pSmtZakl6WkRCa1pUSTFOamM0WlRZM01EazVZbU0wTXpRek1qTmtZekJrT1RZMU1UTmlOVFV5TW1RMFlqYzBNV05pWVRNNVpqZGpPVEprTUdNME5tRmxJaXdpYVhOeklqb2lhSFIwY0RvdkwyeGhkVzVqYUM1emJXRnlkR2hsWVd4MGFHbDBMbTl5WnlJc0ltbGhkQ0k2TVRVMU9EY3hNRGsyTlN3aVpYaHdJam94TlRVNE56RTBOVFkxZlEuVzFPSmdWUl9wOTdERlRaSmZhLWI2aWRmNktZMTUtbE81WU9nNHROZkJ5X3dmUHVpbHBUeXZBcDFHRnc2TFpGMnFhNkFWYV9oc1BoXy1GSTJKNkN6MGlqZkFZbVMzdFZwYVZYSGhpMjZsUG5QdUIxVjFUbWJ6YVhDWmJYaC1pdjl4WTNZQXFFRTgyMjFjTXRzQ3FXUFM3aUlMYmJJZmozQnlNMm04aXNRVS1pOGhxLUdTV2ZKNTlwczRGMFZNdlI0QmlPUUdIOXQ5TFQ0TDVxNnNsLU9ONUpJVnJFdnEweFJQVjBrTnpqbUVheklLbV9MMllZM09yMVYwbE02Q0otM2U4RkdkUElIRlRpMjJXcVc1dXhBU2NDVm1hZ1h4S2l5T2xNRWc3dGtjUHA3MjJtS3B0MTMwT3lzaUZyOGpZaElYZkdhX3VGN0tDVFhTZ0RrZEV1WlNRIiwiaWF0IjoxNTU4NzEwOTY1LCJleHAiOjE1NTg3MTQ1NjV9.FDRzViWLg4rMfDzr7Bx01pt5t7CapzcJwQcaFTVcu3E"
+            }
+        };
+
+        mockServer.mock(fakeTokenResponse);
+
+        // 1. Manual refresh
+        await client.refresh();
+        expect(client.tokenResponse.expires_in).to.equal(3600);
+
+        // 2. Automatic refresh
+        client.tokenResponse.expires_in = 0;
+        mockServer.mock({ status: 401, body: "Unauthorized" });
+        mockServer.mock(fakeTokenResponse);
+        mockServer.mock({
+            status: 200,
+            headers: {
+                "content-type": "application/json"
+            },
+            body: {
+                msg: "successful after all"
+            }
+        });
+        const result = await client.request("/Patient");
+        expect(result).to.equal({ msg: "successful after all" });
+    });
+
+    // it ("client.get");
+
+    it ("client.getBinary", async () => {
+        const client = new window.FHIR.client(OPEN_FHIR_SERVER);
+        
+        const { data } = await client.getBinary("https://r3.smarthealthit.org/Binary/smart-4-photo")
+            .catch(() => {
+                throw new Error("getBinary should not throw");
+            });
+        expect(data).to.be.instanceof(window.Blob);
+
+        // const data2 = await client.request({
+        //     url: "https://r3.smarthealthit.org/Binary/smart-4-photo",
+        //     dataType: "blob"
+        // }).catch(() => {
+        //     throw new Error("binary request should not throw");
+        // });
+        // expect(data2).to.be.instanceof(window.Blob);
+    });
+
+    it ("client.fetchBinary", async () => {
+        const client = new window.FHIR.client(OPEN_FHIR_SERVER);
+        
+        const { data } = await client.fetchBinary("Binary/smart-4-photo")
+            .catch(() => {
+                throw new Error("getBinary should not throw");
+            });
+        expect(data).to.be.instanceof(window.Blob);
+    });
     
     describe("client.api", () => {
         it ("conformance", async () => {
@@ -1445,7 +1478,11 @@ describe("FHIR.client", () => {
                 console.error(e);
                 throw new Error("client.api.conformance({}) should not throw");
             });
-            expect(data).to.equal({ conformance: true });
+            expect(data).to.include({
+                data: {
+                    conformance: true
+                }
+            });
         });
         // it ("document");
         // it ("profile");
@@ -1515,7 +1552,7 @@ describe("FHIR.client", () => {
             status: 201
         });
 
-        const data = await client.get({ resource: "Patient", id: 5 }).catch(() => {
+        const data = await client.request("Patient/5").catch(() => {
             throw new Error("json response with no body should not throw");
         });
         

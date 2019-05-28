@@ -1,12 +1,11 @@
 (function() {
+    /* global angular, fhir */
+    var smart = require("../client/entry");
 
-    var smart = require('../client/entry');
+    angular.module("ng-fhir", ["ng"]);
 
-    angular.module('ng-fhir', ['ng']);
-
-    angular.module('ng-fhir').provider('$fhir', function() {
-        var prov;
-        return prov = {
+    angular.module("ng-fhir").provider("$fhir", function() {
+        return {
             $get: function($http, $q) {
                 var adapter = {http: $http, defer: $q.defer, fhirjs: fhir};
                 return smart(adapter);

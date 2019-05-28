@@ -1,10 +1,10 @@
-var client = require('./client');
-var oauth2 = require('./bb-client');
-var adapter = require('./adapter');
+const client       = require("./client");
+const { BBClient } = require("./bb-client");
+const adapter      = require("./adapter");
 
 window.FHIR = {
-  client: client,
-  oauth2: oauth2
+    client,
+    oauth2: BBClient
 };
 
 module.exports = adapter.set;

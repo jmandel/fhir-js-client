@@ -2,67 +2,67 @@ var utils = module.exports =  {};
 
 utils.byCodes = function(observations, property){
 
-  var bank = utils.byCode(observations, property);
-  function byCodes(){
-    var ret = [];
-    for (var i=0; i<arguments.length;i++){
-      var set = bank[arguments[i]];
-      if (set) {[].push.apply(ret, set);}
+    var bank = utils.byCode(observations, property);
+    function byCodes(){
+        var ret = [];
+        for (var i=0; i<arguments.length;i++){
+            var set = bank[arguments[i]];
+            if (set) {[].push.apply(ret, set);}
+        }
+        return ret;
     }
-    return ret;
-  }
 
-  return byCodes;
+    return byCodes;
 };
 
 utils.byCode = function(observations, property){
-  var ret = {};
-  if (!Array.isArray(observations)){
-    observations = [observations];
-  }
-  observations.forEach(function(o){
-    if (o.resourceType === "Observation"){
-      if (o[property] && Array.isArray(o[property].coding)) {
-        o[property].coding.forEach(function (coding){
-          ret[coding.code] = ret[coding.code] || [];
-          ret[coding.code].push(o);
-        });
-      }
+    var ret = {};
+    if (!Array.isArray(observations)){
+        observations = [observations];
     }
-  });
-  return ret;
+    observations.forEach(function(o){
+        if (o.resourceType === "Observation"){
+            if (o[property] && Array.isArray(o[property].coding)) {
+                o[property].coding.forEach(function (coding){
+                    ret[coding.code] = ret[coding.code] || [];
+                    ret[coding.code].push(o);
+                });
+            }
+        }
+    });
+    return ret;
 };
 
 function ensureNumerical(pq) {
-  if (typeof pq.value !== "number") {
-    throw "Found a non-numerical unit: " + pq.value + " " + pq.code;
-  }
-};
+    if (typeof pq.value !== "number") {
+        throw "Found a non-numerical unit: " + pq.value + " " + pq.code;
+    }
+}
 
 utils.units = {
-  cm: function(pq){
-    ensureNumerical(pq);
-    if(pq.code == "cm") return pq.value;
-    if(pq.code == "m") return 100*pq.value;
-    if(pq.code == "in") return 2.54*pq.value;
-    if(pq.code == "[in_us]") return 2.54*pq.value;
-    if(pq.code == "[in_i]") return 2.54*pq.value;
-    if(pq.code == "ft") return 30.48*pq.value;
-    if(pq.code == "[ft_us]") return 30.48*pq.value;
-    throw "Unrecognized length unit: " + pq.code
-  },
-  kg: function(pq){
-    ensureNumerical(pq);
-    if(pq.code == "kg") return pq.value;
-    if(pq.code == "g") return pq.value / 1000;
-    if(pq.code.match(/lb/)) return pq.value / 2.20462;
-    if(pq.code.match(/oz/)) return pq.value / 35.274;
-    throw "Unrecognized weight unit: " + pq.code
-  },
-  any: function(pq){
-    ensureNumerical(pq);
-    return pq.value
-  }
+    cm({ code, value }) {
+        ensureNumerical({ code, value });
+        if (code == "cm"     ) return value;
+        if (code == "m"      ) return   100 * value;
+        if (code == "in"     ) return  2.54 * value;
+        if (code == "[in_us]") return  2.54 * value;
+        if (code == "[in_i]" ) return  2.54 * value;
+        if (code == "ft"     ) return 30.48 * value;
+        if (code == "[ft_us]") return 30.48 * value;
+        throw "Unrecognized length unit: " + code;
+    },
+    kg({ code, value }){
+        ensureNumerical({ code, value });
+        if(code == "kg"    ) return value;
+        if(code == "g"     ) return value / 1000;
+        if(code.match(/lb/)) return value / 2.20462;
+        if(code.match(/oz/)) return value / 35.274;
+        throw "Unrecognized weight unit: " + code;
+    },
+    any(pq){
+        ensureNumerical(pq);
+        return pq.value;
+    }
 };
 
 

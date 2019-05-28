@@ -1,5 +1,6 @@
 (function() {
-    var smart = require('../client/entry');
+    /* global jQuery, fhir */
+    var smart  = require("../client/entry");
     var jquery = jQuery;
 
     // Patch jQuery AJAX mechanism to receive blob objects via XMLHttpRequest 2. Based on:
@@ -7,7 +8,7 @@
     //    http://www.artandlogic.com/blog/2013/11/jquery-ajax-blobs-and-array-buffers/
 
     /**
-     * Register ajax transports for blob send/recieve and array buffer send/receive via XMLHttpRequest Level 2
+     * Register ajax transports for blob send/receive and array buffer send/receive via XMLHttpRequest Level 2
      * within the comfortable framework of the jquery ajax request, with full support for promises.
      *
      * Notice the +* in the dataType string? The + indicates we want this transport to be prepended to the list
@@ -18,14 +19,14 @@
      * Remember to specify 'processData:false' in the ajax options when attempting to send a blob or arraybuffer -
      * otherwise jquery will try (and fail) to convert the blob or buffer into a query string.
      */
-    jQuery.ajaxTransport("+*", function(options, originalOptions, jqXHR){
+    jquery.ajaxTransport("+*", function(options, originalOptions, jqXHR){
         // Test for the conditions that mean we can/want to send/receive blobs or arraybuffers - we need XMLHttpRequest
         // level 2 (so feature-detect against window.FormData), feature detect against window.Blob or window.ArrayBuffer,
         // and then check to see if the dataType is blob/arraybuffer or the data itself is a Blob/ArrayBuffer
-        if (window.FormData && ((options.dataType && (options.dataType === 'blob' || options.dataType === 'arraybuffer')) ||
+        if (window.FormData && ((options.dataType && (options.dataType === "blob" || options.dataType === "arraybuffer")) ||
             (options.data && ((window.Blob && options.data instanceof Blob) ||
                 (window.ArrayBuffer && options.data instanceof ArrayBuffer)))
-            ))
+        ))
         {
             return {
                 /**
@@ -39,21 +40,21 @@
                 send: function(headers, completeCallback){
                     var xhr = new XMLHttpRequest(),
                         url = options.url || window.location.href,
-                        type = options.type || 'GET',
-                        dataType = options.dataType || 'text',
+                        type = options.type || "GET",
+                        dataType = options.dataType || "text",
                         data = options.data || null,
                         async = options.async || true,
                         key;
 
-                    xhr.addEventListener('load', function(){
-                        var response = {}, status, isSuccess;
+                    xhr.addEventListener("load", function(){
+                        var response = {}, isSuccess;
 
                         isSuccess = xhr.status >= 200 && xhr.status < 300 || xhr.status === 304;
 
                         if (isSuccess) {
                             response[dataType] = xhr.response;
                         } else {
-                            // In case an error occured we assume that the response body contains
+                            // In case an error occurred we assume that the response body contains
                             // text data - so let's convert the binary data to a string which we can
                             // pass to the complete callback.
                             response.text = String.fromCharCode.apply(null, new Uint8Array(xhr.response));
@@ -91,11 +92,38 @@
                 url: args.url,
                 dataType: args.dataType || "json",
                 headers: args.headers || {},
-                data: args.data
+                data: args.data,
+
+                // Filters weird cases where the servers replies with json
+                // content-type header but has no response body (for example
+                // "201 Created" after creating a resource).
+                // dataFilter: function(data, dataType) {
+                //     if (dataType == "json" && data === "") {
+                //         return "null";
+                //     }
+                //     return data;
+                // }
             };
             jquery.ajax(opts)
-                .done(ret.resolve)
-                .fail(ret.reject);
+                // .done(ret.resolve)
+                // .fail(ret.reject);
+                .done(
+                    function(data, status, xhr) {
+                        ret.resolve({
+                            data: data,
+                            status: status,
+                            headers: xhr.getResponseHeader,
+                            config: args
+                        });
+                    }
+                )
+                .fail(function(err) {
+                    ret.reject({
+                        error: err,
+                        data: err,
+                        config: args
+                    });
+                });
             return ret.promise();
         },
         fhirjs: fhir

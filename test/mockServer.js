@@ -8,6 +8,7 @@ app.use(cors());
 const mocks = [];
 
 app.mock = mock => mocks.push(mock);
+app.clear = () => mocks.splice(0, mocks.length);
 
 
 app.all("*", (req, res, next) => {
