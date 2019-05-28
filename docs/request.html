@@ -236,7 +236,7 @@ const client = new FHIR.client({
     userId: "Practitioner/smart-Practitioner-72080416"
 });
 
-client.request(client.userId).then(display).catch(display);
+client.request(client.user.id).then(display).catch(display);
 </pre>
 </div>
 </section>
