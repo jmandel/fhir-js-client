@@ -7381,6 +7381,36 @@ module.exports = verify
 
 /***/ }),
 
+/***/ "./node_modules/btoa/index.js":
+/*!************************************!*\
+  !*** ./node_modules/btoa/index.js ***!
+  \************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(Buffer) {(function () {
+  "use strict";
+
+  function btoa(str) {
+    var buffer
+      ;
+
+    if (str instanceof Buffer) {
+      buffer = str;
+    } else {
+      buffer = new Buffer(str.toString(), 'binary');
+    }
+
+    return buffer.toString('base64');
+  }
+
+  module.exports = btoa;
+}());
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node-libs-browser/node_modules/buffer/index.js */ "./node_modules/node-libs-browser/node_modules/buffer/index.js").Buffer))
+
+/***/ }),
+
 /***/ "./node_modules/buffer-equal-constant-time/index.js":
 /*!**********************************************************!*\
   !*** ./node_modules/buffer-equal-constant-time/index.js ***!
@@ -38657,6 +38687,105 @@ module.exports = function(module) {
 
 /***/ }),
 
+/***/ "./src/HttpError.js":
+/*!**************************!*\
+  !*** ./src/HttpError.js ***!
+  \**************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
+
+function isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _construct(Parent, args, Class) { if (isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+
+function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var HttpError =
+/*#__PURE__*/
+function (_Error) {
+  _inherits(HttpError, _Error);
+
+  function HttpError(message, statusCode, statusText) {
+    var _this;
+
+    _classCallCheck(this, HttpError);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(HttpError).call(this, message));
+    _this.message = message;
+    _this.name = "HttpError";
+    _this.statusCode = statusCode;
+    _this.status = statusCode;
+    _this.statusText = statusText;
+    return _this;
+  }
+
+  _createClass(HttpError, [{
+    key: "toJSON",
+    value: function toJSON() {
+      return {
+        name: this.name,
+        statusCode: this.statusCode,
+        status: this.status,
+        statusText: this.statusText,
+        message: this.message
+      };
+    }
+  }], [{
+    key: "create",
+    value: function create(failure) {
+      // start with generic values
+      var status = 0;
+      var statusText = "Error";
+      var message = "Unknown error";
+
+      if (failure) {
+        if (_typeof(failure) == "object") {
+          if (failure instanceof Error) {
+            message = failure.message; // console.log(failure.stack);
+          } else if (failure.error) {
+            status = failure.error.status || 0;
+            statusText = failure.error.statusText || "Error";
+
+            if (failure.error.responseText) {
+              message = failure.error.responseText;
+            }
+          }
+        } else if (typeof failure == "string") {
+          message = failure;
+        }
+      }
+
+      return new HttpError(message, status, statusText);
+    }
+  }]);
+
+  return HttpError;
+}(_wrapNativeSuper(Error));
+
+module.exports = HttpError;
+
+/***/ }),
+
 /***/ "./src/adapters/angularjs.js":
 /*!***********************************!*\
   !*** ./src/adapters/angularjs.js ***!
@@ -39224,145 +39353,89 @@ BBClient.resolveAuthType = function (fhirServiceUrl, callback, errback) {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-// var btoa    = require("btoa");
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+var btoa = __webpack_require__(/*! btoa */ "./node_modules/btoa/index.js");
+
 var Adapter = __webpack_require__(/*! ./adapter */ "./src/client/adapter.js");
-/**
- * Walks through an object (or array) and returns the value found at the
- * provided path. This function is very simple so it intentionally does not
- * support any argument polymorphism, meaning that the path can only be a
- * dot-separated string. If the path is invalid returns undefined.
- * @param {Object} obj The object (or Array) to walk through
- * @param {String} path The path (eg. "a.b.4.c")
- * @returns {*} Whatever is found in the path or undefined
- */
 
+var HttpError = __webpack_require__(/*! ../HttpError */ "./src/HttpError.js");
 
-function getPath(obj) {
-  var path = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "";
-  path = path.trim();
+var clientUtils = __webpack_require__(/*! ./utils */ "./src/client/utils.js");
 
-  if (!path) {
-    return obj;
-  }
+var _require = __webpack_require__(/*! ../lib */ "./src/lib.js"),
+    absolute = _require.absolute,
+    getPath = _require.getPath,
+    setPath = _require.setPath,
+    makeArray = _require.makeArray;
 
-  return path.split(".").reduce(function (out, key) {
-    return out ? out[key] : undefined;
-  }, obj);
-}
-
-function setPath(obj, path, value) {
-  path.trim().split(".").reduce(function (out, key, idx, arr) {
-    if (out && idx === arr.length - 1) {
-      out[key] = value;
-    } else {
-      return out ? out[key] : undefined;
-    }
-  }, obj);
-}
-
-function makeArray(arg) {
-  if (Array.isArray(arg)) {
-    return arg;
-  }
-
-  return [arg];
-}
-
-function absolute(path, server) {
-  if (path.match(/^http/)) return path;
-  if (path.match(/^urn/)) return path;
-  return server.serviceUrl.replace(/\/+$/, "") + "/" + path.replace(/^\/+/, "");
-}
-
-function HTTPError(message, statusCode, statusText) {
-  Error.call(this, message);
-  this.message = message;
-  this.name = "HTTPError";
-  this.statusCode = statusCode;
-  this.status = statusCode;
-  this.statusText = statusText;
-}
-
-HTTPError.prototype = new Error();
-
-HTTPError.prototype.toJSON = function () {
-  return {
-    name: this.name,
-    statusCode: this.statusCode,
-    status: this.status,
-    statusText: this.statusText,
-    message: this.message
+function connectFhirJs(client, adapter) {
+  var clientApi, patientApi;
+  var options = {
+    baseUrl: client.options.serviceUrl.replace(/\/$/, ""),
+    auth: _objectSpread({}, client.options.auth)
   };
-};
 
-HTTPError.create = function (failure) {
-  // start with generic values
-  var status = 0;
-  var statusText = "Error";
-  var message = "Unknown error";
+  if (options.auth.type == "bearer") {
+    options.auth.bearer = client.options.auth.token;
+    delete options.auth.token;
+  }
 
-  if (failure) {
-    if (_typeof(failure) == "object") {
-      if (failure instanceof Error) {
-        message = failure.message;
-      } else if (failure.error) {
-        status = failure.error.status || 0;
-        statusText = failure.error.statusText || "Error";
-
-        if (failure.error.responseText) {
-          message = failure.error.responseText;
-        }
+  Object.defineProperty(client, "api", {
+    enumerable: true,
+    get: function get() {
+      // console.warn("Using client.api is deprecated!");
+      if (!clientApi) {
+        clientApi = createAPI(adapter, options);
       }
-    } else if (typeof failure == "string") {
-      message = failure;
+
+      return clientApi;
     }
-  } // console.log("failure: ", failure)
+  });
 
-
-  return new HTTPError(message, status, statusText);
-};
-
-function createAPI(fhir, options) {
-  var api = fhir(options, Adapter.get());
-  ["conformance", // "document", "profile", "transaction", "history",
-  // "typeHistory", "resourceHistory",
-  "read"].forEach(function (name) {
-    api[name] = function (orig) {
-      return function () {
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
+  if (client.patient && client.patient.id) {
+    Object.defineProperty(client.patient, "api", {
+      enumerable: true,
+      get: function get() {
+        // console.warn("Using client.patient.api is deprecated!");
+        if (!patientApi) {
+          patientApi = createAPI(adapter, _objectSpread({}, options, {
+            patient: client.patient.id
+          }));
         }
 
-        return orig.apply(api, args).then(function (_ref) {
-          var data = _ref.data;
-          return data;
-        }, function (failure) {
-          throw HTTPError.create(failure);
-        });
-      };
-    }(api[name]);
-  }); // for (const name in api) {
-  //     if (api.hasOwnProperty(name) && typeof api[name] == "function") {
-  //         api[name] = (function(orig) {
-  //             return (...args) => orig.apply(api, args).then(
-  //                 ({ data }) => data,
-  //                 failure => {
-  //                     throw HTTPError.create(failure);
-  //                 }
-  //             );
-  //         })(api[name]);
-  //     }
-  // }
+        return patientApi;
+      }
+    });
+  }
+}
+
+function createAPI(adapter, options) {
+  var api = adapter.fhirjs(options, adapter);
+
+  for (var name in api) {
+    if (api.hasOwnProperty(name) && typeof api[name] == "function") {
+      api[name] = function (orig) {
+        return function () {
+          for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+          }
+
+          return orig.apply(api, args)["catch"](function (failure) {
+            throw HttpError.create(failure);
+          });
+        };
+      }(api[name]);
+    }
+  }
 
   return api;
 }
@@ -39371,91 +39444,123 @@ module.exports = FhirClient;
 
 function ClientPrototype() {}
 
-var clientUtils = __webpack_require__(/*! ./utils */ "./src/client/utils.js");
-
 Object.keys(clientUtils).forEach(function (k) {
   ClientPrototype.prototype[k] = clientUtils[k];
 });
 /**
- * 
  * @param {Object} p
  * @param {String} p.serviceUrl 
  * @param {Object} p.auth 
+ * @param {String} p.userId
+ * @param {String} p.patientId
  * @param {String} p.auth.type
+ * @param {String} p.auth.token
  * @param {String} p.auth.username
  * @param {String} p.auth.password
- * @param {String} p.auth.token
- * @param {String} p.patientId
- * @param {String} p.userId
  */
 
 function FhirClient(p) {
+  // Accept string as argument
   if (typeof p == "string") {
     p = {
       serviceUrl: p
     };
-  } // p.serviceUrl
-  // p.auth {
-  //    type: 'none' | 'basic' | 'bearer'
-  //    basic --> username, password
-  //    bearer --> token
-  // }
+  } // Valid serviceUrl is required!
 
 
-  var client = new ClientPrototype();
-  var fhir = Adapter.get().fhirjs;
-  var server = client.server = {
+  if (!p.serviceUrl || !p.serviceUrl.match(/https?:\/\/.+/)) {
+    throw new Error("A `serviceUrl` option is required and must begin with 'http(s)'");
+  } // Build the options object
+
+
+  var options = {
     serviceUrl: p.serviceUrl,
-    auth: p.auth || {
+    userId: p.userId || null,
+    patientId: p.patientId || null,
+    auth: {
       type: "none"
     }
   };
-  var auth = {};
 
-  if (server.auth.type === "basic") {
-    auth = {
-      user: server.auth.username,
-      pass: server.auth.password
-    };
-  } else if (server.auth.type === "bearer") {
-    auth = {
-      bearer: server.auth.token
-    };
-  } // client.api = fhir({
-  //     baseUrl: server.serviceUrl,
-  //     auth: auth
-  // }, Adapter.get());
+  if (p.auth && _typeof(p.auth) == "object") {
+    var _p$auth = p.auth,
+        user = _p$auth.username,
+        pass = _p$auth.password,
+        type = _p$auth.type,
+        token = _p$auth.token;
 
+    if (type === "basic") {
+      if (!user) {
+        throw new Error("A 'username' option is required for basic auth");
+      }
 
-  client.api = createAPI(fhir, {
-    baseUrl: server.serviceUrl,
-    auth: auth
-  });
+      if (!pass) {
+        throw new Error("A 'password' option is required for basic auth");
+      }
 
-  if (p.patientId) {
-    client.patient = {};
-    client.patient.id = p.patientId;
-    client.patient.api = createAPI(fhir, {
-      baseUrl: server.serviceUrl,
-      patient: p.patientId,
-      auth: auth
-    });
+      options.auth = {
+        type: type,
+        user: user,
+        pass: pass
+      };
+    } else if (type === "bearer") {
+      if (!token) {
+        throw new Error("A 'token' option is required for bearer auth");
+      }
 
-    client.patient.read = function () {
-      return client.get({
-        resource: "Patient"
-      });
-    };
+      options.auth = {
+        type: type,
+        token: token
+      };
+    }
   }
 
-  var fhirAPI = client.patient ? client.patient.api : client.api;
-  client.userId = p.userId;
-  server.auth = server.auth || {
-    type: "none"
-  };
+  var adapter = Adapter.get();
+  var client = new ClientPrototype();
+  client.options = options;
+  client.getPath = getPath; // -------------------------------------------------------------------------
 
-  if (!client.server.serviceUrl || !client.server.serviceUrl.match(/https?:\/\/.+[^/]$/)) {
-    throw "Must supply a `server` property whose `serviceUrl` begins with http(s) " + "and does NOT include a trailing slash. E.g. `https://fhir.aws.af.cm/fhir`";
+  client.patient = {
+    id: options.patientId,
+    read: function read() {
+      if (!options.patientId) {
+        throw new Error("Patient is not known! You have to request launch or " + "launch/Patient scope, or pass a patientId option to the client");
+      }
+
+      return client.request("Patient/".concat(options.patientId));
+    }
+  };
+  client.user = {
+    id: options.userId,
+    read: function read() {
+      if (!options.userId) {
+        throw new Error("User is not known! You have to request openid and fhirUser " + "scopes, or pass an userId option to the client");
+      }
+
+      return client.request(options.userId);
+    }
+  };
+  connectFhirJs(client, adapter);
+
+  function authenticated(p) {
+    if (options.auth.type === "none") {
+      return p;
+    }
+
+    var h;
+
+    if (options.auth.type === "basic") {
+      h = "Basic " + btoa(options.auth.user + ":" + options.auth.pass);
+    } else if (options.auth.type === "bearer") {
+      h = "Bearer " + options.auth.token;
+    }
+
+    if (!p.headers) {
+      p.headers = {};
+    }
+
+    p.headers.Authorization = h;
+    return p;
   } // =========================================================================
 
   /**
@@ -39471,7 +39576,7 @@ function FhirClient(p) {
    * will also be requested and appended to the result. You can use it like so:
    * - fhirOptions.pageLimit = 1 - (default) Only get the current page
    * - fhirOptions.pageLimit = 3 - Get the first 3 pages
-   * - fhirOptions.pageLimit = Infinity - Get all pages
+   * - fhirOptions.pageLimit = 0 - Get all pages
    * @param {String|String[]} fhirOptions.resolveReferences One or more
    * references to resolve. 
    * @param {Boolean} fhirOptions.graph Ignored if `fhirOptions.resolveReferences`
@@ -39485,7 +39590,8 @@ function FhirClient(p) {
 
   client.request = function (requestOptions) {
     var fhirOptions = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-    var resolvedRefs = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+    var _resolvedRefs = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
     // requestOptions.url
     if (typeof requestOptions == "string") {
@@ -39494,7 +39600,9 @@ function FhirClient(p) {
       };
     }
 
-    requestOptions.url = absolute(requestOptions.url, server); // fhirOptions.resolveReferences
+    requestOptions.url = absolute(requestOptions.url, options.serviceUrl); // authentication
+
+    requestOptions = authenticated(requestOptions); // fhirOptions.resolveReferences
 
     if (!Array.isArray(fhirOptions.resolveReferences)) {
       fhirOptions.resolveReferences = [fhirOptions.resolveReferences];
@@ -39509,13 +39617,25 @@ function FhirClient(p) {
     }
 
     var hasPageCallback = typeof fhirOptions.onPage == "function";
-    return Adapter.get().http(requestOptions).then(function (result) {
+    return adapter.http(requestOptions)["catch"](function (result) {
+      if (result.error.status == 401 && fhirOptions.useRefreshToken !== false) {
+        var hasRefreshToken = getPath(client, "tokenResponse.refresh_token");
+
+        if (hasRefreshToken) {
+          return client.refresh().then(function () {
+            return adapter.http(requestOptions);
+          });
+        }
+      }
+
+      return Promise.reject(result.error);
+    }).then(function (result) {
       return result.data;
-    }) // Resolve Refernces
+    }) // Resolve References
     .then(
     /*#__PURE__*/
     function () {
-      var _ref2 = _asyncToGenerator(
+      var _ref = _asyncToGenerator(
       /*#__PURE__*/
       regeneratorRuntime.mark(function _callee2(data) {
         var resolve, _resolve, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, item;
@@ -39524,7 +39644,7 @@ function FhirClient(p) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                _resolve = function _ref4() {
+                _resolve = function _ref3() {
                   _resolve = _asyncToGenerator(
                   /*#__PURE__*/
                   regeneratorRuntime.mark(function _callee(obj) {
@@ -39554,7 +39674,7 @@ function FhirClient(p) {
                               break;
                             }
 
-                            sub = resolvedRefs[ref];
+                            sub = _resolvedRefs[ref];
 
                             if (sub) {
                               _context.next = 15;
@@ -39566,7 +39686,7 @@ function FhirClient(p) {
 
                           case 13:
                             sub = _context.sent;
-                            resolvedRefs[ref] = sub;
+                            _resolvedRefs[ref] = sub;
 
                           case 15:
                             if (fhirOptions.graph) {
@@ -39622,11 +39742,11 @@ function FhirClient(p) {
                   return _resolve.apply(this, arguments);
                 };
 
-                resolve = function _ref3(_x2) {
+                resolve = function _ref2(_x2) {
                   return _resolve.apply(this, arguments);
                 };
 
-                if (!(data.resourceType == "Bundle")) {
+                if (!(data && data.resourceType == "Bundle")) {
                   _context2.next = 31;
                   break;
                 }
@@ -39706,13 +39826,13 @@ function FhirClient(p) {
       }));
 
       return function (_x) {
-        return _ref2.apply(this, arguments);
+        return _ref.apply(this, arguments);
       };
     }()) // Pagination
     .then(
     /*#__PURE__*/
     function () {
-      var _ref5 = _asyncToGenerator(
+      var _ref4 = _asyncToGenerator(
       /*#__PURE__*/
       regeneratorRuntime.mark(function _callee3(data) {
         var links, next, nextPage;
@@ -39731,7 +39851,7 @@ function FhirClient(p) {
                 }
 
                 _context3.next = 4;
-                return fhirOptions.onPage(data, _objectSpread({}, resolvedRefs));
+                return fhirOptions.onPage(data, _objectSpread({}, _resolvedRefs));
 
               case 4:
                 if (! --fhirOptions.pageLimit) {
@@ -39751,7 +39871,7 @@ function FhirClient(p) {
                 }
 
                 _context3.next = 11;
-                return client.request(next.url, fhirOptions, resolvedRefs);
+                return client.request(next.url, fhirOptions, _resolvedRefs);
 
               case 11:
                 nextPage = _context3.sent;
@@ -39769,7 +39889,7 @@ function FhirClient(p) {
                   break;
                 }
 
-                Object.assign(resolvedRefs, nextPage.references); // console.log("===>", nextPage);
+                Object.assign(_resolvedRefs, nextPage.references); // console.log("===>", nextPage);
 
                 return _context3.abrupt("return", data.concat(makeArray(nextPage.data || nextPage)));
 
@@ -39788,73 +39908,70 @@ function FhirClient(p) {
       }));
 
       return function (_x3) {
-        return _ref5.apply(this, arguments);
+        return _ref4.apply(this, arguments);
       };
     }()).then(function (data) {
       if (fhirOptions.graph) {
-        resolvedRefs = {};
+        _resolvedRefs = {};
       } else if (!hasPageCallback && fhirOptions.resolveReferences.length) {
         return {
           data: data,
-          references: resolvedRefs
+          references: _resolvedRefs
         };
       }
 
       return data;
+    })["catch"](function (failure) {
+      // console.log(failure)
+      throw HttpError.create(failure);
+    });
+  };
+  /**
+   * Use the refresh token to obtain new access token. If the refresh token is
+   * expired (or this fails for any other reason) it will be deleted from the
+   * state, so that we don't enter into loops trying to re-authorize.
+   */
+
+
+  client.refresh = function () {
+    var refreshToken = getPath(this, "tokenResponse.refresh_token"); // If one calls this method manually and has no refresh token we throw
+    // an error. But if it called internally (E.g. from `request`), this
+    // shouldn't happen because the caller will check for refresh token
+    // before calling this method.
+
+    if (!refreshToken) {
+      throw new Error("Trying to refresh but there is no refresh token");
+    }
+
+    var tokenUri = getPath(this, "state.provider.oauth2.token_uri"); // This shouldn't happen unless people mess with their sessionStorage
+
+    if (!tokenUri) {
+      throw new Error("`provider.oauth2.token_uri` not found in state");
+    }
+
+    return client.request({
+      url: tokenUri,
+      type: "POST",
+      headers: {
+        "content-type": "application/x-www-form-urlencoded"
+      },
+      body: "grant_type=refresh_token&refresh_token=".concat(encodeURIComponent(refreshToken))
+    }).then(function (data) {
+      client.tokenResponse = _objectSpread({}, client.tokenResponse, data);
+      client.options.auth.token = data.access_token;
+      sessionStorage.tokenResponse = JSON.stringify(client.tokenResponse);
+      return data;
+    })["catch"](function (error) {
+      // debug(error);
+      // debug("Deleting the expired or invalid refresh token");
+      delete client.tokenResponse.refresh_token;
+      throw error;
     });
   };
 
-  client.getPath = getPath; // =========================================================================
-
-  client.authenticated = function (p) {
-    if (server.auth.type === "none") {
-      return p;
-    }
-
-    var h;
-
-    if (server.auth.type === "basic") {
-      h = "Basic " + btoa(server.auth.username + ":" + server.auth.password);
-    } else if (server.auth.type === "bearer") {
-      h = "Bearer " + server.auth.token;
-    }
-
-    if (!p.headers) {
-      p.headers = {};
-    }
-
-    p.headers["Authorization"] = h; //p.beforeSend = function (xhr) { xhr.setRequestHeader ("Authorization", h); }
-
-    return p;
-  };
-
-  client.get = function (p) {
-    var ret = Adapter.get().defer();
-    var params = {
-      type: p.resource
-    };
-
-    if (p.id) {
-      params["id"] = p.id;
-    }
-
-    fhirAPI.read(params).then(ret.resolve, ret.reject);
-    return ret.promise;
-  };
-
-  client.user = {
-    read: function read() {
-      var tokens = client.userId.split("/");
-      return client.get({
-        id: tokens.pop(),
-        resource: tokens.pop()
-      });
-    }
-  };
-
   client.getBinary = function (url) {
-    var ret = Adapter.get().defer();
-    Adapter.get().http(client.authenticated({
+    var ret = adapter.defer();
+    adapter.http(authenticated({
       type: "GET",
       url: url,
       dataType: "blob"
@@ -39867,7 +39984,7 @@ function FhirClient(p) {
   };
 
   client.fetchBinary = function (path) {
-    var url = absolute(path, server);
+    var url = absolute(path, options.serviceUrl);
     return client.getBinary(url);
   };
 
@@ -40138,13 +40255,52 @@ function readyArgs() {
     errback: errback
   };
 }
+/**
+ * Walks through an object (or array) and returns the value found at the
+ * provided path. This function is very simple so it intentionally does not
+ * support any argument polymorphism, meaning that the path can only be a
+ * dot-separated string. If the path is invalid returns undefined.
+ * @param {Object} obj The object (or Array) to walk through
+ * @param {String} path The path (eg. "a.b.4.c")
+ * @returns {*} Whatever is found in the path or undefined
+ */
 
-function absolute(path, server) {
+
+function getPath(obj) {
+  var path = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "";
+  path = path.trim();
+
+  if (!path) {
+    return obj;
+  }
+
+  return path.split(".").reduce(function (out, key) {
+    return out ? out[key] : undefined;
+  }, obj);
+}
+
+function setPath(obj, path, value) {
+  path.trim().split(".").reduce(function (out, key, idx, arr) {
+    if (out && idx === arr.length - 1) {
+      out[key] = value;
+    } else {
+      return out ? out[key] : undefined;
+    }
+  }, obj);
+}
+
+function makeArray(arg) {
+  if (Array.isArray(arg)) {
+    return arg;
+  }
+
+  return [arg];
+}
+
+function absolute(path, baseUrl) {
   if (path.match(/^http/)) return path;
-  if (path.match(/^urn/)) return path; // strip leading slash
-
-  if (path.charAt(0) == "/") path = path.substr(1);
-  return server.serviceUrl + "/" + path;
+  if (path.match(/^urn/)) return path;
+  return baseUrl.replace(/\/+$/, "") + "/" + path.replace(/^\/+/, "");
 }
 
 module.exports = {
@@ -40152,7 +40308,10 @@ module.exports = {
   stripTrailingSlash: stripTrailingSlash,
   relative: relative,
   readyArgs: readyArgs,
-  absolute: absolute
+  absolute: absolute,
+  getPath: getPath,
+  setPath: setPath,
+  makeArray: makeArray
 };
 
 /***/ }),
