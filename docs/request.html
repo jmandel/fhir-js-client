@@ -221,7 +221,7 @@ const client = new FHIR.client({
     userId: "Practitioner/smart-Practitioner-72080416"
 });
 
-client.request(client.userId);
+client.request(client.user.id);
 </pre>
 <pre data-lang="js" class="live-code">
 function display(data, append) {
@@ -257,7 +257,7 @@ FHIR.oauth2.authorize({
 });
 
 // index.html
-FHIR.oauth2.ready(client => client.request(client.userId));
+FHIR.oauth2.ready(client => client.request(client.user.id));
 </pre>
 </div>
 </section>
