@@ -207,10 +207,7 @@ FHIR.oauth2.ready(client => client.request(client.user.fhirUser));</pre>
             <section>
                 <h3>Display patient medications</h3>
                 <div class="codepen-later">
-                    <pre data-lang="babel" class="dead-code">const client = new FHIR.client({
-    serverUrl: "https://r3.smarthealthit.org"
-});
-
+                    <pre data-lang="babel" class="dead-code">const client  = new FHIR.client("https://r3.smarthealthit.org");
 const getPath = client.getPath;
 
 client.request(`/MedicationRequest?patient=smart-1642068`, {
