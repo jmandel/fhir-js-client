@@ -1,0 +1,84 @@
+{
+  "resourceType": "Observation",
+  "id": "bb86aa11-bbe8-4089-9249-fe7834646ba1",
+  "meta": {
+    "versionId": "2",
+    "lastUpdated": "2018-10-04T16:15:32.248-04:00",
+    "profile": [
+      "http://standardhealthrecord.org/fhir/StructureDefinition/shr-vital-BloodPressure",
+      "http://standardhealthrecord.org/fhir/StructureDefinition/shr-observation-Observation"
+    ],
+    "tag": [
+      {
+        "system": "https://smarthealthit.org/tags",
+        "code": "synthea-7-2017"
+      }
+    ]
+  },
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://hl7.org/fhir/observation-category",
+          "code": "vital-signs"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "55284-4",
+        "display": "Blood Pressure"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/d0d0cde0-4b21-42f6-9c1e-bfa447d72059"
+  },
+  "context": {
+    "reference": "Encounter/ee85481a-ed13-4636-9166-adb15cf6b2af"
+  },
+  "effectiveDateTime": "2017-04-28T06:19:04-04:00",
+  "issued": "2017-04-28T06:19:04-04:00",
+  "component": [
+    {
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "8480-6",
+            "display": "Systolic Blood Pressure"
+          }
+        ],
+        "text": "Systolic Blood Pressure"
+      },
+      "valueQuantity": {
+        "value": 110,
+        "unit": "mmHg",
+        "system": "http://unitsofmeasure.org/",
+        "code": "mmHg"
+      }
+    },
+    {
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "8462-4",
+            "display": "Diastolic Blood Pressure"
+          }
+        ],
+        "text": "Diastolic Blood Pressure"
+      },
+      "valueQuantity": {
+        "value": 80,
+        "unit": "mmHg",
+        "system": "http://unitsofmeasure.org/",
+        "code": "mmHg"
+      }
+    }
+  ]
+}
