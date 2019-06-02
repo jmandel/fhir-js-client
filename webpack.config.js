@@ -4,21 +4,14 @@ const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPl
 module.exports = function(env, argv) {
     const isDev = argv.mode === "development";
     return {
-        entry: {
-            // fhir-client with jquery included 
-            "fhir-client": ["babel-polyfill", __dirname + "/src/adapters/bundle.js" ],
-
-            // fhir-client with NO jquery included (expects external jQuery)
-            "fhir-client-jquery": ["babel-polyfill", __dirname + "/src/adapters/jquery.js" ],
-
-            // fhir-client for Angular
-            "fhir-client-angulajs": ["babel-polyfill", __dirname + "/src/adapters/angularjs.js"]
-        },
+        entry: __dirname + "/src/entry.js",
+        target: "web",
         output: {
             path      : __dirname + "/build",
             publicPath: "/",
-            filename  : `[name]${isDev ? "" : ".min"}.js`
+            filename  : `fhir-client${isDev ? "" : ".min"}.js`
         },
+        // externals: /node_modules/,
         devtool: "hidden-source-map",
         module: {
             rules: [
