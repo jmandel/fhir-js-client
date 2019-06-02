@@ -6,25 +6,23 @@
   "license": "ISC",
   "dependencies": {
     "btoa": "*",
+    "core-js": "^3.1.3",
+    "debug": "^4.1.1",
     "fhir.js": "0.0.20",
     "gh-pages": "^2.0.1",
+    "isomorphic-fetch": "^2.2.1",
     "jquery": "^3.3.1",
     "jsonwebtoken": "^8.4.0"
   },
   "scripts": {
-    "test": "lab test/tests.js -v --timeout 5000",
-    
+    "test": "lab test/*.test.js",
     "clean": "rm -rf build",
-
     "pack:prod": "webpack --config webpack.config.js --mode production",
-    "pack:dev" : "webpack --config webpack.config.js --mode development",
-    "pack"     : "npm run pack:dev && npm run pack:prod",
-    
-    "build"    : "npm run pack",
+    "pack:dev": "webpack --config webpack.config.js --mode development",
+    "pack": "npm run pack:dev && npm run pack:prod",
+    "build": "npm run pack",
     "build:dev": "npm run pack:dev -- --watch",
-    
     "examples": "http-server . -o docs/examples/index.html -p 9090 -a 127.0.0.1 -c-1",
-    
     "deploy:gh": "cp -r build docs && gh-pages -d docs"
   },
   "devDependencies": {
@@ -44,7 +42,8 @@
     "webpack-bundle-analyzer": "^3.3.2",
     "webpack-cli": "^3.3.2"
   },
-  "engine": "node >= 0.6.0",
+  "browserslist": "> 0.25%, not dead",
+  "engine": "node >= 10",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/smart-on-fhir/client-js.git"

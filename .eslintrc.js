@@ -5,7 +5,8 @@ module.exports = {
         "es6": true
     },
     "globals": {
-        "process": "readonly"
+        "process": "readonly",
+        "Buffer" : "readonly"
     },
     "extends": [
         "eslint:recommended"
