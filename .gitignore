@@ -7,3 +7,4 @@
 .#*
 *.swp
 node_modules
+.vscode

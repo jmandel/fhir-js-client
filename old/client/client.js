@@ -366,6 +366,13 @@ function FhirClient(p) {
             throw new Error("`provider.oauth2.token_uri` not found in state");
         }
 
+        const scopes = getPath(this, "tokenResponse.scope") || "";
+        
+        // This shouldn't happen unless people mess with their sessionStorage
+        if (scopes.indexOf("online_access") == -1) {
+            throw new Error("Trying to refresh but no `online_access` scope was found");
+        }
+
         return client.request({
             url: tokenUri,
             type: "POST",

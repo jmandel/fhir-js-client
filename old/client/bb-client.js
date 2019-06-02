@@ -1,11 +1,15 @@
-var jwt        = require("jsonwebtoken");
-var Adapter    = require("./adapter");
-var FhirClient = require("./client");
-var Guid       = require("./guid");
-var Lib        = require("../lib");
+const jwt        = require("jsonwebtoken");
+const Adapter    = require("./adapter");
+const FhirClient = require("./client");
+const Guid       = require("./guid");
+const Lib        = require("../lib");
+const Storage    = require("../Storage");
+const smart      = require("../smart");
 
-var BBClient = {
-    debug: true,
+const BBClient = {
+
+    // This will be true in dev builds and false in production (minified versions)
+    debug: process.env.NODE_ENV == "development",
 
     // Client settings
     settings: {
@@ -28,24 +32,9 @@ var BBClient = {
     }
 };
 
-module.exports = {
-    BBClient,
-    getPreviousToken
-};
+module.exports = BBClient;
 
-/**
-* Get the previous token stored in sessionStorage
-* based on fullSessionStorageSupport flag.
-* @return object JSON tokenResponse
-*/
-function getPreviousToken() {
-    if (BBClient.settings.fullSessionStorageSupport) {
-        return JSON.parse(sessionStorage.tokenResponse);
-    } else {
-        var state = Lib.urlParam("state");
-        return JSON.parse(sessionStorage[state]).tokenResponse;
-    }
-}
+const storage = new Storage(BBClient.settings);
 
 function completeTokenFlow(hash){
     if (!hash){
@@ -53,7 +42,7 @@ function completeTokenFlow(hash){
     }
     var ret = Adapter.get().defer();
 
-    process.nextTick(function(){
+    setTimeout(function(){
         var oauthResult = hash.match(/#(.*)/);
         oauthResult = oauthResult ? oauthResult[1] : "";
         oauthResult = oauthResult.split(/&/);
@@ -65,7 +54,7 @@ function completeTokenFlow(hash){
             }
         }
         ret.resolve(authorization);
-    });
+    }, 0);
 
     return ret.promise;
 }
@@ -78,8 +67,8 @@ function completeCodeFlow(params){
         };
     }
     
-    var ret = Adapter.get().defer();
-    var state = JSON.parse(sessionStorage[params.state]);
+    var ret   = Adapter.get().defer();
+    var state = storage.get(params.state);
 
     if (window.history.replaceState && BBClient.settings.replaceBrowserHistory){
         window.history.replaceState({}, "", window.location.toString().replace(window.location.search, ""));
@@ -142,73 +131,19 @@ function completeCodeFlow(params){
     return ret.promise;
 }
 
-/**
- * This code is needed for the page refresh/reload workflow.
- * When the access token is nearing expiration or is expired,
- * this function will make an ajax POST call to obtain a new
- * access token using the current refresh token.
- * @return promise object
- */
-function completeTokenRefreshFlow() {
-    var ret = Adapter.get().defer();
-    var tokenResponse = getPreviousToken();
-    var state = JSON.parse(sessionStorage[tokenResponse.state]);
-    var refresh_token = tokenResponse.refresh_token;
-
-    Adapter.get().http({
-        method: "POST",
-        url: state.provider.oauth2.token_uri,
-        data: {
-            grant_type: "refresh_token",
-            refresh_token: refresh_token
-        },
-    }).then(function(authz) {
-        ret.resolve($.extend(tokenResponse, authz.data));
-    }, function() {
-        console.warn("Failed to exchange refresh_token for access_token", arguments);
-        ret.reject(
-            "Failed to exchange refresh token for access token. " +
-            "Please close and re-launch the application again."
-        );
-    });
-
-    return ret.promise;
-}
-
-function completePageReload(){
+function completePageReload() {
     var d = Adapter.get().defer();
-    process.nextTick(function(){
-        d.resolve(getPreviousToken());
-    });
+    setTimeout(function(){
+        d.resolve(storage.getTokenResponse());
+    }, 0);
     return d;
 }
 
-
-/**
-* Check the tokenResponse object to see if it is valid or not.
-* This is to handle the case of a refresh/reload of the page
-* after the token was already obtain.
-* @return boolean
-*/
-function validTokenResponse() {
-    if (BBClient.settings.fullSessionStorageSupport && sessionStorage.tokenResponse) {
-        return true;
-    } else {
-        if (!BBClient.settings.fullSessionStorageSupport) {
-            var state = Lib.urlParam("state") || (args.input && args.input.state);
-            return (state && sessionStorage[state] && JSON.parse(sessionStorage[state]).tokenResponse);
-        }
-    }
-    return false;
-}
-
 function isFakeOAuthToken(){
-    if (validTokenResponse()) {
-        var token = getPreviousToken();
-        if (token && token.state) {
-            var state = JSON.parse(sessionStorage[token.state] || "{}");
-            return state.fake_token_response;
-        }
+    const token = storage.getTokenResponse();
+    if (token && token.state) {
+        const state = storage.get(token.state);
+        return state && state.fake_token_response;
     }
     return false;
 }
@@ -236,22 +171,10 @@ BBClient.ready = function(/*input, callback, errback*/) {
             window.history.replaceState({}, "", window.location.toString().replace(window.location.search, ""));
         }
     } else {
-        if (validTokenResponse()) { // we're reloading after successful completion
-        
-            // Check if 2 minutes from access token expiration timestamp
-            var tokenResponse = getPreviousToken();
-            var payloadCheck = jwt.decode(tokenResponse.access_token);
-            var nearExpTime = Math.floor(Date.now() / 1000) >= (payloadCheck.exp - 120);
-            
-            if (tokenResponse.refresh_token
-              && tokenResponse.scope.indexOf("online_access") > -1
-              && nearExpTime) { // refresh token flow
-                accessTokenResolver = completeTokenRefreshFlow();
-            } else { // existing access token flow
-                accessTokenResolver = completePageReload();
-            }
+        const tokenResponse = storage.getTokenResponse();
+        if (tokenResponse) { // we're reloading after successful completion
+            accessTokenResolver = completePageReload();
         } else if (isCode) { // code flow
-            
             accessTokenResolver = completeCodeFlow(args.input);
         } else { // token flow
             accessTokenResolver = completeTokenFlow(args.input);
@@ -267,11 +190,18 @@ BBClient.ready = function(/*input, callback, errback*/) {
             sessionStorage.tokenResponse = JSON.stringify(tokenResponse);
         } else {
             //Save the tokenResponse object and the state into sessionStorage keyed by state
-            var combinedObject = $.extend(true, JSON.parse(sessionStorage[tokenResponse.state]), { tokenResponse });
+            const state = storage.get(tokenResponse.state) || {};
+            const combinedObject = {
+                ...state,
+                tokenResponse: {
+                    ...state.tokenResponse,
+                    tokenResponse
+                }
+            };
             sessionStorage[tokenResponse.state] = JSON.stringify(combinedObject);
         }
         
-        var state = JSON.parse(sessionStorage[tokenResponse.state] || "{}");
+        var state = storage.get(tokenResponse.state) || {};
         if (state.fake_token_response) {
             tokenResponse = state.fake_token_response;
         }
@@ -315,60 +245,33 @@ function providers(fhirServiceUrl, provider, callback, errback){
 
     // Shim for pre-OAuth2 launch parameters
     if (isBypassOAuth()){
-        process.nextTick(function(){
+        setTimeout(function(){
             bypassOAuth(fhirServiceUrl, callback);
-        });
+        }, 0);
         return;
     }
 
     // Skip conformance statement introspection when overriding provider setting are available
     if (provider) {
         provider.url = fhirServiceUrl;
-        process.nextTick(function(){
+        setTimeout(function(){
             callback && callback(provider);
-        });
+        }, 0);
         return;
     }
 
-    Adapter.get().http({
-        method: "GET",
-        url: Lib.stripTrailingSlash(fhirServiceUrl) + "/metadata"
-    }).then(
-        function(r){
-            var res = {
-                "name": "SMART on FHIR Testing Server",
-                "description": "Dev server for SMART on FHIR",
-                "url": fhirServiceUrl,
-                "oauth2": {
-                    "registration_uri": null,
-                    "authorize_uri": null,
-                    "token_uri": null
-                }
-            };
-
-            try {
-                var smartExtension = r.data.rest[0].security.extension.filter(function (e) {
-                    return (e.url === "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris");
-                });
-
-                smartExtension[0].extension.forEach(function(arg){
-                    if (arg.url === "register") {
-                        res.oauth2.registration_uri = arg.valueUri;
-                    } else if (arg.url === "authorize") {
-                        res.oauth2.authorize_uri = arg.valueUri;
-                    } else if (arg.url === "token") {
-                        res.oauth2.token_uri = arg.valueUri;
-                    }
-                });
+    smart.getSecurityExtensions(fhirServiceUrl).then(
+        ext => callback && callback({
+            "name": "SMART on FHIR Testing Server",
+            "description": "Dev server for SMART on FHIR",
+            "url": fhirServiceUrl,
+            "oauth2": {
+                "registration_uri": ext.registrationUri,
+                "authorize_uri": ext.authorizeUri,
+                "token_uri": ext.tokenUri
             }
-            catch (err) {
-                return errback && errback(err);
-            }
-
-            callback && callback(res);
-        }, function() {
-            errback && errback("Unable to fetch conformance statement");
-        }
+        }),
+        err => errback && errback(err)
     );
 }
 
@@ -464,7 +367,12 @@ BBClient.preAuthorize = function(params, callback, errback) {
                 sessionStorage[state] = JSON.stringify(params);
                 sessionStorage.tokenResponse = JSON.stringify({ state });
             } else {
-                var combinedObject = $.extend(true, params, { tokenResponse : { state } });
+                var combinedObject = {
+                    ...params,
+                    tokenResponse : {
+                        state
+                    }
+                };
                 sessionStorage[state] = JSON.stringify(combinedObject);
             }
 
@@ -492,31 +400,10 @@ BBClient.preAuthorize = function(params, callback, errback) {
     }, errback);
 };
 
+// $lab:coverage:off$
 BBClient.authorize = function(params, errback) {
     BBClient.preAuthorize(params, redirect => {
         window.location.href = redirect;
     }, errback);
 };
-
-BBClient.resolveAuthType = function (fhirServiceUrl, callback, errback) {
-
-    Adapter.get().http({
-        method: "GET",
-        url: Lib.stripTrailingSlash(fhirServiceUrl) + "/metadata"
-    }).then(function(r){
-        var type = "none";
-
-        try {
-            if (r.data.rest[0].security.service[0].coding[0].code.toLowerCase() === "smart-on-fhir") {
-                type = "oauth2";
-            }
-        }
-        catch (err) {
-            // ignore
-        }
-
-        callback && callback(type);
-    }, function() {
-        errback && errback("Unable to fetch conformance statement");
-    });
-};
+// $lab:coverage:on$
