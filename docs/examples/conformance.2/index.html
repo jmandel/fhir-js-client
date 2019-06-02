@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+ <head>
+     <title>Display Conformance</title>
+     <script src="../../../build/fhir-client.js"></script>
+     <script src="../../../lib/nativeFhir.js"></script>
+ </head>
+ <body>
+    <pre id="output">Loading...</pre>
+    <script type="text/javascript">
+        function display(data, append) {
+            const output = document.getElementById("output");
+            output.innerText = data instanceof Error ?
+                String(data) :
+                JSON.stringify(data, null, 4);
+        }
+
+        // FHIR.oauth2.settings.replaceBrowserHistory = true;
+        // FHIR.oauth2.settings.fullSessionStorageSupport = false;
+
+        FHIR.oauth2.ready(async function(client) {
+            // client.connect(fhir);
+            client.request({
+                url: "/MedicationRequest?patient=smart-1642068"
+            }, {
+                resolveReferences: "subject"
+            }).then(display, display);
+
+            // client.patient.read().then(display, display);
+            // setTimeout(() => { client.refresh() }, 4000);
+            // display({
+            //     "client.getPatientId()  ": client.getPatientId(),
+            //     "client.getEncounterId()": client.getEncounterId(),
+            //     "client.getIdToken()    ": client.getIdToken(),
+            //     "client.getFhirUser()   ": client.getFhirUser(),
+            //     "client.getUserType()   ": client.getUserType(),
+            //     "client.getUserId()     ": client.getUserId(),
+            //     "client.patient         ": client.patient,
+            //     "client.encounter       ": client.encounter,
+            //     "client.user            ": client.user,
+            //     "client.api             ": client.api,
+            //     "client.patient.read()  ": await client.patient.read(),
+            //     "client.encounter.read()": await client.encounter.read(),
+            //     "client.user.read()     ": await client.user.read()
+            // });
+        }, display);
+    </script>
+ </body>
+</html>
