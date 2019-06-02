@@ -64,7 +64,6 @@ app.get("/", (req, res) => {
 ```
 
 ## API
----
 Imagine that there is an object called "smart" that exposes the SMART-specific
 methods. In the browser that is automatically created and is available at
 `window.FHIR.oauth2`. On the server the library exports a function that you call
@@ -144,6 +143,7 @@ This is the single most important method. Please see the [live examples](http://
 **requestUriOrOptions** can be a `String` URL or an object having an `url` property. The `url` can be relative path that will be appended to your base URL. Using a full http URL will also work, as long as it is on the same domain as your base URL. Any other option will be passed to the underlying `fetch()` call.
 
 **fhirOptions: Object** can contain the following options:
+
 | Name    | Type   | Description
 |---------|--------|------------
 |pageLimit|`Number`| When you request a Bundle, the result will typically come back in pages and you will only get the first page. You can set this to number bigger than `1` to request multiple pages. For example `pageLimit: 3` will give you the first 3 pages as array. To fetch all the available pages you can set this to `0`. **Defaults to `1`**. Ignored if the response is not a `Bundle`.
@@ -308,7 +308,6 @@ client.getPath(data, "a.b.c.d.e") // => undefined
 ```
 
 ## Fhir.js Integration
----
 Since v2.0.0 this library no longer includes fhir.js. That architecture was extremely difficult to maintain. However, it is still possible to use fhir.js.
 
 **In the browser** you just need to include fhir.js (`nativeFhir.js`) in the page via script tag. We will detect that and make the necessary linking. You can then use it via `client.api` and `client.patient.api`, just like it used to work with older versions of this library. For convenience we have included the latest build of fhir.js that we have tested with at [lib/nativeFhir.js](lib/nativeFhir.js).
@@ -326,7 +325,6 @@ app.get("/", async (req, res) => {
 ```
 
 ## Contributing and Development
----
 
 ### NPM Scripts
 
