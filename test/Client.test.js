@@ -10,7 +10,6 @@ const mockServer     = require("./mockServer");
 const BrowserEnv     = require("./mocks/BrowserEnvironment");
 const BrowserEnvFhir = require("./mocks/BrowserEnvironmentWithFhirJs");
 
-require("isomorphic-fetch");
 
 const { it, describe, before, after, afterEach } = lab;
 exports.lab = lab;

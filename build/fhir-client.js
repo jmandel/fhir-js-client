@@ -10565,7 +10565,8 @@ var _require = __webpack_require__(/*! ./lib */ "./src/lib.js"),
     debug = _require.debug,
     fetchJSON = _require.fetchJSON,
     getPath = _require.getPath,
-    randomString = _require.randomString;
+    randomString = _require.randomString,
+    btoa = _require.btoa;
 
 var SMART_KEY = "SMART_KEY";
 

@@ -1,18 +1,25 @@
 {
   "name": "fhir-js-client",
-  "version": "0.2.0",
+  "version": "2.0.0",
   "description": "JavaScript client for Fast Healthcare Interoperability Resources",
-  "author": "Josh Mandel <joshua.mandel@childrens.harvard.edu>",
-  "license": "ISC",
+  "author": "SMART Health IT <support@smarthealthit.org> (https://smarthealthit.org/)",
+  "contributors": [
+    "Josh Mandel <joshua.mandel@childrens.harvard.edu>",
+    "Vladimir Ignatov <vlad.ignatov@gmail.com>"
+  ],
+  "keywords": [
+    "SMART",
+    "FHIR",
+    "Client"
+  ],
+  "license": "Apache 2.0",
+  "main": "src/entry.js",
   "dependencies": {
-    "btoa": "*",
     "core-js": "^3.1.3",
     "debug": "^4.1.1",
     "fhir.js": "0.0.20",
     "gh-pages": "^2.0.1",
-    "isomorphic-fetch": "^2.2.1",
-    "jquery": "^3.3.1",
-    "jsonwebtoken": "^8.4.0"
+    "isomorphic-fetch": "^2.2.1"
   },
   "scripts": {
     "test": "lab test/*.test.js",
@@ -37,15 +44,18 @@
     "eslint": "^5.16.0",
     "express": "^4.17.0",
     "http-server": "^0.11.1",
-    "jsdom": "*",
+    "jsdom": "^15.1.1",
     "webpack": "^4.32.2",
     "webpack-bundle-analyzer": "^3.3.2",
     "webpack-cli": "^3.3.2"
   },
-  "browserslist": "> 0.25%, not dead",
   "engine": "node >= 10",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/smart-on-fhir/client-js.git"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/smart-on-fhir/client-js/issues"
+  },
+  "homepage": "https://github.com/smart-on-fhir/client-js"
 }

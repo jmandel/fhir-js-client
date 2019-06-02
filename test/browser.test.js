@@ -1,5 +1,3 @@
-require("isomorphic-fetch");
-
 const { URL }    = require("url");
 const { expect } = require("@hapi/code");
 const lab        = require("@hapi/lab").script();

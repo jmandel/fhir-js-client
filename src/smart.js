@@ -4,7 +4,8 @@ const {
     debug,
     fetchJSON,
     getPath,
-    randomString
+    randomString,
+    btoa
 } = require("./lib");
 
 const SMART_KEY = "SMART_KEY";
