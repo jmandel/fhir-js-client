@@ -8815,6 +8815,8 @@ __webpack_require__(/*! core-js/modules/web.dom-collections.for-each */ "./node_
 
 __webpack_require__(/*! core-js/modules/web.dom-collections.iterator */ "./node_modules/core-js/modules/web.dom-collections.iterator.js");
 
+__webpack_require__(/*! core-js/modules/web.url */ "./node_modules/core-js/modules/web.url.js");
+
 __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -9188,8 +9190,8 @@ function () {
       // url -----------------------------------------------------------------
       var url;
 
-      if (typeof requestOptions == "string") {
-        url = requestOptions;
+      if (typeof requestOptions == "string" || requestOptions instanceof URL) {
+        url = String(requestOptions);
         requestOptions = {};
       } else {
         url = String(requestOptions.url);
@@ -10396,7 +10398,8 @@ function jwtDecode(token) {
  *   "6082-2" : [ observation3 ]
  * }
  * @param {Object|Object[]} observations Array of observations 
- * @param {String} property The name of a CodeableConcept property to group by 
+ * @param {String} property The name of a CodeableConcept property to group by
+ * @returns {Object}
  */
 
 
@@ -10430,8 +10433,9 @@ function byCode(observations, property) {
  * First groups the observations by code using `byCode`. Then returns a function
  * that accepts codes as arguments and will return a flat array of observations
  * having that codes
- * @param {*} observations 
- * @param {*} property 
+ * @param {Object|Object[]} observations Array of observations 
+ * @param {String} property The name of a CodeableConcept property to group by
+ * @returns {Function}
  */
 
 
@@ -10816,7 +10820,6 @@ function authorize(_x2) {
  * The completeAuth function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
  * authorization server..
- * @param {Object|String|URL} location
  */
 
 
@@ -10846,8 +10849,9 @@ function _authorize() {
           case 5:
             redirect = _context2.sent;
             env.redirect(redirect);
+            return _context2.abrupt("return", redirect);
 
-          case 7:
+          case 8:
           case "end":
             return _context2.stop();
         }
@@ -11101,66 +11105,38 @@ function _ready() {
   return _ready.apply(this, arguments);
 }
 
-function init(_x7, _x8) {
-  return _init.apply(this, arguments);
-}
+function init(env, options) {
+  var url = env.getUrl();
+  var code = url.searchParams.get("code");
+  var state = url.searchParams.get("state"); // if `code` and `state` params are present we need to complete the auth flow
 
-function _init() {
-  _init = _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee5(env, options) {
-    var url, code, state, key, cached;
-    return regeneratorRuntime.wrap(function _callee5$(_context5) {
-      while (1) {
-        switch (_context5.prev = _context5.next) {
-          case 0:
-            url = env.getUrl();
-            code = url.searchParams.get("code");
-            state = url.searchParams.get("state"); // if `code` and `state` params are present we need to complete the auth flow
+  if (code && state) {
+    return completeAuth(env);
+  } // Check for existing client state. If state is found, it means a client
+  // instance have already been created in this session and we should try to
+  // "revive" it.
 
-            if (!(code && state)) {
-              _context5.next = 5;
-              break;
-            }
 
-            return _context5.abrupt("return", completeAuth(env));
+  var key = state || env.getStorage().get(SMART_KEY);
+  var cached = env.getStorage().get(key);
 
-          case 5:
-            // Check for existing client state. If state is found, it means a client
-            // instance have already been created in this session and we should try to
-            // "revive" it.
-            key = state || env.getStorage().get(SMART_KEY);
-            cached = env.getStorage().get(key);
+  if (cached) {
+    return new Client(env, cached);
+  } // Otherwise try to launch
 
-            if (!cached) {
-              _context5.next = 9;
-              break;
-            }
 
-            return _context5.abrupt("return", new Client(env, cached));
-
-          case 9:
-            return _context5.abrupt("return", authorize(env, options).then(function () {
-              // `init` promises a Client but that cannot happen in this case. The
-              // browser will be redirected (unload the page and be redirected back
-              // to it later and the same init function will be called again). On
-              // success, authorize will resolve with the redirect url but we don't
-              // want to return that from this promise chain because it is not a
-              // Client instance. At the same time, if authorize fails, we do want to
-              // pass the error to those waiting for a client instance.
-              return new Promise(function () {
-                /* leave it pending! */
-              });
-            }));
-
-          case 10:
-          case "end":
-            return _context5.stop();
-        }
-      }
-    }, _callee5);
-  }));
-  return _init.apply(this, arguments);
+  return authorize(env, options).then(function () {
+    // `init` promises a Client but that cannot happen in this case. The
+    // browser will be redirected (unload the page and be redirected back
+    // to it later and the same init function will be called again). On
+    // success, authorize will resolve with the redirect url but we don't
+    // want to return that from this promise chain because it is not a
+    // Client instance. At the same time, if authorize fails, we do want to
+    // pass the error to those waiting for a client instance.
+    return new Promise(function () {
+      /* leave it pending!!! */
+    });
+  });
 }
 
 module.exports = {

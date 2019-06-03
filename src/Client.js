@@ -356,12 +356,14 @@ class FhirClient
     {
         // url -----------------------------------------------------------------
         let url;
-        if (typeof requestOptions == "string") {
-            url = requestOptions;
+        if (typeof requestOptions == "string" || requestOptions instanceof URL) {
+            url = String(requestOptions);
             requestOptions = {};
-        } else {
+        }
+        else {
             url = String(requestOptions.url);
         }
+        
         url = absolute(url, this.state.serverUrl);
 
         // authentication ------------------------------------------------------

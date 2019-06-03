@@ -8815,6 +8815,8 @@ __webpack_require__(/*! core-js/modules/web.dom-collections.for-each */ "./node_
 
 __webpack_require__(/*! core-js/modules/web.dom-collections.iterator */ "./node_modules/core-js/modules/web.dom-collections.iterator.js");
 
+__webpack_require__(/*! core-js/modules/web.url */ "./node_modules/core-js/modules/web.url.js");
+
 __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -9188,8 +9190,8 @@ function () {
       // url -----------------------------------------------------------------
       var url;
 
-      if (typeof requestOptions == "string") {
-        url = requestOptions;
+      if (typeof requestOptions == "string" || requestOptions instanceof URL) {
+        url = String(requestOptions);
         requestOptions = {};
       } else {
         url = String(requestOptions.url);

@@ -119,7 +119,7 @@ This should be called on your `redirect_uri`. Returns a Promise that will eventu
 ### `init(options): Promise<Client>`
 This function can be used when you want to handle everything in one page (no launch endpoint needed). You can think of it as if it does:
 ```js
-authorize(options).then(() => ready())
+authorize(options).then(ready)
 ```
 **options** is the same object you pass to the `authorize` method.
 
@@ -128,19 +128,19 @@ Example:
 FHIR.oauth2.init({
     client_id: "my_web_app",
     scope    : "patient/*.read"
-}).then(client => client.request("/Patient");
+}).then(client => /* initialize my app */);
 ```
 **Be careful with `init()`!** There are some details you need to be aware of:
 1. It will only work if your `launch_uri` is the same as your `redirect_uri`.
    While this should be valid, we can't promise that every EHR will allow you
    to register client with such settings.
-2. Internally init() will be called twice. First it will redirect to the EHR,
+2. Internally, init() will be called twice. First it will redirect to the EHR,
    then the EHR will redirect back to the page where `init()` will be called
    again to complete the authorization. This is generally fine, because the
    returned promise will only be resolved once, after the second execution,
    but please also consider the following:
-   - You should wrap all your app's initialization code in a function that is
-     only executed after init() resolves!
+   - You should wrap all your app's code in a function that is only executed
+     after init() resolves!
    - Since the page will be loaded twice, you must be careful if your code has
      global side effects that can persist between page reloads (for example
      writing to localStorage).
@@ -344,11 +344,37 @@ client.getPath(data, "a.b.c.d.e") // => undefined
 ```
 
 ## Fhir.js Integration
-Since v2.0.0 this library no longer includes fhir.js. That architecture was extremely difficult to maintain. However, it is still possible to use fhir.js.
+Since v2.0.0 this library no longer includes fhir.js. That architecture was extremely difficult to maintain. Fhir.js is now an optional dependency, meaning that it is not available by default, unless you include it in the page. Our goal is to provide simple
+alternative t fhir.js - most of it should be possible via `client.request`.
 
-**In the browser** you just need to include fhir.js (`nativeFhir.js`) in the page via script tag. We will detect that and make the necessary linking. You can then use it via `client.api` and `client.patient.api`, just like it used to work with older versions of this library. For convenience we have included the latest build of fhir.js that we have tested with at [lib/nativeFhir.js](lib/nativeFhir.js).
+#### Reasons to use fhir.js
+1. If you have old apps using legacy API like `client.api.anyFhirJsMethod()` or `client.patient.api.anyFhirJsMethod()`
+2. If you prefer the mongodb-like query syntax.
+3. If you are trying to do something specific that can only be done with fhir.js 
 
-**In NodeJS** there are no global variables to detect so you'll have to link it manually using the dedicated `connect(fhirJs)` method of the client:
+#### Reasons not to use fhir.js
+1. If you prefer to build the fhir queries yourself using fhir syntax.
+2. If you encounter fhir-version-specific issues with fhir.js
+3. If you want to keep things simpler and smaller
+
+#### How to use request instead of fhir.js
+Please see the [Examples](http://docs.smarthealthit.org/client-js/fhirjs-equivalents)
+
+#### Browser Integration
+You just need to include fhir.js (`nativeFhir.js`) in the page via script tag. We will detect that and make the necessary linking. You can then use it via `client.api` and `client.patient.api`, just like it used to work with older versions of this library. For convenience we have included the latest build of fhir.js that we have tested with at [lib/nativeFhir.js](lib/nativeFhir.js).
+```html
+<!-- index.html -->
+<script src="/path/to/nativeFhir.js"></script>
+<script src="/path/to/fhir-client.js"></script>
+<script>
+FHIR.oauth2.ready().then(client => client.api.search({ type: "Patient" }))
+</script>
+```
+
+
+#### NodeJS Integration
+There are no global variables to detect so you'll have to link it manually using
+the dedicated `connect(fhirJs)` method of the client:
 ```js
 const fhirJs = require("fhir.js");
 
