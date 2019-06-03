@@ -214,13 +214,13 @@ async function authorize(env, options = {})
         ...options
     });
     env.redirect(redirect);
+    return redirect;
 }
 
 /**
  * The completeAuth function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
  * authorization server..
- * @param {Object|String|URL} location
  */
 async function completeAuth(env)
 {
@@ -345,8 +345,8 @@ async function completeAuth(env)
  * Builds the token request options. Does not make the request, just
  * creates it's configuration and returns it in a Promise.
  */
-function buildTokenRequest(code, state) {
-
+function buildTokenRequest(code, state)
+{
     const { redirectUri, clientSecret, tokenUri, clientId } = state;
 
     if (!redirectUri) {
@@ -407,6 +407,38 @@ async function ready(env, onSuccess, onError)
     return task;
 }
 
+function init(env, options)
+{
+    const url   = env.getUrl();
+    const code  = url.searchParams.get("code");
+    const state = url.searchParams.get("state");
+
+    // if `code` and `state` params are present we need to complete the auth flow
+    if (code && state) {
+        return completeAuth(env);
+    }
+
+    // Check for existing client state. If state is found, it means a client
+    // instance have already been created in this session and we should try to
+    // "revive" it.
+    const key = state || env.getStorage().get(SMART_KEY);
+    const cached = env.getStorage().get(key);
+    if (cached) {
+        return new Client(env, cached);
+    }
+
+    // Otherwise try to launch
+    return authorize(env, options).then(() => {
+        // `init` promises a Client but that cannot happen in this case. The
+        // browser will be redirected (unload the page and be redirected back
+        // to it later and the same init function will be called again). On
+        // success, authorize will resolve with the redirect url but we don't
+        // want to return that from this promise chain because it is not a
+        // Client instance. At the same time, if authorize fails, we do want to
+        // pass the error to those waiting for a client instance.
+        return new Promise(() => { /* leave it pending!!! */ });
+    });
+}
 
 module.exports = {
     fetchConformanceStatement,
@@ -417,5 +449,6 @@ module.exports = {
     authorize,
     completeAuth,
     ready,
+    init,
     KEY: SMART_KEY
 };

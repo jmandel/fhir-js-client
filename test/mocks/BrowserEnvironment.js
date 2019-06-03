@@ -1,11 +1,13 @@
 /* global fhir */
-const Storage  = require("./Storage");
-const Location = require("./Location");
+const EventEmitter = require("events");
+const Storage      = require("./Storage");
+const Location     = require("./Location");
 
-class BrowserEnvironment
+class BrowserEnvironment extends EventEmitter
 {
     constructor()
     {
+        super();
         this._location = new Location("http://localhost");
     }
 
@@ -22,6 +24,7 @@ class BrowserEnvironment
     redirect(to)
     {
         this._location.href = to;
+        this.emit("redirect");
     }
 
     getStorage()

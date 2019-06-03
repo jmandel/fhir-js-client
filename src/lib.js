@@ -181,7 +181,8 @@ function jwtDecode(token)
  *   "6082-2" : [ observation3 ]
  * }
  * @param {Object|Object[]} observations Array of observations 
- * @param {String} property The name of a CodeableConcept property to group by 
+ * @param {String} property The name of a CodeableConcept property to group by
+ * @returns {Object}
  */
 function byCode(observations, property)
 {
@@ -213,8 +214,9 @@ function byCode(observations, property)
  * First groups the observations by code using `byCode`. Then returns a function
  * that accepts codes as arguments and will return a flat array of observations
  * having that codes
- * @param {*} observations 
- * @param {*} property 
+ * @param {Object|Object[]} observations Array of observations 
+ * @param {String} property The name of a CodeableConcept property to group by
+ * @returns {Function}
  */
 function byCodes(observations, property)
 {

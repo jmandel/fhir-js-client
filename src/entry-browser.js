@@ -25,7 +25,8 @@ const FHIR = {
             fullSessionStorageSupport: true
         },
         ready: (...args) => smart.ready(env, ...args),
-        authorize: (...args) => smart.authorize(env, ...args)
+        authorize: (...args) => smart.authorize(env, ...args),
+        init: (...args) => smart.init(env, ...args)
         // $lab:coverage:on$
     }
 };

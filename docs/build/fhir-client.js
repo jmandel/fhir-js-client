@@ -9940,6 +9940,13 @@ var FHIR = {
       }
 
       return smart.authorize.apply(smart, [env].concat(args));
+    },
+    init: function init() {
+      for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+        args[_key4] = arguments[_key4];
+      }
+
+      return smart.init.apply(smart, [env].concat(args));
     } // $lab:coverage:on$
 
   }
@@ -10565,7 +10572,8 @@ var _require = __webpack_require__(/*! ./lib */ "./src/lib.js"),
     debug = _require.debug,
     fetchJSON = _require.fetchJSON,
     getPath = _require.getPath,
-    randomString = _require.randomString;
+    randomString = _require.randomString,
+    btoa = _require.btoa;
 
 var SMART_KEY = "SMART_KEY";
 
@@ -11093,6 +11101,68 @@ function _ready() {
   return _ready.apply(this, arguments);
 }
 
+function init(_x7, _x8) {
+  return _init.apply(this, arguments);
+}
+
+function _init() {
+  _init = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee5(env, options) {
+    var url, code, state, key, cached;
+    return regeneratorRuntime.wrap(function _callee5$(_context5) {
+      while (1) {
+        switch (_context5.prev = _context5.next) {
+          case 0:
+            url = env.getUrl();
+            code = url.searchParams.get("code");
+            state = url.searchParams.get("state"); // if `code` and `state` params are present we need to complete the auth flow
+
+            if (!(code && state)) {
+              _context5.next = 5;
+              break;
+            }
+
+            return _context5.abrupt("return", completeAuth(env));
+
+          case 5:
+            // Check for existing client state. If state is found, it means a client
+            // instance have already been created in this session and we should try to
+            // "revive" it.
+            key = state || env.getStorage().get(SMART_KEY);
+            cached = env.getStorage().get(key);
+
+            if (!cached) {
+              _context5.next = 9;
+              break;
+            }
+
+            return _context5.abrupt("return", new Client(env, cached));
+
+          case 9:
+            return _context5.abrupt("return", authorize(env, options).then(function () {
+              // `init` promises a Client but that cannot happen in this case. The
+              // browser will be redirected (unload the page and be redirected back
+              // to it later and the same init function will be called again). On
+              // success, authorize will resolve with the redirect url but we don't
+              // want to return that from this promise chain because it is not a
+              // Client instance. At the same time, if authorize fails, we do want to
+              // pass the error to those waiting for a client instance.
+              return new Promise(function () {
+                /* leave it pending! */
+              });
+            }));
+
+          case 10:
+          case "end":
+            return _context5.stop();
+        }
+      }
+    }, _callee5);
+  }));
+  return _init.apply(this, arguments);
+}
+
 module.exports = {
   fetchConformanceStatement: fetchConformanceStatement,
   fetchWellKnownJson: fetchWellKnownJson,
@@ -11102,6 +11172,7 @@ module.exports = {
   authorize: authorize,
   completeAuth: completeAuth,
   ready: ready,
+  init: init,
   KEY: SMART_KEY
 };
 

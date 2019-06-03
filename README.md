@@ -116,6 +116,36 @@ This should be called on your `redirect_uri`. Returns a Promise that will eventu
 
 > The `onSuccess` and `onError` callback functions are optional (and **deprecated**). We only accept them to keep the library compatible with older apps. If these functions are provided, they will simply be attached to the returned promise chain.
 
+### `init(options): Promise<Client>`
+This function can be used when you want to handle everything in one page (no launch endpoint needed). You can think of it as if it does:
+```js
+authorize(options).then(() => ready())
+```
+**options** is the same object you pass to the `authorize` method.
+
+Example:
+```js
+FHIR.oauth2.init({
+    client_id: "my_web_app",
+    scope    : "patient/*.read"
+}).then(client => client.request("/Patient");
+```
+**Be careful with `init()`!** There are some details you need to be aware of:
+1. It will only work if your `launch_uri` is the same as your `redirect_uri`.
+   While this should be valid, we can't promise that every EHR will allow you
+   to register client with such settings.
+2. Internally init() will be called twice. First it will redirect to the EHR,
+   then the EHR will redirect back to the page where `init()` will be called
+   again to complete the authorization. This is generally fine, because the
+   returned promise will only be resolved once, after the second execution,
+   but please also consider the following:
+   - You should wrap all your app's initialization code in a function that is
+     only executed after init() resolves!
+   - Since the page will be loaded twice, you must be careful if your code has
+     global side effects that can persist between page reloads (for example
+     writing to localStorage).
+   
+
 ### `Client`
 This is a FHIR client that is returned to you from the `ready()` call. You can also create it yourself if needed:
 ```js
