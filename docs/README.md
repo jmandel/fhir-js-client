@@ -35,7 +35,7 @@ FHIR.oauth2.authorize({
 <script src="/path/to/fhir-client.js"></script>
 <script>
 FHIR.oauth2.ready()
-    .then(client => client.request("/Patient"))
+    .then(client => client.request("Patient"))
     .then(console.log)
     .catch(console.error);
 </script>
@@ -58,7 +58,7 @@ app.get("/launch", (req, res) => {
 // This is what the Auth server will redirect to
 app.get("/", (req, res) => {
     fhirClient(req, res).ready()
-        .then(client => client.request("/Patient"))
+        .then(client => client.request("Patient"))
         .then(res.json)
         .catch(res.json);
 });
@@ -188,28 +188,28 @@ This is the single most important method. Please see the [live examples](http://
 
 **Fetch single resource**
 ```js
-client.request("/Patient/id"); // Resolves with a Patient or rejects with an Error
+client.request("Patient/id"); // Resolves with a Patient or rejects with an Error
 ```
 
 **Fetch the current patient**
 ```js
-client.request(`/Patient/${client.patient.id}`); // Resolves with a Patient or rejects with an Error
+client.request(`Patient/${client.patient.id}`); // Resolves with a Patient or rejects with an Error
 ```
 
 **Fetch a bundle**
 ```js
-client.request("/Patient"); // Resolves with a Bundle or rejects with an Error
+client.request("Patient"); // Resolves with a Bundle or rejects with an Error
 ```
 
 **Get all pages**
 ```js
-client.request("/Patient", { pageLimit: 0 });  // Resolves with array of Bundles or rejects with an Error
+client.request("Patient", { pageLimit: 0 });  // Resolves with array of Bundles or rejects with an Error
 ```
 
 **Handle pages as they arrive**
 ```js
 // Resolves with null or rejects with an Error
-client.request("/Patient", {
+client.request("Patient", {
     pageLimit: 5,
     onPage(bundle) {
         // do something with the downloaded page
@@ -221,7 +221,7 @@ client.request("/Patient", {
 ```js
 // Resolves with augmented Encounter or rejects with an Error
 client.request(
-    "/Encounter/518a522a-4b10-47db-9daf-53b726d32607",
+    "Encounter/518a522a-4b10-47db-9daf-53b726d32607",
     resolveReferences: [ "serviceProvider" ]
 );
 ```
@@ -230,7 +230,7 @@ client.request(
 ```js
 // Resolves with Object (augmented Observation) or rejects with an Error
 client.request(
-    "/Observation/smart-691-bmi",
+    "Observation/smart-691-bmi",
     resolveReferences: [
         "context",                 // The Encounter
         "context.serviceProvider", // The Organization (hospital)
@@ -251,7 +251,7 @@ the promise will be resolved with an object having two properties:
 ```js
 // Resolves with Object ({ data, references }) or rejects with an Error
 client.request(
-    "/Encounter/518a522a-4b10-47db-9daf-53b726d32607",
+    "Encounter/518a522a-4b10-47db-9daf-53b726d32607",
     resolveReferences: [ "serviceProvider" ],
     graph: false
 );
