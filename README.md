@@ -7,10 +7,16 @@ It works both in browsers (IE10+) and on the server (NodeJS).
 > This the documentation for the current version. If you want to migrate from older versions, make sure you check out [what's new in v2](http://docs.smarthealthit.org/client-js/v2.html).
 
 ## Installation
+
 Install from npm:
 ```sh
+# This is still in beta! To give it a try do:
+npm i fhirclient@dev
+
+# To still the older version do:
 npm i fhirclient
 ```
+
 ## Browser Usage
 
 In the browser you need to include the library via script tag. You typically
