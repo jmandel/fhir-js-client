@@ -206,13 +206,22 @@ async function authorize(env, options = {})
     // prevent inheritance of tokenResponse from parent window
     env.getStorage().unset(SMART_KEY);
 
-    const url = env.getUrl();
-    const redirect = await buildAuthorizeUrl(env, {
-        iss           : url.searchParams.get("iss"),
-        launch        : url.searchParams.get("launch"),
-        fhirServiceUrl: url.searchParams.get("fhirServiceUrl"),
-        ...options
-    });
+    const url            = env.getUrl();
+    const iss            = url.searchParams.get("iss"); 
+    const fhirServiceUrl = url.searchParams.get("fhirServiceUrl");
+    const launch         = url.searchParams.get("launch");
+
+    options = { launch, ...options };
+
+    if (fhirServiceUrl) {
+        options.fhirServiceUrl = fhirServiceUrl;
+    }
+
+    if (iss) {
+        options.iss = iss;
+    }
+
+    const redirect = await buildAuthorizeUrl(env, options);
     env.redirect(redirect);
     return redirect;
 }

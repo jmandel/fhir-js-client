@@ -10829,6 +10829,9 @@ function _authorize() {
   regeneratorRuntime.mark(function _callee2(env) {
     var options,
         url,
+        iss,
+        fhirServiceUrl,
+        launch,
         redirect,
         _args2 = arguments;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
@@ -10839,19 +10842,30 @@ function _authorize() {
             // prevent inheritance of tokenResponse from parent window
             env.getStorage().unset(SMART_KEY);
             url = env.getUrl();
-            _context2.next = 5;
-            return buildAuthorizeUrl(env, _objectSpread({
-              iss: url.searchParams.get("iss"),
-              launch: url.searchParams.get("launch"),
-              fhirServiceUrl: url.searchParams.get("fhirServiceUrl")
-            }, options));
+            iss = url.searchParams.get("iss");
+            fhirServiceUrl = url.searchParams.get("fhirServiceUrl");
+            launch = url.searchParams.get("launch");
+            options = _objectSpread({
+              launch: launch
+            }, options);
 
-          case 5:
+            if (fhirServiceUrl) {
+              options.fhirServiceUrl = fhirServiceUrl;
+            }
+
+            if (iss) {
+              options.iss = iss;
+            }
+
+            _context2.next = 11;
+            return buildAuthorizeUrl(env, options);
+
+          case 11:
             redirect = _context2.sent;
             env.redirect(redirect);
             return _context2.abrupt("return", redirect);
 
-          case 8:
+          case 14:
           case "end":
             return _context2.stop();
         }
