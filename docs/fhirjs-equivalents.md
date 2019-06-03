@@ -105,19 +105,20 @@ client.request("ResourceType?optional-query", {
 
 ## Building query strings
 Without fhir.js the mongo-like syntax is not available. However, the `request`
-function also accepts `URL` instances as it's first argument (or as value of the `url`)
-property of the first argument if that is an object. By using `fhir.js`, your browser
+function also accepts `URL` instances as it's first argument (or as value of the `url`
+property of the first argument if that is an object). By using `fhir.js`, your browser
 will be polyfill-ed if needed and `URL` and `URLSearchParams` will always be
 available in the global scope (even in Node). Here are some examples of building search queries:
 
 ```js
+// First 10 patients sorted by name
 const query = new URLSearchParams();
 query.set("_sort", "name");
 query.set("_count", 10);
 client.request(`Patient?${query}`);
 
 
-// Another example - comma-separated list of code makes an OR query
+// Another example - comma-separated list of codes makes an OR query
 const query = new URLSearchParams();
 query.set("code", [
     'http://loinc.org|29463-7', // weight
