@@ -11135,7 +11135,7 @@ function init(env, options) {
   var cached = env.getStorage().get(key);
 
   if (cached) {
-    return new Client(env, cached);
+    return Promise.resolve(new Client(env, cached));
   } // Otherwise try to launch
 
 
