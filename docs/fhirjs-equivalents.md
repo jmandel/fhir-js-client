@@ -117,11 +117,9 @@ query.set("_count", 10);
 client.request(`Patient?${query}`);
 
 
-// Another example
+// Another example - comma-separated list of code makes an OR query
 const query = new URLSearchParams();
-
-// Comma-separated list of code makes an OR query
-query.set(code, [
+query.set("code", [
     'http://loinc.org|29463-7', // weight
     'http://loinc.org|3141-9' , // weight
     'http://loinc.org|8302-2' , // Body height
@@ -130,6 +128,5 @@ query.set(code, [
     'http://loinc.org|39156-5', // BMI 39156-5
     'http://loinc.org|37362-1', // bone age
 ].join(","));
-
 client.request(`Observation?${query}`);
 ```
