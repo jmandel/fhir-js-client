@@ -9,7 +9,7 @@ It works both in browsers (IE10+) and on the server (NodeJS).
 ## Installation
 Install from npm:
 ```sh
-npm i client-js
+npm i fhirclient
 ```
 ## Browser Usage
 
@@ -45,7 +45,7 @@ FHIR.oauth2.ready()
 The server is fundamentally different environment than the browser but the
 API is very similar. Here is a simple express example:
 ```js
-const fhirClient = require("fhir-client");
+const fhirClient = require("fhirclient");
 
 // This is what the EHR will call
 app.get("/launch", (req, res) => {
