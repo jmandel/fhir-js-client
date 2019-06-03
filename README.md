@@ -158,27 +158,28 @@ This is the single most important method. Please see the [live examples](http://
 
 **Fetch single resource**
 ```js
-await client.request("/Patient/2e27c71e-30c8-4ceb-8c1c-5641e066c0a4");
+client.request("/Patient/id"); // Resolves with a Patient or rejects with an Error
 ```
 
 **Fetch the current patient**
 ```js
-await client.request(`/Patient/${client.patient.id}`);
+client.request(`/Patient/${client.patient.id}`); // Resolves with a Patient or rejects with an Error
 ```
 
 **Fetch a bundle**
 ```js
-await client.request("/Patient");
+client.request("/Patient"); // Resolves with a Bundle or rejects with an Error
 ```
 
 **Get all pages**
 ```js
-await client.request("/Patient", { pageLimit: 0 });
+client.request("/Patient", { pageLimit: 0 });  // Resolves with array of Bundles or rejects with an Error
 ```
 
 **Handle pages as they arrive**
 ```js
-await client.request("/Patient", {
+// Resolves with null or rejects with an Error
+client.request("/Patient", {
     pageLimit: 5,
     onPage(bundle) {
         // do something with the downloaded page
@@ -188,7 +189,8 @@ await client.request("/Patient", {
 
 **Resolve References**
 ```js
-await client.request(
+// Resolves with augmented Encounter or rejects with an Error
+client.request(
     "/Encounter/518a522a-4b10-47db-9daf-53b726d32607",
     resolveReferences: [ "serviceProvider" ]
 );
@@ -196,7 +198,8 @@ await client.request(
 
 **Extracting multiple related resources from single Observation:**
 ```js
-await client.request(
+// Resolves with Object (augmented Observation) or rejects with an Error
+client.request(
     "/Observation/smart-691-bmi",
     resolveReferences: [
         "context",                 // The Encounter
@@ -216,7 +219,8 @@ the promise will be resolved with an object having two properties:
 - `data` the original response data
 - `references` a map of resolved references
 ```js
-await client.request(
+// Resolves with Object ({ data, references }) or rejects with an Error
+client.request(
     "/Encounter/518a522a-4b10-47db-9daf-53b726d32607",
     resolveReferences: [ "serviceProvider" ],
     graph: false
