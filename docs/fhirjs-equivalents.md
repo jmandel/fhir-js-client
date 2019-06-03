@@ -3,6 +3,11 @@
 ### read
 ```js
 client.request("ResourceType/resourceId")
+
+// client-js also has 3 methods for reading the current user, patient and encounter
+client.user.read()
+client.patient.read()
+client.encounter.read()
 ```
 
 ### vread
@@ -41,7 +46,7 @@ client.request({
 ### delete
 ```js
 client.request({
-    url: "ResourceType",
+    url: "ResourceType/resourceId",
     method: "DELETE"
 })
 ```
