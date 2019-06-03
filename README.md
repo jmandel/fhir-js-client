@@ -172,7 +172,7 @@ It exposes the following API:
 #### client.`request(requestUriOrOptions[, fhirOptions]): Promise<Object>`
 This is the single most important method. Please see the [live examples](http://docs.smarthealthit.org/client-js/request.html).
 
-**requestUriOrOptions** can be a `String` URL or an object having an `url` property. The `url` can be relative path that will be appended to your base URL. Using a full http URL will also work, as long as it is on the same domain as your base URL. Any other option will be passed to the underlying `fetch()` call.
+**requestUriOrOptions** can be a `String` URL, or an `URL instance` or an object having an `url` property. The `url` can be relative path that will be appended to your base URL. Using a full http URL will also work, as long as it is on the same domain as your base URL. Any other option will be passed to the underlying `fetch()` call.
 
 **fhirOptions: Object** can contain the following options:
 
@@ -345,7 +345,7 @@ client.getPath(data, "a.b.c.d.e") // => undefined
 
 ## Fhir.js Integration
 Since v2.0.0 this library no longer includes fhir.js. That architecture was extremely difficult to maintain. Fhir.js is now an optional dependency, meaning that it is not available by default, unless you include it in the page. Our goal is to provide simple
-alternative t fhir.js - most of it should be possible via `client.request`.
+alternative to fhir.js - most of it should be possible via `client.request`. Please see the [Examples](http://docs.smarthealthit.org/client-js/fhirjs-equivalents)
 
 #### Reasons to use fhir.js
 1. If you have old apps using legacy API like `client.api.anyFhirJsMethod()` or `client.patient.api.anyFhirJsMethod()`
@@ -356,9 +356,6 @@ alternative t fhir.js - most of it should be possible via `client.request`.
 1. If you prefer to build the fhir queries yourself using fhir syntax.
 2. If you encounter fhir-version-specific issues with fhir.js
 3. If you want to keep things simpler and smaller
-
-#### How to use request instead of fhir.js
-Please see the [Examples](http://docs.smarthealthit.org/client-js/fhirjs-equivalents)
 
 #### Browser Integration
 You just need to include fhir.js (`nativeFhir.js`) in the page via script tag. We will detect that and make the necessary linking. You can then use it via `client.api` and `client.patient.api`, just like it used to work with older versions of this library. For convenience we have included the latest build of fhir.js that we have tested with at [lib/nativeFhir.js](lib/nativeFhir.js).
