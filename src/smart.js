@@ -116,6 +116,8 @@ async function buildAuthorizeUrl(env, params = {})
 
     if (!redirectUri) {
         redirectUri = env.relative(".");
+    } else {
+        redirectUri = env.relative(redirectUri);
     }
 
     const serverUrl = String(iss || fhirServiceUrl || "");
