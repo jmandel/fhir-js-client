@@ -11,7 +11,7 @@ It works both in browsers (IE10+) and on the server (NodeJS).
 Install from npm:
 ```sh
 # This is still in beta! To give it a try do:
-npm i fhirclient@dev
+npm i https://github.com/smart-on-fhir/client-js
 
 # To install the older version do:
 npm i fhirclient
