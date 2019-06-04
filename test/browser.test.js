@@ -54,6 +54,7 @@ after(() => {
 beforeEach(() => {
     global.window = new Window();
 });
+
 afterEach(() => {
     mockServer.clear();
     delete global.window;
@@ -94,7 +95,7 @@ describe ("Complete authorization", () => {
         // Get the state parameter from the URL
         const state = redirect.searchParams.get("state");
 
-        expect(Storage.get(state), "must have set a state at " + state).to.exist();
+        expect(await Storage.get(state), "must have set a state at " + state).to.exist();
 
         // mock our access token response
         mockServer.mock({
@@ -123,7 +124,7 @@ describe ("Complete authorization", () => {
         // make sure tha browser history was replaced
         expect(window.history._location).to.equal("http://localhost/");
 
-        expect(Storage.get(smart.KEY), `must have set a state at ${smart.KEY}`).to.exist();
+        expect(await Storage.get(smart.KEY), `must have set a state at ${smart.KEY}`).to.exist();
         expect(client.getPatientId()).to.equal("b2536dd3-bccd-4d22-8355-ab20acdf240b");
         expect(client.getEncounterId()).to.equal("e3ec2d15-4c27-4607-a45c-2f84962b0700");
         expect(client.getUserId()).to.equal("smart-Practitioner-71482713");
@@ -166,7 +167,7 @@ describe ("Complete authorization", () => {
         const key = redirect.searchParams.get("state"); // console.log(redirect);
 
         // console.log(redirect, state, storage.get(state));
-        expect(Storage.get(key), "must have set a state at " + key).to.exist();
+        expect(await Storage.get(key), "must have set a state at " + key).to.exist();
  
         // mock our access token response
         mockServer.mock({
@@ -195,12 +196,12 @@ describe ("Complete authorization", () => {
         expect(window.history._location).to.equal("");
 
         expect(
-            Storage.get(smart.KEY),
+            await Storage.get(smart.KEY),
             `without fullSessionStorageSupport a '${smart.KEY}' key should not be used`
         ).to.not.exist();
-        expect(Storage.get(key), "must have set a state at " + key).to.exist();
-        expect(Storage.get(key)).to.include("tokenResponse");
-        expect(Storage.get(key).tokenResponse).to.be.object();
+        expect(await Storage.get(key), "must have set a state at " + key).to.exist();
+        expect(await Storage.get(key)).to.include("tokenResponse");
+        expect((await Storage.get(key)).tokenResponse).to.be.object();
         expect(client.getPatientId()).to.equal("b2536dd3-bccd-4d22-8355-ab20acdf240b");
         expect(client.getEncounterId()).to.equal("e3ec2d15-4c27-4607-a45c-2f84962b0700");
         expect(client.getUserId()).to.equal("smart-Practitioner-71482713");
@@ -213,8 +214,8 @@ describe ("Complete authorization", () => {
         const Storage = env.getStorage();
         const key = "whatever-random-key";
 
-        Storage.set(smart.KEY, key);
-        Storage.set(key, {
+        await Storage.set(smart.KEY, key);
+        await Storage.set(key, {
             clientId     : "my_web_app",
             scope        : "whatever",
             redirectUri  : "whatever",
@@ -253,7 +254,7 @@ describe ("Complete authorization", () => {
         const Storage = env.getStorage();
         const key = "whatever-random-key";
 
-        Storage.set(key, {
+        await Storage.set(key, {
             clientId   : "my_web_app",
             scope      : "whatever",
             redirectUri: "whatever",
@@ -302,13 +303,13 @@ describe ("Complete authorization", () => {
             launch: "123"
         });
         const state = (new URL(redirect)).searchParams.get("state");
-        expect(Storage.get(state).scope).to.equal("x launch");
+        expect((await Storage.get(state)).scope).to.equal("x launch");
     });
 
     it ("can do standalone launch", async () => {
 
         const env     = new BrowserEnv();
-        const storage = env.getStorage();
+        const Storage = env.getStorage();
 
         // mock our oauth endpoints
         mockServer.mock({
@@ -337,7 +338,7 @@ describe ("Complete authorization", () => {
         const redirect = env.getUrl(); // console.log(redirect, storage);
         const state = redirect.searchParams.get("state");
 
-        expect(storage.get(state), "must have set a state at " + state).to.exist();
+        expect(await Storage.get(state), "must have set a state at " + state).to.exist();
 
         // mock our access token response
         mockServer.mock({
@@ -363,7 +364,7 @@ describe ("Complete authorization", () => {
         env.redirect("http://localhost/?code=123&state=" + state);
         const client = await smart.completeAuth(env);
 
-        expect(storage.get(smart.KEY), `must have set a state at ${smart.KEY}`).to.exist();
+        expect(await Storage.get(smart.KEY), `must have set a state at ${smart.KEY}`).to.exist();
         expect(client.getPatientId()).to.equal("b2536dd3-bccd-4d22-8355-ab20acdf240b");
         expect(client.getEncounterId()).to.equal("e3ec2d15-4c27-4607-a45c-2f84962b0700");
         expect(client.getUserId()).to.equal("smart-Practitioner-71482713");
@@ -605,7 +606,7 @@ describe("smart", () => {
                 encounterId: "whatever"
             });
             const state = (new URL(url)).searchParams.get("state");
-            expect(env.getStorage().get(state)).to.include({
+            expect(await env.getStorage().get(state)).to.include({
                 tokenResponse: { encounter: "whatever" }
             });
         });
@@ -617,7 +618,7 @@ describe("smart", () => {
                 patientId: "whatever"
             });
             const state = (new URL(url)).searchParams.get("state");
-            expect(env.getStorage().get(state)).to.include({
+            expect(await env.getStorage().get(state)).to.include({
                 tokenResponse: { patient: "whatever" }
             });
         });
@@ -629,7 +630,7 @@ describe("smart", () => {
                 fakeTokenResponse: { a: 1, b: 2 }
             });
             const state = (new URL(url)).searchParams.get("state");
-            expect(env.getStorage().get(state)).to.include({
+            expect(await env.getStorage().get(state)).to.include({
                 tokenResponse: { a: 1, b: 2 }
             });
         });
@@ -739,9 +740,6 @@ describe("smart", () => {
                 }).catch(reject);
             });
 
-            // console.log(client);
-            // console.log("==================", env.getStorage(), env.getUrl());
-
             expect(client.getPatientId()).to.equal("b2536dd3-bccd-4d22-8355-ab20acdf240b");
             expect(client.getEncounterId()).to.equal("e3ec2d15-4c27-4607-a45c-2f84962b0700");
             expect(client.getUserId()).to.equal("smart-Practitioner-71482713");
@@ -814,9 +812,6 @@ describe("smart", () => {
                     iss       : mockUrl
                 }).catch(reject);
             });
-
-            // console.log(client);
-            // console.log("==================", env.getStorage(), env.getUrl());
 
             expect(client.getPatientId()).to.equal("b2536dd3-bccd-4d22-8355-ab20acdf240b");
             expect(client.getEncounterId()).to.equal("e3ec2d15-4c27-4607-a45c-2f84962b0700");

@@ -1,11 +1,11 @@
-const Storage = require("./Storage");
+const MemoryStorage = require("./MemoryStorage");
 
 class HttpRequest
 {
     constructor(url)
     {
         this.url = url;
-        this.session = new Storage();
+        this.session = new MemoryStorage();
     }
 }
 

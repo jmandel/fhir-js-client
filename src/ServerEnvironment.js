@@ -1,9 +1,21 @@
+const ServerStorage = require("./ServerStorage");
+
 class ServerEnvironment
 {
-    constructor(request, response)
+    constructor(request, response, storage)
     {
-        this.request = request;
+        this.request  = request;
         this.response = response;
+
+        if (storage) {
+            if (typeof storage == "function") {
+                this.storage = storage(request);
+            } else {
+                this.storage = storage;
+            }
+        } else {
+            this.storage = new ServerStorage(this.request);
+        }
     }
 
     getUrl()
@@ -19,7 +31,7 @@ class ServerEnvironment
 
     getStorage()
     {
-        return this.request.session;
+        return this.storage;
     }
 
     relative(url)

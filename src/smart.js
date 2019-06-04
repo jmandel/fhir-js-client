@@ -168,15 +168,14 @@ async function buildAuthorizeUrl(env, params = {})
     if (fhirServiceUrl && !iss) {
         debug("[buildAuthorizeUrl] Making fake launch...");
         // Storage.set(stateKey, state);
-        env.getStorage().set(stateKey, state);
+        await env.getStorage().set(stateKey, state);
         return redirectUri + "?state=" + encodeURIComponent(stateKey);
     }
 
     // Get oauth endpoints and add them to the state
     const extensions = await getSecurityExtensions(serverUrl);
     Object.assign(state, extensions);
-    // Storage.set(stateKey, state);
-    env.getStorage().set(stateKey, state);
+    await env.getStorage().set(stateKey, state);
 
     // If this happens to be an open server and there is no authorizeUri
     if (!state.authorizeUri) {
@@ -204,7 +203,7 @@ async function buildAuthorizeUrl(env, params = {})
 async function authorize(env, options = {})
 {
     // prevent inheritance of tokenResponse from parent window
-    env.getStorage().unset(SMART_KEY);
+    await env.getStorage().unset(SMART_KEY);
 
     const url            = env.getUrl();
     const iss            = url.searchParams.get("iss"); 
@@ -236,10 +235,14 @@ async function completeAuth(env)
     const url = env.getUrl();
     const Storage = env.getStorage();
 
-    const key                  = url.searchParams.get("state") || Storage.get(SMART_KEY);
+    let key                    = url.searchParams.get("state");
     const code                 = url.searchParams.get("code");
     const authError            = url.searchParams.get("error");
     const authErrorDescription = url.searchParams.get("error_description");
+
+    if (!key) {
+        key = await Storage.get(SMART_KEY);
+    }
 
     // Start by checking the url for `error` and `error_description` parameters.
     // This happens when the auth server rejects our authorization attempt. In
@@ -263,7 +266,7 @@ async function completeAuth(env)
     }
 
     // Check if we have a previous state
-    let state = Storage.get(key);
+    let state = await Storage.get(key);
 
     const fullSessionStorageSupport = isBrowser() ?
         getPath(window, "FHIR.oauth2.settings.fullSessionStorageSupport") :
@@ -332,9 +335,9 @@ async function completeAuth(env)
         // save the tokenResponse so that we don't have to re-authorize on
         // every page reload
         state = { ...state, tokenResponse };
-        Storage.set(key, state);
+        await Storage.set(key, state);
         if (fullSessionStorageSupport) {
-            Storage.set(SMART_KEY, key);
+            await Storage.set(SMART_KEY, key);
         }
         debug("[completeAuth] Authorization successful!");
     }
@@ -416,7 +419,7 @@ async function ready(env, onSuccess, onError)
     return task;
 }
 
-function init(env, options)
+async function init(env, options)
 {
     const url   = env.getUrl();
     const code  = url.searchParams.get("code");
@@ -430,8 +433,9 @@ function init(env, options)
     // Check for existing client state. If state is found, it means a client
     // instance have already been created in this session and we should try to
     // "revive" it.
-    const key = state || env.getStorage().get(SMART_KEY);
-    const cached = env.getStorage().get(key);
+    const storage = env.getStorage();
+    const key     = state || await storage.get(SMART_KEY);
+    const cached = await storage.get(key);
     if (cached) {
         return Promise.resolve(new Client(env, cached));
     }

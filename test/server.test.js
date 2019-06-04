@@ -2,12 +2,12 @@ const { expect } = require("@hapi/code");
 const lab        = require("@hapi/lab").script();
 const FHIR       = require("../src/entry-node");
 const { KEY }    = require("../src/smart");
-// const debug      = require("debug");
 
 // Mocks
-const mockServer   = require("./mockServer");
-const HttpRequest  = require("./mocks/HttpRequest");
-const HttpResponse = require("./mocks/HttpResponse");
+const mockServer        = require("./mockServer");
+const HttpRequest       = require("./mocks/HttpRequest");
+const HttpResponse      = require("./mocks/HttpResponse");
+const MemoryStorage     = require("./mocks/MemoryStorage");
 
 require("isomorphic-fetch");
 
@@ -131,12 +131,13 @@ describe ("Complete authorization [SERVER]", () => {
 
         const key = "my-random-state";
 
-        const req   = new HttpRequest("http://localhost/index");
-        const res   = new HttpResponse();
-        const smart = FHIR(req, res);
+        const req     = new HttpRequest("http://localhost/index");
+        const res     = new HttpResponse();
+        const storage = new MemoryStorage();
+        const smart   = FHIR(req, res, storage);
 
-        req.session.set(KEY, key);
-        req.session.set(key, {
+        await storage.set(KEY, key);
+        await storage.set(key, {
             clientId     : "my_web_app",
             scope        : "whatever",
             redirectUri  : "whatever",
@@ -177,9 +178,10 @@ describe ("Complete authorization [SERVER]", () => {
     });
 
     it ("appends 'launch' to the scopes if needed", async () => {
-        const req   = new HttpRequest("http://localhost/launch");
-        const res   = new HttpResponse();
-        const smart = FHIR(req, res);
+        const req     = new HttpRequest("http://localhost/launch");
+        const res     = new HttpResponse();
+        const storage = new MemoryStorage();
+        const smart   = FHIR(req, res, storage);
         await smart.authorize({
             fhirServiceUrl: "http://localhost",
             scope: "x",
@@ -189,7 +191,8 @@ describe ("Complete authorization [SERVER]", () => {
         expect(res.headers.location).to.exist();
         const url = new URL(res.headers.location);
         const state = url.searchParams.get("state");
-        expect(req.session.get(state).scope).to.equal("x launch");
+        const stored = await storage.get(state);
+        expect(stored.scope).to.equal("x launch");
     });
 
     // it ("can do standalone launch");

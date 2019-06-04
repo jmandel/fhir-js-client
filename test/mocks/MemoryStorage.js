@@ -1,24 +1,27 @@
 
-class Storage
+class MemoryStorage
 {
     constructor()
     {
         this.__data = {};
     }
 
-    set(key, value) {
+    async set(key, value) {
         this.__data[key] = value;
+        return value;
     }
 
-    get(key) {
+    async get(key) {
         return this.__data.hasOwnProperty(key) ? this.__data[key] : null;
     }
 
-    unset(key) {
+    async unset(key) {
         if (key in this.__data) {
             delete this.__data[key];
+            return true;
         }
+        return false;
     }
 }
 
-module.exports = Storage;
+module.exports = MemoryStorage;

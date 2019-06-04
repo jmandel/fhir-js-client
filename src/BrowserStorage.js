@@ -1,6 +1,6 @@
 class Storage
 {
-    get(key)
+    async get(key)
     {
         const value = sessionStorage[key];
         if (value) {
@@ -9,16 +9,19 @@ class Storage
         return null;
     }
 
-    set(key, value)
+    async set(key, value)
     {
         sessionStorage[key] = JSON.stringify(value);
+        return value;
     }
 
-    unset(key)
+    async unset(key)
     {
         if (key in sessionStorage) {
             delete sessionStorage[key];
+            return true;
         }
+        return false;
     }
 
 }

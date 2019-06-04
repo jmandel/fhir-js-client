@@ -8716,7 +8716,7 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 /* global fhir */
-var Storage = __webpack_require__(/*! ./Storage */ "./src/Storage.js");
+var Storage = __webpack_require__(/*! ./BrowserStorage */ "./src/BrowserStorage.js");
 
 var BrowserEnvironment =
 /*#__PURE__*/
@@ -8760,6 +8760,147 @@ function () {
 }();
 
 module.exports = BrowserEnvironment;
+
+/***/ }),
+
+/***/ "./src/BrowserStorage.js":
+/*!*******************************!*\
+  !*** ./src/BrowserStorage.js ***!
+  \*******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+__webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
+
+__webpack_require__(/*! core-js/modules/es.promise */ "./node_modules/core-js/modules/es.promise.js");
+
+__webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Storage =
+/*#__PURE__*/
+function () {
+  function Storage() {
+    _classCallCheck(this, Storage);
+  }
+
+  _createClass(Storage, [{
+    key: "get",
+    value: function () {
+      var _get = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee(key) {
+        var value;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                value = sessionStorage[key];
+
+                if (!value) {
+                  _context.next = 3;
+                  break;
+                }
+
+                return _context.abrupt("return", JSON.parse(value));
+
+              case 3:
+                return _context.abrupt("return", null);
+
+              case 4:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee);
+      }));
+
+      function get(_x) {
+        return _get.apply(this, arguments);
+      }
+
+      return get;
+    }()
+  }, {
+    key: "set",
+    value: function () {
+      var _set = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee2(key, value) {
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                sessionStorage[key] = JSON.stringify(value);
+                return _context2.abrupt("return", value);
+
+              case 2:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2);
+      }));
+
+      function set(_x2, _x3) {
+        return _set.apply(this, arguments);
+      }
+
+      return set;
+    }()
+  }, {
+    key: "unset",
+    value: function () {
+      var _unset = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee3(key) {
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                if (!(key in sessionStorage)) {
+                  _context3.next = 3;
+                  break;
+                }
+
+                delete sessionStorage[key];
+                return _context3.abrupt("return", true);
+
+              case 3:
+                return _context3.abrupt("return", false);
+
+              case 4:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3);
+      }));
+
+      function unset(_x4) {
+        return _unset.apply(this, arguments);
+      }
+
+      return unset;
+    }()
+  }]);
+
+  return Storage;
+}();
+
+module.exports = Storage;
 
 /***/ }),
 
@@ -9773,14 +9914,26 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+var ServerStorage = __webpack_require__(/*! ./ServerStorage */ "./src/ServerStorage.js");
+
 var ServerEnvironment =
 /*#__PURE__*/
 function () {
-  function ServerEnvironment(request, response) {
+  function ServerEnvironment(request, response, storage) {
     _classCallCheck(this, ServerEnvironment);
 
     this.request = request;
     this.response = response;
+
+    if (storage) {
+      if (typeof storage == "function") {
+        this.storage = storage(request);
+      } else {
+        this.storage = storage;
+      }
+    } else {
+      this.storage = new ServerStorage(this.request);
+    }
   }
 
   _createClass(ServerEnvironment, [{
@@ -9799,7 +9952,7 @@ function () {
   }, {
     key: "getStorage",
     value: function getStorage() {
-      return this.request.session;
+      return this.storage;
     }
   }, {
     key: "relative",
@@ -9815,15 +9968,25 @@ module.exports = ServerEnvironment;
 
 /***/ }),
 
-/***/ "./src/Storage.js":
-/*!************************!*\
-  !*** ./src/Storage.js ***!
-  \************************/
+/***/ "./src/ServerStorage.js":
+/*!******************************!*\
+  !*** ./src/ServerStorage.js ***!
+  \******************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+
+__webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
+
+__webpack_require__(/*! core-js/modules/es.promise */ "./node_modules/core-js/modules/es.promise.js");
+
+__webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -9831,42 +9994,109 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var Storage =
+var ServerStorage =
 /*#__PURE__*/
 function () {
-  function Storage() {
-    _classCallCheck(this, Storage);
+  function ServerStorage(request) {
+    _classCallCheck(this, ServerStorage);
+
+    this.request = request;
   }
 
-  _createClass(Storage, [{
+  _createClass(ServerStorage, [{
     key: "get",
-    value: function get(key) {
-      var value = sessionStorage[key];
+    value: function () {
+      var _get = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee(key) {
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                return _context.abrupt("return", this.request.session[key]);
 
-      if (value) {
-        return JSON.parse(value);
+              case 1:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function get(_x) {
+        return _get.apply(this, arguments);
       }
 
-      return null;
-    }
+      return get;
+    }()
   }, {
     key: "set",
-    value: function set(key, value) {
-      sessionStorage[key] = JSON.stringify(value);
-    }
+    value: function () {
+      var _set = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee2(key, value) {
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                this.request.session[key] = value;
+                return _context2.abrupt("return", value);
+
+              case 2:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function set(_x2, _x3) {
+        return _set.apply(this, arguments);
+      }
+
+      return set;
+    }()
   }, {
     key: "unset",
-    value: function unset(key) {
-      if (key in sessionStorage) {
-        delete sessionStorage[key];
+    value: function () {
+      var _unset = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee3(key) {
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                if (!this.request.session.hasOwnProperty(key)) {
+                  _context3.next = 3;
+                  break;
+                }
+
+                delete this.request.session[key];
+                return _context3.abrupt("return", true);
+
+              case 3:
+                return _context3.abrupt("return", false);
+
+              case 4:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this);
+      }));
+
+      function unset(_x4) {
+        return _unset.apply(this, arguments);
       }
-    }
+
+      return unset;
+    }()
   }]);
 
-  return Storage;
+  return ServerStorage;
 }();
 
-module.exports = Storage;
+module.exports = ServerStorage;
 
 /***/ }),
 
@@ -9989,13 +10219,14 @@ var smart = __webpack_require__(/*! ./smart */ "./src/smart.js");
 
 var ServerEnv = __webpack_require__(/*! ./ServerEnvironment */ "./src/ServerEnvironment.js"); // Server API
 // -----------------------------------------------------------------------------
-// FHIR(req, res).authorize(options)
-// FHIR(req, res).ready()
-// FHIR(req, res).client()
+// FHIR(req, res [, storage]).authorize(options)
+// FHIR(req, res [, storage]).ready()
+// FHIR(req, res [, storage]).client()
+// FHIR(req, res [, storage]).init()
 
 
-var FHIR = function FHIR(request, response) {
-  var env = new ServerEnv(request, response);
+var FHIR = function FHIR(request, response, storage) {
+  var env = new ServerEnv(request, response, storage);
   return {
     ready: function ready() {
       for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
@@ -10017,6 +10248,13 @@ var FHIR = function FHIR(request, response) {
       }
 
       return _construct(Client, [env].concat(args));
+    },
+    init: function init() {
+      for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+        args[_key4] = arguments[_key4];
+      }
+
+      return smart.init.apply(smart, [env].concat(args));
     }
   };
 };
@@ -10767,33 +11005,37 @@ function _buildAuthorizeUrl() {
 
 
             if (!(fhirServiceUrl && !iss)) {
-              _context.next = 19;
+              _context.next = 20;
               break;
             }
 
             debug("[buildAuthorizeUrl] Making fake launch..."); // Storage.set(stateKey, state);
 
-            env.getStorage().set(stateKey, state);
-            return _context.abrupt("return", redirectUri + "?state=" + encodeURIComponent(stateKey));
+            _context.next = 19;
+            return env.getStorage().set(stateKey, state);
 
           case 19:
-            _context.next = 21;
+            return _context.abrupt("return", redirectUri + "?state=" + encodeURIComponent(stateKey));
+
+          case 20:
+            _context.next = 22;
             return getSecurityExtensions(serverUrl);
 
-          case 21:
+          case 22:
             extensions = _context.sent;
-            Object.assign(state, extensions); // Storage.set(stateKey, state);
+            Object.assign(state, extensions);
+            _context.next = 26;
+            return env.getStorage().set(stateKey, state);
 
-            env.getStorage().set(stateKey, state); // If this happens to be an open server and there is no authorizeUri
-
+          case 26:
             if (state.authorizeUri) {
-              _context.next = 26;
+              _context.next = 28;
               break;
             }
 
             return _context.abrupt("return", redirectUri + "?state=" + encodeURIComponent(stateKey));
 
-          case 26:
+          case 28:
             // build the redirect uri
             redirectParams = ["response_type=code", "client_id=" + encodeURIComponent(clientId), "scope=" + encodeURIComponent(scope), "redirect_uri=" + encodeURIComponent(redirectUri), "aud=" + encodeURIComponent(serverUrl), "state=" + encodeURIComponent(stateKey)]; // also pass this in case of EHR launch
 
@@ -10803,7 +11045,7 @@ function _buildAuthorizeUrl() {
 
             return _context.abrupt("return", state.authorizeUri + "?" + redirectParams.join("&"));
 
-          case 29:
+          case 31:
           case "end":
             return _context.stop();
         }
@@ -10839,8 +11081,10 @@ function _authorize() {
         switch (_context2.prev = _context2.next) {
           case 0:
             options = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : {};
-            // prevent inheritance of tokenResponse from parent window
-            env.getStorage().unset(SMART_KEY);
+            _context2.next = 3;
+            return env.getStorage().unset(SMART_KEY);
+
+          case 3:
             url = env.getUrl();
             iss = url.searchParams.get("iss");
             fhirServiceUrl = url.searchParams.get("fhirServiceUrl");
@@ -10857,15 +11101,15 @@ function _authorize() {
               options.iss = iss;
             }
 
-            _context2.next = 11;
+            _context2.next = 12;
             return buildAuthorizeUrl(env, options);
 
-          case 11:
+          case 12:
             redirect = _context2.sent;
             env.redirect(redirect);
             return _context2.abrupt("return", redirect);
 
-          case 14:
+          case 15:
           case "end":
             return _context2.stop();
         }
@@ -10895,40 +11139,47 @@ function _completeAuth() {
           case 0:
             url = env.getUrl();
             Storage = env.getStorage();
-            key = url.searchParams.get("state") || Storage.get(SMART_KEY);
+            key = url.searchParams.get("state");
             code = url.searchParams.get("code");
             authError = url.searchParams.get("error");
-            authErrorDescription = url.searchParams.get("error_description"); // Start by checking the url for `error` and `error_description` parameters.
-            // This happens when the auth server rejects our authorization attempt. In
-            // this case it has no other way to tell us what the error was, other than
-            // appending these parameters to the redirect url.
-            // From client's point of view, this is not very reliable (because we can't
-            // know how we have landed on this page - was it a redirect or was it loaded
-            // manually). However, if `completeAuth()` is being called, we can assume
-            // that the url comes from the auth server (otherwise the app won't work
-            // anyway).
+            authErrorDescription = url.searchParams.get("error_description");
 
+            if (key) {
+              _context3.next = 10;
+              break;
+            }
+
+            _context3.next = 9;
+            return Storage.get(SMART_KEY);
+
+          case 9:
+            key = _context3.sent;
+
+          case 10:
             if (!(authError || authErrorDescription)) {
-              _context3.next = 9;
+              _context3.next = 13;
               break;
             }
 
             msg = [authError, authErrorDescription].filter(Boolean).join(": ");
             throw new Error(msg);
 
-          case 9:
+          case 13:
             debug("[completeAuth] key: %s, code: %O", key, code); // key might be coming from the page url so it might be empty or missing
 
             if (key) {
-              _context3.next = 12;
+              _context3.next = 16;
               break;
             }
 
             throw new Error("No 'state' parameter found.");
 
-          case 12:
-            // Check if we have a previous state
-            state = Storage.get(key);
+          case 16:
+            _context3.next = 18;
+            return Storage.get(key);
+
+          case 18:
+            state = _context3.sent;
             fullSessionStorageSupport = isBrowser() ? getPath(window, "FHIR.oauth2.settings.fullSessionStorageSupport") : true; // Do we have to remove the `code` and `state` params from the URL?
 
             if (isBrowser()) {
@@ -10971,67 +11222,74 @@ function _completeAuth() {
 
 
             if (state) {
-              _context3.next = 17;
+              _context3.next = 23;
               break;
             }
 
             throw new Error("No state found! Please (re)launch the app.");
 
-          case 17:
+          case 23:
             if (!code) {
-              _context3.next = 35;
+              _context3.next = 44;
               break;
             }
 
             debug("[completeAuth] Preparing to exchange the code for access token...");
-            _context3.next = 21;
+            _context3.next = 27;
             return buildTokenRequest(code, state);
 
-          case 21:
+          case 27:
             requestOptions = _context3.sent;
             debug("[completeAuth] Token request options: %o", requestOptions); // The EHR authorization server SHALL return a JSON structure that
             // includes an access token or a message indicating that the
             // authorization request has been denied.
 
-            _context3.next = 25;
+            _context3.next = 31;
             return fetchJSON(state.tokenUri, requestOptions);
 
-          case 25:
+          case 31:
             tokenResponse = _context3.sent;
             debug("[completeAuth] Token response: %o", tokenResponse);
 
             if (tokenResponse.access_token) {
-              _context3.next = 29;
+              _context3.next = 35;
               break;
             }
 
             throw new Error("Failed to obtain access token.");
 
-          case 29:
+          case 35:
             // save the tokenResponse so that we don't have to re-authorize on
             // every page reload
             state = _objectSpread({}, state, {
               tokenResponse: tokenResponse
             });
-            Storage.set(key, state);
+            _context3.next = 38;
+            return Storage.set(key, state);
 
-            if (fullSessionStorageSupport) {
-              Storage.set(SMART_KEY, key);
+          case 38:
+            if (!fullSessionStorageSupport) {
+              _context3.next = 41;
+              break;
             }
 
+            _context3.next = 41;
+            return Storage.set(SMART_KEY, key);
+
+          case 41:
             debug("[completeAuth] Authorization successful!");
-            _context3.next = 36;
+            _context3.next = 45;
             break;
 
-          case 35:
+          case 44:
             debug("[completeAuth] %s", state.tokenResponse.access_token ? "Already authorized" : "No authorization needed");
 
-          case 36:
+          case 45:
             client = new Client(env, state);
             debug("[completeAuth] Created client instance: %O", client);
             return _context3.abrupt("return", client);
 
-          case 39:
+          case 48:
           case "end":
             return _context3.stop();
         }
@@ -11119,38 +11377,85 @@ function _ready() {
   return _ready.apply(this, arguments);
 }
 
-function init(env, options) {
-  var url = env.getUrl();
-  var code = url.searchParams.get("code");
-  var state = url.searchParams.get("state"); // if `code` and `state` params are present we need to complete the auth flow
+function init(_x7, _x8) {
+  return _init.apply(this, arguments);
+}
 
-  if (code && state) {
-    return completeAuth(env);
-  } // Check for existing client state. If state is found, it means a client
-  // instance have already been created in this session and we should try to
-  // "revive" it.
+function _init() {
+  _init = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee5(env, options) {
+    var url, code, state, storage, key, cached;
+    return regeneratorRuntime.wrap(function _callee5$(_context5) {
+      while (1) {
+        switch (_context5.prev = _context5.next) {
+          case 0:
+            url = env.getUrl();
+            code = url.searchParams.get("code");
+            state = url.searchParams.get("state"); // if `code` and `state` params are present we need to complete the auth flow
 
+            if (!(code && state)) {
+              _context5.next = 5;
+              break;
+            }
 
-  var key = state || env.getStorage().get(SMART_KEY);
-  var cached = env.getStorage().get(key);
+            return _context5.abrupt("return", completeAuth(env));
 
-  if (cached) {
-    return Promise.resolve(new Client(env, cached));
-  } // Otherwise try to launch
+          case 5:
+            // Check for existing client state. If state is found, it means a client
+            // instance have already been created in this session and we should try to
+            // "revive" it.
+            storage = env.getStorage();
+            _context5.t0 = state;
 
+            if (_context5.t0) {
+              _context5.next = 11;
+              break;
+            }
 
-  return authorize(env, options).then(function () {
-    // `init` promises a Client but that cannot happen in this case. The
-    // browser will be redirected (unload the page and be redirected back
-    // to it later and the same init function will be called again). On
-    // success, authorize will resolve with the redirect url but we don't
-    // want to return that from this promise chain because it is not a
-    // Client instance. At the same time, if authorize fails, we do want to
-    // pass the error to those waiting for a client instance.
-    return new Promise(function () {
-      /* leave it pending!!! */
-    });
-  });
+            _context5.next = 10;
+            return storage.get(SMART_KEY);
+
+          case 10:
+            _context5.t0 = _context5.sent;
+
+          case 11:
+            key = _context5.t0;
+            _context5.next = 14;
+            return storage.get(key);
+
+          case 14:
+            cached = _context5.sent;
+
+            if (!cached) {
+              _context5.next = 17;
+              break;
+            }
+
+            return _context5.abrupt("return", Promise.resolve(new Client(env, cached)));
+
+          case 17:
+            return _context5.abrupt("return", authorize(env, options).then(function () {
+              // `init` promises a Client but that cannot happen in this case. The
+              // browser will be redirected (unload the page and be redirected back
+              // to it later and the same init function will be called again). On
+              // success, authorize will resolve with the redirect url but we don't
+              // want to return that from this promise chain because it is not a
+              // Client instance. At the same time, if authorize fails, we do want to
+              // pass the error to those waiting for a client instance.
+              return new Promise(function () {
+                /* leave it pending!!! */
+              });
+            }));
+
+          case 18:
+          case "end":
+            return _context5.stop();
+        }
+      }
+    }, _callee5);
+  }));
+  return _init.apply(this, arguments);
 }
 
 module.exports = {

@@ -1,7 +1,7 @@
 /* global fhir */
-const EventEmitter = require("events");
-const Storage      = require("./Storage");
-const Location     = require("./Location");
+const EventEmitter  = require("events");
+const MemoryStorage = require("./MemoryStorage");
+const Location      = require("./Location");
 
 class BrowserEnvironment extends EventEmitter
 {
@@ -30,7 +30,7 @@ class BrowserEnvironment extends EventEmitter
     getStorage()
     {
         if (!this._storage) {
-            this._storage = new Storage();
+            this._storage = new MemoryStorage();
         }
         return this._storage;
     }
