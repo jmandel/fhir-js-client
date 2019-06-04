@@ -4,7 +4,7 @@ SMART on FHIR JavaScript Library
 This is a JavaScript library for connecting SMART apps to Fhir servers.
 It works both in browsers (IE10+) and on the server (NodeJS).
 
-> This the documentation for the current version. If you want to migrate from older versions, make sure you check out [what's new in v2](http://docs.smarthealthit.org/client-js/v2.html).
+> This the documentation for the new version. If you want to migrate from older versions, make sure you check out [what's new in v2](http://docs.smarthealthit.org/client-js/v2.html). For older versions see http://docs.smarthealthit.org/client-js/index.html
 
 ## Installation
 
