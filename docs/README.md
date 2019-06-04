@@ -13,7 +13,7 @@ Install from npm:
 # This is still in beta! To give it a try do:
 npm i fhirclient@dev
 
-# To still the older version do:
+# To install the older version do:
 npm i fhirclient
 ```
 ## Browser Usage
