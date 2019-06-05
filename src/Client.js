@@ -354,6 +354,10 @@ class FhirClient
      */
     request(requestOptions, fhirOptions = {}, _resolvedRefs = {})
     {
+        if (!requestOptions) {
+            throw new Error("client.request requires an url or request options as argument");
+        }
+
         // url -----------------------------------------------------------------
         let url;
         if (typeof requestOptions == "string" || requestOptions instanceof URL) {
@@ -414,28 +418,31 @@ class FhirClient
             .then(async (data) => {
 
                 const resolve = async obj => {
-                    for (let path of fhirOptions.resolveReferences) {
-                        const ref = getPath(obj, path + ".reference");
-                        if (ref) {
-                            let sub = _resolvedRefs[ref];
-                            if (!sub) {
-                                sub = await this.request(ref);
-                                _resolvedRefs[ref] = sub;
-                            }
+                    await Promise.all(fhirOptions.resolveReferences.map(path => {
+                        return new Promise((resolve2, reject) => {
+                            const ref = getPath(obj, path + ".reference");
+                            if (ref) {
+                                let sub = _resolvedRefs[ref];
+                                if (!sub) {
+                                    return this.request(ref).then(sub => {
+                                        _resolvedRefs[ref] = sub;
+                                        if (fhirOptions.graph) {
+                                            setPath(obj, path, sub);
+                                        }
+                                    }).then(resolve2, reject);
+                                }
 
-
-                            if (fhirOptions.graph) {
-                                setPath(obj, path, sub);
+                                if (fhirOptions.graph) {
+                                    setPath(obj, path, sub);
+                                }
                             }
-                        }
-                    }
+                            resolve2();
+                        });
+                    }));
                 };
 
                 if (data && data.resourceType == "Bundle") {
-                    for (let item of (data.entry || [])) {
-                        await resolve(item.resource);
-                        // console.log(resource);
-                    }
+                    await Promise.all((data.entry || []).map(item => resolve(item.resource)));
                 } else {
                     await resolve(data);
                 }

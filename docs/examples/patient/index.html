@@ -2,14 +2,14 @@
 <html>
  <head>
      <title>Display Patient</title>
-    <script src="../../build/fhir-client.js"></script>
+    <script src="../../../build/fhir-client.js"></script>
  </head>
  <body>
     <h1>Using patient.read() to display the patient</h1>
     <pre id="output">Loading...</pre>
     <script type="text/javascript">
-        function display(data, append) {
-            const output = document.getElementById("output");
+        function display(data) {
+            var output = document.getElementById("output");
             output.innerText = data instanceof Error ?
                 String(data) :
                 JSON.stringify(data, null, 4);

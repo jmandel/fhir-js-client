@@ -2,22 +2,24 @@
 <html>
  <head>
      <title>Display Conformance</title>
-    <script src="../../build/fhir-client.js"></script>
+    <script src="../../../build/fhir-client.js"></script>
  </head>
  <body>
     <h1>Using api.conformance() to display the conformance statement</h1>
     <pre id="output">Loading...</pre>
     <script type="text/javascript">
-        function display(data, append) {
-            const output = document.getElementById("output");
+        
+        function display(data) {
+            var output = document.getElementById("output");
             output.innerText = data instanceof Error ?
                 String(data) :
                 JSON.stringify(data, null, 4);
         }
 
-        FHIR.oauth2.ready(function(smart){
-            smart.api.conformance({}).then(display, display);
-        }, display);
+        // display(location)
+        FHIR.oauth2.ready(function(client){
+            return client.request("metadata");
+        }).then(display, display);
     </script>
  </body>
 </html>

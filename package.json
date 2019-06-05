@@ -22,14 +22,14 @@
     "isomorphic-fetch": "^2.2.1"
   },
   "scripts": {
-    "test": "lab test/*.test.js",
+    "test": "lab -P test",
     "clean": "rm -rf build",
     "pack:prod": "webpack --config webpack.config.js --mode production",
     "pack:dev": "webpack --config webpack.config.js --mode development",
     "pack": "npm run pack:dev && npm run pack:prod",
     "build": "npm run pack",
     "build:dev": "npm run pack:dev -- --watch",
-    "examples": "http-server . -o docs/examples/index.html -p 9090 -a 127.0.0.1 -c-1",
+    "examples": "ws -o -p 9090",
     "deploy:gh": "cp -r build docs && gh-pages -d docs"
   },
   "devDependencies": {
@@ -43,8 +43,8 @@
     "cors": "^2.8.5",
     "eslint": "^5.16.0",
     "express": "^4.17.0",
-    "http-server": "^0.11.1",
     "jsdom": "^15.1.1",
+    "local-web-server": "^2.6.1",
     "webpack": "^4.32.2",
     "webpack-bundle-analyzer": "^3.3.2",
     "webpack-cli": "^3.3.2"

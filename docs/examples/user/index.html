@@ -2,25 +2,24 @@
 <html>
  <head>
      <title>Display User</title>
-    <script src="../../build/fhir-client.js"></script>
+    <script src="../../../build/fhir-client.js"></script>
  </head>
  <body>
     <h1>Using user.read() to display the user</h1>
     <pre id="output">Loading...</pre>
     
     <script type="text/javascript">
-        function display(data, append) {
-            const output = document.getElementById("output");
+        function display(data) {
+            var output = document.getElementById("output");
             output.innerText = data instanceof Error ?
-                String(data) :
+                String(data.stack) :
                 JSON.stringify(data, null, 4);
         }
 
-        const client = new FHIR.client("https://r3.smarthealthit.org");
-        FHIR.oauth2.ready(
-            client => client.request(client.userId).then(display, display),
-            display
-        );
+        var client = new FHIR.client("https://r3.smarthealthit.org");
+        FHIR.oauth2.ready().then(function(client) {
+            return client.request(client.user.fhirUser);
+        }).then(display, display);
     </script>
  </body>
 </html>
