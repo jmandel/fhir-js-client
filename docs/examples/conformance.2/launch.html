@@ -5,12 +5,25 @@
     <script>
       // FHIR.oauth2.settings.replaceBrowserHistory = false;
       // FHIR.oauth2.settings.fullSessionStorageSupport = false;
+
+      function display(data, append) {
+            document.body.innerText = data instanceof Error ?
+                String(data) :
+                JSON.stringify(data, null, 4);
+      }
+
       FHIR.oauth2.authorize({
-        "client_id": "my_web_app",
-        "scope"    : "launch patient/*.read online_access openid fhirUser",
-        // "iss"      : "https://r3.smarthealthit.org"
-        clientSecret: "abc-secret"
-      });
+        "client_id" : "my_web_app",
+        "scope"     : "launch/patient launch/user launch/encounter patient/*.read online_access openid fhirUser",
+        "iss"       : "http://launch.smarthealthit.org/v/r3/sim/eyJoIjoiMSJ9/fhir",
+        clientSecret: "abc-secret",
+        popup       : true
+      }).then(client => client.request({
+            url: "/MedicationRequest?patient=smart-1642068"
+        }, {
+            resolveReferences: "subject"
+        })
+      ).then(display, display);
     </script>
   </head>
   <body>

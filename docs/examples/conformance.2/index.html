@@ -15,35 +15,47 @@
                 JSON.stringify(data, null, 4);
         }
 
+        FHIR.oauth2.init({
+            "client_id" : "my_web_app",
+            "scope"     : "launch/patient launch/user launch/encounter patient/*.read online_access openid fhirUser",
+            "iss"       : "http://launch.smarthealthit.org/v/r3/sim/eyJoIjoiMSJ9/fhir",
+            clientSecret: "abc-secret",
+            popup       : true
+        }).then(client => client.request({
+            url: "/MedicationRequest?patient=smart-1642068"
+        }, {
+            resolveReferences: "subject"
+        })).then(display, display);
+
         // FHIR.oauth2.settings.replaceBrowserHistory = true;
         // FHIR.oauth2.settings.fullSessionStorageSupport = false;
 
-        FHIR.oauth2.ready(async function(client) {
-            // client.connect(fhir);
-            client.request({
-                url: "/MedicationRequest?patient=smart-1642068"
-            }, {
-                resolveReferences: "subject"
-            }).then(display, display);
+        // FHIR.oauth2.ready(async function(client) {
+        //     // client.connect(fhir);
+        //     client.request({
+        //         url: "/MedicationRequest?patient=smart-1642068"
+        //     }, {
+        //         resolveReferences: "subject"
+        //     }).then(display, display);
 
-            // client.patient.read().then(display, display);
-            // setTimeout(() => { client.refresh() }, 4000);
-            // display({
-            //     "client.getPatientId()  ": client.getPatientId(),
-            //     "client.getEncounterId()": client.getEncounterId(),
-            //     "client.getIdToken()    ": client.getIdToken(),
-            //     "client.getFhirUser()   ": client.getFhirUser(),
-            //     "client.getUserType()   ": client.getUserType(),
-            //     "client.getUserId()     ": client.getUserId(),
-            //     "client.patient         ": client.patient,
-            //     "client.encounter       ": client.encounter,
-            //     "client.user            ": client.user,
-            //     "client.api             ": client.api,
-            //     "client.patient.read()  ": await client.patient.read(),
-            //     "client.encounter.read()": await client.encounter.read(),
-            //     "client.user.read()     ": await client.user.read()
-            // });
-        }, display);
+        //     // client.patient.read().then(display, display);
+        //     // setTimeout(() => { client.refresh() }, 4000);
+        //     // display({
+        //     //     "client.getPatientId()  ": client.getPatientId(),
+        //     //     "client.getEncounterId()": client.getEncounterId(),
+        //     //     "client.getIdToken()    ": client.getIdToken(),
+        //     //     "client.getFhirUser()   ": client.getFhirUser(),
+        //     //     "client.getUserType()   ": client.getUserType(),
+        //     //     "client.getUserId()     ": client.getUserId(),
+        //     //     "client.patient         ": client.patient,
+        //     //     "client.encounter       ": client.encounter,
+        //     //     "client.user            ": client.user,
+        //     //     "client.api             ": client.api,
+        //     //     "client.patient.read()  ": await client.patient.read(),
+        //     //     "client.encounter.read()": await client.encounter.read(),
+        //     //     "client.user.read()     ": await client.user.read()
+        //     // });
+        // }, display);
     </script>
  </body>
 </html>
