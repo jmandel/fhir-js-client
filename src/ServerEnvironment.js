@@ -39,7 +39,7 @@ class ServerEnvironment
     redirect(location)
     {
         this.response.writeHead(302, { location });
-        // this.response.end();
+        this.response.end();
     }
 
     getStorage()

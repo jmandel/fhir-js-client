@@ -8747,7 +8747,8 @@ function () {
     value: function redirect(location) {
       this.response.writeHead(302, {
         location: location
-      }); // this.response.end();
+      });
+      this.response.end();
     }
   }, {
     key: "getStorage",
