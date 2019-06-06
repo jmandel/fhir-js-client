@@ -8740,7 +8740,7 @@ function () {
       //     }
       // }
 
-      return new URL(req.originalUrl || req.url, protocol + "://" + host);
+      return new URL(req.originalUrl || req.path || req.url, protocol + "://" + host);
     }
   }, {
     key: "redirect",
