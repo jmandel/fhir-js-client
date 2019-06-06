@@ -325,12 +325,12 @@ async function completeAuth(env)
     if (code) {
         debug("[completeAuth] Preparing to exchange the code for access token...");
         const requestOptions = await buildTokenRequest(code, state);
-        debug("[completeAuth] Token request options: %o", requestOptions);
+        debug("[completeAuth] Token request options: %O", requestOptions);
         // The EHR authorization server SHALL return a JSON structure that
         // includes an access token or a message indicating that the
         // authorization request has been denied.
         let tokenResponse = await fetchJSON(state.tokenUri, requestOptions);
-        debug("[completeAuth] Token response: %o", tokenResponse);
+        debug("[completeAuth] Token response: %O", tokenResponse);
         if (!tokenResponse.access_token) {
             throw new Error("Failed to obtain access token.");
         }

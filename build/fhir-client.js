@@ -10480,7 +10480,7 @@ function () {
 
     if (storage) {
       if (typeof storage == "function") {
-        this.storage = storage(request);
+        this.storage = storage(request, response);
       } else {
         this.storage = storage;
       }
@@ -11807,7 +11807,7 @@ function _completeAuth() {
 
           case 27:
             requestOptions = _context3.sent;
-            debug("[completeAuth] Token request options: %o", requestOptions); // The EHR authorization server SHALL return a JSON structure that
+            debug("[completeAuth] Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
             // includes an access token or a message indicating that the
             // authorization request has been denied.
 
@@ -11816,7 +11816,7 @@ function _completeAuth() {
 
           case 31:
             tokenResponse = _context3.sent;
-            debug("[completeAuth] Token response: %o", tokenResponse);
+            debug("[completeAuth] Token response: %O", tokenResponse);
 
             if (tokenResponse.access_token) {
               _context3.next = 35;

@@ -10,7 +10,7 @@ class ServerEnvironment
 
         if (storage) {
             if (typeof storage == "function") {
-                this.storage = storage(request);
+                this.storage = storage(request, response);
             } else {
                 this.storage = storage;
             }
