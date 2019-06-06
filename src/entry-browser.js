@@ -1,3 +1,4 @@
+require("./polyfills");
 const Client     = require("./Client");
 const smart      = require("./smart");
 const BrowserEnv = require("./BrowserEnvironment");
