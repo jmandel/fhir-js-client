@@ -35,8 +35,8 @@ if (typeof window == "object") {
 }
 
 // In node we return the node adapter by default, meaning that one could do:
-// require("fhirclient")({ request, response }).authorize(options)
-// Other adapters can be included directly (E.g.: require("fhirclient/adapters/hapi"))
+// require("fhirclient").smart({ request, response }).authorize(options)
+// Other adapters can be included directly (E.g.: require("fhirclient/src/adapters/hapi"))
 else {
     module.exports = require("./adapters/NodeAdapter");
 }

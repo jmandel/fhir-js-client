@@ -87,8 +87,10 @@ function getSecurityExtensions(baseUrl = "/")
  * @param {String} params.patientId
  * @param {String} params.encounterId
  * @param {Object} params.fakeTokenResponse
+ * @param {Boolean} _noRedirect If true, resolve with the redirect url without
+ *  trying to redirect to it
  */
-async function buildAuthorizeUrl(env, params = {})
+async function authorize(env, params = {}, _noRedirect)
 {
     // Obtain input
     let {
@@ -105,6 +107,13 @@ async function buildAuthorizeUrl(env, params = {})
         client_id,
         clientId
     } = params;
+
+    const url = env.getUrl();
+    
+    // For these three an url param takes precedence over inline option
+    iss            = url.searchParams.get("iss")            || iss; 
+    fhirServiceUrl = url.searchParams.get("fhirServiceUrl") || fhirServiceUrl;
+    launch         = url.searchParams.get("launch")         || launch;
 
     if (!clientId) {
         clientId = client_id;
@@ -131,13 +140,16 @@ async function buildAuthorizeUrl(env, params = {})
     }
 
     if (iss) {
-        debug("[buildAuthorizeUrl] Making %s launch...", launch ? "EHR" : "standalone");
+        debug("[authorize] Making %s launch...", launch ? "EHR" : "standalone");
     }
 
     // append launch scope if needed
     if (launch && !scope.match(/launch/)) {
         scope += " launch";
     }
+
+    // prevent inheritance of tokenResponse from parent window
+    await env.getStorage().unset(SMART_KEY);
 
     // create initial state
     const stateKey = randomString(16);
@@ -166,12 +178,17 @@ async function buildAuthorizeUrl(env, params = {})
         Object.assign(state.tokenResponse, { encounter: encounterId });
     }
 
+    let redirectUrl = redirectUri + "?state=" + encodeURIComponent(stateKey);
+
     // bypass oauth if fhirServiceUrl is used (but iss takes precedence)
     if (fhirServiceUrl && !iss) {
-        debug("[buildAuthorizeUrl] Making fake launch...");
+        debug("[authorize] Making fake launch...");
         // Storage.set(stateKey, state);
         await env.getStorage().set(stateKey, state);
-        return redirectUri + "?state=" + encodeURIComponent(stateKey);
+        if (_noRedirect) {
+            return redirectUrl;
+        }
+        return await env.redirect(redirectUrl);
     }
 
     // Get oauth endpoints and add them to the state
@@ -181,7 +198,10 @@ async function buildAuthorizeUrl(env, params = {})
 
     // If this happens to be an open server and there is no authorizeUri
     if (!state.authorizeUri) {
-        return redirectUri + "?state=" + encodeURIComponent(stateKey);
+        if (_noRedirect) {
+            return redirectUrl;
+        }
+        return await env.redirect(redirectUrl);
     }
 
     // build the redirect uri
@@ -199,32 +219,13 @@ async function buildAuthorizeUrl(env, params = {})
         redirectParams.push("launch=" + encodeURIComponent(launch));
     }
 
-    return state.authorizeUri + "?" + redirectParams.join("&");
-}
+    redirectUrl = state.authorizeUri + "?" + redirectParams.join("&");
 
-async function authorize(env, options = {})
-{
-    // prevent inheritance of tokenResponse from parent window
-    await env.getStorage().unset(SMART_KEY);
-
-    const url            = env.getUrl();
-    const iss            = url.searchParams.get("iss"); 
-    const fhirServiceUrl = url.searchParams.get("fhirServiceUrl");
-    const launch         = url.searchParams.get("launch");
-
-    options = { launch, ...options };
-
-    if (fhirServiceUrl) {
-        options.fhirServiceUrl = fhirServiceUrl;
+    if (_noRedirect) {
+        return redirectUrl;
     }
 
-    if (iss) {
-        options.iss = iss;
-    }
-
-    const redirect = await buildAuthorizeUrl(env, options);
-    return env.redirect(redirect);
-    // return redirect;
+    return await env.redirect(redirectUrl);
 }
 
 /**
@@ -310,7 +311,7 @@ async function completeAuth(env)
                 window.history.replaceState({}, "", url.href);
             }
             else {
-                env.redirect(url.href);
+                await env.redirect(url.href);
             }
         }
     }
@@ -437,7 +438,7 @@ async function init(env, options)
     // "revive" it.
     const storage = env.getStorage();
     const key     = state || await storage.get(SMART_KEY);
-    const cached = await storage.get(key);
+    const cached  = await storage.get(key);
     if (cached) {
         return Promise.resolve(new Client(env, cached));
     }
@@ -459,7 +460,6 @@ module.exports = {
     fetchConformanceStatement,
     fetchWellKnownJson,
     getSecurityExtensions,
-    buildAuthorizeUrl,
     buildTokenRequest,
     authorize,
     completeAuth,

@@ -8857,13 +8857,20 @@ function (_BaseAdapter) {
     }
     /**
      * This is the static entry point and MUST be provided
-     * @param {Object} options 
+     * @param {Object} req The http request 
+     * @param {Object} res The http response
+     * @param {Object|Function} storage Custom storage instance or a storage
+     *  factory function
      */
 
   }], [{
     key: "smart",
-    value: function smart(options) {
-      return new NodeAdapter(options).getSmartApi();
+    value: function smart(req, res, storage) {
+      return new NodeAdapter({
+        request: req,
+        response: res,
+        storage: storage
+      }).getSmartApi();
     }
   }]);
 
@@ -8922,8 +8929,8 @@ if ((typeof window === "undefined" ? "undefined" : _typeof(window)) == "object")
   window.FHIR = FHIR;
   module.exports = FHIR;
 } // In node we return the node adapter by default, meaning that one could do:
-// require("fhirclient")({ request, response }).authorize(options)
-// Other adapters can be included directly (E.g.: require("fhirclient/adapters/hapi"))
+// require("fhirclient").smart({ request, response }).authorize(options)
+// Other adapters can be included directly (E.g.: require("fhirclient/src/adapters/hapi"))
 else {
     module.exports = __webpack_require__(/*! ./adapters/NodeAdapter */ "./src/adapters/NodeAdapter.js");
   }
@@ -9469,18 +9476,27 @@ function getSecurityExtensions() {
  * @param {String} params.patientId
  * @param {String} params.encounterId
  * @param {Object} params.fakeTokenResponse
+ * @param {Boolean} _noRedirect If true, resolve with the redirect url without
+ *  trying to redirect to it
  */
 
 
-function buildAuthorizeUrl(_x) {
-  return _buildAuthorizeUrl.apply(this, arguments);
+function authorize(_x) {
+  return _authorize.apply(this, arguments);
 }
+/**
+ * The completeAuth function should only be called on the page that represents
+ * the redirectUri. We typically land there after a redirect from the
+ * authorization server..
+ */
 
-function _buildAuthorizeUrl() {
-  _buildAuthorizeUrl = _asyncToGenerator(
+
+function _authorize() {
+  _authorize = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee(env) {
     var params,
+        _noRedirect,
         iss,
         launch,
         fhirServiceUrl,
@@ -9494,9 +9510,11 @@ function _buildAuthorizeUrl() {
         encounterId,
         client_id,
         clientId,
+        url,
         serverUrl,
         stateKey,
         state,
+        redirectUrl,
         extensions,
         redirectParams,
         _args = arguments;
@@ -9506,8 +9524,14 @@ function _buildAuthorizeUrl() {
         switch (_context.prev = _context.next) {
           case 0:
             params = _args.length > 1 && _args[1] !== undefined ? _args[1] : {};
+            _noRedirect = _args.length > 2 ? _args[2] : undefined;
             // Obtain input
             iss = params.iss, launch = params.launch, fhirServiceUrl = params.fhirServiceUrl, redirect_uri = params.redirect_uri, redirectUri = params.redirectUri, _params$scope = params.scope, scope = _params$scope === void 0 ? "" : _params$scope, clientSecret = params.clientSecret, fakeTokenResponse = params.fakeTokenResponse, patientId = params.patientId, encounterId = params.encounterId, client_id = params.client_id, clientId = params.clientId;
+            url = env.getUrl(); // For these three an url param takes precedence over inline option
+
+            iss = url.searchParams.get("iss") || iss;
+            fhirServiceUrl = url.searchParams.get("fhirServiceUrl") || fhirServiceUrl;
+            launch = url.searchParams.get("launch") || launch;
 
             if (!clientId) {
               clientId = client_id;
@@ -9526,23 +9550,28 @@ function _buildAuthorizeUrl() {
             serverUrl = String(iss || fhirServiceUrl || ""); // Validate input
 
             if (serverUrl) {
-              _context.next = 8;
+              _context.next = 13;
               break;
             }
 
             throw new Error("No server url found. It must be specified as `iss` or as " + "`fhirServiceUrl` parameter");
 
-          case 8:
+          case 13:
             if (iss) {
-              debug("[buildAuthorizeUrl] Making %s launch...", launch ? "EHR" : "standalone");
+              debug("[authorize] Making %s launch...", launch ? "EHR" : "standalone");
             } // append launch scope if needed
 
 
             if (launch && !scope.match(/launch/)) {
               scope += " launch";
-            } // create initial state
+            } // prevent inheritance of tokenResponse from parent window
 
 
+            _context.next = 17;
+            return env.getStorage().unset(SMART_KEY);
+
+          case 17:
+            // create initial state
             stateKey = randomString(16);
             state = {
               clientId: clientId,
@@ -9570,41 +9599,66 @@ function _buildAuthorizeUrl() {
               Object.assign(state.tokenResponse, {
                 encounter: encounterId
               });
-            } // bypass oauth if fhirServiceUrl is used (but iss takes precedence)
+            }
 
+            redirectUrl = redirectUri + "?state=" + encodeURIComponent(stateKey); // bypass oauth if fhirServiceUrl is used (but iss takes precedence)
 
             if (!(fhirServiceUrl && !iss)) {
-              _context.next = 20;
+              _context.next = 32;
               break;
             }
 
-            debug("[buildAuthorizeUrl] Making fake launch..."); // Storage.set(stateKey, state);
+            debug("[authorize] Making fake launch..."); // Storage.set(stateKey, state);
 
-            _context.next = 19;
+            _context.next = 27;
             return env.getStorage().set(stateKey, state);
 
-          case 19:
-            return _context.abrupt("return", redirectUri + "?state=" + encodeURIComponent(stateKey));
+          case 27:
+            if (!_noRedirect) {
+              _context.next = 29;
+              break;
+            }
 
-          case 20:
-            _context.next = 22;
+            return _context.abrupt("return", redirectUrl);
+
+          case 29:
+            _context.next = 31;
+            return env.redirect(redirectUrl);
+
+          case 31:
+            return _context.abrupt("return", _context.sent);
+
+          case 32:
+            _context.next = 34;
             return getSecurityExtensions(serverUrl);
 
-          case 22:
+          case 34:
             extensions = _context.sent;
             Object.assign(state, extensions);
-            _context.next = 26;
+            _context.next = 38;
             return env.getStorage().set(stateKey, state);
 
-          case 26:
+          case 38:
             if (state.authorizeUri) {
-              _context.next = 28;
+              _context.next = 44;
               break;
             }
 
-            return _context.abrupt("return", redirectUri + "?state=" + encodeURIComponent(stateKey));
+            if (!_noRedirect) {
+              _context.next = 41;
+              break;
+            }
 
-          case 28:
+            return _context.abrupt("return", redirectUrl);
+
+          case 41:
+            _context.next = 43;
+            return env.redirect(redirectUrl);
+
+          case 43:
+            return _context.abrupt("return", _context.sent);
+
+          case 44:
             // build the redirect uri
             redirectParams = ["response_type=code", "client_id=" + encodeURIComponent(clientId), "scope=" + encodeURIComponent(scope), "redirect_uri=" + encodeURIComponent(redirectUri), "aud=" + encodeURIComponent(serverUrl), "state=" + encodeURIComponent(stateKey)]; // also pass this in case of EHR launch
 
@@ -9612,82 +9666,33 @@ function _buildAuthorizeUrl() {
               redirectParams.push("launch=" + encodeURIComponent(launch));
             }
 
-            return _context.abrupt("return", state.authorizeUri + "?" + redirectParams.join("&"));
+            redirectUrl = state.authorizeUri + "?" + redirectParams.join("&");
 
-          case 31:
+            if (!_noRedirect) {
+              _context.next = 49;
+              break;
+            }
+
+            return _context.abrupt("return", redirectUrl);
+
+          case 49:
+            _context.next = 51;
+            return env.redirect(redirectUrl);
+
+          case 51:
+            return _context.abrupt("return", _context.sent);
+
+          case 52:
           case "end":
             return _context.stop();
         }
       }
     }, _callee);
   }));
-  return _buildAuthorizeUrl.apply(this, arguments);
-}
-
-function authorize(_x2) {
-  return _authorize.apply(this, arguments);
-}
-/**
- * The completeAuth function should only be called on the page that represents
- * the redirectUri. We typically land there after a redirect from the
- * authorization server..
- */
-
-
-function _authorize() {
-  _authorize = _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee2(env) {
-    var options,
-        url,
-        iss,
-        fhirServiceUrl,
-        launch,
-        redirect,
-        _args2 = arguments;
-    return regeneratorRuntime.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            options = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : {};
-            _context2.next = 3;
-            return env.getStorage().unset(SMART_KEY);
-
-          case 3:
-            url = env.getUrl();
-            iss = url.searchParams.get("iss");
-            fhirServiceUrl = url.searchParams.get("fhirServiceUrl");
-            launch = url.searchParams.get("launch");
-            options = _objectSpread({
-              launch: launch
-            }, options);
-
-            if (fhirServiceUrl) {
-              options.fhirServiceUrl = fhirServiceUrl;
-            }
-
-            if (iss) {
-              options.iss = iss;
-            }
-
-            _context2.next = 12;
-            return buildAuthorizeUrl(env, options);
-
-          case 12:
-            redirect = _context2.sent;
-            return _context2.abrupt("return", env.redirect(redirect));
-
-          case 14:
-          case "end":
-            return _context2.stop();
-        }
-      }
-    }, _callee2);
-  }));
   return _authorize.apply(this, arguments);
 }
 
-function completeAuth(_x3) {
+function completeAuth(_x2) {
   return _completeAuth.apply(this, arguments);
 }
 /**
@@ -9699,11 +9704,11 @@ function completeAuth(_x3) {
 function _completeAuth() {
   _completeAuth = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee3(env) {
+  regeneratorRuntime.mark(function _callee2(env) {
     var url, Storage, key, code, authError, authErrorDescription, msg, state, fullSessionStorageSupport, settings, hasState, requestOptions, tokenResponse, client;
-    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
-        switch (_context3.prev = _context3.next) {
+        switch (_context2.prev = _context2.next) {
           case 0:
             url = env.getUrl();
             Storage = env.getStorage();
@@ -9713,19 +9718,19 @@ function _completeAuth() {
             authErrorDescription = url.searchParams.get("error_description");
 
             if (key) {
-              _context3.next = 10;
+              _context2.next = 10;
               break;
             }
 
-            _context3.next = 9;
+            _context2.next = 9;
             return Storage.get(SMART_KEY);
 
           case 9:
-            key = _context3.sent;
+            key = _context2.sent;
 
           case 10:
             if (!(authError || authErrorDescription)) {
-              _context3.next = 13;
+              _context2.next = 13;
               break;
             }
 
@@ -9736,133 +9741,146 @@ function _completeAuth() {
             debug("[completeAuth] key: %s, code: %O", key, code); // key might be coming from the page url so it might be empty or missing
 
             if (key) {
-              _context3.next = 16;
+              _context2.next = 16;
               break;
             }
 
             throw new Error("No 'state' parameter found.");
 
           case 16:
-            _context3.next = 18;
+            _context2.next = 18;
             return Storage.get(key);
 
           case 18:
-            state = _context3.sent;
+            state = _context2.sent;
             fullSessionStorageSupport = isBrowser() ? getPath(window, "FHIR.oauth2.settings.fullSessionStorageSupport") : true; // Do we have to remove the `code` and `state` params from the URL?
 
-            if (isBrowser()) {
-              settings = window.FHIR.oauth2.settings;
-              hasState = url.searchParams.has("state");
+            if (!isBrowser()) {
+              _context2.next = 32;
+              break;
+            }
 
-              if (settings.replaceBrowserHistory && (code || hasState)) {
-                // `code` is the flag that tell us to request an access token.
-                // We have to remove it, otherwise the page will authorize on
-                // every load!
-                if (code) {
-                  debug("[completeAuth] Removing code parameter from the url...");
-                  url.searchParams.delete("code");
-                } // If we have `fullSessionStorageSupport` it means we no longer
-                // need the `state` key. It will be stored to a well know
-                // location - sessionStorage[SMART_KEY]. However, no
-                // fullSessionStorageSupport means that this "well know location"
-                // might be shared between windows and tabs. In this case we
-                // MUST keep the `state` url parameter.
+            settings = window.FHIR.oauth2.settings;
+            hasState = url.searchParams.has("state");
 
+            if (!(settings.replaceBrowserHistory && (code || hasState))) {
+              _context2.next = 32;
+              break;
+            }
 
-                if (hasState && fullSessionStorageSupport) {
-                  debug("[completeAuth] Removing state parameter from the url...");
-                  url.searchParams.delete("state");
-                } // If the browser does not support the replaceState method for the
-                // History Web API, the "code" parameter cannot be removed. As a
-                // consequence, the page will (re)authorize on every load. The
-                // workaround is to reload the page to new location without those
-                // parameters. If that is not acceptable replaceBrowserHistory
-                // should be set to false.
+            // `code` is the flag that tell us to request an access token.
+            // We have to remove it, otherwise the page will authorize on
+            // every load!
+            if (code) {
+              debug("[completeAuth] Removing code parameter from the url...");
+              url.searchParams.delete("code");
+            } // If we have `fullSessionStorageSupport` it means we no longer
+            // need the `state` key. It will be stored to a well know
+            // location - sessionStorage[SMART_KEY]. However, no
+            // fullSessionStorageSupport means that this "well know location"
+            // might be shared between windows and tabs. In this case we
+            // MUST keep the `state` url parameter.
 
 
-                if (window.history.replaceState) {
-                  window.history.replaceState({}, "", url.href);
-                } else {
-                  env.redirect(url.href);
-                }
-              }
-            } // If the state does not exist, it means the page has been loaded directly.
+            if (hasState && fullSessionStorageSupport) {
+              debug("[completeAuth] Removing state parameter from the url...");
+              url.searchParams.delete("state");
+            } // If the browser does not support the replaceState method for the
+            // History Web API, the "code" parameter cannot be removed. As a
+            // consequence, the page will (re)authorize on every load. The
+            // workaround is to reload the page to new location without those
+            // parameters. If that is not acceptable replaceBrowserHistory
+            // should be set to false.
 
 
+            if (!window.history.replaceState) {
+              _context2.next = 30;
+              break;
+            }
+
+            window.history.replaceState({}, "", url.href);
+            _context2.next = 32;
+            break;
+
+          case 30:
+            _context2.next = 32;
+            return env.redirect(url.href);
+
+          case 32:
             if (state) {
-              _context3.next = 23;
+              _context2.next = 34;
               break;
             }
 
             throw new Error("No state found! Please (re)launch the app.");
 
-          case 23:
+          case 34:
             if (!code) {
-              _context3.next = 44;
+              _context2.next = 55;
               break;
             }
 
             debug("[completeAuth] Preparing to exchange the code for access token...");
-            _context3.next = 27;
+            _context2.next = 38;
             return buildTokenRequest(code, state);
 
-          case 27:
-            requestOptions = _context3.sent;
+          case 38:
+            requestOptions = _context2.sent;
             debug("[completeAuth] Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
             // includes an access token or a message indicating that the
             // authorization request has been denied.
 
-            _context3.next = 31;
+            _context2.next = 42;
             return fetchJSON(state.tokenUri, requestOptions);
 
-          case 31:
-            tokenResponse = _context3.sent;
+          case 42:
+            tokenResponse = _context2.sent;
             debug("[completeAuth] Token response: %O", tokenResponse);
 
             if (tokenResponse.access_token) {
-              _context3.next = 35;
+              _context2.next = 46;
               break;
             }
 
             throw new Error("Failed to obtain access token.");
 
-          case 35:
+          case 46:
             // save the tokenResponse so that we don't have to re-authorize on
             // every page reload
             state = _objectSpread({}, state, {
               tokenResponse: tokenResponse
             });
-            _context3.next = 38;
+            _context2.next = 49;
             return Storage.set(key, state);
 
-          case 38:
+          case 49:
             if (!fullSessionStorageSupport) {
-              _context3.next = 41;
+              _context2.next = 52;
               break;
             }
 
-            _context3.next = 41;
+            _context2.next = 52;
             return Storage.set(SMART_KEY, key);
 
-          case 41:
+          case 52:
             debug("[completeAuth] Authorization successful!");
-            _context3.next = 45;
+            _context2.next = 56;
             break;
 
-          case 44:
+          case 55:
             debug("[completeAuth] %s", state.tokenResponse.access_token ? "Already authorized" : "No authorization needed");
 
-          case 45:
+          case 56:
             client = new Client(env, state);
             debug("[completeAuth] Created client instance: %O", client);
-            return _context3.abrupt("return", client);
+            return _context2.abrupt("return", client);
 
-          case 48:
+          case 59:
           case "end":
-            return _context3.stop();
+            return _context2.stop();
         }
       }
-    }, _callee3);
+    }, _callee2);
   }));
   return _completeAuth.apply(this, arguments);
 }
@@ -9910,18 +9928,18 @@ function buildTokenRequest(code, state) {
   return requestOptions;
 }
 
-function ready(_x4, _x5, _x6) {
+function ready(_x3, _x4, _x5) {
   return _ready.apply(this, arguments);
 }
 
 function _ready() {
   _ready = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee4(env, onSuccess, onError) {
+  regeneratorRuntime.mark(function _callee3(env, onSuccess, onError) {
     var task;
-    return regeneratorRuntime.wrap(function _callee4$(_context4) {
+    return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
-        switch (_context4.prev = _context4.next) {
+        switch (_context3.prev = _context3.next) {
           case 0:
             task = completeAuth(env);
 
@@ -9933,77 +9951,77 @@ function _ready() {
               task = task.catch(onError);
             }
 
-            return _context4.abrupt("return", task);
+            return _context3.abrupt("return", task);
 
           case 4:
           case "end":
-            return _context4.stop();
+            return _context3.stop();
         }
       }
-    }, _callee4);
+    }, _callee3);
   }));
   return _ready.apply(this, arguments);
 }
 
-function init(_x7, _x8) {
+function init(_x6, _x7) {
   return _init.apply(this, arguments);
 }
 
 function _init() {
   _init = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee5(env, options) {
+  regeneratorRuntime.mark(function _callee4(env, options) {
     var url, code, state, storage, key, cached;
-    return regeneratorRuntime.wrap(function _callee5$(_context5) {
+    return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
-        switch (_context5.prev = _context5.next) {
+        switch (_context4.prev = _context4.next) {
           case 0:
             url = env.getUrl();
             code = url.searchParams.get("code");
             state = url.searchParams.get("state"); // if `code` and `state` params are present we need to complete the auth flow
 
             if (!(code && state)) {
-              _context5.next = 5;
+              _context4.next = 5;
               break;
             }
 
-            return _context5.abrupt("return", completeAuth(env));
+            return _context4.abrupt("return", completeAuth(env));
 
           case 5:
             // Check for existing client state. If state is found, it means a client
             // instance have already been created in this session and we should try to
             // "revive" it.
             storage = env.getStorage();
-            _context5.t0 = state;
+            _context4.t0 = state;
 
-            if (_context5.t0) {
-              _context5.next = 11;
+            if (_context4.t0) {
+              _context4.next = 11;
               break;
             }
 
-            _context5.next = 10;
+            _context4.next = 10;
             return storage.get(SMART_KEY);
 
           case 10:
-            _context5.t0 = _context5.sent;
+            _context4.t0 = _context4.sent;
 
           case 11:
-            key = _context5.t0;
-            _context5.next = 14;
+            key = _context4.t0;
+            _context4.next = 14;
             return storage.get(key);
 
           case 14:
-            cached = _context5.sent;
+            cached = _context4.sent;
 
             if (!cached) {
-              _context5.next = 17;
+              _context4.next = 17;
               break;
             }
 
-            return _context5.abrupt("return", Promise.resolve(new Client(env, cached)));
+            return _context4.abrupt("return", Promise.resolve(new Client(env, cached)));
 
           case 17:
-            return _context5.abrupt("return", authorize(env, options).then(function () {
+            return _context4.abrupt("return", authorize(env, options).then(function () {
               // `init` promises a Client but that cannot happen in this case. The
               // browser will be redirected (unload the page and be redirected back
               // to it later and the same init function will be called again). On
@@ -10018,10 +10036,10 @@ function _init() {
 
           case 18:
           case "end":
-            return _context5.stop();
+            return _context4.stop();
         }
       }
-    }, _callee5);
+    }, _callee4);
   }));
   return _init.apply(this, arguments);
 }
@@ -10030,7 +10048,6 @@ module.exports = {
   fetchConformanceStatement: fetchConformanceStatement,
   fetchWellKnownJson: fetchWellKnownJson,
   getSecurityExtensions: getSecurityExtensions,
-  buildAuthorizeUrl: buildAuthorizeUrl,
   buildTokenRequest: buildTokenRequest,
   authorize: authorize,
   completeAuth: completeAuth,

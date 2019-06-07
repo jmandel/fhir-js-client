@@ -7,17 +7,6 @@ const NodeAdapter   = require("./NodeAdapter");
 class HapiAdapter extends NodeAdapter
 {
     /**
-     * @param {Object} options 
-     * @param {Object} options.request required
-     * @param {Object} options.response responseToolkit
-     * @param {Object} options.storage optional
-     */
-    constructor(options)    
-    {
-        super(options);
-    }
-
-    /**
      * Given the current environment, this method must redirect to the given
      * path
      * @param {String} location The path to redirect to
@@ -30,11 +19,18 @@ class HapiAdapter extends NodeAdapter
 
     /**
      * This is the static entry point and MUST be provided
-     * @param {Object} options 
+     * @param {Object} request The hapi request 
+     * @param {Object} h The hapi response toolkit
+     * @param {Object|Function} storage Custom storage instance or a storage
+     *  factory function
      */
-    static smart(options)
+    static smart(request, h, storage)
     {
-        return new HapiAdapter(options).getSmartApi();
+        return new HapiAdapter({
+            request,
+            responseToolkit: h,
+            storage
+        }).getSmartApi();
     }
 }
 

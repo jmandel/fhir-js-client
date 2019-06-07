@@ -60,7 +60,7 @@ describe ("Complete authorization [SERVER]", () => {
 
         const req1   = new HttpRequest("http://localhost/launch?launch=123&state=" + key);
         const res1   = new HttpResponse();
-        const smart1 = FHIR({ request: req1, response: res1 });
+        const smart1 = FHIR(req1, res1);
 
         // mock our oauth endpoints
         mockServer.mock({
@@ -97,7 +97,7 @@ describe ("Complete authorization [SERVER]", () => {
         const req2   = new HttpRequest("http://localhost/index?code=123&state=" + code);
         req2.session = req1.session; // inherit the session
         const res2   = new HttpResponse();
-        const smart2 = FHIR({ request: req2, response: res2 });
+        const smart2 = FHIR(req2, res2);
 
         // mock our access token response
         mockServer.mock({
@@ -134,7 +134,7 @@ describe ("Complete authorization [SERVER]", () => {
         const req     = new HttpRequest("http://localhost/index");
         const res     = new HttpResponse();
         const storage = new MemoryStorage();
-        const smart   = FHIR({ request: req, response: res, storage });
+        const smart   = FHIR(req, res, storage);
 
         await storage.set(KEY, key);
         await storage.set(key, {
@@ -166,10 +166,10 @@ describe ("Complete authorization [SERVER]", () => {
         expect(client.user.resourceType).to.equal("Practitioner");
     });
 
-    it ("can bypass oauth by passing `fhirServiceUrl` to `buildAuthorizeUrl`", async () => {
+    it ("can bypass oauth by passing `fhirServiceUrl` to `authorize`", async () => {
         const req   = new HttpRequest("http://localhost/launch");
         const res   = new HttpResponse();
-        const smart = FHIR({ request: req, response: res });
+        const smart = FHIR(req, res);
         await smart.authorize({ fhirServiceUrl: "http://localhost" });
         expect(res.status).to.equal(302);
         expect(res.headers.location).to.exist();
@@ -181,7 +181,7 @@ describe ("Complete authorization [SERVER]", () => {
         const req     = new HttpRequest("http://localhost/launch");
         const res     = new HttpResponse();
         const storage = new MemoryStorage();
-        const smart   = FHIR({ request: req, response: res, storage });
+        const smart   = FHIR(req, res, storage);
         await smart.authorize({
             fhirServiceUrl: "http://localhost",
             scope: "x",

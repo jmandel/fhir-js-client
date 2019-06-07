@@ -150,8 +150,6 @@ describe ("Complete authorization", () => {
         });
 
         // Call our launch code.
-        // NOTE: A real app would call smart.authorize() instead. However, the
-        // tests can't handle a redirect so we call buildAuthorizeUrl instead.
         await smart.authorize(env, {
             iss: mockUrl,
             launch: "123",
@@ -287,9 +285,9 @@ describe ("Complete authorization", () => {
 
     it ("can bypass oauth by passing `fhirServiceUrl`", async () => {
         const env = new BrowserEnv();
-        const url = await smart.buildAuthorizeUrl(env, {
+        const url = await smart.authorize(env, {
             fhirServiceUrl: "http://localhost"
-        });
+        }, true);
 
         expect(url).to.match(/http:\/\/localhost\/\?state=./);
     });
@@ -297,11 +295,11 @@ describe ("Complete authorization", () => {
     it ("appends 'launch' to the scopes if needed", async () => {
         const env = new BrowserEnv();
         const Storage = env.getStorage();
-        const redirect = await smart.buildAuthorizeUrl(env, {
+        const redirect = await smart.authorize(env, {
             fhirServiceUrl: "http://localhost",
             scope: "x",
             launch: "123"
-        });
+        }, true);
         const state = (new URL(redirect)).searchParams.get("state");
         expect((await Storage.get(state)).scope).to.equal("x launch");
     });
@@ -322,8 +320,6 @@ describe ("Complete authorization", () => {
         });
 
         // Call our launch code.
-        // NOTE: A real app would call smart.authorize() instead. However, the
-        // tests can't handle a redirect so we call buildAuthorizeUrl instead.
         await smart.authorize(env, {
             iss: mockUrl,
             // launch: "123",
@@ -592,19 +588,19 @@ describe("smart", () => {
         });
     });
 
-    describe("buildAuthorizeUrl", () => {
+    describe("authorize", () => {
 
         it ("throws if no serverUrl", async () => {
-            await expect(smart.buildAuthorizeUrl(new BrowserEnv(), {}))
+            await expect(smart.authorize(new BrowserEnv(), {}))
                 .to.reject(Error, /No server url found/);
         });
 
         it ("accepts encounterId parameter", async () => {
             const env = new BrowserEnv();
-            const url = await smart.buildAuthorizeUrl(env, {
+            const url = await smart.authorize(env, {
                 fhirServiceUrl: "http://localhost",
                 encounterId: "whatever"
-            });
+            }, true);
             const state = (new URL(url)).searchParams.get("state");
             expect(await env.getStorage().get(state)).to.include({
                 tokenResponse: { encounter: "whatever" }
@@ -613,10 +609,10 @@ describe("smart", () => {
 
         it ("accepts patientId parameter", async () => {
             const env = new BrowserEnv();
-            const url = await smart.buildAuthorizeUrl(env, {
+            const url = await smart.authorize(env, {
                 fhirServiceUrl: "http://localhost",
                 patientId: "whatever"
-            });
+            }, true);
             const state = (new URL(url)).searchParams.get("state");
             expect(await env.getStorage().get(state)).to.include({
                 tokenResponse: { patient: "whatever" }
@@ -625,10 +621,10 @@ describe("smart", () => {
 
         it ("accepts fakeTokenResponse parameter", async () => {
             const env = new BrowserEnv();
-            const url = await smart.buildAuthorizeUrl(env, {
+            const url = await smart.authorize(env, {
                 fhirServiceUrl: "http://localhost",
                 fakeTokenResponse: { a: 1, b: 2 }
-            });
+            }, true);
             const state = (new URL(url)).searchParams.get("state");
             expect(await env.getStorage().get(state)).to.include({
                 tokenResponse: { a: 1, b: 2 }

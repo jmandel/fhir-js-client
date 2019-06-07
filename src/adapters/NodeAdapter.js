@@ -75,11 +75,18 @@ class NodeAdapter extends BaseAdapter
 
     /**
      * This is the static entry point and MUST be provided
-     * @param {Object} options 
+     * @param {Object} req The http request 
+     * @param {Object} res The http response
+     * @param {Object|Function} storage Custom storage instance or a storage
+     *  factory function
      */
-    static smart(options)
+    static smart(req, res, storage)
     {
-        return new NodeAdapter(options).getSmartApi();
+        return new NodeAdapter({
+            request: req,
+            response: res,
+            storage
+        }).getSmartApi();
     }
 }
 
