@@ -1,15 +1,14 @@
 const { expect } = require("@hapi/code");
 const lab        = require("@hapi/lab").script();
-const FHIR       = require("../src/adapters/NodeAdapter").smart;
+const FHIR       = require("../src/adapters/NodeAdapter");
 const { KEY }    = require("../src/smart");
 
 // Mocks
-const mockServer        = require("./mockServer");
+const mockServer        = require("./mocks/mockServer");
 const HttpRequest       = require("./mocks/HttpRequest");
 const HttpResponse      = require("./mocks/HttpResponse");
 const MemoryStorage     = require("./mocks/MemoryStorage");
 
-require("isomorphic-fetch");
 
 const { it, describe, before, after, afterEach } = lab;
 exports.lab = lab;

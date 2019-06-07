@@ -61,4 +61,5 @@ class BrowserAdapter extends BaseAdapter
     }
 }
 
-module.exports = BrowserAdapter;
+module.exports = BrowserAdapter.smart;
+module.exports.Adapter = BrowserAdapter;

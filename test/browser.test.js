@@ -6,7 +6,7 @@ const smart      = require("../src/smart");
 // mocks
 const BrowserEnv = require("./mocks/BrowserEnvironment");
 const Window     = require("./mocks/Window");
-const mockServer = require("./mockServer");
+const mockServer = require("./mocks/mockServer");
 
 
 const {

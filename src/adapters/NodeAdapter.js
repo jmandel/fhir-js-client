@@ -90,4 +90,5 @@ class NodeAdapter extends BaseAdapter
     }
 }
 
-module.exports = NodeAdapter;
+module.exports = NodeAdapter.smart;
+module.exports.Adapter = NodeAdapter;

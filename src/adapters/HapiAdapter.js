@@ -1,5 +1,5 @@
 require("isomorphic-fetch");
-const NodeAdapter   = require("./NodeAdapter");
+const NodeAdapter = require("./NodeAdapter").Adapter;
 
 /**
  * Hapi Adapter
@@ -34,4 +34,5 @@ class HapiAdapter extends NodeAdapter
     }
 }
 
-module.exports = HapiAdapter;
+module.exports = HapiAdapter.smart;
+module.exports.Adapter = HapiAdapter;

@@ -1,8 +1,9 @@
 // In Browsers we create an adapter, get the SMART api from it and build the
 // global FHIR object
 if (typeof window == "object") {
-    const Adapter = require("./adapters/BrowserAdapter");
-    const { ready, authorize, init, client } = Adapter.smart();
+    const smart = require("./adapters/BrowserAdapter");
+    console.log("smart:", smart, smart.Adapter);
+    const { ready, authorize, init, client } = smart();
 
     // $lab:coverage:off$
     const FHIR = {

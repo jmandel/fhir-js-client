@@ -8734,7 +8734,8 @@ function (_BaseAdapter) {
   return BrowserAdapter;
 }(BaseAdapter);
 
-module.exports = BrowserAdapter;
+module.exports = BrowserAdapter.smart;
+module.exports.Adapter = BrowserAdapter;
 
 /***/ }),
 
@@ -8877,7 +8878,8 @@ function (_BaseAdapter) {
   return NodeAdapter;
 }(BaseAdapter);
 
-module.exports = NodeAdapter;
+module.exports = NodeAdapter.smart;
+module.exports.Adapter = NodeAdapter;
 
 /***/ }),
 
@@ -8893,13 +8895,15 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
 // In Browsers we create an adapter, get the SMART api from it and build the
 // global FHIR object
 if ((typeof window === "undefined" ? "undefined" : _typeof(window)) == "object") {
-  var Adapter = __webpack_require__(/*! ./adapters/BrowserAdapter */ "./src/adapters/BrowserAdapter.js");
+  var smart = __webpack_require__(/*! ./adapters/BrowserAdapter */ "./src/adapters/BrowserAdapter.js");
 
-  var _Adapter$smart = Adapter.smart(),
-      ready = _Adapter$smart.ready,
-      authorize = _Adapter$smart.authorize,
-      init = _Adapter$smart.init,
-      client = _Adapter$smart.client; // $lab:coverage:off$
+  console.log("smart:", smart, smart.Adapter);
+
+  var _smart = smart(),
+      ready = _smart.ready,
+      authorize = _smart.authorize,
+      init = _smart.init,
+      client = _smart.client; // $lab:coverage:off$
 
 
   var FHIR = {

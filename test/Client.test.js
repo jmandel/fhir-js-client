@@ -6,7 +6,7 @@ const ServerEnv  = require("./mocks/ServerEnvironment");
 
 
 // Mocks
-const mockServer     = require("./mockServer");
+const mockServer     = require("./mocks/mockServer");
 const BrowserEnv     = require("./mocks/BrowserEnvironment");
 const BrowserEnvFhir = require("./mocks/BrowserEnvironmentWithFhirJs");
 
