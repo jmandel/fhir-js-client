@@ -47,7 +47,7 @@ Alternatively, you can use `init` to handle everything in single route (only if
 your launch_uri is the same as your redirect_uri). This method is not available
 with HAPI!
 ```js
-const fhirClient = require("fhirclient");
+const smart = require("fhirclient");
 
 // inside your route handler
 smart(request, response).init({
@@ -78,7 +78,7 @@ The default storage implementation is [here](../src/storage/ServerStorage.js).
 
 Once you have your custom storage, you can just pass it as third argument to the function that creates the SMART api:
 ```js
-fhirClient(request, response, myStorage).authorize(options)
+smart(request, response, myStorage).authorize(options)
 ```
 
 Most of the time you would need to know more about the current request and response in order to create a storage instance. That is why passing a storage factory function is the recommended way:
@@ -88,7 +88,7 @@ function createStorage({ request, response }) {
 }
 
 // inside a route handler
-fhirClient(request, response, createStorage).authorize(options)
+smart(request, response, createStorage).authorize(options)
 ```
 
 For working example of custom session storage see https://codesandbox.io/s/brave-wildflower-q4mhq
