@@ -25,7 +25,7 @@ class HapiAdapter extends NodeAdapter
      */
     redirect(location)
     {
-        return this.responseToolkit.redirect(location);
+        return this.options.responseToolkit.redirect(location);
     }
 
     /**

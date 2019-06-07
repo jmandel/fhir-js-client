@@ -9675,10 +9675,9 @@ function _authorize() {
 
           case 12:
             redirect = _context2.sent;
-            env.redirect(redirect);
-            return _context2.abrupt("return", redirect);
+            return _context2.abrupt("return", env.redirect(redirect));
 
-          case 15:
+          case 14:
           case "end":
             return _context2.stop();
         }

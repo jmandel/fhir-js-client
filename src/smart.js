@@ -223,8 +223,8 @@ async function authorize(env, options = {})
     }
 
     const redirect = await buildAuthorizeUrl(env, options);
-    env.redirect(redirect);
-    return redirect;
+    return env.redirect(redirect);
+    // return redirect;
 }
 
 /**
