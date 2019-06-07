@@ -2,7 +2,7 @@ const { expect } = require("@hapi/code");
 const lab        = require("@hapi/lab").script();
 const Client     = require("../src/Client");
 const { KEY }    = require("../src/smart");
-const ServerEnv  = require("../src/ServerEnvironment");
+const ServerEnv  = require("./mocks/ServerEnvironment");
 
 
 // Mocks

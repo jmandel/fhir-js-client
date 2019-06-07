@@ -548,24 +548,24 @@
             <a href="#src/HttpError.js"><span class="dirname">src/</span><span class="basename">HttpError.js</span></a>
         </li>
         <li class="">
-            <span class="cov high">87.50</span>
-            <a href="#src/ServerEnvironment.js"><span class="dirname">src/</span><span class="basename">ServerEnvironment.js</span></a>
-        </li>
-        <li class="">
-            <span class="cov high">88</span>
-            <a href="#src/ServerStorage.js"><span class="dirname">src/</span><span class="basename">ServerStorage.js</span></a>
-        </li>
-        <li class="">
-            <span class="cov high">84.62</span>
-            <a href="#src/entry-node.js"><span class="dirname">src/</span><span class="basename">entry-node.js</span></a>
-        </li>
-        <li class="">
             <span class="cov high">94.33</span>
             <a href="#src/lib.js"><span class="dirname">src/</span><span class="basename">lib.js</span></a>
         </li>
         <li class="">
             <span class="cov high">93.25</span>
             <a href="#src/smart.js"><span class="dirname">src/</span><span class="basename">smart.js</span></a>
+        </li>
+        <li class="">
+            <span class="cov high">90.91</span>
+            <a href="#src/adapters/BaseAdapter.js"><span class="dirname">src/adapters/</span><span class="basename">BaseAdapter.js</span></a>
+        </li>
+        <li class="">
+            <span class="cov high">84</span>
+            <a href="#src/adapters/NodeAdapter.js"><span class="dirname">src/adapters/</span><span class="basename">NodeAdapter.js</span></a>
+        </li>
+        <li class="">
+            <span class="cov high">88</span>
+            <a href="#src/storage/ServerStorage.js"><span class="dirname">src/storage/</span><span class="basename">ServerStorage.js</span></a>
         </li>
         <li><a href="#linting">Linting Report</a></li>
     </div>
@@ -575,7 +575,7 @@
           <div class="failures">0</div>
           <div class="skipped">0</div>
           <div class="test-count">108</div>
-          <div class="duration">1296</div>
+          <div class="duration">1286</div>
       </div>
       <div id="filters">
           <input type="checkbox" checked="" onchange="filter(this)" value="success" id="show-success">
@@ -690,14 +690,14 @@
               <td class="test-title">FHIR.client client.refresh validates state and throws if needed
                   
               </td>
-              <td class="test-duration">46</td>
+              <td class="test-duration">47</td>
           </tr>
           <tr class="show FHIR.client success">
               <td class="test-id">2</td>
               <td class="test-title">FHIR.client client.refresh
                   
               </td>
-              <td class="test-duration">15</td>
+              <td class="test-duration">16</td>
           </tr>
           <tr class="show FHIR.client constructor success">
               <td class="test-id">3</td>
@@ -711,7 +711,7 @@
               <td class="test-title">FHIR.client constructor throws if initialized without serverUrl
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">0</td>
           </tr>
           <tr class="show FHIR.client constructor success">
               <td class="test-id">5</td>
@@ -725,14 +725,14 @@
               <td class="test-title">FHIR.client constructor accepts string as second argument
                   
               </td>
-              <td class="test-duration">0</td>
+              <td class="test-duration">1</td>
           </tr>
           <tr class="show FHIR.client patient.read success">
               <td class="test-id">7</td>
               <td class="test-title">FHIR.client patient.read works in the browser
                   
               </td>
-              <td class="test-duration">2</td>
+              <td class="test-duration">3</td>
           </tr>
           <tr class="show FHIR.client patient.read success">
               <td class="test-id">8</td>
@@ -746,7 +746,7 @@
               <td class="test-title">FHIR.client patient.read rejects with no patient works in the browser
                   
               </td>
-              <td class="test-duration">0</td>
+              <td class="test-duration">1</td>
           </tr>
           <tr class="show FHIR.client patient.read rejects_with_no_patient success">
               <td class="test-id">10</td>
@@ -774,28 +774,28 @@
               <td class="test-title">FHIR.client user.read rejects with no user works in the browser
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">0</td>
           </tr>
           <tr class="show FHIR.client user.read rejects_with_no_user success">
               <td class="test-id">14</td>
               <td class="test-title">FHIR.client user.read rejects with no user works on the server
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">0</td>
           </tr>
           <tr class="show FHIR.client fhir.js_api success">
               <td class="test-id">15</td>
               <td class="test-title">FHIR.client fhir.js api works in the browser
                   
               </td>
-              <td class="test-duration">517</td>
+              <td class="test-duration">532</td>
           </tr>
           <tr class="show FHIR.client client.request can_fetch_single_resource success">
               <td class="test-id">16</td>
               <td class="test-title">FHIR.client client.request can fetch single resource works in the browser
                   
               </td>
-              <td class="test-duration">7</td>
+              <td class="test-duration">2</td>
           </tr>
           <tr class="show FHIR.client client.request can_fetch_single_resource success">
               <td class="test-id">17</td>
@@ -823,7 +823,7 @@
               <td class="test-title">FHIR.client client.request can fetch a bundle works in the browser
                   
               </td>
-              <td class="test-duration">2</td>
+              <td class="test-duration">3</td>
           </tr>
           <tr class="show FHIR.client client.request can_fetch_a_bundle success">
               <td class="test-id">21</td>
@@ -837,7 +837,7 @@
               <td class="test-title">FHIR.client client.request does not return an array if pageLimit is 1 works in the browser
                   
               </td>
-              <td class="test-duration">3</td>
+              <td class="test-duration">2</td>
           </tr>
           <tr class="show FHIR.client client.request does_not_return_an_array_if_pageLimit_is_1 success">
               <td class="test-id">23</td>
@@ -851,7 +851,7 @@
               <td class="test-title">FHIR.client client.request can fetch multiple pages works in the browser
                   
               </td>
-              <td class="test-duration">4</td>
+              <td class="test-duration">5</td>
           </tr>
           <tr class="show FHIR.client client.request can_fetch_multiple_pages success">
               <td class="test-id">25</td>
@@ -879,21 +879,21 @@
               <td class="test-title">FHIR.client client.request can fetch all pages works in the browser
                   
               </td>
-              <td class="test-duration">4</td>
+              <td class="test-duration">3</td>
           </tr>
           <tr class="show FHIR.client client.request can_fetch_all_pages success">
               <td class="test-id">29</td>
               <td class="test-title">FHIR.client client.request can fetch all pages works on the server
                   
               </td>
-              <td class="test-duration">4</td>
+              <td class="test-duration">3</td>
           </tr>
           <tr class="show FHIR.client client.request onPage_callback success">
               <td class="test-id">30</td>
               <td class="test-title">FHIR.client client.request onPage callback works in the browser
                   
               </td>
-              <td class="test-duration">5</td>
+              <td class="test-duration">4</td>
           </tr>
           <tr class="show FHIR.client client.request onPage_callback success">
               <td class="test-id">31</td>
@@ -907,70 +907,70 @@
               <td class="test-title">FHIR.client client.request stops fetching pages if onPage throws works in the browser
                   
               </td>
-              <td class="test-duration">2</td>
+              <td class="test-duration">3</td>
           </tr>
           <tr class="show FHIR.client client.request stops_fetching_pages_if_onPage_throws success">
               <td class="test-id">33</td>
               <td class="test-title">FHIR.client client.request stops fetching pages if onPage throws works on the server
                   
               </td>
-              <td class="test-duration">3</td>
+              <td class="test-duration">2</td>
           </tr>
           <tr class="show FHIR.client client.request stops_fetching_pages_if_onPage_rejects success">
               <td class="test-id">34</td>
               <td class="test-title">FHIR.client client.request stops fetching pages if onPage rejects works in the browser
                   
               </td>
-              <td class="test-duration">9</td>
+              <td class="test-duration">2</td>
           </tr>
           <tr class="show FHIR.client client.request stops_fetching_pages_if_onPage_rejects success">
               <td class="test-id">35</td>
               <td class="test-title">FHIR.client client.request stops fetching pages if onPage rejects works on the server
                   
               </td>
-              <td class="test-duration">3</td>
+              <td class="test-duration">2</td>
           </tr>
           <tr class="show FHIR.client client.request awaits_for_the_onPage_callback success">
               <td class="test-id">36</td>
               <td class="test-title">FHIR.client client.request awaits for the onPage callback works in the browser
                   
               </td>
-              <td class="test-duration">207</td>
+              <td class="test-duration">206</td>
           </tr>
           <tr class="show FHIR.client client.request awaits_for_the_onPage_callback success">
               <td class="test-id">37</td>
               <td class="test-title">FHIR.client client.request awaits for the onPage callback works on the server
                   
               </td>
-              <td class="test-duration">207</td>
+              <td class="test-duration">211</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_single_resource success">
               <td class="test-id">38</td>
               <td class="test-title">FHIR.client client.request can resolve refs on single resource works in the browser
                   
               </td>
-              <td class="test-duration">7</td>
+              <td class="test-duration">6</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_single_resource success">
               <td class="test-id">39</td>
               <td class="test-title">FHIR.client client.request can resolve refs on single resource works on the server
                   
               </td>
-              <td class="test-duration">5</td>
+              <td class="test-duration">3</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_single_resource_with_&#x60;graph:_false&#x60; success">
               <td class="test-id">40</td>
               <td class="test-title">FHIR.client client.request can resolve refs on single resource with &#x60;graph: false&#x60; works in the browser
                   
               </td>
-              <td class="test-duration">4</td>
+              <td class="test-duration">3</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_single_resource_with_&#x60;graph:_false&#x60; success">
               <td class="test-id">41</td>
               <td class="test-title">FHIR.client client.request can resolve refs on single resource with &#x60;graph: false&#x60; works on the server
                   
               </td>
-              <td class="test-duration">4</td>
+              <td class="test-duration">3</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_pages success">
               <td class="test-id">42</td>
@@ -991,7 +991,7 @@
               <td class="test-title">FHIR.client client.request can resolve refs on pages with &#x60;graph: false&#x60; works in the browser
                   
               </td>
-              <td class="test-duration">12</td>
+              <td class="test-duration">11</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_pages_with_&#x60;graph:_false&#x60; success">
               <td class="test-id">45</td>
@@ -1005,7 +1005,7 @@
               <td class="test-title">FHIR.client client.request can resolve refs on pages with &#x60;onPage&#x60; works in the browser
                   
               </td>
-              <td class="test-duration">8</td>
+              <td class="test-duration">7</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_pages_with_&#x60;onPage&#x60; success">
               <td class="test-id">47</td>
@@ -1040,7 +1040,7 @@
               <td class="test-title">FHIR.client client.user works on the server
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">2</td>
           </tr>
           <tr class="show FHIR.client client.getAuthorizationHeader success">
               <td class="test-id">52</td>
@@ -1075,7 +1075,7 @@
               <td class="test-title">HttpError create from Error
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">0</td>
           </tr>
           <tr class="show HttpError success">
               <td class="test-id">57</td>
@@ -1110,7 +1110,7 @@
               <td class="test-title">Complete authorization code flow
                   
               </td>
-              <td class="test-duration">10</td>
+              <td class="test-duration">12</td>
           </tr>
           <tr class="show Complete_authorization success">
               <td class="test-id">62</td>
@@ -1124,7 +1124,7 @@
               <td class="test-title">Complete authorization refresh an authorized page
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">2</td>
           </tr>
           <tr class="show Complete_authorization success">
               <td class="test-id">64</td>
@@ -1138,7 +1138,7 @@
               <td class="test-title">Complete authorization can bypass oauth by passing &#x60;fhirServiceUrl&#x60;
                   
               </td>
-              <td class="test-duration">0</td>
+              <td class="test-duration">1</td>
           </tr>
           <tr class="show Complete_authorization success">
               <td class="test-id">66</td>
@@ -1152,21 +1152,21 @@
               <td class="test-title">Complete authorization can do standalone launch
                   
               </td>
-              <td class="test-duration">5</td>
+              <td class="test-duration">4</td>
           </tr>
           <tr class="show smart fetchConformanceStatement success">
               <td class="test-id">68</td>
               <td class="test-title">smart fetchConformanceStatement rejects bad baseUrl values
                   
               </td>
-              <td class="test-duration">2</td>
+              <td class="test-duration">1</td>
           </tr>
           <tr class="show smart fetchConformanceStatement success">
               <td class="test-id">69</td>
               <td class="test-title">smart fetchConformanceStatement works
                   
               </td>
-              <td class="test-duration">4</td>
+              <td class="test-duration">3</td>
           </tr>
           <tr class="show smart fetchConformanceStatement success">
               <td class="test-id">70</td>
@@ -1180,14 +1180,14 @@
               <td class="test-title">smart fetchWellKnownJson works
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">2</td>
           </tr>
           <tr class="show smart fetchWellKnownJson success">
               <td class="test-id">72</td>
               <td class="test-title">smart fetchWellKnownJson rejects on error
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">2</td>
           </tr>
           <tr class="show smart getSecurityExtensions success">
               <td class="test-id">73</td>
@@ -1264,7 +1264,7 @@
               <td class="test-title">smart completeAuth rejects with error and error_description from the url
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">0</td>
           </tr>
           <tr class="show smart completeAuth success">
               <td class="test-id">84</td>
@@ -1285,35 +1285,35 @@
               <td class="test-title">smart buildTokenRequest rejects with missing state.redirectUri
                   
               </td>
-              <td class="test-duration">0</td>
+              <td class="test-duration">1</td>
           </tr>
           <tr class="show smart buildTokenRequest success">
               <td class="test-id">87</td>
               <td class="test-title">smart buildTokenRequest rejects with missing state.tokenUri
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">0</td>
           </tr>
           <tr class="show smart buildTokenRequest success">
               <td class="test-id">88</td>
               <td class="test-title">smart buildTokenRequest rejects with missing state.clientId
                   
               </td>
-              <td class="test-duration">0</td>
+              <td class="test-duration">1</td>
           </tr>
           <tr class="show smart init success">
               <td class="test-id">89</td>
               <td class="test-title">smart init works in standalone mode
                   
               </td>
-              <td class="test-duration">7</td>
+              <td class="test-duration">6</td>
           </tr>
           <tr class="show smart init success">
               <td class="test-id">90</td>
               <td class="test-title">smart init works in EHR mode
                   
               </td>
-              <td class="test-duration">6</td>
+              <td class="test-duration">5</td>
           </tr>
           <tr class="show Lib getPath success">
               <td class="test-id">91</td>
@@ -1341,7 +1341,7 @@
               <td class="test-title">Lib setPath works as expected
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">0</td>
           </tr>
           <tr class="show Lib setPath success">
               <td class="test-id">95</td>
@@ -1362,7 +1362,7 @@
               <td class="test-title">Lib stripTrailingSlash removes the trailing slash
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">0</td>
           </tr>
           <tr class="show Lib stripTrailingSlash success">
               <td class="test-id">98</td>
@@ -1397,28 +1397,28 @@
               <td class="test-title">Lib units cm
                   
               </td>
-              <td class="test-duration">2</td>
+              <td class="test-duration">1</td>
           </tr>
           <tr class="show Lib units success">
               <td class="test-id">103</td>
               <td class="test-title">Lib units kg
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">2</td>
           </tr>
           <tr class="show Lib units success">
               <td class="test-id">104</td>
               <td class="test-title">Lib units any
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">0</td>
           </tr>
           <tr class="show Complete_authorization_[SERVER] success">
               <td class="test-id">105</td>
               <td class="test-title">Complete authorization [SERVER] code flow authorization
                   
               </td>
-              <td class="test-duration">7</td>
+              <td class="test-duration">6</td>
           </tr>
           <tr class="show Complete_authorization_[SERVER] success">
               <td class="test-id">106</td>
@@ -1432,7 +1432,7 @@
               <td class="test-title">Complete authorization [SERVER] can bypass oauth by passing &#x60;fhirServiceUrl&#x60; to &#x60;buildAuthorizeUrl&#x60;
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">0</td>
           </tr>
           <tr class="show Complete_authorization_[SERVER] success">
               <td class="test-id">108</td>
@@ -1447,10 +1447,10 @@
     </div>    <div id="coverage">
         <h1>Code Coverage Report</h1>
         <div class="stats high">
-            <div class="percentage">95.55%</div>
-            <div class="sloc">2090</div>
-            <div class="hits">1997</div>
-            <div class="misses">93</div>
+            <div class="percentage">95.45%</div>
+            <div class="sloc">2109</div>
+            <div class="hits">2013</div>
+            <div class="misses">96</div>
         </div>
         <div id="filters">
           <input type="checkbox" checked="" onchange="filter(this)" value="generated" id="show-generated">
@@ -14154,750 +14154,6 @@
                 </table>
             </div>
             <div class="file ">
-                <h2 id="src/ServerEnvironment.js">src/ServerEnvironment.js </h2>
-                <div class="stats high">
-                    <div class="percentage">87.50%</div>
-                    <div class="sloc">40</div>
-                    <div class="hits">35</div>
-                    <div class="misses">5</div>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Line</th>
-                            <th>Lint</th>
-                            <th>Hits</th>
-                            <th>Source</th>
-                            
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr id="src/ServerEnvironment.js__1" class="hit">
-                          <td class="line" data-tooltip>1</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>1</td>
-                          <td class="source">require(&quot;isomorphic-fetch&quot;);</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__2" class="hit">
-                          <td class="line" data-tooltip>2</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>1</td>
-                          <td class="source">const ServerStorage &#x3D; require(&quot;./ServerStorage&quot;);</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__3" class="hit">
-                          <td class="line" data-tooltip>3</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"></td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__4" class="hit">
-                          <td class="line" data-tooltip>4</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">class ServerEnvironment</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__5" class="hit">
-                          <td class="line" data-tooltip>5</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">{</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__6" class="hit">
-                          <td class="line" data-tooltip>6</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    constructor(request, response, storage)</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__7" class="hit">
-                          <td class="line" data-tooltip>7</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    {</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__8" class="hit">
-                          <td class="line" data-tooltip>8</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">        this.request  &#x3D; request;</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__9" class="hit">
-                          <td class="line" data-tooltip>9</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>28</td>
-                          <td class="source">        this.response &#x3D; response;</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__10" class="hit">
-                          <td class="line" data-tooltip>10</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"></td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__11" class="hit">
-                          <td class="line" data-tooltip>11</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>28</td>
-                          <td class="source">        if (storage) {</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__12" class="chunks">
-                          <td class="line" data-tooltip>12</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"><div>            if (</div><div class="miss false" data-tooltip>typeof storage &#x3D;&#x3D; &quot;function&quot;</div><div>) {</div></td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__13" class="miss">
-                          <td class="line" data-tooltip>13</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>                this.storage &#x3D; storage(request, response);</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__14" class="hit">
-                          <td class="line" data-tooltip>14</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">            } else {</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__15" class="hit">
-                          <td class="line" data-tooltip>15</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>2</td>
-                          <td class="source">                this.storage &#x3D; storage;</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__16" class="hit">
-                          <td class="line" data-tooltip>16</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">            }</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__17" class="hit">
-                          <td class="line" data-tooltip>17</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">        } else {</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__18" class="hit">
-                          <td class="line" data-tooltip>18</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>26</td>
-                          <td class="source">            this.storage &#x3D; new ServerStorage(this.request);</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__19" class="hit">
-                          <td class="line" data-tooltip>19</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">        }</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__20" class="hit">
-                          <td class="line" data-tooltip>20</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    }</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__21" class="hit">
-                          <td class="line" data-tooltip>21</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"></td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__22" class="hit">
-                          <td class="line" data-tooltip>22</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    getUrl()</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__23" class="hit">
-                          <td class="line" data-tooltip>23</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    {</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__24" class="hit">
-                          <td class="line" data-tooltip>24</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">        const req &#x3D; this.request;</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__25" class="chunks">
-                          <td class="line" data-tooltip>25</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"><div>        const host &#x3D; </div><div class="miss false" data-tooltip>req.headers[&quot;x-forwarded-host&quot;]</div><div> || req.headers.host;</div></td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__26" class="chunks">
-                          <td class="line" data-tooltip>26</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"><div>        const protocol &#x3D; </div><div class="miss false" data-tooltip>req.headers[&quot;x-forwarded-proto&quot;]</div><div> || </div><div class="miss false" data-tooltip>req.protocol</div><div> || &quot;http&quot;;</div></td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__27" class="hit">
-                          <td class="line" data-tooltip>27</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">        // if (!host) {</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__28" class="hit">
-                          <td class="line" data-tooltip>28</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">        //     const addr &#x3D; req.socket.address() as AddressInfo;</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__29" class="hit">
-                          <td class="line" data-tooltip>29</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">        //     host &#x3D; addr.address.replace(&quot;::1&quot;, &quot;localhost&quot;);</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__30" class="hit">
-                          <td class="line" data-tooltip>30</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">        //     if ((addr.port !&#x3D; 80  &amp;&amp; req.protocol &#x3D;&#x3D; &quot;http&quot;) ||</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__31" class="hit">
-                          <td class="line" data-tooltip>31</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">        //         (addr.port !&#x3D; 443 &amp;&amp; req.protocol &#x3D;&#x3D; &quot;https&quot;))</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__32" class="hit">
-                          <td class="line" data-tooltip>32</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">        //     {</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__33" class="hit">
-                          <td class="line" data-tooltip>33</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">        //         host +&#x3D; &quot;:&quot; + addr.port;</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__34" class="hit">
-                          <td class="line" data-tooltip>34</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">        //     }</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__35" class="hit">
-                          <td class="line" data-tooltip>35</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">        // }</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__36" class="chunks">
-                          <td class="line" data-tooltip>36</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"><div>        return new URL(</div><div class="miss false" data-tooltip>req.originalUrl</div><div> || </div><div class="miss false" data-tooltip>req.path</div><div> || req.url, protocol + &quot;://&quot; + host);</div></td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__37" class="hit">
-                          <td class="line" data-tooltip>37</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    }</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__38" class="hit">
-                          <td class="line" data-tooltip>38</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"></td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__39" class="hit">
-                          <td class="line" data-tooltip>39</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    redirect(location)</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__40" class="hit">
-                          <td class="line" data-tooltip>40</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    {</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__41" class="hit">
-                          <td class="line" data-tooltip>41</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">        this.response.writeHead(302, { location });</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__42" class="hit">
-                          <td class="line" data-tooltip>42</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>3</td>
-                          <td class="source">        this.response.end();</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__43" class="hit">
-                          <td class="line" data-tooltip>43</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    }</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__44" class="hit">
-                          <td class="line" data-tooltip>44</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"></td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__45" class="hit">
-                          <td class="line" data-tooltip>45</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    getStorage()</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__46" class="hit">
-                          <td class="line" data-tooltip>46</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    {</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__47" class="hit">
-                          <td class="line" data-tooltip>47</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">        return this.storage;</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__48" class="hit">
-                          <td class="line" data-tooltip>48</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    }</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__49" class="hit">
-                          <td class="line" data-tooltip>49</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"></td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__50" class="hit">
-                          <td class="line" data-tooltip>50</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    relative(url)</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__51" class="hit">
-                          <td class="line" data-tooltip>51</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    {</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__52" class="hit">
-                          <td class="line" data-tooltip>52</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">        return new URL(url, this.getUrl()).href;</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__53" class="hit">
-                          <td class="line" data-tooltip>53</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    }</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__54" class="hit">
-                          <td class="line" data-tooltip>54</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">}</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__55" class="hit">
-                          <td class="line" data-tooltip>55</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"></td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__56" class="hit">
-                          <td class="line" data-tooltip>56</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>1</td>
-                          <td class="source">module.exports &#x3D; ServerEnvironment;</td>
-                          
-                        </tr>            <tr id="src/ServerEnvironment.js__57" class="hit">
-                          <td class="line" data-tooltip>57</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"></td>
-                          
-                        </tr>        </tbody>
-                </table>
-            </div>
-            <div class="file ">
-                <h2 id="src/ServerStorage.js">src/ServerStorage.js </h2>
-                <div class="stats high">
-                    <div class="percentage">88%</div>
-                    <div class="sloc">25</div>
-                    <div class="hits">22</div>
-                    <div class="misses">3</div>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Line</th>
-                            <th>Lint</th>
-                            <th>Hits</th>
-                            <th>Source</th>
-                            
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr id="src/ServerStorage.js__1" class="hit">
-                          <td class="line" data-tooltip>1</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">class ServerStorage</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__2" class="hit">
-                          <td class="line" data-tooltip>2</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">{</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__3" class="hit">
-                          <td class="line" data-tooltip>3</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    constructor(request)</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__4" class="hit">
-                          <td class="line" data-tooltip>4</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    {</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__5" class="hit">
-                          <td class="line" data-tooltip>5</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">        this.request &#x3D; request;</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__6" class="hit">
-                          <td class="line" data-tooltip>6</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    }</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__7" class="hit">
-                          <td class="line" data-tooltip>7</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"></td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__8" class="hit">
-                          <td class="line" data-tooltip>8</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    async get(key)</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__9" class="hit">
-                          <td class="line" data-tooltip>9</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    {</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__10" class="hit">
-                          <td class="line" data-tooltip>10</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">        return this.request.session[key];</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__11" class="hit">
-                          <td class="line" data-tooltip>11</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    }</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__12" class="hit">
-                          <td class="line" data-tooltip>12</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"></td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__13" class="hit">
-                          <td class="line" data-tooltip>13</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    async set(key, value)</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__14" class="hit">
-                          <td class="line" data-tooltip>14</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    {</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__15" class="hit">
-                          <td class="line" data-tooltip>15</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">        this.request.session[key] &#x3D; value;</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__16" class="hit">
-                          <td class="line" data-tooltip>16</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>4</td>
-                          <td class="source">        return value;</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__17" class="hit">
-                          <td class="line" data-tooltip>17</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    }</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__18" class="hit">
-                          <td class="line" data-tooltip>18</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"></td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__19" class="hit">
-                          <td class="line" data-tooltip>19</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    async unset(key)</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__20" class="hit">
-                          <td class="line" data-tooltip>20</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    {</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__21" class="chunks">
-                          <td class="line" data-tooltip>21</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"><div>        if (</div><div class="miss false" data-tooltip>this.request.session.hasOwnProperty(key)</div><div>) {</div></td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__22" class="miss">
-                          <td class="line" data-tooltip>22</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>            delete this.request.session[key];</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__23" class="miss">
-                          <td class="line" data-tooltip>23</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>            return true;</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__24" class="hit">
-                          <td class="line" data-tooltip>24</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">        }</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__25" class="hit">
-                          <td class="line" data-tooltip>25</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>2</td>
-                          <td class="source">        return false;</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__26" class="hit">
-                          <td class="line" data-tooltip>26</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    }</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__27" class="hit">
-                          <td class="line" data-tooltip>27</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"></td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__28" class="hit">
-                          <td class="line" data-tooltip>28</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">}</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__29" class="hit">
-                          <td class="line" data-tooltip>29</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"></td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__30" class="hit">
-                          <td class="line" data-tooltip>30</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>1</td>
-                          <td class="source">module.exports &#x3D; ServerStorage;</td>
-                          
-                        </tr>            <tr id="src/ServerStorage.js__31" class="hit">
-                          <td class="line" data-tooltip>31</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"></td>
-                          
-                        </tr>        </tbody>
-                </table>
-            </div>
-            <div class="file ">
-                <h2 id="src/entry-node.js">src/entry-node.js </h2>
-                <div class="stats high">
-                    <div class="percentage">84.62%</div>
-                    <div class="sloc">13</div>
-                    <div class="hits">11</div>
-                    <div class="misses">2</div>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Line</th>
-                            <th>Lint</th>
-                            <th>Hits</th>
-                            <th>Source</th>
-                            
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr id="src/entry-node.js__1" class="hit">
-                          <td class="line" data-tooltip>1</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>1</td>
-                          <td class="source">const Client     &#x3D; require(&quot;./Client&quot;);</td>
-                          
-                        </tr>            <tr id="src/entry-node.js__2" class="hit">
-                          <td class="line" data-tooltip>2</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>1</td>
-                          <td class="source">const smart      &#x3D; require(&quot;./smart&quot;);</td>
-                          
-                        </tr>            <tr id="src/entry-node.js__3" class="hit">
-                          <td class="line" data-tooltip>3</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>1</td>
-                          <td class="source">const ServerEnv  &#x3D; require(&quot;./ServerEnvironment&quot;);</td>
-                          
-                        </tr>            <tr id="src/entry-node.js__4" class="hit">
-                          <td class="line" data-tooltip>4</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"></td>
-                          
-                        </tr>            <tr id="src/entry-node.js__5" class="hit">
-                          <td class="line" data-tooltip>5</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"></td>
-                          
-                        </tr>            <tr id="src/entry-node.js__6" class="hit">
-                          <td class="line" data-tooltip>6</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"></td>
-                          
-                        </tr>            <tr id="src/entry-node.js__7" class="hit">
-                          <td class="line" data-tooltip>7</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">// Server API</td>
-                          
-                        </tr>            <tr id="src/entry-node.js__8" class="hit">
-                          <td class="line" data-tooltip>8</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">// -----------------------------------------------------------------------------</td>
-                          
-                        </tr>            <tr id="src/entry-node.js__9" class="hit">
-                          <td class="line" data-tooltip>9</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">// FHIR(req, res [, storage]).authorize(options)</td>
-                          
-                        </tr>            <tr id="src/entry-node.js__10" class="hit">
-                          <td class="line" data-tooltip>10</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">// FHIR(req, res [, storage]).ready()</td>
-                          
-                        </tr>            <tr id="src/entry-node.js__11" class="hit">
-                          <td class="line" data-tooltip>11</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">// FHIR(req, res [, storage]).client()</td>
-                          
-                        </tr>            <tr id="src/entry-node.js__12" class="hit">
-                          <td class="line" data-tooltip>12</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">// FHIR(req, res [, storage]).init()</td>
-                          
-                        </tr>            <tr id="src/entry-node.js__13" class="hit">
-                          <td class="line" data-tooltip>13</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>1</td>
-                          <td class="source">const FHIR &#x3D; (request, response, storage) &#x3D;&gt; {</td>
-                          
-                        </tr>            <tr id="src/entry-node.js__14" class="hit">
-                          <td class="line" data-tooltip>14</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    const env &#x3D; new ServerEnv(request, response, storage);</td>
-                          
-                        </tr>            <tr id="src/entry-node.js__15" class="hit">
-                          <td class="line" data-tooltip>15</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>5</td>
-                          <td class="source">    return {</td>
-                          
-                        </tr>            <tr id="src/entry-node.js__16" class="hit">
-                          <td class="line" data-tooltip>16</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">        ready    : (...args) &#x3D;&gt; smart.ready(env, ...args),</td>
-                          
-                        </tr>            <tr id="src/entry-node.js__17" class="hit">
-                          <td class="line" data-tooltip>17</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">        authorize: (...args) &#x3D;&gt; smart.authorize(env, ...args),</td>
-                          
-                        </tr>            <tr id="src/entry-node.js__18" class="chunks">
-                          <td class="line" data-tooltip>18</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"><div>        client   : (...args) &#x3D;&gt; </div><div class="miss never" data-tooltip>new Client(env, ...args)</div><div>,</div></td>
-                          
-                        </tr>            <tr id="src/entry-node.js__19" class="chunks">
-                          <td class="line" data-tooltip>19</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"><div>        init     : (...args) &#x3D;&gt; </div><div class="miss never" data-tooltip>smart.init(env, ...args)</div></td>
-                          
-                        </tr>            <tr id="src/entry-node.js__20" class="hit">
-                          <td class="line" data-tooltip>20</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">    };</td>
-                          
-                        </tr>            <tr id="src/entry-node.js__21" class="hit">
-                          <td class="line" data-tooltip>21</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source">};</td>
-                          
-                        </tr>            <tr id="src/entry-node.js__22" class="hit">
-                          <td class="line" data-tooltip>22</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>1</td>
-                          <td class="source">module.exports &#x3D; FHIR;</td>
-                          
-                        </tr>            <tr id="src/entry-node.js__23" class="hit">
-                          <td class="line" data-tooltip>23</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"></td>
-                          
-                        </tr>            <tr id="src/entry-node.js__24" class="hit">
-                          <td class="line" data-tooltip>24</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"></td>
-                          
-                        </tr>            <tr id="src/entry-node.js__25" class="hit">
-                          <td class="line" data-tooltip>25</td>
-                          <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"></td>
-                          
-                        </tr>        </tbody>
-                </table>
-            </div>
-            <div class="file ">
                 <h2 id="src/lib.js">src/lib.js </h2>
                 <div class="stats high">
                     <div class="percentage">94.33%</div>
@@ -19452,6 +18708,1146 @@
                           
                         </tr>            <tr id="src/smart.js__470" class="hit">
                           <td class="line" data-tooltip>470</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"></td>
+                          
+                        </tr>        </tbody>
+                </table>
+            </div>
+            <div class="file ">
+                <h2 id="src/adapters/BaseAdapter.js">src/adapters/BaseAdapter.js </h2>
+                <div class="stats high">
+                    <div class="percentage">90.91%</div>
+                    <div class="sloc">22</div>
+                    <div class="hits">20</div>
+                    <div class="misses">2</div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Line</th>
+                            <th>Lint</th>
+                            <th>Hits</th>
+                            <th>Source</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="src/adapters/BaseAdapter.js__1" class="hit">
+                          <td class="line" data-tooltip>1</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip>1</td>
+                          <td class="source">const smart  &#x3D; require(&quot;../smart&quot;);</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__2" class="hit">
+                          <td class="line" data-tooltip>2</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip>1</td>
+                          <td class="source">const Client &#x3D; require(&quot;../Client&quot;);</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__3" class="hit">
+                          <td class="line" data-tooltip>3</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"></td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__4" class="hit">
+                          <td class="line" data-tooltip>4</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">/**</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__5" class="hit">
+                          <td class="line" data-tooltip>5</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"> * This is the abstract base class that adapters must inherit. It just a</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__6" class="hit">
+                          <td class="line" data-tooltip>6</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"> * collection of environment-specific methods that subclasses have to implement.</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__7" class="hit">
+                          <td class="line" data-tooltip>7</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"> */</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__8" class="hit">
+                          <td class="line" data-tooltip>8</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">class BaseAdapter</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__9" class="hit">
+                          <td class="line" data-tooltip>9</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">{</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__10" class="hit">
+                          <td class="line" data-tooltip>10</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    /**</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__11" class="hit">
+                          <td class="line" data-tooltip>11</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * Given the current environment, this method must return the current url</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__12" class="hit">
+                          <td class="line" data-tooltip>12</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * as URL instance</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__13" class="hit">
+                          <td class="line" data-tooltip>13</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * @returns {URL}</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__14" class="hit">
+                          <td class="line" data-tooltip>14</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     */</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__15" class="hit">
+                          <td class="line" data-tooltip>15</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    getUrl() {}</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__16" class="hit">
+                          <td class="line" data-tooltip>16</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"></td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__17" class="hit">
+                          <td class="line" data-tooltip>17</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    /**</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__18" class="hit">
+                          <td class="line" data-tooltip>18</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * Given the current environment, this method must redirect to the given</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__19" class="hit">
+                          <td class="line" data-tooltip>19</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * path</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__20" class="hit">
+                          <td class="line" data-tooltip>20</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * @param {String} to The path to redirect to</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__21" class="hit">
+                          <td class="line" data-tooltip>21</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * @returns {*}</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__22" class="hit">
+                          <td class="line" data-tooltip>22</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     */</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__23" class="hit">
+                          <td class="line" data-tooltip>23</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    redirect(/*to*/) {}</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__24" class="hit">
+                          <td class="line" data-tooltip>24</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"></td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__25" class="hit">
+                          <td class="line" data-tooltip>25</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    /**</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__26" class="hit">
+                          <td class="line" data-tooltip>26</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * This must return a Storage object</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__27" class="hit">
+                          <td class="line" data-tooltip>27</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * @returns {Storage}</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__28" class="hit">
+                          <td class="line" data-tooltip>28</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     */</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__29" class="hit">
+                          <td class="line" data-tooltip>29</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    getStorage() {}</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__30" class="hit">
+                          <td class="line" data-tooltip>30</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"></td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__31" class="hit">
+                          <td class="line" data-tooltip>31</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    /**</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__32" class="hit">
+                          <td class="line" data-tooltip>32</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * Given a relative path, compute and return the full url, assuming that it</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__33" class="hit">
+                          <td class="line" data-tooltip>33</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * is relative to the current location</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__34" class="hit">
+                          <td class="line" data-tooltip>34</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * @param {String} path The path to convert to absolute</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__35" class="hit">
+                          <td class="line" data-tooltip>35</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * @returns {String}</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__36" class="hit">
+                          <td class="line" data-tooltip>36</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     */</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__37" class="hit">
+                          <td class="line" data-tooltip>37</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    relative(path)</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__38" class="hit">
+                          <td class="line" data-tooltip>38</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    {</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__39" class="hit">
+                          <td class="line" data-tooltip>39</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">        return new URL(path, this.getUrl().href).href;</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__40" class="hit">
+                          <td class="line" data-tooltip>40</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    }</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__41" class="hit">
+                          <td class="line" data-tooltip>41</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"></td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__42" class="hit">
+                          <td class="line" data-tooltip>42</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    /**</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__43" class="hit">
+                          <td class="line" data-tooltip>43</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * Creates and returns adapter-aware SMART api. Not that while the shape of</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__44" class="hit">
+                          <td class="line" data-tooltip>44</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * the returned object is well known, the arguments to this function are not.</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__45" class="hit">
+                          <td class="line" data-tooltip>45</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * Those who override this method are free to require any environment-specific</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__46" class="hit">
+                          <td class="line" data-tooltip>46</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * arguments. For example in node we will need a request, a response and</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__47" class="hit">
+                          <td class="line" data-tooltip>47</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * optionally a storage or storage factory function.</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__48" class="hit">
+                          <td class="line" data-tooltip>48</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     */</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__49" class="hit">
+                          <td class="line" data-tooltip>49</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    getSmartApi()</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__50" class="hit">
+                          <td class="line" data-tooltip>50</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    {</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__51" class="hit">
+                          <td class="line" data-tooltip>51</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">        return {</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__52" class="hit">
+                          <td class="line" data-tooltip>52</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">            ready    : (...args) &#x3D;&gt; smart.ready(this, ...args),</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__53" class="hit">
+                          <td class="line" data-tooltip>53</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">            authorize: (...args) &#x3D;&gt; smart.authorize(this, ...args),</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__54" class="chunks">
+                          <td class="line" data-tooltip>54</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"><div>            init     : (...args) &#x3D;&gt; </div><div class="miss never" data-tooltip>smart.init(this, ...args)</div><div>,</div></td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__55" class="chunks">
+                          <td class="line" data-tooltip>55</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"><div>            client   : (...args) &#x3D;&gt; </div><div class="miss never" data-tooltip>new Client(this, ...args)</div><div>,</div></td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__56" class="hit">
+                          <td class="line" data-tooltip>56</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">        };</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__57" class="hit">
+                          <td class="line" data-tooltip>57</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    }</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__58" class="hit">
+                          <td class="line" data-tooltip>58</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">}</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__59" class="hit">
+                          <td class="line" data-tooltip>59</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"></td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__60" class="hit">
+                          <td class="line" data-tooltip>60</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip>1</td>
+                          <td class="source">module.exports &#x3D; BaseAdapter;</td>
+                          
+                        </tr>            <tr id="src/adapters/BaseAdapter.js__61" class="hit">
+                          <td class="line" data-tooltip>61</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"></td>
+                          
+                        </tr>        </tbody>
+                </table>
+            </div>
+            <div class="file ">
+                <h2 id="src/adapters/NodeAdapter.js">src/adapters/NodeAdapter.js </h2>
+                <div class="stats high">
+                    <div class="percentage">84%</div>
+                    <div class="sloc">50</div>
+                    <div class="hits">42</div>
+                    <div class="misses">8</div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Line</th>
+                            <th>Lint</th>
+                            <th>Hits</th>
+                            <th>Source</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="src/adapters/NodeAdapter.js__1" class="hit">
+                          <td class="line" data-tooltip>1</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip>1</td>
+                          <td class="source">require(&quot;isomorphic-fetch&quot;);</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__2" class="hit">
+                          <td class="line" data-tooltip>2</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip>1</td>
+                          <td class="source">const ServerStorage &#x3D; require(&quot;../storage/ServerStorage&quot;);</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__3" class="hit">
+                          <td class="line" data-tooltip>3</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip>1</td>
+                          <td class="source">const BaseAdapter   &#x3D; require(&quot;./BaseAdapter&quot;);</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__4" class="hit">
+                          <td class="line" data-tooltip>4</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"></td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__5" class="hit">
+                          <td class="line" data-tooltip>5</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">/**</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__6" class="hit">
+                          <td class="line" data-tooltip>6</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"> * Node Adapter - works with native NodeJS and with Express</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__7" class="hit">
+                          <td class="line" data-tooltip>7</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"> */</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__8" class="hit">
+                          <td class="line" data-tooltip>8</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">class NodeAdapter extends BaseAdapter</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__9" class="hit">
+                          <td class="line" data-tooltip>9</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">{</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__10" class="hit">
+                          <td class="line" data-tooltip>10</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    /**</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__11" class="hit">
+                          <td class="line" data-tooltip>11</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * @param {Object} options </td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__12" class="hit">
+                          <td class="line" data-tooltip>12</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * @param {Object} options.request required</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__13" class="hit">
+                          <td class="line" data-tooltip>13</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * @param {Object} options.response required</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__14" class="hit">
+                          <td class="line" data-tooltip>14</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * @param {Object} options.storage optional</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__15" class="hit">
+                          <td class="line" data-tooltip>15</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     */</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__16" class="hit">
+                          <td class="line" data-tooltip>16</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    constructor(options)</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__17" class="hit">
+                          <td class="line" data-tooltip>17</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    {</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__18" class="hit">
+                          <td class="line" data-tooltip>18</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">        super();</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__19" class="hit">
+                          <td class="line" data-tooltip>19</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip>5</td>
+                          <td class="source">        this.options &#x3D; options;</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__20" class="hit">
+                          <td class="line" data-tooltip>20</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    }</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__21" class="hit">
+                          <td class="line" data-tooltip>21</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"></td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__22" class="hit">
+                          <td class="line" data-tooltip>22</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    /**</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__23" class="hit">
+                          <td class="line" data-tooltip>23</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * Given the current environment, this method must return the current url</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__24" class="hit">
+                          <td class="line" data-tooltip>24</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * as URL instance. In Node we might be behind a proxy!</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__25" class="hit">
+                          <td class="line" data-tooltip>25</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * @returns {URL}</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__26" class="hit">
+                          <td class="line" data-tooltip>26</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     */</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__27" class="hit">
+                          <td class="line" data-tooltip>27</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    getUrl()</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__28" class="hit">
+                          <td class="line" data-tooltip>28</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    {</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__29" class="hit">
+                          <td class="line" data-tooltip>29</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">        const req &#x3D; this.options.request;</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__30" class="hit">
+                          <td class="line" data-tooltip>30</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"></td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__31" class="hit">
+                          <td class="line" data-tooltip>31</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip>8</td>
+                          <td class="source">        let host &#x3D; req.headers.host;</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__32" class="chunks">
+                          <td class="line" data-tooltip>32</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"><div>        if (</div><div class="miss false" data-tooltip>req.headers[&quot;x-forwarded-host&quot;]</div><div>) {</div></td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__33" class="miss">
+                          <td class="line" data-tooltip>33</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source" data-tooltip>            host &#x3D; req.headers[&quot;x-forwarded-host&quot;];</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__34" class="miss">
+                          <td class="line" data-tooltip>34</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source" data-tooltip>            if (req.headers[&quot;x-forwarded-port&quot;]) {</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__35" class="miss">
+                          <td class="line" data-tooltip>35</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source" data-tooltip>                host +&#x3D; &quot;:&quot; + req.headers[&quot;x-forwarded-port&quot;];</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__36" class="hit">
+                          <td class="line" data-tooltip>36</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">            }</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__37" class="hit">
+                          <td class="line" data-tooltip>37</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">        }</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__38" class="hit">
+                          <td class="line" data-tooltip>38</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"></td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__39" class="chunks">
+                          <td class="line" data-tooltip>39</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"><div>        const protocol &#x3D; </div><div class="miss false" data-tooltip>req.headers[&quot;x-forwarded-proto&quot;]</div><div> || </div><div class="miss false" data-tooltip>req.protocol</div><div> || &quot;http&quot;;</div></td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__40" class="chunks">
+                          <td class="line" data-tooltip>40</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"><div>        const orig &#x3D; </div><div class="miss false" data-tooltip>req.originalUrl</div><div> || </div><div class="miss false" data-tooltip>req.headers[&quot;x-original-uri&quot;]</div><div> || req.url;</div></td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__41" class="hit">
+                          <td class="line" data-tooltip>41</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip>8</td>
+                          <td class="source">        return new URL(orig, protocol + &quot;://&quot; + host);</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__42" class="hit">
+                          <td class="line" data-tooltip>42</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    }</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__43" class="hit">
+                          <td class="line" data-tooltip>43</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"></td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__44" class="hit">
+                          <td class="line" data-tooltip>44</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    /**</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__45" class="hit">
+                          <td class="line" data-tooltip>45</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * Given the current environment, this method must redirect to the given</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__46" class="hit">
+                          <td class="line" data-tooltip>46</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * path</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__47" class="hit">
+                          <td class="line" data-tooltip>47</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * @param {String} location The path to redirect to</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__48" class="hit">
+                          <td class="line" data-tooltip>48</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * @returns {void}</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__49" class="hit">
+                          <td class="line" data-tooltip>49</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     */</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__50" class="hit">
+                          <td class="line" data-tooltip>50</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    redirect(location)</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__51" class="hit">
+                          <td class="line" data-tooltip>51</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    {</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__52" class="hit">
+                          <td class="line" data-tooltip>52</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">        this.options.response.writeHead(302, { location });</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__53" class="hit">
+                          <td class="line" data-tooltip>53</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip>3</td>
+                          <td class="source">        this.options.response.end();</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__54" class="hit">
+                          <td class="line" data-tooltip>54</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    }</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__55" class="hit">
+                          <td class="line" data-tooltip>55</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"></td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__56" class="hit">
+                          <td class="line" data-tooltip>56</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    /**</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__57" class="hit">
+                          <td class="line" data-tooltip>57</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * Returns a ServerStorage instance</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__58" class="hit">
+                          <td class="line" data-tooltip>58</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * @returns {ServerStorage}</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__59" class="hit">
+                          <td class="line" data-tooltip>59</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     */</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__60" class="hit">
+                          <td class="line" data-tooltip>60</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    getStorage()</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__61" class="hit">
+                          <td class="line" data-tooltip>61</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    {</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__62" class="hit">
+                          <td class="line" data-tooltip>62</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">        if (!this._storage) {</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__63" class="hit">
+                          <td class="line" data-tooltip>63</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip>5</td>
+                          <td class="source">            if (this.options.storage) {</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__64" class="chunks">
+                          <td class="line" data-tooltip>64</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"><div>                if (</div><div class="miss false" data-tooltip>typeof this.options.storage &#x3D;&#x3D; &quot;function&quot;</div><div>) {</div></td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__65" class="miss">
+                          <td class="line" data-tooltip>65</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source" data-tooltip>                    this._storage &#x3D; this.options.storage(this.options);</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__66" class="hit">
+                          <td class="line" data-tooltip>66</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">                } else {</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__67" class="hit">
+                          <td class="line" data-tooltip>67</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip>2</td>
+                          <td class="source">                    this._storage &#x3D; this.options.storage;</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__68" class="hit">
+                          <td class="line" data-tooltip>68</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">                }</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__69" class="hit">
+                          <td class="line" data-tooltip>69</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">            } else {</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__70" class="hit">
+                          <td class="line" data-tooltip>70</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip>3</td>
+                          <td class="source">                this._storage &#x3D; new ServerStorage(this.options.request);</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__71" class="hit">
+                          <td class="line" data-tooltip>71</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">            }</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__72" class="hit">
+                          <td class="line" data-tooltip>72</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">        }</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__73" class="hit">
+                          <td class="line" data-tooltip>73</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip>8</td>
+                          <td class="source">        return this._storage;</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__74" class="hit">
+                          <td class="line" data-tooltip>74</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    }</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__75" class="hit">
+                          <td class="line" data-tooltip>75</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"></td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__76" class="hit">
+                          <td class="line" data-tooltip>76</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    /**</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__77" class="hit">
+                          <td class="line" data-tooltip>77</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * This is the static entry point and MUST be provided</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__78" class="hit">
+                          <td class="line" data-tooltip>78</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     * @param {Object} options </td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__79" class="hit">
+                          <td class="line" data-tooltip>79</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">     */</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__80" class="hit">
+                          <td class="line" data-tooltip>80</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    static smart(options)</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__81" class="hit">
+                          <td class="line" data-tooltip>81</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    {</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__82" class="hit">
+                          <td class="line" data-tooltip>82</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">        return new NodeAdapter(options).getSmartApi();</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__83" class="hit">
+                          <td class="line" data-tooltip>83</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    }</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__84" class="hit">
+                          <td class="line" data-tooltip>84</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">}</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__85" class="hit">
+                          <td class="line" data-tooltip>85</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"></td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__86" class="hit">
+                          <td class="line" data-tooltip>86</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip>1</td>
+                          <td class="source">module.exports &#x3D; NodeAdapter;</td>
+                          
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__87" class="hit">
+                          <td class="line" data-tooltip>87</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"></td>
+                          
+                        </tr>        </tbody>
+                </table>
+            </div>
+            <div class="file ">
+                <h2 id="src/storage/ServerStorage.js">src/storage/ServerStorage.js </h2>
+                <div class="stats high">
+                    <div class="percentage">88%</div>
+                    <div class="sloc">25</div>
+                    <div class="hits">22</div>
+                    <div class="misses">3</div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Line</th>
+                            <th>Lint</th>
+                            <th>Hits</th>
+                            <th>Source</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="src/storage/ServerStorage.js__1" class="hit">
+                          <td class="line" data-tooltip>1</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">class ServerStorage</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__2" class="hit">
+                          <td class="line" data-tooltip>2</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">{</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__3" class="hit">
+                          <td class="line" data-tooltip>3</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    constructor(request)</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__4" class="hit">
+                          <td class="line" data-tooltip>4</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    {</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__5" class="hit">
+                          <td class="line" data-tooltip>5</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">        this.request &#x3D; request;</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__6" class="hit">
+                          <td class="line" data-tooltip>6</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    }</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__7" class="hit">
+                          <td class="line" data-tooltip>7</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"></td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__8" class="hit">
+                          <td class="line" data-tooltip>8</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    async get(key)</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__9" class="hit">
+                          <td class="line" data-tooltip>9</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    {</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__10" class="hit">
+                          <td class="line" data-tooltip>10</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">        return this.request.session[key];</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__11" class="hit">
+                          <td class="line" data-tooltip>11</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    }</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__12" class="hit">
+                          <td class="line" data-tooltip>12</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"></td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__13" class="hit">
+                          <td class="line" data-tooltip>13</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    async set(key, value)</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__14" class="hit">
+                          <td class="line" data-tooltip>14</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    {</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__15" class="hit">
+                          <td class="line" data-tooltip>15</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">        this.request.session[key] &#x3D; value;</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__16" class="hit">
+                          <td class="line" data-tooltip>16</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip>4</td>
+                          <td class="source">        return value;</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__17" class="hit">
+                          <td class="line" data-tooltip>17</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    }</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__18" class="hit">
+                          <td class="line" data-tooltip>18</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"></td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__19" class="hit">
+                          <td class="line" data-tooltip>19</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    async unset(key)</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__20" class="hit">
+                          <td class="line" data-tooltip>20</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    {</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__21" class="chunks">
+                          <td class="line" data-tooltip>21</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"><div>        if (</div><div class="miss false" data-tooltip>this.request.session.hasOwnProperty(key)</div><div>) {</div></td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__22" class="miss">
+                          <td class="line" data-tooltip>22</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source" data-tooltip>            delete this.request.session[key];</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__23" class="miss">
+                          <td class="line" data-tooltip>23</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source" data-tooltip>            return true;</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__24" class="hit">
+                          <td class="line" data-tooltip>24</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">        }</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__25" class="hit">
+                          <td class="line" data-tooltip>25</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip>2</td>
+                          <td class="source">        return false;</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__26" class="hit">
+                          <td class="line" data-tooltip>26</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">    }</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__27" class="hit">
+                          <td class="line" data-tooltip>27</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"></td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__28" class="hit">
+                          <td class="line" data-tooltip>28</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source">}</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__29" class="hit">
+                          <td class="line" data-tooltip>29</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip></td>
+                          <td class="source"></td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__30" class="hit">
+                          <td class="line" data-tooltip>30</td>
+                          <td class="lint empty"></td>
+                          <td class="hits" data-tooltip>1</td>
+                          <td class="source">module.exports &#x3D; ServerStorage;</td>
+                          
+                        </tr>            <tr id="src/storage/ServerStorage.js__31" class="hit">
+                          <td class="line" data-tooltip>31</td>
                           <td class="lint empty"></td>
                           <td class="hits" data-tooltip></td>
                           <td class="source"></td>

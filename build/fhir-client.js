@@ -7689,199 +7689,6 @@ if (!self.fetch) {
 
 /***/ }),
 
-/***/ "./src/BrowserEnvironment.js":
-/*!***********************************!*\
-  !*** ./src/BrowserEnvironment.js ***!
-  \***********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-/* global fhir */
-var Storage = __webpack_require__(/*! ./BrowserStorage */ "./src/BrowserStorage.js");
-
-var BrowserEnvironment =
-/*#__PURE__*/
-function () {
-  function BrowserEnvironment() {
-    _classCallCheck(this, BrowserEnvironment);
-  }
-
-  _createClass(BrowserEnvironment, [{
-    key: "getUrl",
-    value: function getUrl() {
-      return new URL(location + "");
-    }
-  }, {
-    key: "redirect",
-    value: function redirect(to) {
-      location.href = to;
-    }
-  }, {
-    key: "getStorage",
-    value: function getStorage() {
-      if (!this._storage) {
-        this._storage = new Storage();
-      }
-
-      return this._storage;
-    }
-  }, {
-    key: "relative",
-    value: function relative(url) {
-      return new URL(url, location.href).href;
-    }
-  }, {
-    key: "fhir",
-    get: function get() {
-      return typeof fhir === "function" ? fhir : null;
-    }
-  }]);
-
-  return BrowserEnvironment;
-}();
-
-module.exports = BrowserEnvironment;
-
-/***/ }),
-
-/***/ "./src/BrowserStorage.js":
-/*!*******************************!*\
-  !*** ./src/BrowserStorage.js ***!
-  \*******************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var Storage =
-/*#__PURE__*/
-function () {
-  function Storage() {
-    _classCallCheck(this, Storage);
-  }
-
-  _createClass(Storage, [{
-    key: "get",
-    value: function () {
-      var _get = _asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee(key) {
-        var value;
-        return regeneratorRuntime.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                value = sessionStorage[key];
-
-                if (!value) {
-                  _context.next = 3;
-                  break;
-                }
-
-                return _context.abrupt("return", JSON.parse(value));
-
-              case 3:
-                return _context.abrupt("return", null);
-
-              case 4:
-              case "end":
-                return _context.stop();
-            }
-          }
-        }, _callee);
-      }));
-
-      function get(_x) {
-        return _get.apply(this, arguments);
-      }
-
-      return get;
-    }()
-  }, {
-    key: "set",
-    value: function () {
-      var _set = _asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee2(key, value) {
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
-          while (1) {
-            switch (_context2.prev = _context2.next) {
-              case 0:
-                sessionStorage[key] = JSON.stringify(value);
-                return _context2.abrupt("return", value);
-
-              case 2:
-              case "end":
-                return _context2.stop();
-            }
-          }
-        }, _callee2);
-      }));
-
-      function set(_x2, _x3) {
-        return _set.apply(this, arguments);
-      }
-
-      return set;
-    }()
-  }, {
-    key: "unset",
-    value: function () {
-      var _unset = _asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee3(key) {
-        return regeneratorRuntime.wrap(function _callee3$(_context3) {
-          while (1) {
-            switch (_context3.prev = _context3.next) {
-              case 0:
-                if (!(key in sessionStorage)) {
-                  _context3.next = 3;
-                  break;
-                }
-
-                delete sessionStorage[key];
-                return _context3.abrupt("return", true);
-
-              case 3:
-                return _context3.abrupt("return", false);
-
-              case 4:
-              case "end":
-                return _context3.stop();
-            }
-          }
-        }, _callee3);
-      }));
-
-      function unset(_x4) {
-        return _unset.apply(this, arguments);
-      }
-
-      return unset;
-    }()
-  }]);
-
-  return Storage;
-}();
-
-module.exports = Storage;
-
-/***/ }),
-
 /***/ "./src/Client.js":
 /*!***********************!*\
   !*** ./src/Client.js ***!
@@ -8688,12 +8495,18 @@ module.exports = HttpError;
 
 /***/ }),
 
-/***/ "./src/ServerEnvironment.js":
-/*!**********************************!*\
-  !*** ./src/ServerEnvironment.js ***!
-  \**********************************/
+/***/ "./src/adapters/BaseAdapter.js":
+/*!*************************************!*\
+  !*** ./src/adapters/BaseAdapter.js ***!
+  \*************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
+
+function isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _construct(Parent, args, Class) { if (isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -8701,84 +8514,238 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-__webpack_require__(/*! isomorphic-fetch */ "./node_modules/isomorphic-fetch/fetch-npm-browserify.js");
+var smart = __webpack_require__(/*! ../smart */ "./src/smart.js");
 
-var ServerStorage = __webpack_require__(/*! ./ServerStorage */ "./src/ServerStorage.js");
+var Client = __webpack_require__(/*! ../Client */ "./src/Client.js");
+/**
+ * This is the abstract base class that adapters must inherit. It just a
+ * collection of environment-specific methods that subclasses have to implement.
+ */
 
-var ServerEnvironment =
+
+var BaseAdapter =
 /*#__PURE__*/
 function () {
-  function ServerEnvironment(request, response, storage) {
-    _classCallCheck(this, ServerEnvironment);
-
-    this.request = request;
-    this.response = response;
-
-    if (storage) {
-      if (typeof storage == "function") {
-        this.storage = storage(request, response);
-      } else {
-        this.storage = storage;
-      }
-    } else {
-      this.storage = new ServerStorage(this.request);
-    }
+  function BaseAdapter() {
+    _classCallCheck(this, BaseAdapter);
   }
 
-  _createClass(ServerEnvironment, [{
+  _createClass(BaseAdapter, [{
     key: "getUrl",
-    value: function getUrl() {
-      var req = this.request;
-      var host = req.headers["x-forwarded-host"] || req.headers.host;
-      var protocol = req.headers["x-forwarded-proto"] || req.protocol || "http"; // if (!host) {
-      //     const addr = req.socket.address() as AddressInfo;
-      //     host = addr.address.replace("::1", "localhost");
-      //     if ((addr.port != 80  && req.protocol == "http") ||
-      //         (addr.port != 443 && req.protocol == "https"))
-      //     {
-      //         host += ":" + addr.port;
-      //     }
-      // }
 
-      return new URL(req.originalUrl || req.path || req.url, protocol + "://" + host);
-    }
+    /**
+     * Given the current environment, this method must return the current url
+     * as URL instance
+     * @returns {URL}
+     */
+    value: function getUrl() {}
+    /**
+     * Given the current environment, this method must redirect to the given
+     * path
+     * @param {String} to The path to redirect to
+     * @returns {*}
+     */
+
   }, {
     key: "redirect",
-    value: function redirect(location) {
-      this.response.writeHead(302, {
-        location: location
-      });
-      this.response.end();
+    value: function redirect()
+    /*to*/
+    {}
+    /**
+     * This must return a Storage object
+     * @returns {Storage}
+     */
+
+  }, {
+    key: "getStorage",
+    value: function getStorage() {}
+    /**
+     * Given a relative path, compute and return the full url, assuming that it
+     * is relative to the current location
+     * @param {String} path The path to convert to absolute
+     * @returns {String}
+     */
+
+  }, {
+    key: "relative",
+    value: function relative(path) {
+      return new URL(path, this.getUrl().href).href;
     }
+    /**
+     * Creates and returns adapter-aware SMART api. Not that while the shape of
+     * the returned object is well known, the arguments to this function are not.
+     * Those who override this method are free to require any environment-specific
+     * arguments. For example in node we will need a request, a response and
+     * optionally a storage or storage factory function.
+     */
+
+  }, {
+    key: "getSmartApi",
+    value: function getSmartApi() {
+      var _this = this;
+
+      return {
+        ready: function ready() {
+          for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+          }
+
+          return smart.ready.apply(smart, [_this].concat(args));
+        },
+        authorize: function authorize() {
+          for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+            args[_key2] = arguments[_key2];
+          }
+
+          return smart.authorize.apply(smart, [_this].concat(args));
+        },
+        init: function init() {
+          for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+            args[_key3] = arguments[_key3];
+          }
+
+          return smart.init.apply(smart, [_this].concat(args));
+        },
+        client: function client() {
+          for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+            args[_key4] = arguments[_key4];
+          }
+
+          return _construct(Client, [_this].concat(args));
+        }
+      };
+    }
+  }]);
+
+  return BaseAdapter;
+}();
+
+module.exports = BaseAdapter;
+
+/***/ }),
+
+/***/ "./src/adapters/BrowserAdapter.js":
+/*!****************************************!*\
+  !*** ./src/adapters/BrowserAdapter.js ***!
+  \****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+/* global fhir */
+__webpack_require__(/*! ../polyfills */ "./src/polyfills.js");
+
+var BrowserStorage = __webpack_require__(/*! ../storage/BrowserStorage */ "./src/storage/BrowserStorage.js");
+
+var BaseAdapter = __webpack_require__(/*! ./BaseAdapter */ "./src/adapters/BaseAdapter.js");
+/**
+ * Browser Adapter
+ */
+
+
+var BrowserAdapter =
+/*#__PURE__*/
+function (_BaseAdapter) {
+  _inherits(BrowserAdapter, _BaseAdapter);
+
+  function BrowserAdapter() {
+    _classCallCheck(this, BrowserAdapter);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(BrowserAdapter).apply(this, arguments));
+  }
+
+  _createClass(BrowserAdapter, [{
+    key: "getUrl",
+
+    /**
+     * Given the current environment, this method must return the current url
+     * as URL instance
+     * @returns {URL}
+     */
+    value: function getUrl() {
+      if (!this._url) {
+        this._url = new URL(location + "");
+      }
+
+      return this._url;
+    }
+    /**
+     * Given the current environment, this method must redirect to the given
+     * path
+     * @param {String} to The path to redirect to
+     * @returns {void}
+     */
+
+  }, {
+    key: "redirect",
+    value: function redirect(to) {
+      location.href = to;
+    }
+    /**
+     * Returns a BrowserStorage object which is just a wrapper around
+     * sessionStorage
+     * @returns {BrowserStorage}
+     */
+
   }, {
     key: "getStorage",
     value: function getStorage() {
-      return this.storage;
+      if (!this._storage) {
+        this._storage = new BrowserStorage();
+      }
+
+      return this._storage;
     }
   }, {
-    key: "relative",
-    value: function relative(url) {
-      return new URL(url, this.getUrl()).href;
+    key: "fhir",
+
+    /**
+     * In browsers we need to be able to (dynamically) check if fhir.js is
+     * included in the page. If it is, it should have created a "fhir" variable
+     * in the global scope.
+     */
+    get: function get() {
+      return typeof fhir === "function" ? fhir : null;
+    }
+  }], [{
+    key: "smart",
+    value: function smart() {
+      return new BrowserAdapter().getSmartApi();
     }
   }]);
 
-  return ServerEnvironment;
-}();
+  return BrowserAdapter;
+}(BaseAdapter);
 
-module.exports = ServerEnvironment;
+module.exports = BrowserAdapter;
 
 /***/ }),
 
-/***/ "./src/ServerStorage.js":
-/*!******************************!*\
-  !*** ./src/ServerStorage.js ***!
-  \******************************/
+/***/ "./src/adapters/NodeAdapter.js":
+/*!*************************************!*\
+  !*** ./src/adapters/NodeAdapter.js ***!
+  \*************************************/
 /*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -8786,248 +8753,124 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var ServerStorage =
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+__webpack_require__(/*! isomorphic-fetch */ "./node_modules/isomorphic-fetch/fetch-npm-browserify.js");
+
+var ServerStorage = __webpack_require__(/*! ../storage/ServerStorage */ "./src/storage/ServerStorage.js");
+
+var BaseAdapter = __webpack_require__(/*! ./BaseAdapter */ "./src/adapters/BaseAdapter.js");
+/**
+ * Node Adapter - works with native NodeJS and with Express
+ */
+
+
+var NodeAdapter =
 /*#__PURE__*/
-function () {
-  function ServerStorage(request) {
-    _classCallCheck(this, ServerStorage);
+function (_BaseAdapter) {
+  _inherits(NodeAdapter, _BaseAdapter);
 
-    this.request = request;
+  /**
+   * @param {Object} options 
+   * @param {Object} options.request required
+   * @param {Object} options.response required
+   * @param {Object} options.storage optional
+   */
+  function NodeAdapter(options) {
+    var _this;
+
+    _classCallCheck(this, NodeAdapter);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(NodeAdapter).call(this));
+    _this.options = options;
+    return _this;
   }
+  /**
+   * Given the current environment, this method must return the current url
+   * as URL instance. In Node we might be behind a proxy!
+   * @returns {URL}
+   */
 
-  _createClass(ServerStorage, [{
-    key: "get",
-    value: function () {
-      var _get = _asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee(key) {
-        return regeneratorRuntime.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                return _context.abrupt("return", this.request.session[key]);
 
-              case 1:
-              case "end":
-                return _context.stop();
-            }
-          }
-        }, _callee, this);
-      }));
+  _createClass(NodeAdapter, [{
+    key: "getUrl",
+    value: function getUrl() {
+      var req = this.options.request;
+      var host = req.headers.host;
 
-      function get(_x) {
-        return _get.apply(this, arguments);
+      if (req.headers["x-forwarded-host"]) {
+        host = req.headers["x-forwarded-host"];
+
+        if (req.headers["x-forwarded-port"]) {
+          host += ":" + req.headers["x-forwarded-port"];
+        }
       }
 
-      return get;
-    }()
+      var protocol = req.headers["x-forwarded-proto"] || req.protocol || "http";
+      var orig = req.originalUrl || req.headers["x-original-uri"] || req.url;
+      return new URL(orig, protocol + "://" + host);
+    }
+    /**
+     * Given the current environment, this method must redirect to the given
+     * path
+     * @param {String} location The path to redirect to
+     * @returns {void}
+     */
+
   }, {
-    key: "set",
-    value: function () {
-      var _set = _asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee2(key, value) {
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
-          while (1) {
-            switch (_context2.prev = _context2.next) {
-              case 0:
-                this.request.session[key] = value;
-                return _context2.abrupt("return", value);
+    key: "redirect",
+    value: function redirect(location) {
+      this.options.response.writeHead(302, {
+        location: location
+      });
+      this.options.response.end();
+    }
+    /**
+     * Returns a ServerStorage instance
+     * @returns {ServerStorage}
+     */
 
-              case 2:
-              case "end":
-                return _context2.stop();
-            }
-          }
-        }, _callee2, this);
-      }));
-
-      function set(_x2, _x3) {
-        return _set.apply(this, arguments);
-      }
-
-      return set;
-    }()
   }, {
-    key: "unset",
-    value: function () {
-      var _unset = _asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee3(key) {
-        return regeneratorRuntime.wrap(function _callee3$(_context3) {
-          while (1) {
-            switch (_context3.prev = _context3.next) {
-              case 0:
-                if (!this.request.session.hasOwnProperty(key)) {
-                  _context3.next = 3;
-                  break;
-                }
-
-                delete this.request.session[key];
-                return _context3.abrupt("return", true);
-
-              case 3:
-                return _context3.abrupt("return", false);
-
-              case 4:
-              case "end":
-                return _context3.stop();
-            }
+    key: "getStorage",
+    value: function getStorage() {
+      if (!this._storage) {
+        if (this.options.storage) {
+          if (typeof this.options.storage == "function") {
+            this._storage = this.options.storage(this.options);
+          } else {
+            this._storage = this.options.storage;
           }
-        }, _callee3, this);
-      }));
-
-      function unset(_x4) {
-        return _unset.apply(this, arguments);
+        } else {
+          this._storage = new ServerStorage(this.options.request);
+        }
       }
 
-      return unset;
-    }()
+      return this._storage;
+    }
+    /**
+     * This is the static entry point and MUST be provided
+     * @param {Object} options 
+     */
+
+  }], [{
+    key: "smart",
+    value: function smart(options) {
+      return new NodeAdapter(options).getSmartApi();
+    }
   }]);
 
-  return ServerStorage;
-}();
+  return NodeAdapter;
+}(BaseAdapter);
 
-module.exports = ServerStorage;
-
-/***/ }),
-
-/***/ "./src/entry-browser.js":
-/*!******************************!*\
-  !*** ./src/entry-browser.js ***!
-  \******************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-function isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
-
-function _construct(Parent, args, Class) { if (isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-__webpack_require__(/*! ./polyfills */ "./src/polyfills.js");
-
-var Client = __webpack_require__(/*! ./Client */ "./src/Client.js");
-
-var smart = __webpack_require__(/*! ./smart */ "./src/smart.js");
-
-var BrowserEnv = __webpack_require__(/*! ./BrowserEnvironment */ "./src/BrowserEnvironment.js"); // this code is only executed in real browsers!
-
-
-var env = new BrowserEnv();
-var FHIR = {
-  // $lab:coverage:off$
-  client: function client() {
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    return _construct(Client, [env].concat(args));
-  },
-  oauth2: {
-    settings: {
-      // Replaces the browser's current URL
-      // using window.history.replaceState API or by reloading.
-      replaceBrowserHistory: true,
-      // When set to true, this variable will fully utilize
-      // HTML5 sessionStorage API.
-      // This variable can be overridden to false by setting
-      // FHIR.oauth2.settings.fullSessionStorageSupport = false.
-      // When set to false, the sessionStorage will be keyed 
-      // by a state variable. This is to allow the embedded IE browser
-      // instances instantiated on a single thread to continue to
-      // function without having sessionStorage data shared 
-      // across the embedded IE instances.
-      fullSessionStorageSupport: true
-    },
-    ready: function ready() {
-      for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-        args[_key2] = arguments[_key2];
-      }
-
-      return smart.ready.apply(smart, [env].concat(args));
-    },
-    authorize: function authorize() {
-      for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-        args[_key3] = arguments[_key3];
-      }
-
-      return smart.authorize.apply(smart, [env].concat(args));
-    },
-    init: function init() {
-      for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-        args[_key4] = arguments[_key4];
-      }
-
-      return smart.init.apply(smart, [env].concat(args));
-    } // $lab:coverage:on$
-
-  }
-};
-module.exports = FHIR;
-
-/***/ }),
-
-/***/ "./src/entry-node.js":
-/*!***************************!*\
-  !*** ./src/entry-node.js ***!
-  \***************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-function isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
-
-function _construct(Parent, args, Class) { if (isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-var Client = __webpack_require__(/*! ./Client */ "./src/Client.js");
-
-var smart = __webpack_require__(/*! ./smart */ "./src/smart.js");
-
-var ServerEnv = __webpack_require__(/*! ./ServerEnvironment */ "./src/ServerEnvironment.js"); // Server API
-// -----------------------------------------------------------------------------
-// FHIR(req, res [, storage]).authorize(options)
-// FHIR(req, res [, storage]).ready()
-// FHIR(req, res [, storage]).client()
-// FHIR(req, res [, storage]).init()
-
-
-var FHIR = function FHIR(request, response, storage) {
-  var env = new ServerEnv(request, response, storage);
-  return {
-    ready: function ready() {
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      return smart.ready.apply(smart, [env].concat(args));
-    },
-    authorize: function authorize() {
-      for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-        args[_key2] = arguments[_key2];
-      }
-
-      return smart.authorize.apply(smart, [env].concat(args));
-    },
-    client: function client() {
-      for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-        args[_key3] = arguments[_key3];
-      }
-
-      return _construct(Client, [env].concat(args));
-    },
-    init: function init() {
-      for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-        args[_key4] = arguments[_key4];
-      }
-
-      return smart.init.apply(smart, [env].concat(args));
-    }
-  };
-};
-
-module.exports = FHIR;
+module.exports = NodeAdapter;
 
 /***/ }),
 
@@ -9040,25 +8883,49 @@ module.exports = FHIR;
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-// Browser API
-// -----------------------------------------------------------------------------
-// FHIR.oauth2.authorize(options)
-// FHIR.oauth2.ready()
-// FHIR.client()
+// In Browsers we create an adapter, get the SMART api from it and build the
+// global FHIR object
 if ((typeof window === "undefined" ? "undefined" : _typeof(window)) == "object") {
-  var FHIR = __webpack_require__(/*! ./entry-browser */ "./src/entry-browser.js");
+  var Adapter = __webpack_require__(/*! ./adapters/BrowserAdapter */ "./src/adapters/BrowserAdapter.js");
+
+  var _Adapter$smart = Adapter.smart(),
+      ready = _Adapter$smart.ready,
+      authorize = _Adapter$smart.authorize,
+      init = _Adapter$smart.init,
+      client = _Adapter$smart.client; // $lab:coverage:off$
+
+
+  var FHIR = {
+    client: client,
+    oauth2: {
+      settings: {
+        // Replaces the browser's current URL
+        // using window.history.replaceState API or by reloading.
+        replaceBrowserHistory: true,
+        // When set to true, this variable will fully utilize
+        // HTML5 sessionStorage API.
+        // This variable can be overridden to false by setting
+        // FHIR.oauth2.settings.fullSessionStorageSupport = false.
+        // When set to false, the sessionStorage will be keyed 
+        // by a state variable. This is to allow the embedded IE browser
+        // instances instantiated on a single thread to continue to
+        // function without having sessionStorage data shared 
+        // across the embedded IE instances.
+        fullSessionStorageSupport: true
+      },
+      ready: ready,
+      authorize: authorize,
+      init: init
+    }
+  }; // $lab:coverage:on$
 
   window.FHIR = FHIR;
   module.exports = FHIR;
-} // Server API
-// -----------------------------------------------------------------------------
-// FHIR(req, res).authorize(options)
-// FHIR(req, res).ready()
-// FHIR(req, res).client()
+} // In node we return the node adapter by default, meaning that one could do:
+// require("fhirclient")({ request, response }).authorize(options)
+// Other adapters can be included directly (E.g.: require("fhirclient/adapters/hapi"))
 else {
-    var _FHIR = __webpack_require__(/*! ./entry-node */ "./src/entry-node.js");
-
-    module.exports = _FHIR;
+    module.exports = __webpack_require__(/*! ./adapters/NodeAdapter */ "./src/adapters/NodeAdapter.js");
   }
 
 /***/ }),
@@ -10172,6 +10039,261 @@ module.exports = {
   init: init,
   KEY: SMART_KEY
 };
+
+/***/ }),
+
+/***/ "./src/storage/BrowserStorage.js":
+/*!***************************************!*\
+  !*** ./src/storage/BrowserStorage.js ***!
+  \***************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Storage =
+/*#__PURE__*/
+function () {
+  function Storage() {
+    _classCallCheck(this, Storage);
+  }
+
+  _createClass(Storage, [{
+    key: "get",
+    value: function () {
+      var _get = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee(key) {
+        var value;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                value = sessionStorage[key];
+
+                if (!value) {
+                  _context.next = 3;
+                  break;
+                }
+
+                return _context.abrupt("return", JSON.parse(value));
+
+              case 3:
+                return _context.abrupt("return", null);
+
+              case 4:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee);
+      }));
+
+      function get(_x) {
+        return _get.apply(this, arguments);
+      }
+
+      return get;
+    }()
+  }, {
+    key: "set",
+    value: function () {
+      var _set = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee2(key, value) {
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                sessionStorage[key] = JSON.stringify(value);
+                return _context2.abrupt("return", value);
+
+              case 2:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2);
+      }));
+
+      function set(_x2, _x3) {
+        return _set.apply(this, arguments);
+      }
+
+      return set;
+    }()
+  }, {
+    key: "unset",
+    value: function () {
+      var _unset = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee3(key) {
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                if (!(key in sessionStorage)) {
+                  _context3.next = 3;
+                  break;
+                }
+
+                delete sessionStorage[key];
+                return _context3.abrupt("return", true);
+
+              case 3:
+                return _context3.abrupt("return", false);
+
+              case 4:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3);
+      }));
+
+      function unset(_x4) {
+        return _unset.apply(this, arguments);
+      }
+
+      return unset;
+    }()
+  }]);
+
+  return Storage;
+}();
+
+module.exports = Storage;
+
+/***/ }),
+
+/***/ "./src/storage/ServerStorage.js":
+/*!**************************************!*\
+  !*** ./src/storage/ServerStorage.js ***!
+  \**************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var ServerStorage =
+/*#__PURE__*/
+function () {
+  function ServerStorage(request) {
+    _classCallCheck(this, ServerStorage);
+
+    this.request = request;
+  }
+
+  _createClass(ServerStorage, [{
+    key: "get",
+    value: function () {
+      var _get = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee(key) {
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                return _context.abrupt("return", this.request.session[key]);
+
+              case 1:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function get(_x) {
+        return _get.apply(this, arguments);
+      }
+
+      return get;
+    }()
+  }, {
+    key: "set",
+    value: function () {
+      var _set = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee2(key, value) {
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                this.request.session[key] = value;
+                return _context2.abrupt("return", value);
+
+              case 2:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function set(_x2, _x3) {
+        return _set.apply(this, arguments);
+      }
+
+      return set;
+    }()
+  }, {
+    key: "unset",
+    value: function () {
+      var _unset = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee3(key) {
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                if (!this.request.session.hasOwnProperty(key)) {
+                  _context3.next = 3;
+                  break;
+                }
+
+                delete this.request.session[key];
+                return _context3.abrupt("return", true);
+
+              case 3:
+                return _context3.abrupt("return", false);
+
+              case 4:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this);
+      }));
+
+      function unset(_x4) {
+        return _unset.apply(this, arguments);
+      }
+
+      return unset;
+    }()
+  }]);
+
+  return ServerStorage;
+}();
+
+module.exports = ServerStorage;
 
 /***/ })
 

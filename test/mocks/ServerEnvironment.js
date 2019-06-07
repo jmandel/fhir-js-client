@@ -1,5 +1,5 @@
 require("isomorphic-fetch");
-const ServerStorage = require("./ServerStorage");
+const ServerStorage = require("../../src/storage/ServerStorage");
 
 class ServerEnvironment
 {
