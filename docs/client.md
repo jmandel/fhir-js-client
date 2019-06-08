@@ -17,7 +17,7 @@ It exposes the following API:
 ### `client.getUserId()`
 ### `client.getUserType()`
 -->
-### client.request(requestUriOrOptions[, fhirOptions]): Promise<Object>
+### client.request(requestUriOrOptions[, fhirOptions])`: Promise<Object>`
 This is the single most important method. Please see the [live examples](http://docs.smarthealthit.org/client-js/request.html).
 
 **requestUriOrOptions** can be a `String` URL, or an `URL instance` or an object having an `url` property. The `url` can be relative path that will be appended to your base URL. Using a full http URL will also work, as long as it is on the same domain as your base URL. Any other option will be passed to the underlying `fetch()` call.
@@ -108,7 +108,7 @@ client.request(
 );
 ```
 
-### client.refresh(): Promise<Object>
+### client.refresh()`: Promise<Object>`
 Use the refresh token to obtain new access token. If the refresh token is
 expired (or this fails for any other reason) it will be deleted from the
 state, so that we don't enter into loops trying to re-authorize.
@@ -126,7 +126,7 @@ Only accessible if fhir.js is available. Read more about the fhir.js integration
 
 The selected patient ID or `null` if patient is not available. If no patient is selected, it will generate useful debug messages about the possible reasons. See [debugging](#Debugging).
 
-### client.patient.read(): Promise<Object>
+### client.patient.read()`: Promise<Object>`
 Fetches the selected patient resource (if available). Resolves with the patient or rejects with an error.
 
 ### client.patient.api: Object
@@ -137,7 +137,7 @@ Only accessible if fhir.js is available. Read more about the fhir.js integration
 
 The selected encounter ID or `null` if encounter is not available. If no encounter is selected, it will generate useful debug messages about the possible reasons. See debugging.
 
-### client.encounter.read(): Promise<Object>
+### client.encounter.read()`: Promise<Object>`
 
 Fetches the selected encounter resource (if available). Resolves with the encounter or rejects with an error.
 
@@ -151,7 +151,7 @@ The selected user identifier that looks like `Practitioner/id` or `null` if user
 
 The selected user resourceType (E.g. `Practitioner`, `Patient`, `RelatedPerson`...) or `null` if user is not available. If no user is selected, it will generate useful debug messages about the possible reasons. See [debugging](#Debugging).
 
-### client.user.read(): Promise<Object>
+### client.user.read()`: Promise<Object>`
 Fetches the selected user resource (if available). Resolves with the user or rejects with an error. 
 
 ---
