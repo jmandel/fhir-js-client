@@ -3,7 +3,7 @@
     <head>
         <title>Request Examples</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css"/>
-        <link rel="stylesheet" href="prism.css"/>
+        <link rel="stylesheet" href="assets/prism.css"/>
         <style>
         .codepen-later {
             position: relative;
@@ -350,7 +350,7 @@ client.request("/Claim", { pageLimit: 0 })
         </div>
         <script async src="https://static.codepen.io/assets/embed/ei.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-        <script type="text/javascript" src="prism.js"></script>
+        <script type="text/javascript" src="assets/prism.js"></script>
         <script>
         jQuery(function($) {
 
@@ -377,7 +377,8 @@ client.request("/Claim", { pageLimit: 0 })
                         tags: [],
                         stylesheets: [],
                         scripts: [
-                            "https://docs.smarthealthit.org/client-js/build/fhir-client.js"
+                            // "https://docs.smarthealthit.org/client-js/build/fhir-client.js"
+                            "https://raw.githubusercontent.com/smart-on-fhir/client-js/master/build/fhir-client.js"
                         ]
                     })
                 });
