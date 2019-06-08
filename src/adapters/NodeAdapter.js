@@ -37,7 +37,7 @@ class NodeAdapter extends BaseAdapter
         }
 
         const protocol = req.headers["x-forwarded-proto"] || req.protocol || "http";
-        const orig = req.originalUrl || req.headers["x-original-uri"] || req.url;
+        const orig = /*req.originalUrl || */req.headers["x-original-uri"] || req.url;
         return new URL(orig, protocol + "://" + host);
     }
 

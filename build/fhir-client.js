@@ -8814,7 +8814,9 @@ function (_BaseAdapter) {
       }
 
       var protocol = req.headers["x-forwarded-proto"] || req.protocol || "http";
-      var orig = req.originalUrl || req.headers["x-original-uri"] || req.url;
+      var orig =
+      /*req.originalUrl || */
+      req.headers["x-original-uri"] || req.url;
       return new URL(orig, protocol + "://" + host);
     }
     /**

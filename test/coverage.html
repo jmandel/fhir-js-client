@@ -556,11 +556,11 @@
             <a href="#src/adapters/BaseAdapter.js"><span class="dirname">src/adapters/</span><span class="basename">BaseAdapter.js</span></a>
         </li>
         <li class="">
-            <span class="cov high">85.45</span>
+            <span class="cov high">100</span>
             <a href="#src/adapters/NodeAdapter.js"><span class="dirname">src/adapters/</span><span class="basename">NodeAdapter.js</span></a>
         </li>
         <li class="">
-            <span class="cov high">88</span>
+            <span class="cov high">100</span>
             <a href="#src/storage/ServerStorage.js"><span class="dirname">src/storage/</span><span class="basename">ServerStorage.js</span></a>
         </li>
         <li><a href="#linting">Linting Report</a></li>
@@ -570,8 +570,8 @@
       <div class="stats high">
           <div class="failures">0</div>
           <div class="skipped">0</div>
-          <div class="test-count">134</div>
-          <div class="duration">1217</div>
+          <div class="test-count">139</div>
+          <div class="duration">1328</div>
       </div>
       <div id="filters">
           <input type="checkbox" checked="" onchange="filter(this)" value="success" id="show-success">
@@ -697,6 +697,10 @@
           <label for="show-units">units</label>
           <input type="checkbox" checked="" onchange="filter(this)" value="Complete_authorization_[SERVER]" id="show-Complete_authorization_[SERVER]">
           <label for="show-Complete_authorization_[SERVER]">Complete authorization [SERVER]</label>
+          <input type="checkbox" checked="" onchange="filter(this)" value="ServerStorage" id="show-ServerStorage">
+          <label for="show-ServerStorage">ServerStorage</label>
+          <input type="checkbox" checked="" onchange="filter(this)" value="NodeAdapter" id="show-NodeAdapter">
+          <label for="show-NodeAdapter">NodeAdapter</label>
       </div>
       <table>
           <thead>
@@ -712,14 +716,14 @@
               <td class="test-title">FHIR.client client.refresh validates state and throws if needed
                   
               </td>
-              <td class="test-duration">47</td>
+              <td class="test-duration">56</td>
           </tr>
           <tr class="show FHIR.client success">
               <td class="test-id">2</td>
               <td class="test-title">FHIR.client client.refresh
                   
               </td>
-              <td class="test-duration">15</td>
+              <td class="test-duration">17</td>
           </tr>
           <tr class="show FHIR.client constructor success">
               <td class="test-id">3</td>
@@ -747,7 +751,7 @@
               <td class="test-title">FHIR.client constructor accepts string as second argument
                   
               </td>
-              <td class="test-duration">0</td>
+              <td class="test-duration">1</td>
           </tr>
           <tr class="show FHIR.client patient.read success">
               <td class="test-id">7</td>
@@ -768,7 +772,7 @@
               <td class="test-title">FHIR.client patient.read rejects with no patient works in the browser
                   
               </td>
-              <td class="test-duration">0</td>
+              <td class="test-duration">1</td>
           </tr>
           <tr class="show FHIR.client patient.read rejects_with_no_patient success">
               <td class="test-id">10</td>
@@ -789,7 +793,7 @@
               <td class="test-title">FHIR.client encounter.read rejects with no encounter works on the server
                   
               </td>
-              <td class="test-duration">0</td>
+              <td class="test-duration">1</td>
           </tr>
           <tr class="show FHIR.client user.read rejects_with_no_user success">
               <td class="test-id">13</td>
@@ -803,42 +807,42 @@
               <td class="test-title">FHIR.client user.read rejects with no user works on the server
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">0</td>
           </tr>
           <tr class="show FHIR.client fhir.js_api success">
               <td class="test-id">15</td>
               <td class="test-title">FHIR.client fhir.js api works in the browser
                   
               </td>
-              <td class="test-duration">423</td>
+              <td class="test-duration">522</td>
           </tr>
           <tr class="show FHIR.client client.request can_fetch_single_resource success">
               <td class="test-id">16</td>
               <td class="test-title">FHIR.client client.request can fetch single resource works in the browser
                   
               </td>
-              <td class="test-duration">3</td>
+              <td class="test-duration">4</td>
           </tr>
           <tr class="show FHIR.client client.request can_fetch_single_resource success">
               <td class="test-id">17</td>
               <td class="test-title">FHIR.client client.request can fetch single resource works on the server
                   
               </td>
-              <td class="test-duration">3</td>
+              <td class="test-duration">4</td>
           </tr>
           <tr class="show FHIR.client client.request ignores_pageLimit_if_the_result_is_not_a_bundle success">
               <td class="test-id">18</td>
               <td class="test-title">FHIR.client client.request ignores pageLimit if the result is not a bundle works in the browser
                   
               </td>
-              <td class="test-duration">3</td>
+              <td class="test-duration">4</td>
           </tr>
           <tr class="show FHIR.client client.request ignores_pageLimit_if_the_result_is_not_a_bundle success">
               <td class="test-id">19</td>
               <td class="test-title">FHIR.client client.request ignores pageLimit if the result is not a bundle works on the server
                   
               </td>
-              <td class="test-duration">3</td>
+              <td class="test-duration">2</td>
           </tr>
           <tr class="show FHIR.client client.request can_fetch_a_bundle success">
               <td class="test-id">20</td>
@@ -901,7 +905,7 @@
               <td class="test-title">FHIR.client client.request can fetch all pages works in the browser
                   
               </td>
-              <td class="test-duration">3</td>
+              <td class="test-duration">4</td>
           </tr>
           <tr class="show FHIR.client client.request can_fetch_all_pages success">
               <td class="test-id">29</td>
@@ -929,21 +933,21 @@
               <td class="test-title">FHIR.client client.request stops fetching pages if onPage throws works in the browser
                   
               </td>
-              <td class="test-duration">3</td>
+              <td class="test-duration">2</td>
           </tr>
           <tr class="show FHIR.client client.request stops_fetching_pages_if_onPage_throws success">
               <td class="test-id">33</td>
               <td class="test-title">FHIR.client client.request stops fetching pages if onPage throws works on the server
                   
               </td>
-              <td class="test-duration">4</td>
+              <td class="test-duration">2</td>
           </tr>
           <tr class="show FHIR.client client.request stops_fetching_pages_if_onPage_rejects success">
               <td class="test-id">34</td>
               <td class="test-title">FHIR.client client.request stops fetching pages if onPage rejects works in the browser
                   
               </td>
-              <td class="test-duration">4</td>
+              <td class="test-duration">2</td>
           </tr>
           <tr class="show FHIR.client client.request stops_fetching_pages_if_onPage_rejects success">
               <td class="test-id">35</td>
@@ -964,21 +968,21 @@
               <td class="test-title">FHIR.client client.request awaits for the onPage callback works on the server
                   
               </td>
-              <td class="test-duration">210</td>
+              <td class="test-duration">209</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_single_resource success">
               <td class="test-id">38</td>
               <td class="test-title">FHIR.client client.request can resolve refs on single resource works in the browser
                   
               </td>
-              <td class="test-duration">8</td>
+              <td class="test-duration">10</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_single_resource success">
               <td class="test-id">39</td>
               <td class="test-title">FHIR.client client.request can resolve refs on single resource works on the server
                   
               </td>
-              <td class="test-duration">5</td>
+              <td class="test-duration">3</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_single_resource_with_&#x60;graph:_false&#x60; success">
               <td class="test-id">40</td>
@@ -992,7 +996,7 @@
               <td class="test-title">FHIR.client client.request can resolve refs on single resource with &#x60;graph: false&#x60; works on the server
                   
               </td>
-              <td class="test-duration">3</td>
+              <td class="test-duration">4</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_pages success">
               <td class="test-id">42</td>
@@ -1027,7 +1031,7 @@
               <td class="test-title">FHIR.client client.request can resolve refs on pages with &#x60;onPage&#x60; works in the browser
                   
               </td>
-              <td class="test-duration">9</td>
+              <td class="test-duration">8</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_pages_with_&#x60;onPage&#x60; success">
               <td class="test-id">47</td>
@@ -1055,7 +1059,7 @@
               <td class="test-title">FHIR.client client.request resolve all refs if it points to an array works in the browser
                   
               </td>
-              <td class="test-duration">6</td>
+              <td class="test-duration">7</td>
           </tr>
           <tr class="show FHIR.client client.request resolve_all_refs_if_it_points_to_an_array success">
               <td class="test-id">51</td>
@@ -1237,7 +1241,7 @@
               <td class="test-title">FHIR.client getIdToken() complains about scopes works in the browser
                   
               </td>
-              <td class="test-duration">0</td>
+              <td class="test-duration">1</td>
           </tr>
           <tr class="show FHIR.client getIdToken()_complains_about_scopes success">
               <td class="test-id">77</td>
@@ -1265,14 +1269,14 @@
               <td class="test-title">HttpError create with no args
                   
               </td>
-              <td class="test-duration">0</td>
+              <td class="test-duration">1</td>
           </tr>
           <tr class="show HttpError success">
               <td class="test-id">81</td>
               <td class="test-title">HttpError create from string
                   
               </td>
-              <td class="test-duration">0</td>
+              <td class="test-duration">1</td>
           </tr>
           <tr class="show HttpError success">
               <td class="test-id">82</td>
@@ -1286,7 +1290,7 @@
               <td class="test-title">HttpError create from response object having error property
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">0</td>
           </tr>
           <tr class="show HttpError success">
               <td class="test-id">84</td>
@@ -1300,14 +1304,14 @@
               <td class="test-title">HttpError create from empty object
                   
               </td>
-              <td class="test-duration">0</td>
+              <td class="test-duration">1</td>
           </tr>
           <tr class="show HttpError success">
               <td class="test-id">86</td>
               <td class="test-title">HttpError create from incompatible argument
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">0</td>
           </tr>
           <tr class="show Complete_authorization success">
               <td class="test-id">87</td>
@@ -1349,7 +1353,7 @@
               <td class="test-title">Complete authorization appends &#x27;launch&#x27; to the scopes if needed
                   
               </td>
-              <td class="test-duration">0</td>
+              <td class="test-duration">1</td>
           </tr>
           <tr class="show Complete_authorization success">
               <td class="test-id">93</td>
@@ -1461,14 +1465,14 @@
               <td class="test-title">smart authorize accepts fakeTokenResponse parameter
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">0</td>
           </tr>
           <tr class="show smart completeAuth success">
               <td class="test-id">109</td>
               <td class="test-title">smart completeAuth rejects with error and error_description from the url
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">0</td>
           </tr>
           <tr class="show smart completeAuth success">
               <td class="test-id">110</td>
@@ -1517,7 +1521,7 @@
               <td class="test-title">smart init works in EHR mode
                   
               </td>
-              <td class="test-duration">6</td>
+              <td class="test-duration">5</td>
           </tr>
           <tr class="show Lib getPath success">
               <td class="test-id">117</td>
@@ -1580,28 +1584,28 @@
               <td class="test-title">Lib stripTrailingSlash works with non-string argument
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">0</td>
           </tr>
           <tr class="show Lib absolute success">
               <td class="test-id">126</td>
               <td class="test-title">Lib absolute returns http, https or urn URI as is
                   
               </td>
-              <td class="test-duration">0</td>
+              <td class="test-duration">1</td>
           </tr>
           <tr class="show Lib absolute success">
               <td class="test-id">127</td>
               <td class="test-title">Lib absolute returns URLs mounted to the given domain
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">0</td>
           </tr>
           <tr class="show Lib units success">
               <td class="test-id">128</td>
               <td class="test-title">Lib units cm
                   
               </td>
-              <td class="test-duration">2</td>
+              <td class="test-duration">1</td>
           </tr>
           <tr class="show Lib units success">
               <td class="test-id">129</td>
@@ -1615,7 +1619,7 @@
               <td class="test-title">Lib units any
                   
               </td>
-              <td class="test-duration">0</td>
+              <td class="test-duration">1</td>
           </tr>
           <tr class="show Complete_authorization_[SERVER] success">
               <td class="test-id">131</td>
@@ -1643,7 +1647,42 @@
               <td class="test-title">Complete authorization [SERVER] appends &#x27;launch&#x27; to the scopes if needed
                   
               </td>
+              <td class="test-duration">1</td>
+          </tr>
+          <tr class="show ServerStorage success">
+              <td class="test-id">135</td>
+              <td class="test-title">ServerStorage can &#x27;get&#x27;
+                  
+              </td>
               <td class="test-duration">0</td>
+          </tr>
+          <tr class="show ServerStorage success">
+              <td class="test-id">136</td>
+              <td class="test-title">ServerStorage can &#x27;set&#x27;
+                  
+              </td>
+              <td class="test-duration">1</td>
+          </tr>
+          <tr class="show ServerStorage success">
+              <td class="test-id">137</td>
+              <td class="test-title">ServerStorage can &#x27;unset&#x27;
+                  
+              </td>
+              <td class="test-duration">0</td>
+          </tr>
+          <tr class="show NodeAdapter success">
+              <td class="test-id">138</td>
+              <td class="test-title">NodeAdapter getUrl
+                  
+              </td>
+              <td class="test-duration">1</td>
+          </tr>
+          <tr class="show NodeAdapter success">
+              <td class="test-id">139</td>
+              <td class="test-title">NodeAdapter getStorage() works with factory function
+                  
+              </td>
+              <td class="test-duration">1</td>
           </tr>
           </tbody>
       </table>
@@ -1651,10 +1690,10 @@
     </div>    <div id="coverage">
         <h1>Code Coverage Report</h1>
         <div class="stats high">
-            <div class="percentage">92.86%</div>
+            <div class="percentage">93.88%</div>
             <div class="sloc">1078</div>
-            <div class="hits">1001</div>
-            <div class="misses">77</div>
+            <div class="hits">1012</div>
+            <div class="misses">66</div>
         </div>
         <div id="filters">
           <input type="checkbox" checked="" onchange="filter(this)" value="generated" id="show-generated">
@@ -10516,10 +10555,10 @@
             <div class="file ">
                 <h2 id="src/adapters/NodeAdapter.js">src/adapters/NodeAdapter.js </h2>
                 <div class="stats high">
-                    <div class="percentage">85.45%</div>
+                    <div class="percentage">100%</div>
                     <div class="sloc">55</div>
-                    <div class="hits">47</div>
-                    <div class="misses">8</div>
+                    <div class="hits">55</div>
+                    <div class="misses">0</div>
                 </div>
                 <table>
                     <thead>
@@ -10643,7 +10682,7 @@
                         </tr>            <tr id="src/adapters/NodeAdapter.js__19" class="hit">
                           <td class="line" data-tooltip>19</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>5</td>
+                          <td class="hits" data-tooltip>9</td>
                           <td class="source">        this.options &#x3D; options;</td>
                           
                         </tr>            <tr id="src/adapters/NodeAdapter.js__20" class="hit">
@@ -10715,32 +10754,32 @@
                         </tr>            <tr id="src/adapters/NodeAdapter.js__31" class="hit">
                           <td class="line" data-tooltip>31</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>8</td>
+                          <td class="hits" data-tooltip>11</td>
                           <td class="source">        let host &#x3D; req.headers.host;</td>
                           
-                        </tr>            <tr id="src/adapters/NodeAdapter.js__32" class="chunks">
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__32" class="hit">
                           <td class="line" data-tooltip>32</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"><div>        if (</div><div class="miss false" data-tooltip>req.headers[&quot;x-forwarded-host&quot;]</div><div>) {</div></td>
+                          <td class="hits" data-tooltip>11</td>
+                          <td class="source">        if (req.headers[&quot;x-forwarded-host&quot;]) {</td>
                           
-                        </tr>            <tr id="src/adapters/NodeAdapter.js__33" class="miss">
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__33" class="hit">
                           <td class="line" data-tooltip>33</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>            host &#x3D; req.headers[&quot;x-forwarded-host&quot;];</td>
+                          <td class="hits" data-tooltip>2</td>
+                          <td class="source">            host &#x3D; req.headers[&quot;x-forwarded-host&quot;];</td>
                           
-                        </tr>            <tr id="src/adapters/NodeAdapter.js__34" class="miss">
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__34" class="hit">
                           <td class="line" data-tooltip>34</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>            if (req.headers[&quot;x-forwarded-port&quot;]) {</td>
+                          <td class="hits" data-tooltip>2</td>
+                          <td class="source">            if (req.headers[&quot;x-forwarded-port&quot;]) {</td>
                           
-                        </tr>            <tr id="src/adapters/NodeAdapter.js__35" class="miss">
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__35" class="hit">
                           <td class="line" data-tooltip>35</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>                host +&#x3D; &quot;:&quot; + req.headers[&quot;x-forwarded-port&quot;];</td>
+                          <td class="hits" data-tooltip>1</td>
+                          <td class="source">                host +&#x3D; &quot;:&quot; + req.headers[&quot;x-forwarded-port&quot;];</td>
                           
                         </tr>            <tr id="src/adapters/NodeAdapter.js__36" class="hit">
                           <td class="line" data-tooltip>36</td>
@@ -10760,22 +10799,22 @@
                           <td class="hits" data-tooltip></td>
                           <td class="source"></td>
                           
-                        </tr>            <tr id="src/adapters/NodeAdapter.js__39" class="chunks">
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__39" class="hit">
                           <td class="line" data-tooltip>39</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"><div>        const protocol &#x3D; </div><div class="miss false" data-tooltip>req.headers[&quot;x-forwarded-proto&quot;]</div><div> || </div><div class="miss false" data-tooltip>req.protocol</div><div> || &quot;http&quot;;</div></td>
+                          <td class="hits" data-tooltip>11</td>
+                          <td class="source">        const protocol &#x3D; req.headers[&quot;x-forwarded-proto&quot;] || req.protocol || &quot;http&quot;;</td>
                           
-                        </tr>            <tr id="src/adapters/NodeAdapter.js__40" class="chunks">
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__40" class="hit">
                           <td class="line" data-tooltip>40</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"><div>        const orig &#x3D; </div><div class="miss false" data-tooltip>req.originalUrl</div><div> || </div><div class="miss false" data-tooltip>req.headers[&quot;x-original-uri&quot;]</div><div> || req.url;</div></td>
+                          <td class="hits" data-tooltip>11</td>
+                          <td class="source">        const orig &#x3D; /*req.originalUrl || */req.headers[&quot;x-original-uri&quot;] || req.url;</td>
                           
                         </tr>            <tr id="src/adapters/NodeAdapter.js__41" class="hit">
                           <td class="line" data-tooltip>41</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>8</td>
+                          <td class="hits" data-tooltip>11</td>
                           <td class="source">        return new URL(orig, protocol + &quot;://&quot; + host);</td>
                           
                         </tr>            <tr id="src/adapters/NodeAdapter.js__42" class="hit">
@@ -10907,20 +10946,20 @@
                         </tr>            <tr id="src/adapters/NodeAdapter.js__63" class="hit">
                           <td class="line" data-tooltip>63</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>5</td>
+                          <td class="hits" data-tooltip>6</td>
                           <td class="source">            if (this.options.storage) {</td>
                           
-                        </tr>            <tr id="src/adapters/NodeAdapter.js__64" class="chunks">
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__64" class="hit">
                           <td class="line" data-tooltip>64</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"><div>                if (</div><div class="miss false" data-tooltip>typeof this.options.storage &#x3D;&#x3D; &quot;function&quot;</div><div>) {</div></td>
+                          <td class="hits" data-tooltip>3</td>
+                          <td class="source">                if (typeof this.options.storage &#x3D;&#x3D; &quot;function&quot;) {</td>
                           
-                        </tr>            <tr id="src/adapters/NodeAdapter.js__65" class="miss">
+                        </tr>            <tr id="src/adapters/NodeAdapter.js__65" class="hit">
                           <td class="line" data-tooltip>65</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>                    this._storage &#x3D; this.options.storage(this.options);</td>
+                          <td class="hits" data-tooltip>1</td>
+                          <td class="source">                    this._storage &#x3D; this.options.storage(this.options);</td>
                           
                         </tr>            <tr id="src/adapters/NodeAdapter.js__66" class="hit">
                           <td class="line" data-tooltip>66</td>
@@ -10967,7 +11006,7 @@
                         </tr>            <tr id="src/adapters/NodeAdapter.js__73" class="hit">
                           <td class="line" data-tooltip>73</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>8</td>
+                          <td class="hits" data-tooltip>10</td>
                           <td class="source">        return this._storage;</td>
                           
                         </tr>            <tr id="src/adapters/NodeAdapter.js__74" class="hit">
@@ -11108,10 +11147,10 @@
             <div class="file ">
                 <h2 id="src/storage/ServerStorage.js">src/storage/ServerStorage.js </h2>
                 <div class="stats high">
-                    <div class="percentage">88%</div>
+                    <div class="percentage">100%</div>
                     <div class="sloc">25</div>
-                    <div class="hits">22</div>
-                    <div class="misses">3</div>
+                    <div class="hits">25</div>
+                    <div class="misses">0</div>
                 </div>
                 <table>
                     <thead>
@@ -11217,7 +11256,7 @@
                         </tr>            <tr id="src/storage/ServerStorage.js__16" class="hit">
                           <td class="line" data-tooltip>16</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>4</td>
+                          <td class="hits" data-tooltip>5</td>
                           <td class="source">        return value;</td>
                           
                         </tr>            <tr id="src/storage/ServerStorage.js__17" class="hit">
@@ -11244,23 +11283,23 @@
                           <td class="hits" data-tooltip></td>
                           <td class="source">    {</td>
                           
-                        </tr>            <tr id="src/storage/ServerStorage.js__21" class="chunks">
+                        </tr>            <tr id="src/storage/ServerStorage.js__21" class="hit">
                           <td class="line" data-tooltip>21</td>
                           <td class="lint empty"></td>
                           <td class="hits" data-tooltip></td>
-                          <td class="source"><div>        if (</div><div class="miss false" data-tooltip>this.request.session.hasOwnProperty(key)</div><div>) {</div></td>
+                          <td class="source">        if (this.request.session.hasOwnProperty(key)) {</td>
                           
-                        </tr>            <tr id="src/storage/ServerStorage.js__22" class="miss">
+                        </tr>            <tr id="src/storage/ServerStorage.js__22" class="hit">
                           <td class="line" data-tooltip>22</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>            delete this.request.session[key];</td>
+                          <td class="hits" data-tooltip>1</td>
+                          <td class="source">            delete this.request.session[key];</td>
                           
-                        </tr>            <tr id="src/storage/ServerStorage.js__23" class="miss">
+                        </tr>            <tr id="src/storage/ServerStorage.js__23" class="hit">
                           <td class="line" data-tooltip>23</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>            return true;</td>
+                          <td class="hits" data-tooltip>1</td>
+                          <td class="source">            return true;</td>
                           
                         </tr>            <tr id="src/storage/ServerStorage.js__24" class="hit">
                           <td class="line" data-tooltip>24</td>
@@ -11271,7 +11310,7 @@
                         </tr>            <tr id="src/storage/ServerStorage.js__25" class="hit">
                           <td class="line" data-tooltip>25</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>2</td>
+                          <td class="hits" data-tooltip>3</td>
                           <td class="source">        return false;</td>
                           
                         </tr>            <tr id="src/storage/ServerStorage.js__26" class="hit">

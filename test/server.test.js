@@ -2,6 +2,7 @@ const { expect } = require("@hapi/code");
 const lab        = require("@hapi/lab").script();
 const FHIR       = require("../src/adapters/NodeAdapter");
 const { KEY }    = require("../src/smart");
+const ServerStorage = require("../src/storage/ServerStorage");
 
 // Mocks
 const mockServer        = require("./mocks/mockServer");
@@ -52,7 +53,7 @@ afterEach(() => {
 
 // -----------------------------------------------------------------------------
 
-describe ("Complete authorization [SERVER]", () => {
+describe("Complete authorization [SERVER]", () => {
     it ("code flow authorization", async () => {
 
         const key = "my-random-state";
@@ -195,4 +196,96 @@ describe ("Complete authorization [SERVER]", () => {
     });
 
     // it ("can do standalone launch");
+});
+
+describe("ServerStorage", () => {
+    it ("can 'get'", async () => {
+        const session = { a: "b" };
+        const storage = new ServerStorage({ session });
+        expect(await storage.get("a")).to.equal("b");
+        expect(await storage.get("b")).to.equal(undefined);
+    });
+    it ("can 'set'", async () => {
+        const session = {};
+        const storage = new ServerStorage({ session });
+        await storage.set("a", "b");
+        expect(await storage.get("a")).to.equal("b");
+    });
+    it ("can 'unset'", async () => {
+        const session = { a: "b" };
+        const storage = new ServerStorage({ session });
+        const result = await storage.unset("a");
+        expect(result).to.equal(true);
+        expect(session.a).to.equal(undefined);
+        const result2 = await storage.unset("a");
+        expect(result2).to.equal(false);
+    });
+});
+
+describe("NodeAdapter", () => {
+
+    it ("getUrl", () => {
+        const adapter1 = new FHIR.Adapter({
+            request: {
+                protocol: "http",
+                url: "/",
+                headers: {
+                    host: "localhost"
+                }
+            }
+        });
+        expect(adapter1.getUrl().href).to.equal("http://localhost/");
+
+        const adapter2 = new FHIR.Adapter({
+            request: {
+                protocol: "http",
+                url: "/a/b/c",
+                headers: {
+                    "x-forwarded-host": "external-domain",
+                    "x-forwarded-proto": "https"
+                }
+            }
+        });
+        expect(adapter2.getUrl().href).to.equal("https://external-domain/a/b/c");
+
+        const adapter3 = new FHIR.Adapter({
+            request: {
+                protocol: "http",
+                headers: {
+                    "x-forwarded-host": "external-domain",
+                    "x-forwarded-proto": "https",
+                    "x-forwarded-port": 8080,
+                    "x-original-uri": "/b/c/d"
+                }
+            }
+        });
+        expect(adapter3.getUrl().href).to.equal("https://external-domain:8080/b/c/d");
+    });
+
+    it ("getStorage() works with factory function", () => {
+
+        const callLog = [];
+
+        const fakeStorage = { fakeStorage: "whatever" };
+
+        function getStorage(...args) {
+            callLog.push(args);
+            return fakeStorage;
+        }
+
+        const adapter = new FHIR.Adapter({
+            storage : getStorage,
+            request : "my-request",
+            response: "my-response"
+        });
+
+        // Call it twice and make sure that only one instance is created
+        expect(adapter.getStorage()).to.equal(fakeStorage);
+        expect(adapter.getStorage()).to.equal(fakeStorage);
+        expect(callLog).to.equal([[{
+            storage : getStorage,
+            request : "my-request",
+            response: "my-response"
+        }]]);
+    });
 });
