@@ -17,7 +17,7 @@ smart(request, response).authorize(options);
 Once you have obtained that "smart" object, the API that it exposes is exactly
 the same for the browser and the server.
 
-### `authorize(options): Promise<never>`
+### authorize(options) `Promise<never>`
 Starts the [SMART Launch Sequence](http://hl7.org/fhir/smart-app-launch/#smart-launch-sequence).
 
 > **IMPORTANT:** `authorize()` will end up redirecting you to the authorization server. This means that you should **not** add anything to the returned promise chain. Any code written directly after the `authorize()` call might not be executed due to that redirect!
@@ -47,12 +47,12 @@ These should **ONLY** be used in development.
 |launch           |`String`  | The launch identifier that is typically provided by the launching EHR as `launch` url parameter. In development it is sometimes useful to be able to pass this as an option. For example, this could allow you to simulate launches from you tests.
 |fakeTokenResponse|`Object`  | Useful for testing. This object can contain any properties that are typically contained in an [access token response](http://hl7.org/fhir/smart-app-launch/#step-3-app-exchanges-authorization-code-for-access-token). These properties will be stored into the client state, making it "believe" that it has been authorized.
 
-### `ready([onSuccess [, onError]]): Promise<Client>`
+### ready([onSuccess [, onError]]) `Promise<Client>`
 This should be called on your `redirect_uri`. Returns a Promise that will eventually be resolved with a Client instance that you can use to query the fhir server.
 
 > The `onSuccess` and `onError` callback functions are optional (and **deprecated**). We only accept them to keep the library compatible with older apps. If these functions are provided, they will simply be attached to the returned promise chain.
 
-### `init(options): Promise<Client>`
+### init(options) `Promise<Client>`
 This function can be used when you want to handle everything in one page (no launch endpoint needed). You can think of it as if it does:
 ```js
 authorize(options).then(ready)

@@ -74,7 +74,7 @@ set(key: string, value: any): Promise<any> // returns the value
 unset(key: string): Promise<Boolean> // returns !!success
 ```
 
-The default storage implementation is [here](../src/storage/ServerStorage.js).
+The default storage implementation is [here](https://github.com/smart-on-fhir/client-js/tree/master/src/storage/ServerStorage.js).
 
 Once you have your custom storage, you can just pass it as third argument to the function that creates the SMART api:
 ```js
@@ -105,8 +105,7 @@ An adapter is a class that has a few methods for doing environment-specific thin
 - Define how to find out what the "current url" is.
 - Optionally, define how to handle relative URLs.
 
-The adapters are located [here](../src/adapters/). They all extend one abstract base
-class (`BaseAdapter`) but that is just for convenience and not a strict requirement.
+The adapters are located [here](https://github.com/smart-on-fhir/client-js/tree/master/src/adapters). They all extend one abstract base class (`BaseAdapter`) but that is just for convenience and not a strict requirement.
 
 To use an adapter (other than the default one for node/express) load it like so:
 ```js
