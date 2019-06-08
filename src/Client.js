@@ -17,7 +17,7 @@ const {
 class FhirClient
 {
     /**
-     * @param {Object}  state 
+     * @param {Object}  state
      * @param {String}  state.clientId
      * @param {String}  state.clientSecret
      * @param {String}  state.key
@@ -346,7 +346,7 @@ class FhirClient
      *  references to resolve.
      * @param {Function} fhirOptions.onPage
      * @param {Boolean} fhirOptions.graph Ignored if `fhirOptions.resolveReferences`
-     *  is not used. If you use `fhirOptions.resolveReferences` and set 
+     *  is not used. If you use `fhirOptions.resolveReferences` and set
      *  `fhirOptions.graph` to false, the result promise will be resolved with an
      *  object like `{ data: Bundle, references: [ ...Resource ] }`.
      *  If you set `fhirOptions.graph` to true, the resolved references will be
@@ -367,7 +367,7 @@ class FhirClient
         else {
             url = String(requestOptions.url);
         }
-        
+
         url = absolute(url, this.state.serverUrl);
 
         // authentication ------------------------------------------------------
@@ -419,7 +419,7 @@ class FhirClient
 
                 /**
                  * Gets single reference by id. Caches the result in _resolvedRefs
-                 * @param {String} refId 
+                 * @param {String} refId
                  */
                 const getRef = refId => {
                     let sub = _resolvedRefs[refId];
@@ -435,7 +435,7 @@ class FhirClient
                 /**
                  * Resolve all refs (specified in fhirOptions.resolveReferences)
                  * in the given resource.
-                 * @param {Object} obj FHIR Resource 
+                 * @param {Object} obj FHIR Resource
                  */
                 const resolve = obj => {
                     return Promise.all(fhirOptions.resolveReferences.map(path => {

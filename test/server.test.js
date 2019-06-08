@@ -81,7 +81,7 @@ describe("Complete authorization [SERVER]", () => {
 
         expect(res1.status).to.equal(302);
         expect(res1.headers.location).to.exist();
-        
+
         const url = new URL(res1.headers.location);
 
         expect(url.searchParams.get("response_type")).to.equal("code");
@@ -120,7 +120,7 @@ describe("Complete authorization [SERVER]", () => {
         });
 
         const client = await smart2.ready();
-        
+
         expect(client.patient.id).to.equal("b2536dd3-bccd-4d22-8355-ab20acdf240b");
         expect(client.encounter.id).to.equal("e3ec2d15-4c27-4607-a45c-2f84962b0700");
         expect(client.user.id).to.equal("smart-Practitioner-71482713");

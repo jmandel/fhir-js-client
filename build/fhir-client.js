@@ -7729,7 +7729,7 @@ var FhirClient =
 /*#__PURE__*/
 function () {
   /**
-   * @param {Object}  state 
+   * @param {Object}  state
    * @param {String}  state.clientId
    * @param {String}  state.clientSecret
    * @param {String}  state.key
@@ -8048,7 +8048,7 @@ function () {
      *  references to resolve.
      * @param {Function} fhirOptions.onPage
      * @param {Boolean} fhirOptions.graph Ignored if `fhirOptions.resolveReferences`
-     *  is not used. If you use `fhirOptions.resolveReferences` and set 
+     *  is not used. If you use `fhirOptions.resolveReferences` and set
      *  `fhirOptions.graph` to false, the result promise will be resolved with an
      *  object like `{ data: Bundle, references: [ ...Resource ] }`.
      *  If you set `fhirOptions.graph` to true, the resolved references will be
@@ -8148,7 +8148,7 @@ function () {
                           case 0:
                             /**
                              * Gets single reference by id. Caches the result in _resolvedRefs
-                             * @param {String} refId 
+                             * @param {String} refId
                              */
                             getRef = function getRef(refId) {
                               var sub = _resolvedRefs[refId];
@@ -8165,7 +8165,7 @@ function () {
                             /**
                              * Resolve all refs (specified in fhirOptions.resolveReferences)
                              * in the given resource.
-                             * @param {Object} obj FHIR Resource 
+                             * @param {Object} obj FHIR Resource
                              */
 
 
@@ -8806,7 +8806,7 @@ function (_BaseAdapter) {
   _inherits(NodeAdapter, _BaseAdapter);
 
   /**
-   * @param {Object} options 
+   * @param {Object} options
    * @param {Object} options.request required
    * @param {Object} options.response required
    * @param {Object} options.storage optional
@@ -8886,7 +8886,7 @@ function (_BaseAdapter) {
     }
     /**
      * This is the static entry point and MUST be provided
-     * @param {Object} req The http request 
+     * @param {Object} req The http request
      * @param {Object} res The http response
      * @param {Object|Function} storage Custom storage instance or a storage
      *  factory function
@@ -8925,8 +8925,6 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
 if ((typeof window === "undefined" ? "undefined" : _typeof(window)) == "object") {
   var smart = __webpack_require__(/*! ./adapters/BrowserAdapter */ "./src/adapters/BrowserAdapter.js");
 
-  console.log("smart:", smart, smart.Adapter);
-
   var _smart = smart(),
       ready = _smart.ready,
       authorize = _smart.authorize,
@@ -8945,10 +8943,10 @@ if ((typeof window === "undefined" ? "undefined" : _typeof(window)) == "object")
         // HTML5 sessionStorage API.
         // This variable can be overridden to false by setting
         // FHIR.oauth2.settings.fullSessionStorageSupport = false.
-        // When set to false, the sessionStorage will be keyed 
+        // When set to false, the sessionStorage will be keyed
         // by a state variable. This is to allow the embedded IE browser
         // instances instantiated on a single thread to continue to
-        // function without having sessionStorage data shared 
+        // function without having sessionStorage data shared
         // across the embedded IE instances.
         fullSessionStorageSupport: true
       },
@@ -9247,7 +9245,7 @@ function jwtDecode(token) {
  *   "55284-4": [ observation1, observation2 ],
  *   "6082-2" : [ observation3 ]
  * }
- * @param {Object|Object[]} observations Array of observations 
+ * @param {Object|Object[]} observations Array of observations
  * @param {String} property The name of a CodeableConcept property to group by
  * @returns {Object}
  */
@@ -9283,7 +9281,7 @@ function byCode(observations, property) {
  * First groups the observations by code using `byCode`. Then returns a function
  * that accepts codes as arguments and will return a flat array of observations
  * having that codes
- * @param {Object|Object[]} observations Array of observations 
+ * @param {Object|Object[]} observations Array of observations
  * @param {String} property The name of a CodeableConcept property to group by
  * @returns {Function}
  */

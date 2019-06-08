@@ -2,7 +2,6 @@
 // global FHIR object
 if (typeof window == "object") {
     const smart = require("./adapters/BrowserAdapter");
-    console.log("smart:", smart, smart.Adapter);
     const { ready, authorize, init, client } = smart();
 
     // $lab:coverage:off$
@@ -13,15 +12,15 @@ if (typeof window == "object") {
                 // Replaces the browser's current URL
                 // using window.history.replaceState API or by reloading.
                 replaceBrowserHistory: true,
-    
+
                 // When set to true, this variable will fully utilize
                 // HTML5 sessionStorage API.
                 // This variable can be overridden to false by setting
                 // FHIR.oauth2.settings.fullSessionStorageSupport = false.
-                // When set to false, the sessionStorage will be keyed 
+                // When set to false, the sessionStorage will be keyed
                 // by a state variable. This is to allow the embedded IE browser
                 // instances instantiated on a single thread to continue to
-                // function without having sessionStorage data shared 
+                // function without having sessionStorage data shared
                 // across the embedded IE instances.
                 fullSessionStorageSupport: true
             },

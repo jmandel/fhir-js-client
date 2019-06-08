@@ -109,9 +109,9 @@ async function authorize(env, params = {}, _noRedirect)
     } = params;
 
     const url = env.getUrl();
-    
+
     // For these three an url param takes precedence over inline option
-    iss            = url.searchParams.get("iss")            || iss; 
+    iss            = url.searchParams.get("iss")            || iss;
     fhirServiceUrl = url.searchParams.get("fhirServiceUrl") || fhirServiceUrl;
     launch         = url.searchParams.get("launch")         || launch;
 

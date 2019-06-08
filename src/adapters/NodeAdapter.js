@@ -8,7 +8,7 @@ const BaseAdapter   = require("./BaseAdapter");
 class NodeAdapter extends BaseAdapter
 {
     /**
-     * @param {Object} options 
+     * @param {Object} options
      * @param {Object} options.request required
      * @param {Object} options.response required
      * @param {Object} options.storage optional
@@ -75,7 +75,7 @@ class NodeAdapter extends BaseAdapter
 
     /**
      * This is the static entry point and MUST be provided
-     * @param {Object} req The http request 
+     * @param {Object} req The http request
      * @param {Object} res The http response
      * @param {Object|Function} storage Custom storage instance or a storage
      *  factory function

@@ -166,7 +166,7 @@ describe ("Complete authorization", () => {
 
         // console.log(redirect, state, storage.get(state));
         expect(await Storage.get(key), "must have set a state at " + key).to.exist();
- 
+
         // mock our access token response
         mockServer.mock({
             headers: { "content-type": "application/json" },
@@ -801,7 +801,7 @@ describe("smart", () => {
                 });
 
                 // This first call will NEVER resolve, but it will
-                // trigger a "redirect" event                
+                // trigger a "redirect" event
                 smart.init(env, {
                     client_id : "my_web_app",
                     scope     : "launch/patient",

@@ -246,7 +246,7 @@ describe("FHIR.client", () => {
                 "works in the browser": new BrowserEnv(),
                 "works on the server" : new ServerEnv()
             };
-    
+
             for (let name in tests) {
                 it (name, async () => {
                     const client = new Client(tests[name], { serverUrl: mockUrl });
@@ -287,7 +287,7 @@ describe("FHIR.client", () => {
                 "works in the browser": new BrowserEnv(),
                 "works on the server" : new ServerEnv()
             };
-    
+
             for (let name in tests) {
                 it (name, async () => {
                     const client = new Client(tests[name], { serverUrl: mockUrl });
@@ -514,7 +514,7 @@ describe("FHIR.client", () => {
                             resolve();
                         }, 100);
                     });
-                };                  
+                };
 
                 // Page 1
                 mockServer.mock({
@@ -553,7 +553,7 @@ describe("FHIR.client", () => {
         describe ("can resolve refs on single resource", () => {
             crossPlatformTest(async (env) => {
                 const client = new Client(env, { serverUrl: mockUrl });
-            
+
                 // Main page
                 mockServer.mock({
                     headers: { "content-type": "application/json" },
@@ -595,7 +595,7 @@ describe("FHIR.client", () => {
         describe ("can resolve refs on single resource with `graph: false`", () => {
             crossPlatformTest(async (env) => {
                 const client = new Client(env, { serverUrl: mockUrl });
-            
+
                 // Main page
                 mockServer.mock({
                     headers: { "content-type": "application/json" },
@@ -647,7 +647,7 @@ describe("FHIR.client", () => {
         describe ("can resolve refs on pages", () => {
             crossPlatformTest(async (env) => {
                 const client = new Client(env, { serverUrl: mockUrl });
-                
+
                 // Main page 1
                 mockServer.mock({
                     headers: { "content-type": "application/json" },
@@ -751,7 +751,7 @@ describe("FHIR.client", () => {
         describe ("can resolve refs on pages with `graph: false`", () => {
             crossPlatformTest(async (env) => {
                 const client = new Client(env, { serverUrl: mockUrl });
-                
+
                 // Main page 1
                 mockServer.mock({
                     headers: { "content-type": "application/json" },
@@ -866,7 +866,7 @@ describe("FHIR.client", () => {
         describe ("can resolve refs on pages with `onPage`", () => {
             crossPlatformTest(async (env) => {
                 const client = new Client(env, { serverUrl: mockUrl });
-                
+
                 // Main page 1
                 mockServer.mock({
                     headers: { "content-type": "application/json" },
@@ -975,7 +975,7 @@ describe("FHIR.client", () => {
         describe ("can resolve refs on pages with `onPage` and `graph: false`", () => {
             crossPlatformTest(async (env) => {
                 const client = new Client(env, { serverUrl: mockUrl });
-                
+
                 // Main page 1
                 mockServer.mock({
                     headers: { "content-type": "application/json" },
@@ -1285,7 +1285,7 @@ describe("FHIR.client", () => {
 
         storage.set(KEY, key);
         storage.set(key, state);
-        
+
         const client = new Client(env, state);
         // console.log("===> ", env, storage);
 
@@ -1332,7 +1332,7 @@ describe("FHIR.client", () => {
                 "like the selected patient."
             ]]);
         });
-    }); 
+    });
 
     describe("getPatientId() complains about authorizeUri", () => {
         crossPlatformTest(async (env) => {
@@ -1390,7 +1390,7 @@ describe("FHIR.client", () => {
                 "like the selected encounter."
             ]]);
         });
-    }); 
+    });
 
     describe("getEncounterId() complains about authorizeUri", () => {
         crossPlatformTest(async (env) => {
@@ -1448,7 +1448,7 @@ describe("FHIR.client", () => {
                 "need to access launch context items like the id_token."
             ]]);
         });
-    }); 
+    });
 
     describe("getIdToken() complains about authorizeUri", () => {
         crossPlatformTest(async (env) => {
@@ -1503,7 +1503,7 @@ describe("FHIR.client", () => {
             const observation2 = require("./mocks/Observation-2.json");
             // const patient1     = require("./mocks/Patient-1.json");
             // const patient2     = require("./mocks/Patient-2.json");
-            
+
             const resources = [
                 observation1,
                 observation2,
@@ -1540,7 +1540,7 @@ describe("FHIR.client", () => {
             const client = new Client(env, "http://localhost");
             const observation1 = require("./mocks/Observation-1.json");
             const observation2 = require("./mocks/Observation-2.json");
-            
+
             const resources = [
                 observation1,
                 observation2,
@@ -1612,7 +1612,7 @@ describe("FHIR.client", () => {
 
     // it ("client.getBinary", async () => {
     //     const client = new window.FHIR.client(OPEN_FHIR_SERVER);
-        
+
     //     const { data } = await client.getBinary("https://r3.smarthealthit.org/Binary/smart-4-photo")
     //         .catch(() => {
     //             throw new Error("getBinary should not throw");
@@ -1630,14 +1630,13 @@ describe("FHIR.client", () => {
 
     // it ("client.fetchBinary", async () => {
     //     const client = new window.FHIR.client(OPEN_FHIR_SERVER);
-        
+
     //     const { data } = await client.fetchBinary("Binary/smart-4-photo")
     //         .catch(() => {
     //             throw new Error("getBinary should not throw");
     //         });
     //     expect(data).to.be.instanceof(window.Blob);
     // });
-    
     // describe("client.api", () => {
     //     it ("conformance", async () => {
     //         const client = window.FHIR.client({
@@ -1736,9 +1735,9 @@ describe("FHIR.client", () => {
     //     const data = await client.request("Patient/5").catch(() => {
     //         throw new Error("json response with no body should not throw");
     //     });
-        
+
     //     expect(data).to.equal(null);
-           
+
     //     // console.log(client)
     //     //     .catch(ex => { failure = ex });
 

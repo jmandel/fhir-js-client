@@ -19,7 +19,7 @@ class HapiAdapter extends NodeAdapter
 
     /**
      * This is the static entry point and MUST be provided
-     * @param {Object} request The hapi request 
+     * @param {Object} request The hapi request
      * @param {Object} h The hapi response toolkit
      * @param {Object|Function} storage Custom storage instance or a storage
      *  factory function
