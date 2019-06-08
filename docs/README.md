@@ -29,7 +29,7 @@ It works both in browsers (IE10+) and on the server (NodeJS).
     - [Full Documentation](client.md)
     - [Request examples](http://docs.smarthealthit.org/client-js/request.html)
 - [Integration with Fhir.js](#fhirjs-integration)
-    - [Example fhir.js methods and analog request calls](fhirjs-equivalents)
+    - [Example fhir.js methods and analog request calls](fhirjs-equivalents.md)
 - [Contributing and Development](#contributing-and-development)
 - [Debugging](#debugging)
 
