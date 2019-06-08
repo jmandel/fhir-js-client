@@ -22,7 +22,7 @@
     "isomorphic-fetch": "^2.2.1"
   },
   "scripts": {
-    "test": "lab -P test",
+    "test": "lab -P test --ignore fetch,Response,Headers,Request --threshold 90 --verbose --coverage-exclude lib -r console -r html -o stdout -o test/coverage.html",
     "clean": "rm -rf build",
     "pack:prod": "webpack --config webpack.config.js --mode production",
     "pack:dev": "webpack --config webpack.config.js --mode development",
@@ -31,7 +31,7 @@
     "build:dev": "npm run pack:dev -- --watch",
     "examples": "ws -o -p 9090",
     "deploy:gh": "cp -r build docs && gh-pages -d docs",
-    "cover": "cat test/lcov.info | coveralls"
+    "cover": "lab -P test --ignore fetch,Response,Headers,Request --threshold 0 --coverage-exclude lib -r lcov | coveralls"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
