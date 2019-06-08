@@ -141,6 +141,15 @@ describe("FHIR.client", () => {
                 await expect(client.encounter.read()).to.reject(
                     Error, "Encounter is not available"
                 );
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: { id: "encounter-id" }
+                });
+                client.state.tokenResponse.encounter = "whatever";
+                const encounter = await client.encounter.read();
+                expect(encounter).to.equal({ id: "encounter-id" });
             });
         });
     });
@@ -155,6 +164,28 @@ describe("FHIR.client", () => {
                 await expect(client.user.read()).to.reject(
                     Error, "User is not available"
                 );
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: { id: "user-id" }
+                });
+                client.state.tokenResponse.id_token =
+                "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9." +
+                "eyJwcm9maWxlIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb2" +
+                "5lci03MjA4MDQxNiIsImZoaXJVc2VyIjoiUHJhY3RpdGlvbmVyL3Nt" +
+                "YXJ0LVByYWN0aXRpb25lci03MjA4MDQxNiIsInN1YiI6IjM2YTEwYm" +
+                "M0ZDJhNzM1OGI0YWZkYWFhZjlhZjMyYmFjY2FjYmFhYmQxMDkxYmQ0" +
+                "YTgwMjg0MmFkNWNhZGQxNzgiLCJpc3MiOiJodHRwOi8vbGF1bmNoLn" +
+                "NtYXJ0aGVhbHRoaXQub3JnIiwiaWF0IjoxNTU5MzkyMjk1LCJleHAi" +
+                "OjE1NTkzOTU4OTV9.niEs55G4AFJZtU_b9Y1Y6DQmXurUZZkh3WCud" +
+                "ZgwvYasxVU8x3gJiX3jqONttqPhkh7418EFssCKnnaBlUDwsbhp7xd" +
+                "WN4o1L1NvH4bp_R_zJ25F1s6jLmNm2Qp9LqU133PEdcRIqQPgBMyZB" +
+                "WUTyxQ9ihKY1RAjlztAULQ3wKea-rfe0BXJZeUJBsQPzYCnbKY1dON" +
+                "_NRd8N9pTImqf41MpIbEe7YEOHuirIb6HBpurhAHjTLDv1IuHpEAOx" +
+                "pmtxVVHiVf-FYXzTFmn4cGe2PsNJfBl8R_zow2n6qaSANdvSxJDE4D" +
+                "UgIJ6H18wiSJJHp6Plf_bapccAwxbx-zZCw";
+                const user = await client.user.read();
+                expect(user).to.equal({ id: "user-id" });
             });
         });
     });
@@ -175,6 +206,36 @@ describe("FHIR.client", () => {
     });
 
     describe("client.request", () => {
+        it("rejects if no url is provided", async () => {
+            const client = new Client({}, "http://localhost");
+            await expect(client.request()).to.reject();
+        });
+
+        it("rejects on 401 with no refresh token", async () => {
+            const client = new Client({}, mockUrl);
+            const mock = {
+                status: 401,
+                body: "Unauthorized"
+            };
+            mockServer.mock(mock);
+            await expect(client.request("/")).to.reject();
+        });
+
+        it("rejects on 401 with useRefreshToken = false", async () => {
+            const client = new Client({}, {
+                serverUrl: mockUrl,
+                tokenResponse: {
+                    refresh_token: "whatever"
+                }
+            });
+            const mock = {
+                status: 401,
+                body: "Unauthorized"
+            };
+            mockServer.mock(mock);
+            await expect(client.request("/", { useRefreshToken: false })).to.reject();
+        });
+
         describe ("can fetch single resource", () => {
             const mock = {
                 headers: { "content-type": "application/json" },
@@ -1432,6 +1493,120 @@ describe("FHIR.client", () => {
                 "The id_token is not available. Please check if your " +
                 "server supports that."
             ]]);
+        });
+    });
+
+    describe("byCode", () => {
+        crossPlatformTest(async (env) => {
+            const client = new Client(env, "http://localhost");
+            const observation1 = require("./mocks/Observation-1.json");
+            const observation2 = require("./mocks/Observation-2.json");
+            // const patient1     = require("./mocks/Patient-1.json");
+            // const patient2     = require("./mocks/Patient-2.json");
+            
+            const resources = [
+                observation1,
+                observation2,
+                // patient1,
+                // patient2,
+                {},
+                {
+                    resourceType: "Observation",
+                    category: [
+                        null,
+                        {
+                            codding: null
+                        }
+                    ]
+                }
+            ];
+
+            expect(client.byCode(resources, "code")).to.equal({
+                "55284-4": [ observation1 ],
+                "6082-2" : [ observation2 ]
+            });
+
+            expect(client.byCode(resources, "category")).to.equal({
+                "vital-signs": [ observation1 ],
+                "laboratory" : [ observation2 ]
+            });
+
+            expect(client.byCode(resources, "missing")).to.equal({});
+        });
+    });
+
+    describe("byCodes", () => {
+        crossPlatformTest(async (env) => {
+            const client = new Client(env, "http://localhost");
+            const observation1 = require("./mocks/Observation-1.json");
+            const observation2 = require("./mocks/Observation-2.json");
+            
+            const resources = [
+                observation1,
+                observation2,
+                observation1,
+                observation2
+            ];
+
+            expect(client.byCodes(resources, "code")("55284-4")).to.equal([observation1, observation1]);
+
+            expect(client.byCodes(resources, "code")("6082-2")).to.equal([observation2, observation2]);
+
+            expect(client.byCodes(resources, "category")("laboratory")).to.equal([observation2, observation2]);
+        });
+    });
+
+    describe("units", () => {
+        describe ("cm", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, "http://localhost");
+                expect(client.units.cm({ code: "cm", value: 3 })).to.equal(3);
+                expect(client.units.cm({ code: "m", value: 3 })).to.equal(300);
+                expect(client.units.cm({ code: "in", value: 3 })).to.equal(3 * 2.54);
+                expect(client.units.cm({ code: "[in_us]", value: 3 })).to.equal(3 * 2.54);
+                expect(client.units.cm({ code: "[in_i]", value: 3 })).to.equal(3 * 2.54);
+                expect(client.units.cm({ code: "ft", value: 3 })).to.equal(3 * 30.48);
+                expect(client.units.cm({ code: "[ft_us]", value: 3 })).to.equal(3 * 30.48);
+                expect(() => client.units.cm({ code: "xx", value: 3 })).to.throw();
+                expect(() => client.units.cm({ code: "m", value: "x" })).to.throw();
+            });
+        });
+        describe ("kg", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, "http://localhost");
+                expect(client.units.kg({ code: "kg", value: 3 })).to.equal(3);
+                expect(client.units.kg({ code: "g", value: 3 })).to.equal(3 / 1000);
+                expect(client.units.kg({ code: "lb", value: 3 })).to.equal(3 / 2.20462);
+                expect(client.units.kg({ code: "oz", value: 3 })).to.equal(3 / 35.274);
+                expect(() => client.units.kg({ code: "xx", value: 3 })).to.throw();
+                expect(() => client.units.kg({ code: "lb", value: "x" })).to.throw();
+            });
+        });
+        describe ("any", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, "http://localhost");
+                expect(client.units.any({ value: 3 })).to.equal(3);
+                expect(() => client.units.kg({ value: "x" })).to.throw();
+            });
+        });
+    });
+
+    describe("getPath", () => {
+        it ("returns the first arg if no path", () => {
+            const client = new Client({}, "http://localhost");
+            const data = {};
+            expect(client.getPath(data)).to.equal(data);
+        });
+        it ("returns the first arg for empty path", () => {
+            const client = new Client({}, "http://localhost");
+            const data = {};
+            expect(client.getPath(data, "")).to.equal(data);
+        });
+        it ("works as expected", () => {
+            const client = new Client({}, "http://localhost");
+            const data = { a: 1, b: [0, { a: 2 }] };
+            expect(client.getPath(data, "b.1.a")).to.equal(2);
+            expect(client.getPath(data, "b.4.a")).to.equal(undefined);
         });
     });
 

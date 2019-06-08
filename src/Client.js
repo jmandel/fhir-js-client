@@ -352,7 +352,7 @@ class FhirClient
      *  If you set `fhirOptions.graph` to true, the resolved references will be
      *  mounted in place and you just get the data property: `{ data: Bundle }`.
      */
-    request(requestOptions, fhirOptions = {}, _resolvedRefs = {})
+    async request(requestOptions, fhirOptions = {}, _resolvedRefs = {})
     {
         if (!requestOptions) {
             throw new Error("client.request requires an url or request options as argument");

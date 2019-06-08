@@ -8057,257 +8057,285 @@ function () {
 
   }, {
     key: "request",
-    value: function request(requestOptions) {
-      var _this2 = this;
-
-      var fhirOptions = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-      var _resolvedRefs = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-      if (!requestOptions) {
-        throw new Error("client.request requires an url or request options as argument");
-      } // url -----------------------------------------------------------------
-
-
-      var url;
-
-      if (typeof requestOptions == "string" || requestOptions instanceof URL) {
-        url = String(requestOptions);
-        requestOptions = {};
-      } else {
-        url = String(requestOptions.url);
-      }
-
-      url = absolute(url, this.state.serverUrl); // authentication ------------------------------------------------------
-
-      var authHeader = this.getAuthorizationHeader();
-
-      if (authHeader) {
-        requestOptions.headers = _objectSpread({}, requestOptions.headers, {
-          Authorization: authHeader
-        });
-      } // fhirOptions.resolveReferences ---------------------------------------
-
-
-      if (!Array.isArray(fhirOptions.resolveReferences)) {
-        fhirOptions.resolveReferences = [fhirOptions.resolveReferences];
-      }
-
-      fhirOptions.resolveReferences = fhirOptions.resolveReferences.filter(Boolean).map(String); // fhirOptions.graph ---------------------------------------------------
-
-      fhirOptions.graph = fhirOptions.graph !== false; // fhirOptions.pageLimit -----------------------------------------------
-
-      if (!fhirOptions.pageLimit && fhirOptions.pageLimit !== 0) {
-        fhirOptions.pageLimit = 1;
-      }
-
-      var hasPageCallback = typeof fhirOptions.onPage == "function";
-      debug("[client.request] Request url: %s, options: %O, fhirOptions: %O", url, requestOptions, fhirOptions);
-      return fetchJSON(url, requestOptions) // Automatic re-auth via refresh token -----------------------------
-      .catch(function (error) {
-        debug("failed %o", error);
-
-        if (error.status == 401 && fhirOptions.useRefreshToken !== false) {
-          var hasRefreshToken = _getPath(_this2, "state.tokenResponse.refresh_token");
-
-          if (hasRefreshToken) {
-            return _this2.refresh().then(function () {
-              return _this2.request(_objectSpread({}, requestOptions, {
-                url: url
-              }), fhirOptions, _resolvedRefs);
-            });
-          }
-        }
-
-        throw error;
-      }) // Resolve References ----------------------------------------------
-      .then(
+    value: function () {
+      var _request = _asyncToGenerator(
       /*#__PURE__*/
-      function () {
-        var _ref = _asyncToGenerator(
-        /*#__PURE__*/
-        regeneratorRuntime.mark(function _callee(data) {
-          var getRef, resolve;
-          return regeneratorRuntime.wrap(function _callee$(_context) {
-            while (1) {
-              switch (_context.prev = _context.next) {
-                case 0:
-                  /**
-                   * Gets single reference by id. Caches the result in _resolvedRefs
-                   * @param {String} refId 
-                   */
-                  getRef = function getRef(refId) {
-                    var sub = _resolvedRefs[refId];
+      regeneratorRuntime.mark(function _callee3(requestOptions) {
+        var _this2 = this;
 
-                    if (!sub) {
-                      return _this2.request(refId).then(function (sub) {
-                        _resolvedRefs[refId] = sub;
-                        return sub;
+        var fhirOptions,
+            _resolvedRefs,
+            url,
+            authHeader,
+            hasPageCallback,
+            _args3 = arguments;
+
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                fhirOptions = _args3.length > 1 && _args3[1] !== undefined ? _args3[1] : {};
+                _resolvedRefs = _args3.length > 2 && _args3[2] !== undefined ? _args3[2] : {};
+
+                if (requestOptions) {
+                  _context3.next = 4;
+                  break;
+                }
+
+                throw new Error("client.request requires an url or request options as argument");
+
+              case 4:
+                if (typeof requestOptions == "string" || requestOptions instanceof URL) {
+                  url = String(requestOptions);
+                  requestOptions = {};
+                } else {
+                  url = String(requestOptions.url);
+                }
+
+                url = absolute(url, this.state.serverUrl); // authentication ------------------------------------------------------
+
+                authHeader = this.getAuthorizationHeader();
+
+                if (authHeader) {
+                  requestOptions.headers = _objectSpread({}, requestOptions.headers, {
+                    Authorization: authHeader
+                  });
+                } // fhirOptions.resolveReferences ---------------------------------------
+
+
+                if (!Array.isArray(fhirOptions.resolveReferences)) {
+                  fhirOptions.resolveReferences = [fhirOptions.resolveReferences];
+                }
+
+                fhirOptions.resolveReferences = fhirOptions.resolveReferences.filter(Boolean).map(String); // fhirOptions.graph ---------------------------------------------------
+
+                fhirOptions.graph = fhirOptions.graph !== false; // fhirOptions.pageLimit -----------------------------------------------
+
+                if (!fhirOptions.pageLimit && fhirOptions.pageLimit !== 0) {
+                  fhirOptions.pageLimit = 1;
+                }
+
+                hasPageCallback = typeof fhirOptions.onPage == "function";
+                debug("[client.request] Request url: %s, options: %O, fhirOptions: %O", url, requestOptions, fhirOptions);
+                return _context3.abrupt("return", fetchJSON(url, requestOptions) // Automatic re-auth via refresh token -----------------------------
+                .catch(function (error) {
+                  debug("failed %o", error);
+
+                  if (error.status == 401 && fhirOptions.useRefreshToken !== false) {
+                    var hasRefreshToken = _getPath(_this2, "state.tokenResponse.refresh_token");
+
+                    if (hasRefreshToken) {
+                      return _this2.refresh().then(function () {
+                        return _this2.request(_objectSpread({}, requestOptions, {
+                          url: url
+                        }), fhirOptions, _resolvedRefs);
                       });
                     }
-
-                    return sub;
-                  };
-                  /**
-                   * Resolve all refs (specified in fhirOptions.resolveReferences)
-                   * in the given resource.
-                   * @param {Object} obj FHIR Resource 
-                   */
-
-
-                  resolve = function resolve(obj) {
-                    return Promise.all(fhirOptions.resolveReferences.map(function (path) {
-                      var node = _getPath(obj, path);
-
-                      if (node) {
-                        var isArray = Array.isArray(node);
-                        return Promise.all(makeArray(node).map(function (item, i) {
-                          var ref = item.reference;
-
-                          if (ref) {
-                            return getRef(ref).then(function (sub) {
-                              if (fhirOptions.graph) {
-                                if (isArray) {
-                                  setPath(obj, "".concat(path, ".").concat(i), sub);
-                                } else {
-                                  setPath(obj, path, sub);
-                                }
-                              }
-                            });
-                          }
-                        }));
-                      }
-                    }));
-                  };
-
-                  if (!(data && data.resourceType == "Bundle")) {
-                    _context.next = 7;
-                    break;
                   }
 
-                  _context.next = 5;
-                  return Promise.all((data.entry || []).map(function (item) {
-                    return resolve(item.resource);
+                  throw error;
+                }) // Resolve References ----------------------------------------------
+                .then(
+                /*#__PURE__*/
+                function () {
+                  var _ref = _asyncToGenerator(
+                  /*#__PURE__*/
+                  regeneratorRuntime.mark(function _callee(data) {
+                    var getRef, resolve;
+                    return regeneratorRuntime.wrap(function _callee$(_context) {
+                      while (1) {
+                        switch (_context.prev = _context.next) {
+                          case 0:
+                            /**
+                             * Gets single reference by id. Caches the result in _resolvedRefs
+                             * @param {String} refId 
+                             */
+                            getRef = function getRef(refId) {
+                              var sub = _resolvedRefs[refId];
+
+                              if (!sub) {
+                                return _this2.request(refId).then(function (sub) {
+                                  _resolvedRefs[refId] = sub;
+                                  return sub;
+                                });
+                              }
+
+                              return sub;
+                            };
+                            /**
+                             * Resolve all refs (specified in fhirOptions.resolveReferences)
+                             * in the given resource.
+                             * @param {Object} obj FHIR Resource 
+                             */
+
+
+                            resolve = function resolve(obj) {
+                              return Promise.all(fhirOptions.resolveReferences.map(function (path) {
+                                var node = _getPath(obj, path);
+
+                                if (node) {
+                                  var isArray = Array.isArray(node);
+                                  return Promise.all(makeArray(node).map(function (item, i) {
+                                    var ref = item.reference;
+
+                                    if (ref) {
+                                      return getRef(ref).then(function (sub) {
+                                        if (fhirOptions.graph) {
+                                          if (isArray) {
+                                            setPath(obj, "".concat(path, ".").concat(i), sub);
+                                          } else {
+                                            setPath(obj, path, sub);
+                                          }
+                                        }
+                                      });
+                                    }
+                                  }));
+                                }
+                              }));
+                            };
+
+                            if (!(data && data.resourceType == "Bundle")) {
+                              _context.next = 7;
+                              break;
+                            }
+
+                            _context.next = 5;
+                            return Promise.all((data.entry || []).map(function (item) {
+                              return resolve(item.resource);
+                            }));
+
+                          case 5:
+                            _context.next = 9;
+                            break;
+
+                          case 7:
+                            _context.next = 9;
+                            return resolve(data);
+
+                          case 9:
+                            return _context.abrupt("return", data);
+
+                          case 10:
+                          case "end":
+                            return _context.stop();
+                        }
+                      }
+                    }, _callee);
                   }));
 
-                case 5:
-                  _context.next = 9;
-                  break;
+                  return function (_x2) {
+                    return _ref.apply(this, arguments);
+                  };
+                }()) // Pagination ------------------------------------------------------
+                .then(
+                /*#__PURE__*/
+                function () {
+                  var _ref2 = _asyncToGenerator(
+                  /*#__PURE__*/
+                  regeneratorRuntime.mark(function _callee2(data) {
+                    var links, next, nextPage;
+                    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+                      while (1) {
+                        switch (_context2.prev = _context2.next) {
+                          case 0:
+                            if (!(data && data.resourceType == "Bundle")) {
+                              _context2.next = 18;
+                              break;
+                            }
 
-                case 7:
-                  _context.next = 9;
-                  return resolve(data);
+                            if (!hasPageCallback) {
+                              _context2.next = 4;
+                              break;
+                            }
 
-                case 9:
-                  return _context.abrupt("return", data);
+                            _context2.next = 4;
+                            return fhirOptions.onPage(data, _objectSpread({}, _resolvedRefs));
 
-                case 10:
-                case "end":
-                  return _context.stop();
-              }
+                          case 4:
+                            if (! --fhirOptions.pageLimit) {
+                              _context2.next = 18;
+                              break;
+                            }
+
+                            links = data.link || [];
+                            next = links.find(function (l) {
+                              return l.relation == "next";
+                            });
+                            data = makeArray(data); // console.log("===>", data);
+
+                            if (!(next && next.url)) {
+                              _context2.next = 18;
+                              break;
+                            }
+
+                            _context2.next = 11;
+                            return _this2.request(next.url, fhirOptions, _resolvedRefs);
+
+                          case 11:
+                            nextPage = _context2.sent;
+
+                            if (!hasPageCallback) {
+                              _context2.next = 14;
+                              break;
+                            }
+
+                            return _context2.abrupt("return", null);
+
+                          case 14:
+                            if (!fhirOptions.resolveReferences.length) {
+                              _context2.next = 17;
+                              break;
+                            }
+
+                            Object.assign(_resolvedRefs, nextPage.references); // console.log("===>", nextPage);
+
+                            return _context2.abrupt("return", data.concat(makeArray(nextPage.data || nextPage)));
+
+                          case 17:
+                            return _context2.abrupt("return", data.concat(makeArray(nextPage)));
+
+                          case 18:
+                            return _context2.abrupt("return", data);
+
+                          case 19:
+                          case "end":
+                            return _context2.stop();
+                        }
+                      }
+                    }, _callee2);
+                  }));
+
+                  return function (_x3) {
+                    return _ref2.apply(this, arguments);
+                  };
+                }()) // Finalize --------------------------------------------------------
+                .then(function (data) {
+                  if (fhirOptions.graph) {
+                    _resolvedRefs = {};
+                  } else if (!hasPageCallback && fhirOptions.resolveReferences.length) {
+                    return {
+                      data: data,
+                      references: _resolvedRefs
+                    };
+                  }
+
+                  return data;
+                }));
+
+              case 15:
+              case "end":
+                return _context3.stop();
             }
-          }, _callee);
-        }));
+          }
+        }, _callee3, this);
+      }));
 
-        return function (_x) {
-          return _ref.apply(this, arguments);
-        };
-      }()) // Pagination ------------------------------------------------------
-      .then(
-      /*#__PURE__*/
-      function () {
-        var _ref2 = _asyncToGenerator(
-        /*#__PURE__*/
-        regeneratorRuntime.mark(function _callee2(data) {
-          var links, next, nextPage;
-          return regeneratorRuntime.wrap(function _callee2$(_context2) {
-            while (1) {
-              switch (_context2.prev = _context2.next) {
-                case 0:
-                  if (!(data && data.resourceType == "Bundle")) {
-                    _context2.next = 18;
-                    break;
-                  }
+      function request(_x) {
+        return _request.apply(this, arguments);
+      }
 
-                  if (!hasPageCallback) {
-                    _context2.next = 4;
-                    break;
-                  }
-
-                  _context2.next = 4;
-                  return fhirOptions.onPage(data, _objectSpread({}, _resolvedRefs));
-
-                case 4:
-                  if (! --fhirOptions.pageLimit) {
-                    _context2.next = 18;
-                    break;
-                  }
-
-                  links = data.link || [];
-                  next = links.find(function (l) {
-                    return l.relation == "next";
-                  });
-                  data = makeArray(data); // console.log("===>", data);
-
-                  if (!(next && next.url)) {
-                    _context2.next = 18;
-                    break;
-                  }
-
-                  _context2.next = 11;
-                  return _this2.request(next.url, fhirOptions, _resolvedRefs);
-
-                case 11:
-                  nextPage = _context2.sent;
-
-                  if (!hasPageCallback) {
-                    _context2.next = 14;
-                    break;
-                  }
-
-                  return _context2.abrupt("return", null);
-
-                case 14:
-                  if (!fhirOptions.resolveReferences.length) {
-                    _context2.next = 17;
-                    break;
-                  }
-
-                  Object.assign(_resolvedRefs, nextPage.references); // console.log("===>", nextPage);
-
-                  return _context2.abrupt("return", data.concat(makeArray(nextPage.data || nextPage)));
-
-                case 17:
-                  return _context2.abrupt("return", data.concat(makeArray(nextPage)));
-
-                case 18:
-                  return _context2.abrupt("return", data);
-
-                case 19:
-                case "end":
-                  return _context2.stop();
-              }
-            }
-          }, _callee2);
-        }));
-
-        return function (_x2) {
-          return _ref2.apply(this, arguments);
-        };
-      }()) // Finalize --------------------------------------------------------
-      .then(function (data) {
-        if (fhirOptions.graph) {
-          _resolvedRefs = {};
-        } else if (!hasPageCallback && fhirOptions.resolveReferences.length) {
-          return {
-            data: data,
-            references: _resolvedRefs
-          };
-        }
-
-        return data;
-      });
-    }
+      return request;
+    }()
     /**
      * Use the refresh token to obtain new access token. If the refresh token is
      * expired (or this fails for any other reason) it will be deleted from the
