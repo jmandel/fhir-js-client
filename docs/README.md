@@ -121,7 +121,7 @@ Read the [SMART API Documentation](api)
 
    
 
-### `Client`
+## Client
 This is a FHIR client that is returned to you from the `ready()` SMART API call.
 You can also create it yourself if needed:
 ```js
@@ -212,17 +212,12 @@ After building, the following files will be generated:
 * `build/fhir-client.min.js.map` - Hidden source map
 * `build/report.html`            - Graphical visualization of the dev bundle
 
-### Debugging
+## Debugging
 This library uses the [debug](https://www.npmjs.com/package/debug) module. To enable
 debug logging in Node use the `DEBUG` env variable. In the browser execute this in the console:
 ```js
 localStorage.debug = 'FHIRClient:*'
 ```
-and reload the page.
+and then reload the page.
 
-
-<!-- - http://docs.smarthealthit.org/client-js/index.html
-- http://docs.smarthealthit.org/client-js/api.html -->
-<!-- - http://docs.smarthealthit.org/client-js/request.html -->
-<!-- - http://docs.smarthealthit.org/clients/javascript/ -->
 
