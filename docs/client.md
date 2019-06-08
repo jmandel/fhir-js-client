@@ -130,7 +130,7 @@ Only accessible if fhir.js is available. Read more about the fhir.js integration
 
 ### client.patient.id `String|null`
 
-The selected patient ID or `null` if patient is not available. If no patient is selected, it will generate useful debug messages about the possible reasons. See [debugging](/client-js/#debugging).
+The selected patient ID or `null` if patient is not available. If no patient is selected, it will generate useful debug messages about the possible reasons. See [debugging](README.md#debugging).
 
 ### client.patient.read() `Promise<Object>`
 Fetches the selected patient resource (if available). Resolves with the patient or rejects with an error.
@@ -141,21 +141,21 @@ Only accessible if fhir.js is available. Read more about the fhir.js integration
 
 ### client.encounter.id `String|null`
 
-The selected encounter ID or `null` if encounter is not available. If no encounter is selected, it will generate useful debug messages about the possible reasons. See [debugging](/client-js/#debugging).
+The selected encounter ID or `null` if encounter is not available. If no encounter is selected, it will generate useful debug messages about the possible reasons. See [debugging](README.md#debugging).
 
 ### client.encounter.read() `Promise<Object>`
 
 Fetches the selected encounter resource (if available). Resolves with the encounter or rejects with an error.
 
 ### client.user.id `String`
-The selected user ID or `null` if user is not available. If no user is selected, it will generate useful debug messages about the possible reasons. See [debugging](/client-js/#debugging).
+The selected user ID or `null` if user is not available. If no user is selected, it will generate useful debug messages about the possible reasons. See [debugging](README.md#debugging).
 
 ### client.user.fhirUser `String`
-The selected user identifier that looks like `Practitioner/id` or `null` if user is not available. If no user is selected, it will generate useful debug messages about the possible reasons. See [debugging](/client-js/#debugging).
+The selected user identifier that looks like `Practitioner/id` or `null` if user is not available. If no user is selected, it will generate useful debug messages about the possible reasons. See [debugging](README.md#debugging).
 
 ### client.user.resourceType `String`
 
-The selected user resourceType (E.g. `Practitioner`, `Patient`, `RelatedPerson`...) or `null` if user is not available. If no user is selected, it will generate useful debug messages about the possible reasons. See [debugging](/client-js/#debugging).
+The selected user resourceType (E.g. `Practitioner`, `Patient`, `RelatedPerson`...) or `null` if user is not available. If no user is selected, it will generate useful debug messages about the possible reasons. See [debugging](README.md#debugging).
 
 ### client.user.read() `Promise<Object>`
 Fetches the selected user resource (if available). Resolves with the user or rejects with an error. 
