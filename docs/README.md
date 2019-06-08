@@ -1,6 +1,3 @@
----
-title: SMART on FHIR JavaScript Library
----
 
 SMART on FHIR JavaScript Library
 ================================
