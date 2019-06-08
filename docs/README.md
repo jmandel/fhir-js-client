@@ -96,8 +96,8 @@ app.get("/", (req, res) => {
         .then(res.json)
         .catch(res.json);
 });
-
 ```
+Read more at the [NodeJS API Details](node).
 
 ## SMART API
 Imagine that there is an object called "smart" that exposes the SMART-specific
