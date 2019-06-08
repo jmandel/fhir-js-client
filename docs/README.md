@@ -1,3 +1,8 @@
+---
+title: SMART on FHIR JavaScript Library
+layout: post
+---
+
 SMART on FHIR JavaScript Library
 ================================
 
