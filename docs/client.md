@@ -2,10 +2,10 @@
 This is a FHIR client that is returned to you from the `ready()` call of the SMART API. You can also create it yourself if needed:
 ```js
 // BROWSER
-const client = FHIR.client("https:r4.smarthealthit.org");
+const client = FHIR.client("https://r4.smarthealthit.org");
 
 // SERVER
-const client = smart(req, res).client("https:r4.smarthealthit.org");
+const client = smart(req, res).client("https://r4.smarthealthit.org");
 ```
 It exposes the following API:
 
@@ -17,10 +17,11 @@ It exposes the following API:
 ### `client.getUserId()`
 ### `client.getUserType()`
 -->
-### client.request(requestUriOrOptions[, fhirOptions]) `Promise<Object>`
-This is the single most important method. Please see the [live examples](http://docs.smarthealthit.org/client-js/request.html).
+### client.request(requestOptions[, fhirOptions]) `Promise<Object>`
 
-**requestUriOrOptions** can be a `String` URL, or an `URL instance` or an object having an `url` property. The `url` can be relative path that will be appended to your base URL. Using a full http URL will also work, as long as it is on the same domain as your base URL. Any other option will be passed to the underlying `fetch()` call.
+> This is the single most important method. Please see the **[live examples](http://docs.smarthealthit.org/client-js/request.html)**.
+
+The **requestOptions** can be a `String` URL, or an `URL instance` or an object having an `url` property. The `url` can be relative path that will be appended to your base URL. Using a full http URL will also work, as long as it is on the same domain as your base URL. Any other option will be passed to the underlying `fetch()` call.
 
 The **fhirOptions** object can contain the following properties:
 
@@ -39,22 +40,26 @@ The **fhirOptions** object can contain the following properties:
 
 **Fetch single resource**
 ```js
-client.request("Patient/id"); // Resolves with a Patient or rejects with an Error
+// Resolves with a Patient or rejects with an Error
+client.request("Patient/id");
 ```
 
 **Fetch the current patient**
 ```js
-client.request(`Patient/${client.patient.id}`); // Resolves with a Patient or rejects with an Error
+// Resolves with a Patient or rejects with an Error
+client.request(`Patient/${client.patient.id}`);
 ```
 
 **Fetch a bundle**
 ```js
-client.request("Patient"); // Resolves with a Bundle or rejects with an Error
+// Resolves with a Bundle or rejects with an Error
+client.request("Patient");
 ```
 
 **Get all pages**
 ```js
-client.request("Patient", { pageLimit: 0 });  // Resolves with array of Bundles or rejects with an Error
+// Resolves with array of Bundles or rejects with an Error
+client.request("Patient", { pageLimit: 0 });
 ```
 
 **Handle pages as they arrive**
@@ -99,6 +104,7 @@ you can set the `graph` option of the `request` method to false. In this case,
 the promise will be resolved with an object having two properties:
 - `data` the original response data
 - `references` a map of resolved references
+
 ```js
 // Resolves with Object ({ data, references }) or rejects with an Error
 client.request(
@@ -124,7 +130,7 @@ Only accessible if fhir.js is available. Read more about the fhir.js integration
 
 ### client.patient.id `String|null`
 
-The selected patient ID or `null` if patient is not available. If no patient is selected, it will generate useful debug messages about the possible reasons. See [debugging](#Debugging).
+The selected patient ID or `null` if patient is not available. If no patient is selected, it will generate useful debug messages about the possible reasons. See [debugging](client-js/#debugging).
 
 ### client.patient.read() `Promise<Object>`
 Fetches the selected patient resource (if available). Resolves with the patient or rejects with an error.
@@ -135,21 +141,21 @@ Only accessible if fhir.js is available. Read more about the fhir.js integration
 
 ### client.encounter.id `String|null`
 
-The selected encounter ID or `null` if encounter is not available. If no encounter is selected, it will generate useful debug messages about the possible reasons. See debugging.
+The selected encounter ID or `null` if encounter is not available. If no encounter is selected, it will generate useful debug messages about the possible reasons. See [debugging](client-js/#debugging).
 
 ### client.encounter.read() `Promise<Object>`
 
 Fetches the selected encounter resource (if available). Resolves with the encounter or rejects with an error.
 
 ### client.user.id `String`
-The selected user ID or `null` if user is not available. If no user is selected, it will generate useful debug messages about the possible reasons. See [debugging](#Debugging).
+The selected user ID or `null` if user is not available. If no user is selected, it will generate useful debug messages about the possible reasons. See [debugging](client-js/#debugging).
 
 ### client.user.fhirUser `String`
-The selected user identifier that looks like `Practitioner/id` or `null` if user is not available. If no user is selected, it will generate useful debug messages about the possible reasons. See [debugging](#Debugging).
+The selected user identifier that looks like `Practitioner/id` or `null` if user is not available. If no user is selected, it will generate useful debug messages about the possible reasons. See [debugging](client-js/#debugging).
 
 ### client.user.resourceType `String`
 
-The selected user resourceType (E.g. `Practitioner`, `Patient`, `RelatedPerson`...) or `null` if user is not available. If no user is selected, it will generate useful debug messages about the possible reasons. See [debugging](#Debugging).
+The selected user resourceType (E.g. `Practitioner`, `Patient`, `RelatedPerson`...) or `null` if user is not available. If no user is selected, it will generate useful debug messages about the possible reasons. See [debugging](client-js/#debugging).
 
 ### client.user.read() `Promise<Object>`
 Fetches the selected user resource (if available). Resolves with the user or rejects with an error. 
