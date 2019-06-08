@@ -1,4 +1,4 @@
-# `Client`
+# Client
 This is a FHIR client that is returned to you from the `ready()` call of the SMART API. You can also create it yourself if needed:
 ```js
 // BROWSER
@@ -17,7 +17,7 @@ It exposes the following API:
 ### `client.getUserId()`
 ### `client.getUserType()`
 -->
-### `client.`request(requestUriOrOptions[, fhirOptions]): Promise<Object>
+### client.request(requestUriOrOptions[, fhirOptions]): Promise<Object>
 This is the single most important method. Please see the [live examples](http://docs.smarthealthit.org/client-js/request.html).
 
 **requestUriOrOptions** can be a `String` URL, or an `URL instance` or an object having an `url` property. The `url` can be relative path that will be appended to your base URL. Using a full http URL will also work, as long as it is on the same domain as your base URL. Any other option will be passed to the underlying `fetch()` call.
@@ -108,7 +108,7 @@ client.request(
 );
 ```
 
-### client.refresh()`: Promise<Object>`
+### client.refresh(): Promise<Object>
 Use the refresh token to obtain new access token. If the refresh token is
 expired (or this fails for any other reason) it will be deleted from the
 state, so that we don't enter into loops trying to re-authorize.
@@ -118,46 +118,46 @@ for you!
 
 Resolves with the updated state or rejects with an error.
 
-### client.api`: Object`
+### client.api: Object
 
 Only accessible if fhir.js is available. Read more about the fhir.js integration here.
 
-### client.patient.id`: String|null`
+### client.patient.id: String|null
 
 The selected patient ID or `null` if patient is not available. If no patient is selected, it will generate useful debug messages about the possible reasons. See [debugging](#Debugging).
 
-### client.patient.read()`: Promise<Object>`
+### client.patient.read(): Promise<Object>
 Fetches the selected patient resource (if available). Resolves with the patient or rejects with an error.
 
-### client.patient.api`: Object`
+### client.patient.api: Object
 
 Only accessible if fhir.js is available. Read more about the fhir.js integration here.
 
-### client.encounter.id`: String|null`
+### client.encounter.id: String|null
 
 The selected encounter ID or `null` if encounter is not available. If no encounter is selected, it will generate useful debug messages about the possible reasons. See debugging.
 
-### client.encounter.read()`: Promise<Object>`
+### client.encounter.read(): Promise<Object>
 
 Fetches the selected encounter resource (if available). Resolves with the encounter or rejects with an error.
 
 ### client.user.id: String
 The selected user ID or `null` if user is not available. If no user is selected, it will generate useful debug messages about the possible reasons. See [debugging](#Debugging).
 
-### client.user.fhirUser`: String`
+### client.user.fhirUser: String
 The selected user identifier that looks like `Practitioner/id` or `null` if user is not available. If no user is selected, it will generate useful debug messages about the possible reasons. See [debugging](#Debugging).
 
-### client.user.resourceType`: String`
+### client.user.resourceType: String
 
 The selected user resourceType (E.g. `Practitioner`, `Patient`, `RelatedPerson`...) or `null` if user is not available. If no user is selected, it will generate useful debug messages about the possible reasons. See [debugging](#Debugging).
 
-### client.user.read()`: Promise<Object>`
+### client.user.read(): Promise<Object>
 Fetches the selected user resource (if available). Resolves with the user or rejects with an error. 
 
 ---
 
 Finally, there are some **utility methods**, mostly inherited by older versions of the library:
-### client.byCode(observations, property)`: Object`
+### client.byCode(observations, property): Object
 Groups the observations by code. Returns a map that will look like:
 ```js
 const map = client.byCodes(observations, "code");
@@ -167,7 +167,7 @@ const map = client.byCodes(observations, "code");
 // }
 ```
 
-### client.byCodes(observations, property)`: Function`
+### client.byCodes(observations, property): Function
 Similar to `byCode` but builds the map internally and returns a filter function
 that will produce flat arrays. For example:
 ```js
@@ -177,16 +177,16 @@ filter("vital-signs") // => [ observation3 ]
 filter("laboratory", "vital-signs") // => [ observation1, observation2, observation3 ]
 ```
 
-### client.units.cm({ code, value })`: Number`
+### client.units.cm({ code, value }): Number
 Converts the `value` to `code`, where `code` can be `cm`, `m`, `in`, `[in_us]`, `[in_i]`, `ft`, `[ft_us]`
 
-### client.units.kg({ code, value })`: Number`
-Converts the `value` to `code`, where `code` can be `kg`, `g`, string containing `lb`, string containing `oz`
+### client.units.kg({ code, value }): Number
+Converts the `value` to `code`, where `code` can be `kg`, `g`, string containing `lb`, string containing `oz`.
 
-### client.units.any({ code, value })`: Number`
+### client.units.any({ code, value }): Number
 Just asserts that `value` is a number and then returns that value
 
-### client.getPath(object, path)`: any`
+### client.getPath(object, path): any
 Given an object (or array), tries to walk down to the given dot-separated path
 and returns the value. It will return `undefined` if the path cannot find any property. It will NOT throw if an intermediate property does not exist.
 The path is dot-separated even for arrays! Examples:
