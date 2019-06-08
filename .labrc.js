@@ -32,14 +32,16 @@ module.exports = {
     // Note that the order of entries corresponds to the `output` below
     reporter: [
         "console",
-        "html"
+        "html",
+        "lcov"
     ],
 
     // file path to write test results
     // Note that the order of entries corresponds to the `reporter` above
     output: [
         "stdout",
-        "test/coverage.html"
+        "test/coverage.html",
+        "test/lcov.info"
     ],
 
     // exit the process with a non zero exit code on the first test failure

@@ -6,6 +6,10 @@ It works both in browsers (IE10+) and on the server (NodeJS).
 
 > This the documentation for the new version. If you want to migrate from older versions, make sure you check out [what's new in v2](http://docs.smarthealthit.org/client-js/v2.html). For older versions see http://docs.smarthealthit.org/clients/javascript/
 
+
+[![CircleCI](https://circleci.com/gh/smart-on-fhir/client-js.svg?style=svg)](https://circleci.com/gh/smart-on-fhir/client-js)
+
+
 ## Installation
 
 Install from npm:
