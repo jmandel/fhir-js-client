@@ -7,9 +7,7 @@ It works both in browsers (IE10+) and on the server (NodeJS).
 > This is the documentation for the new version. If you want to migrate from older versions, make sure you check out **[what's new in v2](http://docs.smarthealthit.org/client-js/v2.html)**. For older versions see http://docs.smarthealthit.org/clients/javascript/
 
 
-[![CircleCI](https://circleci.com/gh/smart-on-fhir/client-js.svg?style=svg)](https://circleci.com/gh/smart-on-fhir/client-js)
-
-[![npm version](https://badge.fury.io/js/fhirclient.svg)](https://badge.fury.io/js/fhirclient)
+[![CircleCI](https://circleci.com/gh/smart-on-fhir/client-js.svg?style=svg)](https://circleci.com/gh/smart-on-fhir/client-js) [![npm version](https://badge.fury.io/js/fhirclient.svg)](https://badge.fury.io/js/fhirclient)
 
 ## Table of Contents
 ---
