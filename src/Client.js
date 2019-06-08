@@ -417,27 +417,46 @@ class FhirClient
             // Resolve References ----------------------------------------------
             .then(async (data) => {
 
-                const resolve = async obj => {
-                    await Promise.all(fhirOptions.resolveReferences.map(path => {
-                        return new Promise((resolve2, reject) => {
-                            const ref = getPath(obj, path + ".reference");
-                            if (ref) {
-                                let sub = _resolvedRefs[ref];
-                                if (!sub) {
-                                    return this.request(ref).then(sub => {
-                                        _resolvedRefs[ref] = sub;
-                                        if (fhirOptions.graph) {
-                                            setPath(obj, path, sub);
-                                        }
-                                    }).then(resolve2, reject);
-                                }
-
-                                if (fhirOptions.graph) {
-                                    setPath(obj, path, sub);
-                                }
-                            }
-                            resolve2();
+                /**
+                 * Gets single reference by id. Caches the result in _resolvedRefs
+                 * @param {String} refId 
+                 */
+                const getRef = refId => {
+                    let sub = _resolvedRefs[refId];
+                    if (!sub) {
+                        return this.request(refId).then(sub => {
+                            _resolvedRefs[refId] = sub;
+                            return sub;
                         });
+                    }
+                    return sub;
+                };
+
+                /**
+                 * Resolve all refs (specified in fhirOptions.resolveReferences)
+                 * in the given resource.
+                 * @param {Object} obj FHIR Resource 
+                 */
+                const resolve = obj => {
+                    return Promise.all(fhirOptions.resolveReferences.map(path => {
+                        const node = getPath(obj, path);
+                        if (node) {
+                            const isArray = Array.isArray(node);
+                            return Promise.all(makeArray(node).map((item, i) => {
+                                const ref = item.reference;
+                                if (ref) {
+                                    return getRef(ref).then(sub => {
+                                        if (fhirOptions.graph) {
+                                            if (isArray) {
+                                                setPath(obj, `${path}.${i}`, sub);
+                                            } else {
+                                                setPath(obj, path, sub);
+                                            }
+                                        }
+                                    });
+                                }
+                            }));
+                        }
                     }));
                 };
 

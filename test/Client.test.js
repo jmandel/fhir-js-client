@@ -1030,8 +1030,53 @@ describe("FHIR.client", () => {
                 ]);
             });
         });
-        // it ("can refresh");
-        // it ("can not refresh if useRefreshToken is false");
+
+        describe ("resolve all refs if it points to an array", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, mockUrl);
+
+                // Main page
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Patient",
+                        id: "id",
+                        ref1: [
+                            { reference: "whatever-1" },
+                            { reference: "whatever-2" }
+                        ]
+                    }
+                });
+
+                // Referenced page 1
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: { resourceType: "Ref", id: "Ref-id-1" }
+                });
+
+                // Referenced page 2
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: { resourceType: "Ref", id: "Ref-id-2" }
+                });
+
+                const result = await client.request(
+                    "/Patient/id",
+                    { resolveReferences: "ref1" }
+                );
+                expect(result).to.equal({
+                    resourceType: "Patient",
+                    id: "id",
+                    ref1: [
+                        { resourceType: "Ref", id: "Ref-id-1" },
+                        { resourceType: "Ref", id: "Ref-id-2" }
+                    ]
+                });
+            });
+        });
     });
 
     describe ("client.user", () => {

@@ -8126,89 +8126,87 @@ function () {
       function () {
         var _ref = _asyncToGenerator(
         /*#__PURE__*/
-        regeneratorRuntime.mark(function _callee2(data) {
-          var resolve;
-          return regeneratorRuntime.wrap(function _callee2$(_context2) {
+        regeneratorRuntime.mark(function _callee(data) {
+          var getRef, resolve;
+          return regeneratorRuntime.wrap(function _callee$(_context) {
             while (1) {
-              switch (_context2.prev = _context2.next) {
+              switch (_context.prev = _context.next) {
                 case 0:
-                  resolve =
-                  /*#__PURE__*/
-                  function () {
-                    var _ref2 = _asyncToGenerator(
-                    /*#__PURE__*/
-                    regeneratorRuntime.mark(function _callee(obj) {
-                      return regeneratorRuntime.wrap(function _callee$(_context) {
-                        while (1) {
-                          switch (_context.prev = _context.next) {
-                            case 0:
-                              _context.next = 2;
-                              return Promise.all(fhirOptions.resolveReferences.map(function (path) {
-                                return new Promise(function (resolve2, reject) {
-                                  var ref = _getPath(obj, path + ".reference");
+                  /**
+                   * Gets single reference by id. Caches the result in _resolvedRefs
+                   * @param {String} refId 
+                   */
+                  getRef = function getRef(refId) {
+                    var sub = _resolvedRefs[refId];
 
-                                  if (ref) {
-                                    var sub = _resolvedRefs[ref];
+                    if (!sub) {
+                      return _this2.request(refId).then(function (sub) {
+                        _resolvedRefs[refId] = sub;
+                        return sub;
+                      });
+                    }
 
-                                    if (!sub) {
-                                      return _this2.request(ref).then(function (sub) {
-                                        _resolvedRefs[ref] = sub;
+                    return sub;
+                  };
+                  /**
+                   * Resolve all refs (specified in fhirOptions.resolveReferences)
+                   * in the given resource.
+                   * @param {Object} obj FHIR Resource 
+                   */
 
-                                        if (fhirOptions.graph) {
-                                          setPath(obj, path, sub);
-                                        }
-                                      }).then(resolve2, reject);
-                                    }
 
-                                    if (fhirOptions.graph) {
-                                      setPath(obj, path, sub);
-                                    }
-                                  }
+                  resolve = function resolve(obj) {
+                    return Promise.all(fhirOptions.resolveReferences.map(function (path) {
+                      var node = _getPath(obj, path);
 
-                                  resolve2();
-                                });
-                              }));
+                      if (node) {
+                        var isArray = Array.isArray(node);
+                        return Promise.all(makeArray(node).map(function (item, i) {
+                          var ref = item.reference;
 
-                            case 2:
-                            case "end":
-                              return _context.stop();
+                          if (ref) {
+                            return getRef(ref).then(function (sub) {
+                              if (fhirOptions.graph) {
+                                if (isArray) {
+                                  setPath(obj, "".concat(path, ".").concat(i), sub);
+                                } else {
+                                  setPath(obj, path, sub);
+                                }
+                              }
+                            });
                           }
-                        }
-                      }, _callee);
+                        }));
+                      }
                     }));
-
-                    return function resolve(_x2) {
-                      return _ref2.apply(this, arguments);
-                    };
-                  }();
+                  };
 
                   if (!(data && data.resourceType == "Bundle")) {
-                    _context2.next = 6;
+                    _context.next = 7;
                     break;
                   }
 
-                  _context2.next = 4;
+                  _context.next = 5;
                   return Promise.all((data.entry || []).map(function (item) {
                     return resolve(item.resource);
                   }));
 
-                case 4:
-                  _context2.next = 8;
+                case 5:
+                  _context.next = 9;
                   break;
 
-                case 6:
-                  _context2.next = 8;
+                case 7:
+                  _context.next = 9;
                   return resolve(data);
 
-                case 8:
-                  return _context2.abrupt("return", data);
-
                 case 9:
+                  return _context.abrupt("return", data);
+
+                case 10:
                 case "end":
-                  return _context2.stop();
+                  return _context.stop();
               }
             }
-          }, _callee2);
+          }, _callee);
         }));
 
         return function (_x) {
@@ -8218,30 +8216,30 @@ function () {
       .then(
       /*#__PURE__*/
       function () {
-        var _ref3 = _asyncToGenerator(
+        var _ref2 = _asyncToGenerator(
         /*#__PURE__*/
-        regeneratorRuntime.mark(function _callee3(data) {
+        regeneratorRuntime.mark(function _callee2(data) {
           var links, next, nextPage;
-          return regeneratorRuntime.wrap(function _callee3$(_context3) {
+          return regeneratorRuntime.wrap(function _callee2$(_context2) {
             while (1) {
-              switch (_context3.prev = _context3.next) {
+              switch (_context2.prev = _context2.next) {
                 case 0:
                   if (!(data && data.resourceType == "Bundle")) {
-                    _context3.next = 18;
+                    _context2.next = 18;
                     break;
                   }
 
                   if (!hasPageCallback) {
-                    _context3.next = 4;
+                    _context2.next = 4;
                     break;
                   }
 
-                  _context3.next = 4;
+                  _context2.next = 4;
                   return fhirOptions.onPage(data, _objectSpread({}, _resolvedRefs));
 
                 case 4:
                   if (! --fhirOptions.pageLimit) {
-                    _context3.next = 18;
+                    _context2.next = 18;
                     break;
                   }
 
@@ -8252,49 +8250,49 @@ function () {
                   data = makeArray(data); // console.log("===>", data);
 
                   if (!(next && next.url)) {
-                    _context3.next = 18;
+                    _context2.next = 18;
                     break;
                   }
 
-                  _context3.next = 11;
+                  _context2.next = 11;
                   return _this2.request(next.url, fhirOptions, _resolvedRefs);
 
                 case 11:
-                  nextPage = _context3.sent;
+                  nextPage = _context2.sent;
 
                   if (!hasPageCallback) {
-                    _context3.next = 14;
+                    _context2.next = 14;
                     break;
                   }
 
-                  return _context3.abrupt("return", null);
+                  return _context2.abrupt("return", null);
 
                 case 14:
                   if (!fhirOptions.resolveReferences.length) {
-                    _context3.next = 17;
+                    _context2.next = 17;
                     break;
                   }
 
                   Object.assign(_resolvedRefs, nextPage.references); // console.log("===>", nextPage);
 
-                  return _context3.abrupt("return", data.concat(makeArray(nextPage.data || nextPage)));
+                  return _context2.abrupt("return", data.concat(makeArray(nextPage.data || nextPage)));
 
                 case 17:
-                  return _context3.abrupt("return", data.concat(makeArray(nextPage)));
+                  return _context2.abrupt("return", data.concat(makeArray(nextPage)));
 
                 case 18:
-                  return _context3.abrupt("return", data);
+                  return _context2.abrupt("return", data);
 
                 case 19:
                 case "end":
-                  return _context3.stop();
+                  return _context2.stop();
               }
             }
-          }, _callee3);
+          }, _callee2);
         }));
 
-        return function (_x3) {
-          return _ref3.apply(this, arguments);
+        return function (_x2) {
+          return _ref2.apply(this, arguments);
         };
       }()) // Finalize --------------------------------------------------------
       .then(function (data) {
