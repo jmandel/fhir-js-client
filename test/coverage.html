@@ -536,7 +536,7 @@
         <li><a href="#tests">Test Report</a></li>
         <li><a href="#coverage">Coverage Report</a></li>
         <li class="">
-            <span class="cov high">88.37</span>
+            <span class="cov high">93.02</span>
             <a href="#src/Client.js"><span class="dirname">src/</span><span class="basename">Client.js</span></a>
         </li>
         <li class="">
@@ -570,8 +570,8 @@
       <div class="stats high">
           <div class="failures">0</div>
           <div class="skipped">0</div>
-          <div class="test-count">110</div>
-          <div class="duration">1307</div>
+          <div class="test-count">134</div>
+          <div class="duration">1217</div>
       </div>
       <div id="filters">
           <input type="checkbox" checked="" onchange="filter(this)" value="success" id="show-success">
@@ -639,6 +639,30 @@
           <label for="show-client.user">client.user</label>
           <input type="checkbox" checked="" onchange="filter(this)" value="client.getAuthorizationHeader" id="show-client.getAuthorizationHeader">
           <label for="show-client.getAuthorizationHeader">client.getAuthorizationHeader</label>
+          <input type="checkbox" checked="" onchange="filter(this)" value="getPatientId()_returns_null_without_tokenResponse" id="show-getPatientId()_returns_null_without_tokenResponse">
+          <label for="show-getPatientId()_returns_null_without_tokenResponse">getPatientId() returns null without tokenResponse</label>
+          <input type="checkbox" checked="" onchange="filter(this)" value="getPatientId()_complains_about_authorizeUri" id="show-getPatientId()_complains_about_authorizeUri">
+          <label for="show-getPatientId()_complains_about_authorizeUri">getPatientId() complains about authorizeUri</label>
+          <input type="checkbox" checked="" onchange="filter(this)" value="getPatientId()_complains_about_scopes" id="show-getPatientId()_complains_about_scopes">
+          <label for="show-getPatientId()_complains_about_scopes">getPatientId() complains about scopes</label>
+          <input type="checkbox" checked="" onchange="filter(this)" value="getPatientId()_complains_about_server_support" id="show-getPatientId()_complains_about_server_support">
+          <label for="show-getPatientId()_complains_about_server_support">getPatientId() complains about server support</label>
+          <input type="checkbox" checked="" onchange="filter(this)" value="getEncounterId()_returns_null_without_tokenResponse" id="show-getEncounterId()_returns_null_without_tokenResponse">
+          <label for="show-getEncounterId()_returns_null_without_tokenResponse">getEncounterId() returns null without tokenResponse</label>
+          <input type="checkbox" checked="" onchange="filter(this)" value="getEncounterId()_complains_about_authorizeUri" id="show-getEncounterId()_complains_about_authorizeUri">
+          <label for="show-getEncounterId()_complains_about_authorizeUri">getEncounterId() complains about authorizeUri</label>
+          <input type="checkbox" checked="" onchange="filter(this)" value="getEncounterId()_complains_about_scopes" id="show-getEncounterId()_complains_about_scopes">
+          <label for="show-getEncounterId()_complains_about_scopes">getEncounterId() complains about scopes</label>
+          <input type="checkbox" checked="" onchange="filter(this)" value="getEncounterId()_complains_about_server_support" id="show-getEncounterId()_complains_about_server_support">
+          <label for="show-getEncounterId()_complains_about_server_support">getEncounterId() complains about server support</label>
+          <input type="checkbox" checked="" onchange="filter(this)" value="getIdToken()_returns_null_without_tokenResponse" id="show-getIdToken()_returns_null_without_tokenResponse">
+          <label for="show-getIdToken()_returns_null_without_tokenResponse">getIdToken() returns null without tokenResponse</label>
+          <input type="checkbox" checked="" onchange="filter(this)" value="getIdToken()_complains_about_authorizeUri" id="show-getIdToken()_complains_about_authorizeUri">
+          <label for="show-getIdToken()_complains_about_authorizeUri">getIdToken() complains about authorizeUri</label>
+          <input type="checkbox" checked="" onchange="filter(this)" value="getIdToken()_complains_about_scopes" id="show-getIdToken()_complains_about_scopes">
+          <label for="show-getIdToken()_complains_about_scopes">getIdToken() complains about scopes</label>
+          <input type="checkbox" checked="" onchange="filter(this)" value="getIdToken()_complains_about_server_support" id="show-getIdToken()_complains_about_server_support">
+          <label for="show-getIdToken()_complains_about_server_support">getIdToken() complains about server support</label>
           <input type="checkbox" checked="" onchange="filter(this)" value="HttpError" id="show-HttpError">
           <label for="show-HttpError">HttpError</label>
           <input type="checkbox" checked="" onchange="filter(this)" value="Complete_authorization" id="show-Complete_authorization">
@@ -688,14 +712,14 @@
               <td class="test-title">FHIR.client client.refresh validates state and throws if needed
                   
               </td>
-              <td class="test-duration">49</td>
+              <td class="test-duration">47</td>
           </tr>
           <tr class="show FHIR.client success">
               <td class="test-id">2</td>
               <td class="test-title">FHIR.client client.refresh
                   
               </td>
-              <td class="test-duration">16</td>
+              <td class="test-duration">15</td>
           </tr>
           <tr class="show FHIR.client constructor success">
               <td class="test-id">3</td>
@@ -723,7 +747,7 @@
               <td class="test-title">FHIR.client constructor accepts string as second argument
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">0</td>
           </tr>
           <tr class="show FHIR.client patient.read success">
               <td class="test-id">7</td>
@@ -744,7 +768,7 @@
               <td class="test-title">FHIR.client patient.read rejects with no patient works in the browser
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">0</td>
           </tr>
           <tr class="show FHIR.client patient.read rejects_with_no_patient success">
               <td class="test-id">10</td>
@@ -779,21 +803,21 @@
               <td class="test-title">FHIR.client user.read rejects with no user works on the server
                   
               </td>
-              <td class="test-duration">0</td>
+              <td class="test-duration">1</td>
           </tr>
           <tr class="show FHIR.client fhir.js_api success">
               <td class="test-id">15</td>
               <td class="test-title">FHIR.client fhir.js api works in the browser
                   
               </td>
-              <td class="test-duration">518</td>
+              <td class="test-duration">423</td>
           </tr>
           <tr class="show FHIR.client client.request can_fetch_single_resource success">
               <td class="test-id">16</td>
               <td class="test-title">FHIR.client client.request can fetch single resource works in the browser
                   
               </td>
-              <td class="test-duration">5</td>
+              <td class="test-duration">3</td>
           </tr>
           <tr class="show FHIR.client client.request can_fetch_single_resource success">
               <td class="test-id">17</td>
@@ -807,14 +831,14 @@
               <td class="test-title">FHIR.client client.request ignores pageLimit if the result is not a bundle works in the browser
                   
               </td>
-              <td class="test-duration">2</td>
+              <td class="test-duration">3</td>
           </tr>
           <tr class="show FHIR.client client.request ignores_pageLimit_if_the_result_is_not_a_bundle success">
               <td class="test-id">19</td>
               <td class="test-title">FHIR.client client.request ignores pageLimit if the result is not a bundle works on the server
                   
               </td>
-              <td class="test-duration">2</td>
+              <td class="test-duration">3</td>
           </tr>
           <tr class="show FHIR.client client.request can_fetch_a_bundle success">
               <td class="test-id">20</td>
@@ -828,7 +852,7 @@
               <td class="test-title">FHIR.client client.request can fetch a bundle works on the server
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">2</td>
           </tr>
           <tr class="show FHIR.client client.request does_not_return_an_array_if_pageLimit_is_1 success">
               <td class="test-id">22</td>
@@ -849,7 +873,7 @@
               <td class="test-title">FHIR.client client.request can fetch multiple pages works in the browser
                   
               </td>
-              <td class="test-duration">4</td>
+              <td class="test-duration">5</td>
           </tr>
           <tr class="show FHIR.client client.request can_fetch_multiple_pages success">
               <td class="test-id">25</td>
@@ -863,7 +887,7 @@
               <td class="test-title">FHIR.client client.request returns aan array if pageLimit is different than 1, even if there is only one page works in the browser
                   
               </td>
-              <td class="test-duration">3</td>
+              <td class="test-duration">2</td>
           </tr>
           <tr class="show FHIR.client client.request returns_aan_array_if_pageLimit_is_different_than_1,_even_if_there_is_only_one_page success">
               <td class="test-id">27</td>
@@ -877,14 +901,14 @@
               <td class="test-title">FHIR.client client.request can fetch all pages works in the browser
                   
               </td>
-              <td class="test-duration">4</td>
+              <td class="test-duration">3</td>
           </tr>
           <tr class="show FHIR.client client.request can_fetch_all_pages success">
               <td class="test-id">29</td>
               <td class="test-title">FHIR.client client.request can fetch all pages works on the server
                   
               </td>
-              <td class="test-duration">3</td>
+              <td class="test-duration">4</td>
           </tr>
           <tr class="show FHIR.client client.request onPage_callback success">
               <td class="test-id">30</td>
@@ -898,28 +922,28 @@
               <td class="test-title">FHIR.client client.request onPage callback works on the server
                   
               </td>
-              <td class="test-duration">3</td>
+              <td class="test-duration">4</td>
           </tr>
           <tr class="show FHIR.client client.request stops_fetching_pages_if_onPage_throws success">
               <td class="test-id">32</td>
               <td class="test-title">FHIR.client client.request stops fetching pages if onPage throws works in the browser
                   
               </td>
-              <td class="test-duration">2</td>
+              <td class="test-duration">3</td>
           </tr>
           <tr class="show FHIR.client client.request stops_fetching_pages_if_onPage_throws success">
               <td class="test-id">33</td>
               <td class="test-title">FHIR.client client.request stops fetching pages if onPage throws works on the server
                   
               </td>
-              <td class="test-duration">2</td>
+              <td class="test-duration">4</td>
           </tr>
           <tr class="show FHIR.client client.request stops_fetching_pages_if_onPage_rejects success">
               <td class="test-id">34</td>
               <td class="test-title">FHIR.client client.request stops fetching pages if onPage rejects works in the browser
                   
               </td>
-              <td class="test-duration">3</td>
+              <td class="test-duration">4</td>
           </tr>
           <tr class="show FHIR.client client.request stops_fetching_pages_if_onPage_rejects success">
               <td class="test-id">35</td>
@@ -933,21 +957,21 @@
               <td class="test-title">FHIR.client client.request awaits for the onPage callback works in the browser
                   
               </td>
-              <td class="test-duration">205</td>
+              <td class="test-duration">208</td>
           </tr>
           <tr class="show FHIR.client client.request awaits_for_the_onPage_callback success">
               <td class="test-id">37</td>
               <td class="test-title">FHIR.client client.request awaits for the onPage callback works on the server
                   
               </td>
-              <td class="test-duration">208</td>
+              <td class="test-duration">210</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_single_resource success">
               <td class="test-id">38</td>
               <td class="test-title">FHIR.client client.request can resolve refs on single resource works in the browser
                   
               </td>
-              <td class="test-duration">7</td>
+              <td class="test-duration">8</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_single_resource success">
               <td class="test-id">39</td>
@@ -961,63 +985,63 @@
               <td class="test-title">FHIR.client client.request can resolve refs on single resource with &#x60;graph: false&#x60; works in the browser
                   
               </td>
-              <td class="test-duration">5</td>
+              <td class="test-duration">4</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_single_resource_with_&#x60;graph:_false&#x60; success">
               <td class="test-id">41</td>
               <td class="test-title">FHIR.client client.request can resolve refs on single resource with &#x60;graph: false&#x60; works on the server
                   
               </td>
-              <td class="test-duration">6</td>
+              <td class="test-duration">3</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_pages success">
               <td class="test-id">42</td>
               <td class="test-title">FHIR.client client.request can resolve refs on pages works in the browser
                   
               </td>
-              <td class="test-duration">11</td>
+              <td class="test-duration">7</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_pages success">
               <td class="test-id">43</td>
               <td class="test-title">FHIR.client client.request can resolve refs on pages works on the server
                   
               </td>
-              <td class="test-duration">11</td>
+              <td class="test-duration">7</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_pages_with_&#x60;graph:_false&#x60; success">
               <td class="test-id">44</td>
               <td class="test-title">FHIR.client client.request can resolve refs on pages with &#x60;graph: false&#x60; works in the browser
                   
               </td>
-              <td class="test-duration">13</td>
+              <td class="test-duration">11</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_pages_with_&#x60;graph:_false&#x60; success">
               <td class="test-id">45</td>
               <td class="test-title">FHIR.client client.request can resolve refs on pages with &#x60;graph: false&#x60; works on the server
                   
               </td>
-              <td class="test-duration">8</td>
+              <td class="test-duration">7</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_pages_with_&#x60;onPage&#x60; success">
               <td class="test-id">46</td>
               <td class="test-title">FHIR.client client.request can resolve refs on pages with &#x60;onPage&#x60; works in the browser
                   
               </td>
-              <td class="test-duration">8</td>
+              <td class="test-duration">9</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_pages_with_&#x60;onPage&#x60; success">
               <td class="test-id">47</td>
               <td class="test-title">FHIR.client client.request can resolve refs on pages with &#x60;onPage&#x60; works on the server
                   
               </td>
-              <td class="test-duration">7</td>
+              <td class="test-duration">8</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_pages_with_&#x60;onPage&#x60;_and_&#x60;graph:_false&#x60; success">
               <td class="test-id">48</td>
               <td class="test-title">FHIR.client client.request can resolve refs on pages with &#x60;onPage&#x60; and &#x60;graph: false&#x60; works in the browser
                   
               </td>
-              <td class="test-duration">7</td>
+              <td class="test-duration">8</td>
           </tr>
           <tr class="show FHIR.client client.request can_resolve_refs_on_pages_with_&#x60;onPage&#x60;_and_&#x60;graph:_false&#x60; success">
               <td class="test-id">49</td>
@@ -1052,7 +1076,7 @@
               <td class="test-title">FHIR.client client.user works on the server
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">2</td>
           </tr>
           <tr class="show FHIR.client client.getAuthorizationHeader success">
               <td class="test-id">54</td>
@@ -1068,386 +1092,554 @@
               </td>
               <td class="test-duration">1</td>
           </tr>
-          <tr class="show HttpError success">
+          <tr class="show FHIR.client getPatientId()_returns_null_without_tokenResponse success">
               <td class="test-id">56</td>
+              <td class="test-title">FHIR.client getPatientId() returns null without tokenResponse works in the browser
+                  
+              </td>
+              <td class="test-duration">1</td>
+          </tr>
+          <tr class="show FHIR.client getPatientId()_returns_null_without_tokenResponse success">
+              <td class="test-id">57</td>
+              <td class="test-title">FHIR.client getPatientId() returns null without tokenResponse works on the server
+                  
+              </td>
+              <td class="test-duration">0</td>
+          </tr>
+          <tr class="show FHIR.client getPatientId()_complains_about_authorizeUri success">
+              <td class="test-id">58</td>
+              <td class="test-title">FHIR.client getPatientId() complains about authorizeUri works in the browser
+                  
+              </td>
+              <td class="test-duration">1</td>
+          </tr>
+          <tr class="show FHIR.client getPatientId()_complains_about_authorizeUri success">
+              <td class="test-id">59</td>
+              <td class="test-title">FHIR.client getPatientId() complains about authorizeUri works on the server
+                  
+              </td>
+              <td class="test-duration">0</td>
+          </tr>
+          <tr class="show FHIR.client getPatientId()_complains_about_scopes success">
+              <td class="test-id">60</td>
+              <td class="test-title">FHIR.client getPatientId() complains about scopes works in the browser
+                  
+              </td>
+              <td class="test-duration">0</td>
+          </tr>
+          <tr class="show FHIR.client getPatientId()_complains_about_scopes success">
+              <td class="test-id">61</td>
+              <td class="test-title">FHIR.client getPatientId() complains about scopes works on the server
+                  
+              </td>
+              <td class="test-duration">0</td>
+          </tr>
+          <tr class="show FHIR.client getPatientId()_complains_about_server_support success">
+              <td class="test-id">62</td>
+              <td class="test-title">FHIR.client getPatientId() complains about server support works in the browser
+                  
+              </td>
+              <td class="test-duration">0</td>
+          </tr>
+          <tr class="show FHIR.client getPatientId()_complains_about_server_support success">
+              <td class="test-id">63</td>
+              <td class="test-title">FHIR.client getPatientId() complains about server support works on the server
+                  
+              </td>
+              <td class="test-duration">1</td>
+          </tr>
+          <tr class="show FHIR.client getEncounterId()_returns_null_without_tokenResponse success">
+              <td class="test-id">64</td>
+              <td class="test-title">FHIR.client getEncounterId() returns null without tokenResponse works in the browser
+                  
+              </td>
+              <td class="test-duration">0</td>
+          </tr>
+          <tr class="show FHIR.client getEncounterId()_returns_null_without_tokenResponse success">
+              <td class="test-id">65</td>
+              <td class="test-title">FHIR.client getEncounterId() returns null without tokenResponse works on the server
+                  
+              </td>
+              <td class="test-duration">1</td>
+          </tr>
+          <tr class="show FHIR.client getEncounterId()_complains_about_authorizeUri success">
+              <td class="test-id">66</td>
+              <td class="test-title">FHIR.client getEncounterId() complains about authorizeUri works in the browser
+                  
+              </td>
+              <td class="test-duration">0</td>
+          </tr>
+          <tr class="show FHIR.client getEncounterId()_complains_about_authorizeUri success">
+              <td class="test-id">67</td>
+              <td class="test-title">FHIR.client getEncounterId() complains about authorizeUri works on the server
+                  
+              </td>
+              <td class="test-duration">1</td>
+          </tr>
+          <tr class="show FHIR.client getEncounterId()_complains_about_scopes success">
+              <td class="test-id">68</td>
+              <td class="test-title">FHIR.client getEncounterId() complains about scopes works in the browser
+                  
+              </td>
+              <td class="test-duration">0</td>
+          </tr>
+          <tr class="show FHIR.client getEncounterId()_complains_about_scopes success">
+              <td class="test-id">69</td>
+              <td class="test-title">FHIR.client getEncounterId() complains about scopes works on the server
+                  
+              </td>
+              <td class="test-duration">1</td>
+          </tr>
+          <tr class="show FHIR.client getEncounterId()_complains_about_server_support success">
+              <td class="test-id">70</td>
+              <td class="test-title">FHIR.client getEncounterId() complains about server support works in the browser
+                  
+              </td>
+              <td class="test-duration">0</td>
+          </tr>
+          <tr class="show FHIR.client getEncounterId()_complains_about_server_support success">
+              <td class="test-id">71</td>
+              <td class="test-title">FHIR.client getEncounterId() complains about server support works on the server
+                  
+              </td>
+              <td class="test-duration">1</td>
+          </tr>
+          <tr class="show FHIR.client getIdToken()_returns_null_without_tokenResponse success">
+              <td class="test-id">72</td>
+              <td class="test-title">FHIR.client getIdToken() returns null without tokenResponse works in the browser
+                  
+              </td>
+              <td class="test-duration">0</td>
+          </tr>
+          <tr class="show FHIR.client getIdToken()_returns_null_without_tokenResponse success">
+              <td class="test-id">73</td>
+              <td class="test-title">FHIR.client getIdToken() returns null without tokenResponse works on the server
+                  
+              </td>
+              <td class="test-duration">1</td>
+          </tr>
+          <tr class="show FHIR.client getIdToken()_complains_about_authorizeUri success">
+              <td class="test-id">74</td>
+              <td class="test-title">FHIR.client getIdToken() complains about authorizeUri works in the browser
+                  
+              </td>
+              <td class="test-duration">0</td>
+          </tr>
+          <tr class="show FHIR.client getIdToken()_complains_about_authorizeUri success">
+              <td class="test-id">75</td>
+              <td class="test-title">FHIR.client getIdToken() complains about authorizeUri works on the server
+                  
+              </td>
+              <td class="test-duration">0</td>
+          </tr>
+          <tr class="show FHIR.client getIdToken()_complains_about_scopes success">
+              <td class="test-id">76</td>
+              <td class="test-title">FHIR.client getIdToken() complains about scopes works in the browser
+                  
+              </td>
+              <td class="test-duration">0</td>
+          </tr>
+          <tr class="show FHIR.client getIdToken()_complains_about_scopes success">
+              <td class="test-id">77</td>
+              <td class="test-title">FHIR.client getIdToken() complains about scopes works on the server
+                  
+              </td>
+              <td class="test-duration">0</td>
+          </tr>
+          <tr class="show FHIR.client getIdToken()_complains_about_server_support success">
+              <td class="test-id">78</td>
+              <td class="test-title">FHIR.client getIdToken() complains about server support works in the browser
+                  
+              </td>
+              <td class="test-duration">1</td>
+          </tr>
+          <tr class="show FHIR.client getIdToken()_complains_about_server_support success">
+              <td class="test-id">79</td>
+              <td class="test-title">FHIR.client getIdToken() complains about server support works on the server
+                  
+              </td>
+              <td class="test-duration">0</td>
+          </tr>
+          <tr class="show HttpError success">
+              <td class="test-id">80</td>
               <td class="test-title">HttpError create with no args
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">0</td>
           </tr>
           <tr class="show HttpError success">
-              <td class="test-id">57</td>
+              <td class="test-id">81</td>
               <td class="test-title">HttpError create from string
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">0</td>
           </tr>
           <tr class="show HttpError success">
-              <td class="test-id">58</td>
+              <td class="test-id">82</td>
               <td class="test-title">HttpError create from Error
                   
               </td>
               <td class="test-duration">1</td>
           </tr>
           <tr class="show HttpError success">
-              <td class="test-id">59</td>
+              <td class="test-id">83</td>
               <td class="test-title">HttpError create from response object having error property
                   
               </td>
-              <td class="test-duration">0</td>
+              <td class="test-duration">1</td>
           </tr>
           <tr class="show HttpError success">
-              <td class="test-id">60</td>
+              <td class="test-id">84</td>
               <td class="test-title">HttpError create from incompatible object
                   
               </td>
               <td class="test-duration">1</td>
           </tr>
           <tr class="show HttpError success">
-              <td class="test-id">61</td>
+              <td class="test-id">85</td>
               <td class="test-title">HttpError create from empty object
-                  
-              </td>
-              <td class="test-duration">1</td>
-          </tr>
-          <tr class="show HttpError success">
-              <td class="test-id">62</td>
-              <td class="test-title">HttpError create from incompatible argument
                   
               </td>
               <td class="test-duration">0</td>
           </tr>
+          <tr class="show HttpError success">
+              <td class="test-id">86</td>
+              <td class="test-title">HttpError create from incompatible argument
+                  
+              </td>
+              <td class="test-duration">1</td>
+          </tr>
           <tr class="show Complete_authorization success">
-              <td class="test-id">63</td>
+              <td class="test-id">87</td>
               <td class="test-title">Complete authorization code flow
                   
               </td>
               <td class="test-duration">10</td>
           </tr>
           <tr class="show Complete_authorization success">
-              <td class="test-id">64</td>
+              <td class="test-id">88</td>
               <td class="test-title">Complete authorization code flow with fullSessionStorageSupport &#x3D; false
                   
               </td>
               <td class="test-duration">5</td>
           </tr>
           <tr class="show Complete_authorization success">
-              <td class="test-id">65</td>
+              <td class="test-id">89</td>
               <td class="test-title">Complete authorization refresh an authorized page
                   
               </td>
               <td class="test-duration">1</td>
           </tr>
           <tr class="show Complete_authorization success">
-              <td class="test-id">66</td>
+              <td class="test-id">90</td>
               <td class="test-title">Complete authorization refresh an authorized page with fullSessionStorageSupport &#x3D; false
                   
               </td>
               <td class="test-duration">1</td>
           </tr>
           <tr class="show Complete_authorization success">
-              <td class="test-id">67</td>
+              <td class="test-id">91</td>
               <td class="test-title">Complete authorization can bypass oauth by passing &#x60;fhirServiceUrl&#x60;
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">0</td>
           </tr>
           <tr class="show Complete_authorization success">
-              <td class="test-id">68</td>
+              <td class="test-id">92</td>
               <td class="test-title">Complete authorization appends &#x27;launch&#x27; to the scopes if needed
                   
               </td>
               <td class="test-duration">0</td>
           </tr>
           <tr class="show Complete_authorization success">
-              <td class="test-id">69</td>
+              <td class="test-id">93</td>
               <td class="test-title">Complete authorization can do standalone launch
                   
               </td>
-              <td class="test-duration">4</td>
+              <td class="test-duration">5</td>
           </tr>
           <tr class="show smart fetchConformanceStatement success">
-              <td class="test-id">70</td>
+              <td class="test-id">94</td>
               <td class="test-title">smart fetchConformanceStatement rejects bad baseUrl values
                   
               </td>
               <td class="test-duration">1</td>
           </tr>
           <tr class="show smart fetchConformanceStatement success">
-              <td class="test-id">71</td>
+              <td class="test-id">95</td>
               <td class="test-title">smart fetchConformanceStatement works
                   
               </td>
               <td class="test-duration">2</td>
           </tr>
           <tr class="show smart fetchConformanceStatement success">
-              <td class="test-id">72</td>
+              <td class="test-id">96</td>
               <td class="test-title">smart fetchConformanceStatement rejects on error
                   
               </td>
               <td class="test-duration">2</td>
           </tr>
           <tr class="show smart fetchWellKnownJson success">
-              <td class="test-id">73</td>
+              <td class="test-id">97</td>
               <td class="test-title">smart fetchWellKnownJson works
                   
               </td>
               <td class="test-duration">2</td>
           </tr>
           <tr class="show smart fetchWellKnownJson success">
-              <td class="test-id">74</td>
+              <td class="test-id">98</td>
               <td class="test-title">smart fetchWellKnownJson rejects on error
                   
               </td>
               <td class="test-duration">3</td>
           </tr>
           <tr class="show smart getSecurityExtensions success">
-              <td class="test-id">75</td>
+              <td class="test-id">99</td>
               <td class="test-title">smart getSecurityExtensions works with .well-known/smart-configuration
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">2</td>
           </tr>
           <tr class="show smart getSecurityExtensions success">
-              <td class="test-id">76</td>
+              <td class="test-id">100</td>
               <td class="test-title">smart getSecurityExtensions fails back to conformance if .well-known/smart-configuration is bad
                   
               </td>
               <td class="test-duration">4</td>
           </tr>
           <tr class="show smart getSecurityExtensions success">
-              <td class="test-id">77</td>
+              <td class="test-id">101</td>
               <td class="test-title">smart getSecurityExtensions works with conformance statement
                   
               </td>
-              <td class="test-duration">4</td>
+              <td class="test-duration">9</td>
           </tr>
           <tr class="show smart getSecurityExtensions success">
-              <td class="test-id">78</td>
+              <td class="test-id">102</td>
               <td class="test-title">smart getSecurityExtensions returns empty endpoints for open servers
                   
               </td>
               <td class="test-duration">3</td>
           </tr>
           <tr class="show smart getSecurityExtensions success">
-              <td class="test-id">79</td>
+              <td class="test-id">103</td>
               <td class="test-title">smart getSecurityExtensions returns empty endpoints for missing conformance
                   
               </td>
               <td class="test-duration">3</td>
           </tr>
           <tr class="show smart getSecurityExtensions success">
-              <td class="test-id">80</td>
+              <td class="test-id">104</td>
               <td class="test-title">smart getSecurityExtensions rejects on error
                   
               </td>
               <td class="test-duration">3</td>
           </tr>
           <tr class="show smart authorize success">
-              <td class="test-id">81</td>
+              <td class="test-id">105</td>
               <td class="test-title">smart authorize throws if no serverUrl
                   
               </td>
               <td class="test-duration">1</td>
           </tr>
           <tr class="show smart authorize success">
-              <td class="test-id">82</td>
+              <td class="test-id">106</td>
               <td class="test-title">smart authorize accepts encounterId parameter
                   
               </td>
               <td class="test-duration">1</td>
           </tr>
           <tr class="show smart authorize success">
-              <td class="test-id">83</td>
+              <td class="test-id">107</td>
               <td class="test-title">smart authorize accepts patientId parameter
                   
               </td>
               <td class="test-duration">1</td>
           </tr>
           <tr class="show smart authorize success">
-              <td class="test-id">84</td>
+              <td class="test-id">108</td>
               <td class="test-title">smart authorize accepts fakeTokenResponse parameter
                   
               </td>
               <td class="test-duration">1</td>
           </tr>
           <tr class="show smart completeAuth success">
-              <td class="test-id">85</td>
+              <td class="test-id">109</td>
               <td class="test-title">smart completeAuth rejects with error and error_description from the url
                   
               </td>
-              <td class="test-duration">0</td>
+              <td class="test-duration">1</td>
           </tr>
           <tr class="show smart completeAuth success">
-              <td class="test-id">86</td>
+              <td class="test-id">110</td>
               <td class="test-title">smart completeAuth rejects with missing key
                   
               </td>
               <td class="test-duration">0</td>
           </tr>
           <tr class="show smart completeAuth success">
-              <td class="test-id">87</td>
+              <td class="test-id">111</td>
               <td class="test-title">smart completeAuth rejects with empty state
                   
               </td>
               <td class="test-duration">1</td>
           </tr>
           <tr class="show smart buildTokenRequest success">
-              <td class="test-id">88</td>
+              <td class="test-id">112</td>
               <td class="test-title">smart buildTokenRequest rejects with missing state.redirectUri
                   
               </td>
               <td class="test-duration">0</td>
           </tr>
           <tr class="show smart buildTokenRequest success">
-              <td class="test-id">89</td>
+              <td class="test-id">113</td>
               <td class="test-title">smart buildTokenRequest rejects with missing state.tokenUri
                   
               </td>
               <td class="test-duration">1</td>
           </tr>
           <tr class="show smart buildTokenRequest success">
-              <td class="test-id">90</td>
+              <td class="test-id">114</td>
               <td class="test-title">smart buildTokenRequest rejects with missing state.clientId
                   
               </td>
               <td class="test-duration">0</td>
           </tr>
           <tr class="show smart init success">
-              <td class="test-id">91</td>
+              <td class="test-id">115</td>
               <td class="test-title">smart init works in standalone mode
                   
               </td>
-              <td class="test-duration">9</td>
+              <td class="test-duration">6</td>
           </tr>
           <tr class="show smart init success">
-              <td class="test-id">92</td>
+              <td class="test-id">116</td>
               <td class="test-title">smart init works in EHR mode
                   
               </td>
               <td class="test-duration">6</td>
           </tr>
           <tr class="show Lib getPath success">
-              <td class="test-id">93</td>
+              <td class="test-id">117</td>
               <td class="test-title">Lib getPath returns the first arg if no path
                   
               </td>
               <td class="test-duration">1</td>
           </tr>
           <tr class="show Lib getPath success">
-              <td class="test-id">94</td>
+              <td class="test-id">118</td>
               <td class="test-title">Lib getPath returns the first arg for empty path
                   
               </td>
               <td class="test-duration">0</td>
           </tr>
           <tr class="show Lib getPath success">
-              <td class="test-id">95</td>
+              <td class="test-id">119</td>
               <td class="test-title">Lib getPath works as expected
                   
               </td>
               <td class="test-duration">1</td>
           </tr>
           <tr class="show Lib setPath success">
-              <td class="test-id">96</td>
+              <td class="test-id">120</td>
               <td class="test-title">Lib setPath works as expected
                   
               </td>
               <td class="test-duration">0</td>
           </tr>
           <tr class="show Lib setPath success">
-              <td class="test-id">97</td>
+              <td class="test-id">121</td>
               <td class="test-title">Lib setPath does nothing if the first argument is null
                   
               </td>
               <td class="test-duration">1</td>
           </tr>
           <tr class="show Lib stripTrailingSlash success">
-              <td class="test-id">98</td>
+              <td class="test-id">122</td>
               <td class="test-title">Lib stripTrailingSlash returns the same string if it does not end with slash
                   
               </td>
               <td class="test-duration">0</td>
           </tr>
           <tr class="show Lib stripTrailingSlash success">
-              <td class="test-id">99</td>
+              <td class="test-id">123</td>
               <td class="test-title">Lib stripTrailingSlash removes the trailing slash
                   
               </td>
               <td class="test-duration">0</td>
           </tr>
           <tr class="show Lib stripTrailingSlash success">
-              <td class="test-id">100</td>
+              <td class="test-id">124</td>
               <td class="test-title">Lib stripTrailingSlash removes repeated trailing slashes
                   
               </td>
               <td class="test-duration">1</td>
           </tr>
           <tr class="show Lib stripTrailingSlash success">
-              <td class="test-id">101</td>
+              <td class="test-id">125</td>
               <td class="test-title">Lib stripTrailingSlash works with non-string argument
                   
               </td>
               <td class="test-duration">1</td>
           </tr>
           <tr class="show Lib absolute success">
-              <td class="test-id">102</td>
+              <td class="test-id">126</td>
               <td class="test-title">Lib absolute returns http, https or urn URI as is
                   
               </td>
               <td class="test-duration">0</td>
           </tr>
           <tr class="show Lib absolute success">
-              <td class="test-id">103</td>
+              <td class="test-id">127</td>
               <td class="test-title">Lib absolute returns URLs mounted to the given domain
                   
               </td>
               <td class="test-duration">1</td>
           </tr>
           <tr class="show Lib units success">
-              <td class="test-id">104</td>
+              <td class="test-id">128</td>
               <td class="test-title">Lib units cm
                   
               </td>
-              <td class="test-duration">1</td>
+              <td class="test-duration">2</td>
           </tr>
           <tr class="show Lib units success">
-              <td class="test-id">105</td>
+              <td class="test-id">129</td>
               <td class="test-title">Lib units kg
                   
               </td>
               <td class="test-duration">1</td>
           </tr>
           <tr class="show Lib units success">
-              <td class="test-id">106</td>
+              <td class="test-id">130</td>
               <td class="test-title">Lib units any
                   
               </td>
               <td class="test-duration">0</td>
           </tr>
           <tr class="show Complete_authorization_[SERVER] success">
-              <td class="test-id">107</td>
+              <td class="test-id">131</td>
               <td class="test-title">Complete authorization [SERVER] code flow authorization
                   
               </td>
-              <td class="test-duration">6</td>
+              <td class="test-duration">7</td>
           </tr>
           <tr class="show Complete_authorization_[SERVER] success">
-              <td class="test-id">108</td>
+              <td class="test-id">132</td>
               <td class="test-title">Complete authorization [SERVER] refresh an authorized page
                   
               </td>
               <td class="test-duration">1</td>
           </tr>
           <tr class="show Complete_authorization_[SERVER] success">
-              <td class="test-id">109</td>
+              <td class="test-id">133</td>
               <td class="test-title">Complete authorization [SERVER] can bypass oauth by passing &#x60;fhirServiceUrl&#x60; to &#x60;authorize&#x60;
                   
               </td>
-              <td class="test-duration">0</td>
+              <td class="test-duration">1</td>
           </tr>
           <tr class="show Complete_authorization_[SERVER] success">
-              <td class="test-id">110</td>
+              <td class="test-id">134</td>
               <td class="test-title">Complete authorization [SERVER] appends &#x27;launch&#x27; to the scopes if needed
                   
               </td>
@@ -1459,10 +1651,10 @@
     </div>    <div id="coverage">
         <h1>Code Coverage Report</h1>
         <div class="stats high">
-            <div class="percentage">91.00%</div>
+            <div class="percentage">92.86%</div>
             <div class="sloc">1078</div>
-            <div class="hits">981</div>
-            <div class="misses">97</div>
+            <div class="hits">1001</div>
+            <div class="misses">77</div>
         </div>
         <div id="filters">
           <input type="checkbox" checked="" onchange="filter(this)" value="generated" id="show-generated">
@@ -1472,10 +1664,10 @@
             <div class="file ">
                 <h2 id="src/Client.js">src/Client.js </h2>
                 <div class="stats high">
-                    <div class="percentage">88.37%</div>
+                    <div class="percentage">93.02%</div>
                     <div class="sloc">430</div>
-                    <div class="hits">380</div>
-                    <div class="misses">50</div>
+                    <div class="hits">400</div>
+                    <div class="misses">30</div>
                 </div>
                 <table>
                     <thead>
@@ -1749,7 +1941,7 @@
                         </tr>            <tr id="src/Client.js__44" class="hit">
                           <td class="line" data-tooltip>44</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>4</td>
+                          <td class="hits" data-tooltip>10</td>
                           <td class="source">            state &#x3D; { serverUrl: state };</td>
                           
                         </tr>            <tr id="src/Client.js__45" class="hit">
@@ -1773,7 +1965,7 @@
                         </tr>            <tr id="src/Client.js__48" class="hit">
                           <td class="line" data-tooltip>48</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>72</td>
+                          <td class="hits" data-tooltip>96</td>
                           <td class="source">        if (!state.serverUrl || !state.serverUrl.match(/https?:\/\/.+/)) {</td>
                           
                         </tr>            <tr id="src/Client.js__49" class="hit">
@@ -1809,13 +2001,13 @@
                         </tr>            <tr id="src/Client.js__54" class="hit">
                           <td class="line" data-tooltip>54</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>69</td>
+                          <td class="hits" data-tooltip>93</td>
                           <td class="source">        this.state &#x3D; state;</td>
                           
                         </tr>            <tr id="src/Client.js__55" class="hit">
                           <td class="line" data-tooltip>55</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>69</td>
+                          <td class="hits" data-tooltip>93</td>
                           <td class="source">        this.environment &#x3D; environment;</td>
                           
                         </tr>            <tr id="src/Client.js__56" class="hit">
@@ -1827,7 +2019,7 @@
                         </tr>            <tr id="src/Client.js__57" class="hit">
                           <td class="line" data-tooltip>57</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>69</td>
+                          <td class="hits" data-tooltip>93</td>
                           <td class="source">        const client &#x3D; this;</td>
                           
                         </tr>            <tr id="src/Client.js__58" class="hit">
@@ -1845,7 +2037,7 @@
                         </tr>            <tr id="src/Client.js__60" class="hit">
                           <td class="line" data-tooltip>60</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>69</td>
+                          <td class="hits" data-tooltip>93</td>
                           <td class="source">        this.patient &#x3D; {</td>
                           
                         </tr>            <tr id="src/Client.js__61" class="hit">
@@ -1911,7 +2103,7 @@
                         </tr>            <tr id="src/Client.js__71" class="hit">
                           <td class="line" data-tooltip>71</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>69</td>
+                          <td class="hits" data-tooltip>93</td>
                           <td class="source">        this.encounter &#x3D; {</td>
                           
                         </tr>            <tr id="src/Client.js__72" class="hit">
@@ -1977,7 +2169,7 @@
                         </tr>            <tr id="src/Client.js__82" class="hit">
                           <td class="line" data-tooltip>82</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>69</td>
+                          <td class="hits" data-tooltip>93</td>
                           <td class="source">        this.user &#x3D; {</td>
                           
                         </tr>            <tr id="src/Client.js__83" class="hit">
@@ -2061,7 +2253,7 @@
                         </tr>            <tr id="src/Client.js__96" class="hit">
                           <td class="line" data-tooltip>96</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>69</td>
+                          <td class="hits" data-tooltip>93</td>
                           <td class="source">        if (environment.fhir) {</td>
                           
                         </tr>            <tr id="src/Client.js__97" class="hit">
@@ -2322,11 +2514,11 @@
                           <td class="hits" data-tooltip></td>
                           <td class="source">        const tokenResponse &#x3D; this.state.tokenResponse;</td>
                           
-                        </tr>            <tr id="src/Client.js__140" class="chunks">
+                        </tr>            <tr id="src/Client.js__140" class="hit">
                           <td class="line" data-tooltip>140</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"><div>        if (</div><div class="miss true" data-tooltip>tokenResponse</div><div>) {</div></td>
+                          <td class="hits" data-tooltip>23</td>
+                          <td class="source">        if (tokenResponse) {</td>
                           
                         </tr>            <tr id="src/Client.js__141" class="hit">
                           <td class="line" data-tooltip>141</td>
@@ -2343,19 +2535,19 @@
                         </tr>            <tr id="src/Client.js__143" class="hit">
                           <td class="line" data-tooltip>143</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>15</td>
+                          <td class="hits" data-tooltip>19</td>
                           <td class="source">            if (!tokenResponse.patient) {</td>
                           
-                        </tr>            <tr id="src/Client.js__144" class="chunks">
+                        </tr>            <tr id="src/Client.js__144" class="hit">
                           <td class="line" data-tooltip>144</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"><div>                if (</div><div class="miss true" data-tooltip>!(this.state.scope || &quot;&quot;).match(/\blaunch(\/patient)?\b/)</div><div>) {</div></td>
+                          <td class="hits" data-tooltip>6</td>
+                          <td class="source">                if (!(this.state.scope || &quot;&quot;).match(/\blaunch(\/patient)?\b/)) {</td>
                           
                         </tr>            <tr id="src/Client.js__145" class="hit">
                           <td class="line" data-tooltip>145</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>2</td>
+                          <td class="hits" data-tooltip>4</td>
                           <td class="source">                    debug(</td>
                           
                         </tr>            <tr id="src/Client.js__146" class="hit">
@@ -2406,11 +2598,11 @@
                           <td class="hits" data-tooltip></td>
                           <td class="source">                    // The server should have returned the patient!</td>
                           
-                        </tr>            <tr id="src/Client.js__154" class="miss">
+                        </tr>            <tr id="src/Client.js__154" class="hit">
                           <td class="line" data-tooltip>154</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>                    debug(</td>
+                          <td class="hits" data-tooltip>2</td>
+                          <td class="source">                    debug(</td>
                           
                         </tr>            <tr id="src/Client.js__155" class="hit">
                           <td class="line" data-tooltip>155</td>
@@ -2439,7 +2631,7 @@
                         </tr>            <tr id="src/Client.js__159" class="hit">
                           <td class="line" data-tooltip>159</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>2</td>
+                          <td class="hits" data-tooltip>6</td>
                           <td class="source">                return null;</td>
                           
                         </tr>            <tr id="src/Client.js__160" class="hit">
@@ -2466,17 +2658,17 @@
                           <td class="hits" data-tooltip></td>
                           <td class="source"></td>
                           
-                        </tr>            <tr id="src/Client.js__164" class="miss">
+                        </tr>            <tr id="src/Client.js__164" class="hit">
                           <td class="line" data-tooltip>164</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>        if (this.state.authorizeUri) {</td>
+                          <td class="hits" data-tooltip>4</td>
+                          <td class="source">        if (this.state.authorizeUri) {</td>
                           
-                        </tr>            <tr id="src/Client.js__165" class="miss">
+                        </tr>            <tr id="src/Client.js__165" class="hit">
                           <td class="line" data-tooltip>165</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>            debug(</td>
+                          <td class="hits" data-tooltip>2</td>
+                          <td class="source">            debug(</td>
                           
                         </tr>            <tr id="src/Client.js__166" class="hit">
                           <td class="line" data-tooltip>166</td>
@@ -2508,11 +2700,11 @@
                           <td class="hits" data-tooltip></td>
                           <td class="source">        else {</td>
                           
-                        </tr>            <tr id="src/Client.js__171" class="miss">
+                        </tr>            <tr id="src/Client.js__171" class="hit">
                           <td class="line" data-tooltip>171</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>            debug(</td>
+                          <td class="hits" data-tooltip>2</td>
+                          <td class="source">            debug(</td>
                           
                         </tr>            <tr id="src/Client.js__172" class="hit">
                           <td class="line" data-tooltip>172</td>
@@ -2550,11 +2742,11 @@
                           <td class="hits" data-tooltip></td>
                           <td class="source">        }</td>
                           
-                        </tr>            <tr id="src/Client.js__178" class="miss">
+                        </tr>            <tr id="src/Client.js__178" class="hit">
                           <td class="line" data-tooltip>178</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>        return null;</td>
+                          <td class="hits" data-tooltip>4</td>
+                          <td class="source">        return null;</td>
                           
                         </tr>            <tr id="src/Client.js__179" class="hit">
                           <td class="line" data-tooltip>179</td>
@@ -2622,11 +2814,11 @@
                           <td class="hits" data-tooltip></td>
                           <td class="source">        const tokenResponse &#x3D; this.state.tokenResponse;</td>
                           
-                        </tr>            <tr id="src/Client.js__190" class="chunks">
+                        </tr>            <tr id="src/Client.js__190" class="hit">
                           <td class="line" data-tooltip>190</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"><div>        if (</div><div class="miss true" data-tooltip>tokenResponse</div><div>) {</div></td>
+                          <td class="hits" data-tooltip>21</td>
+                          <td class="source">        if (tokenResponse) {</td>
                           
                         </tr>            <tr id="src/Client.js__191" class="hit">
                           <td class="line" data-tooltip>191</td>
@@ -2643,19 +2835,19 @@
                         </tr>            <tr id="src/Client.js__193" class="hit">
                           <td class="line" data-tooltip>193</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>13</td>
+                          <td class="hits" data-tooltip>17</td>
                           <td class="source">            if (!tokenResponse.encounter) {</td>
                           
-                        </tr>            <tr id="src/Client.js__194" class="chunks">
+                        </tr>            <tr id="src/Client.js__194" class="hit">
                           <td class="line" data-tooltip>194</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"><div>                if (</div><div class="miss true" data-tooltip>!(this.state.scope || &quot;&quot;).match(/\blaunch(\/encounter)?\b/)</div><div>) {</div></td>
+                          <td class="hits" data-tooltip>6</td>
+                          <td class="source">                if (!(this.state.scope || &quot;&quot;).match(/\blaunch(\/encounter)?\b/)) {</td>
                           
                         </tr>            <tr id="src/Client.js__195" class="hit">
                           <td class="line" data-tooltip>195</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>2</td>
+                          <td class="hits" data-tooltip>4</td>
                           <td class="source">                    debug(</td>
                           
                         </tr>            <tr id="src/Client.js__196" class="hit">
@@ -2704,13 +2896,13 @@
                           <td class="line" data-tooltip>203</td>
                           <td class="lint empty"></td>
                           <td class="hits" data-tooltip></td>
-                          <td class="source">                    // The server should have returned the patient!</td>
+                          <td class="source">                    // The server should have returned the encounter!</td>
                           
-                        </tr>            <tr id="src/Client.js__204" class="miss">
+                        </tr>            <tr id="src/Client.js__204" class="hit">
                           <td class="line" data-tooltip>204</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>                    debug(</td>
+                          <td class="hits" data-tooltip>2</td>
+                          <td class="source">                    debug(</td>
                           
                         </tr>            <tr id="src/Client.js__205" class="hit">
                           <td class="line" data-tooltip>205</td>
@@ -2745,7 +2937,7 @@
                         </tr>            <tr id="src/Client.js__210" class="hit">
                           <td class="line" data-tooltip>210</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>2</td>
+                          <td class="hits" data-tooltip>6</td>
                           <td class="source">                return null;</td>
                           
                         </tr>            <tr id="src/Client.js__211" class="hit">
@@ -2772,17 +2964,17 @@
                           <td class="hits" data-tooltip></td>
                           <td class="source"></td>
                           
-                        </tr>            <tr id="src/Client.js__215" class="miss">
+                        </tr>            <tr id="src/Client.js__215" class="hit">
                           <td class="line" data-tooltip>215</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>        if (this.state.authorizeUri) {</td>
+                          <td class="hits" data-tooltip>4</td>
+                          <td class="source">        if (this.state.authorizeUri) {</td>
                           
-                        </tr>            <tr id="src/Client.js__216" class="miss">
+                        </tr>            <tr id="src/Client.js__216" class="hit">
                           <td class="line" data-tooltip>216</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>            debug(</td>
+                          <td class="hits" data-tooltip>2</td>
+                          <td class="source">            debug(</td>
                           
                         </tr>            <tr id="src/Client.js__217" class="hit">
                           <td class="line" data-tooltip>217</td>
@@ -2814,11 +3006,11 @@
                           <td class="hits" data-tooltip></td>
                           <td class="source">        else {</td>
                           
-                        </tr>            <tr id="src/Client.js__222" class="miss">
+                        </tr>            <tr id="src/Client.js__222" class="hit">
                           <td class="line" data-tooltip>222</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>            debug(</td>
+                          <td class="hits" data-tooltip>2</td>
+                          <td class="source">            debug(</td>
                           
                         </tr>            <tr id="src/Client.js__223" class="hit">
                           <td class="line" data-tooltip>223</td>
@@ -2856,11 +3048,11 @@
                           <td class="hits" data-tooltip></td>
                           <td class="source">        }</td>
                           
-                        </tr>            <tr id="src/Client.js__229" class="miss">
+                        </tr>            <tr id="src/Client.js__229" class="hit">
                           <td class="line" data-tooltip>229</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>        return null;</td>
+                          <td class="hits" data-tooltip>4</td>
+                          <td class="source">        return null;</td>
                           
                         </tr>            <tr id="src/Client.js__230" class="hit">
                           <td class="line" data-tooltip>230</td>
@@ -2922,22 +3114,22 @@
                           <td class="hits" data-tooltip></td>
                           <td class="source">        const tokenResponse &#x3D; this.state.tokenResponse;</td>
                           
-                        </tr>            <tr id="src/Client.js__240" class="chunks">
+                        </tr>            <tr id="src/Client.js__240" class="hit">
                           <td class="line" data-tooltip>240</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source"><div>        if (</div><div class="miss true" data-tooltip>tokenResponse</div><div>) {</div></td>
+                          <td class="hits" data-tooltip>48</td>
+                          <td class="source">        if (tokenResponse) {</td>
                           
                         </tr>            <tr id="src/Client.js__241" class="hit">
                           <td class="line" data-tooltip>241</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>40</td>
+                          <td class="hits" data-tooltip>44</td>
                           <td class="source">            const idToken &#x3D; tokenResponse.id_token;</td>
                           
                         </tr>            <tr id="src/Client.js__242" class="hit">
                           <td class="line" data-tooltip>242</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>40</td>
+                          <td class="hits" data-tooltip>44</td>
                           <td class="source">            const scope &#x3D; this.state.scope || &quot;&quot;;</td>
                           
                         </tr>            <tr id="src/Client.js__243" class="hit">
@@ -2961,37 +3153,37 @@
                         </tr>            <tr id="src/Client.js__246" class="hit">
                           <td class="line" data-tooltip>246</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>40</td>
+                          <td class="hits" data-tooltip>44</td>
                           <td class="source">            if (!idToken) {</td>
                           
                         </tr>            <tr id="src/Client.js__247" class="hit">
                           <td class="line" data-tooltip>247</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>10</td>
+                          <td class="hits" data-tooltip>14</td>
                           <td class="source">                const hasOpenid   &#x3D; scope.match(/\bopenid\b/);</td>
                           
                         </tr>            <tr id="src/Client.js__248" class="hit">
                           <td class="line" data-tooltip>248</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>10</td>
+                          <td class="hits" data-tooltip>14</td>
                           <td class="source">                const hasProfile  &#x3D; scope.match(/\bprofile\b/);</td>
                           
                         </tr>            <tr id="src/Client.js__249" class="hit">
                           <td class="line" data-tooltip>249</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>10</td>
+                          <td class="hits" data-tooltip>14</td>
                           <td class="source">                const hasFhirUser &#x3D; scope.match(/\bfhirUser\b/);</td>
                           
                         </tr>            <tr id="src/Client.js__250" class="chunks">
                           <td class="line" data-tooltip>250</td>
                           <td class="lint empty"></td>
                           <td class="hits" data-tooltip></td>
-                          <td class="source"><div>                if (</div><div class="miss true" data-tooltip>!hasOpenid</div><div> || </div><div class="miss never" data-tooltip>!(hasFhirUser || hasProfile)</div><div>) {</div></td>
+                          <td class="source"><div>                if (!hasOpenid || </div><div class="miss false" data-tooltip>!(hasFhirUser || hasProfile)</div><div>) {</div></td>
                           
                         </tr>            <tr id="src/Client.js__251" class="hit">
                           <td class="line" data-tooltip>251</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>10</td>
+                          <td class="hits" data-tooltip>12</td>
                           <td class="source">                    debug(</td>
                           
                         </tr>            <tr id="src/Client.js__252" class="hit">
@@ -3042,11 +3234,11 @@
                           <td class="hits" data-tooltip></td>
                           <td class="source">                    // The server should have returned the id_token!</td>
                           
-                        </tr>            <tr id="src/Client.js__260" class="miss">
+                        </tr>            <tr id="src/Client.js__260" class="hit">
                           <td class="line" data-tooltip>260</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>                    debug(</td>
+                          <td class="hits" data-tooltip>2</td>
+                          <td class="source">                    debug(</td>
                           
                         </tr>            <tr id="src/Client.js__261" class="hit">
                           <td class="line" data-tooltip>261</td>
@@ -3075,7 +3267,7 @@
                         </tr>            <tr id="src/Client.js__265" class="hit">
                           <td class="line" data-tooltip>265</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip>10</td>
+                          <td class="hits" data-tooltip>14</td>
                           <td class="source">                return null;</td>
                           
                         </tr>            <tr id="src/Client.js__266" class="hit">
@@ -3096,17 +3288,17 @@
                           <td class="hits" data-tooltip></td>
                           <td class="source">        }</td>
                           
-                        </tr>            <tr id="src/Client.js__269" class="miss">
+                        </tr>            <tr id="src/Client.js__269" class="hit">
                           <td class="line" data-tooltip>269</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>        if (this.state.authorizeUri) {</td>
+                          <td class="hits" data-tooltip>4</td>
+                          <td class="source">        if (this.state.authorizeUri) {</td>
                           
-                        </tr>            <tr id="src/Client.js__270" class="miss">
+                        </tr>            <tr id="src/Client.js__270" class="hit">
                           <td class="line" data-tooltip>270</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>            debug(</td>
+                          <td class="hits" data-tooltip>2</td>
+                          <td class="source">            debug(</td>
                           
                         </tr>            <tr id="src/Client.js__271" class="hit">
                           <td class="line" data-tooltip>271</td>
@@ -3138,11 +3330,11 @@
                           <td class="hits" data-tooltip></td>
                           <td class="source">        else {</td>
                           
-                        </tr>            <tr id="src/Client.js__276" class="miss">
+                        </tr>            <tr id="src/Client.js__276" class="hit">
                           <td class="line" data-tooltip>276</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>            debug(</td>
+                          <td class="hits" data-tooltip>2</td>
+                          <td class="source">            debug(</td>
                           
                         </tr>            <tr id="src/Client.js__277" class="hit">
                           <td class="line" data-tooltip>277</td>
@@ -3174,11 +3366,11 @@
                           <td class="hits" data-tooltip></td>
                           <td class="source">        }</td>
                           
-                        </tr>            <tr id="src/Client.js__282" class="miss">
+                        </tr>            <tr id="src/Client.js__282" class="hit">
                           <td class="line" data-tooltip>282</td>
                           <td class="lint empty"></td>
-                          <td class="hits" data-tooltip></td>
-                          <td class="source" data-tooltip>        return null;</td>
+                          <td class="hits" data-tooltip>4</td>
+                          <td class="source">        return null;</td>
                           
                         </tr>            <tr id="src/Client.js__283" class="hit">
                           <td class="line" data-tooltip>283</td>

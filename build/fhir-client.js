@@ -7909,7 +7909,7 @@ function () {
           if (!(this.state.scope || "").match(/\blaunch(\/encounter)?\b/)) {
             debug("You are trying to get the ID of the selected encounter " + "but you have not used the right scopes. Please add " + "'launch' or 'launch/encounter' to the scopes you " + "are requesting and try again.");
           } else {
-            // The server should have returned the patient!
+            // The server should have returned the encounter!
             debug("The ID of the selected encounter is not available. " + "Please check if your server supports that, and that " + "the selected patient has any recorded encounters.");
           }
 

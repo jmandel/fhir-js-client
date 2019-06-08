@@ -200,7 +200,7 @@ class FhirClient
                     );
                 }
                 else {
-                    // The server should have returned the patient!
+                    // The server should have returned the encounter!
                     debug(
                         "The ID of the selected encounter is not available. " +
                         "Please check if your server supports that, and that " +

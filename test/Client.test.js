@@ -1,12 +1,16 @@
 const { expect } = require("@hapi/code");
 const lab        = require("@hapi/lab").script();
+const Lib        = require("../src/lib");
+Lib.debug = function(...args) {
+    debugLog.push(args);
+};
 const Client     = require("../src/Client");
 const { KEY }    = require("../src/smart");
-const ServerEnv  = require("./mocks/ServerEnvironment");
 
 
 // Mocks
 const mockServer     = require("./mocks/mockServer");
+const ServerEnv      = require("./mocks/ServerEnvironment");
 const BrowserEnv     = require("./mocks/BrowserEnvironment");
 const BrowserEnvFhir = require("./mocks/BrowserEnvironmentWithFhirJs");
 
@@ -14,7 +18,7 @@ const BrowserEnvFhir = require("./mocks/BrowserEnvironmentWithFhirJs");
 const { it, describe, before, after, afterEach } = lab;
 exports.lab = lab;
 
-let mockDataServer, mockUrl;
+let mockDataServer, mockUrl, debugLog = [];
 
 before(() => {
     return new Promise((resolve, reject) => {
@@ -48,7 +52,11 @@ after(() => {
 
 afterEach(() => {
     mockServer.clear();
+    debugLog = [];
 });
+
+
+
 
 function crossPlatformTest(callback) {
     const tests = {
@@ -1250,6 +1258,181 @@ describe("FHIR.client", () => {
         });
         const result = await client.request("/Patient");
         expect(result).to.equal({ msg: "successful after all" });
+    });
+
+    describe("getPatientId() returns null without tokenResponse", () => {
+        crossPlatformTest(async (env) => {
+            const client = new Client(env, mockUrl);
+            expect(client.getPatientId()).to.equal(null);
+            expect(debugLog).to.equal([[
+                "You are trying to get the ID of the selected patient " +
+                "but your app needs to be authorized first. Please don't use " +
+                "open fhir servers if you need to access launch context items " +
+                "like the selected patient."
+            ]]);
+        });
+    }); 
+
+    describe("getPatientId() complains about authorizeUri", () => {
+        crossPlatformTest(async (env) => {
+            const client = new Client(env, {
+                serverUrl: mockUrl,
+                authorizeUri: "whatever"
+            });
+            expect(client.getPatientId()).to.equal(null);
+            expect(debugLog).to.equal([[
+                "You are trying to get the ID of the selected patient " +
+                "but your app is not authorized yet."
+            ]]);
+        });
+    });
+
+    describe("getPatientId() complains about scopes", () => {
+        crossPlatformTest(async (env) => {
+            const client = new Client(env, {
+                serverUrl: mockUrl,
+                tokenResponse: {}
+            });
+            expect(client.getPatientId()).to.equal(null);
+            expect(debugLog).to.equal([[
+                "You are trying to get the ID of the selected patient " +
+                "but you have not used the right scopes. Please add " +
+                "'launch' or 'launch/patient' to the scopes you are " +
+                "requesting and try again."
+            ]]);
+        });
+    });
+
+    describe("getPatientId() complains about server support", () => {
+        crossPlatformTest(async (env) => {
+            const client = new Client(env, {
+                serverUrl: mockUrl,
+                scope: "launch",
+                tokenResponse: {}
+            });
+            expect(client.getPatientId()).to.equal(null);
+            expect(debugLog).to.equal([[
+                "The ID of the selected patient is not available. " +
+                "Please check if your server supports that."
+            ]]);
+        });
+    });
+
+    describe("getEncounterId() returns null without tokenResponse", () => {
+        crossPlatformTest(async (env) => {
+            const client = new Client(env, mockUrl);
+            expect(client.getEncounterId()).to.equal(null);
+            expect(debugLog).to.equal([[
+                "You are trying to get the ID of the selected encounter " +
+                "but your app needs to be authorized first. Please don't use " +
+                "open fhir servers if you need to access launch context items " +
+                "like the selected encounter."
+            ]]);
+        });
+    }); 
+
+    describe("getEncounterId() complains about authorizeUri", () => {
+        crossPlatformTest(async (env) => {
+            const client = new Client(env, {
+                serverUrl: mockUrl,
+                authorizeUri: "whatever"
+            });
+            expect(client.getEncounterId()).to.equal(null);
+            expect(debugLog).to.equal([[
+                "You are trying to get the ID of the selected encounter " +
+                "but your app is not authorized yet."
+            ]]);
+        });
+    });
+
+    describe("getEncounterId() complains about scopes", () => {
+        crossPlatformTest(async (env) => {
+            const client = new Client(env, {
+                serverUrl: mockUrl,
+                tokenResponse: {}
+            });
+            expect(client.getEncounterId()).to.equal(null);
+            expect(debugLog).to.equal([[
+                "You are trying to get the ID of the selected encounter " +
+                "but you have not used the right scopes. Please add " +
+                "'launch' or 'launch/encounter' to the scopes you " +
+                "are requesting and try again."
+            ]]);
+        });
+    });
+
+    describe("getEncounterId() complains about server support", () => {
+        crossPlatformTest(async (env) => {
+            const client = new Client(env, {
+                serverUrl: mockUrl,
+                scope: "launch",
+                tokenResponse: {}
+            });
+            expect(client.getEncounterId()).to.equal(null);
+            expect(debugLog).to.equal([[
+                "The ID of the selected encounter is not available. " +
+                "Please check if your server supports that, and that " +
+                "the selected patient has any recorded encounters."
+            ]]);
+        });
+    });
+
+    describe("getIdToken() returns null without tokenResponse", () => {
+        crossPlatformTest(async (env) => {
+            const client = new Client(env, mockUrl);
+            expect(client.getIdToken()).to.equal(null);
+            expect(debugLog).to.equal([[
+                "You are trying to get the id_token but your app needs to be " +
+                "authorized first. Please don't use open fhir servers if you " +
+                "need to access launch context items like the id_token."
+            ]]);
+        });
+    }); 
+
+    describe("getIdToken() complains about authorizeUri", () => {
+        crossPlatformTest(async (env) => {
+            const client = new Client(env, {
+                serverUrl: mockUrl,
+                authorizeUri: "whatever"
+            });
+            expect(client.getIdToken()).to.equal(null);
+            expect(debugLog).to.equal([[
+                "You are trying to get the id_token " +
+                "but your app is not authorized yet."
+            ]]);
+        });
+    });
+
+    describe("getIdToken() complains about scopes", () => {
+        crossPlatformTest(async (env) => {
+            const client = new Client(env, {
+                serverUrl: mockUrl,
+                scope: "fhirUser",
+                tokenResponse: {}
+            });
+            expect(client.getIdToken()).to.equal(null);
+            expect(debugLog).to.equal([[
+                "You are trying to get the id_token but you are not " +
+                "using the right scopes. Please add 'openid' and " +
+                "'fhirUser' or 'profile' to the scopes you are " +
+                "requesting and try again."
+            ]]);
+        });
+    });
+
+    describe("getIdToken() complains about server support", () => {
+        crossPlatformTest(async (env) => {
+            const client = new Client(env, {
+                serverUrl: mockUrl,
+                scope: "openid fhirUser",
+                tokenResponse: {}
+            });
+            expect(client.getIdToken()).to.equal(null);
+            expect(debugLog).to.equal([[
+                "The id_token is not available. Please check if your " +
+                "server supports that."
+            ]]);
+        });
     });
 
     // it ("client.getBinary", async () => {
