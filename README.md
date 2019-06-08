@@ -9,6 +9,7 @@ It works both in browsers (IE10+) and on the server (NodeJS).
 
 [![CircleCI](https://circleci.com/gh/smart-on-fhir/client-js.svg?style=svg)](https://circleci.com/gh/smart-on-fhir/client-js)
 
+[![npm version](https://badge.fury.io/js/fhirclient.svg)](https://badge.fury.io/js/fhirclient)
 
 ## Installation
 
