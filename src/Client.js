@@ -604,8 +604,8 @@ class FhirClient
         }
 
         const scopes = getPath(this, "state.tokenResponse.scope") || "";
-        if (scopes.indexOf("online_access") == -1) {
-            throw new Error("Trying to refresh but no `online_access` scope was granted");
+        if (scopes.indexOf("offline_access") == -1) {
+            throw new Error("Trying to refresh but no `offline_access` scope was granted");
         }
 
         return request(tokenUri, {

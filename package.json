@@ -12,7 +12,7 @@
     "FHIR",
     "Client"
   ],
-  "license": "Apache 2.0",
+  "license": "Apache-2.0",
   "main": "src/entry.js",
   "dependencies": {
     "core-js": "^3.1.3",
