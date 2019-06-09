@@ -18,6 +18,8 @@ module.exports = {
         "quotes"            : [ "warn", "double" ],
         "no-console"        : 0,
         "semi"              : [ "error", "always" ],
-        "no-trailing-spaces": 1
+        "no-trailing-spaces": 1,
+        "no-await-in-loop"  : 2,
+        "no-console"        : 1
     }
 };

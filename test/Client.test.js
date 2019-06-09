@@ -37,11 +37,11 @@ before(() => {
 
 after(() => {
     if (mockDataServer && mockDataServer.listening) {
-        return new Promise(resolve => {
+        return new Promise((resolve, reject) => {
             mockUrl = "";
             mockDataServer.close(error => {
                 if (error) {
-                    console.log("Error shutting down the mock-data server: ", error);
+                    reject(new Error("Error shutting down the mock-data server: " + error));
                 }
                 // console.log("Mock Data Server CLOSED!");
                 resolve();
@@ -588,6 +588,83 @@ describe("FHIR.client", () => {
                         resourceType: "Ref",
                         id: "Ref-id"
                     }
+                });
+            });
+        });
+
+        describe ("can resolve nested refs", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl
+                });
+
+                // This is how the user had defined the list, If it works properly,
+                // the request function should resolve them in different order:
+                // 1. subject and encounter (in parallel)
+                // 2. encounter.serviceProvider
+                const refsToResolve = [
+                    "subject",
+                    "encounter.serviceProvider",
+                    "encounter"
+                ];
+
+                // 1. Observation
+                // this request should be sent first!
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Observation",
+                        encounter: { reference: "encounter/1" },
+                        subject: { reference: "subject/1" }
+                    }
+                });
+
+                // 2. Patient (Observation.subject)
+                // this request should be sent second (even though it might
+                // reply after #3)
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: { resourceType: "Patient" }
+                });
+
+                // 3. Encounter
+                // this request should be sent third (even though it might
+                // reply before #2)
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Encounter",
+                        serviceProvider: { reference: "Organization/1" }
+                    }
+                });
+
+                // 4. Organization (Encounter.serviceProvider)
+                // this request should be sent AFTER we have handled the response
+                // from #3!
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: { resourceType: "Organization" }
+                });
+
+                const result = await client.request("Observation/id", {
+                    resolveReferences: refsToResolve
+                });
+
+                expect(result).to.equal({
+                    resourceType: "Observation",           // OK
+                    encounter: {                           // OK
+                        resourceType: "Encounter",         // OK
+                        serviceProvider: {
+                            resourceType: "Organization"
+                        }
+                    },                                     // OK
+                    subject: {                             // OK
+                        resourceType: "Patient"            // OK
+                    }                                      // OK
                 });
             });
         });
@@ -1714,50 +1791,6 @@ describe("FHIR.client", () => {
     //     //         type: "Patient"
     //     //     });
     //     // });
-    // });
-
-    // // it ("user.read");
-    // // it ("getBinary");
-    // // it ("fetchBinary");
-
-    // it ("handles json responses with no body", async () => {
-    //     const client = new FhirClient({
-    //         serviceUrl: mockUrl
-    //     });
-
-    //     mockServer.mock({
-    //         headers: {
-    //             "content-type": "application/json"
-    //         },
-    //         status: 201
-    //     });
-
-    //     const data = await client.request("Patient/5").catch(() => {
-    //         throw new Error("json response with no body should not throw");
-    //     });
-
-    //     expect(data).to.equal(null);
-
-    //     // console.log(client)
-    //     //     .catch(ex => { failure = ex });
-
-    //     // // console.log(failure)
-    //     // expect(failure).to.be.an.error();
-    //     // expect(failure.name).to.equal("HTTPError");
-    //     // expect(failure.status).to.equal(404);
-    //     // expect(failure.statusCode).to.equal(404);
-    //     // expect(failure.statusText).to.equal("Not Found");
-    //     // expect(failure.message).to.equal("Could not fetch Patient NoSuchId");
-
-    //     // expect(client.get({ resource: "Patient", id: "NoSuchId" })).to.reject()
-    //     // .fail(
-    //     //     // function() {
-    //     //     //     console.log("success", arguments);
-    //     //     // },
-    //     //     function() {
-    //     //         console.log("error", arguments);
-    //     //     }
-    //     // );
     // });
 
 });

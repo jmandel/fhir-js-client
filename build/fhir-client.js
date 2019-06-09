@@ -7696,10 +7696,6 @@ if (!self.fetch) {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -7709,6 +7705,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 var _require = __webpack_require__(/*! ./lib */ "./src/lib.js"),
     fetchJSON = _require.fetchJSON,
@@ -7724,6 +7724,136 @@ var _require = __webpack_require__(/*! ./lib */ "./src/lib.js"),
     _byCode = _require.byCode,
     _byCodes = _require.byCodes,
     units = _require.units;
+/**
+ * Gets single reference by id. Caches the result.
+ * @param {String} refId
+ * @param {Object} cache A map to store the resolved refs
+ */
+
+
+function getRef(_x, _x2, _x3) {
+  return _getRef.apply(this, arguments);
+}
+/**
+ * Resolves a reference in the given resource.
+ * @param {Object} obj FHIR Resource
+ */
+
+
+function _getRef() {
+  _getRef = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee4(refId, cache, client) {
+    var sub;
+    return regeneratorRuntime.wrap(function _callee4$(_context4) {
+      while (1) {
+        switch (_context4.prev = _context4.next) {
+          case 0:
+            sub = cache[refId];
+
+            if (sub) {
+              _context4.next = 3;
+              break;
+            }
+
+            return _context4.abrupt("return", client.request(refId).then(function (sub) {
+              cache[refId] = sub;
+              return sub;
+            }));
+
+          case 3:
+            return _context4.abrupt("return", sub);
+
+          case 4:
+          case "end":
+            return _context4.stop();
+        }
+      }
+    }, _callee4);
+  }));
+  return _getRef.apply(this, arguments);
+}
+
+function resolveRef(obj, path, graph, cache, client) {
+  var node = _getPath(obj, path);
+
+  if (node) {
+    var isArray = Array.isArray(node);
+    return Promise.all(makeArray(node).map(function (item, i) {
+      var ref = item.reference;
+
+      if (ref) {
+        return getRef(ref, cache, client).then(function (sub) {
+          if (graph) {
+            if (isArray) {
+              setPath(obj, "".concat(path, ".").concat(i), sub);
+            } else {
+              setPath(obj, path, sub);
+            }
+          }
+        });
+      }
+    }));
+  }
+}
+/**
+ * Given a resource and a list of ref paths - resolves them all
+ * @param {Object} obj FHIR Resource
+ * @param {Object} fhirOptions The fhir options of the initiating request call
+ * @param {Object} cache A map to store fetched refs
+ * @param {FhirClient} client The client instance
+ * @private
+ */
+
+
+function resolveRefs(obj, fhirOptions, cache, client) {
+  // 1. Sanitize paths, remove any invalid ones
+  var paths = makeArray(fhirOptions.resolveReferences).filter(Boolean) // No false, 0, null, undefined or ""
+  .map(function (path) {
+    return String(path).trim();
+  }).filter(Boolean); // No space-only strings
+  // 2. Remove duplicates
+
+  paths = paths.filter(function (p, i) {
+    var index = paths.indexOf(p, i + 1);
+
+    if (index > -1) {
+      debug("[client.request] Duplicated reference path \"".concat(p, "\""));
+      return false;
+    }
+
+    return true;
+  }); // 3. Early exit if no valid paths are found
+
+  if (!paths.length) {
+    return Promise.resolve();
+  } // 4. Group the paths by depth so that child refs are looked up
+  // after their parents!
+
+
+  var groups = {};
+  paths.forEach(function (path) {
+    var len = path.split(".").length;
+
+    if (!groups[len]) {
+      groups[len] = [];
+    }
+
+    groups[len].push(path);
+  }); // 5. Execute groups sequentially! Paths within same group are
+  // fetched in parallel!
+
+  var task = Promise.resolve();
+  Object.keys(groups).sort().forEach(function (len) {
+    var group = groups[len];
+    task = task.then(function () {
+      return Promise.all(group.map(function (path) {
+        return resolveRef(obj, path, fhirOptions.graph, cache, client);
+      }));
+    });
+  });
+  return task;
+}
 
 var FhirClient =
 /*#__PURE__*/
@@ -8100,14 +8230,8 @@ function () {
                   requestOptions.headers = _objectSpread({}, requestOptions.headers, {
                     Authorization: authHeader
                   });
-                } // fhirOptions.resolveReferences ---------------------------------------
+                } // fhirOptions.graph ---------------------------------------------------
 
-
-                if (!Array.isArray(fhirOptions.resolveReferences)) {
-                  fhirOptions.resolveReferences = [fhirOptions.resolveReferences];
-                }
-
-                fhirOptions.resolveReferences = fhirOptions.resolveReferences.filter(Boolean).map(String); // fhirOptions.graph ---------------------------------------------------
 
                 fhirOptions.graph = fhirOptions.graph !== false; // fhirOptions.pageLimit -----------------------------------------------
 
@@ -8141,81 +8265,32 @@ function () {
                   var _ref = _asyncToGenerator(
                   /*#__PURE__*/
                   regeneratorRuntime.mark(function _callee(data) {
-                    var getRef, resolve;
                     return regeneratorRuntime.wrap(function _callee$(_context) {
                       while (1) {
                         switch (_context.prev = _context.next) {
                           case 0:
-                            /**
-                             * Gets single reference by id. Caches the result in _resolvedRefs
-                             * @param {String} refId
-                             */
-                            getRef = function getRef(refId) {
-                              var sub = _resolvedRefs[refId];
-
-                              if (!sub) {
-                                return _this2.request(refId).then(function (sub) {
-                                  _resolvedRefs[refId] = sub;
-                                  return sub;
-                                });
-                              }
-
-                              return sub;
-                            };
-                            /**
-                             * Resolve all refs (specified in fhirOptions.resolveReferences)
-                             * in the given resource.
-                             * @param {Object} obj FHIR Resource
-                             */
-
-
-                            resolve = function resolve(obj) {
-                              return Promise.all(fhirOptions.resolveReferences.map(function (path) {
-                                var node = _getPath(obj, path);
-
-                                if (node) {
-                                  var isArray = Array.isArray(node);
-                                  return Promise.all(makeArray(node).map(function (item, i) {
-                                    var ref = item.reference;
-
-                                    if (ref) {
-                                      return getRef(ref).then(function (sub) {
-                                        if (fhirOptions.graph) {
-                                          if (isArray) {
-                                            setPath(obj, "".concat(path, ".").concat(i), sub);
-                                          } else {
-                                            setPath(obj, path, sub);
-                                          }
-                                        }
-                                      });
-                                    }
-                                  }));
-                                }
-                              }));
-                            };
-
                             if (!(data && data.resourceType == "Bundle")) {
-                              _context.next = 7;
+                              _context.next = 5;
                               break;
                             }
 
-                            _context.next = 5;
+                            _context.next = 3;
                             return Promise.all((data.entry || []).map(function (item) {
-                              return resolve(item.resource);
+                              return resolveRefs(item.resource, fhirOptions, _resolvedRefs, _this2);
                             }));
 
-                          case 5:
-                            _context.next = 9;
+                          case 3:
+                            _context.next = 7;
                             break;
 
-                          case 7:
-                            _context.next = 9;
-                            return resolve(data);
+                          case 5:
+                            _context.next = 7;
+                            return resolveRefs(data, fhirOptions, _resolvedRefs, _this2);
 
-                          case 9:
+                          case 7:
                             return _context.abrupt("return", data);
 
-                          case 10:
+                          case 8:
                           case "end":
                             return _context.stop();
                         }
@@ -8223,7 +8298,7 @@ function () {
                     }, _callee);
                   }));
 
-                  return function (_x2) {
+                  return function (_x5) {
                     return _ref.apply(this, arguments);
                   };
                 }()) // Pagination ------------------------------------------------------
@@ -8282,7 +8357,7 @@ function () {
                             return _context2.abrupt("return", null);
 
                           case 14:
-                            if (!fhirOptions.resolveReferences.length) {
+                            if (!(fhirOptions.resolveReferences && fhirOptions.resolveReferences.length)) {
                               _context2.next = 17;
                               break;
                             }
@@ -8305,7 +8380,7 @@ function () {
                     }, _callee2);
                   }));
 
-                  return function (_x3) {
+                  return function (_x6) {
                     return _ref2.apply(this, arguments);
                   };
                 }()) // Finalize --------------------------------------------------------
@@ -8322,7 +8397,7 @@ function () {
                   return data;
                 }));
 
-              case 15:
+              case 13:
               case "end":
                 return _context3.stop();
             }
@@ -8330,7 +8405,7 @@ function () {
         }, _callee3, this);
       }));
 
-      function request(_x) {
+      function request(_x4) {
         return _request.apply(this, arguments);
       }
 

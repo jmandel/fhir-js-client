@@ -14,6 +14,101 @@ const {
     units
 } = require("./lib");
 
+/**
+ * Gets single reference by id. Caches the result.
+ * @param {String} refId
+ * @param {Object} cache A map to store the resolved refs
+ */
+async function getRef(refId, cache, client) {
+    let sub = cache[refId];
+    if (!sub) {
+        return client.request(refId).then(sub => {
+            cache[refId] = sub;
+            return sub;
+        });
+    }
+    return sub;
+}
+
+/**
+ * Resolves a reference in the given resource.
+ * @param {Object} obj FHIR Resource
+ */
+function resolveRef(obj, path, graph, cache, client) {
+    const node = getPath(obj, path);
+    if (node) {
+        const isArray = Array.isArray(node);
+        return Promise.all(makeArray(node).map((item, i) => {
+            const ref = item.reference;
+            if (ref) {
+                return getRef(ref, cache, client).then(sub => {
+                    if (graph) {
+                        if (isArray) {
+                            setPath(obj, `${path}.${i}`, sub);
+                        } else {
+                            setPath(obj, path, sub);
+                        }
+                    }
+                });
+            }
+        }));
+    }
+}
+
+/**
+ * Given a resource and a list of ref paths - resolves them all
+ * @param {Object} obj FHIR Resource
+ * @param {Object} fhirOptions The fhir options of the initiating request call
+ * @param {Object} cache A map to store fetched refs
+ * @param {FhirClient} client The client instance
+ * @private
+ */
+function resolveRefs(obj, fhirOptions, cache, client) {
+
+    // 1. Sanitize paths, remove any invalid ones
+    let paths = makeArray(fhirOptions.resolveReferences)
+        .filter(Boolean) // No false, 0, null, undefined or ""
+        .map(path => String(path).trim())
+        .filter(Boolean); // No space-only strings
+
+    // 2. Remove duplicates
+    paths = paths.filter((p, i) => {
+        let index = paths.indexOf(p, i + 1);
+        if (index > -1) {
+            debug(`[client.request] Duplicated reference path "${p}"`);
+            return false;
+        }
+        return true;
+    });
+
+    // 3. Early exit if no valid paths are found
+    if (!paths.length) {
+        return Promise.resolve();
+    }
+
+    // 4. Group the paths by depth so that child refs are looked up
+    // after their parents!
+    const groups = {};
+    paths.forEach(path => {
+        const len = path.split(".").length;
+        if (!groups[len]) {
+            groups[len] = [];
+        }
+        groups[len].push(path);
+    });
+
+    // 5. Execute groups sequentially! Paths within same group are
+    // fetched in parallel!
+    let task = Promise.resolve();
+    Object.keys(groups).sort().forEach(len => {
+        const group = groups[len];
+        task = task.then(() => Promise.all(group.map(path => {
+            return resolveRef(obj, path, fhirOptions.graph, cache, client);
+        })));
+    });
+    return task;
+}
+
 class FhirClient
 {
     /**
@@ -379,12 +474,6 @@ class FhirClient
             };
         }
 
-        // fhirOptions.resolveReferences ---------------------------------------
-        if (!Array.isArray(fhirOptions.resolveReferences)) {
-            fhirOptions.resolveReferences = [fhirOptions.resolveReferences];
-        }
-        fhirOptions.resolveReferences = fhirOptions.resolveReferences.filter(Boolean).map(String);
-
         // fhirOptions.graph ---------------------------------------------------
         fhirOptions.graph = (fhirOptions.graph !== false);
 
@@ -417,53 +506,20 @@ class FhirClient
             // Resolve References ----------------------------------------------
             .then(async (data) => {
 
-                /**
-                 * Gets single reference by id. Caches the result in _resolvedRefs
-                 * @param {String} refId
-                 */
-                const getRef = refId => {
-                    let sub = _resolvedRefs[refId];
-                    if (!sub) {
-                        return this.request(refId).then(sub => {
-                            _resolvedRefs[refId] = sub;
-                            return sub;
-                        });
-                    }
-                    return sub;
-                };
-
-                /**
-                 * Resolve all refs (specified in fhirOptions.resolveReferences)
-                 * in the given resource.
-                 * @param {Object} obj FHIR Resource
-                 */
-                const resolve = obj => {
-                    return Promise.all(fhirOptions.resolveReferences.map(path => {
-                        const node = getPath(obj, path);
-                        if (node) {
-                            const isArray = Array.isArray(node);
-                            return Promise.all(makeArray(node).map((item, i) => {
-                                const ref = item.reference;
-                                if (ref) {
-                                    return getRef(ref).then(sub => {
-                                        if (fhirOptions.graph) {
-                                            if (isArray) {
-                                                setPath(obj, `${path}.${i}`, sub);
-                                            } else {
-                                                setPath(obj, path, sub);
-                                            }
-                                        }
-                                    });
-                                }
-                            }));
-                        }
-                    }));
-                };
-
                 if (data && data.resourceType == "Bundle") {
-                    await Promise.all((data.entry || []).map(item => resolve(item.resource)));
+                    await Promise.all((data.entry || []).map(item => resolveRefs(
+                        item.resource,
+                        fhirOptions,
+                        _resolvedRefs,
+                        this
+                    )));
                 } else {
-                    await resolve(data);
+                    await resolveRefs(
+                        data,
+                        fhirOptions,
+                        _resolvedRefs,
+                        this
+                    );
                 }
 
                 return data;
@@ -492,7 +548,7 @@ class FhirClient
                                 return null;
                             }
                             // console.log("===>", nextPage);
-                            if (fhirOptions.resolveReferences.length) {
+                            if (fhirOptions.resolveReferences && fhirOptions.resolveReferences.length) {
                                 Object.assign(_resolvedRefs, nextPage.references);
                                 // console.log("===>", nextPage);
                                 return data.concat(makeArray(nextPage.data || nextPage));
