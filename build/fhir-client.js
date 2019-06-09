@@ -7696,6 +7696,10 @@ if (!self.fetch) {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -7705,10 +7709,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 var _require = __webpack_require__(/*! ./lib */ "./src/lib.js"),
     fetchJSON = _require.fetchJSON,
@@ -7728,51 +7728,36 @@ var _require = __webpack_require__(/*! ./lib */ "./src/lib.js"),
  * Gets single reference by id. Caches the result.
  * @param {String} refId
  * @param {Object} cache A map to store the resolved refs
+ * @param {FhirClient} client The client instance
+ * @returns {Promise<Object>} The resolved reference
+ * @private
  */
 
 
-function getRef(_x, _x2, _x3) {
-  return _getRef.apply(this, arguments);
+function getRef(refId, cache, client) {
+  var sub = cache[refId];
+
+  if (!sub) {
+    // Note that we set cache[refId] immediately! When the promise is settled
+    // it will be updated. This is to avoid a ref being fetched twice because
+    // some of these requests are executed in parallel.
+    cache[refId] = client.request(refId).then(function (sub) {
+      cache[refId] = sub;
+      return sub;
+    }, function (error) {
+      delete cache[refId];
+      throw error;
+    });
+    return cache[refId];
+  }
+
+  return sub;
 }
 /**
  * Resolves a reference in the given resource.
  * @param {Object} obj FHIR Resource
  */
 
-
-function _getRef() {
-  _getRef = _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee4(refId, cache, client) {
-    var sub;
-    return regeneratorRuntime.wrap(function _callee4$(_context4) {
-      while (1) {
-        switch (_context4.prev = _context4.next) {
-          case 0:
-            sub = cache[refId];
-
-            if (sub) {
-              _context4.next = 3;
-              break;
-            }
-
-            return _context4.abrupt("return", client.request(refId).then(function (sub) {
-              cache[refId] = sub;
-              return sub;
-            }));
-
-          case 3:
-            return _context4.abrupt("return", sub);
-
-          case 4:
-          case "end":
-            return _context4.stop();
-        }
-      }
-    }, _callee4);
-  }));
-  return _getRef.apply(this, arguments);
-}
 
 function resolveRef(obj, path, graph, cache, client) {
   var node = _getPath(obj, path);
@@ -7791,6 +7776,8 @@ function resolveRef(obj, path, graph, cache, client) {
               setPath(obj, path, sub);
             }
           }
+        }).catch(function () {
+          /* ignore */
         });
       }
     }));
@@ -8298,7 +8285,7 @@ function () {
                     }, _callee);
                   }));
 
-                  return function (_x5) {
+                  return function (_x2) {
                     return _ref.apply(this, arguments);
                   };
                 }()) // Pagination ------------------------------------------------------
@@ -8362,8 +8349,7 @@ function () {
                               break;
                             }
 
-                            Object.assign(_resolvedRefs, nextPage.references); // console.log("===>", nextPage);
-
+                            Object.assign(_resolvedRefs, nextPage.references);
                             return _context2.abrupt("return", data.concat(makeArray(nextPage.data || nextPage)));
 
                           case 17:
@@ -8380,7 +8366,7 @@ function () {
                     }, _callee2);
                   }));
 
-                  return function (_x6) {
+                  return function (_x3) {
                     return _ref2.apply(this, arguments);
                   };
                 }()) // Finalize --------------------------------------------------------
@@ -8405,7 +8391,7 @@ function () {
         }, _callee3, this);
       }));
 
-      function request(_x4) {
+      function request(_x) {
         return _request.apply(this, arguments);
       }
 

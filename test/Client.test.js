@@ -592,6 +592,102 @@ describe("FHIR.client", () => {
             });
         });
 
+        describe ("does not fetch the same ref twice", async () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        patient: { reference: "ref/1" },
+                        subject: { reference: "ref/1" }
+                    }
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: { resourceType: "Patient" }
+                });
+
+                const result = await client.request("Observation/id", {
+                    resolveReferences: [ "patient", "subject" ]
+                });
+
+                expect(result).to.equal({
+                    patient: { resourceType: "Patient" },
+                    subject: { resourceType: "Patient" }
+                });
+            });
+        });
+
+        describe ("ignores missing ref", async () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        patient: { reference: "ref/1" }
+                    }
+                });
+
+                mockServer.mock({
+                    status: 404,
+                    body: "Not Found"
+                });
+
+                const result = await client.request("Observation/id", {
+                    resolveReferences: "patient"
+                });
+
+                expect(result).to.equal({
+                    patient: { reference: "ref/1" }
+                });
+            });
+        });
+
+        describe ("warns about duplicate ref paths", async () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        patient: { reference: "ref/1" }
+                    }
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: { resourceType: "Patient" }
+                });
+
+                const result = await client.request("Observation/id", {
+                    resolveReferences: ["patient", "patient"]
+                });
+
+                expect(result).to.equal({
+                    patient: { resourceType: "Patient" }
+                });
+
+                expect(debugLog.find(
+                    o => o[0] === "[client.request] Duplicated reference path \"patient\""
+                )).to.exist();
+            });
+        });
+
+
         describe ("can resolve nested refs", () => {
             crossPlatformTest(async (env) => {
                 const client = new Client(env, {
@@ -655,16 +751,16 @@ describe("FHIR.client", () => {
                 });
 
                 expect(result).to.equal({
-                    resourceType: "Observation",           // OK
-                    encounter: {                           // OK
-                        resourceType: "Encounter",         // OK
+                    resourceType: "Observation",
+                    encounter: {
+                        resourceType: "Encounter",
                         serviceProvider: {
                             resourceType: "Organization"
                         }
-                    },                                     // OK
-                    subject: {                             // OK
-                        resourceType: "Patient"            // OK
-                    }                                      // OK
+                    },
+                    subject: {
+                        resourceType: "Patient"
+                    }
                 });
             });
         });

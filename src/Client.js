@@ -18,14 +18,24 @@ const {
  * Gets single reference by id. Caches the result.
  * @param {String} refId
  * @param {Object} cache A map to store the resolved refs
+ * @param {FhirClient} client The client instance
+ * @returns {Promise<Object>} The resolved reference
+ * @private
  */
-async function getRef(refId, cache, client) {
+function getRef(refId, cache, client) {
     let sub = cache[refId];
     if (!sub) {
-        return client.request(refId).then(sub => {
+        // Note that we set cache[refId] immediately! When the promise is settled
+        // it will be updated. This is to avoid a ref being fetched twice because
+        // some of these requests are executed in parallel.
+        cache[refId] = client.request(refId).then(sub => {
             cache[refId] = sub;
             return sub;
+        }, error => {
+            delete cache[refId];
+            throw error;
         });
+        return cache[refId];
     }
     return sub;
 }
@@ -49,7 +59,7 @@ function resolveRef(obj, path, graph, cache, client) {
                             setPath(obj, path, sub);
                         }
                     }
-                });
+                }).catch(() => { /* ignore */ });
             }
         }));
     }
@@ -547,10 +557,9 @@ class FhirClient
                             if (hasPageCallback) {
                                 return null;
                             }
-                            // console.log("===>", nextPage);
+
                             if (fhirOptions.resolveReferences && fhirOptions.resolveReferences.length) {
                                 Object.assign(_resolvedRefs, nextPage.references);
-                                // console.log("===>", nextPage);
                                 return data.concat(makeArray(nextPage.data || nextPage));
                             }
                             return data.concat(makeArray(nextPage));
