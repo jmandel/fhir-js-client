@@ -118,16 +118,24 @@ query.set("_count", 10);
 client.request(`Patient?${query}`);
 
 
-// Another example - comma-separated list of codes makes an OR query
-const query = new URLSearchParams();
-query.set("code", [
-    'http://loinc.org|29463-7', // weight
-    'http://loinc.org|3141-9' , // weight
-    'http://loinc.org|8302-2' , // Body height
-    'http://loinc.org|8306-3' , // Body height --lying
-    'http://loinc.org|8287-5' , // headC
-    'http://loinc.org|39156-5', // BMI 39156-5
-    'http://loinc.org|37362-1', // bone age
-].join(","));
-client.request(`Observation?${query}`);
+// Real-life example borrowed from the Growth Chart App
+function fetchVitals(client) {
+    var query = new URLSearchParams();
+    query.set("patient", client.patient.id);
+    query.set("code", [
+        'http://loinc.org|29463-7', // weight
+        'http://loinc.org|3141-9' , // weight
+        'http://loinc.org|8302-2' , // Body height
+        'http://loinc.org|8306-3' , // Body height --lying
+        'http://loinc.org|8287-5' , // headC
+        'http://loinc.org|39156-5', // BMI 39156-5
+        'http://loinc.org|18185-9', // gestAge
+        'http://loinc.org|37362-1', // bone age
+        'http://loinc.org|11884-4'  // gestAge
+    ].join(","));
+    return client.request("Observation?" + query, {
+        pageLimit: 0,   // get all pages
+        flat     : true // return flat array of Observation resources
+    });
+}
 ```
