@@ -49,7 +49,7 @@ npm i fhirclient
 ## Browser Usage
 
 In the browser you need to include the library via script tag. You typically
-have to create two separate pages that correspond the your
+have to create two separate pages that correspond to your
 `launch_uri` (Launch Page) and `redirect_uri` (Index Page).
 
 **Launch Page**
@@ -78,7 +78,7 @@ FHIR.oauth2.ready()
 
 ## Server Usage
 The server is fundamentally different environment than the browser but the
-API is very similar. Here is a simple express example:
+API is very similar. Here is a simple Express example:
 ```js
 const fhirClient = require("fhirclient");
 
@@ -124,8 +124,10 @@ Read the [SMART API Documentation](api)
    
 
 ## Client
-This is a FHIR client that is returned to you from the `ready()` SMART API call.
-You can also create it yourself if needed:
+This is a FHIR client that is returned to you from the `ready()` or the `init()`
+SMART API calls. You can also create it yourself if needed. For example, there
+is no need to authorize against an open FHIR server. You can skip that and start
+by creating a client instance:
 ```js
 // BROWSER
 const client = FHIR.client({
