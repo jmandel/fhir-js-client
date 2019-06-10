@@ -33,7 +33,7 @@ The **fhirOptions** object is optional and can contain the following properties:
 - **onPage** `Function` - When you fetch multiple pages the result array might be huge. That could take a lot of time and memory. It is often better if you specify a page callback instead. The `onPage` callback will be called once for each page with the page Bundle as it's argument. If you use `resolveReferences` and `graph: false`, the references will be passed to `onPage` as second argument.
     - If `onPage` returns a promise it will be awaited for, meaning that no more pages will be fetched until the `onPage` promise is resolved.
     - If `onPage` returns a rejected promise or throws an error, the client will not continue fetching more pages.
-    - If you use an `onPage` callback options the promise returned by `request()` will be resolved with `null`. This is to avoid building that huge array in memory. By using the `onPage` option you are stating that you will handle the result one page at a time, instead of expecting to receive big combined result.
+    - If you use `onPage` callback, the promise returned by `request()` will be resolved with `null`. This is to avoid building that huge array in memory. By using the `onPage` option you are stating that you will handle the result one page at a time, instead of expecting to receive the big combined result.
 - **flat** `Boolean` When fetching a `Bundle`, you are typically only interested in the included resources which are located at `{response}.entry[N].resource`. If this option is set to `true`, the returned result will be an array of resources instead of the whole bundle. This is especially useful when multiple pages are fetched, because an array of page bundles is not that useful and will often have to be converted to array of resources that is easier to iterate.
     - This option is ignored if the response is not a bundle.
     - If you use `onPage` callback with `flat: true`, it will receive that array of resources instead of the page bundle.
@@ -138,7 +138,7 @@ Resolves with the updated state or rejects with an error.
 
 ### client.api `Object`
 
-Only accessible if fhir.js is available. Read more about the fhir.js integration here.
+Only accessible if fhir.js is available. Read more about the fhir.js integration [here](README.md#fhirjs-integration).
 
 ### client.patient.id `String|null`
 
@@ -149,7 +149,7 @@ Fetches the selected patient resource (if available). Resolves with the patient 
 
 ### client.patient.api `Object`
 
-Only accessible if fhir.js is available. Read more about the fhir.js integration here.
+Only accessible if fhir.js is available. Read more about the fhir.js integration [here](README.md#fhirjs-integration).
 
 ### client.encounter.id `String|null`
 
