@@ -17,13 +17,21 @@ It exposes the following API:
 ### `client.getUserId()`
 ### `client.getUserType()`
 -->
-### client.request(requestOptions[, fhirOptions]) `Promise<Object>`
+### client.request(uri: String[, fhirOptions: Object]) `Promise<Object>`
+or
+### client.request(url: URL[, fhirOptions: Object]) `Promise<Object>`
+or
+### client.request(options: Object[, fhirOptions: Object]) `Promise<Object>`
 
 > This is the single most important method. Please see the **[live examples](http://docs.smarthealthit.org/client-js/request.html)**.
 
-The **requestOptions** can be a `String` URL, or an `URL instance` or an object having an `url` property. The `url` can be relative path that will be appended to your base URL. Using a full http URL will also work, as long as it is on the same domain as your base URL. Any other option will be passed to the underlying `fetch()` call.
+The first argument can be one of:
+- **String** - either the full url, or a path that will be rooted at the FHIR baseUrl.
+- **URL** - an URL instance.
+- **Object** - options that must contain an `url` property (`String|URL`). Any other properties will be passed to the underlying `fetch()` call.
 
-The **fhirOptions** object can contain the following properties:
+
+The **fhirOptions** object is optional and can contain the following properties:
 
 - **pageLimit** `Number` - When you request a Bundle, the result will typically come back in pages and you will only get the first page. You can set this to number bigger than `1` to request multiple pages. For example `pageLimit: 3` will give you the first 3 pages as array. To fetch all the available pages you can set this to `0`. **Defaults to `1`**. Ignored if the response is not a `Bundle`.
 - **onPage** `Function` - When you fetch multiple pages the result array might be huge. That could take a lot of time and memory. It is often better if you specify a page callback instead. The `onPage` callback will be called once for each page with the page Bundle as it's argument. If you use `resolveReferences` and `graph: false`, the references will be passed to `onPage` as second argument.
