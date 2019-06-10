@@ -30,6 +30,12 @@ The **fhirOptions** object can contain the following properties:
     - If `onPage` returns a promise it will be awaited for, meaning that no more pages will be fetched until the `onPage` promise is resolved.
     - If `onPage` returns a rejected promise or throws an error, the client will not continue fetching more pages.
     - If you use an `onPage` callback options the promise returned by `request()` will be resolved with `null`. This is to avoid building that huge array in memory. By using the `onPage` option you are stating that you will handle the result one page at a time, instead of expecting to receive big combined result.
+- **flat** `Boolean` When fetching a `Bundle`, you are typically only interested in the included resources which are located at `{response}.entry[N].resource`. If this option is set to `true`, the returned result will be an array of resources instead of the whole bundle. This is especially useful when multiple pages are fetched, because an array of page bundles is not that useful and will often have to be converted to array of resources that is easier to iterate.
+    - This option is ignored if the response is not a bundle.
+    - If you use `onPage` callback with `flat: true`, it will receive that array of resources instead of the page bundle.
+    - Resources from multiple pages are flattened into single array (unless you use `onPage`, which will be called with one array for each page).
+    - Defaults to `false`.
+    - Finally, `Bundle.entry` is optional in FHIR and that leads to bugs in apps that assume that it is always present. With `flat: true`, you will always get an array, even if it is empty, and even if no `entry` is found in the response bundle.
 - **graph** `Boolean` - Only applicable if you use `resolveReferences`. If `false`, the resolved references will not be "mounted" in the result tree, but will be returned as separate map object instead. **Defaults to `true`**.
 - **resolveReferences** `String|String[]` - One or more references to resolve. Single item can be specified as a string or as an array of one string. Multiple items must be specified as array.
     - Each item is a dot-separated path to the desired reference within the result object, excluding the "reference" property. For example `context.serviceProvider` will look for `{Response}.context.serviceProvider.reference`.

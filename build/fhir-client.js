@@ -8220,7 +8220,9 @@ function () {
                 } // fhirOptions.graph ---------------------------------------------------
 
 
-                fhirOptions.graph = fhirOptions.graph !== false; // fhirOptions.pageLimit -----------------------------------------------
+                fhirOptions.graph = fhirOptions.graph !== false; // fhirOptions.flat ---------------------------------------------
+
+                fhirOptions.flat = !!fhirOptions.flat; // fhirOptions.pageLimit -----------------------------------------------
 
                 if (!fhirOptions.pageLimit && fhirOptions.pageLimit !== 0) {
                   fhirOptions.pageLimit = 1;
@@ -8301,64 +8303,71 @@ function () {
                         switch (_context2.prev = _context2.next) {
                           case 0:
                             if (!(data && data.resourceType == "Bundle")) {
-                              _context2.next = 18;
-                              break;
-                            }
-
-                            if (!hasPageCallback) {
-                              _context2.next = 4;
-                              break;
-                            }
-
-                            _context2.next = 4;
-                            return fhirOptions.onPage(data, _objectSpread({}, _resolvedRefs));
-
-                          case 4:
-                            if (! --fhirOptions.pageLimit) {
-                              _context2.next = 18;
+                              _context2.next = 19;
                               break;
                             }
 
                             links = data.link || [];
+
+                            if (fhirOptions.flat) {
+                              data = (data.entry || []).map(function (entry) {
+                                return entry.resource;
+                              });
+                            }
+
+                            if (!hasPageCallback) {
+                              _context2.next = 6;
+                              break;
+                            }
+
+                            _context2.next = 6;
+                            return fhirOptions.onPage(data, _objectSpread({}, _resolvedRefs));
+
+                          case 6:
+                            if (! --fhirOptions.pageLimit) {
+                              _context2.next = 19;
+                              break;
+                            }
+
                             next = links.find(function (l) {
                               return l.relation == "next";
                             });
                             data = makeArray(data); // console.log("===>", data);
 
                             if (!(next && next.url)) {
-                              _context2.next = 18;
+                              _context2.next = 19;
                               break;
                             }
 
-                            _context2.next = 11;
+                            _context2.next = 12;
                             return _this2.request(next.url, fhirOptions, _resolvedRefs);
 
-                          case 11:
+                          case 12:
                             nextPage = _context2.sent;
 
                             if (!hasPageCallback) {
-                              _context2.next = 14;
+                              _context2.next = 15;
                               break;
                             }
 
                             return _context2.abrupt("return", null);
 
-                          case 14:
+                          case 15:
                             if (!(fhirOptions.resolveReferences && fhirOptions.resolveReferences.length)) {
-                              _context2.next = 17;
+                              _context2.next = 18;
                               break;
                             }
 
                             Object.assign(_resolvedRefs, nextPage.references);
                             return _context2.abrupt("return", data.concat(makeArray(nextPage.data || nextPage)));
 
-                          case 17:
+                          case 18:
                             return _context2.abrupt("return", data.concat(makeArray(nextPage)));
 
-                          case 18:
+                          case 19:
                             return _context2.abrupt("return", data);
 
-                          case 19:
+                          case 20:
                           case "end":
                             return _context2.stop();
                         }
@@ -8383,7 +8392,7 @@ function () {
                   return data;
                 }));
 
-              case 13:
+              case 14:
               case "end":
                 return _context3.stop();
             }

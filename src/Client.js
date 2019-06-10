@@ -487,6 +487,9 @@ class FhirClient
         // fhirOptions.graph ---------------------------------------------------
         fhirOptions.graph = (fhirOptions.graph !== false);
 
+        // fhirOptions.flat ---------------------------------------------
+        fhirOptions.flat = !!fhirOptions.flat;
+
         // fhirOptions.pageLimit -----------------------------------------------
         if (!fhirOptions.pageLimit && fhirOptions.pageLimit !== 0) {
             fhirOptions.pageLimit = 1;
@@ -523,7 +526,16 @@ class FhirClient
                         _resolvedRefs,
                         this
                     )));
-                } else {
+                }
+                // else if (Array.isArray(data)) {
+                //     await Promise.all(data.map(item => resolveRefs(
+                //         item.resource,
+                //         fhirOptions,
+                //         _resolvedRefs,
+                //         this
+                //     )));
+                // }
+                else {
                     await resolveRefs(
                         data,
                         fhirOptions,
@@ -538,12 +550,17 @@ class FhirClient
             // Pagination ------------------------------------------------------
             .then(async (data) => {
                 if (data && data.resourceType == "Bundle") {
+                    const links = data.link || [];
+
+                    if (fhirOptions.flat) {
+                        data = (data.entry || []).map(entry => entry.resource);
+                    }
+
                     if (hasPageCallback) {
                         await fhirOptions.onPage(data, { ..._resolvedRefs });
                     }
 
                     if (--fhirOptions.pageLimit) {
-                        const links = data.link || [];
                         const next = links.find(l => l.relation == "next");
                         data = makeArray(data);
                         // console.log("===>", data);

@@ -349,7 +349,7 @@ describe("FHIR.client", () => {
             });
         });
 
-        describe ("returns aan array if pageLimit is different than 1, even if there is only one page", () => {
+        describe ("returns an array if pageLimit is different than 1, even if there is only one page", () => {
             crossPlatformTest(async (env) => {
                 const client = new Client(env, { serverUrl: mockUrl });
                 mockServer.mock({
@@ -686,7 +686,6 @@ describe("FHIR.client", () => {
                 )).to.exist();
             });
         });
-
 
         describe ("can resolve nested refs", () => {
             crossPlatformTest(async (env) => {
@@ -1319,7 +1318,427 @@ describe("FHIR.client", () => {
                 });
             });
         });
+
+        // flat ----------------------------------------------------------------
+
+        describe("flat", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, mockUrl);
+
+                // Main page
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Bundle",
+                        entry: [
+                            { resource: "resource-1" },
+                            { resource: "resource-2" }
+                        ]
+                    }
+                });
+
+                const result = await client.request("/Patient/id", { flat: true });
+
+                expect(result).to.equal([
+                    "resource-1",
+                    "resource-2"
+                ]);
+            });
+        });
+
+        describe("flat on multiple pages", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, mockUrl);
+
+                // Page 1
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Bundle",
+                        link: [{ relation: "next", url: "whatever" }],
+                        entry: [
+                            { resource: "resource-1" },
+                            { resource: "resource-2" }
+                        ]
+                    }
+                });
+
+                // Page 2
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Bundle",
+                        entry: [
+                            { resource: "resource-3" }
+                        ]
+                    }
+                });
+
+                const result = await client.request("/Patient/id", {
+                    flat: true,
+                    pageLimit: 0
+                });
+
+                expect(result).to.equal([
+                    "resource-1",
+                    "resource-2",
+                    "resource-3"
+                ]);
+            });
+        });
+
+        describe("flat on multiple pages with references and onPage", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, mockUrl);
+
+                const results = [];
+
+                // Page 1
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Bundle",
+                        link: [{ relation: "next", url: "whatever" }],
+                        entry: [
+                            { resource: "resource-1" },
+                            {
+                                resource: {
+                                    subject: {
+                                        reference: "Patient/1"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                });
+
+                // Referenced page 1
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Patient",
+                        id: "Patient-1"
+                    }
+                });
+
+                // Page 2
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Bundle",
+                        link: [{ relation: "next", url: "whatever" }],
+                        entry: [
+                            { resource: "resource-3" }
+                        ]
+                    }
+                });
+
+                // Page 3
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Bundle",
+                        entry: [
+                            { resource: "resource-4" },
+                            { resource: "resource-5" }
+                        ]
+                    }
+                });
+
+                const result = await client.request("/Patient/id", {
+                    flat: true,
+                    pageLimit: 0,
+                    resolveReferences: "subject",
+                    onPage: data => results.push(data)
+                });
+
+                expect(result).to.equal(null);
+                expect(results).to.equal([
+                    [
+                        "resource-1",
+                        {
+                            subject: {
+                                resourceType: "Patient",
+                                id: "Patient-1"
+                            }
+                        }
+                    ],
+                    ["resource-3"],
+                    ["resource-4", "resource-5"]
+                ]);
+            });
+
+        });
+
+        describe("flat on multiple pages with references and onPage and graph=false", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, mockUrl);
+
+                const results = [];
+                const references = {};
+
+                // Page 1
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Bundle",
+                        link: [{ relation: "next", url: "whatever" }],
+                        entry: [
+                            { resource: "resource-1" },
+                            {
+                                resource: {
+                                    subject: {
+                                        reference: "Patient/1"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                });
+
+                // Referenced page 1
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Patient",
+                        id: "Patient-1"
+                    }
+                });
+
+                // Page 2
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Bundle",
+                        link: [{ relation: "next", url: "whatever" }],
+                        entry: [
+                            { resource: "resource-3" }
+                        ]
+                    }
+                });
+
+                // Page 3
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Bundle",
+                        entry: [
+                            { resource: "resource-4" },
+                            { resource: "resource-5" }
+                        ]
+                    }
+                });
+
+                const result = await client.request("/Patient/id", {
+                    flat: true,
+                    pageLimit: 0,
+                    resolveReferences: "subject",
+                    graph: false,
+                    onPage: (data, refs) => {
+                        results.push(data);
+                        Object.assign(references, refs);
+                    }
+                });
+
+                expect(result).to.equal(null);
+                expect(results).to.equal([
+                    [ "resource-1", {
+                        subject: {
+                            reference: "Patient/1"
+                        }
+                    } ],
+                    [ "resource-3"               ],
+                    [ "resource-4", "resource-5" ]
+                ]);
+                expect(references).to.equal({
+                    "Patient/1": {
+                        resourceType: "Patient",
+                        id: "Patient-1"
+                    }
+                });
+            });
+
+        });
+
+        describe("flat on multiple pages with references", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, mockUrl);
+
+                // Page 1
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Bundle",
+                        link: [{ relation: "next", url: "whatever" }],
+                        entry: [
+                            { resource: "resource-1" },
+                            {
+                                resource: {
+                                    subject: {
+                                        reference: "Patient/1"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                });
+
+                // Referenced page 1
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Patient",
+                        id: "Patient-1"
+                    }
+                });
+
+                // Page 2
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Bundle",
+                        link: [{ relation: "next", url: "whatever" }],
+                        entry: [
+                            { resource: "resource-3" }
+                        ]
+                    }
+                });
+
+                // Page 3 (this should be ignored because pageLimit is 2)
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Bundle",
+                        entry: [
+                            { resource: "resource-4" },
+                            { resource: "resource-5" }
+                        ]
+                    }
+                });
+
+                const result = await client.request("/Patient/id", {
+                    flat: true,
+                    pageLimit: 2,
+                    resolveReferences: "subject"
+                });
+
+                expect(result).to.equal([
+                    "resource-1",
+                    {
+                        subject: {
+                            resourceType: "Patient",
+                            id: "Patient-1"
+                        }
+                    },
+                    "resource-3"
+                ]);
+            });
+        });
+
+        describe("flat on multiple pages with references and graph=false", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, mockUrl);
+
+                // Page 1
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Bundle",
+                        link: [{ relation: "next", url: "whatever" }],
+                        entry: [
+                            { resource: "resource-1" },
+                            {
+                                resource: {
+                                    subject: {
+                                        reference: "Patient/1"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                });
+
+                // Referenced page 1
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Patient",
+                        id: "Patient-1"
+                    }
+                });
+
+                // Page 2
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Bundle",
+                        link: [{ relation: "next", url: "whatever" }],
+                        entry: [
+                            { resource: "resource-3" }
+                        ]
+                    }
+                });
+
+                // Page 3 (this should be ignored because pageLimit is 2)
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Bundle",
+                        entry: [
+                            { resource: "resource-4" },
+                            { resource: "resource-5" }
+                        ]
+                    }
+                });
+
+                const result = await client.request("/Patient/id", {
+                    flat: true,
+                    pageLimit: 2,
+                    graph: false, 
+                    resolveReferences: "subject"
+                });
+
+                expect(result).to.equal({
+                    data: [
+                        "resource-1",
+                        {
+                            subject: {
+                                reference: "Patient/1"
+                            }
+                        },
+                        "resource-3"
+                    ],
+                    references: {
+                        "Patient/1": {
+                            resourceType: "Patient",
+                            id: "Patient-1"
+                        }
+                    }
+                });
+            });
+        });
     });
+
+    // -------------------------------------------------------------------------
 
     describe ("client.user", () => {
         const id_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJwcm9maWxlIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MjA4MDQxNiIsImZoaXJVc2VyIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MjA4MDQxNiIsInN1YiI6IjM2YTEwYmM0ZDJhNzM1OGI0YWZkYWFhZjlhZjMyYmFjY2FjYmFhYmQxMDkxYmQ0YTgwMjg0MmFkNWNhZGQxNzgiLCJpc3MiOiJodHRwOi8vbGF1bmNoLnNtYXJ0aGVhbHRoaXQub3JnIiwiaWF0IjoxNTU5MzkyMjk1LCJleHAiOjE1NTkzOTU4OTV9.niEs55G4AFJZtU_b9Y1Y6DQmXurUZZkh3WCudZgwvYasxVU8x3gJiX3jqONttqPhkh7418EFssCKnnaBlUDwsbhp7xdWN4o1L1NvH4bp_R_zJ25F1s6jLmNm2Qp9LqU133PEdcRIqQPgBMyZBWUTyxQ9ihKY1RAjlztAULQ3wKea-rfe0BXJZeUJBsQPzYCnbKY1dON_NRd8N9pTImqf41MpIbEe7YEOHuirIb6HBpurhAHjTLDv1IuHpEAOxpmtxVVHiVf-FYXzTFmn4cGe2PsNJfBl8R_zow2n6qaSANdvSxJDE4DUgIJ6H18wiSJJHp6Plf_bapccAwxbx-zZCw";
