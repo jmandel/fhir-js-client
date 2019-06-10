@@ -487,7 +487,7 @@ class FhirClient
         // fhirOptions.graph ---------------------------------------------------
         fhirOptions.graph = (fhirOptions.graph !== false);
 
-        // fhirOptions.flat ---------------------------------------------
+        // fhirOptions.flat ----------------------------------------------------
         fhirOptions.flat = !!fhirOptions.flat;
 
         // fhirOptions.pageLimit -----------------------------------------------
@@ -527,14 +527,6 @@ class FhirClient
                         this
                     )));
                 }
-                // else if (Array.isArray(data)) {
-                //     await Promise.all(data.map(item => resolveRefs(
-                //         item.resource,
-                //         fhirOptions,
-                //         _resolvedRefs,
-                //         this
-                //     )));
-                // }
                 else {
                     await resolveRefs(
                         data,
@@ -625,29 +617,38 @@ class FhirClient
             throw new Error("Trying to refresh but no `offline_access` scope was granted");
         }
 
-        return request(tokenUri, {
-            mode   : "cors",
-            method : "POST",
-            headers: {
-                "content-type": "application/x-www-form-urlencoded"
-            },
-            body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}`
-        }).then(responseToJSON).then(data => {
-            if (!data.access_token) {
-                throw new Error("No access token received");
-            }
-            return data;
-        }).then(data => {
-            debug("[refresh] Received new access token %O", data);
-            Object.assign(this.state.tokenResponse, data);
-            return this.state;
-        }).catch(error => {
-            debug("[refresh] Deleting the expired or invalid refresh token");
-            delete this.state.tokenResponse.refresh_token;
-            throw error;
-        }).finally(() => {
-            this.environment.getStorage().set(this.state.key, this.state);
-        });
+        // This method is typically called internally from `request` if certain
+        // request fails with 401. However, clients will often run multiple
+        // requests in parallel which may result in multiple refresh calls.
+        // To avoid that, we keep a to the current refresh task (if any).
+        if (!this._refreshTask) {
+            this._refreshTask = request(tokenUri, {
+                mode   : "cors",
+                method : "POST",
+                headers: {
+                    "content-type": "application/x-www-form-urlencoded"
+                },
+                body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}`
+            }).then(responseToJSON).then(data => {
+                if (!data.access_token) {
+                    throw new Error("No access token received");
+                }
+                return data;
+            }).then(data => {
+                debug("[refresh] Received new access token %O", data);
+                Object.assign(this.state.tokenResponse, data);
+                return this.state;
+            }).catch(error => {
+                debug("[refresh] Deleting the expired or invalid refresh token");
+                delete this.state.tokenResponse.refresh_token;
+                throw error;
+            }).finally(() => {
+                this._refreshTask = null;
+                this.environment.getStorage().set(this.state.key, this.state);
+            });
+        }
+
+        return this._refreshTask;
     }
 
     // utils -------------------------------------------------------------------
