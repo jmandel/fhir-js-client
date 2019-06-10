@@ -17,11 +17,7 @@ It exposes the following API:
 ### `client.getUserId()`
 ### `client.getUserType()`
 -->
-### client.request(uri: String[, fhirOptions: Object]) `Promise<Object>`
-or
-### client.request(url: URL[, fhirOptions: Object]) `Promise<Object>`
-or
-### client.request(options: Object[, fhirOptions: Object]) `Promise<Object>`
+### client.request(uri: String[, fhirOptions: Object]) `Promise<Object>`<br/>client.request(url: URL[, fhirOptions: Object]) `Promise<Object>`<br/>client.request(options: Object[, fhirOptions: Object]) `Promise<Object>`
 
 > This is the single most important method. Please see the **[live examples](http://docs.smarthealthit.org/client-js/request.html)**.
 
