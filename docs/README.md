@@ -59,7 +59,7 @@ have to create two separate pages that correspond the your
 <script>
 FHIR.oauth2.authorize({
     "client_id": "my_web_app",
-    "scope"    : "launch patient/*.read online_access openid fhirUser"
+    "scope"    : "patient/*.read"
 });
 </script>
 ```
@@ -86,7 +86,7 @@ const fhirClient = require("fhirclient");
 app.get("/launch", (req, res) => {
     fhirClient(req, res).authorize({
         "client_id": "my_web_app",
-        "scope"    : "launch patient/*.read online_access openid fhirUser"
+        "scope"    : "patient/*.read"
     });
 });
 
