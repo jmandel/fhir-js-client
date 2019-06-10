@@ -28,7 +28,7 @@ const smart = require("fhirclient");
 // inside your launch_uri route handler
 smart(request, response).authorize({
     "client_id": "my_web_app",
-    "scope"    : "launch patient/*.read online_access openid fhirUser"
+    "scope"    : "launch patient/*.read openid fhirUser"
 });
 ```
 
@@ -52,7 +52,7 @@ const smart = require("fhirclient");
 // inside your route handler
 smart(request, response).init({
     "client_id": "my_web_app",
-    "scope"    : "launch patient/*.read online_access openid fhirUser"
+    "scope"    : "launch patient/*.read openid fhirUser"
 }).then(client => client.request("Patient"));
 ```
 
