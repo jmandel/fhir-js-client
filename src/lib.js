@@ -28,10 +28,14 @@ function responseToJSON(resp) {
     return resp.text().then(text => text.length ? JSON.parse(text) : "");
 }
 
-function fetchJSON(url, options) {
+function fetchJSON(url, options = {}) {
     return request(url, {
         mode: "cors",
-        ...options
+        ...options,
+        headers: {
+            accept:"application/json",
+            ...options.headers
+        }
     }).then(responseToJSON);
 }
 

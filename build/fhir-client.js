@@ -9135,10 +9135,15 @@ function responseToJSON(resp) {
   });
 }
 
-function fetchJSON(url, options) {
+function fetchJSON(url) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
   return request(url, _objectSpread({
     mode: "cors"
-  }, options)).then(responseToJSON);
+  }, options, {
+    headers: _objectSpread({
+      accept: "application/json"
+    }, options.headers)
+  })).then(responseToJSON);
 }
 
 function request(url, options) {
