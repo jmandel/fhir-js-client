@@ -1,9 +1,9 @@
 # Using client-js in Node
 
-The API for node is exactly the same as for the browsers. The only difference
-is how the SMART api object is created. In the browser, the SMART api is available
+The API for node is exactly the same as for the browsers, with the exception of
+how the SMART API object is created. In the browser, the SMART API is available
 in the global scope at `window.FHIR.oauth2`. In Node, the `fhirclient` module
-exports a function that you need to call to obtain the same SMART api object.
+exports a function that you need to call to obtain the same SMART API object.
 
 > This will not work out of the box if your request object does not have a `session` object property that we can write to. This means that may need use a middleware or plugin to provide that session support. See [sessions](#sessions).
 
@@ -11,7 +11,7 @@ exports a function that you need to call to obtain the same SMART api object.
 This is very simple collection of three functions - `authorize`, `ready` and `init`.
 These are the exact same functions that we use in the browser. The only thing they
 do differently under the hood is how they store data in a session and how they
-handle redirects. Here is how this api object is created:
+handle redirects. Here is how this API object is created:
 
 ```js
 const smart = require("fhirclient");
@@ -64,8 +64,9 @@ smart(request, response).init({
 ## Sessions
 If you use Express with `express-session`, or HAPI with `hapi-server-session`,
 or anything else that will ad a `session` object to your http request objects,
-then this library should work fine. Otherwise (or if you prefer some alternative storage),
-you will have create custom session storage for storing the SMART state.
+then this library should work fine. Otherwise (or if you prefer some alternative
+storage), you will have to create custom session storage for storing the SMART
+state.
 
 A valid storage object must implement the following interface:
 ```js
@@ -76,12 +77,15 @@ unset(key: string): Promise<Boolean> // returns !!success
 
 The default storage implementation is [here](https://github.com/smart-on-fhir/client-js/tree/master/src/storage/ServerStorage.js).
 
-Once you have your custom storage, you can just pass it as third argument to the function that creates the SMART api:
+Once you have your custom storage, you can just pass it as third argument to the
+function that creates the SMART API:
 ```js
 smart(request, response, myStorage).authorize(options)
 ```
 
-Most of the time you would need to know more about the current request and response in order to create a storage instance. That is why passing a storage factory function is the recommended way:
+Most of the time you would need to know more about the current request and
+response in order to create a storage instance. That is why passing a storage
+factory function is the recommended way:
 ```js
 function createStorage({ request, response }) {
     return new AwesomeCustomStorage(request, response);

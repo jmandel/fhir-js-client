@@ -29,12 +29,14 @@ The first argument can be one of:
 
 The **fhirOptions** object is optional and can contain the following properties:
 
-- **pageLimit** `Number` - When you request a Bundle, the result will typically come back in pages and you will only get the first page. You can set this to number bigger than `1` to request multiple pages. For example `pageLimit: 3` will give you the first 3 pages as array. To fetch all the available pages you can set this to `0`. **Defaults to `1`**. Ignored if the response is not a `Bundle`.
-- **onPage** `Function` - When you fetch multiple pages the result array might be huge. That could take a lot of time and memory. It is often better if you specify a page callback instead. The `onPage` callback will be called once for each page with the page Bundle as it's argument. If you use `resolveReferences` and `graph: false`, the references will be passed to `onPage` as second argument.
+- **pageLimit** `Number` - When you request a Bundle, the result will typically come back in pages and you will only get the first page. You can use `pageLimit` greater than `1` to request multiple pages. For example `pageLimit: 3` will give you the first 3 pages as array. To fetch all the available pages you can set this to `0`.
+    - Defaults to `1`.
+    - Ignored if the response is not a `Bundle`.
+- **onPage** `Function` - When you fetch multiple pages the resulting array may be very large, requiring a lot of time and memory. It is often better if you specify a page callback instead. The `onPage` callback will be called once for each page with the page Bundle as it's argument. If you use `resolveReferences` and `graph: false`, the references will be passed to `onPage` as second argument.
     - If `onPage` returns a promise it will be awaited for, meaning that no more pages will be fetched until the `onPage` promise is resolved.
     - If `onPage` returns a rejected promise or throws an error, the client will not continue fetching more pages.
     - If you use `onPage` callback, the promise returned by `request()` will be resolved with `null`. This is to avoid building that huge array in memory. By using the `onPage` option you are stating that you will handle the result one page at a time, instead of expecting to receive the big combined result.
-- **flat** `Boolean` When fetching a `Bundle`, you are typically only interested in the included resources which are located at `{response}.entry[N].resource`. If this option is set to `true`, the returned result will be an array of resources instead of the whole bundle. This is especially useful when multiple pages are fetched, because an array of page bundles is not that useful and will often have to be converted to array of resources that is easier to iterate.
+- **flat** `Boolean` - When fetching a `Bundle`, you are typically only interested in the included resources which are located at `{response}.entry[N].resource`. If this option is set to `true`, the returned result will be an array of resources instead of the whole bundle. This is especially useful when multiple pages are fetched, because an array of page bundles is not that useful and will often have to be converted to array of resources that is easier to iterate.
     - This option is ignored if the response is not a bundle.
     - If you use `onPage` callback with `flat: true`, it will receive that array of resources instead of the page bundle.
     - Resources from multiple pages are flattened into single array (unless you use `onPage`, which will be called with one array for each page).

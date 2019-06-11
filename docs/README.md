@@ -2,7 +2,7 @@
 SMART on FHIR JavaScript Library
 ================================
 
-This is a JavaScript library for connecting SMART apps to Fhir servers.
+This is a JavaScript library for connecting SMART apps to FHIR servers.
 It works both in browsers (IE10+) and on the server (NodeJS).
 
 
@@ -146,8 +146,11 @@ the FHIR server and a bunch of other useful utilities and methods.
 
 
 ## Fhir.js Integration
-Since v2.0.0 this library no longer includes fhir.js. That architecture was extremely difficult to maintain. Fhir.js is now an optional dependency, meaning that it is not available by default, unless you include it in the page. Our goal is to provide simple
-alternative to fhir.js - most of it should be possible via `client.request`. Please see the [Examples](fhirjs-equivalents).
+Since v2.0.0 this library no longer includes fhir.js. That architecture was
+extremely difficult to maintain. Fhir.js is now an optional dependency, meaning
+that it is not available by default, unless you include it in the page.
+Our goal is to provide a simple alternative to fhir.js - most of it should be
+possible via `client.request`. Please see the [Examples](fhirjs-equivalents).
 
 #### Reasons to use fhir.js
 1. If you have old apps using legacy API like `client.api.anyFhirJsMethod()` or `client.patient.api.anyFhirJsMethod()`
@@ -160,7 +163,11 @@ alternative to fhir.js - most of it should be possible via `client.request`. Ple
 3. If you want to keep things simpler and smaller
 
 #### Browser Integration
-You just need to include fhir.js (`nativeFhir.js`) in the page via script tag. We will detect that and make the necessary linking. You can then use it via `client.api` and `client.patient.api`, just like it used to work with older versions of this library. For convenience we have included the latest build of fhir.js that we have tested with at [lib/nativeFhir.js](https://github.com/smart-on-fhir/client-js/blob/master/lib/nativeFhir.js).
+You just need to include fhir.js (`nativeFhir.js`) in the page via script tag.
+We will detect that and make the necessary linking. You can then use it via
+`client.api` and `client.patient.api`, just like it used to work with older
+versions of this library. The latest build of fhir.js that we have tested with
+is available at [lib/nativeFhir.js](https://github.com/smart-on-fhir/client-js/blob/master/lib/nativeFhir.js).
 ```html
 <!-- index.html -->
 <script src="/path/to/nativeFhir.js"></script>
