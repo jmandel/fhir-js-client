@@ -1,9 +1,9 @@
 # SMART API
 
-Imagine that there is an object called "smart" that exposes the SMART-specific
-methods. In the browser that is automatically created and is available at
-`window.FHIR.oauth2`. On the server the library exports a function that you call
-with your http request and response and it will create that "smart" object for you:
+The SMART API is a collection of SMART-specific methods (`authorize`, `ready`, `init`) for app authorization and launch.
+If you are working in a browser, the SMART API is automatically created, and available at
+`window.FHIR.oauth2`. In NodeJs, the library exports a function that should be called
+with a http request and response objects, and will return the same SMART API as in the browser. 
 
 ```js
 // BROWSER
@@ -14,8 +14,7 @@ smart.authorize(options);
 const smart = require("fhirclient");
 smart(request, response).authorize(options);
 ```
-Once you have obtained that "smart" object, the API that it exposes is exactly
-the same for the browser and the server.
+
 
 ### authorize(options) `Promise<never>`
 Starts the [SMART Launch Sequence](http://hl7.org/fhir/smart-app-launch/#smart-launch-sequence).
