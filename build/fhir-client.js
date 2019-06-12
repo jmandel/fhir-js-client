@@ -9557,6 +9557,8 @@ var _require = __webpack_require__(/*! ./lib */ "./src/lib.js"),
     _byCode = _require.byCode,
     _byCodes = _require.byCodes,
     units = _require.units;
+
+var str = __webpack_require__(/*! ./strings */ "./src/strings.js");
 /**
  * Gets single reference by id. Caches the result.
  * @param {String} refId
@@ -9638,7 +9640,7 @@ function resolveRefs(obj, fhirOptions, cache, client) {
     var index = paths.indexOf(p, i + 1);
 
     if (index > -1) {
-      debug("[client.request] Duplicated reference path \"" + p + "\"");
+      debug(str.dupRef, p);
       return false;
     }
 
@@ -9711,7 +9713,7 @@ function () {
 
 
     if (!state.serverUrl || !state.serverUrl.match(/https?:\/\/.+/)) {
-      throw new Error("A `serverUrl` option is required and must begin with 'http(s)'");
+      throw new Error(str.clientNoServerUrl);
     }
 
     this.state = state;
@@ -9725,7 +9727,7 @@ function () {
 
       read: function read() {
         var id = _this.patient.id;
-        return id ? _this.request("Patient/" + id) : Promise.reject(new Error("Patient is not available"));
+        return id ? _this.request("Patient/" + id) : Promise.reject(new Error(str.noPatient));
       }
     }; // encounter api -------------------------------------------------------
 
@@ -9736,7 +9738,7 @@ function () {
 
       read: function read() {
         var id = _this.encounter.id;
-        return id ? _this.request("Encounter/" + id) : Promise.reject(new Error("Encounter is not available"));
+        return id ? _this.request("Encounter/" + id) : Promise.reject(new Error(str.noEncounter));
       }
     }; // user api ------------------------------------------------------------
 
@@ -9755,7 +9757,7 @@ function () {
 
       read: function read() {
         var fhirUser = _this.user.fhirUser;
-        return fhirUser ? _this.request(fhirUser) : Promise.reject(new Error("User is not available"));
+        return fhirUser ? _this.request(fhirUser) : Promise.reject(new Error(str.noUser));
       }
     }; // fhir.js api (attached automatically in browser)
     // ---------------------------------------------------------------------
@@ -9817,10 +9819,10 @@ function () {
       // the patient. This should be a scope issue.
       if (!tokenResponse.patient) {
         if (!(this.state.scope || "").match(/\blaunch(\/patient)?\b/)) {
-          debug("You are trying to get the ID of the selected patient " + "but you have not used the right scopes. Please add " + "'launch' or 'launch/patient' to the scopes you are " + "requesting and try again.");
+          debug(str.noScopeForId, "patient");
         } else {
           // The server should have returned the patient!
-          debug("The ID of the selected patient is not available. " + "Please check if your server supports that.");
+          debug(str.noPatientId);
         }
 
         return null;
@@ -9830,9 +9832,9 @@ function () {
     }
 
     if (this.state.authorizeUri) {
-      debug("You are trying to get the ID of the selected patient " + "but your app is not authorized yet.");
+      debug(str.noIdIfNoAuth, "patient");
     } else {
-      debug("You are trying to get the ID of the selected patient " + "but your app needs to be authorized first. Please don't use " + "open fhir servers if you need to access launch context items " + "like the selected patient.");
+      debug(str.noFreeContext, "patient");
     }
 
     return null;
@@ -9853,7 +9855,7 @@ function () {
       // the encounter. This should be a scope issue.
       if (!tokenResponse.encounter) {
         if (!(this.state.scope || "").match(/\blaunch(\/encounter)?\b/)) {
-          debug("You are trying to get the ID of the selected encounter " + "but you have not used the right scopes. Please add " + "'launch' or 'launch/encounter' to the scopes you " + "are requesting and try again.");
+          debug(str.noScopeForId, "encounter");
         } else {
           // The server should have returned the encounter!
           debug("The ID of the selected encounter is not available. " + "Please check if your server supports that, and that " + "the selected patient has any recorded encounters.");
@@ -9866,9 +9868,9 @@ function () {
     }
 
     if (this.state.authorizeUri) {
-      debug("You are trying to get the ID of the selected encounter " + "but your app is not authorized yet.");
+      debug(str.noIdIfNoAuth, "encounter");
     } else {
-      debug("You are trying to get the ID of the selected encounter " + "but your app needs to be authorized first. Please don't use " + "open fhir servers if you need to access launch context items " + "like the selected encounter.");
+      debug(str.noFreeContext, "encounter");
     }
 
     return null;
@@ -10068,6 +10070,48 @@ function () {
                       }), fhirOptions, _resolvedRefs);
                     });
                   }
+                }
+
+                throw error;
+              }) // Handle 401 ------------------------------------------------------
+              .catch(function (error) {
+                if (error.status == 401) {
+                  // !accessToken -> not authorized -> No session. Need to launch.
+                  if (!_getPath(_this2, "state.tokenResponse.accessToken")) {
+                    throw new Error("This app cannot be accessed directly. Please " + "launch it as SMART app!");
+                  } // !fhirOptions.useRefreshToken -> auto-refresh not enabled
+                  // Session expired. Need to re-launch. Clear state to
+                  // start over!
+
+
+                  if (!fhirOptions.useRefreshToken) {
+                    debug("Your session has expired and the useRefreshToken " + "option is set to false. Please re-launch the app."); // TODO: Clear state
+
+                    throw new Error("Session expired! Please re-launch the app");
+                  } // !refresh_token -> auto-refresh not possible. Session
+                  // expired. Need to re-launch. Clear state to start over!
+
+
+                  if (!_this2.state.tokenResponse.refresh_token) {
+                    debug("Your session has expired and no refresh token is" + "available. Please re-launch the app."); // TODO: Clear state
+
+                    throw new Error("Session expired! Please re-launch the app");
+                  } // otherwise -> auto-refresh failed. Session expired.
+                  // Need to re-launch. Clear state to start over!
+
+
+                  if (_getPath(_this2, "this.state.tokenResponse.access_token")) {
+                    debug("Auto-refresh failed! Please re-launch the app."); // TODO: Clear state
+
+                    throw new Error("Session expired! Please re-launch the app");
+                  }
+                }
+
+                throw error;
+              }) // Handle 403 ------------------------------------------------------
+              .catch(function (error) {
+                if (error.status == 403) {
+                  debug("[client.request] Permission denied! Please make sure " + "that you have requested the proper scopes.");
                 }
 
                 throw error;
@@ -11983,6 +12027,32 @@ function () {
 }();
 
 module.exports = Storage;
+
+/***/ }),
+
+/***/ "./src/strings.js":
+/*!************************!*\
+  !*** ./src/strings.js ***!
+  \************************/
+/*! all exports used */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  "dupRef": "Duplicated reference path \"%s\"",
+  "request": "Request url: %s, options: %O, fhirOptions: %O",
+  "clientNoServerUrl": "A \"serverUrl\" option is required and must begin with \"http(s)\"",
+  "noCtx": "%s is not available",
+  "noPatient": "Patient is not available",
+  "noEncounter": "Encounter is not available",
+  "noUser": "User is not available",
+  "noScopeForId": "Trying to get the ID of the selected %s. Please add 'launch' or 'launch/%s' to the requested scopes and try again.",
+  "noPatientId": "The ID of the selected patient is not available. Please check if your server supports that.",
+  "noIdIfNoAuth": "You are trying to get the ID of the selected %s but the app is not authorized yet.",
+  "noFreeContext": "Please don't use open fhir servers if you need to access launch context items like the selected %S."
+};
 
 /***/ })
 

@@ -1,6 +1,7 @@
 const { expect } = require("@hapi/code");
 const lab        = require("@hapi/lab").script();
 const Lib        = require("../src/lib");
+const str        = require("../src/strings");
 Lib.debug = function(...args) {
     debugLog.push(args);
 };
@@ -98,7 +99,7 @@ describe("FHIR.client", () => {
                     tokenResponse: {}
                 });
                 await expect(client.patient.read()).to.reject(
-                    Error, "Patient is not available"
+                    Error, str.noCtx.replace("%s", "Patient")
                 );
             });
         });
@@ -681,9 +682,7 @@ describe("FHIR.client", () => {
                     patient: { resourceType: "Patient" }
                 });
 
-                expect(debugLog.find(
-                    o => o[0] === "[client.request] Duplicated reference path \"patient\""
-                )).to.exist();
+                expect(debugLog.find(o => o[0] === str.dupRef)).to.exist();
             });
         });
 
@@ -1917,12 +1916,7 @@ describe("FHIR.client", () => {
         crossPlatformTest(async (env) => {
             const client = new Client(env, mockUrl);
             expect(client.getPatientId()).to.equal(null);
-            expect(debugLog).to.equal([[
-                "You are trying to get the ID of the selected patient " +
-                "but your app needs to be authorized first. Please don't use " +
-                "open fhir servers if you need to access launch context items " +
-                "like the selected patient."
-            ]]);
+            expect(debugLog).to.equal([[str.noFreeContext, "patient"]]);
         });
     });
 
@@ -1933,10 +1927,7 @@ describe("FHIR.client", () => {
                 authorizeUri: "whatever"
             });
             expect(client.getPatientId()).to.equal(null);
-            expect(debugLog).to.equal([[
-                "You are trying to get the ID of the selected patient " +
-                "but your app is not authorized yet."
-            ]]);
+            expect(debugLog).to.equal([[str.noIdIfNoAuth, "patient"]]);
         });
     });
 
@@ -1947,12 +1938,7 @@ describe("FHIR.client", () => {
                 tokenResponse: {}
             });
             expect(client.getPatientId()).to.equal(null);
-            expect(debugLog).to.equal([[
-                "You are trying to get the ID of the selected patient " +
-                "but you have not used the right scopes. Please add " +
-                "'launch' or 'launch/patient' to the scopes you are " +
-                "requesting and try again."
-            ]]);
+            expect(debugLog).to.equal([[str.noScopeForId, "patient"]]);
         });
     });
 
@@ -1975,12 +1961,7 @@ describe("FHIR.client", () => {
         crossPlatformTest(async (env) => {
             const client = new Client(env, mockUrl);
             expect(client.getEncounterId()).to.equal(null);
-            expect(debugLog).to.equal([[
-                "You are trying to get the ID of the selected encounter " +
-                "but your app needs to be authorized first. Please don't use " +
-                "open fhir servers if you need to access launch context items " +
-                "like the selected encounter."
-            ]]);
+            expect(debugLog).to.equal([[str.noFreeContext, "encounter"]]);
         });
     });
 
@@ -1991,10 +1972,7 @@ describe("FHIR.client", () => {
                 authorizeUri: "whatever"
             });
             expect(client.getEncounterId()).to.equal(null);
-            expect(debugLog).to.equal([[
-                "You are trying to get the ID of the selected encounter " +
-                "but your app is not authorized yet."
-            ]]);
+            expect(debugLog).to.equal([[str.noIdIfNoAuth, "encounter"]]);
         });
     });
 
@@ -2005,12 +1983,7 @@ describe("FHIR.client", () => {
                 tokenResponse: {}
             });
             expect(client.getEncounterId()).to.equal(null);
-            expect(debugLog).to.equal([[
-                "You are trying to get the ID of the selected encounter " +
-                "but you have not used the right scopes. Please add " +
-                "'launch' or 'launch/encounter' to the scopes you " +
-                "are requesting and try again."
-            ]]);
+            expect(debugLog).to.equal([[str.noScopeForId, "encounter"]]);
         });
     });
 

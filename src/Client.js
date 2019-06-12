@@ -14,6 +14,8 @@ const {
     units
 } = require("./lib");
 
+const str = require("./strings");
+
 /**
  * Gets single reference by id. Caches the result.
  * @param {String} refId
@@ -85,7 +87,7 @@ function resolveRefs(obj, fhirOptions, cache, client) {
     paths = paths.filter((p, i) => {
         let index = paths.indexOf(p, i + 1);
         if (index > -1) {
-            debug(`[client.request] Duplicated reference path "${p}"`);
+            debug(str.dupRef, p);
             return false;
         }
         return true;
@@ -151,9 +153,7 @@ class FhirClient
 
         // Valid serverUrl is required!
         if (!state.serverUrl || !state.serverUrl.match(/https?:\/\/.+/)) {
-            throw new Error(
-                "A `serverUrl` option is required and must begin with 'http(s)'"
-            );
+            throw new Error(str.clientNoServerUrl);
         }
 
         this.state = state;
@@ -168,7 +168,7 @@ class FhirClient
                 const id = this.patient.id;
                 return id ?
                     this.request(`Patient/${id}`) :
-                    Promise.reject(new Error("Patient is not available"));
+                    Promise.reject(new Error(str.noPatient));
             }
         };
 
@@ -179,7 +179,7 @@ class FhirClient
                 const id = this.encounter.id;
                 return id ?
                     this.request(`Encounter/${id}`) :
-                    Promise.reject(new Error("Encounter is not available"));
+                    Promise.reject(new Error(str.noEncounter));
             }
         };
 
@@ -192,7 +192,7 @@ class FhirClient
                 const fhirUser = this.user.fhirUser;
                 return fhirUser ?
                     this.request(fhirUser) :
-                    Promise.reject(new Error("User is not available"));
+                    Promise.reject(new Error(str.noUser));
             }
         };
 
@@ -247,19 +247,11 @@ class FhirClient
             // the patient. This should be a scope issue.
             if (!tokenResponse.patient) {
                 if (!(this.state.scope || "").match(/\blaunch(\/patient)?\b/)) {
-                    debug(
-                        "You are trying to get the ID of the selected patient " +
-                        "but you have not used the right scopes. Please add " +
-                        "'launch' or 'launch/patient' to the scopes you are " +
-                        "requesting and try again."
-                    );
+                    debug(str.noScopeForId, "patient");
                 }
                 else {
                     // The server should have returned the patient!
-                    debug(
-                        "The ID of the selected patient is not available. " +
-                        "Please check if your server supports that."
-                    );
+                    debug(str.noPatientId);
                 }
                 return null;
             }
@@ -267,18 +259,10 @@ class FhirClient
         }
 
         if (this.state.authorizeUri) {
-            debug(
-                "You are trying to get the ID of the selected patient " +
-                "but your app is not authorized yet."
-            );
+            debug(str.noIdIfNoAuth, "patient");
         }
         else {
-            debug(
-                "You are trying to get the ID of the selected patient " +
-                "but your app needs to be authorized first. Please don't use " +
-                "open fhir servers if you need to access launch context items " +
-                "like the selected patient."
-            );
+            debug(str.noFreeContext, "patient");
         }
         return null;
     }
@@ -297,12 +281,7 @@ class FhirClient
             // the encounter. This should be a scope issue.
             if (!tokenResponse.encounter) {
                 if (!(this.state.scope || "").match(/\blaunch(\/encounter)?\b/)) {
-                    debug(
-                        "You are trying to get the ID of the selected encounter " +
-                        "but you have not used the right scopes. Please add " +
-                        "'launch' or 'launch/encounter' to the scopes you " +
-                        "are requesting and try again."
-                    );
+                    debug(str.noScopeForId, "encounter");
                 }
                 else {
                     // The server should have returned the encounter!
@@ -318,18 +297,10 @@ class FhirClient
         }
 
         if (this.state.authorizeUri) {
-            debug(
-                "You are trying to get the ID of the selected encounter " +
-                "but your app is not authorized yet."
-            );
+            debug(str.noIdIfNoAuth, "encounter");
         }
         else {
-            debug(
-                "You are trying to get the ID of the selected encounter " +
-                "but your app needs to be authorized first. Please don't use " +
-                "open fhir servers if you need to access launch context items " +
-                "like the selected encounter."
-            );
+            debug(str.noFreeContext, "encounter");
         }
         return null;
     }
@@ -497,7 +468,13 @@ class FhirClient
 
         const hasPageCallback = typeof fhirOptions.onPage == "function";
 
-        debug("[client.request] Request url: %s, options: %O, fhirOptions: %O", url, requestOptions, fhirOptions);
+        debug(
+            "[client.request] Request url: %s, options: %O, fhirOptions: %O",
+            url,
+            requestOptions,
+            fhirOptions
+        );
+
         return fetchJSON(url, requestOptions)
 
             // Automatic re-auth via refresh token -----------------------------
@@ -512,6 +489,63 @@ class FhirClient
                             _resolvedRefs
                         ));
                     }
+                }
+                throw error;
+            })
+
+            // Handle 401 ------------------------------------------------------
+            .catch(error => {
+                if (error.status == 401) {
+
+                    // !accessToken -> not authorized -> No session. Need to launch.
+                    if (!getPath(this, "state.tokenResponse.accessToken")) {
+                        throw new Error(
+                            "This app cannot be accessed directly. Please " +
+                            "launch it as SMART app!"
+                        );
+                    }
+
+                    // !fhirOptions.useRefreshToken -> auto-refresh not enabled
+                    // Session expired. Need to re-launch. Clear state to
+                    // start over!
+                    if (!fhirOptions.useRefreshToken) {
+                        debug(
+                            "Your session has expired and the useRefreshToken " +
+                            "option is set to false. Please re-launch the app."
+                        );
+                        // TODO: Clear state
+                        throw new Error("Session expired! Please re-launch the app");
+                    }
+
+                    // !refresh_token -> auto-refresh not possible. Session
+                    // expired. Need to re-launch. Clear state to start over!
+                    if (!this.state.tokenResponse.refresh_token) {
+                        debug(
+                            "Your session has expired and no refresh token is" +
+                            "available. Please re-launch the app."
+                        );
+                        // TODO: Clear state
+                        throw new Error("Session expired! Please re-launch the app");
+                    }
+
+                    // otherwise -> auto-refresh failed. Session expired.
+                    // Need to re-launch. Clear state to start over!
+                    if (getPath(this, "this.state.tokenResponse.access_token")) {
+                        debug("Auto-refresh failed! Please re-launch the app.");
+                        // TODO: Clear state
+                        throw new Error("Session expired! Please re-launch the app");
+                    }
+                }
+                throw error;
+            })
+
+            // Handle 403 ------------------------------------------------------
+            .catch(error => {
+                if (error.status == 403) {
+                    debug(
+                        "[client.request] Permission denied! Please make sure " +
+                        "that you have requested the proper scopes."
+                    );
                 }
                 throw error;
             })
