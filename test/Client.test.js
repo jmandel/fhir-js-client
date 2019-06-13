@@ -2,9 +2,10 @@ const { expect } = require("@hapi/code");
 const lab        = require("@hapi/lab").script();
 const Lib        = require("../src/lib");
 const str        = require("../src/strings");
-Lib.debug = function(...args) {
-    debugLog.push(args);
-};
+
+Lib.debug = (...args) => debugLog.push(args);
+Lib.debug.extend = () => Lib.debug;
+
 const Client     = require("../src/Client");
 const { KEY }    = require("../src/smart");
 
@@ -99,7 +100,7 @@ describe("FHIR.client", () => {
                     tokenResponse: {}
                 });
                 await expect(client.patient.read()).to.reject(
-                    Error, str.noCtx.replace("%s", "Patient")
+                    Error, "Patient is not available"
                 );
             });
         });
@@ -682,7 +683,7 @@ describe("FHIR.client", () => {
                     patient: { resourceType: "Patient" }
                 });
 
-                expect(debugLog.find(o => o[0] === str.dupRef)).to.exist();
+                expect(debugLog.find(o => o[0] === "Duplicated reference path \"%s\"")).to.exist();
             });
         });
 
@@ -1318,6 +1319,14 @@ describe("FHIR.client", () => {
             });
         });
 
+        describe ("throws if 401 and no accessToken", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, mockUrl);
+                mockServer.mock({ status: 401 });
+                expect(client.request("/")).to.reject();
+            });
+        });
+
         // flat ----------------------------------------------------------------
 
         describe("flat", () => {
@@ -1916,7 +1925,7 @@ describe("FHIR.client", () => {
         crossPlatformTest(async (env) => {
             const client = new Client(env, mockUrl);
             expect(client.getPatientId()).to.equal(null);
-            expect(debugLog).to.equal([[str.noFreeContext, "patient"]]);
+            expect(debugLog).to.equal([[str.noFreeContext, "selected patient"]]);
         });
     });
 
@@ -1927,7 +1936,7 @@ describe("FHIR.client", () => {
                 authorizeUri: "whatever"
             });
             expect(client.getPatientId()).to.equal(null);
-            expect(debugLog).to.equal([[str.noIdIfNoAuth, "patient"]]);
+            expect(debugLog).to.equal([[str.noIfNoAuth, "the ID of the selected patient"]]);
         });
     });
 
@@ -1961,7 +1970,7 @@ describe("FHIR.client", () => {
         crossPlatformTest(async (env) => {
             const client = new Client(env, mockUrl);
             expect(client.getEncounterId()).to.equal(null);
-            expect(debugLog).to.equal([[str.noFreeContext, "encounter"]]);
+            expect(debugLog).to.equal([[str.noFreeContext, "selected encounter"]]);
         });
     });
 
@@ -1972,7 +1981,7 @@ describe("FHIR.client", () => {
                 authorizeUri: "whatever"
             });
             expect(client.getEncounterId()).to.equal(null);
-            expect(debugLog).to.equal([[str.noIdIfNoAuth, "encounter"]]);
+            expect(debugLog).to.equal([[str.noIfNoAuth, "the ID of the selected encounter"]]);
         });
     });
 
@@ -2007,25 +2016,18 @@ describe("FHIR.client", () => {
         crossPlatformTest(async (env) => {
             const client = new Client(env, mockUrl);
             expect(client.getIdToken()).to.equal(null);
-            expect(debugLog).to.equal([[
-                "You are trying to get the id_token but your app needs to be " +
-                "authorized first. Please don't use open fhir servers if you " +
-                "need to access launch context items like the id_token."
-            ]]);
+            expect(debugLog).to.equal([[str.noFreeContext, "id_token"]]);
         });
     });
 
     describe("getIdToken() complains about authorizeUri", () => {
         crossPlatformTest(async (env) => {
             const client = new Client(env, {
-                serverUrl: mockUrl,
+                serverUrl   : mockUrl,
                 authorizeUri: "whatever"
             });
             expect(client.getIdToken()).to.equal(null);
-            expect(debugLog).to.equal([[
-                "You are trying to get the id_token " +
-                "but your app is not authorized yet."
-            ]]);
+            expect(debugLog).to.equal([[str.noIfNoAuth, "the id_token"]]);
         });
     });
 
@@ -2037,12 +2039,7 @@ describe("FHIR.client", () => {
                 tokenResponse: {}
             });
             expect(client.getIdToken()).to.equal(null);
-            expect(debugLog).to.equal([[
-                "You are trying to get the id_token but you are not " +
-                "using the right scopes. Please add 'openid' and " +
-                "'fhirUser' or 'profile' to the scopes you are " +
-                "requesting and try again."
-            ]]);
+            expect(debugLog).to.equal([["You are trying to get the id_token but you are not using the right scopes. Please add 'openid' and 'fhirUser' or 'profile' to the scopes you are requesting."]]);
         });
     });
 
@@ -2174,111 +2171,5 @@ describe("FHIR.client", () => {
             expect(client.getPath(data, "b.4.a")).to.equal(undefined);
         });
     });
-
-    // it ("client.getBinary", async () => {
-    //     const client = new window.FHIR.client(OPEN_FHIR_SERVER);
-
-    //     const { data } = await client.getBinary("https://r3.smarthealthit.org/Binary/smart-4-photo")
-    //         .catch(() => {
-    //             throw new Error("getBinary should not throw");
-    //         });
-    //     expect(data).to.be.instanceof(window.Blob);
-
-    //     // const data2 = await client.request({
-    //     //     url: "https://r3.smarthealthit.org/Binary/smart-4-photo",
-    //     //     dataType: "blob"
-    //     // }).catch(() => {
-    //     //     throw new Error("binary request should not throw");
-    //     // });
-    //     // expect(data2).to.be.instanceof(window.Blob);
-    // });
-
-    // it ("client.fetchBinary", async () => {
-    //     const client = new window.FHIR.client(OPEN_FHIR_SERVER);
-
-    //     const { data } = await client.fetchBinary("Binary/smart-4-photo")
-    //         .catch(() => {
-    //             throw new Error("getBinary should not throw");
-    //         });
-    //     expect(data).to.be.instanceof(window.Blob);
-    // });
-    // describe("client.api", () => {
-    //     it ("conformance", async () => {
-    //         const client = window.FHIR.client({
-    //             serviceUrl: mockUrl,
-    //             auth: {
-    //                 type: "none"
-    //             }
-    //         });
-    //         mockServer.mock({
-    //             headers: {
-    //                 "content-type": "application/json"
-    //             },
-    //             status: 200,
-    //             body: {
-    //                 conformance: true
-    //             }
-    //         });
-    //         const data = await client.api.conformance({}).catch((e) => {
-    //             console.error(e);
-    //             throw new Error("client.api.conformance({}) should not throw");
-    //         });
-    //         expect(data).to.include({
-    //             data: {
-    //                 conformance: true
-    //             }
-    //         });
-    //     });
-    //     // it ("document");
-    //     // it ("profile");
-    //     // it ("transaction");
-    //     // it ("history");
-    //     // it ("typeHistory");
-    //     // it ("resourceHistory");
-    //     it ("read", async () => {
-    //         const client = new window.FHIR.client({
-    //             serviceUrl: OPEN_FHIR_SERVER,
-    //             auth: {
-    //                 type: "none"
-    //             }
-    //         });
-    //         await client.api.read({
-    //             type: "Patient",
-    //             id: "eb3271e1-ae1b-4644-9332-41e32c829486"
-    //         });
-    //     });
-    //     // it ("vread");
-    //     // it ("delete");
-    //     // it ("create");
-    //     // it ("validate");
-    //     // it ("search");
-    //     // it ("update");
-    //     // it ("nextPage");
-    //     // it ("prevPage");
-    //     // it ("resolve");
-    //     // it ("drain");
-    //     // it ("fetchAll", async () => {
-    //     //     const client = new window.FHIR.client({
-    //     //         serviceUrl: OPEN_FHIR_SERVER,
-    //     //         auth: {
-    //     //             type: "none"
-    //     //         }
-    //     //     });
-    //     //     await client.api.fetchAll({
-    //     //         type: "Patient"
-    //     //     });
-    //     // });
-    //     // it ("fetchAllWithReferences", async () => {
-    //     //     const client = new window.FHIR.client({
-    //     //         serviceUrl: OPEN_FHIR_SERVER,
-    //     //         auth: {
-    //     //             type: "none"
-    //     //         }
-    //     //     });
-    //     //     await client.api.fetchAllWithReferences({
-    //     //         type: "Patient"
-    //     //     });
-    //     // });
-    // });
 
 });

@@ -27,7 +27,7 @@ module.exports = function(env, argv) {
             publicPath: "/",
             filename  : `fhir-client${isDev ? "" : ".min"}.js`
         },
-        devtool: "hidden-source-map",
+        devtool: "source-map",
         optimization: {
             providedExports: false,
             usedExports: true,

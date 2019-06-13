@@ -1,12 +1,14 @@
 const Client  = require("./Client");
 const {
     isBrowser,
-    debug,
+    debug: _debug,
     fetchJSON,
     getPath,
     randomString,
     btoa
 } = require("./lib");
+
+const debug = _debug.extend("oauth2");
 
 const SMART_KEY = "SMART_KEY";
 
@@ -140,7 +142,7 @@ async function authorize(env, params = {}, _noRedirect)
     }
 
     if (iss) {
-        debug("[authorize] Making %s launch...", launch ? "EHR" : "standalone");
+        debug("Making %s launch...", launch ? "EHR" : "standalone");
     }
 
     // append launch scope if needed
@@ -182,7 +184,7 @@ async function authorize(env, params = {}, _noRedirect)
 
     // bypass oauth if fhirServiceUrl is used (but iss takes precedence)
     if (fhirServiceUrl && !iss) {
-        debug("[authorize] Making fake launch...");
+        debug("Making fake launch...");
         // Storage.set(stateKey, state);
         await env.getStorage().set(stateKey, state);
         if (_noRedirect) {
@@ -261,7 +263,7 @@ async function completeAuth(env)
         throw new Error(msg);
     }
 
-    debug("[completeAuth] key: %s, code: %O", key, code);
+    debug("key: %s, code: %O", key, code);
 
     // key might be coming from the page url so it might be empty or missing
     if (!key) {
@@ -286,8 +288,8 @@ async function completeAuth(env)
             // We have to remove it, otherwise the page will authorize on
             // every load!
             if (code) {
-                debug("[completeAuth] Removing code parameter from the url...");
                 url.searchParams.delete("code");
+                debug("Removed code parameter from the url.");
             }
 
             // If we have `fullSessionStorageSupport` it means we no longer
@@ -297,8 +299,8 @@ async function completeAuth(env)
             // might be shared between windows and tabs. In this case we
             // MUST keep the `state` url parameter.
             if (hasState && fullSessionStorageSupport) {
-                debug("[completeAuth] Removing state parameter from the url...");
                 url.searchParams.delete("state");
+                debug("Removed state parameter from the url.");
             }
 
             // If the browser does not support the replaceState method for the
@@ -324,14 +326,14 @@ async function completeAuth(env)
     // If we have state, then check to see if we got a `code`. If we don't,
     // then this is just a reload. Otherwise, we have to complete the code flow
     if (code) {
-        debug("[completeAuth] Preparing to exchange the code for access token...");
+        debug("Preparing to exchange the code for access token...");
         const requestOptions = await buildTokenRequest(code, state);
-        debug("[completeAuth] Token request options: %O", requestOptions);
+        debug("Token request options: %O", requestOptions);
         // The EHR authorization server SHALL return a JSON structure that
         // includes an access token or a message indicating that the
         // authorization request has been denied.
         let tokenResponse = await fetchJSON(state.tokenUri, requestOptions);
-        debug("[completeAuth] Token response: %O", tokenResponse);
+        debug("Token response: %O", tokenResponse);
         if (!tokenResponse.access_token) {
             throw new Error("Failed to obtain access token.");
         }
@@ -342,17 +344,17 @@ async function completeAuth(env)
         if (fullSessionStorageSupport) {
             await Storage.set(SMART_KEY, key);
         }
-        debug("[completeAuth] Authorization successful!");
+        debug("Authorization successful!");
     }
     else {
-        debug("[completeAuth] %s", state.tokenResponse.access_token ?
+        debug(state.tokenResponse.access_token ?
             "Already authorized" :
             "No authorization needed"
         );
     }
 
     const client = new Client(env, state);
-    debug("[completeAuth] Created client instance: %O", client);
+    debug("Created client instance: %O", client);
     return client;
 }
 
@@ -394,16 +396,9 @@ function buildTokenRequest(code, state)
         requestOptions.headers.Authorization = "Basic " + btoa(
             clientId + ":" + clientSecret
         );
-        debug(
-            "[buildTokenRequest] Using state.clientSecret to construct the " +
-            "authorization header: %s",
-            requestOptions.headers.Authorization
-        );
+        debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
     } else {
-        debug(
-            "[buildTokenRequest] No clientSecret found in state. Adding " +
-            "the client_id to the POST body"
-        );
+        debug("No clientSecret found in state. Adding the clientId to the POST body");
         requestOptions.body += `&client_id=${encodeURIComponent(clientId)}`;
     }
 

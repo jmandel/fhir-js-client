@@ -4,7 +4,7 @@
  */
 
 const HttpError = require("./HttpError");
-const debug     = require("debug")("FHIRClient");
+const debug     = require("debug")("FHIR");
 
 function isBrowser() {
     return typeof window === "object";

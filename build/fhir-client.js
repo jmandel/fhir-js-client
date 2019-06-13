@@ -9546,7 +9546,7 @@ var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtim
 var _require = __webpack_require__(/*! ./lib */ "./src/lib.js"),
     fetchJSON = _require.fetchJSON,
     absolute = _require.absolute,
-    debug = _require.debug,
+    _debug = _require.debug,
     _getPath = _require.getPath,
     setPath = _require.setPath,
     jwtDecode = _require.jwtDecode,
@@ -9557,6 +9557,8 @@ var _require = __webpack_require__(/*! ./lib */ "./src/lib.js"),
     _byCode = _require.byCode,
     _byCodes = _require.byCodes,
     units = _require.units;
+
+var debug = _debug.extend("client");
 
 var str = __webpack_require__(/*! ./strings */ "./src/strings.js");
 /**
@@ -9640,7 +9642,7 @@ function resolveRefs(obj, fhirOptions, cache, client) {
     var index = paths.indexOf(p, i + 1);
 
     if (index > -1) {
-      debug(str.dupRef, p);
+      debug("Duplicated reference path \"%s\"", p);
       return false;
     }
 
@@ -9713,7 +9715,7 @@ function () {
 
 
     if (!state.serverUrl || !state.serverUrl.match(/https?:\/\/.+/)) {
-      throw new Error(str.clientNoServerUrl);
+      throw new Error("A \"serverUrl\" option is required and must begin with \"http(s)\"");
     }
 
     this.state = state;
@@ -9727,7 +9729,7 @@ function () {
 
       read: function read() {
         var id = _this.patient.id;
-        return id ? _this.request("Patient/" + id) : Promise.reject(new Error(str.noPatient));
+        return id ? _this.request("Patient/" + id) : Promise.reject(new Error("Patient is not available"));
       }
     }; // encounter api -------------------------------------------------------
 
@@ -9738,7 +9740,7 @@ function () {
 
       read: function read() {
         var id = _this.encounter.id;
-        return id ? _this.request("Encounter/" + id) : Promise.reject(new Error(str.noEncounter));
+        return id ? _this.request("Encounter/" + id) : Promise.reject(new Error("Encounter is not available"));
       }
     }; // user api ------------------------------------------------------------
 
@@ -9757,7 +9759,7 @@ function () {
 
       read: function read() {
         var fhirUser = _this.user.fhirUser;
-        return fhirUser ? _this.request(fhirUser) : Promise.reject(new Error(str.noUser));
+        return fhirUser ? _this.request(fhirUser) : Promise.reject(new Error("User is not available"));
       }
     }; // fhir.js api (attached automatically in browser)
     // ---------------------------------------------------------------------
@@ -9822,7 +9824,7 @@ function () {
           debug(str.noScopeForId, "patient");
         } else {
           // The server should have returned the patient!
-          debug(str.noPatientId);
+          debug("The ID of the selected patient is not available. Please check if your server supports that.");
         }
 
         return null;
@@ -9832,9 +9834,9 @@ function () {
     }
 
     if (this.state.authorizeUri) {
-      debug(str.noIdIfNoAuth, "patient");
+      debug(str.noIfNoAuth, "the ID of the selected patient");
     } else {
-      debug(str.noFreeContext, "patient");
+      debug(str.noFreeContext, "selected patient");
     }
 
     return null;
@@ -9858,7 +9860,7 @@ function () {
           debug(str.noScopeForId, "encounter");
         } else {
           // The server should have returned the encounter!
-          debug("The ID of the selected encounter is not available. " + "Please check if your server supports that, and that " + "the selected patient has any recorded encounters.");
+          debug("The ID of the selected encounter is not available. Please check if your server supports that, and that the selected patient has any recorded encounters.");
         }
 
         return null;
@@ -9868,9 +9870,9 @@ function () {
     }
 
     if (this.state.authorizeUri) {
-      debug(str.noIdIfNoAuth, "encounter");
+      debug(str.noIfNoAuth, "the ID of the selected encounter");
     } else {
-      debug(str.noFreeContext, "encounter");
+      debug(str.noFreeContext, "selected encounter");
     }
 
     return null;
@@ -9896,10 +9898,10 @@ function () {
         var hasFhirUser = scope.match(/\bfhirUser\b/);
 
         if (!hasOpenid || !(hasFhirUser || hasProfile)) {
-          debug("You are trying to get the id_token but you are not " + "using the right scopes. Please add 'openid' and " + "'fhirUser' or 'profile' to the scopes you are " + "requesting and try again.");
+          debug("You are trying to get the id_token but you are not using the right scopes. Please add 'openid' and 'fhirUser' or 'profile' to the scopes you are requesting.");
         } else {
           // The server should have returned the id_token!
-          debug("The id_token is not available. Please check if your " + "server supports that.");
+          debug("The id_token is not available. Please check if your server supports that.");
         }
 
         return null;
@@ -9909,9 +9911,9 @@ function () {
     }
 
     if (this.state.authorizeUri) {
-      debug("You are trying to get the id_token " + "but your app is not authorized yet.");
+      debug(str.noIfNoAuth, "the id_token");
     } else {
-      debug("You are trying to get the id_token but your app needs to be " + "authorized first. Please don't use open fhir servers if you " + "need to access launch context items like the id_token.");
+      debug(str.noFreeContext, "id_token");
     }
 
     return null;
@@ -9978,7 +9980,57 @@ function () {
     }
 
     return null;
-  }
+  };
+
+  _proto._clearState =
+  /*#__PURE__*/
+  function () {
+    var _clearState2 = (0, _asyncToGenerator2.default)(
+    /*#__PURE__*/
+    _regenerator.default.mark(function _callee() {
+      var _require2, KEY, storage, key;
+
+      return _regenerator.default.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              _require2 = __webpack_require__(/*! ./smart */ "./src/smart.js"), KEY = _require2.KEY;
+              storage = this.environment.getStorage();
+              _context.next = 4;
+              return storage.get(KEY);
+
+            case 4:
+              key = _context.sent;
+
+              if (!key) {
+                _context.next = 8;
+                break;
+              }
+
+              _context.next = 8;
+              return storage.unset(key);
+
+            case 8:
+              _context.next = 10;
+              return storage.unset(KEY);
+
+            case 10:
+              this.state.tokenResponse = {};
+
+            case 11:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee, this);
+    }));
+
+    function _clearState() {
+      return _clearState2.apply(this, arguments);
+    }
+
+    return _clearState;
+  }()
   /**
    * @param {Object|String} requestOptions Can be a string URL (relative to
    *  the serviceUrl), or an object which will be passed to fetch()
@@ -10004,13 +10056,13 @@ function () {
   function () {
     var _request = (0, _asyncToGenerator2.default)(
     /*#__PURE__*/
-    _regenerator.default.mark(function _callee3(requestOptions, fhirOptions, _resolvedRefs) {
+    _regenerator.default.mark(function _callee5(requestOptions, fhirOptions, _resolvedRefs) {
       var _this2 = this;
 
-      var url, authHeader, hasPageCallback;
-      return _regenerator.default.wrap(function _callee3$(_context3) {
+      var debug, url, authHeader, hasPageCallback;
+      return _regenerator.default.wrap(function _callee5$(_context5) {
         while (1) {
-          switch (_context3.prev = _context3.next) {
+          switch (_context5.prev = _context5.next) {
             case 0:
               if (fhirOptions === void 0) {
                 fhirOptions = {};
@@ -10020,14 +10072,16 @@ function () {
                 _resolvedRefs = {};
               }
 
+              debug = _debug.extend("client:request");
+
               if (requestOptions) {
-                _context3.next = 4;
+                _context5.next = 5;
                 break;
               }
 
-              throw new Error("client.request requires an url or request options as argument");
+              throw new Error("request requires an url or request options as argument");
 
-            case 4:
+            case 5:
               if (typeof requestOptions == "string" || requestOptions instanceof URL) {
                 url = String(requestOptions);
                 requestOptions = {};
@@ -10055,10 +10109,10 @@ function () {
               }
 
               hasPageCallback = typeof fhirOptions.onPage == "function";
-              debug("[client.request] Request url: %s, options: %O, fhirOptions: %O", url, requestOptions, fhirOptions);
-              return _context3.abrupt("return", fetchJSON(url, requestOptions) // Automatic re-auth via refresh token -----------------------------
+              debug("%s, options: %O, fhirOptions: %O", url, requestOptions, fhirOptions);
+              return _context5.abrupt("return", fetchJSON(url, requestOptions) // Automatic re-auth via refresh token -----------------------------
               .catch(function (error) {
-                debug("failed %o", error);
+                debug("%o", error);
 
                 if (error.status == 401 && fhirOptions.useRefreshToken !== false) {
                   var hasRefreshToken = _getPath(_this2, "state.tokenResponse.refresh_token");
@@ -10074,44 +10128,85 @@ function () {
 
                 throw error;
               }) // Handle 401 ------------------------------------------------------
-              .catch(function (error) {
-                if (error.status == 401) {
-                  // !accessToken -> not authorized -> No session. Need to launch.
-                  if (!_getPath(_this2, "state.tokenResponse.accessToken")) {
-                    throw new Error("This app cannot be accessed directly. Please " + "launch it as SMART app!");
-                  } // !fhirOptions.useRefreshToken -> auto-refresh not enabled
-                  // Session expired. Need to re-launch. Clear state to
-                  // start over!
+              .catch(
+              /*#__PURE__*/
+              function () {
+                var _ref = (0, _asyncToGenerator2.default)(
+                /*#__PURE__*/
+                _regenerator.default.mark(function _callee2(error) {
+                  return _regenerator.default.wrap(function _callee2$(_context2) {
+                    while (1) {
+                      switch (_context2.prev = _context2.next) {
+                        case 0:
+                          if (!(error.status == 401)) {
+                            _context2.next = 18;
+                            break;
+                          }
 
+                          if (_getPath(_this2, "state.tokenResponse.accessToken")) {
+                            _context2.next = 3;
+                            break;
+                          }
 
-                  if (!fhirOptions.useRefreshToken) {
-                    debug("Your session has expired and the useRefreshToken " + "option is set to false. Please re-launch the app."); // TODO: Clear state
+                          throw new Error("This app cannot be accessed directly. Please launch it as SMART app!");
 
-                    throw new Error("Session expired! Please re-launch the app");
-                  } // !refresh_token -> auto-refresh not possible. Session
-                  // expired. Need to re-launch. Clear state to start over!
+                        case 3:
+                          if (fhirOptions.useRefreshToken) {
+                            _context2.next = 8;
+                            break;
+                          }
 
+                          debug("Your session has expired and the useRefreshToken option is set to false. Please re-launch the app.");
+                          _context2.next = 7;
+                          return _this2._clearState();
 
-                  if (!_this2.state.tokenResponse.refresh_token) {
-                    debug("Your session has expired and no refresh token is" + "available. Please re-launch the app."); // TODO: Clear state
+                        case 7:
+                          throw new Error(str.expired);
 
-                    throw new Error("Session expired! Please re-launch the app");
-                  } // otherwise -> auto-refresh failed. Session expired.
-                  // Need to re-launch. Clear state to start over!
+                        case 8:
+                          if (_this2.state.tokenResponse.refresh_token) {
+                            _context2.next = 13;
+                            break;
+                          }
 
+                          debug("Your session has expired and no refresh token is available. Please re-launch the app.");
+                          _context2.next = 12;
+                          return _this2._clearState();
 
-                  if (_getPath(_this2, "this.state.tokenResponse.access_token")) {
-                    debug("Auto-refresh failed! Please re-launch the app."); // TODO: Clear state
+                        case 12:
+                          throw new Error(str.expired);
 
-                    throw new Error("Session expired! Please re-launch the app");
-                  }
-                }
+                        case 13:
+                          if (!_getPath(_this2, "this.state.tokenResponse.access_token")) {
+                            _context2.next = 18;
+                            break;
+                          }
 
-                throw error;
-              }) // Handle 403 ------------------------------------------------------
+                          debug("Auto-refresh failed! Please re-launch the app.");
+                          _context2.next = 17;
+                          return _this2._clearState();
+
+                        case 17:
+                          throw new Error(str.expired);
+
+                        case 18:
+                          throw error;
+
+                        case 19:
+                        case "end":
+                          return _context2.stop();
+                      }
+                    }
+                  }, _callee2);
+                }));
+
+                return function (_x4) {
+                  return _ref.apply(this, arguments);
+                };
+              }()) // Handle 403 ------------------------------------------------------
               .catch(function (error) {
                 if (error.status == 403) {
-                  debug("[client.request] Permission denied! Please make sure " + "that you have requested the proper scopes.");
+                  debug("Permission denied! Please make sure that you have requested the proper scopes.");
                 }
 
                 throw error;
@@ -10119,59 +10214,59 @@ function () {
               .then(
               /*#__PURE__*/
               function () {
-                var _ref = (0, _asyncToGenerator2.default)(
+                var _ref2 = (0, _asyncToGenerator2.default)(
                 /*#__PURE__*/
-                _regenerator.default.mark(function _callee(data) {
-                  return _regenerator.default.wrap(function _callee$(_context) {
+                _regenerator.default.mark(function _callee3(data) {
+                  return _regenerator.default.wrap(function _callee3$(_context3) {
                     while (1) {
-                      switch (_context.prev = _context.next) {
+                      switch (_context3.prev = _context3.next) {
                         case 0:
                           if (!(data && data.resourceType == "Bundle")) {
-                            _context.next = 5;
+                            _context3.next = 5;
                             break;
                           }
 
-                          _context.next = 3;
+                          _context3.next = 3;
                           return Promise.all((data.entry || []).map(function (item) {
                             return resolveRefs(item.resource, fhirOptions, _resolvedRefs, _this2);
                           }));
 
                         case 3:
-                          _context.next = 7;
+                          _context3.next = 7;
                           break;
 
                         case 5:
-                          _context.next = 7;
+                          _context3.next = 7;
                           return resolveRefs(data, fhirOptions, _resolvedRefs, _this2);
 
                         case 7:
-                          return _context.abrupt("return", data);
+                          return _context3.abrupt("return", data);
 
                         case 8:
                         case "end":
-                          return _context.stop();
+                          return _context3.stop();
                       }
                     }
-                  }, _callee);
+                  }, _callee3);
                 }));
 
-                return function (_x4) {
-                  return _ref.apply(this, arguments);
+                return function (_x5) {
+                  return _ref2.apply(this, arguments);
                 };
               }()) // Pagination ------------------------------------------------------
               .then(
               /*#__PURE__*/
               function () {
-                var _ref2 = (0, _asyncToGenerator2.default)(
+                var _ref3 = (0, _asyncToGenerator2.default)(
                 /*#__PURE__*/
-                _regenerator.default.mark(function _callee2(data) {
+                _regenerator.default.mark(function _callee4(data) {
                   var links, next, nextPage;
-                  return _regenerator.default.wrap(function _callee2$(_context2) {
+                  return _regenerator.default.wrap(function _callee4$(_context4) {
                     while (1) {
-                      switch (_context2.prev = _context2.next) {
+                      switch (_context4.prev = _context4.next) {
                         case 0:
                           if (!(data && data.resourceType == "Bundle")) {
-                            _context2.next = 19;
+                            _context4.next = 19;
                             break;
                           }
 
@@ -10184,16 +10279,16 @@ function () {
                           }
 
                           if (!hasPageCallback) {
-                            _context2.next = 6;
+                            _context4.next = 6;
                             break;
                           }
 
-                          _context2.next = 6;
+                          _context4.next = 6;
                           return fhirOptions.onPage(data, Object.assign({}, _resolvedRefs));
 
                         case 6:
                           if (! --fhirOptions.pageLimit) {
-                            _context2.next = 19;
+                            _context4.next = 19;
                             break;
                           }
 
@@ -10203,48 +10298,48 @@ function () {
                           data = makeArray(data); // console.log("===>", data);
 
                           if (!(next && next.url)) {
-                            _context2.next = 19;
+                            _context4.next = 19;
                             break;
                           }
 
-                          _context2.next = 12;
+                          _context4.next = 12;
                           return _this2.request(next.url, fhirOptions, _resolvedRefs);
 
                         case 12:
-                          nextPage = _context2.sent;
+                          nextPage = _context4.sent;
 
                           if (!hasPageCallback) {
-                            _context2.next = 15;
+                            _context4.next = 15;
                             break;
                           }
 
-                          return _context2.abrupt("return", null);
+                          return _context4.abrupt("return", null);
 
                         case 15:
                           if (!(fhirOptions.resolveReferences && fhirOptions.resolveReferences.length)) {
-                            _context2.next = 18;
+                            _context4.next = 18;
                             break;
                           }
 
                           Object.assign(_resolvedRefs, nextPage.references);
-                          return _context2.abrupt("return", data.concat(makeArray(nextPage.data || nextPage)));
+                          return _context4.abrupt("return", data.concat(makeArray(nextPage.data || nextPage)));
 
                         case 18:
-                          return _context2.abrupt("return", data.concat(makeArray(nextPage)));
+                          return _context4.abrupt("return", data.concat(makeArray(nextPage)));
 
                         case 19:
-                          return _context2.abrupt("return", data);
+                          return _context4.abrupt("return", data);
 
                         case 20:
                         case "end":
-                          return _context2.stop();
+                          return _context4.stop();
                       }
                     }
-                  }, _callee2);
+                  }, _callee4);
                 }));
 
-                return function (_x5) {
-                  return _ref2.apply(this, arguments);
+                return function (_x6) {
+                  return _ref3.apply(this, arguments);
                 };
               }()) // Finalize --------------------------------------------------------
               .then(function (data) {
@@ -10260,12 +10355,12 @@ function () {
                 return data;
               }));
 
-            case 14:
+            case 15:
             case "end":
-              return _context3.stop();
+              return _context5.stop();
           }
         }
-      }, _callee3, this);
+      }, _callee5, this);
     }));
 
     function request(_x, _x2, _x3) {
@@ -10284,24 +10379,26 @@ function () {
   _proto.refresh = function refresh() {
     var _this3 = this;
 
-    debug("[refresh] Attempting to refresh using a refresh_token...");
+    var debug = _debug.extend("client:refresh");
+
+    debug("Attempting to refresh with refresh_token...");
 
     var refreshToken = _getPath(this, "state.tokenResponse.refresh_token");
 
     if (!refreshToken) {
-      throw new Error("Unable to refresh. No refresh_token found in state");
+      throw new Error("Unable to refresh. No refresh_token found.");
     }
 
     var tokenUri = this.state.tokenUri;
 
     if (!tokenUri) {
-      throw new Error("Unable to refresh. No tokenUri found in storage");
+      throw new Error("Unable to refresh. No tokenUri found.");
     }
 
     var scopes = _getPath(this, "state.tokenResponse.scope") || "";
 
     if (scopes.indexOf("offline_access") == -1) {
-      throw new Error("Trying to refresh but no `offline_access` scope was granted");
+      throw new Error("Unable to refresh. No offline_access scope found.");
     } // This method is typically called internally from `request` if certain
     // request fails with 401. However, clients will often run multiple
     // requests in parallel which may result in multiple refresh calls.
@@ -10323,11 +10420,11 @@ function () {
 
         return data;
       }).then(function (data) {
-        debug("[refresh] Received new access token %O", data);
+        debug("Received new access token %O", data);
         Object.assign(_this3.state.tokenResponse, data);
         return _this3.state;
       }).catch(function (error) {
-        debug("[refresh] Deleting the expired or invalid refresh token");
+        debug("Deleting the expired or invalid refresh token.");
         delete _this3.state.tokenResponse.refresh_token;
         throw error;
       }).finally(function () {
@@ -10784,7 +10881,7 @@ var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/r
  */
 var HttpError = __webpack_require__(/*! ./HttpError */ "./src/HttpError.js");
 
-var debug = __webpack_require__(/*! debug */ "./node_modules/debug/src/browser.js")("FHIRClient");
+var debug = __webpack_require__(/*! debug */ "./node_modules/debug/src/browser.js")("FHIR");
 
 function isBrowser() {
   return typeof window === "object";
@@ -11234,11 +11331,13 @@ var Client = __webpack_require__(/*! ./Client */ "./src/Client.js");
 
 var _require = __webpack_require__(/*! ./lib */ "./src/lib.js"),
     isBrowser = _require.isBrowser,
-    debug = _require.debug,
+    _debug = _require.debug,
     fetchJSON = _require.fetchJSON,
     getPath = _require.getPath,
     randomString = _require.randomString,
     btoa = _require.btoa;
+
+var debug = _debug.extend("oauth2");
 
 var SMART_KEY = "SMART_KEY";
 
@@ -11396,7 +11495,7 @@ function _authorize() {
 
           case 12:
             if (iss) {
-              debug("[authorize] Making %s launch...", launch ? "EHR" : "standalone");
+              debug("Making %s launch...", launch ? "EHR" : "standalone");
             } // append launch scope if needed
 
 
@@ -11446,7 +11545,7 @@ function _authorize() {
               break;
             }
 
-            debug("[authorize] Making fake launch..."); // Storage.set(stateKey, state);
+            debug("Making fake launch..."); // Storage.set(stateKey, state);
 
             _context.next = 26;
             return env.getStorage().set(stateKey, state);
@@ -11576,7 +11675,7 @@ function _completeAuth() {
             throw new Error(msg);
 
           case 13:
-            debug("[completeAuth] key: %s, code: %O", key, code); // key might be coming from the page url so it might be empty or missing
+            debug("key: %s, code: %O", key, code); // key might be coming from the page url so it might be empty or missing
 
             if (key) {
               _context2.next = 16;
@@ -11610,8 +11709,8 @@ function _completeAuth() {
             // We have to remove it, otherwise the page will authorize on
             // every load!
             if (code) {
-              debug("[completeAuth] Removing code parameter from the url...");
               url.searchParams.delete("code");
+              debug("Removed code parameter from the url.");
             } // If we have `fullSessionStorageSupport` it means we no longer
             // need the `state` key. It will be stored to a well know
             // location - sessionStorage[SMART_KEY]. However, no
@@ -11621,8 +11720,8 @@ function _completeAuth() {
 
 
             if (hasState && fullSessionStorageSupport) {
-              debug("[completeAuth] Removing state parameter from the url...");
               url.searchParams.delete("state");
+              debug("Removed state parameter from the url.");
             } // If the browser does not support the replaceState method for the
             // History Web API, the "code" parameter cannot be removed. As a
             // consequence, the page will (re)authorize on every load. The
@@ -11658,13 +11757,13 @@ function _completeAuth() {
               break;
             }
 
-            debug("[completeAuth] Preparing to exchange the code for access token...");
+            debug("Preparing to exchange the code for access token...");
             _context2.next = 38;
             return buildTokenRequest(code, state);
 
           case 38:
             requestOptions = _context2.sent;
-            debug("[completeAuth] Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
+            debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
             // includes an access token or a message indicating that the
             // authorization request has been denied.
 
@@ -11673,7 +11772,7 @@ function _completeAuth() {
 
           case 42:
             tokenResponse = _context2.sent;
-            debug("[completeAuth] Token response: %O", tokenResponse);
+            debug("Token response: %O", tokenResponse);
 
             if (tokenResponse.access_token) {
               _context2.next = 46;
@@ -11701,16 +11800,16 @@ function _completeAuth() {
             return Storage.set(SMART_KEY, key);
 
           case 52:
-            debug("[completeAuth] Authorization successful!");
+            debug("Authorization successful!");
             _context2.next = 56;
             break;
 
           case 55:
-            debug("[completeAuth] %s", state.tokenResponse.access_token ? "Already authorized" : "No authorization needed");
+            debug(state.tokenResponse.access_token ? "Already authorized" : "No authorization needed");
 
           case 56:
             client = new Client(env, state);
-            debug("[completeAuth] Created client instance: %O", client);
+            debug("Created client instance: %O", client);
             return _context2.abrupt("return", client);
 
           case 59:
@@ -11757,9 +11856,9 @@ function buildTokenRequest(code, state) {
 
   if (clientSecret) {
     requestOptions.headers.Authorization = "Basic " + btoa(clientId + ":" + clientSecret);
-    debug("[buildTokenRequest] Using state.clientSecret to construct the " + "authorization header: %s", requestOptions.headers.Authorization);
+    debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
   } else {
-    debug("[buildTokenRequest] No clientSecret found in state. Adding " + "the client_id to the POST body");
+    debug("No clientSecret found in state. Adding the clientId to the POST body");
     requestOptions.body += "&client_id=" + encodeURIComponent(clientId);
   }
 
@@ -12040,20 +12139,15 @@ module.exports = Storage;
 "use strict";
 
 
+// This map contains reusable debug messages (only those used in multiple places)
 module.exports = {
-  "dupRef": "Duplicated reference path \"%s\"",
-  "request": "Request url: %s, options: %O, fhirOptions: %O",
-  "clientNoServerUrl": "A \"serverUrl\" option is required and must begin with \"http(s)\"",
-  "noCtx": "%s is not available",
-  "noPatient": "Patient is not available",
-  "noEncounter": "Encounter is not available",
-  "noUser": "User is not available",
-  "noScopeForId": "Trying to get the ID of the selected %s. Please add 'launch' or 'launch/%s' to the requested scopes and try again.",
-  "noPatientId": "The ID of the selected patient is not available. Please check if your server supports that.",
-  "noIdIfNoAuth": "You are trying to get the ID of the selected %s but the app is not authorized yet.",
-  "noFreeContext": "Please don't use open fhir servers if you need to access launch context items like the selected %S."
+  expired: "Session expired! Please re-launch the app",
+  noScopeForId: "Trying to get the ID of the selected %s. Please add 'launch' or 'launch/%s' to the requested scopes and try again.",
+  noIfNoAuth: "You are trying to get %s but the app is not authorized yet.",
+  noFreeContext: "Please don't use open fhir servers if you need to access launch context items like the %S."
 };
 
 /***/ })
 
 /******/ });
+//# sourceMappingURL=fhir-client.js.map
