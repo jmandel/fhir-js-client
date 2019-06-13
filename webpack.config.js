@@ -20,12 +20,13 @@ module.exports = function(env, argv) {
     }));
 
     return {
-        entry: __dirname + "/src/entry.js",
+        entry: __dirname + "/src/browser.js",
         target: "web",
         output: {
-            path      : __dirname + "/build",
-            publicPath: "/",
-            filename  : `fhir-client${isDev ? "" : ".min"}.js`
+            path      : __dirname + "/dist/build",
+            filename  : `fhir-client${isDev ? "" : ".min"}.js`,
+            library: "FHIR",
+            libraryTarget: "window"
         },
         devtool: "source-map",
         optimization: {

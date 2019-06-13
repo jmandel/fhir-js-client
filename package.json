@@ -13,7 +13,7 @@
     "Client"
   ],
   "license": "Apache-2.0",
-  "main": "src/adapters/NodeAdapter.js",
+  "main": "dist/lib/index.js",
   "dependencies": {
     "@babel/runtime": "^7.4.5",
     "core-js": "^3.1.3",
@@ -26,10 +26,11 @@
     "pack:prod": "webpack --config webpack.config.js --mode production",
     "pack:dev": "webpack --config webpack.config.js --mode development",
     "pack": "npm run pack:dev && npm run pack:prod",
-    "build": "npm run pack",
+    "build": "npm run build:module && npm run pack",
     "build:dev": "npm run pack:dev -- --watch",
     "examples": "ws -o -p 9090",
-    "cover": "lab -P test --ignore fetch,Response,Headers,Request --threshold 0 --coverage-exclude lib -r lcov | coveralls"
+    "cover": "lab -P test --ignore fetch,Response,Headers,Request --threshold 0 --coverage-exclude lib -r lcov | coveralls",
+    "build:module": "babel -d dist src"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
@@ -47,6 +48,7 @@
     "fhir.js": "0.0.20",
     "jsdom": "^15.1.1",
     "local-web-server": "^2.6.1",
+    "typescript": "^3.5.2",
     "webpack": "^4.32.2",
     "webpack-bundle-analyzer": "^3.3.2",
     "webpack-cli": "^3.3.2"

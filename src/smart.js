@@ -1,3 +1,5 @@
+//// <reference path="index.d.ts" />
+
 const Client  = require("./Client");
 const {
     isBrowser,
@@ -31,7 +33,8 @@ function fetchWellKnownJson(baseUrl = "/")
 /**
  * Given a fhir server returns an object with it's Oauth security endpoints that
  * we are interested in
- * @param baseUrl Fhir server base URL
+ * @param {String} baseUrl Fhir server base URL
+ * @returns {Promise<FhirClient.OAuthSecurityExtensions>}
  */
 function getSecurityExtensions(baseUrl = "/")
 {
@@ -75,24 +78,11 @@ function getSecurityExtensions(baseUrl = "/")
 }
 
 /**
- * @param {Object} params
- * @param {String} params.iss This should come as url parameter but can also be
- *  passed as an option for testing
- * @param {String} params.launch This should come as url parameter but can also
- *  be passed as an option for testing
- * @param {String} params.fhirServiceUrl Can be passed as an option or as an URL param.
- *  If present (and if `iss` is not present), it will make the client bypass the
- *  authorization
- * @param {String} params.redirectUri (or redirect_uri) redirect_uri Defaults to the current directory (it's index file)
- * @param {String} params.clientId // or "client_id"
- * @param {String} params.scope
- * @param {String} params.patientId
- * @param {String} params.encounterId
- * @param {Object} params.fakeTokenResponse
+ * @param {FhirClient.AuthorizeParams} params
  * @param {Boolean} _noRedirect If true, resolve with the redirect url without
  *  trying to redirect to it
  */
-async function authorize(env, params = {}, _noRedirect)
+async function authorize(env, params = {}, _noRedirect = false)
 {
     // Obtain input
     let {
@@ -274,15 +264,14 @@ async function completeAuth(env)
     let state = await Storage.get(key);
 
     const fullSessionStorageSupport = isBrowser() ?
-        getPath(window, "FHIR.oauth2.settings.fullSessionStorageSupport") :
+        getPath(env, "options.fullSessionStorageSupport") :
         true;
 
     // Do we have to remove the `code` and `state` params from the URL?
     if (isBrowser()) {
-        const { settings } = window.FHIR.oauth2;
         const hasState = url.searchParams.has("state");
 
-        if (settings.replaceBrowserHistory && (code || hasState)) {
+        if (getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
 
             // `code` is the flag that tell us to request an access token.
             // We have to remove it, otherwise the page will authorize on

@@ -126,7 +126,7 @@ function resolveRefs(obj, fhirOptions, cache, client) {
 class FhirClient
 {
     /**
-     * @param {Object}  state
+     * @param {fhirclient.clientState}  state
      * @param {String}  state.clientId
      * @param {String}  state.clientSecret
      * @param {String}  state.key
@@ -249,7 +249,7 @@ class FhirClient
             // the patient. This should be a scope issue.
             if (!tokenResponse.patient) {
                 if (!(this.state.scope || "").match(/\blaunch(\/patient)?\b/)) {
-                    debug(str.noScopeForId, "patient");
+                    debug(str.noScopeForId, "patient", "patient");
                 }
                 else {
                     // The server should have returned the patient!
@@ -283,7 +283,7 @@ class FhirClient
             // the encounter. This should be a scope issue.
             if (!tokenResponse.encounter) {
                 if (!(this.state.scope || "").match(/\blaunch(\/encounter)?\b/)) {
-                    debug(str.noScopeForId, "encounter");
+                    debug(str.noScopeForId, "encounter", "encounter");
                 }
                 else {
                     // The server should have returned the encounter!
@@ -493,34 +493,24 @@ class FhirClient
                 if (error.status == 401) {
 
                     // !accessToken -> not authorized -> No session. Need to launch.
-                    if (!getPath(this, "state.tokenResponse.accessToken")) {
+                    if (!getPath(this, "state.tokenResponse.access_token")) {
                         throw new Error("This app cannot be accessed directly. Please launch it as SMART app!");
                     }
 
                     // !fhirOptions.useRefreshToken -> auto-refresh not enabled
                     // Session expired. Need to re-launch. Clear state to
                     // start over!
-                    if (!fhirOptions.useRefreshToken) {
+                    if (fhirOptions.useRefreshToken === false) {
                         debug("Your session has expired and the useRefreshToken option is set to false. Please re-launch the app.");
-                        await this._clearState();
-                        throw new Error(str.expired);
-                    }
-
-                    // !refresh_token -> auto-refresh not possible. Session
-                    // expired. Need to re-launch. Clear state to start over!
-                    if (!this.state.tokenResponse.refresh_token) {
-                        debug("Your session has expired and no refresh token is available. Please re-launch the app.");
                         await this._clearState();
                         throw new Error(str.expired);
                     }
 
                     // otherwise -> auto-refresh failed. Session expired.
                     // Need to re-launch. Clear state to start over!
-                    if (getPath(this, "this.state.tokenResponse.access_token")) {
-                        debug("Auto-refresh failed! Please re-launch the app.");
-                        await this._clearState();
-                        throw new Error(str.expired);
-                    }
+                    debug("Auto-refresh failed! Please re-launch the app.");
+                    await this._clearState();
+                    throw new Error(str.expired);
                 }
                 throw error;
             })
@@ -572,7 +562,6 @@ class FhirClient
                     if (--fhirOptions.pageLimit) {
                         const next = links.find(l => l.relation == "next");
                         data = makeArray(data);
-                        // console.log("===>", data);
                         if (next && next.url) {
                             const nextPage = await this.request(
                                 next.url,

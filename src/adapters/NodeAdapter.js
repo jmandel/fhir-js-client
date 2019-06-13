@@ -8,18 +8,6 @@ const BaseAdapter   = require("./BaseAdapter");
 class NodeAdapter extends BaseAdapter
 {
     /**
-     * @param {Object} options
-     * @param {Object} options.request required
-     * @param {Object} options.response required
-     * @param {Object} options.storage optional
-     */
-    constructor(options)
-    {
-        super();
-        this.options = options;
-    }
-
-    /**
      * Given the current environment, this method must return the current url
      * as URL instance. In Node we might be behind a proxy!
      * @returns {URL}

@@ -1,6 +1,6 @@
 const { expect } = require("@hapi/code");
 const lab        = require("@hapi/lab").script();
-const HttpError  = require("../src/HttpError");
+const HttpError  = require("../dist/HttpError");
 
 const { it, describe } = lab;
 exports.lab = lab;

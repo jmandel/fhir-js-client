@@ -5,9 +5,14 @@ const Location      = require("./Location");
 
 class BrowserEnvironment extends EventEmitter
 {
-    constructor()
+    constructor(options)
     {
         super();
+        this.options = {
+            replaceBrowserHistory: true,
+            fullSessionStorageSupport: true,
+            ...options
+        };
         this._location = new Location("http://localhost");
     }
 

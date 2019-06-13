@@ -30,7 +30,6 @@ class HttpError extends Error
             if (typeof failure == "object") {
                 if (failure instanceof Error) {
                     message = failure.message;
-                    // console.log(failure.stack);
                 }
                 else if (failure.error) {
                     status = failure.error.status || 0;

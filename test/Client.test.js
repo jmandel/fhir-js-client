@@ -1,13 +1,13 @@
 const { expect } = require("@hapi/code");
 const lab        = require("@hapi/lab").script();
-const Lib        = require("../src/lib");
-const str        = require("../src/strings");
+const Lib        = require("../dist/lib");
+const str        = require("../dist/strings");
 
 Lib.debug = (...args) => debugLog.push(args);
 Lib.debug.extend = () => Lib.debug;
 
-const Client     = require("../src/Client");
-const { KEY }    = require("../src/smart");
+const Client     = require("../dist/Client");
+const { KEY }    = require("../dist/smart");
 
 
 // Mocks
@@ -63,7 +63,7 @@ afterEach(() => {
 function crossPlatformTest(callback) {
     const tests = {
         "works in the browser": new BrowserEnv(),
-        "works on the server" : new ServerEnv()
+        "works on the server" : new ServerEnv({ session: {} })
     };
 
     for (let name in tests) {
@@ -1323,9 +1323,60 @@ describe("FHIR.client", () => {
             crossPlatformTest(async (env) => {
                 const client = new Client(env, mockUrl);
                 mockServer.mock({ status: 401 });
-                expect(client.request("/")).to.reject();
+                await expect(client.request("/")).to.reject();
             });
         });
+
+        describe ("throws if 401 and no fhirOptions.useRefreshToken", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        access_token: "whatever"
+                    }
+                });
+                mockServer.mock({ status: 401 });
+                await expect(client.request("/", {
+                    useRefreshToken: false
+                })).to.reject();
+            });
+        });
+
+        describe ("throws if 401 and no refresh_token", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        access_token: "whatever"
+                    }
+                });
+                mockServer.mock({ status: 401 });
+                await expect(client.request("/")).to.reject();
+            });
+        });
+
+        describe ("throws if 401 after refresh", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        access_token: "whatever",
+                        refresh_token: "whatever"
+                    }
+                });
+                mockServer.mock({ status: 401 });
+                await expect(client.request("/")).to.reject();
+            });
+        });
+
+        describe ("throws if 403 after refresh", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, mockUrl);
+                mockServer.mock({ status: 403 });
+                await expect(client.request("/")).to.reject();
+            });
+        });
+
 
         // flat ----------------------------------------------------------------
 
@@ -1947,7 +1998,7 @@ describe("FHIR.client", () => {
                 tokenResponse: {}
             });
             expect(client.getPatientId()).to.equal(null);
-            expect(debugLog).to.equal([[str.noScopeForId, "patient"]]);
+            expect(debugLog).to.equal([[str.noScopeForId, "patient", "patient"]]);
         });
     });
 
@@ -1992,7 +2043,7 @@ describe("FHIR.client", () => {
                 tokenResponse: {}
             });
             expect(client.getEncounterId()).to.equal(null);
-            expect(debugLog).to.equal([[str.noScopeForId, "encounter"]]);
+            expect(debugLog).to.equal([[str.noScopeForId, "encounter", "encounter"]]);
         });
     });
 
@@ -2055,6 +2106,24 @@ describe("FHIR.client", () => {
                 "The id_token is not available. Please check if your " +
                 "server supports that."
             ]]);
+        });
+    });
+
+    describe("_clearState()", () => {
+        crossPlatformTest(async (env) => {
+            const client = new Client(env, {
+                serverUrl: mockUrl,
+                scope: "openid fhirUser",
+                tokenResponse: { a: "b" }
+            });
+            const storage = env.getStorage();
+            const key = "my-key";
+            await storage.set(KEY, key);
+            await storage.set(key, "whatever");
+            await client._clearState();
+            expect(client.state.tokenResponse).to.equal({});
+            expect(storage.get(KEY)).to.be.empty();
+            expect(storage.get(key)).to.be.empty();
         });
     });
 

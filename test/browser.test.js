@@ -1,7 +1,7 @@
 const { URL }    = require("url");
 const { expect } = require("@hapi/code");
 const lab        = require("@hapi/lab").script();
-const smart      = require("../src/smart");
+const smart      = require("../dist/smart");
 
 // mocks
 const BrowserEnv = require("./mocks/BrowserEnvironment");
@@ -133,10 +133,10 @@ describe ("Complete authorization", () => {
 
     it ("code flow with fullSessionStorageSupport = false", async () => {
 
-        window.FHIR.oauth2.settings.fullSessionStorageSupport = false;
-        window.FHIR.oauth2.settings.replaceBrowserHistory = false;
-
-        const env = new BrowserEnv();
+        const env = new BrowserEnv({
+            fullSessionStorageSupport: false,
+            replaceBrowserHistory: false
+        });
         const Storage = env.getStorage();
 
         // mock our oauth endpoints

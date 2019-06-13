@@ -1,5 +1,4 @@
 /* global fhir */
-require("../polyfills");
 const BrowserStorage = require("../storage/BrowserStorage");
 const BaseAdapter    = require("./BaseAdapter");
 
@@ -55,9 +54,9 @@ class BrowserAdapter extends BaseAdapter
         return this._storage;
     }
 
-    static smart()
+    static smart(options)
     {
-        return new BrowserAdapter().getSmartApi();
+        return new BrowserAdapter(options).getSmartApi();
     }
 }
 

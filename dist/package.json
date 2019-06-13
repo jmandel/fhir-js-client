@@ -1,0 +1,36 @@
+{
+  "name": "fhirclient",
+  "version": "2.0.0",
+  "description": "JavaScript client for Fast Healthcare Interoperability Resources",
+  "author": "SMART Health IT <support@smarthealthit.org> (https://smarthealthit.org/)",
+  "contributors": [
+    "Josh Mandel <joshua.mandel@childrens.harvard.edu>",
+    "Vladimir Ignatov <vlad.ignatov@gmail.com>"
+  ],
+  "keywords": [
+    "SMART",
+    "FHIR",
+    "Client"
+  ],
+  "license": "Apache-2.0",
+  "main": "index.js",
+  "dependencies": {
+    "debug": "^4.1.1",
+    "isomorphic-fetch": "^2.2.1"
+  },
+  "engine": "node >= 10",
+  "browserslist": [
+    "last 2 Chrome versions",
+    "last 2 firefox versions",
+    "last 2 Edge versions",
+    "ie 10-11"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smart-on-fhir/client-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/smart-on-fhir/client-js/issues"
+  },
+  "homepage": "https://github.com/smart-on-fhir/client-js"
+}

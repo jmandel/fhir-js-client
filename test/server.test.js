@@ -1,8 +1,9 @@
+
 const { expect } = require("@hapi/code");
 const lab        = require("@hapi/lab").script();
-const FHIR       = require("../src/adapters/NodeAdapter");
-const { KEY }    = require("../src/smart");
-const ServerStorage = require("../src/storage/ServerStorage");
+const FHIR       = require("../dist/adapters/NodeAdapter");
+const { KEY }    = require("../dist/smart");
+const ServerStorage = require("../dist/storage/ServerStorage");
 
 // Mocks
 const mockServer        = require("./mocks/mockServer");
@@ -283,6 +284,8 @@ describe("NodeAdapter", () => {
         expect(adapter.getStorage()).to.equal(fakeStorage);
         expect(adapter.getStorage()).to.equal(fakeStorage);
         expect(callLog).to.equal([[{
+            fullSessionStorageSupport: true,
+            replaceBrowserHistory: true,
             storage : getStorage,
             request : "my-request",
             response: "my-response"

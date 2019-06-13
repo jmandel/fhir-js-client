@@ -8,6 +8,31 @@ const Client = require("../Client");
 class BaseAdapter
 {
     /**
+     * @param {Object} options Environment-specific options
+     */
+    constructor(options = {})
+    {
+        this.options = {
+            // Replaces the browser's current URL
+            // using window.history.replaceState API or by reloading.
+            replaceBrowserHistory: true,
+
+            // When set to true, this variable will fully utilize
+            // HTML5 sessionStorage API.
+            // This variable can be overridden to false by setting
+            // FHIR.oauth2.settings.fullSessionStorageSupport = false.
+            // When set to false, the sessionStorage will be keyed
+            // by a state variable. This is to allow the embedded IE browser
+            // instances instantiated on a single thread to continue to
+            // function without having sessionStorage data shared
+            // across the embedded IE instances.
+            fullSessionStorageSupport: true,
+
+            ...options
+        };
+    }
+
+    /**
      * Given the current environment, this method must return the current url
      * as URL instance
      * @returns {URL}
@@ -53,6 +78,7 @@ class BaseAdapter
             authorize: (...args) => smart.authorize(this, ...args),
             init     : (...args) => smart.init(this, ...args),
             client   : (...args) => new Client(this, ...args),
+            options  : this.options
         };
     }
 }
