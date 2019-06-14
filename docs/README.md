@@ -15,8 +15,8 @@ It works both in browsers (IE10+) and on the server (NodeJS).
 ---
 - [Installation](#installation)
 - [Browser Usage](#browser-usage)
-    - [Live Examples](https://35u09.codesandbox.io/)
-    - [Live Examples Code](https://codesandbox.io/s/fhir-client-browser-examples-35u09)
+    - [Basic Examples](https://35u09.codesandbox.io/) - [Code](https://codesandbox.io/s/fhir-client-browser-examples-35u09)
+    - [React/TypeScript SPA](https://4e7rl.codesandbox.io/test.html) - [Code](https://codesandbox.io/s/fhir-client-typescript-react-spa-4e7rl)
 - [Server Usage](#server-usage)
     - [NodeJS API Details](node.md)
     - [Express Example](https://codesandbox.io/s/jovial-dew-c0che)
