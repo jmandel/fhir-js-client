@@ -4,6 +4,7 @@ const BaseAdapter   = require("./BaseAdapter");
 
 /**
  * Node Adapter - works with native NodeJS and with Express
+ * @type {fhirclient.Adapter}
  */
 class NodeAdapter extends BaseAdapter
 {

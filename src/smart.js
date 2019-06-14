@@ -1,5 +1,3 @@
-//// <reference path="index.d.ts" />
-
 const Client  = require("./Client");
 const {
     isBrowser,
@@ -34,7 +32,7 @@ function fetchWellKnownJson(baseUrl = "/")
  * Given a fhir server returns an object with it's Oauth security endpoints that
  * we are interested in
  * @param {String} baseUrl Fhir server base URL
- * @returns {Promise<FhirClient.OAuthSecurityExtensions>}
+ * @returns { Promise<fhirclient.OAuthSecurityExtensions> }
  */
 function getSecurityExtensions(baseUrl = "/")
 {
@@ -78,9 +76,11 @@ function getSecurityExtensions(baseUrl = "/")
 }
 
 /**
- * @param {FhirClient.AuthorizeParams} params
- * @param {Boolean} _noRedirect If true, resolve with the redirect url without
- *  trying to redirect to it
+ * @param {Object} env
+ * @param {fhirclient.AuthorizeParams} params
+ * @param {Boolean} [_noRedirect = false] If true, resolve with the redirect url
+ * without trying to redirect to it
+ * @returns { Promise<never|string> }
  */
 async function authorize(env, params = {}, _noRedirect = false)
 {
@@ -224,6 +224,7 @@ async function authorize(env, params = {}, _noRedirect = false)
  * The completeAuth function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
  * authorization server..
+ * @returns { Promise<fhirclient.Client> }
  */
 async function completeAuth(env)
 {
@@ -394,6 +395,12 @@ function buildTokenRequest(code, state)
     return requestOptions;
 }
 
+/**
+ * @param {Object} env
+ * @param {() => Promise<fhirclient.Client>} [onSuccess]
+ * @param {() => never} [onError]
+ * @returns { Promise<fhirclient.Client> }
+ */
 async function ready(env, onSuccess, onError)
 {
     let task = completeAuth(env);

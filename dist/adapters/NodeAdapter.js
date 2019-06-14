@@ -5,6 +5,7 @@ const ServerStorage = require("../storage/ServerStorage");
 const BaseAdapter = require("./BaseAdapter");
 /**
  * Node Adapter - works with native NodeJS and with Express
+ * @type {fhirclient.Adapter}
  */
 
 

@@ -9668,6 +9668,10 @@ function resolveRefs(obj, fhirOptions, cache, client) {
   }); // 5. Execute groups sequentially! Paths within same group are
   // fetched in parallel!
 
+  /**
+   * @type any
+   */
+
   var task = Promise.resolve();
   Object.keys(groups).sort().forEach(function (len) {
     var group = groups[len];
@@ -9679,47 +9683,34 @@ function resolveRefs(obj, fhirOptions, cache, client) {
   });
   return task;
 }
+/**
+ * @implements { fhirclient.Client }
+ */
+
 
 var FhirClient =
 /*#__PURE__*/
 function () {
   /**
-   * @param {fhirclient.clientState}  state
-   * @param {String}  state.clientId
-   * @param {String}  state.clientSecret
-   * @param {String}  state.key
-   * @param {String}  state.scope
-   * @param {String}  state.serverUrl
-   * @param {String}  state.tokenUri
-   * @param {String}  state.username
-   * @param {String}  state.password
-   * @param {Object}  state.tokenResponse
-   * @param {String}  state.tokenResponse.access_token
-   * @param {String}  state.tokenResponse.encounter
-   * @param {Number}  state.tokenResponse.expires_in
-   * @param {Boolean} state.tokenResponse.need_patient_banner
-   * @param {String}  state.tokenResponse.patient
-   * @param {String}  state.tokenResponse.refresh_token
-   * @param {String}  state.tokenResponse.scope
-   * @param {String}  state.tokenResponse.smart_style_url
-   * @param {String}  state.tokenResponse.token_type
+   * @param {object} environment
+   * @param {fhirclient.ClientState|string} state
    */
   function FhirClient(environment, state) {
     var _this = this;
 
-    // Accept string as argument
-    if (typeof state == "string") {
-      state = {
-        serverUrl: state
-      };
-    } // Valid serverUrl is required!
+    /**
+     * @type fhirclient.ClientState
+     */
+    var _state = typeof state == "string" ? {
+      serverUrl: state
+    } : state; // Valid serverUrl is required!
 
 
-    if (!state.serverUrl || !state.serverUrl.match(/https?:\/\/.+/)) {
+    if (!_state.serverUrl || !_state.serverUrl.match(/https?:\/\/.+/)) {
       throw new Error("A \"serverUrl\" option is required and must begin with \"http(s)\"");
     }
 
-    this.state = state;
+    this.state = _state;
     this.environment = environment;
     var client = this; // patient api ---------------------------------------------------------
 
@@ -10035,20 +10026,8 @@ function () {
   /**
    * @param {Object|String} requestOptions Can be a string URL (relative to
    *  the serviceUrl), or an object which will be passed to fetch()
-   * @param {Object} fhirOptions Additional options to control the behavior
-   * @param {Boolean} fhirOptions.useRefreshToken If false, the request will
-   *  fail if your access token is expired. If true (default), when you receive
-   *  a 401 response and you have a refresh token, the client will attempt to
-   *  re-authorize and try again.
-   * @param {String|String[]} fhirOptions.resolveReferences One or more
-   *  references to resolve.
-   * @param {Function} fhirOptions.onPage
-   * @param {Boolean} fhirOptions.graph Ignored if `fhirOptions.resolveReferences`
-   *  is not used. If you use `fhirOptions.resolveReferences` and set
-   *  `fhirOptions.graph` to false, the result promise will be resolved with an
-   *  object like `{ data: Bundle, references: [ ...Resource ] }`.
-   *  If you set `fhirOptions.graph` to true, the resolved references will be
-   *  mounted in place and you just get the data property: `{ data: Bundle }`.
+   * @param {fhirclient.FhirOptions} fhirOptions Additional options to control the behavior
+   * @param {object} _resolvedRefs DO NOT USE! Used internally.
    */
   ;
 
@@ -10421,11 +10400,22 @@ function () {
 
     return this._refreshTask;
   } // utils -------------------------------------------------------------------
+
+  /**
+   * @param {object|object[]} observations
+   * @param {string} property
+   */
   ;
 
   _proto.byCode = function byCode(observations, property) {
     return _byCode(observations, property);
-  };
+  }
+  /**
+   * @param {object|object[]} observations
+   * @param {string} property
+   * @returns {(codes: string[]) => object[]}
+   */
+  ;
 
   _proto.byCodes = function byCodes(observations, property) {
     return _byCodes(observations, property);
@@ -10540,8 +10530,6 @@ module.exports = HttpError;
 "use strict";
 
 
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-
 __webpack_require__(/*! core-js/modules/es.array.concat */ "./node_modules/core-js/modules/es.array.concat.js");
 
 __webpack_require__(/*! core-js/modules/es.array.iterator */ "./node_modules/core-js/modules/es.array.iterator.js");
@@ -10556,14 +10544,13 @@ __webpack_require__(/*! core-js/modules/web.dom-collections.iterator */ "./node_
 
 __webpack_require__(/*! core-js/modules/web.url */ "./node_modules/core-js/modules/web.url.js");
 
-var _construct2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/construct */ "./node_modules/@babel/runtime/helpers/construct.js"));
-
 var smart = __webpack_require__(/*! ../smart */ "./src/smart.js");
 
 var Client = __webpack_require__(/*! ../Client */ "./src/Client.js");
 /**
  * This is the abstract base class that adapters must inherit. It just a
  * collection of environment-specific methods that subclasses have to implement.
+ * @type { fhirclient.Adapter }
  */
 
 
@@ -10594,39 +10581,16 @@ function () {
       fullSessionStorageSupport: true
     }, options);
   }
-  /**
-   * Given the current environment, this method must return the current url
-   * as URL instance
-   * @returns {URL}
-   */
-
 
   var _proto = BaseAdapter.prototype;
 
-  _proto.getUrl = function getUrl() {}
-  /**
-   * Given the current environment, this method must redirect to the given
-   * path
-   * @param {String} to The path to redirect to
-   * @returns {*}
-   */
-  ;
-
-  _proto.redirect = function redirect()
-  /*to*/
-  {}
-  /**
-   * This must return a Storage object
-   * @returns {Storage}
-   */
-  ;
+  _proto.getUrl = function getUrl() {
+    return new URL("");
+  };
 
   _proto.getStorage = function getStorage() {}
   /**
-   * Given a relative path, compute and return the full url, assuming that it
-   * is relative to the current location
-   * @param {String} path The path to convert to absolute
-   * @returns {String}
+   * @param {String} path
    */
   ;
 
@@ -10639,6 +10603,7 @@ function () {
    * Those who override this method are free to require any environment-specific
    * arguments. For example in node we will need a request, a response and
    * optionally a storage or storage factory function.
+   * @returns { fhirclient.SMART }
    */
   ;
 
@@ -10653,26 +10618,18 @@ function () {
 
         return smart.ready.apply(smart, [_this].concat(args));
       },
-      authorize: function authorize() {
+      authorize: function authorize(options) {
+        return smart.authorize(_this, options);
+      },
+      init: function init() {
         for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
           args[_key2] = arguments[_key2];
         }
 
-        return smart.authorize.apply(smart, [_this].concat(args));
-      },
-      init: function init() {
-        for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-          args[_key3] = arguments[_key3];
-        }
-
         return smart.init.apply(smart, [_this].concat(args));
       },
-      client: function client() {
-        for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-          args[_key4] = arguments[_key4];
-        }
-
-        return (0, _construct2.default)(Client, [_this].concat(args));
+      client: function client(state) {
+        return new Client(_this, state);
       },
       options: this.options
     };
@@ -10717,6 +10674,7 @@ var BrowserStorage = __webpack_require__(/*! ../storage/BrowserStorage */ "./src
 var BaseAdapter = __webpack_require__(/*! ./BaseAdapter */ "./src/adapters/BaseAdapter.js");
 /**
  * Browser Adapter
+ * @type {fhirclient.Adapter}
  */
 
 
@@ -10782,6 +10740,7 @@ function (_BaseAdapter) {
      * in the global scope.
      */
     get: function get() {
+      // @ts-ignore
       return typeof fhir === "function" ? fhir : null;
     }
   }]);
@@ -10812,6 +10771,7 @@ __webpack_require__(/*! core-js/modules/es.promise */ "./node_modules/core-js/mo
 // the fetch polyfill from the library build if the targets do not include IE.
 // However, when the code is used as module it becomes part of a project, that
 // gets built with another build tool and the fetch polyfill might not be excluded!
+// @ts-ignore
 if ( false ||  true && typeof window.fetch != "function") {
   __webpack_require__(/*! isomorphic-fetch */ "./node_modules/isomorphic-fetch/fetch-npm-browserify.js");
 } // In Browsers we create an adapter, get the SMART api from it and build the
@@ -10827,12 +10787,8 @@ var _smart = smart(),
     client = _smart.client,
     options = _smart.options; // $lab:coverage:off$
 
-/**
- * @type {FhirClient.FHIR}
- */
 
-
-var FHIR = {
+module.exports = {
   client: client,
   oauth2: {
     settings: options,
@@ -10841,8 +10797,6 @@ var FHIR = {
     init: init
   }
 }; // $lab:coverage:on$
-
-module.exports = FHIR;
 
 /***/ }),
 
@@ -11196,7 +11150,7 @@ function byCode(observations, property) {
  * having that codes
  * @param {Object|Object[]} observations Array of observations
  * @param {String} property The name of a CodeableConcept property to group by
- * @returns {Function}
+ * @returns {(codes: string[]) => object[]}
  */
 
 
@@ -11208,9 +11162,9 @@ function byCodes(observations, property) {
     }
 
     return codes.filter(function (code) {
-      return code in bank;
+      return code + "" in bank;
     }).reduce(function (prev, code) {
-      return [].concat(prev, bank[code]);
+      return [].concat(prev, bank[code + ""]);
     }, []);
   };
 }
@@ -11320,7 +11274,10 @@ __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerat
 
 var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/asyncToGenerator.js"));
 
-//// <reference path="index.d.ts" />
+//// <reference path="../index.d.ts" />
+// import "../index.d.ts";
+// import { oauth2 } from "..";
+// import { oauth2 } from "../dist";
 var Client = __webpack_require__(/*! ./Client */ "./src/Client.js");
 
 var _require = __webpack_require__(/*! ./lib */ "./src/lib.js"),
@@ -11360,7 +11317,7 @@ function fetchWellKnownJson(baseUrl) {
  * Given a fhir server returns an object with it's Oauth security endpoints that
  * we are interested in
  * @param {String} baseUrl Fhir server base URL
- * @returns {Promise<FhirClient.OAuthSecurityExtensions>}
+ * @returns { Promise<fhirclient.OAuthSecurityExtensions> }
  */
 
 
@@ -11414,9 +11371,11 @@ function getSecurityExtensions(baseUrl) {
   });
 }
 /**
- * @param {FhirClient.AuthorizeParams} params
- * @param {Boolean} _noRedirect If true, resolve with the redirect url without
- *  trying to redirect to it
+ * @param {Object} env
+ * @param {fhirclient.AuthorizeParams} params
+ * @param {Boolean} [_noRedirect = false] If true, resolve with the redirect url
+ * without trying to redirect to it
+ * @returns { Promise<never|string> }
  */
 
 
@@ -11427,6 +11386,7 @@ function authorize(_x, _x2, _x3) {
  * The completeAuth function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
  * authorization server..
+ * @returns { Promise<fhirclient.Client> }
  */
 
 
@@ -11849,6 +11809,13 @@ function buildTokenRequest(code, state) {
 
   return requestOptions;
 }
+/**
+ * @param {Object} env
+ * @param {() => Promise<fhirclient.Client>} [onSuccess]
+ * @param {() => never} [onError]
+ * @returns { Promise<fhirclient.Client> }
+ */
+
 
 function ready(_x5, _x6, _x7) {
   return _ready.apply(this, arguments);
@@ -12005,6 +11972,12 @@ function () {
 
   var _proto = Storage.prototype;
 
+  /**
+   * Gets the value at `key`. Returns a promise that will be resolved
+   * with that value (or undefined for missing keys).
+   * @param {String} key
+   * @returns {Promise<any>}
+   */
   _proto.get =
   /*#__PURE__*/
   function () {
@@ -12041,7 +12014,15 @@ function () {
     }
 
     return get;
-  }();
+  }()
+  /**
+   * Sets the `value` on `key` and returns a promise that will be resolved
+   * with the value that was set.
+   * @param {String} key
+   * @param {any} value
+   * @returns {Promise<any>}
+   */
+  ;
 
   _proto.set =
   /*#__PURE__*/
@@ -12069,7 +12050,15 @@ function () {
     }
 
     return set;
-  }();
+  }()
+  /**
+   * Deletes the value at `key`. Returns a promise that will be resolved
+   * with true if the key was deleted or with false if it was not (eg. if
+   * did not exist).
+   * @param {String} key
+   * @returns {Promise<Boolean>}
+   */
+  ;
 
   _proto.unset =
   /*#__PURE__*/

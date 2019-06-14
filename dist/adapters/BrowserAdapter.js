@@ -4,6 +4,7 @@ const BrowserStorage = require("../storage/BrowserStorage");
 const BaseAdapter = require("./BaseAdapter");
 /**
  * Browser Adapter
+ * @type {fhirclient.Adapter}
  */
 
 
@@ -14,6 +15,7 @@ class BrowserAdapter extends BaseAdapter {
    * in the global scope.
    */
   get fhir() {
+    // @ts-ignore
     return typeof fhir === "function" ? fhir : null;
   }
   /**

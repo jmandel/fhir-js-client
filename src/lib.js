@@ -220,14 +220,14 @@ function byCode(observations, property)
  * having that codes
  * @param {Object|Object[]} observations Array of observations
  * @param {String} property The name of a CodeableConcept property to group by
- * @returns {Function}
+ * @returns {(codes: string[]) => object[]}
  */
 function byCodes(observations, property)
 {
     const bank = byCode(observations, property);
     return (...codes) => codes
-        .filter(code => code in bank)
-        .reduce((prev, code) => [...prev, ...bank[code]], []);
+        .filter(code => (code + "") in bank)
+        .reduce((prev, code) => [...prev, ...bank[code + ""]], []);
 }
 
 function ensureNumerical({ value, code }) {

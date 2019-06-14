@@ -4,6 +4,7 @@ const Client = require("../Client");
 /**
  * This is the abstract base class that adapters must inherit. It just a
  * collection of environment-specific methods that subclasses have to implement.
+ * @type { fhirclient.Adapter }
  */
 
 
@@ -29,37 +30,14 @@ class BaseAdapter {
       ...options
     };
   }
-  /**
-   * Given the current environment, this method must return the current url
-   * as URL instance
-   * @returns {URL}
-   */
 
-
-  getUrl() {}
-  /**
-   * Given the current environment, this method must redirect to the given
-   * path
-   * @param {String} to The path to redirect to
-   * @returns {*}
-   */
-
-
-  redirect()
-  /*to*/
-  {}
-  /**
-   * This must return a Storage object
-   * @returns {Storage}
-   */
-
+  getUrl() {
+    return new URL("");
+  }
 
   getStorage() {}
   /**
-   * Given a relative path, compute and return the full url, assuming that it
-   * is relative to the current location
-   * @param {String} path The path to convert to absolute
-   * @returns {String}
+   * @param {String} path
    */
 
 
@@ -72,15 +50,16 @@ class BaseAdapter {
    * Those who override this method are free to require any environment-specific
    * arguments. For example in node we will need a request, a response and
    * optionally a storage or storage factory function.
+   * @returns { fhirclient.SMART }
    */
 
 
   getSmartApi() {
     return {
       ready: (...args) => smart.ready(this, ...args),
-      authorize: (...args) => smart.authorize(this, ...args),
+      authorize: options => smart.authorize(this, options),
       init: (...args) => smart.init(this, ...args),
-      client: (...args) => new Client(this, ...args),
+      client: state => new Client(this, state),
       options: this.options
     };
   }

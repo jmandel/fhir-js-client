@@ -3,6 +3,7 @@ require("isomorphic-fetch");
 const NodeAdapter = require("./NodeAdapter").Adapter;
 /**
  * Hapi Adapter
+ * @type {fhirclient.Adapter}
  */
 
 

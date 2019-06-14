@@ -3,6 +3,7 @@ const NodeAdapter = require("./NodeAdapter").Adapter;
 
 /**
  * Hapi Adapter
+ * @type {fhirclient.Adapter}
  */
 class HapiAdapter extends NodeAdapter
 {

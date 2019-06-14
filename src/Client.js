@@ -113,6 +113,9 @@ function resolveRefs(obj, fhirOptions, cache, client) {
 
     // 5. Execute groups sequentially! Paths within same group are
     // fetched in parallel!
+    /**
+     * @type any
+     */
     let task = Promise.resolve();
     Object.keys(groups).sort().forEach(len => {
         const group = groups[len];
@@ -123,42 +126,28 @@ function resolveRefs(obj, fhirOptions, cache, client) {
     return task;
 }
 
+/**
+ * @implements { fhirclient.Client }
+ */
 class FhirClient
 {
     /**
-     * @param {fhirclient.clientState}  state
-     * @param {String}  state.clientId
-     * @param {String}  state.clientSecret
-     * @param {String}  state.key
-     * @param {String}  state.scope
-     * @param {String}  state.serverUrl
-     * @param {String}  state.tokenUri
-     * @param {String}  state.username
-     * @param {String}  state.password
-     * @param {Object}  state.tokenResponse
-     * @param {String}  state.tokenResponse.access_token
-     * @param {String}  state.tokenResponse.encounter
-     * @param {Number}  state.tokenResponse.expires_in
-     * @param {Boolean} state.tokenResponse.need_patient_banner
-     * @param {String}  state.tokenResponse.patient
-     * @param {String}  state.tokenResponse.refresh_token
-     * @param {String}  state.tokenResponse.scope
-     * @param {String}  state.tokenResponse.smart_style_url
-     * @param {String}  state.tokenResponse.token_type
+     * @param {object} environment
+     * @param {fhirclient.ClientState|string} state
      */
     constructor(environment, state)
     {
-        // Accept string as argument
-        if (typeof state == "string") {
-            state = { serverUrl: state };
-        }
+        /**
+         * @type fhirclient.ClientState
+         */
+        const _state = typeof state == "string" ? { serverUrl: state } : state;
 
         // Valid serverUrl is required!
-        if (!state.serverUrl || !state.serverUrl.match(/https?:\/\/.+/)) {
+        if (!_state.serverUrl || !_state.serverUrl.match(/https?:\/\/.+/)) {
             throw new Error("A \"serverUrl\" option is required and must begin with \"http(s)\"");
         }
 
-        this.state = state;
+        this.state = _state;
         this.environment = environment;
 
         const client = this;
@@ -407,20 +396,8 @@ class FhirClient
     /**
      * @param {Object|String} requestOptions Can be a string URL (relative to
      *  the serviceUrl), or an object which will be passed to fetch()
-     * @param {Object} fhirOptions Additional options to control the behavior
-     * @param {Boolean} fhirOptions.useRefreshToken If false, the request will
-     *  fail if your access token is expired. If true (default), when you receive
-     *  a 401 response and you have a refresh token, the client will attempt to
-     *  re-authorize and try again.
-     * @param {String|String[]} fhirOptions.resolveReferences One or more
-     *  references to resolve.
-     * @param {Function} fhirOptions.onPage
-     * @param {Boolean} fhirOptions.graph Ignored if `fhirOptions.resolveReferences`
-     *  is not used. If you use `fhirOptions.resolveReferences` and set
-     *  `fhirOptions.graph` to false, the result promise will be resolved with an
-     *  object like `{ data: Bundle, references: [ ...Resource ] }`.
-     *  If you set `fhirOptions.graph` to true, the resolved references will be
-     *  mounted in place and you just get the data property: `{ data: Bundle }`.
+     * @param {fhirclient.FhirOptions} fhirOptions Additional options to control the behavior
+     * @param {object} _resolvedRefs DO NOT USE! Used internally.
      */
     async request(requestOptions, fhirOptions = {}, _resolvedRefs = {})
     {
@@ -659,10 +636,19 @@ class FhirClient
     }
 
     // utils -------------------------------------------------------------------
+    /**
+     * @param {object|object[]} observations
+     * @param {string} property
+     */
     byCode(observations, property) {
         return byCode(observations, property);
     }
 
+    /**
+     * @param {object|object[]} observations
+     * @param {string} property
+     * @returns {(codes: string[]) => object[]}
+     */
     byCodes(observations, property) {
         return byCodes(observations, property);
     }
