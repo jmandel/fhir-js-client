@@ -2,7 +2,7 @@
 
 The SMART API is a collection of SMART-specific methods (`authorize`, `ready`, `init`) for app authorization and launch.
 If you are working in a browser, the SMART API is automatically created, and available at
-`window.FHIR.oauth2`. In NodeJs, the library exports a function that should be called
+`window.FHIR.oauth2`. In NodeJS, the library exports a function that should be called
 with a http request and response objects, and will return the same SMART API as in the browser. 
 
 ```js
