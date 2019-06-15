@@ -79,9 +79,9 @@ FHIR.oauth2.init({
    - Since the page will be loaded twice, you must be careful if your code has
      global side effects that can persist between page reloads (for example
      writing to localStorage).
-3. For standalone launch, only `init` in combination with `offline_access` scope.
-   Otherwise (if you don't have a refresh_token), once the access_token expires,
-   there is no way to reauthorize. We detect that and delete the expired access token,
+3. For standalone launch, only use `init` in combination with `offline_access` scope.
+   Once the access_token expires, if you don't have a refresh_token there is no way
+   to re-authorize properly. We detect that and delete the expired access token,
    but it still means that the user will have to refresh the page twice to
    re-authorize.
    
