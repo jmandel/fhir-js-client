@@ -187,11 +187,17 @@ the FHIR server and a bunch of other useful utilities and methods.
 
 
 ## Fhir.js Integration
-Since v2.0.0 this library no longer includes fhir.js. That architecture was
+Since v2.0 this library no longer includes fhir.js. That architecture was
 extremely difficult to maintain. Fhir.js is now an optional dependency, meaning
 that it is not available by default, unless you include it in the page.
 Our goal is to provide a simple alternative to fhir.js - most of it should be
 possible via `client.request`. Please see the [Examples](fhirjs-equivalents).
+
+You are now free to to choose what version of fhir.js to include. For backward
+compatibility you can try [our fork of fhir.js](https://github.com/smart-on-fhir/client-js/blob/9e77b7b26b5d7dff7e65f25625441e0905f84811/lib/jqFhir.js).
+It is not maintained any more, and it would require Jquery to be include in the page.
+Newer versions of fhir.js work fine, but might have different API or return result
+objects with different shape.
 
 #### Reasons to use fhir.js
 1. If you have old apps using legacy API like `client.api.anyFhirJsMethod()` or `client.patient.api.anyFhirJsMethod()`
@@ -256,19 +262,11 @@ npm run pack:dev
 npm run build:dev
 ```
 
-After building, the following files will be generated:
-
-* `build/fhir-client.js`         - The browser bundle for development
-* `build/fhir-client.min.js`     - The browser bundle for production
-* `build/fhir-client.js.map`     - Hidden source map 
-* `build/fhir-client.min.js.map` - Hidden source map
-* `build/report.html`            - Graphical visualization of the dev bundle
-
 ## Debugging
 This library uses the [debug](https://www.npmjs.com/package/debug) module. To enable
 debug logging in Node use the `DEBUG` env variable. In the browser execute this in the console:
 ```js
-localStorage.debug = 'FHIRClient:*'
+localStorage.debug = "FHIR.*"
 ```
 and then reload the page.
 
