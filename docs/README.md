@@ -69,14 +69,15 @@ Latest development builds from GitHub:
 
 ## Browser Usage
 
-In the browser you need to include the library via script tag. You typically
-have to create two separate pages that correspond to your
+In the browser you typically have to create two separate pages that correspond to your
 `launch_uri` (Launch Page) and `redirect_uri` (Index Page).
+
+### As Library
 
 **Launch Page**
 ```html
 <!-- launch.html -->
-<script src="/path/to/fhir-client.js"></script>
+<script src="./node_module/fhirclient/build/fhir-client.js"></script>
 <script>
 FHIR.oauth2.authorize({
     "client_id": "my_web_app",
@@ -88,13 +89,32 @@ FHIR.oauth2.authorize({
 **Index Page**
 ```html
 <!-- index.html -->
-<script src="/path/to/fhir-client.js"></script>
+<script src="./node_module/fhirclient/build/fhir-client.js"></script>
 <script>
 FHIR.oauth2.ready()
     .then(client => client.request("Patient"))
     .then(console.log)
     .catch(console.error);
 </script>
+```
+
+### As Module
+**Launch Page**
+```js
+import FHIR from "fhirclient"
+FHIR.oauth2.authorize({
+    "client_id": "my_web_app",
+    "scope": "patient/*.read"
+});
+```
+
+**Index Page**
+```js
+import FHIR from "fhirclient"
+FHIR.oauth2.ready()
+    .then(client => client.request("Patient"))
+    .then(console.log)
+    .catch(console.error);
 ```
 
 ## Server Usage
