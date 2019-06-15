@@ -190,9 +190,9 @@ that it is not available by default, unless you include it in the page.
 Our goal is to provide a simple alternative to fhir.js - most of it should be
 possible via `client.request`. Please see the [Examples](fhirjs-equivalents).
 
-You are now free to to choose what version of fhir.js to include. For backward
-compatibility you can try [our fork of fhir.js](https://github.com/smart-on-fhir/client-js/blob/9e77b7b26b5d7dff7e65f25625441e0905f84811/lib/jqFhir.js).
-It is not maintained any more, and it would require Jquery to be include in the page.
+You are now free to choose what version of fhir.js to include. For backward
+compatibility try [our fork of fhir.js](https://github.com/smart-on-fhir/client-js/blob/9e77b7b26b5d7dff7e65f25625441e0905f84811/lib/jqFhir.js).
+It is not maintained any more, and it would require Jquery to be included in the page.
 Newer versions of fhir.js work fine, but might have different API or return result
 objects with different shape.
 
