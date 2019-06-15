@@ -9544,6 +9544,7 @@ var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/r
 
 var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ "./node_modules/@babel/runtime/helpers/createClass.js"));
 
+/// <reference path="types.d.ts" />
 var _require = __webpack_require__(/*! ./lib */ "./src/lib.js"),
     fetchJSON = _require.fetchJSON,
     absolute = _require.absolute,

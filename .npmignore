@@ -9,6 +9,7 @@
 node_modules
 .vscode
 old
+trash
 test
 docs
 .babelrc                    
