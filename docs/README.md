@@ -15,8 +15,9 @@ It works both in browsers (IE10+) and on the server (NodeJS).
 ---
 - [Installation](#installation)
 - [Browser Usage](#browser-usage)
-    - [Basic Examples](https://35u09.codesandbox.io/) - [Code](https://codesandbox.io/s/fhir-client-browser-examples-35u09)
-    - [React / TypeScript SPA](https://4e7rl.codesandbox.io/test.html) - [Code](https://codesandbox.io/s/fhir-client-typescript-react-spa-4e7rl)
+    - [Basic Examples](https://35u09.codesandbox.io/) - [Code](https://codesandbox.io/s/fhir-client-browser-examples-35u09) - Basic examples with no additional libraries or frameworks
+    - [React / TypeScript SPA](https://4e7rl.codesandbox.io/test.html) - [Code](https://codesandbox.io/s/fhir-client-typescript-react-spa-4e7rl) - Example with React and TypeScript on a single page
+    - [Advanced React Example](https://0q3n8.codesandbox.io) - [Code](https://codesandbox.io/s/fhir-client-react-react-router-context-0q3n8) - React with React Router, storing client instance in context to make it available to any component
 - [Server Usage](#server-usage)
     - [NodeJS API Details](node.md)
     - [Express Example](https://c0che.sse.codesandbox.io/) - [Code](https://codesandbox.io/s/jovial-dew-c0che)
