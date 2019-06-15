@@ -51,7 +51,7 @@ This should be called on your `redirect_uri`. Returns a Promise that will eventu
 
 > The `onSuccess` and `onError` callback functions are optional (and **deprecated**). We only accept them to keep the library compatible with older apps. If these functions are provided, they will simply be attached to the returned promise chain.
 
-### init(options) `Promise<Client>`
+### init(options) `Promise<Client>` (experimental)
 This function can be used when you want to handle everything in one page (no launch endpoint needed). You can think of it as if it does:
 ```js
 authorize(options).then(ready)
@@ -79,4 +79,9 @@ FHIR.oauth2.init({
    - Since the page will be loaded twice, you must be careful if your code has
      global side effects that can persist between page reloads (for example
      writing to localStorage).
+3. For standalone launch, only `init` in combination with `offline_access` scope.
+   Otherwise (if you don't have a refresh_token), once the access_token expires,
+   there is no way to reauthorize. We detect that and delete the expired access token,
+   but it still means that the user will have to refresh the page twice to
+   re-authorize.
    
