@@ -1,7 +1,3 @@
-//// <reference path="../index.d.ts" />
-// import "../index.d.ts";
-// import { oauth2 } from "..";
-// import { oauth2 } from "../dist";
 const Client = require("./Client");
 
 const {
@@ -102,7 +98,8 @@ async function authorize(env, params = {}, _noRedirect = false) {
     client_id,
     clientId
   } = params;
-  const url = env.getUrl(); // For these three an url param takes precedence over inline option
+  const url = env.getUrl();
+  const storage = env.getStorage(); // For these three an url param takes precedence over inline option
 
   iss = url.searchParams.get("iss") || iss;
   fhirServiceUrl = url.searchParams.get("fhirServiceUrl") || fhirServiceUrl;
@@ -138,7 +135,7 @@ async function authorize(env, params = {}, _noRedirect = false) {
   } // prevent inheritance of tokenResponse from parent window
 
 
-  await env.getStorage().unset(SMART_KEY); // create initial state
+  await storage.unset(SMART_KEY); // create initial state
 
   const stateKey = randomString(16);
   const state = {
@@ -174,7 +171,7 @@ async function authorize(env, params = {}, _noRedirect = false) {
   if (fhirServiceUrl && !iss) {
     debug("Making fake launch..."); // Storage.set(stateKey, state);
 
-    await env.getStorage().set(stateKey, state);
+    await storage.set(stateKey, state);
 
     if (_noRedirect) {
       return redirectUrl;
@@ -186,7 +183,7 @@ async function authorize(env, params = {}, _noRedirect = false) {
 
   const extensions = await getSecurityExtensions(serverUrl);
   Object.assign(state, extensions);
-  await env.getStorage().set(stateKey, state); // If this happens to be an open server and there is no authorizeUri
+  await storage.set(stateKey, state); // If this happens to be an open server and there is no authorizeUri
 
   if (!state.authorizeUri) {
     if (_noRedirect) {
@@ -222,10 +219,11 @@ async function authorize(env, params = {}, _noRedirect = false) {
 async function completeAuth(env) {
   const url = env.getUrl();
   const Storage = env.getStorage();
-  let key = url.searchParams.get("state");
-  const code = url.searchParams.get("code");
-  const authError = url.searchParams.get("error");
-  const authErrorDescription = url.searchParams.get("error_description");
+  const params = url.searchParams;
+  let key = params.get("state");
+  const code = params.get("code");
+  const authError = params.get("error");
+  const authErrorDescription = params.get("error_description");
 
   if (!key) {
     key = await Storage.get(SMART_KEY);
@@ -248,47 +246,45 @@ async function completeAuth(env) {
   debug("key: %s, code: %O", key, code); // key might be coming from the page url so it might be empty or missing
 
   if (!key) {
-    throw new Error("No 'state' parameter found.");
+    throw new Error("No 'state' parameter found. Please (re)launch the app.");
   } // Check if we have a previous state
 
 
   let state = await Storage.get(key);
   const fullSessionStorageSupport = isBrowser() ? getPath(env, "options.fullSessionStorageSupport") : true; // Do we have to remove the `code` and `state` params from the URL?
 
-  if (isBrowser()) {
-    const hasState = url.searchParams.has("state");
+  const hasState = params.has("state");
 
-    if (getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
-      // `code` is the flag that tell us to request an access token.
-      // We have to remove it, otherwise the page will authorize on
-      // every load!
-      if (code) {
-        url.searchParams.delete("code");
-        debug("Removed code parameter from the url.");
-      } // If we have `fullSessionStorageSupport` it means we no longer
-      // need the `state` key. It will be stored to a well know
-      // location - sessionStorage[SMART_KEY]. However, no
-      // fullSessionStorageSupport means that this "well know location"
-      // might be shared between windows and tabs. In this case we
-      // MUST keep the `state` url parameter.
-
-
-      if (hasState && fullSessionStorageSupport) {
-        url.searchParams.delete("state");
-        debug("Removed state parameter from the url.");
-      } // If the browser does not support the replaceState method for the
-      // History Web API, the "code" parameter cannot be removed. As a
-      // consequence, the page will (re)authorize on every load. The
-      // workaround is to reload the page to new location without those
-      // parameters. If that is not acceptable replaceBrowserHistory
-      // should be set to false.
+  if (getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
+    // `code` is the flag that tell us to request an access token.
+    // We have to remove it, otherwise the page will authorize on
+    // every load!
+    if (code) {
+      params.delete("code");
+      debug("Removed code parameter from the url.");
+    } // If we have `fullSessionStorageSupport` it means we no longer
+    // need the `state` key. It will be stored to a well know
+    // location - sessionStorage[SMART_KEY]. However, no
+    // fullSessionStorageSupport means that this "well know location"
+    // might be shared between windows and tabs. In this case we
+    // MUST keep the `state` url parameter.
 
 
-      if (window.history.replaceState) {
-        window.history.replaceState({}, "", url.href);
-      } else {
-        await env.redirect(url.href);
-      }
+    if (hasState && fullSessionStorageSupport) {
+      params.delete("state");
+      debug("Removed state parameter from the url.");
+    } // If the browser does not support the replaceState method for the
+    // History Web API, the "code" parameter cannot be removed. As a
+    // consequence, the page will (re)authorize on every load. The
+    // workaround is to reload the page to new location without those
+    // parameters. If that is not acceptable replaceBrowserHistory
+    // should be set to false.
+
+
+    if (isBrowser() && window.history.replaceState) {
+      window.history.replaceState({}, "", url.href);
+    } else {
+      await env.redirect(url.href);
     }
   } // If the state does not exist, it means the page has been loaded directly.
 

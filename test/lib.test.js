@@ -1,6 +1,6 @@
 const { expect } = require("@hapi/code");
 const lab        = require("@hapi/lab").script();
-const lib        = require("../dist/lib");
+const lib        = require("../src/lib");
 
 const { it, describe } = lab;
 exports.lab = lab;

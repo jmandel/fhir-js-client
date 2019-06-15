@@ -1,9 +1,9 @@
 
 const { expect } = require("@hapi/code");
 const lab        = require("@hapi/lab").script();
-const FHIR       = require("../dist/adapters/NodeAdapter");
-const { KEY }    = require("../dist/smart");
-const ServerStorage = require("../dist/storage/ServerStorage");
+const FHIR       = require("../src/adapters/NodeAdapter");
+const { KEY }    = require("../src/smart");
+const ServerStorage = require("../src/storage/ServerStorage");
 
 // Mocks
 const mockServer        = require("./mocks/mockServer");

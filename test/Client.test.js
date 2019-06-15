@@ -1,13 +1,13 @@
 const { expect } = require("@hapi/code");
 const lab        = require("@hapi/lab").script();
-const Lib        = require("../dist/lib");
-const str        = require("../dist/strings");
+const Lib        = require("../src/lib");
+const str        = require("../src/strings");
 
 Lib.debug = (...args) => debugLog.push(args);
 Lib.debug.extend = () => Lib.debug;
 
-const Client     = require("../dist/Client");
-const { KEY }    = require("../dist/smart");
+const Client     = require("../src/Client");
+const { KEY }    = require("../src/smart");
 
 
 // Mocks

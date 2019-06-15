@@ -1,7 +1,7 @@
 const { URL }    = require("url");
 const { expect } = require("@hapi/code");
 const lab        = require("@hapi/lab").script();
-const smart      = require("../dist/smart");
+const smart      = require("../src/smart");
 
 // mocks
 const BrowserEnv = require("./mocks/BrowserEnvironment");
@@ -651,7 +651,7 @@ describe("smart", () => {
             const env = new BrowserEnv();
             env.redirect("http://localhost/");
             await expect(smart.completeAuth(env, {}))
-                .to.reject(Error, "No 'state' parameter found.");
+                .to.reject(Error, /^No 'state' parameter found/);
         });
 
         it ("rejects with empty state", async () => {
