@@ -49,26 +49,23 @@ npm i fhirclient
 ```
 ### From CDN
 Include it with a `script` tag from one of the following locations:
-```sh
-# From NPM Release
-# -----------------------------------------------------------------------
-https://cdn.jsdelivr.net/npm/fhirclient@2.0.1/build/fhir-client.js
-https://cdn.jsdelivr.net/npm/fhirclient@2.0.1/build/fhir-client.min.js
-https://cdn.jsdelivr.net/npm/fhirclient@dev/build/fhir-client.js
-https://cdn.jsdelivr.net/npm/fhirclient@dev/build/fhir-client.js
 
-# These will work after v2 is officially released
-# -----------------------------------------------------------------------
-https://cdn.jsdelivr.net/npm/fhirclient/build/fhir-client.js
-https://cdn.jsdelivr.net/npm/fhirclient/build/fhir-client.min.js
-https://cdn.jsdelivr.net/npm/fhirclient@latest/build/fhir-client.js
-https://cdn.jsdelivr.net/npm/fhirclient@latest/build/fhir-client.min.js
+From NPM Release:
+- https://cdn.jsdelivr.net/npm/fhirclient@2.0.1/build/fhir-client.js
+- https://cdn.jsdelivr.net/npm/fhirclient@2.0.1/build/fhir-client.min.js
+- https://cdn.jsdelivr.net/npm/fhirclient@dev/build/fhir-client.js
+- https://cdn.jsdelivr.net/npm/fhirclient@dev/build/fhir-client.js
 
-# Latest development builds from GitHub
-# -----------------------------------------------------------------------
-https://combinatronics.com/smart-on-fhir/client-js/master/dist/build/fhir-client.js
-https://combinatronics.com/smart-on-fhir/client-js/master/dist/build/fhir-client.min.js
-```
+These will work properly after v2 is officially released:
+- https://cdn.jsdelivr.net/npm/fhirclient/build/fhir-client.js
+- https://cdn.jsdelivr.net/npm/fhirclient/build/fhir-client.min.js
+- https://cdn.jsdelivr.net/npm/fhirclient@latest/build/fhir-client.js
+- https://cdn.jsdelivr.net/npm/fhirclient@latest/build/fhir-client.min.js
+
+Latest development builds from GitHub:
+- https://combinatronics.com/smart-on-fhir/client-js/master/dist/build/fhir-client.js
+- https://combinatronics.com/smart-on-fhir/client-js/master/dist/build/fhir-client.min.js
+
 
 ## Browser Usage
 
