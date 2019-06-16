@@ -11659,123 +11659,107 @@ function _completeAuth() {
 
             hasState = params.has("state");
 
-            if (!(getPath(env, "options.replaceBrowserHistory") && (code || hasState))) {
-              _context2.next = 33;
-              break;
-            }
-
-            // `code` is the flag that tell us to request an access token.
-            // We have to remove it, otherwise the page will authorize on
-            // every load!
-            if (code) {
-              params.delete("code");
-              debug("Removed code parameter from the url.");
-            } // If we have `fullSessionStorageSupport` it means we no longer
-            // need the `state` key. It will be stored to a well know
-            // location - sessionStorage[SMART_KEY]. However, no
-            // fullSessionStorageSupport means that this "well know location"
-            // might be shared between windows and tabs. In this case we
-            // MUST keep the `state` url parameter.
+            if (isBrowser() && getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
+              // `code` is the flag that tell us to request an access token.
+              // We have to remove it, otherwise the page will authorize on
+              // every load!
+              if (code) {
+                params.delete("code");
+                debug("Removed code parameter from the url.");
+              } // If we have `fullSessionStorageSupport` it means we no longer
+              // need the `state` key. It will be stored to a well know
+              // location - sessionStorage[SMART_KEY]. However, no
+              // fullSessionStorageSupport means that this "well know location"
+              // might be shared between windows and tabs. In this case we
+              // MUST keep the `state` url parameter.
 
 
-            if (hasState && fullSessionStorageSupport) {
-              params.delete("state");
-              debug("Removed state parameter from the url.");
-            } // If the browser does not support the replaceState method for the
-            // History Web API, the "code" parameter cannot be removed. As a
-            // consequence, the page will (re)authorize on every load. The
-            // workaround is to reload the page to new location without those
-            // parameters. If that is not acceptable replaceBrowserHistory
-            // should be set to false.
+              if (hasState && fullSessionStorageSupport) {
+                params.delete("state");
+                debug("Removed state parameter from the url.");
+              } // If the browser does not support the replaceState method for the
+              // History Web API, the "code" parameter cannot be removed. As a
+              // consequence, the page will (re)authorize on every load. The
+              // workaround is to reload the page to new location without those
+              // parameters. If that is not acceptable replaceBrowserHistory
+              // should be set to false.
 
 
-            if (!(isBrowser() && window.history.replaceState)) {
-              _context2.next = 29;
-              break;
-            }
+              if (window.history.replaceState) {
+                window.history.replaceState({}, "", url.href);
+              }
+            } // If the state does not exist, it means the page has been loaded directly.
 
-            window.history.replaceState({}, "", url.href);
-            _context2.next = 33;
-            break;
 
-          case 29:
-            _context2.next = 31;
-            return Storage.set(SMART_KEY, key);
-
-          case 31:
-            _context2.next = 33;
-            return env.redirect(url.href);
-
-          case 33:
             if (state) {
-              _context2.next = 35;
+              _context2.next = 25;
               break;
             }
 
             throw new Error("No state found! Please (re)launch the app.");
 
-          case 35:
-            if (!code) {
-              _context2.next = 56;
+          case 25:
+            if (!(code && !state.tokenResponse)) {
+              _context2.next = 46;
               break;
             }
 
             debug("Preparing to exchange the code for access token...");
-            _context2.next = 39;
+            _context2.next = 29;
             return buildTokenRequest(code, state);
 
-          case 39:
+          case 29:
             requestOptions = _context2.sent;
             debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
             // includes an access token or a message indicating that the
             // authorization request has been denied.
 
-            _context2.next = 43;
+            _context2.next = 33;
             return request(state.tokenUri, requestOptions);
 
-          case 43:
+          case 33:
             tokenResponse = _context2.sent;
             debug("Token response: %O", tokenResponse);
 
             if (tokenResponse.access_token) {
-              _context2.next = 47;
+              _context2.next = 37;
               break;
             }
 
             throw new Error("Failed to obtain access token.");
 
-          case 47:
+          case 37:
             // save the tokenResponse so that we don't have to re-authorize on
             // every page reload
             state = Object.assign({}, state, {
               tokenResponse: tokenResponse
             });
-            _context2.next = 50;
+            _context2.next = 40;
             return Storage.set(key, state);
 
-          case 50:
+          case 40:
             if (!fullSessionStorageSupport) {
-              _context2.next = 53;
+              _context2.next = 43;
               break;
             }
 
-            _context2.next = 53;
+            _context2.next = 43;
             return Storage.set(SMART_KEY, key);
 
-          case 53:
+          case 43:
             debug("Authorization successful!");
-            _context2.next = 57;
+            _context2.next = 47;
             break;
 
-          case 56:
+          case 46:
             debug(state.tokenResponse.access_token ? "Already authorized" : "No authorization needed");
 
-          case 57:
+          case 47:
             client = new Client(env, state);
             debug("Created client instance: %O", client);
             return _context2.abrupt("return", client);
 
-          case 60:
+          case 50:
           case "end":
             return _context2.stop();
         }

@@ -273,7 +273,7 @@ async function completeAuth(env)
     // Do we have to remove the `code` and `state` params from the URL?
     const hasState = params.has("state");
 
-    if (getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
+    if (isBrowser() && getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
 
         // `code` is the flag that tell us to request an access token.
         // We have to remove it, otherwise the page will authorize on
@@ -300,12 +300,8 @@ async function completeAuth(env)
         // workaround is to reload the page to new location without those
         // parameters. If that is not acceptable replaceBrowserHistory
         // should be set to false.
-        if (isBrowser() && window.history.replaceState) {
+        if (window.history.replaceState) {
             window.history.replaceState({}, "", url.href);
-        }
-        else {
-            await Storage.set(SMART_KEY, key);
-            await env.redirect(url.href);
         }
     }
 
@@ -316,7 +312,7 @@ async function completeAuth(env)
 
     // If we have state, then check to see if we got a `code`. If we don't,
     // then this is just a reload. Otherwise, we have to complete the code flow
-    if (code) {
+    if (code && !state.tokenResponse.access_token) {
         debug("Preparing to exchange the code for access token...");
         const requestOptions = await buildTokenRequest(code, state);
         debug("Token request options: %O", requestOptions);

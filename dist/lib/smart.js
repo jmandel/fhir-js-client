@@ -255,7 +255,7 @@ async function completeAuth(env) {
 
   const hasState = params.has("state");
 
-  if (getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
+  if (isBrowser() && getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
     // `code` is the flag that tell us to request an access token.
     // We have to remove it, otherwise the page will authorize on
     // every load!
@@ -281,11 +281,8 @@ async function completeAuth(env) {
     // should be set to false.
 
 
-    if (isBrowser() && window.history.replaceState) {
+    if (window.history.replaceState) {
       window.history.replaceState({}, "", url.href);
-    } else {
-      await Storage.set(SMART_KEY, key);
-      await env.redirect(url.href);
     }
   } // If the state does not exist, it means the page has been loaded directly.
 
@@ -296,7 +293,7 @@ async function completeAuth(env) {
   // then this is just a reload. Otherwise, we have to complete the code flow
 
 
-  if (code) {
+  if (code && !state.tokenResponse) {
     debug("Preparing to exchange the code for access token...");
     const requestOptions = await buildTokenRequest(code, state);
     debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
