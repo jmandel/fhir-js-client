@@ -9,14 +9,14 @@ module.exports = function(env, argv) {
 
     const plugins = [
         new webpack.DefinePlugin({
-            HAS_FETCH: !pkg.browserslist.find(str => str.match(/\bie\b/i))
+            HAS_FETCH: argv.pure || !pkg.browserslist.find(str => str.match(/\bie\b/i))
         })
     ];
 
     plugins.push(new BundleAnalyzerPlugin({
         analyzerMode  : "static",
         openAnalyzer  : false,
-        reportFilename: `report.${isDev ? "dev" : "prod"}.html`
+        reportFilename: `bundle${argv.pure ? ".pure" : ""}.${isDev ? "dev" : "prod"}.html`
     }));
 
     return {
@@ -24,7 +24,7 @@ module.exports = function(env, argv) {
         target: "web",
         output: {
             path      : __dirname + "/dist/build",
-            filename  : `fhir-client${isDev ? "" : ".min"}.js`,
+            filename  : `fhir-client${argv.pure ? ".pure" : ""}${isDev ? "" : ".min"}.js`,
             library: "FHIR",
             libraryTarget: "window"
         },
@@ -39,14 +39,14 @@ module.exports = function(env, argv) {
                 {
                     test: /\.js$/,
                     include: [
-                        path.resolve(__dirname, 'src'),
-                        path.resolve(__dirname, 'node_modules/debug')
+                        path.resolve(__dirname, "src"),
+                        path.resolve(__dirname, "node_modules/debug")
                     ],
                     use: {
                         loader: "babel-loader",
                         options: {
                             plugins: ["@babel/plugin-transform-runtime"],
-                            presets: [
+                            presets: argv.pure ? [] : [
                                 [
                                     "@babel/preset-env",
                                     {

@@ -34,5 +34,5 @@
   "bugs": {
     "url": "https://github.com/smart-on-fhir/client-js/issues"
   },
-  "homepage": "https://github.com/smart-on-fhir/client-js"
+  "homepage": "http://docs.smarthealthit.org/client-js/"
 }

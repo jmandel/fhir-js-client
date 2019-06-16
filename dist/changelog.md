@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.0.2
+- See http://docs.smarthealthit.org/client-js/v2.html
+
 ## v0.1.15
 - Included the last version of fhir.js
     - For previous page, bundle.link.relation can either   have 'previous' or 'prev' value

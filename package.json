@@ -24,13 +24,13 @@
   },
   "scripts": {
     "test": "lab -P test --ignore fetch,Response,Headers,Request --threshold 90 --verbose --coverage-exclude lib -r console -r html -o stdout -o test/coverage.html",
-    "clean": "rm -rf build",
     "pack:prod": "webpack --config webpack.config.js --mode production",
     "pack:dev": "webpack --config webpack.config.js --mode development",
-    "pack": "npm run pack:dev && npm run pack:prod",
+    "pack:prod:pure": "npm run pack:prod -- --pure",
+    "pack:dev:pure": "npm run pack:dev -- --pure",
+    "pack": "npm run pack:dev && npm run pack:prod && npm run pack:dev:pure && npm run pack:prod:pure",
     "build": "npm run build:module && npm run pack",
     "build:dev": "npm run pack:dev -- --watch",
-    "examples": "ws -o -p 9090",
     "cover": "lab -P test --ignore fetch,Response,Headers,Request --threshold 0 --coverage-exclude lib -r lcov | coveralls",
     "build:module": "babel -d dist/lib src"
   },
@@ -69,5 +69,5 @@
   "bugs": {
     "url": "https://github.com/smart-on-fhir/client-js/issues"
   },
-  "homepage": "https://github.com/smart-on-fhir/client-js"
+  "homepage": "http://docs.smarthealthit.org/client-js/"
 }
