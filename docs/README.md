@@ -3,10 +3,10 @@ SMART on FHIR JavaScript Library
 ================================
 
 This is a JavaScript library for connecting SMART apps to FHIR servers.
-It works both in browsers (IE10+) and on the server (NodeJS).
+It works both in browsers (IE 10+) and on the server (Node 10+).
 
 
-> This is the documentation for version 2.0.0.+. If you want to migrate from older versions, make sure you check out **[what's new in v2](http://docs.smarthealthit.org/client-js/v2.html)**. For older versions see [http://docs.smarthealthit.org/clients/javascript/](http://docs.smarthealthit.org/clients/javascript/).
+> This is the documentation for version 2+. If you want to migrate from older versions, please check out **[what's new in v2](http://docs.smarthealthit.org/client-js/v2.html)**. For older versions see [http://docs.smarthealthit.org/clients/javascript/](http://docs.smarthealthit.org/clients/javascript/).
 
 
 [![CircleCI](https://circleci.com/gh/smart-on-fhir/client-js/tree/master.svg?style=svg)](https://circleci.com/gh/smart-on-fhir/client-js/tree/master) [![Coverage Status](https://coveralls.io/repos/github/smart-on-fhir/client-js/badge.svg?branch=master)](https://coveralls.io/github/smart-on-fhir/client-js?branch=master) [![npm version](https://badge.fury.io/js/fhirclient.svg)](https://badge.fury.io/js/fhirclient)
@@ -15,8 +15,9 @@ It works both in browsers (IE10+) and on the server (NodeJS).
 ---
 - [Installation](#installation)
 - [Browser Usage](#browser-usage)
-    - [Basic Examples](https://35u09.codesandbox.io/) - [Code](https://codesandbox.io/s/fhir-client-browser-examples-35u09)
-    - [React / TypeScript SPA](https://4e7rl.codesandbox.io/test.html) - [Code](https://codesandbox.io/s/fhir-client-typescript-react-spa-4e7rl)
+    - [Basic Examples](https://35u09.codesandbox.io/) - [Code](https://codesandbox.io/s/fhir-client-browser-examples-35u09) - Basic examples with no additional libraries or frameworks
+    - [React / TypeScript SPA](https://4e7rl.codesandbox.io/test.html) - [Code](https://codesandbox.io/s/fhir-client-typescript-react-spa-4e7rl) - Example with React and TypeScript on a single page
+    - [Advanced React Example](https://0q3n8.codesandbox.io) - [Code](https://codesandbox.io/s/fhir-client-react-react-router-context-0q3n8) - React with React Router, storing a FHIR client instance in React context
 - [Server Usage](#server-usage)
     - [NodeJS API Details](node.md)
     - [Express Example](https://c0che.sse.codesandbox.io/) - [Code](https://codesandbox.io/s/jovial-dew-c0che)
@@ -38,24 +39,45 @@ It works both in browsers (IE10+) and on the server (NodeJS).
 
 ## Installation
 
-Install from npm:
+### From NPM
 ```sh
 # This is still in beta! To give it a try do:
-npm i https://github.com/smart-on-fhir/client-js
+npm i fhirclient@dev
 
 # To install the older version do:
 npm i fhirclient
 ```
+### From CDN
+Include it with a `script` tag from one of the following locations:
+
+From NPM Release:
+- https://cdn.jsdelivr.net/npm/fhirclient@2.0.1/build/fhir-client.js
+- https://cdn.jsdelivr.net/npm/fhirclient@2.0.1/build/fhir-client.min.js
+- https://cdn.jsdelivr.net/npm/fhirclient@dev/build/fhir-client.js
+- https://cdn.jsdelivr.net/npm/fhirclient@dev/build/fhir-client.js
+
+These will work properly after v2 is officially released:
+- https://cdn.jsdelivr.net/npm/fhirclient/build/fhir-client.js
+- https://cdn.jsdelivr.net/npm/fhirclient/build/fhir-client.min.js
+- https://cdn.jsdelivr.net/npm/fhirclient@latest/build/fhir-client.js
+- https://cdn.jsdelivr.net/npm/fhirclient@latest/build/fhir-client.min.js
+
+Latest development builds from GitHub:
+- https://combinatronics.com/smart-on-fhir/client-js/master/dist/build/fhir-client.js
+- https://combinatronics.com/smart-on-fhir/client-js/master/dist/build/fhir-client.min.js
+
+
 ## Browser Usage
 
-In the browser you need to include the library via script tag. You typically
-have to create two separate pages that correspond to your
+In the browser you typically have to create two separate pages that correspond to your
 `launch_uri` (Launch Page) and `redirect_uri` (Index Page).
+
+### As Library
 
 **Launch Page**
 ```html
 <!-- launch.html -->
-<script src="/path/to/fhir-client.js"></script>
+<script src="./node_module/fhirclient/build/fhir-client.js"></script>
 <script>
 FHIR.oauth2.authorize({
     "client_id": "my_web_app",
@@ -67,13 +89,32 @@ FHIR.oauth2.authorize({
 **Index Page**
 ```html
 <!-- index.html -->
-<script src="/path/to/fhir-client.js"></script>
+<script src="./node_module/fhirclient/build/fhir-client.js"></script>
 <script>
 FHIR.oauth2.ready()
     .then(client => client.request("Patient"))
     .then(console.log)
     .catch(console.error);
 </script>
+```
+
+### As Module
+**Launch Page**
+```js
+import FHIR from "fhirclient"
+FHIR.oauth2.authorize({
+    "client_id": "my_web_app",
+    "scope": "patient/*.read"
+});
+```
+
+**Index Page**
+```js
+import FHIR from "fhirclient"
+FHIR.oauth2.ready()
+    .then(client => client.request("Patient"))
+    .then(console.log)
+    .catch(console.error);
 ```
 
 ## Server Usage
@@ -101,10 +142,10 @@ app.get("/", (req, res) => {
 Read more at the [NodeJS API Details](node).
 
 ## SMART API
-Imagine that there is an object called "smart" that exposes the SMART-specific
-methods. In the browser that is automatically created and is available at
-`window.FHIR.oauth2`. On the server the library exports a function that you call
-with your http request and response and it will create that "smart" object for you:
+The SMART API is a collection of SMART-specific methods (`authorize`, `ready`, `init`) for app
+authorization and launch. If you are working in a browser, the SMART API is automatically created,
+and available at `window.FHIR.oauth2`. In NodeJS, the library exports a function that should be
+called with a http request and response objects, and will return the same SMART API as in the browser. 
 
 ```js
 // BROWSER
@@ -115,9 +156,6 @@ smart.authorize(options);
 const smart = require("fhirclient");
 smart(request, response).authorize(options);
 ```
-Once you have obtained that "smart" object, the API that it exposes is exactly
-the same for the browser and the server.
-
 Read the [SMART API Documentation](api)
 
 
@@ -146,11 +184,17 @@ the FHIR server and a bunch of other useful utilities and methods.
 
 
 ## Fhir.js Integration
-Since v2.0.0 this library no longer includes fhir.js. That architecture was
+Since v2.0 this library no longer includes fhir.js. That architecture was
 extremely difficult to maintain. Fhir.js is now an optional dependency, meaning
 that it is not available by default, unless you include it in the page.
 Our goal is to provide a simple alternative to fhir.js - most of it should be
 possible via `client.request`. Please see the [Examples](fhirjs-equivalents).
+
+You are now free to choose what version of fhir.js to include. For backward
+compatibility try [our fork of fhir.js](https://github.com/smart-on-fhir/client-js/blob/9e77b7b26b5d7dff7e65f25625441e0905f84811/lib/jqFhir.js).
+It is not maintained any more, and it would require Jquery to be included in the page.
+Newer versions of fhir.js work fine, but might have different API or return result
+objects with different shape.
 
 #### Reasons to use fhir.js
 1. If you have old apps using legacy API like `client.api.anyFhirJsMethod()` or `client.patient.api.anyFhirJsMethod()`
@@ -215,19 +259,11 @@ npm run pack:dev
 npm run build:dev
 ```
 
-After building, the following files will be generated:
-
-* `build/fhir-client.js`         - The browser bundle for development
-* `build/fhir-client.min.js`     - The browser bundle for production
-* `build/fhir-client.js.map`     - Hidden source map 
-* `build/fhir-client.min.js.map` - Hidden source map
-* `build/report.html`            - Graphical visualization of the dev bundle
-
 ## Debugging
 This library uses the [debug](https://www.npmjs.com/package/debug) module. To enable
 debug logging in Node use the `DEBUG` env variable. In the browser execute this in the console:
 ```js
-localStorage.debug = 'FHIRClient:*'
+localStorage.debug = "FHIR.*"
 ```
 and then reload the page.
 

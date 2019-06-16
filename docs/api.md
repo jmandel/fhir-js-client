@@ -1,9 +1,9 @@
 # SMART API
 
-Imagine that there is an object called "smart" that exposes the SMART-specific
-methods. In the browser that is automatically created and is available at
-`window.FHIR.oauth2`. On the server the library exports a function that you call
-with your http request and response and it will create that "smart" object for you:
+The SMART API is a collection of SMART-specific methods (`authorize`, `ready`, `init`) for app authorization and launch.
+If you are working in a browser, the SMART API is automatically created, and available at
+`window.FHIR.oauth2`. In NodeJS, the library exports a function that should be called
+with a http request and response objects, and will return the same SMART API as in the browser. 
 
 ```js
 // BROWSER
@@ -14,8 +14,7 @@ smart.authorize(options);
 const smart = require("fhirclient");
 smart(request, response).authorize(options);
 ```
-Once you have obtained that "smart" object, the API that it exposes is exactly
-the same for the browser and the server.
+
 
 ### authorize(options) `Promise<never>`
 Starts the [SMART Launch Sequence](http://hl7.org/fhir/smart-app-launch/#smart-launch-sequence).
@@ -52,7 +51,7 @@ This should be called on your `redirect_uri`. Returns a Promise that will eventu
 
 > The `onSuccess` and `onError` callback functions are optional (and **deprecated**). We only accept them to keep the library compatible with older apps. If these functions are provided, they will simply be attached to the returned promise chain.
 
-### init(options) `Promise<Client>`
+### init(options) `Promise<Client>` (experimental)
 This function can be used when you want to handle everything in one page (no launch endpoint needed). You can think of it as if it does:
 ```js
 authorize(options).then(ready)
@@ -80,4 +79,9 @@ FHIR.oauth2.init({
    - Since the page will be loaded twice, you must be careful if your code has
      global side effects that can persist between page reloads (for example
      writing to localStorage).
+3. For standalone launch, only use `init` in combination with `offline_access` scope.
+   Once the access_token expires, if you don't have a refresh_token there is no way
+   to re-authorize properly. We detect that and delete the expired access token,
+   but it still means that the user will have to refresh the page twice to
+   re-authorize.
    
