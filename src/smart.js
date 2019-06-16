@@ -231,11 +231,12 @@ async function completeAuth(env)
 {
     const url = env.getUrl();
     const Storage = env.getStorage();
+    const params = url.searchParams;
 
-    let key                    = url.searchParams.get("state");
-    const code                 = url.searchParams.get("code");
-    const authError            = url.searchParams.get("error");
-    const authErrorDescription = url.searchParams.get("error_description");
+    let key                    = params.get("state");
+    const code                 = params.get("code");
+    const authError            = params.get("error");
+    const authErrorDescription = params.get("error_description");
 
     if (!key) {
         key = await Storage.get(SMART_KEY);
@@ -270,7 +271,7 @@ async function completeAuth(env)
         true;
 
     // Do we have to remove the `code` and `state` params from the URL?
-    const hasState = url.searchParams.has("state");
+    const hasState = params.has("state");
 
     if (getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
 
@@ -278,7 +279,7 @@ async function completeAuth(env)
         // We have to remove it, otherwise the page will authorize on
         // every load!
         if (code) {
-            url.searchParams.delete("code");
+            params.delete("code");
             debug("Removed code parameter from the url.");
         }
 
@@ -289,7 +290,7 @@ async function completeAuth(env)
         // might be shared between windows and tabs. In this case we
         // MUST keep the `state` url parameter.
         if (hasState && fullSessionStorageSupport) {
-            url.searchParams.delete("state");
+            params.delete("state");
             debug("Removed state parameter from the url.");
         }
 
@@ -303,6 +304,7 @@ async function completeAuth(env)
             window.history.replaceState({}, "", url.href);
         }
         else {
+            await Storage.set(SMART_KEY, key);
             await env.redirect(url.href);
         }
     }

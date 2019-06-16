@@ -219,10 +219,11 @@ async function authorize(env, params = {}, _noRedirect = false) {
 async function completeAuth(env) {
   const url = env.getUrl();
   const Storage = env.getStorage();
-  let key = url.searchParams.get("state");
-  const code = url.searchParams.get("code");
-  const authError = url.searchParams.get("error");
-  const authErrorDescription = url.searchParams.get("error_description");
+  const params = url.searchParams;
+  let key = params.get("state");
+  const code = params.get("code");
+  const authError = params.get("error");
+  const authErrorDescription = params.get("error_description");
 
   if (!key) {
     key = await Storage.get(SMART_KEY);
@@ -252,14 +253,14 @@ async function completeAuth(env) {
   let state = await Storage.get(key);
   const fullSessionStorageSupport = isBrowser() ? getPath(env, "options.fullSessionStorageSupport") : true; // Do we have to remove the `code` and `state` params from the URL?
 
-  const hasState = url.searchParams.has("state");
+  const hasState = params.has("state");
 
   if (getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
     // `code` is the flag that tell us to request an access token.
     // We have to remove it, otherwise the page will authorize on
     // every load!
     if (code) {
-      url.searchParams.delete("code");
+      params.delete("code");
       debug("Removed code parameter from the url.");
     } // If we have `fullSessionStorageSupport` it means we no longer
     // need the `state` key. It will be stored to a well know
@@ -270,7 +271,7 @@ async function completeAuth(env) {
 
 
     if (hasState && fullSessionStorageSupport) {
-      url.searchParams.delete("state");
+      params.delete("state");
       debug("Removed state parameter from the url.");
     } // If the browser does not support the replaceState method for the
     // History Web API, the "code" parameter cannot be removed. As a
@@ -283,6 +284,7 @@ async function completeAuth(env) {
     if (isBrowser() && window.history.replaceState) {
       window.history.replaceState({}, "", url.href);
     } else {
+      await Storage.set(SMART_KEY, key);
       await env.redirect(url.href);
     }
   } // If the state does not exist, it means the page has been loaded directly.
