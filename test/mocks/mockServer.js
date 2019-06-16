@@ -26,10 +26,18 @@ app.all("*", (req, res, next) => {
     }
 
     if (settings.body) {
-        res.send(JSON.stringify(settings.body));
+        res.send(
+            typeof settings.body == "object" ?
+                JSON.stringify(settings.body) :
+                settings.body
+        );
     }
 
-    res.end();
+    if (settings.file) {
+        res.sendFile(settings.file, { root: __dirname });
+    } else {
+        res.end();
+    }
 });
 
 

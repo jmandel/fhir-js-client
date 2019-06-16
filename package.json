@@ -13,12 +13,14 @@
     "Client"
   ],
   "license": "Apache-2.0",
-  "main": "dist/lib/index.js",
+  "main": "src/adapters/NodeAdapter.js",
+  "browser": "src/browser.js",
   "dependencies": {
     "@babel/runtime": "^7.4.5",
     "core-js": "^3.1.3",
     "debug": "^4.1.1",
-    "isomorphic-fetch": "^2.2.1"
+    "node-fetch-npm": "^2.0.2",
+    "whatwg-fetch": "^3.0.0"
   },
   "scripts": {
     "test": "lab -P test --ignore fetch,Response,Headers,Request --threshold 90 --verbose --coverage-exclude lib -r console -r html -o stdout -o test/coverage.html",
@@ -30,7 +32,7 @@
     "build:dev": "npm run pack:dev -- --watch",
     "examples": "ws -o -p 9090",
     "cover": "lab -P test --ignore fetch,Response,Headers,Request --threshold 0 --coverage-exclude lib -r lcov | coveralls",
-    "build:module": "babel -d dist src"
+    "build:module": "babel -d dist/lib src"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",

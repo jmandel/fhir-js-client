@@ -1,3 +1,4 @@
+const FS         = require("fs");
 const { expect } = require("@hapi/code");
 const lab        = require("@hapi/lab").script();
 const Lib        = require("../src/lib");
@@ -1793,6 +1794,57 @@ describe("FHIR.client", () => {
                         }
                     }
                 });
+            });
+        });
+
+        describe("can fetch text", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, mockUrl);
+
+                mockServer.mock({
+                    headers: { "Content-Type": "text/plain" },
+                    status: 200,
+                    body: "This is a text"
+                });
+
+                const result = await client.request("/");
+
+                expect(result).to.equal("This is a text");
+            });
+        });
+
+        describe("can fetch binary", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, mockUrl);
+
+                const file   = FS.readFileSync(__dirname + "/mocks/json.png");
+                const goal64 = file.toString("base64");
+
+                mockServer.mock({
+                    headers: { "Content-Type": "image/png" },
+                    status: 200,
+                    file: "json.png"
+                });
+
+                const result = await client.request("/");
+                // const text   = await result.text();
+                const buffer = await result.arrayBuffer();
+                // const base64 = Buffer.from(buffer).toString("base64");
+                expect(Buffer.from(buffer).toString("base64")).to.equal(goal64);
+
+                // const client = new Client(env, "https://r2.smarthealthit.org");
+                // const result = await client.request("Binary/smart-Binary-1-document");
+
+                // // Using blob() ------------------------------------------------
+
+                // // Using arrayBuffer() -----------------------------------------
+
+                // const buffer = await result.arrayBuffer();
+                // // console.log(URL.createObjectURL(blob));
+                // // const text   = await result.text();
+                // var base64Image = Buffer.from(buffer).toString('base64');
+                // console.log(base64Image);
+                // expect(result).to.equal("This is a text");
             });
         });
     });

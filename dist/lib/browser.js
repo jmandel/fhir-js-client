@@ -5,7 +5,7 @@
 // gets built with another build tool and the fetch polyfill might not be excluded!
 // @ts-ignore
 if (typeof HAS_FETCH == "undefined" || !HAS_FETCH && typeof window.fetch != "function") {
-  require("isomorphic-fetch");
+  require("whatwg-fetch");
 } // In Browsers we create an adapter, get the SMART api from it and build the
 // global FHIR object
 

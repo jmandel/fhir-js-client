@@ -21,51 +21,75 @@ async function checkResponse(resp) {
 }
 
 /**
- * Used in fetch Promise chains to return the JSON version of the response
+ * Used in fetch Promise chains to return the JSON version of the response.
+ * Note that `resp.json()` will throw on empty body so we use resp.text()
+ * instead.
+ * @param {Response} resp
+ * @returns {Promise<object|string>}
  */
 function responseToJSON(resp) {
-    // return resp.json();
     return resp.text().then(text => text.length ? JSON.parse(text) : "");
 }
 
-function fetchJSON(url, options = {}) {
-    return request(url, {
+/**
+ * This is our built-in request function. It does a few things by default
+ * (unless told otherwise):
+ * - Makes CORS requests
+ * - Sets accept header to "application/json"
+ * - Handles errors
+ * - If the response is json return the json object
+ * - If the response is text return the result text
+ * - Otherwise return the response object on which we call stuff like `.blob()`
+ * @param {String|Request} url
+ * @param {Object} options
+ */
+function request(url, options = {}) {
+    return fetch(url, {
         mode: "cors",
         ...options,
         headers: {
-            accept:"application/json",
+            accept: "application/json",
             ...options.headers
         }
-    }).then(responseToJSON);
-}
-
-function request(url, options) {
-    return fetch(url, options).then(checkResponse);
+    })
+        .then(checkResponse)
+        .then(res => {
+            const type = res.headers.get("Content-Type") + "";
+            if (type.match(/\bjson\b/i)) {
+                return responseToJSON(res);
+            }
+            if (type.match(/^text\//i)) {
+                return res.text();
+            }
+            return res;
+        });
 }
 
 async function humanizeError(resp) {
     let msg = `${resp.status} ${resp.statusText}\nURL: ${resp.url}`;
 
     try {
-        const json = await resp.json();
-        if (json.error) {
-            msg += "\n" + json.error;
-            if (json.error_description) {
-                msg += ": " + json.error_description;
+        const type = resp.headers.get("Content-Type") || "text/plain";
+        if (type.match(/\bjson\b/i)) {
+            const json = await resp.json();
+            if (json.error) {
+                msg += "\n" + json.error;
+                if (json.error_description) {
+                    msg += ": " + json.error_description;
+                }
+            }
+            else {
+                msg += "\n\n" + JSON.stringify(json, null, 4);
             }
         }
-        else {
-            msg += "\n\n" + JSON.stringify(json, null, 4);
-        }
-    } catch (_) {
-        try {
+        if (type.match(/^text\//i)) {
             const text = await resp.text();
             if (text) {
                 msg += "\n\n" + text;
             }
-        } catch (_) {
-            // ignore
         }
+    } catch (_) {
+        // ignore
     }
 
     throw new HttpError(msg, resp.status, resp.statusText);
@@ -274,7 +298,6 @@ module.exports = {
     debug,
     checkResponse,
     responseToJSON,
-    fetchJSON,
     humanizeError,
     jwtDecode,
     request,

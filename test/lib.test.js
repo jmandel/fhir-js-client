@@ -1,6 +1,7 @@
 const { expect } = require("@hapi/code");
 const lab        = require("@hapi/lab").script();
 const lib        = require("../src/lib");
+const HttpError  = require("../src/HttpError");
 
 const { it, describe } = lab;
 exports.lab = lab;
@@ -62,6 +63,69 @@ describe("Lib", () => {
             expect(lib.absolute("/", "http://google.com")).to.equal("http://google.com/");
             expect(lib.absolute("/a/b/c", "http://google.com")).to.equal("http://google.com/a/b/c");
             expect(lib.absolute("a/b/c", "http://google.com")).to.equal("http://google.com/a/b/c");
+        });
+    });
+
+    describe("humanizeError", () => {
+        it ("parses json", async () => {
+            const res = new Response("{}", {
+                status: 400,
+                statusText: "Bad Request",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+            await expect(lib.humanizeError(res)).to.reject(
+                HttpError,
+                "400 Bad Request\nURL: undefined\n\n{}"
+            );
+        });
+
+        it ("parses json and respects 'error'", async () => {
+            const res = new Response(JSON.stringify({
+                error: "my-error"
+            }), {
+                status: 400,
+                statusText: "Bad Request",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+            await expect(lib.humanizeError(res)).to.reject(
+                HttpError,
+                "400 Bad Request\nURL: undefined\nmy-error"
+            );
+        });
+
+        it ("parses json and respects 'error' and 'error_description'", async () => {
+            const res = new Response(JSON.stringify({
+                error: "my-error",
+                error_description: "my-error-description"
+            }), {
+                status: 400,
+                statusText: "Bad Request",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+            await expect(lib.humanizeError(res)).to.reject(
+                HttpError,
+                "400 Bad Request\nURL: undefined\nmy-error: my-error-description"
+            );
+        });
+
+        it ("parses text", async () => {
+            const res = new Response("my-error", {
+                status: 400,
+                statusText: "Bad Request",
+                headers: {
+                    "Content-Type": "text/plain"
+                }
+            });
+            await expect(lib.humanizeError(res)).to.reject(
+                HttpError,
+                "400 Bad Request\nURL: undefined\n\nmy-error"
+            );
         });
     });
 

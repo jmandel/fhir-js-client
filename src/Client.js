@@ -1,6 +1,5 @@
 /// <reference path="types.d.ts" />
 const {
-    fetchJSON,
     absolute,
     debug: _debug,
     getPath,
@@ -8,7 +7,6 @@ const {
     jwtDecode,
     makeArray,
     request,
-    responseToJSON,
     btoa,
     byCode,
     byCodes,
@@ -448,7 +446,7 @@ class FhirClient
             fhirOptions
         );
 
-        return fetchJSON(url, requestOptions)
+        return request(url, requestOptions)
 
             // Automatic re-auth via refresh token -----------------------------
             .catch(error => {
@@ -501,79 +499,91 @@ class FhirClient
                 throw error;
             })
 
-            // Resolve References ----------------------------------------------
-            .then(async (data) => {
+            // Handle raw requests (anything other than json) ------------------
+            .then(data => {
+                if (!data)
+                    return data;
+                if (typeof data == "string")
+                    return data;
+                if (typeof data == "object" && data instanceof Response)
+                    return data;
 
-                if (data && data.resourceType == "Bundle") {
-                    await Promise.all((data.entry || []).map(item => resolveRefs(
-                        item.resource,
-                        fhirOptions,
-                        _resolvedRefs,
-                        this
-                    )));
-                }
-                else {
-                    await resolveRefs(
-                        data,
-                        fhirOptions,
-                        _resolvedRefs,
-                        this
-                    );
-                }
+                // Resolve References ----------------------------------------------
+                return (async (data) => {
 
-                return data;
-            })
-
-            // Pagination ------------------------------------------------------
-            .then(async (data) => {
-                if (data && data.resourceType == "Bundle") {
-                    const links = data.link || [];
-
-                    if (fhirOptions.flat) {
-                        data = (data.entry || []).map(entry => entry.resource);
-                    }
-
-                    if (hasPageCallback) {
-                        await fhirOptions.onPage(data, { ..._resolvedRefs });
-                    }
-
-                    if (--fhirOptions.pageLimit) {
-                        const next = links.find(l => l.relation == "next");
-                        data = makeArray(data);
-                        if (next && next.url) {
-                            const nextPage = await this.request(
-                                next.url,
+                    if (data) {
+                        if (data.resourceType == "Bundle") {
+                            await Promise.all((data.entry || []).map(item => resolveRefs(
+                                item.resource,
                                 fhirOptions,
-                                _resolvedRefs
+                                _resolvedRefs,
+                                this
+                            )));
+                        }
+                        else {
+                            await resolveRefs(
+                                data,
+                                fhirOptions,
+                                _resolvedRefs,
+                                this
                             );
-
-                            if (hasPageCallback) {
-                                return null;
-                            }
-
-                            if (fhirOptions.resolveReferences && fhirOptions.resolveReferences.length) {
-                                Object.assign(_resolvedRefs, nextPage.references);
-                                return data.concat(makeArray(nextPage.data || nextPage));
-                            }
-                            return data.concat(makeArray(nextPage));
                         }
                     }
-                }
-                return data;
-            })
 
-            // Finalize --------------------------------------------------------
-            .then(data => {
-                if (fhirOptions.graph) {
-                    _resolvedRefs = {};
-                }
-                else if (!hasPageCallback && fhirOptions.resolveReferences.length) {
-                    return {
-                        data,
-                        references: _resolvedRefs
-                    };
-                }
-                return data;
+                    return data;
+                })(data)
+
+                    // Pagination ------------------------------------------------------
+                    .then(async (data) => {
+                        if (data && data.resourceType == "Bundle") {
+                            const links = data.link || [];
+
+                            if (fhirOptions.flat) {
+                                data = (data.entry || []).map(entry => entry.resource);
+                            }
+
+                            if (hasPageCallback) {
+                                await fhirOptions.onPage(data, { ..._resolvedRefs });
+                            }
+
+                            if (--fhirOptions.pageLimit) {
+                                const next = links.find(l => l.relation == "next");
+                                data = makeArray(data);
+                                if (next && next.url) {
+                                    const nextPage = await this.request(
+                                        next.url,
+                                        fhirOptions,
+                                        _resolvedRefs
+                                    );
+
+                                    if (hasPageCallback) {
+                                        return null;
+                                    }
+
+                                    if (fhirOptions.resolveReferences && fhirOptions.resolveReferences.length) {
+                                        Object.assign(_resolvedRefs, nextPage.references);
+                                        return data.concat(makeArray(nextPage.data || nextPage));
+                                    }
+                                    return data.concat(makeArray(nextPage));
+                                }
+                            }
+                        }
+                        return data;
+                    })
+
+                    // Finalize --------------------------------------------------------
+                    .then(data => {
+                        if (fhirOptions.graph) {
+                            _resolvedRefs = {};
+                        }
+                        else if (!hasPageCallback && fhirOptions.resolveReferences.length) {
+                            return {
+                                data,
+                                references: _resolvedRefs
+                            };
+                        }
+                        return data;
+                    });
             });
     }
 
@@ -614,7 +624,7 @@ class FhirClient
                     "content-type": "application/x-www-form-urlencoded"
                 },
                 body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}`
-            }).then(responseToJSON).then(data => {
+            }).then(data => {
                 if (!data.access_token) {
                     throw new Error("No access token received");
                 }

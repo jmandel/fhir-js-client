@@ -7957,23 +7957,6 @@ module.exports = setup;
 
 /***/ }),
 
-/***/ "./node_modules/isomorphic-fetch/fetch-npm-browserify.js":
-/*!***************************************************************!*\
-  !*** ./node_modules/isomorphic-fetch/fetch-npm-browserify.js ***!
-  \***************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-// the whatwg-fetch polyfill installs the fetch() function
-// on the global object (window or self)
-//
-// Return that as the export for use in Webpack, Browserify etc.
-__webpack_require__(/*! whatwg-fetch */ "./node_modules/whatwg-fetch/fetch.js");
-module.exports = self.fetch.bind(self);
-
-
-/***/ }),
-
 /***/ "./node_modules/process/browser.js":
 /*!*****************************************!*\
   !*** ./node_modules/process/browser.js ***!
@@ -9546,15 +9529,13 @@ var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtim
 
 /// <reference path="types.d.ts" />
 var _require = __webpack_require__(/*! ./lib */ "./src/lib.js"),
-    fetchJSON = _require.fetchJSON,
     absolute = _require.absolute,
     _debug = _require.debug,
     _getPath = _require.getPath,
     setPath = _require.setPath,
     jwtDecode = _require.jwtDecode,
     makeArray = _require.makeArray,
-    request = _require.request,
-    responseToJSON = _require.responseToJSON,
+    _request = _require.request,
     btoa = _require.btoa,
     _byCode = _require.byCode,
     _byCodes = _require.byCodes,
@@ -10035,7 +10016,7 @@ function () {
   _proto.request =
   /*#__PURE__*/
   function () {
-    var _request = (0, _asyncToGenerator2.default)(
+    var _request2 = (0, _asyncToGenerator2.default)(
     /*#__PURE__*/
     _regenerator.default.mark(function _callee5(requestOptions, fhirOptions, _resolvedRefs) {
       var _this2 = this;
@@ -10091,7 +10072,7 @@ function () {
 
               hasPageCallback = typeof fhirOptions.onPage == "function";
               debug("%s, options: %O, fhirOptions: %O", url, requestOptions, fhirOptions);
-              return _context5.abrupt("return", fetchJSON(url, requestOptions) // Automatic re-auth via refresh token -----------------------------
+              return _context5.abrupt("return", _request(url, requestOptions) // Automatic re-auth via refresh token -----------------------------
               .catch(function (error) {
                 debug("%o", error);
 
@@ -10175,149 +10156,158 @@ function () {
                 }
 
                 throw error;
-              }) // Resolve References ----------------------------------------------
-              .then(
-              /*#__PURE__*/
-              function () {
-                var _ref2 = (0, _asyncToGenerator2.default)(
-                /*#__PURE__*/
-                _regenerator.default.mark(function _callee3(data) {
-                  return _regenerator.default.wrap(function _callee3$(_context3) {
-                    while (1) {
-                      switch (_context3.prev = _context3.next) {
-                        case 0:
-                          if (!(data && data.resourceType == "Bundle")) {
-                            _context3.next = 5;
-                            break;
-                          }
-
-                          _context3.next = 3;
-                          return Promise.all((data.entry || []).map(function (item) {
-                            return resolveRefs(item.resource, fhirOptions, _resolvedRefs, _this2);
-                          }));
-
-                        case 3:
-                          _context3.next = 7;
-                          break;
-
-                        case 5:
-                          _context3.next = 7;
-                          return resolveRefs(data, fhirOptions, _resolvedRefs, _this2);
-
-                        case 7:
-                          return _context3.abrupt("return", data);
-
-                        case 8:
-                        case "end":
-                          return _context3.stop();
-                      }
-                    }
-                  }, _callee3);
-                }));
-
-                return function (_x5) {
-                  return _ref2.apply(this, arguments);
-                };
-              }()) // Pagination ------------------------------------------------------
-              .then(
-              /*#__PURE__*/
-              function () {
-                var _ref3 = (0, _asyncToGenerator2.default)(
-                /*#__PURE__*/
-                _regenerator.default.mark(function _callee4(data) {
-                  var links, next, nextPage;
-                  return _regenerator.default.wrap(function _callee4$(_context4) {
-                    while (1) {
-                      switch (_context4.prev = _context4.next) {
-                        case 0:
-                          if (!(data && data.resourceType == "Bundle")) {
-                            _context4.next = 19;
-                            break;
-                          }
-
-                          links = data.link || [];
-
-                          if (fhirOptions.flat) {
-                            data = (data.entry || []).map(function (entry) {
-                              return entry.resource;
-                            });
-                          }
-
-                          if (!hasPageCallback) {
-                            _context4.next = 6;
-                            break;
-                          }
-
-                          _context4.next = 6;
-                          return fhirOptions.onPage(data, Object.assign({}, _resolvedRefs));
-
-                        case 6:
-                          if (! --fhirOptions.pageLimit) {
-                            _context4.next = 19;
-                            break;
-                          }
-
-                          next = links.find(function (l) {
-                            return l.relation == "next";
-                          });
-                          data = makeArray(data);
-
-                          if (!(next && next.url)) {
-                            _context4.next = 19;
-                            break;
-                          }
-
-                          _context4.next = 12;
-                          return _this2.request(next.url, fhirOptions, _resolvedRefs);
-
-                        case 12:
-                          nextPage = _context4.sent;
-
-                          if (!hasPageCallback) {
-                            _context4.next = 15;
-                            break;
-                          }
-
-                          return _context4.abrupt("return", null);
-
-                        case 15:
-                          if (!(fhirOptions.resolveReferences && fhirOptions.resolveReferences.length)) {
-                            _context4.next = 18;
-                            break;
-                          }
-
-                          Object.assign(_resolvedRefs, nextPage.references);
-                          return _context4.abrupt("return", data.concat(makeArray(nextPage.data || nextPage)));
-
-                        case 18:
-                          return _context4.abrupt("return", data.concat(makeArray(nextPage)));
-
-                        case 19:
-                          return _context4.abrupt("return", data);
-
-                        case 20:
-                        case "end":
-                          return _context4.stop();
-                      }
-                    }
-                  }, _callee4);
-                }));
-
-                return function (_x6) {
-                  return _ref3.apply(this, arguments);
-                };
-              }()) // Finalize --------------------------------------------------------
+              }) // Handle raw requests (anything other than json) ------------------
               .then(function (data) {
-                if (fhirOptions.graph) {
-                  _resolvedRefs = {};
-                } else if (!hasPageCallback && fhirOptions.resolveReferences.length) {
-                  return {
-                    data: data,
-                    references: _resolvedRefs
-                  };
-                }
+                if (!data) return data;
+                if (typeof data == "string") return data;
+                if (typeof data == "object" && data instanceof Response) return data; // Resolve References ----------------------------------------------
 
-                return data;
+                return function () {
+                  var _ref2 = (0, _asyncToGenerator2.default)(
+                  /*#__PURE__*/
+                  _regenerator.default.mark(function _callee3(data) {
+                    return _regenerator.default.wrap(function _callee3$(_context3) {
+                      while (1) {
+                        switch (_context3.prev = _context3.next) {
+                          case 0:
+                            if (!data) {
+                              _context3.next = 8;
+                              break;
+                            }
+
+                            if (!(data.resourceType == "Bundle")) {
+                              _context3.next = 6;
+                              break;
+                            }
+
+                            _context3.next = 4;
+                            return Promise.all((data.entry || []).map(function (item) {
+                              return resolveRefs(item.resource, fhirOptions, _resolvedRefs, _this2);
+                            }));
+
+                          case 4:
+                            _context3.next = 8;
+                            break;
+
+                          case 6:
+                            _context3.next = 8;
+                            return resolveRefs(data, fhirOptions, _resolvedRefs, _this2);
+
+                          case 8:
+                            return _context3.abrupt("return", data);
+
+                          case 9:
+                          case "end":
+                            return _context3.stop();
+                        }
+                      }
+                    }, _callee3);
+                  }));
+
+                  return function (_x5) {
+                    return _ref2.apply(this, arguments);
+                  };
+                }()(data) // Pagination ------------------------------------------------------
+                .then(
+                /*#__PURE__*/
+                function () {
+                  var _ref3 = (0, _asyncToGenerator2.default)(
+                  /*#__PURE__*/
+                  _regenerator.default.mark(function _callee4(data) {
+                    var links, next, nextPage;
+                    return _regenerator.default.wrap(function _callee4$(_context4) {
+                      while (1) {
+                        switch (_context4.prev = _context4.next) {
+                          case 0:
+                            if (!(data && data.resourceType == "Bundle")) {
+                              _context4.next = 19;
+                              break;
+                            }
+
+                            links = data.link || [];
+
+                            if (fhirOptions.flat) {
+                              data = (data.entry || []).map(function (entry) {
+                                return entry.resource;
+                              });
+                            }
+
+                            if (!hasPageCallback) {
+                              _context4.next = 6;
+                              break;
+                            }
+
+                            _context4.next = 6;
+                            return fhirOptions.onPage(data, Object.assign({}, _resolvedRefs));
+
+                          case 6:
+                            if (! --fhirOptions.pageLimit) {
+                              _context4.next = 19;
+                              break;
+                            }
+
+                            next = links.find(function (l) {
+                              return l.relation == "next";
+                            });
+                            data = makeArray(data);
+
+                            if (!(next && next.url)) {
+                              _context4.next = 19;
+                              break;
+                            }
+
+                            _context4.next = 12;
+                            return _this2.request(next.url, fhirOptions, _resolvedRefs);
+
+                          case 12:
+                            nextPage = _context4.sent;
+
+                            if (!hasPageCallback) {
+                              _context4.next = 15;
+                              break;
+                            }
+
+                            return _context4.abrupt("return", null);
+
+                          case 15:
+                            if (!(fhirOptions.resolveReferences && fhirOptions.resolveReferences.length)) {
+                              _context4.next = 18;
+                              break;
+                            }
+
+                            Object.assign(_resolvedRefs, nextPage.references);
+                            return _context4.abrupt("return", data.concat(makeArray(nextPage.data || nextPage)));
+
+                          case 18:
+                            return _context4.abrupt("return", data.concat(makeArray(nextPage)));
+
+                          case 19:
+                            return _context4.abrupt("return", data);
+
+                          case 20:
+                          case "end":
+                            return _context4.stop();
+                        }
+                      }
+                    }, _callee4);
+                  }));
+
+                  return function (_x6) {
+                    return _ref3.apply(this, arguments);
+                  };
+                }()) // Finalize --------------------------------------------------------
+                .then(function (data) {
+                  if (fhirOptions.graph) {
+                    _resolvedRefs = {};
+                  } else if (!hasPageCallback && fhirOptions.resolveReferences.length) {
+                    return {
+                      data: data,
+                      references: _resolvedRefs
+                    };
+                  }
+
+                  return data;
+                });
               }));
 
             case 15:
@@ -10329,7 +10319,7 @@ function () {
     }));
 
     function request(_x, _x2, _x3) {
-      return _request.apply(this, arguments);
+      return _request2.apply(this, arguments);
     }
 
     return request;
@@ -10371,14 +10361,14 @@ function () {
 
 
     if (!this._refreshTask) {
-      this._refreshTask = request(tokenUri, {
+      this._refreshTask = _request(tokenUri, {
         mode: "cors",
         method: "POST",
         headers: {
           "content-type": "application/x-www-form-urlencoded"
         },
         body: "grant_type=refresh_token&refresh_token=" + encodeURIComponent(refreshToken)
-      }).then(responseToJSON).then(function (data) {
+      }).then(function (data) {
         if (!data.access_token) {
           throw new Error("No access token received");
         }
@@ -10774,7 +10764,7 @@ __webpack_require__(/*! core-js/modules/es.promise */ "./node_modules/core-js/mo
 // gets built with another build tool and the fetch polyfill might not be excluded!
 // @ts-ignore
 if ( false ||  true && typeof window.fetch != "function") {
-  __webpack_require__(/*! isomorphic-fetch */ "./node_modules/isomorphic-fetch/fetch-npm-browserify.js");
+  __webpack_require__(/*! whatwg-fetch */ "./node_modules/whatwg-fetch/fetch.js");
 } // In Browsers we create an adapter, get the SMART api from it and build the
 // global FHIR object
 
@@ -10863,7 +10853,11 @@ function checkResponse(_x) {
   return _checkResponse.apply(this, arguments);
 }
 /**
- * Used in fetch Promise chains to return the JSON version of the response
+ * Used in fetch Promise chains to return the JSON version of the response.
+ * Note that `resp.json()` will throw on empty body so we use resp.text()
+ * instead.
+ * @param {Response} resp
+ * @returns {Promise<object|string>}
  */
 
 
@@ -10900,28 +10894,48 @@ function _checkResponse() {
 }
 
 function responseToJSON(resp) {
-  // return resp.json();
   return resp.text().then(function (text) {
     return text.length ? JSON.parse(text) : "";
   });
 }
+/**
+ * This is our built-in request function. It does a few things by default
+ * (unless told otherwise):
+ * - Makes CORS requests
+ * - Sets accept header to "application/json"
+ * - Handles errors
+ * - If the response is json return the json object
+ * - If the response is text return the result text
+ * - Otherwise return the response object on which we call stuff like `.blob()`
+ * @param {String|Request} url
+ * @param {Object} options
+ */
 
-function fetchJSON(url, options) {
+
+function request(url, options) {
   if (options === void 0) {
     options = {};
   }
 
-  return request(url, Object.assign({
+  return fetch(url, Object.assign({
     mode: "cors"
   }, options, {
     headers: Object.assign({
       accept: "application/json"
     }, options.headers)
-  })).then(responseToJSON);
-}
+  })).then(checkResponse).then(function (res) {
+    var type = res.headers.get("Content-Type") + "";
 
-function request(url, options) {
-  return fetch(url, options).then(checkResponse);
+    if (type.match(/\bjson\b/i)) {
+      return responseToJSON(res);
+    }
+
+    if (type.match(/^text\//i)) {
+      return res.text();
+    }
+
+    return res;
+  });
 }
 
 function humanizeError(_x2) {
@@ -10932,17 +10946,24 @@ function _humanizeError() {
   _humanizeError = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
   _regenerator.default.mark(function _callee2(resp) {
-    var msg, json, text;
+    var msg, type, json, text;
     return _regenerator.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
             msg = resp.status + " " + resp.statusText + "\nURL: " + resp.url;
             _context2.prev = 1;
-            _context2.next = 4;
+            type = resp.headers.get("Content-Type") || "text/plain";
+
+            if (!type.match(/\bjson\b/i)) {
+              _context2.next = 8;
+              break;
+            }
+
+            _context2.next = 6;
             return resp.json();
 
-          case 4:
+          case 6:
             json = _context2.sent;
 
             if (json.error) {
@@ -10955,39 +10976,39 @@ function _humanizeError() {
               msg += "\n\n" + JSON.stringify(json, null, 4);
             }
 
-            _context2.next = 19;
-            break;
-
           case 8:
-            _context2.prev = 8;
-            _context2.t0 = _context2["catch"](1);
-            _context2.prev = 10;
-            _context2.next = 13;
+            if (!type.match(/^text\//i)) {
+              _context2.next = 13;
+              break;
+            }
+
+            _context2.next = 11;
             return resp.text();
 
-          case 13:
+          case 11:
             text = _context2.sent;
 
             if (text) {
               msg += "\n\n" + text;
             }
 
-            _context2.next = 19;
+          case 13:
+            _context2.next = 17;
             break;
 
-          case 17:
-            _context2.prev = 17;
-            _context2.t1 = _context2["catch"](10);
+          case 15:
+            _context2.prev = 15;
+            _context2.t0 = _context2["catch"](1);
 
-          case 19:
+          case 17:
             throw new HttpError(msg, resp.status, resp.statusText);
 
-          case 20:
+          case 18:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, null, [[1, 8], [10, 17]]);
+    }, _callee2, null, [[1, 15]]);
   }));
   return _humanizeError.apply(this, arguments);
 }
@@ -11225,7 +11246,6 @@ module.exports = {
   debug: debug,
   checkResponse: checkResponse,
   responseToJSON: responseToJSON,
-  fetchJSON: fetchJSON,
   humanizeError: humanizeError,
   jwtDecode: jwtDecode,
   request: request,
@@ -11280,7 +11300,7 @@ var Client = __webpack_require__(/*! ./Client */ "./src/Client.js");
 var _require = __webpack_require__(/*! ./lib */ "./src/lib.js"),
     isBrowser = _require.isBrowser,
     _debug = _require.debug,
-    fetchJSON = _require.fetchJSON,
+    request = _require.request,
     getPath = _require.getPath,
     randomString = _require.randomString,
     btoa = _require.btoa;
@@ -11295,7 +11315,7 @@ function fetchConformanceStatement(baseUrl) {
   }
 
   var url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
-  return fetchJSON(url).catch(function (ex) {
+  return request(url).catch(function (ex) {
     throw new Error("Failed to fetch the conformance statement from \"" + url + "\". " + ex);
   });
 }
@@ -11306,7 +11326,7 @@ function fetchWellKnownJson(baseUrl) {
   }
 
   var url = String(baseUrl).replace(/\/*$/, "/") + ".well-known/smart-configuration";
-  return fetchJSON(url).catch(function (ex) {
+  return request(url).catch(function (ex) {
     throw new Error("Failed to fetch the well-known json \"" + url + "\". " + ex.message);
   });
 }
@@ -11707,7 +11727,7 @@ function _completeAuth() {
             // authorization request has been denied.
 
             _context2.next = 41;
-            return fetchJSON(state.tokenUri, requestOptions);
+            return request(state.tokenUri, requestOptions);
 
           case 41:
             tokenResponse = _context2.sent;

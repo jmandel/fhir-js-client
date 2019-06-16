@@ -1,4 +1,11 @@
-require("isomorphic-fetch");
+const fetch = require("node-fetch-npm");
+
+Object.assign(global, {
+  fetch,
+  Headers: fetch.Headers,
+  Request: fetch.Request,
+  Response: fetch.Response
+});
 
 const ServerStorage = require("../storage/ServerStorage");
 

@@ -1,4 +1,3 @@
-require("isomorphic-fetch");
 const NodeAdapter = require("./NodeAdapter").Adapter;
 
 /**

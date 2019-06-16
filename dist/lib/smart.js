@@ -3,7 +3,7 @@ const Client = require("./Client");
 const {
   isBrowser,
   debug: _debug,
-  fetchJSON,
+  request,
   getPath,
   randomString,
   btoa
@@ -15,14 +15,14 @@ const SMART_KEY = "SMART_KEY";
 
 function fetchConformanceStatement(baseUrl = "/") {
   const url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
-  return fetchJSON(url).catch(ex => {
+  return request(url).catch(ex => {
     throw new Error(`Failed to fetch the conformance statement from "${url}". ${ex}`);
   });
 }
 
 function fetchWellKnownJson(baseUrl = "/") {
   const url = String(baseUrl).replace(/\/*$/, "/") + ".well-known/smart-configuration";
-  return fetchJSON(url).catch(ex => {
+  return request(url).catch(ex => {
     throw new Error(`Failed to fetch the well-known json "${url}". ${ex.message}`);
   });
 }
@@ -302,7 +302,7 @@ async function completeAuth(env) {
     // includes an access token or a message indicating that the
     // authorization request has been denied.
 
-    let tokenResponse = await fetchJSON(state.tokenUri, requestOptions);
+    let tokenResponse = await request(state.tokenUri, requestOptions);
     debug("Token response: %O", tokenResponse);
 
     if (!tokenResponse.access_token) {
