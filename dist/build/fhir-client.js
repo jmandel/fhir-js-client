@@ -11699,7 +11699,7 @@ function _completeAuth() {
             throw new Error("No state found! Please (re)launch the app.");
 
           case 25:
-            if (!(code && !state.tokenResponse)) {
+            if (!code) {
               _context2.next = 46;
               break;
             }

@@ -293,7 +293,7 @@ async function completeAuth(env) {
   // then this is just a reload. Otherwise, we have to complete the code flow
 
 
-  if (code && !state.tokenResponse) {
+  if (code) {
     debug("Preparing to exchange the code for access token...");
     const requestOptions = await buildTokenRequest(code, state);
     debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that

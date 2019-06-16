@@ -312,7 +312,7 @@ async function completeAuth(env)
 
     // If we have state, then check to see if we got a `code`. If we don't,
     // then this is just a reload. Otherwise, we have to complete the code flow
-    if (code && !state.tokenResponse.access_token) {
+    if (code) {
         debug("Preparing to exchange the code for access token...");
         const requestOptions = await buildTokenRequest(code, state);
         debug("Token request options: %O", requestOptions);
