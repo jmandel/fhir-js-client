@@ -11606,61 +11606,60 @@ function _completeAuth() {
   _completeAuth = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
   _regenerator.default.mark(function _callee2(env) {
-    var url, Storage, params, key, code, authError, authErrorDescription, msg, state, fullSessionStorageSupport, hasState, requestOptions, tokenResponse, client;
+    var url, Storage, key, code, authError, authErrorDescription, msg, state, fullSessionStorageSupport, hasState, requestOptions, tokenResponse, client;
     return _regenerator.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
             url = env.getUrl();
             Storage = env.getStorage();
-            params = url.searchParams;
-            key = params.get("state");
-            code = params.get("code");
-            authError = params.get("error");
-            authErrorDescription = params.get("error_description");
+            key = url.searchParams.get("state");
+            code = url.searchParams.get("code");
+            authError = url.searchParams.get("error");
+            authErrorDescription = url.searchParams.get("error_description");
 
             if (key) {
-              _context2.next = 11;
+              _context2.next = 10;
               break;
             }
 
-            _context2.next = 10;
+            _context2.next = 9;
             return Storage.get(SMART_KEY);
 
-          case 10:
+          case 9:
             key = _context2.sent;
 
-          case 11:
+          case 10:
             if (!(authError || authErrorDescription)) {
-              _context2.next = 14;
+              _context2.next = 13;
               break;
             }
 
             msg = [authError, authErrorDescription].filter(Boolean).join(": ");
             throw new Error(msg);
 
-          case 14:
+          case 13:
             debug("key: %s, code: %O", key, code); // key might be coming from the page url so it might be empty or missing
 
             if (key) {
-              _context2.next = 17;
+              _context2.next = 16;
               break;
             }
 
             throw new Error("No 'state' parameter found. Please (re)launch the app.");
 
-          case 17:
-            _context2.next = 19;
+          case 16:
+            _context2.next = 18;
             return Storage.get(key);
 
-          case 19:
+          case 18:
             state = _context2.sent;
             fullSessionStorageSupport = isBrowser() ? getPath(env, "options.fullSessionStorageSupport") : true; // Do we have to remove the `code` and `state` params from the URL?
 
-            hasState = params.has("state");
+            hasState = url.searchParams.has("state");
 
             if (!(getPath(env, "options.replaceBrowserHistory") && (code || hasState))) {
-              _context2.next = 31;
+              _context2.next = 30;
               break;
             }
 
@@ -11668,7 +11667,7 @@ function _completeAuth() {
             // We have to remove it, otherwise the page will authorize on
             // every load!
             if (code) {
-              params.delete("code");
+              url.searchParams.delete("code");
               debug("Removed code parameter from the url.");
             } // If we have `fullSessionStorageSupport` it means we no longer
             // need the `state` key. It will be stored to a well know
@@ -11679,7 +11678,7 @@ function _completeAuth() {
 
 
             if (hasState && fullSessionStorageSupport) {
-              params.delete("state");
+              url.searchParams.delete("state");
               debug("Removed state parameter from the url.");
             } // If the browser does not support the replaceState method for the
             // History Web API, the "code" parameter cannot be removed. As a
@@ -11690,88 +11689,88 @@ function _completeAuth() {
 
 
             if (!(isBrowser() && window.history.replaceState)) {
-              _context2.next = 29;
+              _context2.next = 28;
               break;
             }
 
             window.history.replaceState({}, "", url.href);
-            _context2.next = 31;
+            _context2.next = 30;
             break;
 
-          case 29:
-            _context2.next = 31;
+          case 28:
+            _context2.next = 30;
             return env.redirect(url.href);
 
-          case 31:
+          case 30:
             if (state) {
-              _context2.next = 33;
+              _context2.next = 32;
               break;
             }
 
             throw new Error("No state found! Please (re)launch the app.");
 
-          case 33:
+          case 32:
             if (!code) {
-              _context2.next = 54;
+              _context2.next = 53;
               break;
             }
 
             debug("Preparing to exchange the code for access token...");
-            _context2.next = 37;
+            _context2.next = 36;
             return buildTokenRequest(code, state);
 
-          case 37:
+          case 36:
             requestOptions = _context2.sent;
             debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
             // includes an access token or a message indicating that the
             // authorization request has been denied.
 
-            _context2.next = 41;
+            _context2.next = 40;
             return request(state.tokenUri, requestOptions);
 
-          case 41:
+          case 40:
             tokenResponse = _context2.sent;
             debug("Token response: %O", tokenResponse);
 
             if (tokenResponse.access_token) {
-              _context2.next = 45;
+              _context2.next = 44;
               break;
             }
 
             throw new Error("Failed to obtain access token.");
 
-          case 45:
+          case 44:
             // save the tokenResponse so that we don't have to re-authorize on
             // every page reload
             state = Object.assign({}, state, {
               tokenResponse: tokenResponse
             });
-            _context2.next = 48;
+            _context2.next = 47;
             return Storage.set(key, state);
 
-          case 48:
+          case 47:
             if (!fullSessionStorageSupport) {
-              _context2.next = 51;
+              _context2.next = 50;
               break;
             }
 
-            _context2.next = 51;
+            _context2.next = 50;
             return Storage.set(SMART_KEY, key);
 
-          case 51:
+          case 50:
             debug("Authorization successful!");
-            _context2.next = 55;
+            _context2.next = 54;
             break;
 
-          case 54:
+          case 53:
             debug(state.tokenResponse.access_token ? "Already authorized" : "No authorization needed");
 
-          case 55:
+          case 54:
             client = new Client(env, state);
             debug("Created client instance: %O", client);
             return _context2.abrupt("return", client);
 
-          case 58:
+          case 57:
           case "end":
             return _context2.stop();
         }
