@@ -5,7 +5,7 @@ how the SMART API object is created. In the browser, the SMART API is available
 in the global scope at `window.FHIR.oauth2`. In Node, the `fhirclient` module
 exports a function that you need to call to obtain the same SMART API object.
 
-> This will not work out of the box if your request object does not have a `session` object property that we can write to. This means that may need use a middleware or plugin to provide that session support. See [sessions](#sessions).
+> This will not work out of the box if your request object does not have a `session` object property that we can write to. This means that you may need use a middleware or plugin to provide that session support. See [sessions](#sessions).
 
 ## SMART API
 This is very simple collection of three functions - `authorize`, `ready` and `init`.
@@ -95,7 +95,7 @@ function createStorage({ request, response }) {
 smart(request, response, createStorage).authorize(options)
 ```
 
-For working example of custom session storage see https://codesandbox.io/s/brave-wildflower-q4mhq
+For working example of custom session storage see [this example](https://codesandbox.io/s/brave-wildflower-q4mhq).
 
 
 ## Adapters
