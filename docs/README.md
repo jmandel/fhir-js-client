@@ -268,7 +268,7 @@ npm run pack:dev:pure
 npm run build:dev
 
 # Build the CommonJS modules (for Node and bundlers)
-build:module
+npm run build:module
 ```
 
 ## Debugging
