@@ -109,16 +109,16 @@ An adapter is a class that has a few methods for doing environment-specific thin
 - Define how to find out what the "current url" is.
 - Optionally, define how to handle relative URLs.
 
-The adapters are located [here](https://github.com/smart-on-fhir/client-js/tree/master/src/adapters). They all extend one abstract base class (`BaseAdapter`) but that is just for convenience and not a strict requirement.
+The adapters are located [here](https://github.com/smart-on-fhir/client-js/tree/master/src/adapters). They all extend one abstract base class (`BaseAdapter`).
 
-To use an adapter (other than the default one for node/express) load it like so:
+In Node `require("fhirclient")` is the same as `require("fhirclient/lib/adapters/NodeAdapter")` which loads the default adapter for Node and/or Express. To use another adapter load it like so:
 ```js
-const smart = require("fhirclient/src/adapters/HapiAdapter");
+const smart = require("fhirclient/lib/adapters/HapiAdapter");
 
 // inside your redirect_uri route handler
 smart(request, h).ready(client => client.request("Patient"));
 ```
-Also note in the above example how the signature of the `smart` function has changed
+Note how in the above example the signature of the `smart` function has changed
 to `smart(request, h)` which makes more sense in HAPI. This is also defined by the adapter.
 
 See the complete [HAPI Example](https://codesandbox.io/s/fhir-client-hapi-myq5q)
