@@ -249,22 +249,38 @@ npm test
 # Build everything
 npm run build
 
-# Only build minified scripts for production
+# Build all bundles
+npm run pack
+
+# Only build the minified bundle for production
 npm run pack:prod
 
-# Only build non-minified scripts for development
+# Only build the pure (no polyfills included) minified bundle for production
+npm run pack:prod:pure
+
+# Only build non-minified bundle for development
 npm run pack:dev
 
-# Only build non-minified scripts for development and watch them for changes
+# Only build the pure (no polyfills included) bundle for development
+npm run pack:dev:pure
+
+# Only build non-minified bundle for development and rebuild on change
 npm run build:dev
+
+# Build the CommonJS modules (for Node and bundlers)
+build:module
 ```
 
 ## Debugging
-This library uses the [debug](https://www.npmjs.com/package/debug) module. To enable
-debug logging in Node use the `DEBUG` env variable. In the browser execute this in the console:
+This library uses the [debug](https://www.npmjs.com/package/debug) module.
+
+To enable debug logging in Node use the `DEBUG` env variable:
+```sh
+DEBUG='FHIR.*' node my-app
+```
+In the browser execute this in the console and then reload the page:
 ```js
 localStorage.debug = "FHIR.*"
 ```
-and then reload the page.
 
 
