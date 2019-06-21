@@ -21,8 +21,8 @@ npm i fhirclient
 Include it with a `script` tag from one of the following locations:
 
 From NPM Release:
-- https://cdn.jsdelivr.net/npm/fhirclient@latest/build/fhir-client.js
-- https://cdn.jsdelivr.net/npm/fhirclient@latest/build/fhir-client.min.js
+- https://cdn.jsdelivr.net/npm/fhirclient/build/fhir-client.js
+- https://cdn.jsdelivr.net/npm/fhirclient/build/fhir-client.min.js
 
 Latest development builds from GitHub:
 - https://combinatronics.com/smart-on-fhir/client-js/master/dist/build/fhir-client.js

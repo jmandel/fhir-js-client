@@ -63,10 +63,6 @@ From NPM (specific version):
 - https://cdn.jsdelivr.net/npm/fhirclient@2.0.7/build/fhir-client.js
 - https://cdn.jsdelivr.net/npm/fhirclient@2.0.7/build/fhir-client.min.js
 
-From NPM (latest development release):
-- https://cdn.jsdelivr.net/npm/fhirclient@dev/build/fhir-client.js
-- https://cdn.jsdelivr.net/npm/fhirclient@dev/build/fhir-client.min.js
-
 Latest development builds from GitHub:
 - https://combinatronics.com/smart-on-fhir/client-js/master/dist/build/fhir-client.js
 - https://combinatronics.com/smart-on-fhir/client-js/master/dist/build/fhir-client.min.js
