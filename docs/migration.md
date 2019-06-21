@@ -45,7 +45,7 @@ good idea to start by reading [this document](v2.md).
     ```js
     FHIR.oauth2.ready(onSuccess, onError);
     ```
-    In v2 this is acceptable, but ready returns a `Promise` and we
+    In v2 this is acceptable, but `ready` returns a `Promise` and we
     advise you to change it to:
     ```js
     FHIR.oauth2.ready().then(onSuccess).catch(onError);
@@ -69,10 +69,10 @@ good idea to start by reading [this document](v2.md).
     is time to proceed to the FHIR queries. Almost every http request
     made by this library before v2 was sent through `fhir.js`. Since v2,
     we recommend switching to the built-in `request` function which comes
-    with some benefits.
+    with some benefits. See [fhir.js integration](/#fhirjs-integration)
 
     > If you want to continue using fhir.js, you will have to include it in the
-      page. Since we provide a `fetch` polyfill, the native version can be used.
+      page. Since we provide a `fetch` polyfill, the native fhir.js build can be used.
       We have tested our fhir.js integration with native build of fhir.js version
       0.0.20 (available [here](../lib/nativeFhir.js)).
       This can still bring in some incompatibilities, so another option would be
@@ -128,9 +128,11 @@ good idea to start by reading [this document](v2.md).
         
         .catch(console.error);
     ```
-
+    See [this](/fhirjs-equivalents) for other examples.
 5. Other Changes
+
     5.1. Client state
+
         The old client had a `state` and a `tokenResponse` properties. Now the
         `tokenResponse` is part of the state. This means that read tokenResponse
         values the code needs to be updated like so:
