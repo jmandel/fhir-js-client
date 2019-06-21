@@ -6,7 +6,7 @@ This is a JavaScript library for connecting SMART apps to FHIR servers.
 It works both in browsers (IE 10+) and on the server (Node 10+).
 
 
-> This is the documentation for version 2+. If you want to migrate from older versions, please check out **[what's new in v2](http://docs.smarthealthit.org/client-js/v2.html)**. For older versions see [http://docs.smarthealthit.org/clients/javascript/](http://docs.smarthealthit.org/clients/javascript/).
+> This is the documentation for version 2+. If you want to migrate from older versions, please check out **[what's new in v2](http://docs.smarthealthit.org/client-js/v2.html)** and [migration instructions](migration). For older versions see [http://docs.smarthealthit.org/clients/javascript/](http://docs.smarthealthit.org/clients/javascript/).
 
 
 [![CircleCI](https://circleci.com/gh/smart-on-fhir/client-js/tree/master.svg?style=svg)](https://circleci.com/gh/smart-on-fhir/client-js/tree/master) [![Coverage Status](https://coveralls.io/repos/github/smart-on-fhir/client-js/badge.svg?branch=master)](https://coveralls.io/github/smart-on-fhir/client-js?branch=master) [![npm version](https://badge.fury.io/js/fhirclient.svg)](https://badge.fury.io/js/fhirclient)
