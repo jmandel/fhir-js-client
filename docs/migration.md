@@ -128,7 +128,7 @@ good idea to start by reading [this document](v2.md).
         
         .catch(console.error);
     ```
-    See [this](/fhirjs-equivalents) for other examples.
+    See [this](./fhirjs-equivalents) for other examples.
 5. Other Changes
 
     5.1. Client state
@@ -136,6 +136,7 @@ good idea to start by reading [this document](v2.md).
         The old client had a `state` and a `tokenResponse` properties. Now the
         `tokenResponse` is part of the state. This means that read tokenResponse
         values the code needs to be updated like so:
+
         ```js
         // old
         const needPatientBanner = client.tokenResponse.need_patient_banner;
