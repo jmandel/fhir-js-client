@@ -15,15 +15,8 @@ It works both in browsers (IE 10+) and on the server (Node 10+).
 ---
 - [Installation](#installation)
 - [Browser Usage](#browser-usage)
-    - [Basic Examples](https://35u09.codesandbox.io/) - [Code](https://codesandbox.io/s/fhir-client-browser-examples-35u09) - Basic examples with no additional libraries or frameworks
-    - [React / TypeScript SPA](https://4e7rl.codesandbox.io/test.html) - [Code](https://codesandbox.io/s/fhir-client-typescript-react-spa-4e7rl) - Example with React and TypeScript on a single page
-    - [Advanced React Example](https://0q3n8.codesandbox.io) - [Code](https://codesandbox.io/s/fhir-client-react-react-router-context-0q3n8) - React with React Router, storing a FHIR client instance in React context
 - [Server Usage](#server-usage)
     - [NodeJS API Details](node.md)
-    - [Express Example](https://c0che.sse.codesandbox.io/) - [Code](https://codesandbox.io/s/jovial-dew-c0che)
-    - [Native Example](https://q4mhq.sse.codesandbox.io/) - [Code](https://codesandbox.io/s/brave-wildflower-q4mhq)
-    - [HAPI Example](https://myq5q.sse.codesandbox.io/) - [Code](https://codesandbox.io/s/fhir-client-hapi-myq5q)
-    - [Express + fhir.js Example](https://4t1mp.sse.codesandbox.io/) - [Code](https://codesandbox.io/s/fhir-client-express-and-fhirjs-4t1mp)
 - [SMART API](#smart-api)
     - [Full Documentation](api.md)
 - [Client API](#client)
@@ -33,6 +26,15 @@ It works both in browsers (IE 10+) and on the server (Node 10+).
     - [Example fhir.js methods and analog request calls](fhirjs-equivalents.md)
 - [Contributing and Development](#contributing-and-development)
 - [Debugging](#debugging)
+- Browser Examples
+    - [Basic Examples](https://35u09.codesandbox.io/) - [Code](https://codesandbox.io/s/fhir-client-browser-examples-35u09) - Basic examples with no additional libraries or frameworks
+    - [React / TypeScript SPA](https://4e7rl.codesandbox.io/test.html) - [Code](https://codesandbox.io/s/fhir-client-typescript-react-spa-4e7rl) - Example with React and TypeScript on a single page
+    - [Advanced React Example](https://0q3n8.codesandbox.io) - [Code](https://codesandbox.io/s/fhir-client-react-react-router-context-0q3n8) - React with React Router, storing a FHIR client instance in React context
+- Server Examples
+    - [Express Example](https://c0che.sse.codesandbox.io/) - [Code](https://codesandbox.io/s/jovial-dew-c0che)
+    - [Native Example](https://q4mhq.sse.codesandbox.io/) - [Code](https://codesandbox.io/s/brave-wildflower-q4mhq)
+    - [HAPI Example](https://myq5q.sse.codesandbox.io/) - [Code](https://codesandbox.io/s/fhir-client-hapi-myq5q)
+    - [Express + fhir.js Example](https://4t1mp.sse.codesandbox.io/) - [Code](https://codesandbox.io/s/fhir-client-express-and-fhirjs-4t1mp)
 
 <br/><br/>
 
@@ -50,17 +52,19 @@ npm i fhirclient
 ### From CDN
 Include it with a `script` tag from one of the following locations:
 
-From NPM Release:
-- https://cdn.jsdelivr.net/npm/fhirclient@2.0.1/build/fhir-client.js
-- https://cdn.jsdelivr.net/npm/fhirclient@2.0.1/build/fhir-client.min.js
-- https://cdn.jsdelivr.net/npm/fhirclient@dev/build/fhir-client.js
-- https://cdn.jsdelivr.net/npm/fhirclient@dev/build/fhir-client.js
-
-These will work properly after v2 is officially released:
+From NPM (latest version):
 - https://cdn.jsdelivr.net/npm/fhirclient/build/fhir-client.js
 - https://cdn.jsdelivr.net/npm/fhirclient/build/fhir-client.min.js
 - https://cdn.jsdelivr.net/npm/fhirclient@latest/build/fhir-client.js
 - https://cdn.jsdelivr.net/npm/fhirclient@latest/build/fhir-client.min.js
+
+From NPM (specific version):
+- https://cdn.jsdelivr.net/npm/fhirclient@2.0.7/build/fhir-client.js
+- https://cdn.jsdelivr.net/npm/fhirclient@2.0.7/build/fhir-client.min.js
+
+From NPM (latest development release):
+- https://cdn.jsdelivr.net/npm/fhirclient@dev/build/fhir-client.js
+- https://cdn.jsdelivr.net/npm/fhirclient@dev/build/fhir-client.min.js
 
 Latest development builds from GitHub:
 - https://combinatronics.com/smart-on-fhir/client-js/master/dist/build/fhir-client.js
