@@ -44,10 +44,6 @@ It works both in browsers (IE 10+) and on the server (Node 10+).
 
 ### From NPM
 ```sh
-# This is still in beta! To give it a try do:
-npm i fhirclient@dev
-
-# To install the older version do:
 npm i fhirclient
 ```
 ### From CDN
