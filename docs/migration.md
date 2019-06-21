@@ -19,7 +19,7 @@ through the script tags. For example, this should load the latest development bu
 <script src="https://cdn.jsdelivr.net/npm/fhirclient/build/fhir-client.js"></script>
 ```
 
-### `FHIR.oauth2.authorize()`
+### FHIR.oauth2.authorize()
     
 In your launch page you should have a call to `FHIR.oauth2.authorize()`.
 This should work without any changes for EHR launch. For Standalone Launch,
@@ -42,7 +42,7 @@ FHIR.oauth2.authorize({
 })
 ```
 
-### `FHIR.oauth2.ready()`
+### FHIR.oauth2.ready()
 This is where apps are initialized. You probably call this with
 one or two callback arguments like:
 ```js
@@ -73,18 +73,18 @@ Once you have the SMART part (`authorize` and `ready`) working, it
 is time to proceed to the FHIR queries. Almost every http request
 made by this library before v2 was sent through `fhir.js`. Since v2,
 we recommend switching to the built-in `request` function which comes
-with some benefits. See [fhir.js integration](/#fhirjs-integration)
+with some benefits. See [fhir.js integration](README.md#fhirjs-integration)
 
 > If you want to continue using fhir.js, you will have to include it in the
     page. Since we provide a `fetch` polyfill, the native fhir.js build can be used.
     We have tested our fhir.js integration with native build of fhir.js version
-    0.0.20 (available [here](../lib/nativeFhir.js)).
+    0.0.20 (available [here](https://raw.githubusercontent.com/smart-on-fhir/client-js/master/lib/nativeFhir.js)).
     This can still bring in some incompatibilities, so another option would be
     to try our fork of fhir.js that was included in older versions of the
     `fhirclient` library. You can grab it from [here](https://github.com/smart-on-fhir/client-js/blob/9e77b7b26b5d7dff7e65f25625441e0905f84811/lib/jqFhir.js),
     but note that it will also require jQuery to be included in the page.
 
-#### `patient.read()`
+#### patient.read()
 Most of the apps are using information about the
 selected patient, so you probably have a call like `client.patient.read()`
 somewhere in your code. That should work in v2, but it returns a `Promise`
