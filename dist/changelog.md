@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.0.2
+## v2.0.7
 - See http://docs.smarthealthit.org/client-js/v2.html
 
 ## v0.1.15
