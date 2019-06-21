@@ -21,9 +21,7 @@ It works both in browsers (IE 10+) and on the server (Node 10+).
     - [Full Documentation](api.md)
 - [Client API](#client)
     - [Full Documentation](client.md)
-    - [Request examples](http://docs.smarthealthit.org/client-js/request.html)
 - [Integration with Fhir.js](#fhirjs-integration)
-    - [Example fhir.js methods and analog request calls](fhirjs-equivalents.md)
 - [Contributing and Development](#contributing-and-development)
 - [Debugging](#debugging)
 - Browser Examples
@@ -35,6 +33,9 @@ It works both in browsers (IE 10+) and on the server (Node 10+).
     - [Native Example](https://q4mhq.sse.codesandbox.io/) - [Code](https://codesandbox.io/s/brave-wildflower-q4mhq)
     - [HAPI Example](https://myq5q.sse.codesandbox.io/) - [Code](https://codesandbox.io/s/fhir-client-hapi-myq5q)
     - [Express + fhir.js Example](https://4t1mp.sse.codesandbox.io/) - [Code](https://codesandbox.io/s/fhir-client-express-and-fhirjs-4t1mp)
+- Other Examples
+    - [Request examples](http://docs.smarthealthit.org/client-js/request.html)
+    - [Example fhir.js methods and analog request calls](fhirjs-equivalents.md)
 
 <br/><br/>
 
