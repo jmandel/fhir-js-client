@@ -19,14 +19,14 @@ declare namespace fhirclient {
          * The options that you would typically pass for an EHR launch are just
          * `clientId` and `scope`. For standalone launch you should also provide
          * the `iss` option.
-         * @param options 
+         * @param options
          */
         authorize(options: AuthorizeParams): Promise<string|never>;
 
         /**
          * This function can be used when you want to handle everything in one
          * page (no launch endpoint needed).
-         * 
+         *
          * 1. It will only work if your `launch_uri` is the same as your `redirect_uri`.
          *    While this should be valid, we can't promise that every EHR will allow you
          *    to register client with such settings.
@@ -40,7 +40,7 @@ declare namespace fhirclient {
          *  - Since the page will be loaded twice, you must be careful if your code has
          *      global side effects that can persist between page reloads (for example
          *      writing to localStorage).
-         * @param options 
+         * @param options
          */
         init(options: AuthorizeParams): Promise<never|Client>;
 
@@ -56,7 +56,7 @@ declare namespace fhirclient {
         /**
          * Replaces the browser's current URL using
          * `window.history.replaceState` API.
-         * 
+         *
          * ONLY RELEVANT IN BROWSERS!
          */
         replaceBrowserHistory: boolean;
@@ -75,7 +75,7 @@ declare namespace fhirclient {
 
     class Adapter {
 
-        constructor(options: fhirSettings): Adapter;
+        constructor(options: fhirSettings);
 
         options: fhirSettings;
 
@@ -119,13 +119,13 @@ declare namespace fhirclient {
      * Simple key/value storage interface
      */
     class Storage {
-        
+
         /**
          * Sets the `value` on `key` and returns a promise that will be resolved
          * with the value that was set.
          */
         set: (key: string, value: any) => Promise<any>;
-        
+
         /**
          * Gets the value at `key`. Returns a promise that will be resolved
          * with that value (or undefined for missing keys).
@@ -169,14 +169,14 @@ declare namespace fhirclient {
 
         /**
          * Returns the ID of the current patient (if any) or null
-         * 
+         *
          * NOTE: use `patient.id` instead
          */
         getPatientId(): string|null;
 
         /**
          * Returns the ID of the current encounter (if any) or null
-         * 
+         *
          * NOTE: use `encounter.id` instead
          */
         getEncounterId(): string|null;
@@ -185,14 +185,14 @@ declare namespace fhirclient {
 
         /**
          * Returns the ID of the current user (if any) or null
-         * 
+         *
          * NOTE: use `user.id` instead
          */
         getUserId(): string|null;
 
         /**
          * Returns the resourceType of the current user (if any) or null
-         * 
+         *
          * NOTE: use `user.resourceType` instead
          */
         getUserType(): string|null;
@@ -203,21 +203,21 @@ declare namespace fhirclient {
         /**
          * Use this method to query the FHIR server
          * @param uri Either the full url, or a path that will be rooted at the FHIR baseUrl.
-         * @param fhirOptions Additional options to control the behavior 
+         * @param fhirOptions Additional options to control the behavior
          * @param _resolvedRefs DO NOT USE! Used internally.
          */
         request(uri: string, fhirOptions?: FhirOptions, _resolvedRefs?: object): Promise<RequestResult>
         request(url: URL, fhirOptions?: FhirOptions, _resolvedRefs?: object): Promise<RequestResult>;
         request(requestOptions: RequestOptions, fhirOptions?: FhirOptions, _resolvedRefs?: object): Promise<RequestResult>;
-        
+
         /**
          * Use the refresh token to obtain new access token. If the refresh token is
          * expired (or this fails for any other reason) it will be deleted from the
          * state, so that we don't enter into loops trying to re-authorize.
-         * 
+         *
          * **Note** that that `client.request()` will automatically refresh the access
          * token for you!
-         * 
+         *
          * Resolves with the updated state or rejects with an error.
          */
         refresh(): Promise<object>;
@@ -231,7 +231,7 @@ declare namespace fhirclient {
      * The three security endpoints that SMART servers might declare in the
      * conformance statement
      */
-    declare interface OAuthSecurityExtensions {
+    interface OAuthSecurityExtensions {
 
         /**
          * You could register new SMART client at this endpoint (if the server
@@ -255,7 +255,7 @@ declare namespace fhirclient {
      * Describes the state that should be passed to the Client constructor.
      * Everything except `serverUrl` is optional
      */
-    declare interface ClientState {
+    interface ClientState {
         /**
          * The base URL of the Fhir server. The library should have detected it
          * at authorization time from request query params of from config options.
@@ -327,14 +327,14 @@ declare namespace fhirclient {
         /**
          * The key under which this state is persisted in the storage
          */
-        key?: string; 
+        key?: string;
     }
 
     /**
      * Authorization parameters that can be passed to `authorize` or `init`
      */
-    declare interface AuthorizeParams {
-            
+    interface AuthorizeParams {
+
         /**
          * This is the URL of the service you are connecting to.
          * For [EHR Launch](http://hl7.org/fhir/smart-app-launch/#ehr-launch-sequence)
@@ -344,7 +344,7 @@ declare namespace fhirclient {
          * you can do [Standalone Launch](http://hl7.org/fhir/smart-app-launch/#standalone-launch-sequence).
          */
         iss?: string;
-        
+
         /**
          * Do not pass use this option, unless you want to test it. It should come
          * as url parameter from the SMART authorization server as part of the EHR
@@ -423,14 +423,14 @@ declare namespace fhirclient {
          * These properties will be stored into the client state, as if it has been
          * authorized.
          */
-        fakeTokenResponse?: object; 
+        fakeTokenResponse?: object;
     }
 
     /**
      * Additional options that can be passed to `client.request` to control its
      * behavior
      */
-    declare interface FhirOptions {
+    interface FhirOptions {
 
         /**
          * When you request a Bundle, the result will typically come back in pages
@@ -442,7 +442,7 @@ declare namespace fhirclient {
          * - Ignored if the response is not a `Bundle`.
          */
         pageLimit?: number;
-        
+
         /**
          * When you fetch multiple pages the resulting array may be very large,
          * requiring a lot of time and memory. It is often better if you specify a
@@ -464,8 +464,8 @@ declare namespace fhirclient {
          * @param references Map of resolved references. Only available if the `graph`
          *  option is set to `false`
          */
-        onPage?: (data: JsonObject | JsonObject[], references?: JsonObject) => any; 
-        
+        onPage?: (data: JsonObject | JsonObject[], references?: JsonObject) => any;
+
         /**
          * When fetching a `Bundle`, you are typically only interested in the
          * included resources which are located at `{response}.entry[N].resource`.
@@ -486,7 +486,7 @@ declare namespace fhirclient {
          *   found in the response bundle.
          */
         flat?: boolean;
-        
+
         /**
          * Only applicable if you use `resolveReferences`. If `false`, the resolved
          * references will not be "mounted" in the result tree, but will be returned
@@ -514,7 +514,7 @@ declare namespace fhirclient {
          *   resolved" anyway).
          */
         resolveReferences?: string|String[]
-        
+
         /**
          * If the client is authorized, it will possess an access token and pass it
          * with the requests it makes. When that token expires, you should get back
@@ -526,7 +526,7 @@ declare namespace fhirclient {
          * unless the refresh token is also expired. If you don't want this, you can
          * set `useRefreshToken` to `false`. There is a `refresh` method on the
          * client that can be called manually to renew the access token.
-         * - **Defaults to `true`**. 
+         * - **Defaults to `true`**.
          */
         useRefreshToken?: boolean;
     }
@@ -538,7 +538,7 @@ declare namespace fhirclient {
      * additional properties.
      * @see http://docs.smarthealthit.org/authorization/
      */
-    declare interface TokenResponse {
+    interface TokenResponse {
 
         /**
          * If present, this tells the app that it is being rendered within an
@@ -565,7 +565,7 @@ declare namespace fhirclient {
         /**
          * If you have requested that require it (like `launch` or `launch/encounter`)
          * the selected encounter ID will be available here.
-         * **NOTE:** This is not widely supported as of 2018. 
+         * **NOTE:** This is not widely supported as of 2018.
          */
         encounter?: string;
 
@@ -614,10 +614,10 @@ declare namespace fhirclient {
         /**
          * Other properties might be passed by the server
          */
-        [key?: string]: any;
+        [key: string]: any;
     }
 
-    declare interface JsonObject {
+    interface JsonObject {
         [key: string]: any
     }
 }

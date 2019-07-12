@@ -17,6 +17,8 @@
   "browser": "src/browser.js",
   "dependencies": {
     "@babel/runtime": "^7.4.5",
+    "@types/debug": "^4.1.4",
+    "@types/whatwg-fetch": "0.0.33",
     "core-js": "^3.1.3",
     "debug": "^4.1.1",
     "node-fetch-npm": "^2.0.2",
