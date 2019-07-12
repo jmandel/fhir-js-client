@@ -75,7 +75,7 @@ declare namespace fhirclient {
 
     class Adapter {
 
-        constructor(options: fhirSettings): Adapter;
+        constructor(options: fhirSettings);
 
         options: fhirSettings;
 
@@ -231,7 +231,7 @@ declare namespace fhirclient {
      * The three security endpoints that SMART servers might declare in the
      * conformance statement
      */
-    declare interface OAuthSecurityExtensions {
+    interface OAuthSecurityExtensions {
 
         /**
          * You could register new SMART client at this endpoint (if the server
