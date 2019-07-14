@@ -11742,7 +11742,7 @@ function _completeAuth() {
 
           case 25:
             if (!code) {
-              _context2.next = 46;
+              _context2.next = 43;
               break;
             }
 
@@ -11780,21 +11780,21 @@ function _completeAuth() {
             return Storage.set(key, state);
 
           case 40:
+            debug("Authorization successful!");
+            _context2.next = 44;
+            break;
+
+          case 43:
+            debug(state.tokenResponse.access_token ? "Already authorized" : "No authorization needed");
+
+          case 44:
             if (!fullSessionStorageSupport) {
-              _context2.next = 43;
+              _context2.next = 47;
               break;
             }
 
-            _context2.next = 43;
-            return Storage.set(SMART_KEY, key);
-
-          case 43:
-            debug("Authorization successful!");
             _context2.next = 47;
-            break;
-
-          case 46:
-            debug(state.tokenResponse.access_token ? "Already authorized" : "No authorization needed");
+            return Storage.set(SMART_KEY, key);
 
           case 47:
             client = new Client(env, state);
