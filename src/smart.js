@@ -310,9 +310,13 @@ async function completeAuth(env)
         throw new Error("No state found! Please (re)launch the app.");
     }
 
-    // If we have state, then check to see if we got a `code`. If we don't,
-    // then this is just a reload. Otherwise, we have to complete the code flow
-    if (code) {
+    // Assume the client has already completed a token exchange when
+    // there is no code or access token is found in state
+    const authorized = !code || state.tokenResponse.access_token;
+
+    // If we are authorized already, then this is just a reload.
+    // Otherwise, we have to complete the code flow
+    if (!authorized) {
         debug("Preparing to exchange the code for access token...");
         const requestOptions = await buildTokenRequest(code, state);
         debug("Token request options: %O", requestOptions);
