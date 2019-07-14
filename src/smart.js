@@ -328,9 +328,6 @@ async function completeAuth(env)
         // every page reload
         state = { ...state, tokenResponse };
         await Storage.set(key, state);
-        if (fullSessionStorageSupport) {
-            await Storage.set(SMART_KEY, key);
-        }
         debug("Authorization successful!");
     }
     else {
@@ -338,6 +335,10 @@ async function completeAuth(env)
             "Already authorized" :
             "No authorization needed"
         );
+    }
+
+    if (fullSessionStorageSupport) {
+        await Storage.set(SMART_KEY, key);
     }
 
     const client = new Client(env, state);
