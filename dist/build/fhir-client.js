@@ -10006,6 +10006,48 @@ function () {
     return _clearState;
   }()
   /**
+   * @param {Object} resource A FHIR resource to be created
+   */
+  ;
+
+  _proto.create = function create(resource) {
+    return this.request({
+      url: "" + resource.resourceType,
+      method: "POST",
+      body: JSON.stringify(resource),
+      headers: {
+        "Content-Type": "application/fhir+json"
+      }
+    });
+  }
+  /**
+   * @param {Object} resource A FHIR resource to be updated
+   */
+  ;
+
+  _proto.update = function update(resource) {
+    return this.request({
+      url: resource.resourceType + "/" + resource.id,
+      method: "PUT",
+      body: JSON.stringify(resource),
+      headers: {
+        "Content-Type": "application/fhir+json"
+      }
+    });
+  }
+  /**
+   * @param {String} url Relative URI of the FHIR resource to be deleted
+   * (format: `resourceType/id`)
+   */
+  ;
+
+  _proto.delete = function _delete(url) {
+    return this.request({
+      url: url,
+      method: "DELETE"
+    });
+  }
+  /**
    * @param {Object|String} requestOptions Can be a string URL (relative to
    *  the serviceUrl), or an object which will be passed to fetch()
    * @param {fhirclient.FhirOptions} fhirOptions Additional options to control the behavior
@@ -12110,18 +12152,9 @@ module.exports = Storage;
   !*** ./src/strings.js ***!
   \************************/
 /*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-"use strict";
-
-
-// This map contains reusable debug messages (only those used in multiple places)
-module.exports = {
-  expired: "Session expired! Please re-launch the app",
-  noScopeForId: "Trying to get the ID of the selected %s. Please add 'launch' or 'launch/%s' to the requested scopes and try again.",
-  noIfNoAuth: "You are trying to get %s but the app is not authorized yet.",
-  noFreeContext: "Please don't use open fhir servers if you need to access launch context items like the %S."
-};
+throw new Error("Module build failed (from ./node_modules/babel-loader/lib/index.js):\nSyntaxError: /media/vlad/Data/dev/client-js/src/strings.js: Unexpected token, expected \",\" (7:0)\n\n\u001b[0m \u001b[90m 5 | \u001b[39m    noIfNoAuth   \u001b[33m:\u001b[39m \u001b[32m\"You are trying to get %s but the app is not authorized yet.\"\u001b[39m\u001b[33m,\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 6 | \u001b[39m    noFreeContext\u001b[33m:\u001b[39m \u001b[32m\"Please don't use open fhir servers if you need to access launch context items like the %S.\"\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 7 | \u001b[39m\u001b[0m\n\u001b[0m \u001b[90m   | \u001b[39m\u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n    at Parser.raise (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:6344:17)\n    at Parser.unexpected (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:7659:16)\n    at Parser.expect (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:7645:28)\n    at Parser.parseObj (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:9134:14)\n    at Parser.parseExprAtom (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8774:21)\n    at Parser.parseExprSubscripts (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8413:23)\n    at Parser.parseMaybeUnary (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8393:21)\n    at Parser.parseExprOps (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8280:23)\n    at Parser.parseMaybeConditional (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8253:23)\n    at Parser.parseMaybeAssign (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8200:21)\n    at Parser.parseMaybeAssign (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8239:25)\n    at Parser.parseExpression (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8148:23)\n    at Parser.parseStatementContent (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:9917:23)\n    at Parser.parseStatement (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:9788:17)\n    at Parser.parseBlockOrModuleBlockBody (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:10364:25)\n    at Parser.parseBlockBody (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:10351:10)\n    at Parser.parseTopLevel (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:9717:10)\n    at Parser.parse (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:11233:17)\n    at parse (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:11269:38)\n    at parser (/media/vlad/Data/dev/client-js/node_modules/@babel/core/lib/transformation/normalize-file.js:170:34)\n    at normalizeFile (/media/vlad/Data/dev/client-js/node_modules/@babel/core/lib/transformation/normalize-file.js:138:11)\n    at runSync (/media/vlad/Data/dev/client-js/node_modules/@babel/core/lib/transformation/index.js:44:43)\n    at runAsync (/media/vlad/Data/dev/client-js/node_modules/@babel/core/lib/transformation/index.js:35:14)\n    at process.nextTick (/media/vlad/Data/dev/client-js/node_modules/@babel/core/lib/transform.js:34:34)\n    at process._tickCallback (internal/process/next_tick.js:61:11)");
 
 /***/ })
 
