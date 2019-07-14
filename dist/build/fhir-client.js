@@ -11648,7 +11648,7 @@ function _completeAuth() {
   _completeAuth = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
   _regenerator.default.mark(function _callee2(env) {
-    var url, Storage, params, key, code, authError, authErrorDescription, msg, state, fullSessionStorageSupport, hasState, requestOptions, tokenResponse, client;
+    var url, Storage, params, key, code, authError, authErrorDescription, msg, state, fullSessionStorageSupport, hasState, authorized, requestOptions, tokenResponse, client;
     return _regenerator.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
@@ -11741,67 +11741,72 @@ function _completeAuth() {
             throw new Error("No state found! Please (re)launch the app.");
 
           case 25:
-            if (!code) {
-              _context2.next = 43;
+            // Assume the client has already completed a token exchange when
+            // there is no code or access token is found in state
+            authorized = !code || state.tokenResponse.access_token; // If we are authorized already, then this is just a reload.
+            // Otherwise, we have to complete the code flow
+
+            if (authorized) {
+              _context2.next = 44;
               break;
             }
 
             debug("Preparing to exchange the code for access token...");
-            _context2.next = 29;
+            _context2.next = 30;
             return buildTokenRequest(code, state);
 
-          case 29:
+          case 30:
             requestOptions = _context2.sent;
             debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
             // includes an access token or a message indicating that the
             // authorization request has been denied.
 
-            _context2.next = 33;
+            _context2.next = 34;
             return request(state.tokenUri, requestOptions);
 
-          case 33:
+          case 34:
             tokenResponse = _context2.sent;
             debug("Token response: %O", tokenResponse);
 
             if (tokenResponse.access_token) {
-              _context2.next = 37;
+              _context2.next = 38;
               break;
             }
 
             throw new Error("Failed to obtain access token.");
 
-          case 37:
+          case 38:
             // save the tokenResponse so that we don't have to re-authorize on
             // every page reload
             state = Object.assign({}, state, {
               tokenResponse: tokenResponse
             });
-            _context2.next = 40;
+            _context2.next = 41;
             return Storage.set(key, state);
 
-          case 40:
+          case 41:
             debug("Authorization successful!");
-            _context2.next = 44;
+            _context2.next = 45;
             break;
 
-          case 43:
+          case 44:
             debug(state.tokenResponse.access_token ? "Already authorized" : "No authorization needed");
 
-          case 44:
+          case 45:
             if (!fullSessionStorageSupport) {
-              _context2.next = 47;
+              _context2.next = 48;
               break;
             }
 
-            _context2.next = 47;
+            _context2.next = 48;
             return Storage.set(SMART_KEY, key);
 
-          case 47:
+          case 48:
             client = new Client(env, state);
             debug("Created client instance: %O", client);
             return _context2.abrupt("return", client);
 
-          case 50:
+          case 51:
           case "end":
             return _context2.stop();
         }
@@ -12152,9 +12157,18 @@ module.exports = Storage;
   !*** ./src/strings.js ***!
   \************************/
 /*! all exports used */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-throw new Error("Module build failed (from ./node_modules/babel-loader/lib/index.js):\nSyntaxError: /media/vlad/Data/dev/client-js/src/strings.js: Unexpected token, expected \",\" (7:0)\n\n\u001b[0m \u001b[90m 5 | \u001b[39m    noIfNoAuth   \u001b[33m:\u001b[39m \u001b[32m\"You are trying to get %s but the app is not authorized yet.\"\u001b[39m\u001b[33m,\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 6 | \u001b[39m    noFreeContext\u001b[33m:\u001b[39m \u001b[32m\"Please don't use open fhir servers if you need to access launch context items like the %S.\"\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 7 | \u001b[39m\u001b[0m\n\u001b[0m \u001b[90m   | \u001b[39m\u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n    at Parser.raise (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:6344:17)\n    at Parser.unexpected (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:7659:16)\n    at Parser.expect (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:7645:28)\n    at Parser.parseObj (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:9134:14)\n    at Parser.parseExprAtom (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8774:21)\n    at Parser.parseExprSubscripts (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8413:23)\n    at Parser.parseMaybeUnary (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8393:21)\n    at Parser.parseExprOps (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8280:23)\n    at Parser.parseMaybeConditional (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8253:23)\n    at Parser.parseMaybeAssign (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8200:21)\n    at Parser.parseMaybeAssign (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8239:25)\n    at Parser.parseExpression (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8148:23)\n    at Parser.parseStatementContent (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:9917:23)\n    at Parser.parseStatement (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:9788:17)\n    at Parser.parseBlockOrModuleBlockBody (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:10364:25)\n    at Parser.parseBlockBody (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:10351:10)\n    at Parser.parseTopLevel (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:9717:10)\n    at Parser.parse (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:11233:17)\n    at parse (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:11269:38)\n    at parser (/media/vlad/Data/dev/client-js/node_modules/@babel/core/lib/transformation/normalize-file.js:170:34)\n    at normalizeFile (/media/vlad/Data/dev/client-js/node_modules/@babel/core/lib/transformation/normalize-file.js:138:11)\n    at runSync (/media/vlad/Data/dev/client-js/node_modules/@babel/core/lib/transformation/index.js:44:43)\n    at runAsync (/media/vlad/Data/dev/client-js/node_modules/@babel/core/lib/transformation/index.js:35:14)\n    at process.nextTick (/media/vlad/Data/dev/client-js/node_modules/@babel/core/lib/transform.js:34:34)\n    at process._tickCallback (internal/process/next_tick.js:61:11)");
+"use strict";
+
+
+// This map contains reusable debug messages (only those used in multiple places)
+module.exports = {
+  expired: "Session expired! Please re-launch the app",
+  noScopeForId: "Trying to get the ID of the selected %s. Please add 'launch' or 'launch/%s' to the requested scopes and try again.",
+  noIfNoAuth: "You are trying to get %s but the app is not authorized yet.",
+  noFreeContext: "Please don't use open fhir servers if you need to access launch context items like the %S."
+};
 
 /***/ })
 
