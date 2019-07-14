@@ -311,7 +311,7 @@ async function completeAuth(env)
     }
 
     // Assume the client has already completed a token exchange when
-    // there is no code or access token is found in state
+    // there is no code (but we have a state) or access token is found in state
     const authorized = !code || state.tokenResponse.access_token;
 
     // If we are authorized already, then this is just a reload.
