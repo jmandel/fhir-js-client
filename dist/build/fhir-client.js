@@ -10006,6 +10006,48 @@ function () {
     return _clearState;
   }()
   /**
+   * @param {Object} resource A FHIR resource to be created
+   */
+  ;
+
+  _proto.create = function create(resource) {
+    return this.request({
+      url: "" + resource.resourceType,
+      method: "POST",
+      body: JSON.stringify(resource),
+      headers: {
+        "Content-Type": "application/fhir+json"
+      }
+    });
+  }
+  /**
+   * @param {Object} resource A FHIR resource to be updated
+   */
+  ;
+
+  _proto.update = function update(resource) {
+    return this.request({
+      url: resource.resourceType + "/" + resource.id,
+      method: "PUT",
+      body: JSON.stringify(resource),
+      headers: {
+        "Content-Type": "application/fhir+json"
+      }
+    });
+  }
+  /**
+   * @param {String} url Relative URI of the FHIR resource to be deleted
+   * (format: `resourceType/id`)
+   */
+  ;
+
+  _proto.delete = function _delete(url) {
+    return this.request({
+      url: url,
+      method: "DELETE"
+    });
+  }
+  /**
    * @param {Object|String} requestOptions Can be a string URL (relative to
    *  the serviceUrl), or an object which will be passed to fetch()
    * @param {fhirclient.FhirOptions} fhirOptions Additional options to control the behavior
@@ -11606,7 +11648,7 @@ function _completeAuth() {
   _completeAuth = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
   _regenerator.default.mark(function _callee2(env) {
-    var url, Storage, params, key, code, authError, authErrorDescription, msg, state, fullSessionStorageSupport, hasState, requestOptions, tokenResponse, client;
+    var url, Storage, params, key, code, authError, authErrorDescription, msg, state, fullSessionStorageSupport, hasState, authorized, requestOptions, tokenResponse, client;
     return _regenerator.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
@@ -11699,67 +11741,72 @@ function _completeAuth() {
             throw new Error("No state found! Please (re)launch the app.");
 
           case 25:
-            if (!code) {
-              _context2.next = 46;
+            // Assume the client has already completed a token exchange when
+            // there is no code or access token is found in state
+            authorized = !code || state.tokenResponse.access_token; // If we are authorized already, then this is just a reload.
+            // Otherwise, we have to complete the code flow
+
+            if (authorized) {
+              _context2.next = 44;
               break;
             }
 
             debug("Preparing to exchange the code for access token...");
-            _context2.next = 29;
+            _context2.next = 30;
             return buildTokenRequest(code, state);
 
-          case 29:
+          case 30:
             requestOptions = _context2.sent;
             debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
             // includes an access token or a message indicating that the
             // authorization request has been denied.
 
-            _context2.next = 33;
+            _context2.next = 34;
             return request(state.tokenUri, requestOptions);
 
-          case 33:
+          case 34:
             tokenResponse = _context2.sent;
             debug("Token response: %O", tokenResponse);
 
             if (tokenResponse.access_token) {
-              _context2.next = 37;
+              _context2.next = 38;
               break;
             }
 
             throw new Error("Failed to obtain access token.");
 
-          case 37:
+          case 38:
             // save the tokenResponse so that we don't have to re-authorize on
             // every page reload
             state = Object.assign({}, state, {
               tokenResponse: tokenResponse
             });
-            _context2.next = 40;
+            _context2.next = 41;
             return Storage.set(key, state);
 
-          case 40:
+          case 41:
+            debug("Authorization successful!");
+            _context2.next = 45;
+            break;
+
+          case 44:
+            debug(state.tokenResponse.access_token ? "Already authorized" : "No authorization needed");
+
+          case 45:
             if (!fullSessionStorageSupport) {
-              _context2.next = 43;
+              _context2.next = 48;
               break;
             }
 
-            _context2.next = 43;
+            _context2.next = 48;
             return Storage.set(SMART_KEY, key);
 
-          case 43:
-            debug("Authorization successful!");
-            _context2.next = 47;
-            break;
-
-          case 46:
-            debug(state.tokenResponse.access_token ? "Already authorized" : "No authorization needed");
-
-          case 47:
+          case 48:
             client = new Client(env, state);
             debug("Created client instance: %O", client);
             return _context2.abrupt("return", client);
 
-          case 50:
+          case 51:
           case "end":
             return _context2.stop();
         }

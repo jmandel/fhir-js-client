@@ -7,9 +7,9 @@ jobs:
       - image: circleci/node:10.15.0
     working_directory: ~/repo
 
-    branches:
-      only:
-        - master
+    #branches:
+    #  only:
+    #    - master
 
     steps:
       - checkout

@@ -1773,7 +1773,7 @@ describe("FHIR.client", () => {
                 const result = await client.request("/Patient/id", {
                     flat: true,
                     pageLimit: 2,
-                    graph: false, 
+                    graph: false,
                     resolveReferences: "subject"
                 });
 
@@ -2293,4 +2293,49 @@ describe("FHIR.client", () => {
         });
     });
 
+    describe("create", () => {
+        crossPlatformTest(async (env) => {
+            const client = new Client(env, mockUrl);
+            const resource = { resourceType: "Patient" };
+            client.request = async options => options;
+            const result = await client.create(resource);
+            expect(result).to.equal({
+                url    : "Patient",
+                method : "POST",
+                body   : JSON.stringify(resource),
+                headers: {
+                    "Content-Type": "application/fhir+json"
+                }
+            });
+        });
+    });
+
+    describe("update", () => {
+        crossPlatformTest(async (env) => {
+            const client = new Client(env, mockUrl);
+            const resource = { resourceType: "Patient", id: 2 };
+            client.request = async options => options;
+            const result = await client.update(resource);
+            expect(result).to.equal({
+                url    : "Patient/2",
+                method : "PUT",
+                body   : JSON.stringify(resource),
+                headers: {
+                    "Content-Type": "application/fhir+json"
+                }
+            });
+        });
+    });
+
+    describe("delete", () => {
+        crossPlatformTest(async (env) => {
+            const client = new Client(env, mockUrl);
+            client.request = async options => options;
+            const result = await client.delete("Patient/2");
+            expect(result).to.equal({
+                url   : "Patient/2",
+                method: "DELETE"
+            });
+        });
+    });
 });
