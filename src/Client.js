@@ -160,9 +160,9 @@ class FhirClient
                     this.request(`Patient/${id}`) :
                     Promise.reject(new Error("Patient is not available"));
             },
-            request: (requestOptions, fhirOptions = {}, _resolvedRefs = {}) => {
+            request: (requestOptions, fhirOptions = {}) => {
                 return this.patient.id ?
-                    this.request(contextualize(requestOptions, this), fhirOptions, _resolvedRefs) :
+                    this.request(contextualize(requestOptions, this), fhirOptions) :
                     Promise.reject(new Error("Patient is not available"));
             }
         };

@@ -17,7 +17,7 @@ function contextualize (requestOptions, client) {
     const patient = client.patient.id;
     const base = absolute("/", client.state.serverUrl);
 
-    if (!patient) return Promise.reject(new Error("Patient is not available"));
+    if (!patient) throw new Error("Patient is not available");
 
     function contextualURL(url) {
         const type = url.pathname.split("/").pop();
