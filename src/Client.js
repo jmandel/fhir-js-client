@@ -161,9 +161,14 @@ class FhirClient
                     Promise.reject(new Error("Patient is not available"));
             },
             request: (requestOptions, fhirOptions = {}) => {
-                return this.patient.id ?
-                    this.request(contextualize(requestOptions, this), fhirOptions) :
-                    Promise.reject(new Error("Patient is not available"));
+                if (this.patient.id) {
+                    return (async () => {
+                        const options = await contextualize(requestOptions, this);
+                        return this.request(options, fhirOptions);
+                    })();
+                } else {
+                    return Promise.reject(new Error("Patient is not available"));
+                }
             }
         };
 

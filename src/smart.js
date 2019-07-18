@@ -14,10 +14,21 @@ const SMART_KEY = "SMART_KEY";
 
 function fetchConformanceStatement(baseUrl = "/")
 {
-    const url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
-    return request(url).catch(ex => {
-        throw new Error(`Failed to fetch the conformance statement from "${url}". ${ex}`);
-    });
+    let cache;
+
+    return function (baseUrl) {
+        if (cache) {
+            return Promise.resolve(cache);
+        }
+
+        const url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
+        return request(url).then((metadata) => {
+            cache = metadata;
+            return metadata;
+        }).catch(ex => {
+            throw new Error(`Failed to fetch the conformance statement from "${url}". ${ex}`);
+        });
+    } (baseUrl);
 }
 
 function fetchWellKnownJson(baseUrl = "/")
@@ -26,6 +37,10 @@ function fetchWellKnownJson(baseUrl = "/")
     return request(url).catch(ex => {
         throw new Error(`Failed to fetch the well-known json "${url}". ${ex.message}`);
     });
+}
+
+function fetchFhirVersion(baseUrl = "/") {
+    return fetchConformanceStatement(baseUrl).then((metadata) => metadata.fhirVersion);
 }
 
 /**
@@ -172,6 +187,11 @@ async function authorize(env, params = {}, _noRedirect = false)
     }
 
     let redirectUrl = redirectUri + "?state=" + encodeURIComponent(stateKey);
+
+    state.fhirVersion = await fetchFhirVersion(serverUrl);
+    debug (`FHIR Version is ${state.fhirVersion}`);
+
+    state.conformanceStatement = await fetchConformanceStatement(serverUrl);
 
     // bypass oauth if fhirServiceUrl is used (but iss takes precedence)
     if (fhirServiceUrl && !iss) {
@@ -449,6 +469,7 @@ module.exports = {
     fetchWellKnownJson,
     getSecurityExtensions,
     buildTokenRequest,
+    fetchFhirVersion,
     authorize,
     completeAuth,
     ready,
