@@ -5,6 +5,7 @@
 
 const HttpError = require("./HttpError");
 const debug     = require("debug")("FHIR");
+const { patientParams } = require("./settings");
 
 function isBrowser() {
     return typeof window === "object";
@@ -64,6 +65,17 @@ function request(url, options = {}) {
             return res;
         });
 }
+
+const getAndCache = (() => {
+    let cache = {};
+
+    return (url, force = process.env.NODE_ENV === "test") => {
+        if (force || !cache[url]) {
+            cache[url] = request(url);
+        }
+        return cache[url];
+    };
+})();
 
 async function humanizeError(resp) {
     let msg = `${resp.status} ${resp.statusText}\nURL: ${resp.url}`;
@@ -286,6 +298,40 @@ const units = {
     }
 };
 
+/**
+ * Given a conformance statement and a resource type, returns the name of the
+ * URL parameter that can be used to scope the resource type by patient ID.
+ * @param {fhirclient.JsonObject} conformance
+ * @param {string} resourceType
+ */
+function getPatientParam(conformance, resourceType)
+{
+    // Find what resources are supported by this server
+    const resources = getPath(conformance, "rest.0.resource") || [];
+
+    // Check if this resource is supported
+    const meta = resources.find(r => r.type === resourceType);
+    if (!meta)
+        throw new Error("Resource not supported");
+
+    // Check if any search parameters are available for this resource
+    if (!Array.isArray(meta.searchParam))
+        throw new Error(`No search parameters supported for "${resourceType}" on this FHIR server`);
+
+    // This is a rare case vut could happen in generic workflows
+    if (resourceType == "Patient" && meta.searchParam.find(x => x.name == "_id"))
+        return "_id";
+
+    // Now find the first possible parameter name
+    let out = patientParams.find(p => meta.searchParam.find(x => x.name == p));
+
+    // If there is no match
+    if (!out)
+        throw new Error("I don't know what param to use for " + resourceType);
+
+    return out;
+}
+
 
 module.exports = {
     stripTrailingSlash,
@@ -305,5 +351,7 @@ module.exports = {
     btoa,
     byCode,
     byCodes,
-    units
+    units,
+    getPatientParam,
+    getAndCache
 };

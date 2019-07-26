@@ -10,12 +10,55 @@ const {
     btoa,
     byCode,
     byCodes,
-    units
+    units,
+    getPatientParam
 } = require("./lib");
 
 const debug = _debug.extend("client");
 const str = require("./strings");
-const contextualize = require("./patient");
+const { fetchConformanceStatement } = require("./smart");
+const { SMART_KEY, patientCompartment } = require("./settings");
+
+
+/**
+ * Adds patient context to requestOptions object to be used with fhirclient.Client.request
+ * @param {Object|String} requestOptions Can be a string URL (relative to
+ *  the serviceUrl), or an object which will be passed to fetch()
+ * @param {fhirclient.Client} client Current FHIR client object containing patient context
+ * @return {Promise<Object|String>} requestOptions object contextualized to current patient
+ */
+async function contextualize(requestOptions, client) {
+
+    // This code could be useful for implementing FHIR version awareness in the future:
+    //   const fhirVersionsMap = require("./data/fhir-versions");
+    //   const fetchFhirVersion = require("./smart").fetchFhirVersion;
+    //   const fhirVersion = client.state.fhirVersion || await fetchFhirVersion(client.state.serverUrl) || "";
+    //   const fhirRelease = fhirVersionsMap[fhirVersion];
+
+    const base = absolute("/", client.state.serverUrl);
+
+    async function contextualURL(url) {
+        const resourceType = url.pathname.split("/").pop();
+
+        if (patientCompartment.indexOf(resourceType) == -1) {
+            throw new Error(`Cannot filter "${resourceType}" resources by patient`);
+        }
+
+        const conformance = await fetchConformanceStatement(client.state.serverUrl);
+        const searchParam = getPatientParam(conformance, resourceType);
+        url.searchParams.set(searchParam, client.patient.id);
+        return url.href;
+    }
+
+    if (typeof requestOptions == "string" || requestOptions instanceof URL) {
+        let url = new URL(requestOptions + "", base);
+        return contextualURL(url);
+    }
+
+    let url = new URL(requestOptions.url, base);
+    requestOptions.url = await contextualURL(url);
+    return requestOptions;
+}
 
 /**
  * Gets single reference by id. Caches the result.
@@ -392,13 +435,12 @@ class FhirClient
     }
 
     async _clearState() {
-        const { KEY } = require("./smart");
         const storage = this.environment.getStorage();
-        const key = await storage.get(KEY);
+        const key = await storage.get(SMART_KEY);
         if (key) {
             await storage.unset(key);
         }
-        await storage.unset(KEY);
+        await storage.unset(SMART_KEY);
         this.state.tokenResponse = {};
     }
 
