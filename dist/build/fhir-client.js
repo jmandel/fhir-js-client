@@ -9523,9 +9523,9 @@ var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime
 
 __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
 
-var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/asyncToGenerator.js"));
-
 var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ "./node_modules/@babel/runtime/helpers/createClass.js"));
+
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/asyncToGenerator.js"));
 
 /// <reference path="types.d.ts" />
 var _require = __webpack_require__(/*! ./lib */ "./src/lib.js"),
@@ -9539,11 +9539,31 @@ var _require = __webpack_require__(/*! ./lib */ "./src/lib.js"),
     btoa = _require.btoa,
     _byCode = _require.byCode,
     _byCodes = _require.byCodes,
-    units = _require.units;
+    units = _require.units,
+    getPatientParam = _require.getPatientParam;
 
 var debug = _debug.extend("client");
 
 var str = __webpack_require__(/*! ./strings */ "./src/strings.js");
+
+var _require2 = __webpack_require__(/*! ./smart */ "./src/smart.js"),
+    fetchConformanceStatement = _require2.fetchConformanceStatement;
+
+var _require3 = __webpack_require__(/*! ./settings */ "./src/settings.js"),
+    SMART_KEY = _require3.SMART_KEY,
+    patientCompartment = _require3.patientCompartment;
+/**
+ * Adds patient context to requestOptions object to be used with fhirclient.Client.request
+ * @param {Object|String} requestOptions Can be a string URL (relative to
+ *  the serviceUrl), or an object which will be passed to fetch()
+ * @param {fhirclient.Client} client Current FHIR client object containing patient context
+ * @return {Promise<Object|String>} requestOptions object contextualized to current patient
+ */
+
+
+function contextualize(_x, _x2) {
+  return _contextualize.apply(this, arguments);
+}
 /**
  * Gets single reference by id. Caches the result.
  * @param {String} refId
@@ -9553,6 +9573,92 @@ var str = __webpack_require__(/*! ./strings */ "./src/strings.js");
  * @private
  */
 
+
+function _contextualize() {
+  _contextualize = (0, _asyncToGenerator2.default)(
+  /*#__PURE__*/
+  _regenerator.default.mark(function _callee8(requestOptions, client) {
+    var base, contextualURL, _contextualURL, _url, url;
+
+    return _regenerator.default.wrap(function _callee8$(_context8) {
+      while (1) {
+        switch (_context8.prev = _context8.next) {
+          case 0:
+            _contextualURL = function _ref6() {
+              _contextualURL = (0, _asyncToGenerator2.default)(
+              /*#__PURE__*/
+              _regenerator.default.mark(function _callee7(url) {
+                var resourceType, conformance, searchParam;
+                return _regenerator.default.wrap(function _callee7$(_context7) {
+                  while (1) {
+                    switch (_context7.prev = _context7.next) {
+                      case 0:
+                        resourceType = url.pathname.split("/").pop();
+
+                        if (!(patientCompartment.indexOf(resourceType) == -1)) {
+                          _context7.next = 3;
+                          break;
+                        }
+
+                        throw new Error("Cannot filter \"" + resourceType + "\" resources by patient");
+
+                      case 3:
+                        _context7.next = 5;
+                        return fetchConformanceStatement(client.state.serverUrl);
+
+                      case 5:
+                        conformance = _context7.sent;
+                        searchParam = getPatientParam(conformance, resourceType);
+                        url.searchParams.set(searchParam, client.patient.id);
+                        return _context7.abrupt("return", url.href);
+
+                      case 9:
+                      case "end":
+                        return _context7.stop();
+                    }
+                  }
+                }, _callee7);
+              }));
+              return _contextualURL.apply(this, arguments);
+            };
+
+            contextualURL = function _ref5(_x9) {
+              return _contextualURL.apply(this, arguments);
+            };
+
+            // This code could be useful for implementing FHIR version awareness in the future:
+            //   const fhirVersionsMap = require("./data/fhir-versions");
+            //   const fetchFhirVersion = require("./smart").fetchFhirVersion;
+            //   const fhirVersion = client.state.fhirVersion || await fetchFhirVersion(client.state.serverUrl) || "";
+            //   const fhirRelease = fhirVersionsMap[fhirVersion];
+            base = absolute("/", client.state.serverUrl);
+
+            if (!(typeof requestOptions == "string" || requestOptions instanceof URL)) {
+              _context8.next = 6;
+              break;
+            }
+
+            _url = new URL(requestOptions + "", base);
+            return _context8.abrupt("return", contextualURL(_url));
+
+          case 6:
+            url = new URL(requestOptions.url, base);
+            _context8.next = 9;
+            return contextualURL(url);
+
+          case 9:
+            requestOptions.url = _context8.sent;
+            return _context8.abrupt("return", requestOptions);
+
+          case 11:
+          case "end":
+            return _context8.stop();
+        }
+      }
+    }, _callee8);
+  }));
+  return _contextualize.apply(this, arguments);
+}
 
 function getRef(refId, cache, client) {
   var sub = cache[refId];
@@ -9704,6 +9810,38 @@ function () {
       read: function read() {
         var id = _this.patient.id;
         return id ? _this.request("Patient/" + id) : Promise.reject(new Error("Patient is not available"));
+      },
+      request: function request(requestOptions, fhirOptions) {
+        if (fhirOptions === void 0) {
+          fhirOptions = {};
+        }
+
+        if (_this.patient.id) {
+          return (0, _asyncToGenerator2.default)(
+          /*#__PURE__*/
+          _regenerator.default.mark(function _callee() {
+            var options;
+            return _regenerator.default.wrap(function _callee$(_context) {
+              while (1) {
+                switch (_context.prev = _context.next) {
+                  case 0:
+                    _context.next = 2;
+                    return contextualize(requestOptions, _this);
+
+                  case 2:
+                    options = _context.sent;
+                    return _context.abrupt("return", _this.request(options, fhirOptions));
+
+                  case 4:
+                  case "end":
+                    return _context.stop();
+                }
+              }
+            }, _callee);
+          }))();
+        } else {
+          return Promise.reject(new Error("Patient is not available"));
+        }
       }
     }; // encounter api -------------------------------------------------------
 
@@ -9961,42 +10099,40 @@ function () {
   function () {
     var _clearState2 = (0, _asyncToGenerator2.default)(
     /*#__PURE__*/
-    _regenerator.default.mark(function _callee() {
-      var _require2, KEY, storage, key;
-
-      return _regenerator.default.wrap(function _callee$(_context) {
+    _regenerator.default.mark(function _callee2() {
+      var storage, key;
+      return _regenerator.default.wrap(function _callee2$(_context2) {
         while (1) {
-          switch (_context.prev = _context.next) {
+          switch (_context2.prev = _context2.next) {
             case 0:
-              _require2 = __webpack_require__(/*! ./smart */ "./src/smart.js"), KEY = _require2.KEY;
               storage = this.environment.getStorage();
-              _context.next = 4;
-              return storage.get(KEY);
+              _context2.next = 3;
+              return storage.get(SMART_KEY);
 
-            case 4:
-              key = _context.sent;
+            case 3:
+              key = _context2.sent;
 
               if (!key) {
-                _context.next = 8;
+                _context2.next = 7;
                 break;
               }
 
-              _context.next = 8;
+              _context2.next = 7;
               return storage.unset(key);
 
-            case 8:
-              _context.next = 10;
-              return storage.unset(KEY);
+            case 7:
+              _context2.next = 9;
+              return storage.unset(SMART_KEY);
 
-            case 10:
+            case 9:
               this.state.tokenResponse = {};
 
-            case 11:
+            case 10:
             case "end":
-              return _context.stop();
+              return _context2.stop();
           }
         }
-      }, _callee, this);
+      }, _callee2, this);
     }));
 
     function _clearState() {
@@ -10060,13 +10196,13 @@ function () {
   function () {
     var _request2 = (0, _asyncToGenerator2.default)(
     /*#__PURE__*/
-    _regenerator.default.mark(function _callee5(requestOptions, fhirOptions, _resolvedRefs) {
+    _regenerator.default.mark(function _callee6(requestOptions, fhirOptions, _resolvedRefs) {
       var _this2 = this;
 
       var debug, url, authHeader, hasPageCallback;
-      return _regenerator.default.wrap(function _callee5$(_context5) {
+      return _regenerator.default.wrap(function _callee6$(_context6) {
         while (1) {
-          switch (_context5.prev = _context5.next) {
+          switch (_context6.prev = _context6.next) {
             case 0:
               if (fhirOptions === void 0) {
                 fhirOptions = {};
@@ -10079,7 +10215,7 @@ function () {
               debug = _debug.extend("client:request");
 
               if (requestOptions) {
-                _context5.next = 5;
+                _context6.next = 5;
                 break;
               }
 
@@ -10114,7 +10250,7 @@ function () {
 
               hasPageCallback = typeof fhirOptions.onPage == "function";
               debug("%s, options: %O, fhirOptions: %O", url, requestOptions, fhirOptions);
-              return _context5.abrupt("return", _request(url, requestOptions) // Automatic re-auth via refresh token -----------------------------
+              return _context6.abrupt("return", _request(url, requestOptions) // Automatic re-auth via refresh token -----------------------------
               .catch(function (error) {
                 debug("%o", error);
 
@@ -10135,20 +10271,20 @@ function () {
               .catch(
               /*#__PURE__*/
               function () {
-                var _ref = (0, _asyncToGenerator2.default)(
+                var _ref2 = (0, _asyncToGenerator2.default)(
                 /*#__PURE__*/
-                _regenerator.default.mark(function _callee2(error) {
-                  return _regenerator.default.wrap(function _callee2$(_context2) {
+                _regenerator.default.mark(function _callee3(error) {
+                  return _regenerator.default.wrap(function _callee3$(_context3) {
                     while (1) {
-                      switch (_context2.prev = _context2.next) {
+                      switch (_context3.prev = _context3.next) {
                         case 0:
                           if (!(error.status == 401)) {
-                            _context2.next = 12;
+                            _context3.next = 12;
                             break;
                           }
 
                           if (_getPath(_this2, "state.tokenResponse.access_token")) {
-                            _context2.next = 3;
+                            _context3.next = 3;
                             break;
                           }
 
@@ -10156,12 +10292,12 @@ function () {
 
                         case 3:
                           if (!(fhirOptions.useRefreshToken === false)) {
-                            _context2.next = 8;
+                            _context3.next = 8;
                             break;
                           }
 
                           debug("Your session has expired and the useRefreshToken option is set to false. Please re-launch the app.");
-                          _context2.next = 7;
+                          _context3.next = 7;
                           return _this2._clearState();
 
                         case 7:
@@ -10171,7 +10307,7 @@ function () {
                           // otherwise -> auto-refresh failed. Session expired.
                           // Need to re-launch. Clear state to start over!
                           debug("Auto-refresh failed! Please re-launch the app.");
-                          _context2.next = 11;
+                          _context3.next = 11;
                           return _this2._clearState();
 
                         case 11:
@@ -10182,14 +10318,14 @@ function () {
 
                         case 13:
                         case "end":
-                          return _context2.stop();
+                          return _context3.stop();
                       }
                     }
-                  }, _callee2);
+                  }, _callee3);
                 }));
 
-                return function (_x4) {
-                  return _ref.apply(this, arguments);
+                return function (_x6) {
+                  return _ref2.apply(this, arguments);
                 };
               }()) // Handle 403 ------------------------------------------------------
               .catch(function (error) {
@@ -10205,64 +10341,64 @@ function () {
                 if (typeof data == "object" && data instanceof Response) return data; // Resolve References ----------------------------------------------
 
                 return function () {
-                  var _ref2 = (0, _asyncToGenerator2.default)(
+                  var _ref3 = (0, _asyncToGenerator2.default)(
                   /*#__PURE__*/
-                  _regenerator.default.mark(function _callee3(data) {
-                    return _regenerator.default.wrap(function _callee3$(_context3) {
+                  _regenerator.default.mark(function _callee4(data) {
+                    return _regenerator.default.wrap(function _callee4$(_context4) {
                       while (1) {
-                        switch (_context3.prev = _context3.next) {
+                        switch (_context4.prev = _context4.next) {
                           case 0:
                             if (!data) {
-                              _context3.next = 8;
+                              _context4.next = 8;
                               break;
                             }
 
                             if (!(data.resourceType == "Bundle")) {
-                              _context3.next = 6;
+                              _context4.next = 6;
                               break;
                             }
 
-                            _context3.next = 4;
+                            _context4.next = 4;
                             return Promise.all((data.entry || []).map(function (item) {
                               return resolveRefs(item.resource, fhirOptions, _resolvedRefs, _this2);
                             }));
 
                           case 4:
-                            _context3.next = 8;
+                            _context4.next = 8;
                             break;
 
                           case 6:
-                            _context3.next = 8;
+                            _context4.next = 8;
                             return resolveRefs(data, fhirOptions, _resolvedRefs, _this2);
 
                           case 8:
-                            return _context3.abrupt("return", data);
+                            return _context4.abrupt("return", data);
 
                           case 9:
                           case "end":
-                            return _context3.stop();
+                            return _context4.stop();
                         }
                       }
-                    }, _callee3);
+                    }, _callee4);
                   }));
 
-                  return function (_x5) {
-                    return _ref2.apply(this, arguments);
+                  return function (_x7) {
+                    return _ref3.apply(this, arguments);
                   };
                 }()(data) // Pagination ------------------------------------------------------
                 .then(
                 /*#__PURE__*/
                 function () {
-                  var _ref3 = (0, _asyncToGenerator2.default)(
+                  var _ref4 = (0, _asyncToGenerator2.default)(
                   /*#__PURE__*/
-                  _regenerator.default.mark(function _callee4(data) {
+                  _regenerator.default.mark(function _callee5(data) {
                     var links, next, nextPage;
-                    return _regenerator.default.wrap(function _callee4$(_context4) {
+                    return _regenerator.default.wrap(function _callee5$(_context5) {
                       while (1) {
-                        switch (_context4.prev = _context4.next) {
+                        switch (_context5.prev = _context5.next) {
                           case 0:
                             if (!(data && data.resourceType == "Bundle")) {
-                              _context4.next = 19;
+                              _context5.next = 19;
                               break;
                             }
 
@@ -10275,16 +10411,16 @@ function () {
                             }
 
                             if (!hasPageCallback) {
-                              _context4.next = 6;
+                              _context5.next = 6;
                               break;
                             }
 
-                            _context4.next = 6;
+                            _context5.next = 6;
                             return fhirOptions.onPage(data, Object.assign({}, _resolvedRefs));
 
                           case 6:
                             if (! --fhirOptions.pageLimit) {
-                              _context4.next = 19;
+                              _context5.next = 19;
                               break;
                             }
 
@@ -10294,48 +10430,48 @@ function () {
                             data = makeArray(data);
 
                             if (!(next && next.url)) {
-                              _context4.next = 19;
+                              _context5.next = 19;
                               break;
                             }
 
-                            _context4.next = 12;
+                            _context5.next = 12;
                             return _this2.request(next.url, fhirOptions, _resolvedRefs);
 
                           case 12:
-                            nextPage = _context4.sent;
+                            nextPage = _context5.sent;
 
                             if (!hasPageCallback) {
-                              _context4.next = 15;
+                              _context5.next = 15;
                               break;
                             }
 
-                            return _context4.abrupt("return", null);
+                            return _context5.abrupt("return", null);
 
                           case 15:
                             if (!(fhirOptions.resolveReferences && fhirOptions.resolveReferences.length)) {
-                              _context4.next = 18;
+                              _context5.next = 18;
                               break;
                             }
 
                             Object.assign(_resolvedRefs, nextPage.references);
-                            return _context4.abrupt("return", data.concat(makeArray(nextPage.data || nextPage)));
+                            return _context5.abrupt("return", data.concat(makeArray(nextPage.data || nextPage)));
 
                           case 18:
-                            return _context4.abrupt("return", data.concat(makeArray(nextPage)));
+                            return _context5.abrupt("return", data.concat(makeArray(nextPage)));
 
                           case 19:
-                            return _context4.abrupt("return", data);
+                            return _context5.abrupt("return", data);
 
                           case 20:
                           case "end":
-                            return _context4.stop();
+                            return _context5.stop();
                         }
                       }
-                    }, _callee4);
+                    }, _callee5);
                   }));
 
-                  return function (_x6) {
-                    return _ref3.apply(this, arguments);
+                  return function (_x8) {
+                    return _ref4.apply(this, arguments);
                   };
                 }()) // Finalize --------------------------------------------------------
                 .then(function (data) {
@@ -10354,13 +10490,13 @@ function () {
 
             case 15:
             case "end":
-              return _context5.stop();
+              return _context6.stop();
           }
         }
-      }, _callee5, this);
+      }, _callee6, this);
     }));
 
-    function request(_x, _x2, _x3) {
+    function request(_x3, _x4, _x5) {
       return _request2.apply(this, arguments);
     }
 
@@ -10849,7 +10985,11 @@ __webpack_require__(/*! core-js/modules/es.array.concat */ "./node_modules/core-
 
 __webpack_require__(/*! core-js/modules/es.array.filter */ "./node_modules/core-js/modules/es.array.filter.js");
 
+__webpack_require__(/*! core-js/modules/es.array.find */ "./node_modules/core-js/modules/es.array.find.js");
+
 __webpack_require__(/*! core-js/modules/es.array.join */ "./node_modules/core-js/modules/es.array.join.js");
+
+__webpack_require__(/*! core-js/modules/es.function.name */ "./node_modules/core-js/modules/es.function.name.js");
 
 __webpack_require__(/*! core-js/modules/es.object.assign */ "./node_modules/core-js/modules/es.object.assign.js");
 
@@ -10882,6 +11022,9 @@ var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/r
 var HttpError = __webpack_require__(/*! ./HttpError */ "./src/HttpError.js");
 
 var debug = __webpack_require__(/*! debug */ "./node_modules/debug/src/browser.js")("FHIR");
+
+var _require = __webpack_require__(/*! ./settings */ "./src/settings.js"),
+    patientParams = _require.patientParams;
 
 function isBrowser() {
   return typeof window === "object";
@@ -10979,6 +11122,21 @@ function request(url, options) {
     return res;
   });
 }
+
+var getAndCache = function () {
+  var cache = {};
+  return function (url, force) {
+    if (force === void 0) {
+      force = "development" === "test";
+    }
+
+    if (force || !cache[url]) {
+      cache[url] = request(url);
+    }
+
+    return cache[url];
+  };
+}();
 
 function humanizeError(_x2) {
   return _humanizeError.apply(this, arguments);
@@ -11277,6 +11435,38 @@ var units = {
     return pq.value;
   }
 };
+/**
+ * Given a conformance statement and a resource type, returns the name of the
+ * URL parameter that can be used to scope the resource type by patient ID.
+ * @param {fhirclient.JsonObject} conformance
+ * @param {string} resourceType
+ */
+
+function getPatientParam(conformance, resourceType) {
+  // Find what resources are supported by this server
+  var resources = getPath(conformance, "rest.0.resource") || []; // Check if this resource is supported
+
+  var meta = resources.find(function (r) {
+    return r.type === resourceType;
+  });
+  if (!meta) throw new Error("Resource not supported"); // Check if any search parameters are available for this resource
+
+  if (!Array.isArray(meta.searchParam)) throw new Error("No search parameters supported for \"" + resourceType + "\" on this FHIR server"); // This is a rare case vut could happen in generic workflows
+
+  if (resourceType == "Patient" && meta.searchParam.find(function (x) {
+    return x.name == "_id";
+  })) return "_id"; // Now find the first possible parameter name
+
+  var out = patientParams.find(function (p) {
+    return meta.searchParam.find(function (x) {
+      return x.name == p;
+    });
+  }); // If there is no match
+
+  if (!out) throw new Error("I don't know what param to use for " + resourceType);
+  return out;
+}
+
 module.exports = {
   stripTrailingSlash: stripTrailingSlash,
   absolute: absolute,
@@ -11295,9 +11485,65 @@ module.exports = {
   btoa: btoa,
   byCode: byCode,
   byCodes: byCodes,
-  units: units
+  units: units,
+  getPatientParam: getPatientParam,
+  getAndCache: getAndCache
 };
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./src/settings.js":
+/*!*************************!*\
+  !*** ./src/settings.js ***!
+  \*************************/
+/*! all exports used */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Combined list of FHIR resource types accepting patient parameter in FHIR R2-R4
+ */
+var patientCompartment = ["Account", "AdverseEvent", "AllergyIntolerance", "Appointment", "AppointmentResponse", "AuditEvent", "Basic", "BodySite", "BodyStructure", "CarePlan", "CareTeam", "ChargeItem", "Claim", "ClaimResponse", "ClinicalImpression", "Communication", "CommunicationRequest", "Composition", "Condition", "Consent", "Coverage", "CoverageEligibilityRequest", "CoverageEligibilityResponse", "DetectedIssue", "DeviceRequest", "DeviceUseRequest", "DeviceUseStatement", "DiagnosticOrder", "DiagnosticReport", "DocumentManifest", "DocumentReference", "EligibilityRequest", "Encounter", "EnrollmentRequest", "EpisodeOfCare", "ExplanationOfBenefit", "FamilyMemberHistory", "Flag", "Goal", "Group", "ImagingManifest", "ImagingObjectSelection", "ImagingStudy", "Immunization", "ImmunizationEvaluation", "ImmunizationRecommendation", "Invoice", "List", "MeasureReport", "Media", "MedicationAdministration", "MedicationDispense", "MedicationOrder", "MedicationRequest", "MedicationStatement", "MolecularSequence", "NutritionOrder", "Observation", "Order", "Patient", "Person", "Procedure", "ProcedureRequest", "Provenance", "QuestionnaireResponse", "ReferralRequest", "RelatedPerson", "RequestGroup", "ResearchSubject", "RiskAssessment", "Schedule", "ServiceRequest", "Specimen", "SupplyDelivery", "SupplyRequest", "VisionPrescription"];
+/**
+ * Map of FHIR releases and their abstract version as number
+ */
+
+var fhirVersions = {
+  "0.4.0": 2,
+  "0.5.0": 2,
+  "1.0.0": 2,
+  "1.0.1": 2,
+  "1.0.2": 2,
+  "1.1.0": 3,
+  "1.4.0": 3,
+  "1.6.0": 3,
+  "1.8.0": 3,
+  "3.0.0": 3,
+  "3.0.1": 3,
+  "3.3.0": 4,
+  "3.5.0": 4,
+  "4.0.0": 4
+};
+/**
+ * Combined (FHIR R2-R4) list of search parameters that can be used to scope
+ * a request by patient ID.
+ */
+
+var patientParams = ["requester", "patient", "subject", "member", "actor", "beneficiary"];
+/**
+ * The name of the sessionStorage entry that contains the current key
+ */
+
+var SMART_KEY = "SMART_KEY";
+module.exports = {
+  SMART_KEY: SMART_KEY,
+  patientParams: patientParams,
+  fhirVersions: fhirVersions,
+  patientCompartment: patientCompartment
+};
 
 /***/ }),
 
@@ -11337,19 +11583,42 @@ __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerat
 
 var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/asyncToGenerator.js"));
 
-var Client = __webpack_require__(/*! ./Client */ "./src/Client.js");
-
 var _require = __webpack_require__(/*! ./lib */ "./src/lib.js"),
     isBrowser = _require.isBrowser,
     _debug = _require.debug,
     request = _require.request,
     getPath = _require.getPath,
     randomString = _require.randomString,
-    btoa = _require.btoa;
+    btoa = _require.btoa,
+    getAndCache = _require.getAndCache;
 
 var debug = _debug.extend("oauth2");
 
-var SMART_KEY = "SMART_KEY";
+var _require2 = __webpack_require__(/*! ./settings */ "./src/settings.js"),
+    SMART_KEY = _require2.SMART_KEY;
+/**
+ * Creates and returns a Client instance.
+ * Note that this is done within a function to postpone the "./Client" import
+ * and avoid cyclic dependency.
+ * @param {fhirclient.JsonObject} env The adapter
+ * @param {string | fhirclient.ClientState} state The client state or baseUrl
+ * @returns {fhirclient.Client}
+ */
+
+
+function createClient(env, state) {
+  var Client = __webpack_require__(/*! ./Client */ "./src/Client.js");
+
+  return new Client(env, state);
+}
+/**
+ * Fetches the conformance statement from the given base URL.
+ * Note that the result is cached in memory (until the page is reloaded in the
+ * browser) because it might have to be re-used by the client
+ * @param {String} baseUrl The base URL of the FHIR server
+ * @returns {Promise<fhirclient.JsonObject>}
+ */
+
 
 function fetchConformanceStatement(baseUrl) {
   if (baseUrl === void 0) {
@@ -11357,7 +11626,7 @@ function fetchConformanceStatement(baseUrl) {
   }
 
   var url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
-  return request(url).catch(function (ex) {
+  return getAndCache(url).catch(function (ex) {
     throw new Error("Failed to fetch the conformance statement from \"" + url + "\". " + ex);
   });
 }
@@ -11368,8 +11637,18 @@ function fetchWellKnownJson(baseUrl) {
   }
 
   var url = String(baseUrl).replace(/\/*$/, "/") + ".well-known/smart-configuration";
-  return request(url).catch(function (ex) {
+  return getAndCache(url).catch(function (ex) {
     throw new Error("Failed to fetch the well-known json \"" + url + "\". " + ex.message);
+  });
+}
+
+function fetchFhirVersion(baseUrl) {
+  if (baseUrl === void 0) {
+    baseUrl = "/";
+  }
+
+  return fetchConformanceStatement(baseUrl).then(function (metadata) {
+    return metadata.fhirVersion;
   });
 }
 /**
@@ -11802,7 +12081,7 @@ function _completeAuth() {
             return Storage.set(SMART_KEY, key);
 
           case 48:
-            client = new Client(env, state);
+            client = createClient(env, state);
             debug("Created client instance: %O", client);
             return _context2.abrupt("return", client);
 
@@ -11956,7 +12235,7 @@ function _init() {
               break;
             }
 
-            return _context4.abrupt("return", Promise.resolve(new Client(env, cached)));
+            return _context4.abrupt("return", Promise.resolve(createClient(env, cached)));
 
           case 17:
             return _context4.abrupt("return", authorize(env, options).then(function () {
@@ -11987,6 +12266,7 @@ module.exports = {
   fetchWellKnownJson: fetchWellKnownJson,
   getSecurityExtensions: getSecurityExtensions,
   buildTokenRequest: buildTokenRequest,
+  fetchFhirVersion: fetchFhirVersion,
   authorize: authorize,
   completeAuth: completeAuth,
   ready: ready,
@@ -12157,9 +12437,18 @@ module.exports = Storage;
   !*** ./src/strings.js ***!
   \************************/
 /*! all exports used */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-throw new Error("Module build failed (from ./node_modules/babel-loader/lib/index.js):\nSyntaxError: /media/vlad/Data/dev/client-js/src/strings.js: Unexpected token, expected \",\" (7:0)\n\n\u001b[0m \u001b[90m 5 | \u001b[39m    noIfNoAuth   \u001b[33m:\u001b[39m \u001b[32m\"You are trying to get %s but the app is not authorized yet.\"\u001b[39m\u001b[33m,\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 6 | \u001b[39m    noFreeContext\u001b[33m:\u001b[39m \u001b[32m\"Please don't use open fhir servers if you need to access launch context items like the %S.\"\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 7 | \u001b[39m\u001b[0m\n\u001b[0m \u001b[90m   | \u001b[39m\u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n    at Parser.raise (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:6344:17)\n    at Parser.unexpected (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:7659:16)\n    at Parser.expect (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:7645:28)\n    at Parser.parseObj (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:9134:14)\n    at Parser.parseExprAtom (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8774:21)\n    at Parser.parseExprSubscripts (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8413:23)\n    at Parser.parseMaybeUnary (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8393:21)\n    at Parser.parseExprOps (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8280:23)\n    at Parser.parseMaybeConditional (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8253:23)\n    at Parser.parseMaybeAssign (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8200:21)\n    at Parser.parseMaybeAssign (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8239:25)\n    at Parser.parseExpression (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:8148:23)\n    at Parser.parseStatementContent (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:9917:23)\n    at Parser.parseStatement (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:9788:17)\n    at Parser.parseBlockOrModuleBlockBody (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:10364:25)\n    at Parser.parseBlockBody (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:10351:10)\n    at Parser.parseTopLevel (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:9717:10)\n    at Parser.parse (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:11233:17)\n    at parse (/media/vlad/Data/dev/client-js/node_modules/@babel/parser/lib/index.js:11269:38)\n    at parser (/media/vlad/Data/dev/client-js/node_modules/@babel/core/lib/transformation/normalize-file.js:170:34)\n    at normalizeFile (/media/vlad/Data/dev/client-js/node_modules/@babel/core/lib/transformation/normalize-file.js:138:11)\n    at runSync (/media/vlad/Data/dev/client-js/node_modules/@babel/core/lib/transformation/index.js:44:43)\n    at runAsync (/media/vlad/Data/dev/client-js/node_modules/@babel/core/lib/transformation/index.js:35:14)\n    at process.nextTick (/media/vlad/Data/dev/client-js/node_modules/@babel/core/lib/transform.js:34:34)\n    at process._tickCallback (internal/process/next_tick.js:61:11)");
+"use strict";
+
+
+// This map contains reusable debug messages (only those used in multiple places)
+module.exports = {
+  expired: "Session expired! Please re-launch the app",
+  noScopeForId: "Trying to get the ID of the selected %s. Please add 'launch' or 'launch/%s' to the requested scopes and try again.",
+  noIfNoAuth: "You are trying to get %s but the app is not authorized yet.",
+  noFreeContext: "Please don't use open fhir servers if you need to access launch context items like the %S."
+};
 
 /***/ })
 

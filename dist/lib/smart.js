@@ -1,30 +1,58 @@
-const Client = require("./Client");
-
 const {
   isBrowser,
   debug: _debug,
   request,
   getPath,
   randomString,
-  btoa
+  btoa,
+  getAndCache
 } = require("./lib");
 
 const debug = _debug.extend("oauth2");
 
-const SMART_KEY = "SMART_KEY";
+const {
+  SMART_KEY
+} = require("./settings");
+/**
+ * Creates and returns a Client instance.
+ * Note that this is done within a function to postpone the "./Client" import
+ * and avoid cyclic dependency.
+ * @param {fhirclient.JsonObject} env The adapter
+ * @param {string | fhirclient.ClientState} state The client state or baseUrl
+ * @returns {fhirclient.Client}
+ */
+
+
+function createClient(env, state) {
+  const Client = require("./Client");
+
+  return new Client(env, state);
+}
+/**
+ * Fetches the conformance statement from the given base URL.
+ * Note that the result is cached in memory (until the page is reloaded in the
+ * browser) because it might have to be re-used by the client
+ * @param {String} baseUrl The base URL of the FHIR server
+ * @returns {Promise<fhirclient.JsonObject>}
+ */
+
 
 function fetchConformanceStatement(baseUrl = "/") {
   const url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
-  return request(url).catch(ex => {
+  return getAndCache(url).catch(ex => {
     throw new Error(`Failed to fetch the conformance statement from "${url}". ${ex}`);
   });
 }
 
 function fetchWellKnownJson(baseUrl = "/") {
   const url = String(baseUrl).replace(/\/*$/, "/") + ".well-known/smart-configuration";
-  return request(url).catch(ex => {
+  return getAndCache(url).catch(ex => {
     throw new Error(`Failed to fetch the well-known json "${url}". ${ex.message}`);
   });
+}
+
+function fetchFhirVersion(baseUrl = "/") {
+  return fetchConformanceStatement(baseUrl).then(metadata => metadata.fhirVersion);
 }
 /**
  * Given a fhir server returns an object with it's Oauth security endpoints that
@@ -290,7 +318,7 @@ async function completeAuth(env) {
   if (!state) {
     throw new Error("No state found! Please (re)launch the app.");
   } // Assume the client has already completed a token exchange when
-  // there is no code or access token is found in state
+  // there is no code (but we have a state) or access token is found in state
 
 
   const authorized = !code || state.tokenResponse.access_token; // If we are authorized already, then this is just a reload.
@@ -325,7 +353,7 @@ async function completeAuth(env) {
     await Storage.set(SMART_KEY, key);
   }
 
-  const client = new Client(env, state);
+  const client = createClient(env, state);
   debug("Created client instance: %O", client);
   return client;
 }
@@ -418,7 +446,7 @@ async function init(env, options) {
   const cached = await storage.get(key);
 
   if (cached) {
-    return Promise.resolve(new Client(env, cached));
+    return Promise.resolve(createClient(env, cached));
   } // Otherwise try to launch
 
 
@@ -441,6 +469,7 @@ module.exports = {
   fetchWellKnownJson,
   getSecurityExtensions,
   buildTokenRequest,
+  fetchFhirVersion,
   authorize,
   completeAuth,
   ready,

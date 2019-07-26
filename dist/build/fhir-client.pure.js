@@ -976,12 +976,61 @@ const {
   btoa,
   byCode,
   byCodes,
-  units
+  units,
+  getPatientParam
 } = __webpack_require__(/*! ./lib */ "./src/lib.js");
 
 const debug = _debug.extend("client");
 
 const str = __webpack_require__(/*! ./strings */ "./src/strings.js");
+
+const {
+  fetchConformanceStatement
+} = __webpack_require__(/*! ./smart */ "./src/smart.js");
+
+const {
+  SMART_KEY,
+  patientCompartment
+} = __webpack_require__(/*! ./settings */ "./src/settings.js");
+/**
+ * Adds patient context to requestOptions object to be used with fhirclient.Client.request
+ * @param {Object|String} requestOptions Can be a string URL (relative to
+ *  the serviceUrl), or an object which will be passed to fetch()
+ * @param {fhirclient.Client} client Current FHIR client object containing patient context
+ * @return {Promise<Object|String>} requestOptions object contextualized to current patient
+ */
+
+
+async function contextualize(requestOptions, client) {
+  // This code could be useful for implementing FHIR version awareness in the future:
+  //   const fhirVersionsMap = require("./data/fhir-versions");
+  //   const fetchFhirVersion = require("./smart").fetchFhirVersion;
+  //   const fhirVersion = client.state.fhirVersion || await fetchFhirVersion(client.state.serverUrl) || "";
+  //   const fhirRelease = fhirVersionsMap[fhirVersion];
+  const base = absolute("/", client.state.serverUrl);
+
+  async function contextualURL(url) {
+    const resourceType = url.pathname.split("/").pop();
+
+    if (patientCompartment.indexOf(resourceType) == -1) {
+      throw new Error(`Cannot filter "${resourceType}" resources by patient`);
+    }
+
+    const conformance = await fetchConformanceStatement(client.state.serverUrl);
+    const searchParam = getPatientParam(conformance, resourceType);
+    url.searchParams.set(searchParam, client.patient.id);
+    return url.href;
+  }
+
+  if (typeof requestOptions == "string" || requestOptions instanceof URL) {
+    let url = new URL(requestOptions + "", base);
+    return contextualURL(url);
+  }
+
+  let url = new URL(requestOptions.url, base);
+  requestOptions.url = await contextualURL(url);
+  return requestOptions;
+}
 /**
  * Gets single reference by id. Caches the result.
  * @param {String} refId
@@ -1134,6 +1183,16 @@ class FhirClient {
       read: () => {
         const id = this.patient.id;
         return id ? this.request(`Patient/${id}`) : Promise.reject(new Error("Patient is not available"));
+      },
+      request: (requestOptions, fhirOptions = {}) => {
+        if (this.patient.id) {
+          return (async () => {
+            const options = await contextualize(requestOptions, this);
+            return this.request(options, fhirOptions);
+          })();
+        } else {
+          return Promise.reject(new Error("Patient is not available"));
+        }
       }
     }; // encounter api -------------------------------------------------------
 
@@ -1385,18 +1444,14 @@ class FhirClient {
   }
 
   async _clearState() {
-    const {
-      KEY
-    } = __webpack_require__(/*! ./smart */ "./src/smart.js");
-
     const storage = this.environment.getStorage();
-    const key = await storage.get(KEY);
+    const key = await storage.get(SMART_KEY);
 
     if (key) {
       await storage.unset(key);
     }
 
-    await storage.unset(KEY);
+    await storage.unset(SMART_KEY);
     this.state.tokenResponse = {};
   }
   /**
@@ -1969,6 +2024,10 @@ const HttpError = __webpack_require__(/*! ./HttpError */ "./src/HttpError.js");
 
 const debug = __webpack_require__(/*! debug */ "./node_modules/debug/src/browser.js")("FHIR");
 
+const {
+  patientParams
+} = __webpack_require__(/*! ./settings */ "./src/settings.js");
+
 function isBrowser() {
   return typeof window === "object";
 }
@@ -2032,6 +2091,17 @@ function request(url, options = {}) {
     return res;
   });
 }
+
+const getAndCache = (() => {
+  let cache = {};
+  return (url, force = "development" === "test") => {
+    if (force || !cache[url]) {
+      cache[url] = request(url);
+    }
+
+    return cache[url];
+  };
+})();
 
 async function humanizeError(resp) {
   let msg = `${resp.status} ${resp.statusText}\nURL: ${resp.url}`;
@@ -2268,6 +2338,30 @@ const units = {
   }
 
 };
+/**
+ * Given a conformance statement and a resource type, returns the name of the
+ * URL parameter that can be used to scope the resource type by patient ID.
+ * @param {fhirclient.JsonObject} conformance
+ * @param {string} resourceType
+ */
+
+function getPatientParam(conformance, resourceType) {
+  // Find what resources are supported by this server
+  const resources = getPath(conformance, "rest.0.resource") || []; // Check if this resource is supported
+
+  const meta = resources.find(r => r.type === resourceType);
+  if (!meta) throw new Error("Resource not supported"); // Check if any search parameters are available for this resource
+
+  if (!Array.isArray(meta.searchParam)) throw new Error(`No search parameters supported for "${resourceType}" on this FHIR server`); // This is a rare case vut could happen in generic workflows
+
+  if (resourceType == "Patient" && meta.searchParam.find(x => x.name == "_id")) return "_id"; // Now find the first possible parameter name
+
+  let out = patientParams.find(p => meta.searchParam.find(x => x.name == p)); // If there is no match
+
+  if (!out) throw new Error("I don't know what param to use for " + resourceType);
+  return out;
+}
+
 module.exports = {
   stripTrailingSlash,
   absolute,
@@ -2286,9 +2380,62 @@ module.exports = {
   btoa,
   byCode,
   byCodes,
-  units
+  units,
+  getPatientParam,
+  getAndCache
 };
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./src/settings.js":
+/*!*************************!*\
+  !*** ./src/settings.js ***!
+  \*************************/
+/*! all exports used */
+/***/ (function(module, exports) {
+
+/**
+ * Combined list of FHIR resource types accepting patient parameter in FHIR R2-R4
+ */
+const patientCompartment = ["Account", "AdverseEvent", "AllergyIntolerance", "Appointment", "AppointmentResponse", "AuditEvent", "Basic", "BodySite", "BodyStructure", "CarePlan", "CareTeam", "ChargeItem", "Claim", "ClaimResponse", "ClinicalImpression", "Communication", "CommunicationRequest", "Composition", "Condition", "Consent", "Coverage", "CoverageEligibilityRequest", "CoverageEligibilityResponse", "DetectedIssue", "DeviceRequest", "DeviceUseRequest", "DeviceUseStatement", "DiagnosticOrder", "DiagnosticReport", "DocumentManifest", "DocumentReference", "EligibilityRequest", "Encounter", "EnrollmentRequest", "EpisodeOfCare", "ExplanationOfBenefit", "FamilyMemberHistory", "Flag", "Goal", "Group", "ImagingManifest", "ImagingObjectSelection", "ImagingStudy", "Immunization", "ImmunizationEvaluation", "ImmunizationRecommendation", "Invoice", "List", "MeasureReport", "Media", "MedicationAdministration", "MedicationDispense", "MedicationOrder", "MedicationRequest", "MedicationStatement", "MolecularSequence", "NutritionOrder", "Observation", "Order", "Patient", "Person", "Procedure", "ProcedureRequest", "Provenance", "QuestionnaireResponse", "ReferralRequest", "RelatedPerson", "RequestGroup", "ResearchSubject", "RiskAssessment", "Schedule", "ServiceRequest", "Specimen", "SupplyDelivery", "SupplyRequest", "VisionPrescription"];
+/**
+ * Map of FHIR releases and their abstract version as number
+ */
+
+const fhirVersions = {
+  "0.4.0": 2,
+  "0.5.0": 2,
+  "1.0.0": 2,
+  "1.0.1": 2,
+  "1.0.2": 2,
+  "1.1.0": 3,
+  "1.4.0": 3,
+  "1.6.0": 3,
+  "1.8.0": 3,
+  "3.0.0": 3,
+  "3.0.1": 3,
+  "3.3.0": 4,
+  "3.5.0": 4,
+  "4.0.0": 4
+};
+/**
+ * Combined (FHIR R2-R4) list of search parameters that can be used to scope
+ * a request by patient ID.
+ */
+
+const patientParams = ["requester", "patient", "subject", "member", "actor", "beneficiary"];
+/**
+ * The name of the sessionStorage entry that contains the current key
+ */
+
+const SMART_KEY = "SMART_KEY";
+module.exports = {
+  SMART_KEY,
+  patientParams,
+  fhirVersions,
+  patientCompartment
+};
 
 /***/ }),
 
@@ -2299,33 +2446,61 @@ module.exports = {
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Client = __webpack_require__(/*! ./Client */ "./src/Client.js");
-
 const {
   isBrowser,
   debug: _debug,
   request,
   getPath,
   randomString,
-  btoa
+  btoa,
+  getAndCache
 } = __webpack_require__(/*! ./lib */ "./src/lib.js");
 
 const debug = _debug.extend("oauth2");
 
-const SMART_KEY = "SMART_KEY";
+const {
+  SMART_KEY
+} = __webpack_require__(/*! ./settings */ "./src/settings.js");
+/**
+ * Creates and returns a Client instance.
+ * Note that this is done within a function to postpone the "./Client" import
+ * and avoid cyclic dependency.
+ * @param {fhirclient.JsonObject} env The adapter
+ * @param {string | fhirclient.ClientState} state The client state or baseUrl
+ * @returns {fhirclient.Client}
+ */
+
+
+function createClient(env, state) {
+  const Client = __webpack_require__(/*! ./Client */ "./src/Client.js");
+
+  return new Client(env, state);
+}
+/**
+ * Fetches the conformance statement from the given base URL.
+ * Note that the result is cached in memory (until the page is reloaded in the
+ * browser) because it might have to be re-used by the client
+ * @param {String} baseUrl The base URL of the FHIR server
+ * @returns {Promise<fhirclient.JsonObject>}
+ */
+
 
 function fetchConformanceStatement(baseUrl = "/") {
   const url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
-  return request(url).catch(ex => {
+  return getAndCache(url).catch(ex => {
     throw new Error(`Failed to fetch the conformance statement from "${url}". ${ex}`);
   });
 }
 
 function fetchWellKnownJson(baseUrl = "/") {
   const url = String(baseUrl).replace(/\/*$/, "/") + ".well-known/smart-configuration";
-  return request(url).catch(ex => {
+  return getAndCache(url).catch(ex => {
     throw new Error(`Failed to fetch the well-known json "${url}". ${ex.message}`);
   });
+}
+
+function fetchFhirVersion(baseUrl = "/") {
+  return fetchConformanceStatement(baseUrl).then(metadata => metadata.fhirVersion);
 }
 /**
  * Given a fhir server returns an object with it's Oauth security endpoints that
@@ -2591,7 +2766,7 @@ async function completeAuth(env) {
   if (!state) {
     throw new Error("No state found! Please (re)launch the app.");
   } // Assume the client has already completed a token exchange when
-  // there is no code or access token is found in state
+  // there is no code (but we have a state) or access token is found in state
 
 
   const authorized = !code || state.tokenResponse.access_token; // If we are authorized already, then this is just a reload.
@@ -2626,7 +2801,7 @@ async function completeAuth(env) {
     await Storage.set(SMART_KEY, key);
   }
 
-  const client = new Client(env, state);
+  const client = createClient(env, state);
   debug("Created client instance: %O", client);
   return client;
 }
@@ -2719,7 +2894,7 @@ async function init(env, options) {
   const cached = await storage.get(key);
 
   if (cached) {
-    return Promise.resolve(new Client(env, cached));
+    return Promise.resolve(createClient(env, cached));
   } // Otherwise try to launch
 
 
@@ -2742,6 +2917,7 @@ module.exports = {
   fetchWellKnownJson,
   getSecurityExtensions,
   buildTokenRequest,
+  fetchFhirVersion,
   authorize,
   completeAuth,
   ready,
