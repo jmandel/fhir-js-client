@@ -9547,11 +9547,13 @@ var debug = _debug.extend("client");
 var str = __webpack_require__(/*! ./strings */ "./src/strings.js");
 
 var _require2 = __webpack_require__(/*! ./smart */ "./src/smart.js"),
-    fetchConformanceStatement = _require2.fetchConformanceStatement;
+    fetchConformanceStatement = _require2.fetchConformanceStatement,
+    fetchFhirVersion = _require2.fetchFhirVersion;
 
 var _require3 = __webpack_require__(/*! ./settings */ "./src/settings.js"),
     SMART_KEY = _require3.SMART_KEY,
-    patientCompartment = _require3.patientCompartment;
+    patientCompartment = _require3.patientCompartment,
+    fhirVersions = _require3.fhirVersions;
 /**
  * Adds patient context to requestOptions object to be used with fhirclient.Client.request
  * @param {Object|String} requestOptions Can be a string URL (relative to
@@ -10592,6 +10594,29 @@ function () {
 
   _proto.getPath = function getPath(object, path) {
     return _getPath(object, path);
+  }
+  /**
+   * Returns a promise that will be resolved with the fhir version as defined
+   * in the conformance statement.
+   */
+  ;
+
+  _proto.getFhirVersion = function getFhirVersion() {
+    return fetchFhirVersion(this.state.serverUrl);
+  }
+  /**
+   * Returns a promise that will be resolved with the numeric fhir version
+   * - 2 for DSTU2
+   * - 3 for STU3
+   * - 4 for R4
+   * - 0 if the version is not known
+   */
+  ;
+
+  _proto.getFhirRelease = function getFhirRelease() {
+    return this.getFhirVersion().then(function (v) {
+      return fhirVersions[v || ""] || 0;
+    });
   };
 
   (0, _createClass2.default)(FhirClient, [{

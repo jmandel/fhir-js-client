@@ -2648,4 +2648,52 @@ describe("FHIR.client", () => {
             });
         });
     });
+
+    describe("getFhirVersion", () => {
+        crossPlatformTest(async (env) => {
+            const client = new Client(env, mockUrl);
+
+            // Mock the conformance statement
+            mockServer.mock({
+                headers: { "content-type": "application/json" },
+                status: 200,
+                body: { fhirVersion: "1.2.3" }
+            });
+
+            const version = await client.getFhirVersion();
+            expect(version).to.equal("1.2.3");
+        });
+    });
+
+    describe("getFhirRelease", () => {
+        crossPlatformTest(async (env) => {
+            const client = new Client(env, mockUrl);
+
+            // Mock the conformance statement
+            mockServer.mock({
+                headers: { "content-type": "application/json" },
+                status: 200,
+                body: { fhirVersion: "3.3.0" }
+            });
+
+            const version = await client.getFhirRelease();
+            expect(version).to.equal(4);
+        });
+
+        describe("returns 0 for unknown versions", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, mockUrl);
+
+                // Mock the conformance statement
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: { fhirVersion: "8.3.0" }
+                });
+
+                const version = await client.getFhirRelease();
+                expect(version).to.equal(0);
+            });
+        });
+    });
 });

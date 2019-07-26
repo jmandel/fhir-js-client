@@ -16,8 +16,8 @@ const {
 
 const debug = _debug.extend("client");
 const str = require("./strings");
-const { fetchConformanceStatement } = require("./smart");
-const { SMART_KEY, patientCompartment } = require("./settings");
+const { fetchConformanceStatement, fetchFhirVersion } = require("./smart");
+const { SMART_KEY, patientCompartment, fhirVersions } = require("./settings");
 
 
 /**
@@ -764,6 +764,25 @@ class FhirClient
 
     getPath(object, path) {
         return getPath(object, path);
+    }
+
+    /**
+     * Returns a promise that will be resolved with the fhir version as defined
+     * in the conformance statement.
+     */
+    getFhirVersion() {
+        return fetchFhirVersion(this.state.serverUrl);
+    }
+
+    /**
+     * Returns a promise that will be resolved with the numeric fhir version
+     * - 2 for DSTU2
+     * - 3 for STU3
+     * - 4 for R4
+     * - 0 if the version is not known
+     */
+    getFhirRelease() {
+        return this.getFhirVersion().then(v => fhirVersions[v || ""] || 0);
     }
 }
 
