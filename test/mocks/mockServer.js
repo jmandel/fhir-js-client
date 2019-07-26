@@ -42,8 +42,7 @@ app.all("*", (req, res, next) => {
 
 
 app.use((err, _req, res, _next) => { // eslint-disable-line
-    console.error(err);
-    res.status(500).send("Something broke!");
+    res.status(500).send(err.meassage);
 });
 
 if (!module.parent) {

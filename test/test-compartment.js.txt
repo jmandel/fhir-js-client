@@ -14,6 +14,10 @@ const SERVERS = [
     {
         baseUrl: "https://r4.smarthealthit.org",
         patient: "af0e5952-c2ac-44fc-a896-36e9e30c2097"
+    },
+    {
+        baseUrl: "https://api.logicahealth.org/hspcdemo/open",
+        patient: "SMART-1288992"
     }
 ];
 

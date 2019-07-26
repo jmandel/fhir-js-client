@@ -134,6 +134,316 @@ describe("FHIR.client", () => {
         }
     });
 
+    describe("patient.request", () => {
+        describe("rejects with no patient", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {}
+                });
+                await expect(client.patient.request("Observation")).to.reject(
+                    Error, "Patient is not available"
+                );
+            });
+        });
+
+        describe("rejects for not supported resource types", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        patient: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
+                    }
+                });
+
+                // Mock the conformance statement
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {}
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Observation",
+                        id: "whatever"
+                    }
+                });
+
+                await expect(client.patient.request("Observation")).to.reject(
+                    Error,
+                    "Resource not supported"
+                );
+            });
+        });
+
+        describe("rejects if a search param cannot be determined", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        patient: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
+                    }
+                });
+
+                // Mock the conformance statement
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        rest: [{
+                            resource: [{
+                                type: "Observation"
+                            }]
+                        }]
+                    }
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Observation",
+                        id: "whatever"
+                    }
+                });
+
+                await expect(client.patient.request("Observation")).to.reject(
+                    Error,
+                    "No search parameters supported for \"Observation\" on this FHIR server"
+                );
+            });
+        });
+
+        describe("rejects if a resource is not in the patient compartment", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        patient: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
+                    }
+                });
+
+                // Mock the conformance statement
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        rest: [{
+                            resource: [{
+                                type: "Test"
+                            }]
+                        }]
+                    }
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Test",
+                        id: "whatever"
+                    }
+                });
+
+                await expect(client.patient.request("Test")).to.reject(
+                    Error,
+                    "Cannot filter \"Test\" resources by patient"
+                );
+            });
+        });
+
+        describe("works as expected with a string URL", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        patient: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
+                    }
+                });
+
+                // Mock the conformance statement
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        rest: [{
+                            resource: [{
+                                type: "Observation",
+                                searchParam: [
+                                    { name: "patient" }
+                                ]
+                            }]
+                        }]
+                    }
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Observation",
+                        id: "whatever"
+                    }
+                });
+
+                await client.patient.request("Observation");
+            });
+        });
+
+        describe("works as expected with URL instance", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        patient: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
+                    }
+                });
+
+                // Mock the conformance statement
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        rest: [{
+                            resource: [{
+                                type: "Observation",
+                                searchParam: [
+                                    { name: "patient" }
+                                ]
+                            }]
+                        }]
+                    }
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Observation",
+                        id: "whatever"
+                    }
+                });
+
+                await client.patient.request(new URL("Observation", mockUrl));
+            });
+        });
+
+        describe("works as expected with request options", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        patient: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
+                    }
+                });
+
+                // Mock the conformance statement
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        rest: [{
+                            resource: [{
+                                type: "Observation",
+                                searchParam: [
+                                    { name: "patient" }
+                                ]
+                            }]
+                        }]
+                    }
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Observation",
+                        id: "whatever"
+                    }
+                });
+
+                await client.patient.request({ url: "Observation" });
+            });
+        });
+
+        describe("works if the resource is Patient and _id param is supported", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        patient: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
+                    }
+                });
+
+                // Mock the conformance statement
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        rest: [{
+                            resource: [{
+                                type: "Patient",
+                                searchParam: [
+                                    { name: "_id" }
+                                ]
+                            }]
+                        }]
+                    }
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Patient",
+                        id: "whatever"
+                    }
+                });
+
+                await client.patient.request("Patient");
+            });
+        });
+
+        describe("rejects if the resource is Patient and _id param is not supported", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        patient: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
+                    }
+                });
+
+                // Mock the conformance statement
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        rest: [{
+                            resource: [{
+                                type: "Patient",
+                                searchParam: []
+                            }]
+                        }]
+                    }
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Patient",
+                        id: "whatever"
+                    }
+                });
+
+                await expect(client.patient.request("Patient")).to.reject();
+            });
+        });
+    });
+
     describe("encounter.read", () => {
         describe("rejects with no encounter", () => {
             crossPlatformTest(async (env) => {
