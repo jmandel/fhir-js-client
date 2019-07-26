@@ -148,23 +148,23 @@ declare namespace fhirclient {
         /**
          * The current state including options and tokenResponse
          */
-        state: object;
-        environment: object;
-        api?: object;
+        state: JsonObject;
+        environment: JsonObject;
+        api?: JsonObject;
         patient: {
             id: string;
-            api?: object;
-            read(): Promise<object>;
+            api?: JsonObject;
+            read(): Promise<JsonObject>;
         };
         encounter: {
             id: string;
-            read(): Promise<object>;
+            read(): Promise<JsonObject>;
         };
         user: {
             id: string;
             fhirUser: string;
             resourceType: string;
-            read(): Promise<object>;
+            read(): Promise<JsonObject>;
         }
 
         /**
