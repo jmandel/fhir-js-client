@@ -148,23 +148,23 @@ declare namespace fhirclient {
         /**
          * The current state including options and tokenResponse
          */
-        state: object;
-        environment: object;
-        api?: object;
+        state: JsonObject;
+        environment: JsonObject;
+        api?: JsonObject;
         patient: {
             id: string;
-            api?: object;
-            read(): Promise<object>;
+            api?: JsonObject;
+            read(): Promise<JsonObject>;
         };
         encounter: {
             id: string;
-            read(): Promise<object>;
+            read(): Promise<JsonObject>;
         };
         user: {
             id: string;
             fhirUser: string;
             resourceType: string;
-            read(): Promise<object>;
+            read(): Promise<JsonObject>;
         }
 
         /**
@@ -201,6 +201,24 @@ declare namespace fhirclient {
         _clearState(): Promise<void>;
 
         /**
+         * Wrapper for `client.request` implementing the FHIR resource create operation
+         * @param {Object} resource A FHIR resource to be created
+         */
+        create(resource: object): Promise<RequestResult>
+
+        /**
+         * Wrapper for `client.request` implementing the FHIR resource update operation
+         * @param {Object} resource A FHIR resource to be updated
+         */
+        update(resource: object): Promise<RequestResult>
+
+        /**
+         * Wrapper for `client.request` implementing the FHIR resource delete operation
+         * @param {String} uri Relative URI of the FHIR resource to be deleted (format: `resourceType/id`)
+         */
+        delete(uri: string): Promise<RequestResult>
+
+        /**
          * Use this method to query the FHIR server
          * @param uri Either the full url, or a path that will be rooted at the FHIR baseUrl.
          * @param fhirOptions Additional options to control the behavior
@@ -221,6 +239,22 @@ declare namespace fhirclient {
          * Resolves with the updated state or rejects with an error.
          */
         refresh(): Promise<object>;
+
+        /**
+         * Returns a promise that will be resolved with the fhir version as defined
+         * in the conformance statement.
+         */
+        getFhirVersion(): Promise<string>;
+
+        /**
+         * Returns a promise that will be resolved with the numeric fhir version
+         * - 2 for DSTU2
+         * - 3 for STU3
+         * - 4 for R4
+         * - 0 if the version is not known
+         */
+        getFhirRelease(): Promise<number>;
+
         byCode(observations: object|object[], property: string): object[];
         byCodes(observations: object|object[], property: string): (codes: string[]) => object[];
         units: any;
@@ -255,7 +289,7 @@ declare namespace fhirclient {
      * Describes the state that should be passed to the Client constructor.
      * Everything except `serverUrl` is optional
      */
-    declare interface ClientState {
+    interface ClientState {
         /**
          * The base URL of the Fhir server. The library should have detected it
          * at authorization time from request query params of from config options.
@@ -333,7 +367,7 @@ declare namespace fhirclient {
     /**
      * Authorization parameters that can be passed to `authorize` or `init`
      */
-    declare interface AuthorizeParams {
+    interface AuthorizeParams {
 
         /**
          * This is the URL of the service you are connecting to.
@@ -430,7 +464,7 @@ declare namespace fhirclient {
      * Additional options that can be passed to `client.request` to control its
      * behavior
      */
-    declare interface FhirOptions {
+    interface FhirOptions {
 
         /**
          * When you request a Bundle, the result will typically come back in pages
@@ -538,7 +572,7 @@ declare namespace fhirclient {
      * additional properties.
      * @see http://docs.smarthealthit.org/authorization/
      */
-    declare interface TokenResponse {
+    interface TokenResponse {
 
         /**
          * If present, this tells the app that it is being rendered within an
@@ -614,10 +648,10 @@ declare namespace fhirclient {
         /**
          * Other properties might be passed by the server
          */
-        [key?: string]: any;
+        [key: string]: any;
     }
 
-    declare interface JsonObject {
+    interface JsonObject {
         [key: string]: any
     }
 }

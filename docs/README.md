@@ -218,7 +218,6 @@ FHIR.oauth2.ready().then(client => client.api.search({ type: "Patient" }))
 </script>
 ```
 
-
 #### NodeJS Integration
 There are no global variables to detect so you'll have to link it manually using
 the dedicated `connect(fhirJs)` method of the client:
@@ -231,41 +230,6 @@ app.get("/", async (req, res) => {
     client.connect(fhirJs);
     client.api.search({ type: "Patient" }).then(res.json).catch(res.json);
 });
-```
-
-## Contributing and Development
-
-### NPM Scripts
-
-After you `cd` into to the project folder and run `npm i`, you can use npm scripts to handle any project-related task:
-
-```sh
-# run tests
-npm test
-
-# Build everything
-npm run build
-
-# Build all bundles
-npm run pack
-
-# Only build the minified bundle for production
-npm run pack:prod
-
-# Only build the pure (no polyfills included) minified bundle for production
-npm run pack:prod:pure
-
-# Only build non-minified bundle for development
-npm run pack:dev
-
-# Only build the pure (no polyfills included) bundle for development
-npm run pack:dev:pure
-
-# Only build non-minified bundle for development and rebuild on change
-npm run build:dev
-
-# Build the CommonJS modules (for Node and bundlers)
-npm run build:module
 ```
 
 ## Debugging

@@ -239,6 +239,22 @@ declare namespace fhirclient {
          * Resolves with the updated state or rejects with an error.
          */
         refresh(): Promise<object>;
+
+        /**
+         * Returns a promise that will be resolved with the fhir version as defined
+         * in the conformance statement.
+         */
+        getFhirVersion(): Promise<string>;
+
+        /**
+         * Returns a promise that will be resolved with the numeric fhir version
+         * - 2 for DSTU2
+         * - 3 for STU3
+         * - 4 for R4
+         * - 0 if the version is not known
+         */
+        getFhirRelease(): Promise<number>;
+
         byCode(observations: object|object[], property: string): object[];
         byCodes(observations: object|object[], property: string): (codes: string[]) => object[];
         units: any;

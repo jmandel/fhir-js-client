@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.1.0
+- Added convenience wrappers for the FHIR create/update/delete operations #56
+- Added patient context aware request wrapper #57
+- Fixed a refresh issue in Firefox #58
+- Improved fake token flow #59
+- Added `getFhirVersion` and `getFhirRelease` client methods
+- Few other minor fixes and improvements
+
 ## v2.0.7
 - See http://docs.smarthealthit.org/client-js/v2.html
 
