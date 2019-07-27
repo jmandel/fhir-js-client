@@ -163,7 +163,7 @@ The selected patient ID or `null` if patient is not available. If no patient is 
 ### client.patient.read() `Promise<Object>`
 Fetches the selected patient resource (if available). Resolves with the patient or rejects with an error.
 
-### client.patient.request(requestOptions, fhirOptions) Promise<Object>
+### client.patient.request(requestOptions, fhirOptions) `Promise<Object>`
 Wrapper for `client.request` that will automatically add a search parameter to the requested URL to filter the requested resources to those related to the current patient. For example:
 ```js
 client.patient.request("Observation"); // -> /Observation?patient=patient-id
