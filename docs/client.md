@@ -163,6 +163,13 @@ The selected patient ID or `null` if patient is not available. If no patient is 
 ### client.patient.read() `Promise<Object>`
 Fetches the selected patient resource (if available). Resolves with the patient or rejects with an error.
 
+### client.patient.request(requestOptions, fhirOptions) Promise<Object>
+Wrapper for `client.request` that will automatically add a search parameter to the requested URL to filter the requested resources to those related to the current patient. For example:
+```js
+client.patient.request("Observation"); // -> /Observation?patient=patient-id
+client.patient.request("Group");       // -> /Group?member=patient-id
+```
+
 ### client.patient.api `Object`
 
 Only accessible if fhir.js is available. Read more about the fhir.js integration [here](README.md#fhirjs-integration).
@@ -186,7 +193,18 @@ The selected user identifier that looks like `Practitioner/id` or `null` if user
 The selected user resourceType (E.g. `Practitioner`, `Patient`, `RelatedPerson`...) or `null` if user is not available. If no user is selected, it will generate useful debug messages about the possible reasons. See [debugging](README.md#debugging).
 
 ### client.user.read() `Promise<Object>`
-Fetches the selected user resource (if available). Resolves with the user or rejects with an error. 
+Fetches the selected user resource (if available). Resolves with the user or rejects with an error.
+
+### client.getFhirVersion() `Promise<String>`
+Returns a promise that will be resolved with the FHIR version as defined in the conformance statement of the server.
+
+### client.getFhirRelease() `Promise<Number>`
+Returns a promise that will be resolved with the numeric FHIR version:
+- `2` for **DSTU2**
+- `3` for **STU3**
+- `4` for **R4**
+- `0` if the version is not known
+    
 
 ---
 
