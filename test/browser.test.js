@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-env browser */
 import { URL }    from "url";
 import { expect } from "@hapi/code";
@@ -637,27 +638,27 @@ describe("smart", () => {
         it ("rejects with error and error_description from the url", async () => {
             const env = new BrowserEnv();
             env.redirect("http://localhost/?error=test-error");
-            await expect(smart.completeAuth(env, {}))
+            await expect(smart.completeAuth(env))
                 .to.reject(Error, "test-error");
             env.redirect("http://localhost/?error_description=test-error-description");
-            await expect(smart.completeAuth(env, {}))
+            await expect(smart.completeAuth(env))
                 .to.reject(Error, "test-error-description");
             env.redirect("http://localhost/?error=test-error&error_description=test-error-description");
-            await expect(smart.completeAuth(env, {}))
+            await expect(smart.completeAuth(env))
                 .to.reject(Error, "test-error: test-error-description");
         });
 
         it ("rejects with missing key", async () => {
             const env = new BrowserEnv();
             env.redirect("http://localhost/");
-            await expect(smart.completeAuth(env, {}))
+            await expect(smart.completeAuth(env))
                 .to.reject(Error, /^No 'state' parameter found/);
         });
 
         it ("rejects with empty state", async () => {
             const env = new BrowserEnv();
             env.redirect("http://localhost/?state=whatever");
-            await expect(smart.completeAuth(env, {}))
+            await expect(smart.completeAuth(env))
                 .to.reject(Error, /No state found/);
         });
 

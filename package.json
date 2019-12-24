@@ -16,7 +16,6 @@
   "main": "src/index.js",
   "browser": "src/browser.js",
   "dependencies": {
-    "@types/express": "^4.17.2",
     "core-js": "^3.5.0",
     "cross-fetch": "^3.0.4",
     "debug": "^4.1.1"
