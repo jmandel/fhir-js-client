@@ -1,12 +1,5 @@
-const fetch = require("node-fetch-npm");
-Object.assign(global, {
-    fetch,
-    Headers : fetch.Headers,
-    Request : fetch.Request,
-    Response: fetch.Response
-});
-const ServerStorage = require("../storage/ServerStorage");
-const BaseAdapter   = require("./BaseAdapter");
+import ServerStorage from "../storage/ServerStorage";
+import BaseAdapter   from "./BaseAdapter";
 
 /**
  * Node Adapter - works with native NodeJS and with Express
@@ -85,5 +78,5 @@ class NodeAdapter extends BaseAdapter
     }
 }
 
-module.exports = NodeAdapter.smart;
-module.exports.Adapter = NodeAdapter;
+export default NodeAdapter.smart;
+export { NodeAdapter as Adapter };

@@ -1,4 +1,4 @@
-function Location(url)
+export default function Location(url)
 {
     return {
         href: url,
@@ -8,5 +8,3 @@ function Location(url)
         }
     };
 }
-
-module.exports = Location;

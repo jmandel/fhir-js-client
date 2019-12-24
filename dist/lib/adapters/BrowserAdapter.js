@@ -1,14 +1,29 @@
-/* global fhir */
-const BrowserStorage = require("../storage/BrowserStorage");
+"use strict";
 
-const BaseAdapter = require("./BaseAdapter");
+require("core-js/modules/es.array.iterator");
+
+require("core-js/modules/web.url");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Adapter = exports.default = void 0;
+
+var _BrowserStorage = _interopRequireDefault(require("../storage/BrowserStorage"));
+
+var _BaseAdapter = _interopRequireDefault(require("./BaseAdapter"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/* eslint-env browser */
+
+/* global fhir */
+
 /**
  * Browser Adapter
  * @type {fhirclient.Adapter}
  */
-
-
-class BrowserAdapter extends BaseAdapter {
+class BrowserAdapter extends _BaseAdapter.default {
   /**
    * In browsers we need to be able to (dynamically) check if fhir.js is
    * included in the page. If it is, it should have created a "fhir" variable
@@ -52,7 +67,7 @@ class BrowserAdapter extends BaseAdapter {
 
   getStorage() {
     if (!this._storage) {
-      this._storage = new BrowserStorage();
+      this._storage = new _BrowserStorage.default();
     }
 
     return this._storage;
@@ -64,5 +79,6 @@ class BrowserAdapter extends BaseAdapter {
 
 }
 
-module.exports = BrowserAdapter.smart;
-module.exports.Adapter = BrowserAdapter;
+exports.Adapter = BrowserAdapter;
+var _default = BrowserAdapter.smart;
+exports.default = _default;

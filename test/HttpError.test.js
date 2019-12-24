@@ -1,10 +1,9 @@
-const { expect } = require("@hapi/code");
-const lab        = require("@hapi/lab").script();
-const HttpError  = require("../src/HttpError");
+import { expect } from "@hapi/code";
+import Lab        from "@hapi/lab";
+import HttpError  from "../src/HttpError";
 
+export const lab = Lab.script();
 const { it, describe } = lab;
-exports.lab = lab;
-
 
 describe("HttpError", () => {
     it ("create with no args", () => {

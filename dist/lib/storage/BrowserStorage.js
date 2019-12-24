@@ -1,3 +1,13 @@
+"use strict";
+
+require("core-js/modules/es.promise");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/* eslint-env browser */
 class Storage {
   /**
    * Gets the value at `key`. Returns a promise that will be resolved
@@ -47,4 +57,4 @@ class Storage {
 
 }
 
-module.exports = Storage;
+exports.default = Storage;

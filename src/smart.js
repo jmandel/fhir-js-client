@@ -1,29 +1,21 @@
-const {
+/* global window */
+import {
     isBrowser,
-    debug: _debug,
+    debug as _debug,
     request,
     getPath,
     randomString,
     btoa,
     getAndCache
-} = require("./lib");
+} from "./lib";
+
+import Client from "./Client";
+
+import { SMART_KEY } from "./settings";
 
 const debug = _debug.extend("oauth2");
-const { SMART_KEY } = require("./settings");
 
-
-/**
- * Creates and returns a Client instance.
- * Note that this is done within a function to postpone the "./Client" import
- * and avoid cyclic dependency.
- * @param {fhirclient.JsonObject} env The adapter
- * @param {string | fhirclient.ClientState} state The client state or baseUrl
- * @returns {fhirclient.Client}
- */
-function createClient(env, state) {
-    const Client  = require("./Client");
-    return new Client(env, state);
-}
+export { SMART_KEY as KEY };
 
 /**
  * Fetches the conformance statement from the given base URL.
@@ -32,7 +24,7 @@ function createClient(env, state) {
  * @param {String} baseUrl The base URL of the FHIR server
  * @returns {Promise<fhirclient.JsonObject>}
  */
-function fetchConformanceStatement(baseUrl = "/") {
+export function fetchConformanceStatement(baseUrl = "/") {
 
     const url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
     return getAndCache(url).catch(ex => {
@@ -42,7 +34,7 @@ function fetchConformanceStatement(baseUrl = "/") {
     });
 }
 
-function fetchWellKnownJson(baseUrl = "/")
+export function fetchWellKnownJson(baseUrl = "/")
 {
     const url = String(baseUrl).replace(/\/*$/, "/") + ".well-known/smart-configuration";
     return getAndCache(url).catch(ex => {
@@ -50,7 +42,7 @@ function fetchWellKnownJson(baseUrl = "/")
     });
 }
 
-function fetchFhirVersion(baseUrl = "/") {
+export function fetchFhirVersion(baseUrl = "/") {
     return fetchConformanceStatement(baseUrl).then((metadata) => metadata.fhirVersion);
 }
 
@@ -60,7 +52,7 @@ function fetchFhirVersion(baseUrl = "/") {
  * @param {String} baseUrl Fhir server base URL
  * @returns { Promise<fhirclient.OAuthSecurityExtensions> }
  */
-function getSecurityExtensions(baseUrl = "/")
+export function getSecurityExtensions(baseUrl = "/")
 {
     return fetchWellKnownJson(baseUrl).then(meta => {
         if (!meta.authorization_endpoint || !meta.token_endpoint) {
@@ -108,7 +100,7 @@ function getSecurityExtensions(baseUrl = "/")
  * without trying to redirect to it
  * @returns { Promise<never|string> }
  */
-async function authorize(env, params = {}, _noRedirect = false)
+export async function authorize(env, params = {}, _noRedirect = false)
 {
     // Obtain input
     let {
@@ -253,7 +245,7 @@ async function authorize(env, params = {}, _noRedirect = false)
  * authorization server..
  * @returns { Promise<fhirclient.Client> }
  */
-async function completeAuth(env)
+export async function completeAuth(env)
 {
     const url = env.getUrl();
     const Storage = env.getStorage();
@@ -300,7 +292,6 @@ async function completeAuth(env)
     const hasState = params.has("state");
 
     if (isBrowser() && getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
-
         // `code` is the flag that tell us to request an access token.
         // We have to remove it, otherwise the page will authorize on
         // every load!
@@ -371,7 +362,7 @@ async function completeAuth(env)
         await Storage.set(SMART_KEY, key);
     }
 
-    const client = createClient(env, state);
+    const client = new Client(env, state);
     debug("Created client instance: %O", client);
     return client;
 }
@@ -380,7 +371,7 @@ async function completeAuth(env)
  * Builds the token request options. Does not make the request, just
  * creates it's configuration and returns it in a Promise.
  */
-function buildTokenRequest(code, state)
+export function buildTokenRequest(code, state)
 {
     const { redirectUri, clientSecret, tokenUri, clientId } = state;
 
@@ -429,7 +420,7 @@ function buildTokenRequest(code, state)
  * @param {() => never} [onError]
  * @returns { Promise<fhirclient.Client> }
  */
-async function ready(env, onSuccess, onError)
+export async function ready(env, onSuccess, onError)
 {
     let task = completeAuth(env);
     if (onSuccess) {
@@ -441,7 +432,7 @@ async function ready(env, onSuccess, onError)
     return task;
 }
 
-async function init(env, options)
+export async function init(env, options)
 {
     const url   = env.getUrl();
     const code  = url.searchParams.get("code");
@@ -459,7 +450,7 @@ async function init(env, options)
     const key     = state || await storage.get(SMART_KEY);
     const cached  = await storage.get(key);
     if (cached) {
-        return Promise.resolve(createClient(env, cached));
+        return new Client(env, cached);
     }
 
     // Otherwise try to launch
@@ -474,16 +465,3 @@ async function init(env, options)
         return new Promise(() => { /* leave it pending!!! */ });
     });
 }
-
-module.exports = {
-    fetchConformanceStatement,
-    fetchWellKnownJson,
-    getSecurityExtensions,
-    buildTokenRequest,
-    fetchFhirVersion,
-    authorize,
-    completeAuth,
-    ready,
-    init,
-    KEY: SMART_KEY
-};

@@ -1,4 +1,4 @@
-class HttpResponse
+export default class HttpResponse
 {
     constructor()
     {
@@ -14,5 +14,3 @@ class HttpResponse
 
     end() {}
 }
-
-module.exports = HttpResponse;

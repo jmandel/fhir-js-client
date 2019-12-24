@@ -1,4 +1,4 @@
-class ServerStorage
+export default class ServerStorage
 {
     /**
      * @param {Object} request The HTTP request that is expected to have a
@@ -42,7 +42,7 @@ class ServerStorage
      */
     async unset(key)
     {
-        if (this.request.session.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(this.request.session, key)) {
             delete this.request.session[key];
             return true;
         }
@@ -50,5 +50,3 @@ class ServerStorage
     }
 
 }
-
-module.exports = ServerStorage;

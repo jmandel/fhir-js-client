@@ -1,19 +1,18 @@
 
-const { expect } = require("@hapi/code");
-const lab        = require("@hapi/lab").script();
-const FHIR       = require("../src/adapters/NodeAdapter");
-const { KEY }    = require("../src/smart");
-const ServerStorage = require("../src/storage/ServerStorage");
+import { expect } from "@hapi/code";
+import Lab        from "@hapi/lab";
+import FHIR, { Adapter } from "../src/adapters/NodeAdapter";
+import { KEY }    from "../src/smart";
+import ServerStorage from "../src/storage/ServerStorage";
 
 // Mocks
-const mockServer        = require("./mocks/mockServer");
-const HttpRequest       = require("./mocks/HttpRequest");
-const HttpResponse      = require("./mocks/HttpResponse");
-const MemoryStorage     = require("./mocks/MemoryStorage");
+import mockServer        from "./mocks/mockServer";
+import HttpRequest       from "./mocks/HttpRequest";
+import HttpResponse      from "./mocks/HttpResponse";
+import MemoryStorage     from "./mocks/MemoryStorage";
 
-
+export const lab = Lab.script();
 const { it, describe, before, after, afterEach } = lab;
-exports.lab = lab;
 
 let mockDataServer, mockUrl;
 
@@ -226,7 +225,7 @@ describe("ServerStorage", () => {
 describe("NodeAdapter", () => {
 
     it ("getUrl", () => {
-        const adapter1 = new FHIR.Adapter({
+        const adapter1 = new Adapter({
             request: {
                 protocol: "http",
                 url: "/",
@@ -237,7 +236,7 @@ describe("NodeAdapter", () => {
         });
         expect(adapter1.getUrl().href).to.equal("http://localhost/");
 
-        const adapter2 = new FHIR.Adapter({
+        const adapter2 = new Adapter({
             request: {
                 protocol: "http",
                 url: "/a/b/c",
@@ -249,7 +248,7 @@ describe("NodeAdapter", () => {
         });
         expect(adapter2.getUrl().href).to.equal("https://external-domain/a/b/c");
 
-        const adapter3 = new FHIR.Adapter({
+        const adapter3 = new Adapter({
             request: {
                 protocol: "http",
                 headers: {
@@ -274,7 +273,7 @@ describe("NodeAdapter", () => {
             return fakeStorage;
         }
 
-        const adapter = new FHIR.Adapter({
+        const adapter = new Adapter({
             storage : getStorage,
             request : "my-request",
             response: "my-response"

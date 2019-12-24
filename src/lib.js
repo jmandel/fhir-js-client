@@ -3,18 +3,25 @@
  * are defined here so that tests can import this library and test them.
  */
 
-const HttpError = require("./HttpError");
-const debug     = require("debug")("FHIR");
-const { patientParams } = require("./settings");
+import HttpError from "./HttpError";
+import { patientParams } from "./settings";
+import debug from "debug";
 
-function isBrowser() {
+// @ts-ignore
+// eslint-disable-next-line no-undef
+const fetch = global.FHIRCLIENT_PURE ? window.fetch : require("cross-fetch").fetch;
+
+const _debug     = debug("FHIR");
+export { _debug as debug };
+
+export function isBrowser() {
     return typeof window === "object";
 }
 
 /**
  * Used in fetch Promise chains to reject if the "ok" property is not true
  */
-async function checkResponse(resp) {
+export async function checkResponse(resp) {
     if (!resp.ok) {
         throw (await humanizeError(resp));
     }
@@ -28,7 +35,7 @@ async function checkResponse(resp) {
  * @param {Response} resp
  * @returns {Promise<object|string>}
  */
-function responseToJSON(resp) {
+export function responseToJSON(resp) {
     return resp.text().then(text => text.length ? JSON.parse(text) : "");
 }
 
@@ -44,7 +51,7 @@ function responseToJSON(resp) {
  * @param {String|Request} url
  * @param {Object} options
  */
-function request(url, options = {}) {
+export function request(url, options = {}) {
     return fetch(url, {
         mode: "cors",
         ...options,
@@ -66,7 +73,7 @@ function request(url, options = {}) {
         });
 }
 
-const getAndCache = (() => {
+export const getAndCache = (() => {
     let cache = {};
 
     return (url, force = process.env.NODE_ENV === "test") => {
@@ -77,7 +84,7 @@ const getAndCache = (() => {
     };
 })();
 
-async function humanizeError(resp) {
+export async function humanizeError(resp) {
     let msg = `${resp.status} ${resp.statusText}\nURL: ${resp.url}`;
 
     try {
@@ -107,7 +114,7 @@ async function humanizeError(resp) {
     throw new HttpError(msg, resp.status, resp.statusText);
 }
 
-function stripTrailingSlash(str) {
+export function stripTrailingSlash(str) {
     return String(str || "").replace(/\/+$/, "");
 }
 
@@ -120,7 +127,7 @@ function stripTrailingSlash(str) {
  * @param {String} path The path (eg. "a.b.4.c")
  * @returns {*} Whatever is found in the path or undefined
  */
-function getPath(obj, path = "") {
+export function getPath(obj, path = "") {
     path = path.trim();
     if (!path) {
         return obj;
@@ -138,7 +145,7 @@ function getPath(obj, path = "") {
  * @param {*} value The value to set
  * @returns {Object} The modified object
  */
-function setPath(obj, path, value) {
+export function setPath(obj, path, value) {
     path.trim().split(".").reduce(
         (out, key, idx, arr) => {
             if (out && idx === arr.length - 1) {
@@ -152,14 +159,14 @@ function setPath(obj, path, value) {
     return obj;
 }
 
-function makeArray(arg) {
+export function makeArray(arg) {
     if (Array.isArray(arg)) {
         return arg;
     }
     return [arg];
 }
 
-function absolute(path, baseUrl) {
+export function absolute(path, baseUrl) {
     if (path.match(/^http/)) return path;
     if (path.match(/^urn/)) return path;
     return baseUrl.replace(/\/+$/, "") + "/" + path.replace(/^\/+/, "");
@@ -172,7 +179,7 @@ function absolute(path, baseUrl) {
  * @param {String} charSet A string containing all the possible characters.
  *     Defaults to all the upper and lower-case letters plus digits.
  */
-function randomString(strLength = 8, charSet = null) {
+export function randomString(strLength = 8, charSet = null) {
     const result = [];
 
     charSet = charSet || "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
@@ -186,9 +193,10 @@ function randomString(strLength = 8, charSet = null) {
     return result.join("");
 }
 
-function atob(str)
+export function atob(str)
 {
     if (isBrowser()) {
+        // eslint-disable-next-line no-undef
         return window.atob(str);
     }
 
@@ -197,9 +205,10 @@ function atob(str)
     return global.Buffer.from(str, "base64").toString("ascii");
 }
 
-function btoa(str)
+export function btoa(str)
 {
     if (isBrowser()) {
+        // eslint-disable-next-line no-undef
         return window.btoa(str);
     }
 
@@ -208,7 +217,7 @@ function btoa(str)
     return global.Buffer.from(str).toString("base64");
 }
 
-function jwtDecode(token)
+export function jwtDecode(token)
 {
     const payload = token.split(".")[1];
     return JSON.parse(atob(payload));
@@ -224,7 +233,7 @@ function jwtDecode(token)
  * @param {String} property The name of a CodeableConcept property to group by
  * @returns {Object}
  */
-function byCode(observations, property)
+export function byCode(observations, property)
 {
     const ret = {};
 
@@ -258,7 +267,7 @@ function byCode(observations, property)
  * @param {String} property The name of a CodeableConcept property to group by
  * @returns {(codes: string[]) => object[]}
  */
-function byCodes(observations, property)
+export function byCodes(observations, property)
 {
     const bank = byCode(observations, property);
     return (...codes) => codes
@@ -266,13 +275,13 @@ function byCodes(observations, property)
         .reduce((prev, code) => [...prev, ...bank[code + ""]], []);
 }
 
-function ensureNumerical({ value, code }) {
+export function ensureNumerical({ value, code }) {
     if (typeof value !== "number") {
         throw new Error("Found a non-numerical unit: " + value + " " + code);
     }
 }
 
-const units = {
+export const units = {
     cm({ code, value }) {
         ensureNumerical({ code, value });
         if (code == "cm"     ) return value;
@@ -304,7 +313,7 @@ const units = {
  * @param {fhirclient.JsonObject} conformance
  * @param {string} resourceType
  */
-function getPatientParam(conformance, resourceType)
+export function getPatientParam(conformance, resourceType)
 {
     // Find what resources are supported by this server
     const resources = getPath(conformance, "rest.0.resource") || [];
@@ -331,27 +340,3 @@ function getPatientParam(conformance, resourceType)
 
     return out;
 }
-
-
-module.exports = {
-    stripTrailingSlash,
-    absolute,
-    getPath,
-    setPath,
-    makeArray,
-    randomString,
-    isBrowser,
-    debug,
-    checkResponse,
-    responseToJSON,
-    humanizeError,
-    jwtDecode,
-    request,
-    atob,
-    btoa,
-    byCode,
-    byCodes,
-    units,
-    getPatientParam,
-    getAndCache
-};

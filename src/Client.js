@@ -1,7 +1,7 @@
 /// <reference path="types.d.ts" />
-const {
+import {
     absolute,
-    debug: _debug,
+    debug as _debug,
     getPath,
     setPath,
     jwtDecode,
@@ -12,13 +12,16 @@ const {
     byCodes,
     units,
     getPatientParam
-} = require("./lib");
+} from "./lib";
 
+import str from "./strings";
+import { fetchConformanceStatement, fetchFhirVersion } from "./smart";
+import { SMART_KEY, patientCompartment, fhirVersions } from "./settings";
+
+// @ts-ignore
+// eslint-disable-next-line no-undef
+const { Response } = global.FHIRCLIENT_PURE ? window : require("cross-fetch");
 const debug = _debug.extend("client");
-const str = require("./strings");
-const { fetchConformanceStatement, fetchFhirVersion } = require("./smart");
-const { SMART_KEY, patientCompartment, fhirVersions } = require("./settings");
-
 
 /**
  * Adds patient context to requestOptions object to be used with fhirclient.Client.request
@@ -171,7 +174,7 @@ function resolveRefs(obj, fhirOptions, cache, client) {
 /**
  * @implements { fhirclient.Client }
  */
-class FhirClient
+export default class FhirClient
 {
     /**
      * @param {object} environment
@@ -785,5 +788,3 @@ class FhirClient
         return this.getFhirVersion().then(v => fhirVersions[v || ""] || 0);
     }
 }
-
-module.exports = FhirClient;

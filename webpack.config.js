@@ -1,29 +1,17 @@
-/* global __dirname */
 const path = require("path");
-const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
-const webpack = require("webpack");
-const pkg = require("./package.json");
+const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
+const { DefinePlugin } = require("webpack");
 
 module.exports = function(env, argv) {
+    process.env.BABEL_ENV = argv.pure ? "pure" : "browser";
     const isDev = argv.mode === "development";
 
-    const plugins = [
-        new webpack.DefinePlugin({
-            HAS_FETCH: argv.pure || !pkg.browserslist.find(str => str.match(/\bie\b/i))
-        })
-    ];
-
-    plugins.push(new BundleAnalyzerPlugin({
-        analyzerMode  : "static",
-        openAnalyzer  : false,
-        reportFilename: `bundle${argv.pure ? ".pure" : ""}.${isDev ? "dev" : "prod"}.html`
-    }));
-
     return {
-        entry: __dirname + "/src/browser.js",
+        context: __dirname,
+        entry: "./src/browser.js",
         target: "web",
         output: {
-            path      : __dirname + "/dist/build",
+            path      : path.resolve(__dirname, "dist/build"),
             filename  : `fhir-client${argv.pure ? ".pure" : ""}${isDev ? "" : ".min"}.js`,
             library: "FHIR",
             libraryTarget: "window"
@@ -39,36 +27,25 @@ module.exports = function(env, argv) {
                 {
                     test: /\.js$/,
                     include: [
-                        path.resolve(__dirname, "src"),
-                        path.resolve(__dirname, "node_modules/debug")
+                        path.join(__dirname, "src"),
+                        require.resolve("debug")
                     ],
-                    use: {
-                        loader: "babel-loader",
-                        options: {
-                            plugins: ["@babel/plugin-transform-runtime"],
-                            presets: argv.pure ? [] : [
-                                [
-                                    "@babel/preset-env",
-                                    {
-                                        useBuiltIns: "usage",
-                                        modules: "commonjs",
-                                        corejs: {
-                                            version: 3,
-                                            proposals: true
-                                        },
-                                        // debug: true,
-                                        loose: true, // needed for IE 10
-                                    }
-                                ]
-                            ]
-                        }
-                    }
+                    use:  "babel-loader"
                 }
             ]
         },
         resolve: {
             extensions: [".js"]
         },
-        plugins
+        plugins: [
+            new DefinePlugin({
+                "global.FHIRCLIENT_PURE": argv.pure
+            }),
+            new BundleAnalyzerPlugin({
+                analyzerMode  : "static",
+                openAnalyzer  : false,
+                reportFilename: `bundle${argv.pure ? ".pure" : ""}.${isDev ? "dev" : "prod"}.html`
+            })
+        ]
     };
 };

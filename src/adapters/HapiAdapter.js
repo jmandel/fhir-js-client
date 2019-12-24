@@ -1,4 +1,4 @@
-const NodeAdapter = require("./NodeAdapter").Adapter;
+import { Adapter as NodeAdapter } from "./NodeAdapter";
 
 /**
  * Hapi Adapter
@@ -34,5 +34,5 @@ class HapiAdapter extends NodeAdapter
     }
 }
 
-module.exports = HapiAdapter.smart;
-module.exports.Adapter = HapiAdapter;
+export default HapiAdapter.smart;
+export { HapiAdapter as Adapter };

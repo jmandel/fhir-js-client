@@ -1,6 +1,6 @@
-const MemoryStorage = require("./MemoryStorage");
+import MemoryStorage from "./MemoryStorage";
 
-class HttpRequest
+export default class HttpRequest
 {
     constructor(url)
     {
@@ -9,5 +9,3 @@ class HttpRequest
         this.session = new MemoryStorage();
     }
 }
-
-module.exports = HttpRequest;

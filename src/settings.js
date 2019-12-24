@@ -1,7 +1,7 @@
 /**
  * Combined list of FHIR resource types accepting patient parameter in FHIR R2-R4
  */
-const patientCompartment = [
+export const patientCompartment = [
     "Account",
     "AdverseEvent",
     "AllergyIntolerance",
@@ -83,7 +83,7 @@ const patientCompartment = [
 /**
  * Map of FHIR releases and their abstract version as number
  */
-const fhirVersions = {
+export const fhirVersions = {
     "0.4.0": 2,
     "0.5.0": 2,
     "1.0.0": 2,
@@ -104,7 +104,7 @@ const fhirVersions = {
  * Combined (FHIR R2-R4) list of search parameters that can be used to scope
  * a request by patient ID.
  */
-const patientParams = [
+export const patientParams = [
     "requester",
     "patient",
     "subject",
@@ -116,11 +116,4 @@ const patientParams = [
 /**
  * The name of the sessionStorage entry that contains the current key
  */
-const SMART_KEY = "SMART_KEY";
-
-module.exports = {
-    SMART_KEY,
-    patientParams,
-    fhirVersions,
-    patientCompartment
-};
+export const SMART_KEY = "SMART_KEY";

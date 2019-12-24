@@ -1,9 +1,9 @@
 /* global fhir */
-const EventEmitter  = require("events");
-const MemoryStorage = require("./MemoryStorage");
-const Location      = require("./Location");
+import EventEmitter from "events";
+import MemoryStorage from "./MemoryStorage";
+import Location      from "./Location";
 
-class BrowserEnvironment extends EventEmitter
+export default class BrowserEnvironment extends EventEmitter
 {
     constructor(options)
     {
@@ -45,5 +45,3 @@ class BrowserEnvironment extends EventEmitter
         return new URL(url, this._location.href).href;
     }
 }
-
-module.exports = BrowserEnvironment;

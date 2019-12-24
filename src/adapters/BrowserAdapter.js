@@ -1,6 +1,7 @@
+/* eslint-env browser */
 /* global fhir */
-const BrowserStorage = require("../storage/BrowserStorage");
-const BaseAdapter    = require("./BaseAdapter");
+import BrowserStorage from "../storage/BrowserStorage";
+import BaseAdapter    from "./BaseAdapter";
 
 /**
  * Browser Adapter
@@ -62,5 +63,5 @@ class BrowserAdapter extends BaseAdapter
     }
 }
 
-module.exports = BrowserAdapter.smart;
-module.exports.Adapter = BrowserAdapter;
+export default BrowserAdapter.smart;
+export { BrowserAdapter as Adapter };

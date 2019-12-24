@@ -1,33 +1,44 @@
+"use strict";
+
+require("core-js/modules/es.array.flat");
+
+require("core-js/modules/es.array.iterator");
+
+require("core-js/modules/es.array.sort");
+
+require("core-js/modules/es.array.unscopables.flat");
+
+require("core-js/modules/es.promise");
+
+require("core-js/modules/es.promise.finally");
+
+require("core-js/modules/es.string.replace");
+
+require("core-js/modules/web.url");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _lib = require("./lib");
+
+var _strings = _interopRequireDefault(require("./strings"));
+
+var _smart = require("./smart");
+
+var _settings = require("./settings");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 /// <reference path="types.d.ts" />
+// @ts-ignore
+// eslint-disable-next-line no-undef
 const {
-  absolute,
-  debug: _debug,
-  getPath,
-  setPath,
-  jwtDecode,
-  makeArray,
-  request,
-  btoa,
-  byCode,
-  byCodes,
-  units,
-  getPatientParam
-} = require("./lib");
+  Response
+} = global.FHIRCLIENT_PURE ? window : require("cross-fetch");
 
-const debug = _debug.extend("client");
-
-const str = require("./strings");
-
-const {
-  fetchConformanceStatement,
-  fetchFhirVersion
-} = require("./smart");
-
-const {
-  SMART_KEY,
-  patientCompartment,
-  fhirVersions
-} = require("./settings");
+const debug = _lib.debug.extend("client");
 /**
  * Adds patient context to requestOptions object to be used with fhirclient.Client.request
  * @param {Object|String} requestOptions Can be a string URL (relative to
@@ -43,17 +54,17 @@ async function contextualize(requestOptions, client) {
   //   const fetchFhirVersion = require("./smart").fetchFhirVersion;
   //   const fhirVersion = client.state.fhirVersion || await fetchFhirVersion(client.state.serverUrl) || "";
   //   const fhirRelease = fhirVersionsMap[fhirVersion];
-  const base = absolute("/", client.state.serverUrl);
+  const base = (0, _lib.absolute)("/", client.state.serverUrl);
 
   async function contextualURL(url) {
     const resourceType = url.pathname.split("/").pop();
 
-    if (patientCompartment.indexOf(resourceType) == -1) {
+    if (_settings.patientCompartment.indexOf(resourceType) == -1) {
       throw new Error(`Cannot filter "${resourceType}" resources by patient`);
     }
 
-    const conformance = await fetchConformanceStatement(client.state.serverUrl);
-    const searchParam = getPatientParam(conformance, resourceType);
+    const conformance = await (0, _smart.fetchConformanceStatement)(client.state.serverUrl);
+    const searchParam = (0, _lib.getPatientParam)(conformance, resourceType);
     url.searchParams.set(searchParam, client.patient.id);
     return url.href;
   }
@@ -103,20 +114,20 @@ function getRef(refId, cache, client) {
 
 
 function resolveRef(obj, path, graph, cache, client) {
-  const node = getPath(obj, path);
+  const node = (0, _lib.getPath)(obj, path);
 
   if (node) {
     const isArray = Array.isArray(node);
-    return Promise.all(makeArray(node).map((item, i) => {
+    return Promise.all((0, _lib.makeArray)(node).map((item, i) => {
       const ref = item.reference;
 
       if (ref) {
         return getRef(ref, cache, client).then(sub => {
           if (graph) {
             if (isArray) {
-              setPath(obj, `${path}.${i}`, sub);
+              (0, _lib.setPath)(obj, `${path}.${i}`, sub);
             } else {
-              setPath(obj, path, sub);
+              (0, _lib.setPath)(obj, path, sub);
             }
           }
         }).catch(() => {
@@ -138,7 +149,7 @@ function resolveRef(obj, path, graph, cache, client) {
 
 function resolveRefs(obj, fhirOptions, cache, client) {
   // 1. Sanitize paths, remove any invalid ones
-  let paths = makeArray(fhirOptions.resolveReferences).filter(Boolean) // No false, 0, null, undefined or ""
+  let paths = (0, _lib.makeArray)(fhirOptions.resolveReferences).filter(Boolean) // No false, 0, null, undefined or ""
   .map(path => String(path).trim()).filter(Boolean); // No space-only strings
   // 2. Remove duplicates
 
@@ -273,7 +284,7 @@ class FhirClient {
       const options = {
         baseUrl: this.state.serverUrl.replace(/\/$/, "")
       };
-      const accessToken = getPath(this, "state.tokenResponse.access_token");
+      const accessToken = (0, _lib.getPath)(this, "state.tokenResponse.access_token");
 
       if (accessToken) {
         options.auth = {
@@ -294,7 +305,7 @@ class FhirClient {
       }
 
       this.api = fhirJs(options);
-      const patientId = getPath(this, "state.tokenResponse.patient");
+      const patientId = (0, _lib.getPath)(this, "state.tokenResponse.patient");
 
       if (patientId) {
         this.patient.api = fhirJs({ ...options,
@@ -317,7 +328,7 @@ class FhirClient {
       // the patient. This should be a scope issue.
       if (!tokenResponse.patient) {
         if (!(this.state.scope || "").match(/\blaunch(\/patient)?\b/)) {
-          debug(str.noScopeForId, "patient", "patient");
+          debug(_strings.default.noScopeForId, "patient", "patient");
         } else {
           // The server should have returned the patient!
           debug("The ID of the selected patient is not available. Please check if your server supports that.");
@@ -330,9 +341,9 @@ class FhirClient {
     }
 
     if (this.state.authorizeUri) {
-      debug(str.noIfNoAuth, "the ID of the selected patient");
+      debug(_strings.default.noIfNoAuth, "the ID of the selected patient");
     } else {
-      debug(str.noFreeContext, "selected patient");
+      debug(_strings.default.noFreeContext, "selected patient");
     }
 
     return null;
@@ -353,7 +364,7 @@ class FhirClient {
       // the encounter. This should be a scope issue.
       if (!tokenResponse.encounter) {
         if (!(this.state.scope || "").match(/\blaunch(\/encounter)?\b/)) {
-          debug(str.noScopeForId, "encounter", "encounter");
+          debug(_strings.default.noScopeForId, "encounter", "encounter");
         } else {
           // The server should have returned the encounter!
           debug("The ID of the selected encounter is not available. Please check if your server supports that, and that the selected patient has any recorded encounters.");
@@ -366,9 +377,9 @@ class FhirClient {
     }
 
     if (this.state.authorizeUri) {
-      debug(str.noIfNoAuth, "the ID of the selected encounter");
+      debug(_strings.default.noIfNoAuth, "the ID of the selected encounter");
     } else {
-      debug(str.noFreeContext, "selected encounter");
+      debug(_strings.default.noFreeContext, "selected encounter");
     }
 
     return null;
@@ -403,13 +414,13 @@ class FhirClient {
         return null;
       }
 
-      return jwtDecode(idToken);
+      return (0, _lib.jwtDecode)(idToken);
     }
 
     if (this.state.authorizeUri) {
-      debug(str.noIfNoAuth, "the id_token");
+      debug(_strings.default.noIfNoAuth, "the id_token");
     } else {
-      debug(str.noFreeContext, "id_token");
+      debug(_strings.default.noFreeContext, "id_token");
     }
 
     return null;
@@ -461,7 +472,7 @@ class FhirClient {
   }
 
   getAuthorizationHeader() {
-    const accessToken = getPath(this, "state.tokenResponse.access_token");
+    const accessToken = (0, _lib.getPath)(this, "state.tokenResponse.access_token");
 
     if (accessToken) {
       return "Bearer " + accessToken;
@@ -473,7 +484,7 @@ class FhirClient {
     } = this.state;
 
     if (username && password) {
-      return "Basic " + btoa(username + ":" + password);
+      return "Basic " + (0, _lib.btoa)(username + ":" + password);
     }
 
     return null;
@@ -481,13 +492,13 @@ class FhirClient {
 
   async _clearState() {
     const storage = this.environment.getStorage();
-    const key = await storage.get(SMART_KEY);
+    const key = await storage.get(_settings.SMART_KEY);
 
     if (key) {
       await storage.unset(key);
     }
 
-    await storage.unset(SMART_KEY);
+    await storage.unset(_settings.SMART_KEY);
     this.state.tokenResponse = {};
   }
   /**
@@ -541,7 +552,7 @@ class FhirClient {
 
 
   async request(requestOptions, fhirOptions = {}, _resolvedRefs = {}) {
-    const debug = _debug.extend("client:request");
+    const debug = _lib.debug.extend("client:request");
 
     if (!requestOptions) {
       throw new Error("request requires an url or request options as argument");
@@ -557,7 +568,7 @@ class FhirClient {
       url = String(requestOptions.url);
     }
 
-    url = absolute(url, this.state.serverUrl); // authentication ------------------------------------------------------
+    url = (0, _lib.absolute)(url, this.state.serverUrl); // authentication ------------------------------------------------------
 
     const authHeader = this.getAuthorizationHeader();
 
@@ -578,12 +589,12 @@ class FhirClient {
 
     const hasPageCallback = typeof fhirOptions.onPage == "function";
     debug("%s, options: %O, fhirOptions: %O", url, requestOptions, fhirOptions);
-    return request(url, requestOptions) // Automatic re-auth via refresh token -----------------------------
+    return (0, _lib.request)(url, requestOptions) // Automatic re-auth via refresh token -----------------------------
     .catch(error => {
       debug("%o", error);
 
       if (error.status == 401 && fhirOptions.useRefreshToken !== false) {
-        const hasRefreshToken = getPath(this, "state.tokenResponse.refresh_token");
+        const hasRefreshToken = (0, _lib.getPath)(this, "state.tokenResponse.refresh_token");
 
         if (hasRefreshToken) {
           return this.refresh().then(() => this.request({ ...requestOptions,
@@ -597,7 +608,7 @@ class FhirClient {
     .catch(async error => {
       if (error.status == 401) {
         // !accessToken -> not authorized -> No session. Need to launch.
-        if (!getPath(this, "state.tokenResponse.access_token")) {
+        if (!(0, _lib.getPath)(this, "state.tokenResponse.access_token")) {
           throw new Error("This app cannot be accessed directly. Please launch it as SMART app!");
         } // !fhirOptions.useRefreshToken -> auto-refresh not enabled
         // Session expired. Need to re-launch. Clear state to
@@ -607,14 +618,14 @@ class FhirClient {
         if (fhirOptions.useRefreshToken === false) {
           debug("Your session has expired and the useRefreshToken option is set to false. Please re-launch the app.");
           await this._clearState();
-          throw new Error(str.expired);
+          throw new Error(_strings.default.expired);
         } // otherwise -> auto-refresh failed. Session expired.
         // Need to re-launch. Clear state to start over!
 
 
         debug("Auto-refresh failed! Please re-launch the app.");
         await this._clearState();
-        throw new Error(str.expired);
+        throw new Error(_strings.default.expired);
       }
 
       throw error;
@@ -657,7 +668,7 @@ class FhirClient {
 
           if (--fhirOptions.pageLimit) {
             const next = links.find(l => l.relation == "next");
-            data = makeArray(data);
+            data = (0, _lib.makeArray)(data);
 
             if (next && next.url) {
               const nextPage = await this.request(next.url, fhirOptions, _resolvedRefs);
@@ -668,10 +679,10 @@ class FhirClient {
 
               if (fhirOptions.resolveReferences && fhirOptions.resolveReferences.length) {
                 Object.assign(_resolvedRefs, nextPage.references);
-                return data.concat(makeArray(nextPage.data || nextPage));
+                return data.concat((0, _lib.makeArray)(nextPage.data || nextPage));
               }
 
-              return data.concat(makeArray(nextPage));
+              return data.concat((0, _lib.makeArray)(nextPage));
             }
           }
         }
@@ -700,10 +711,10 @@ class FhirClient {
 
 
   refresh() {
-    const debug = _debug.extend("client:refresh");
+    const debug = _lib.debug.extend("client:refresh");
 
     debug("Attempting to refresh with refresh_token...");
-    const refreshToken = getPath(this, "state.tokenResponse.refresh_token");
+    const refreshToken = (0, _lib.getPath)(this, "state.tokenResponse.refresh_token");
 
     if (!refreshToken) {
       throw new Error("Unable to refresh. No refresh_token found.");
@@ -715,7 +726,7 @@ class FhirClient {
       throw new Error("Unable to refresh. No tokenUri found.");
     }
 
-    const scopes = getPath(this, "state.tokenResponse.scope") || "";
+    const scopes = (0, _lib.getPath)(this, "state.tokenResponse.scope") || "";
 
     if (scopes.indexOf("offline_access") == -1) {
       throw new Error("Unable to refresh. No offline_access scope found.");
@@ -726,7 +737,7 @@ class FhirClient {
 
 
     if (!this._refreshTask) {
-      this._refreshTask = request(tokenUri, {
+      this._refreshTask = (0, _lib.request)(tokenUri, {
         mode: "cors",
         method: "POST",
         headers: {
@@ -763,7 +774,7 @@ class FhirClient {
 
 
   byCode(observations, property) {
-    return byCode(observations, property);
+    return (0, _lib.byCode)(observations, property);
   }
   /**
    * @param {object|object[]} observations
@@ -773,15 +784,15 @@ class FhirClient {
 
 
   byCodes(observations, property) {
-    return byCodes(observations, property);
+    return (0, _lib.byCodes)(observations, property);
   }
 
   get units() {
-    return units;
+    return _lib.units;
   }
 
   getPath(object, path) {
-    return getPath(object, path);
+    return (0, _lib.getPath)(object, path);
   }
   /**
    * Returns a promise that will be resolved with the fhir version as defined
@@ -790,7 +801,7 @@ class FhirClient {
 
 
   getFhirVersion() {
-    return fetchFhirVersion(this.state.serverUrl);
+    return (0, _smart.fetchFhirVersion)(this.state.serverUrl);
   }
   /**
    * Returns a promise that will be resolved with the numeric fhir version
@@ -802,9 +813,9 @@ class FhirClient {
 
 
   getFhirRelease() {
-    return this.getFhirVersion().then(v => fhirVersions[v || ""] || 0);
+    return this.getFhirVersion().then(v => _settings.fhirVersions[v || ""] || 0);
   }
 
 }
 
-module.exports = FhirClient;
+exports.default = FhirClient;

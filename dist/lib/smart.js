@@ -1,33 +1,39 @@
-const {
-  isBrowser,
-  debug: _debug,
-  request,
-  getPath,
-  randomString,
-  btoa,
-  getAndCache
-} = require("./lib");
+"use strict";
 
-const debug = _debug.extend("oauth2");
+require("core-js/modules/es.promise");
 
-const {
-  SMART_KEY
-} = require("./settings");
-/**
- * Creates and returns a Client instance.
- * Note that this is done within a function to postpone the "./Client" import
- * and avoid cyclic dependency.
- * @param {fhirclient.JsonObject} env The adapter
- * @param {string | fhirclient.ClientState} state The client state or baseUrl
- * @returns {fhirclient.Client}
- */
+require("core-js/modules/es.string.replace");
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.fetchConformanceStatement = fetchConformanceStatement;
+exports.fetchWellKnownJson = fetchWellKnownJson;
+exports.fetchFhirVersion = fetchFhirVersion;
+exports.getSecurityExtensions = getSecurityExtensions;
+exports.authorize = authorize;
+exports.completeAuth = completeAuth;
+exports.buildTokenRequest = buildTokenRequest;
+exports.ready = ready;
+exports.init = init;
+Object.defineProperty(exports, "KEY", {
+  enumerable: true,
+  get: function () {
+    return _settings.SMART_KEY;
+  }
+});
 
-function createClient(env, state) {
-  const Client = require("./Client");
+var _lib = require("./lib");
 
-  return new Client(env, state);
-}
+var _Client = _interopRequireDefault(require("./Client"));
+
+var _settings = require("./settings");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/* global window */
+const debug = _lib.debug.extend("oauth2");
+
 /**
  * Fetches the conformance statement from the given base URL.
  * Note that the result is cached in memory (until the page is reloaded in the
@@ -35,18 +41,16 @@ function createClient(env, state) {
  * @param {String} baseUrl The base URL of the FHIR server
  * @returns {Promise<fhirclient.JsonObject>}
  */
-
-
 function fetchConformanceStatement(baseUrl = "/") {
   const url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
-  return getAndCache(url).catch(ex => {
+  return (0, _lib.getAndCache)(url).catch(ex => {
     throw new Error(`Failed to fetch the conformance statement from "${url}". ${ex}`);
   });
 }
 
 function fetchWellKnownJson(baseUrl = "/") {
   const url = String(baseUrl).replace(/\/*$/, "/") + ".well-known/smart-configuration";
-  return getAndCache(url).catch(ex => {
+  return (0, _lib.getAndCache)(url).catch(ex => {
     throw new Error(`Failed to fetch the well-known json "${url}". ${ex.message}`);
   });
 }
@@ -75,7 +79,7 @@ function getSecurityExtensions(baseUrl = "/") {
     };
   }).catch(() => fetchConformanceStatement(baseUrl).then(metadata => {
     const nsUri = "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris";
-    const extensions = (getPath(metadata || {}, "rest.0.security.extension") || []).filter(e => e.url === nsUri).map(o => o.extension)[0];
+    const extensions = ((0, _lib.getPath)(metadata || {}, "rest.0.security.extension") || []).filter(e => e.url === nsUri).map(o => o.extension)[0];
     const out = {
       registrationUri: "",
       authorizeUri: "",
@@ -163,9 +167,9 @@ async function authorize(env, params = {}, _noRedirect = false) {
   } // prevent inheritance of tokenResponse from parent window
 
 
-  await storage.unset(SMART_KEY); // create initial state
+  await storage.unset(_settings.SMART_KEY); // create initial state
 
-  const stateKey = randomString(16);
+  const stateKey = (0, _lib.randomString)(16);
   const state = {
     clientId,
     scope,
@@ -254,7 +258,7 @@ async function completeAuth(env) {
   const authErrorDescription = params.get("error_description");
 
   if (!key) {
-    key = await Storage.get(SMART_KEY);
+    key = await Storage.get(_settings.SMART_KEY);
   } // Start by checking the url for `error` and `error_description` parameters.
   // This happens when the auth server rejects our authorization attempt. In
   // this case it has no other way to tell us what the error was, other than
@@ -279,11 +283,11 @@ async function completeAuth(env) {
 
 
   let state = await Storage.get(key);
-  const fullSessionStorageSupport = isBrowser() ? getPath(env, "options.fullSessionStorageSupport") : true; // Do we have to remove the `code` and `state` params from the URL?
+  const fullSessionStorageSupport = (0, _lib.isBrowser)() ? (0, _lib.getPath)(env, "options.fullSessionStorageSupport") : true; // Do we have to remove the `code` and `state` params from the URL?
 
   const hasState = params.has("state");
 
-  if (isBrowser() && getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
+  if ((0, _lib.isBrowser)() && (0, _lib.getPath)(env, "options.replaceBrowserHistory") && (code || hasState)) {
     // `code` is the flag that tell us to request an access token.
     // We have to remove it, otherwise the page will authorize on
     // every load!
@@ -331,7 +335,7 @@ async function completeAuth(env) {
     // includes an access token or a message indicating that the
     // authorization request has been denied.
 
-    let tokenResponse = await request(state.tokenUri, requestOptions);
+    let tokenResponse = await (0, _lib.request)(state.tokenUri, requestOptions);
     debug("Token response: %O", tokenResponse);
 
     if (!tokenResponse.access_token) {
@@ -350,10 +354,10 @@ async function completeAuth(env) {
   }
 
   if (fullSessionStorageSupport) {
-    await Storage.set(SMART_KEY, key);
+    await Storage.set(_settings.SMART_KEY, key);
   }
 
-  const client = createClient(env, state);
+  const client = new _Client.default(env, state);
   debug("Created client instance: %O", client);
   return client;
 }
@@ -398,7 +402,7 @@ function buildTokenRequest(code, state) {
   // client_id and the password is the app’s client_secret (see example).
 
   if (clientSecret) {
-    requestOptions.headers.Authorization = "Basic " + btoa(clientId + ":" + clientSecret);
+    requestOptions.headers.Authorization = "Basic " + (0, _lib.btoa)(clientId + ":" + clientSecret);
     debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
   } else {
     debug("No clientSecret found in state. Adding the clientId to the POST body");
@@ -442,11 +446,11 @@ async function init(env, options) {
 
 
   const storage = env.getStorage();
-  const key = state || (await storage.get(SMART_KEY));
+  const key = state || (await storage.get(_settings.SMART_KEY));
   const cached = await storage.get(key);
 
   if (cached) {
-    return Promise.resolve(createClient(env, cached));
+    return new _Client.default(env, cached);
   } // Otherwise try to launch
 
 
@@ -463,16 +467,3 @@ async function init(env, options) {
     });
   });
 }
-
-module.exports = {
-  fetchConformanceStatement,
-  fetchWellKnownJson,
-  getSecurityExtensions,
-  buildTokenRequest,
-  fetchFhirVersion,
-  authorize,
-  completeAuth,
-  ready,
-  init,
-  KEY: SMART_KEY
-};

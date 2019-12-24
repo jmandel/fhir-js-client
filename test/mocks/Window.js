@@ -11,7 +11,7 @@ class History
     }
 }
 
-class Window
+export default class Window
 {
     constructor()
     {
@@ -35,5 +35,3 @@ class Window
         return Buffer.from(str, "base64").toString("ascii");
     }
 }
-
-module.exports = Window;

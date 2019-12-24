@@ -1,14 +1,15 @@
-const { URL }    = require("url");
-const { expect } = require("@hapi/code");
-const lab        = require("@hapi/lab").script();
-const smart      = require("../src/smart");
+/* eslint-env browser */
+import { URL }    from "url";
+import { expect } from "@hapi/code";
+import Lab        from "@hapi/lab";
+import * as smart from "../src/smart";
 
 // mocks
-const BrowserEnv = require("./mocks/BrowserEnvironment");
-const Window     = require("./mocks/Window");
-const mockServer = require("./mocks/mockServer");
+import BrowserEnv from "./mocks/BrowserEnvironment";
+import Window     from "./mocks/Window";
+import mockServer from "./mocks/mockServer";
 
-
+export const lab = Lab.script();
 const {
     it,
     describe,
@@ -17,7 +18,6 @@ const {
     beforeEach,
     afterEach
 } = lab;
-exports.lab = lab;
 
 let mockDataServer, mockUrl;
 

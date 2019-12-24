@@ -1,3 +1,10 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.SMART_KEY = exports.patientParams = exports.fhirVersions = exports.patientCompartment = void 0;
+
 /**
  * Combined list of FHIR resource types accepting patient parameter in FHIR R2-R4
  */
@@ -6,6 +13,7 @@ const patientCompartment = ["Account", "AdverseEvent", "AllergyIntolerance", "Ap
  * Map of FHIR releases and their abstract version as number
  */
 
+exports.patientCompartment = patientCompartment;
 const fhirVersions = {
   "0.4.0": 2,
   "0.5.0": 2,
@@ -27,15 +35,12 @@ const fhirVersions = {
  * a request by patient ID.
  */
 
+exports.fhirVersions = fhirVersions;
 const patientParams = ["requester", "patient", "subject", "member", "actor", "beneficiary"];
 /**
  * The name of the sessionStorage entry that contains the current key
  */
 
+exports.patientParams = patientParams;
 const SMART_KEY = "SMART_KEY";
-module.exports = {
-  SMART_KEY,
-  patientParams,
-  fhirVersions,
-  patientCompartment
-};
+exports.SMART_KEY = SMART_KEY;

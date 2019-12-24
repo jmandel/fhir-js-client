@@ -13,12 +13,12 @@
     "Client"
   ],
   "license": "Apache-2.0",
-  "main": "lib/adapters/NodeAdapter.js",
+  "main": "lib/index.js",
   "browser": "lib/browser.js",
   "dependencies": {
-    "debug": "^4.1.1",
-    "node-fetch-npm": "^2.0.2",
-    "whatwg-fetch": "^3.0.0"
+    "core-js": "^3.5.0",
+    "cross-fetch": "^3.0.4",
+    "debug": "^4.1.1"
   },
   "engine": "node >= 10",
   "browserslist": [

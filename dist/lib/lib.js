@@ -1,14 +1,53 @@
+"use strict";
+
+require("core-js/modules/es.array.iterator");
+
+require("core-js/modules/es.promise");
+
+require("core-js/modules/es.string.replace");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.isBrowser = isBrowser;
+exports.checkResponse = checkResponse;
+exports.responseToJSON = responseToJSON;
+exports.request = request;
+exports.humanizeError = humanizeError;
+exports.stripTrailingSlash = stripTrailingSlash;
+exports.getPath = getPath;
+exports.setPath = setPath;
+exports.makeArray = makeArray;
+exports.absolute = absolute;
+exports.randomString = randomString;
+exports.atob = atob;
+exports.btoa = btoa;
+exports.jwtDecode = jwtDecode;
+exports.byCode = byCode;
+exports.byCodes = byCodes;
+exports.ensureNumerical = ensureNumerical;
+exports.getPatientParam = getPatientParam;
+exports.units = exports.getAndCache = exports.debug = void 0;
+
+var _HttpError = _interopRequireDefault(require("./HttpError"));
+
+var _settings = require("./settings");
+
+var _debug2 = _interopRequireDefault(require("debug"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 /*
  * This file contains some shared functions. The are used by other modules, but
  * are defined here so that tests can import this library and test them.
  */
-const HttpError = require("./HttpError");
+// @ts-ignore
+// eslint-disable-next-line no-undef
+const fetch = global.FHIRCLIENT_PURE ? window.fetch : require("cross-fetch").fetch;
 
-const debug = require("debug")("FHIR");
+const _debug = (0, _debug2.default)("FHIR");
 
-const {
-  patientParams
-} = require("./settings");
+exports.debug = _debug;
 
 function isBrowser() {
   return typeof window === "object";
@@ -85,6 +124,8 @@ const getAndCache = (() => {
   };
 })();
 
+exports.getAndCache = getAndCache;
+
 async function humanizeError(resp) {
   let msg = `${resp.status} ${resp.statusText}\nURL: ${resp.url}`;
 
@@ -115,7 +156,7 @@ async function humanizeError(resp) {
   } catch (_) {// ignore
   }
 
-  throw new HttpError(msg, resp.status, resp.statusText);
+  throw new _HttpError.default(msg, resp.status, resp.statusText);
 }
 
 function stripTrailingSlash(str) {
@@ -197,6 +238,7 @@ function randomString(strLength = 8, charSet = null) {
 
 function atob(str) {
   if (isBrowser()) {
+    // eslint-disable-next-line no-undef
     return window.atob(str);
   } // The "global." makes Webpack understand that it doesn't have to include
   // the Buffer code in the bundle
@@ -207,6 +249,7 @@ function atob(str) {
 
 function btoa(str) {
   if (isBrowser()) {
+    // eslint-disable-next-line no-undef
     return window.btoa(str);
   } // The "global." makes Webpack understand that it doesn't have to include
   // the Buffer code in the bundle
@@ -327,6 +370,8 @@ const units = {
  * @param {string} resourceType
  */
 
+exports.units = units;
+
 function getPatientParam(conformance, resourceType) {
   // Find what resources are supported by this server
   const resources = getPath(conformance, "rest.0.resource") || []; // Check if this resource is supported
@@ -338,31 +383,9 @@ function getPatientParam(conformance, resourceType) {
 
   if (resourceType == "Patient" && meta.searchParam.find(x => x.name == "_id")) return "_id"; // Now find the first possible parameter name
 
-  let out = patientParams.find(p => meta.searchParam.find(x => x.name == p)); // If there is no match
+  let out = _settings.patientParams.find(p => meta.searchParam.find(x => x.name == p)); // If there is no match
+
 
   if (!out) throw new Error("I don't know what param to use for " + resourceType);
   return out;
 }
-
-module.exports = {
-  stripTrailingSlash,
-  absolute,
-  getPath,
-  setPath,
-  makeArray,
-  randomString,
-  isBrowser,
-  debug,
-  checkResponse,
-  responseToJSON,
-  humanizeError,
-  jwtDecode,
-  request,
-  atob,
-  btoa,
-  byCode,
-  byCodes,
-  units,
-  getPatientParam,
-  getAndCache
-};

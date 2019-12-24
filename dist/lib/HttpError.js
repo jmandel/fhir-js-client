@@ -1,3 +1,10 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
 class HttpError extends Error {
   constructor(message, statusCode, statusText) {
     super(message);
@@ -46,4 +53,4 @@ class HttpError extends Error {
 
 }
 
-module.exports = HttpError;
+exports.default = HttpError;

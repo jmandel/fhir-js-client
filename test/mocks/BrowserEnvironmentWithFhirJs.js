@@ -1,8 +1,11 @@
-const BrowserEnvironment = require("./BrowserEnvironment");
-const { JSDOM }  = require("jsdom");
+/* eslint-env browser */
+import BrowserEnvironment from "./BrowserEnvironment";
+import fetch from "cross-fetch";
+import { JSDOM } from "jsdom";
 
 const dom = new JSDOM("", { url: "http://localhost" });
 global.window = dom.window;
+global.fetch = fetch;
 
 class BrowserEnvironmentWithFhirJs extends BrowserEnvironment
 {
@@ -14,4 +17,4 @@ class BrowserEnvironmentWithFhirJs extends BrowserEnvironment
     }
 }
 
-module.exports = BrowserEnvironmentWithFhirJs;
+export default BrowserEnvironmentWithFhirJs;

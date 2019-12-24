@@ -1,13 +1,29 @@
-const smart = require("../smart");
+"use strict";
 
-const Client = require("../Client");
+require("core-js/modules/es.array.iterator");
+
+require("core-js/modules/web.url");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var smart = _interopRequireWildcard(require("../smart"));
+
+var _Client = _interopRequireDefault(require("../Client"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
 /**
  * This is the abstract base class that adapters must inherit. It just a
  * collection of environment-specific methods that subclasses have to implement.
  * @type { fhirclient.Adapter }
  */
-
-
 class BaseAdapter {
   /**
    * @param {Object} options Environment-specific options
@@ -59,11 +75,11 @@ class BaseAdapter {
       ready: (...args) => smart.ready(this, ...args),
       authorize: options => smart.authorize(this, options),
       init: (...args) => smart.init(this, ...args),
-      client: state => new Client(this, state),
+      client: state => new _Client.default(this, state),
       options: this.options
     };
   }
 
 }
 
-module.exports = BaseAdapter;
+exports.default = BaseAdapter;

@@ -1,22 +1,25 @@
-const fetch = require("node-fetch-npm");
+"use strict";
 
-Object.assign(global, {
-  fetch,
-  Headers: fetch.Headers,
-  Request: fetch.Request,
-  Response: fetch.Response
+require("core-js/modules/es.array.iterator");
+
+require("core-js/modules/web.url");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
 });
+exports.Adapter = exports.default = void 0;
 
-const ServerStorage = require("../storage/ServerStorage");
+var _ServerStorage = _interopRequireDefault(require("../storage/ServerStorage"));
 
-const BaseAdapter = require("./BaseAdapter");
+var _BaseAdapter = _interopRequireDefault(require("./BaseAdapter"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 /**
  * Node Adapter - works with native NodeJS and with Express
  * @type {fhirclient.Adapter}
  */
-
-
-class NodeAdapter extends BaseAdapter {
+class NodeAdapter extends _BaseAdapter.default {
   /**
    * Given the current environment, this method must return the current url
    * as URL instance. In Node we might be behind a proxy!
@@ -69,7 +72,7 @@ class NodeAdapter extends BaseAdapter {
           this._storage = this.options.storage;
         }
       } else {
-        this._storage = new ServerStorage(this.options.request);
+        this._storage = new _ServerStorage.default(this.options.request);
       }
     }
 
@@ -94,5 +97,6 @@ class NodeAdapter extends BaseAdapter {
 
 }
 
-module.exports = NodeAdapter.smart;
-module.exports.Adapter = NodeAdapter;
+exports.Adapter = NodeAdapter;
+var _default = NodeAdapter.smart;
+exports.default = _default;

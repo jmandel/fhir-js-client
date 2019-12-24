@@ -1,11 +1,17 @@
-const NodeAdapter = require("./NodeAdapter").Adapter;
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Adapter = exports.default = void 0;
+
+var _NodeAdapter = require("./NodeAdapter");
+
 /**
  * Hapi Adapter
  * @type {fhirclient.Adapter}
  */
-
-
-class HapiAdapter extends NodeAdapter {
+class HapiAdapter extends _NodeAdapter.Adapter {
   /**
    * Given the current environment, this method must redirect to the given
    * path
@@ -34,5 +40,6 @@ class HapiAdapter extends NodeAdapter {
 
 }
 
-module.exports = HapiAdapter.smart;
-module.exports.Adapter = HapiAdapter;
+exports.Adapter = HapiAdapter;
+var _default = HapiAdapter.smart;
+exports.default = _default;

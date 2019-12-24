@@ -1,11 +1,11 @@
-const { expect } = require("@hapi/code");
-const lab        = require("@hapi/lab").script();
-const lib        = require("../src/lib");
-const HttpError  = require("../src/HttpError");
+import { expect } from "@hapi/code";
+import Lab        from "@hapi/lab";
+import { Response } from "cross-fetch";
+import * as lib   from "../src/lib";
+import HttpError  from "../src/HttpError";
 
+export const lab = Lab.script();
 const { it, describe } = lab;
-exports.lab = lab;
-
 
 describe("Lib", () => {
 
@@ -77,7 +77,7 @@ describe("Lib", () => {
             });
             await expect(lib.humanizeError(res)).to.reject(
                 HttpError,
-                "400 Bad Request\nURL: undefined\n\n{}"
+                "400 Bad Request\nURL: \n\n{}"
             );
         });
 
@@ -93,7 +93,7 @@ describe("Lib", () => {
             });
             await expect(lib.humanizeError(res)).to.reject(
                 HttpError,
-                "400 Bad Request\nURL: undefined\nmy-error"
+                "400 Bad Request\nURL: \nmy-error"
             );
         });
 
@@ -110,7 +110,7 @@ describe("Lib", () => {
             });
             await expect(lib.humanizeError(res)).to.reject(
                 HttpError,
-                "400 Bad Request\nURL: undefined\nmy-error: my-error-description"
+                "400 Bad Request\nURL: \nmy-error: my-error-description"
             );
         });
 
@@ -124,7 +124,7 @@ describe("Lib", () => {
             });
             await expect(lib.humanizeError(res)).to.reject(
                 HttpError,
-                "400 Bad Request\nURL: undefined\n\nmy-error"
+                "400 Bad Request\nURL: \n\nmy-error"
             );
         });
     });

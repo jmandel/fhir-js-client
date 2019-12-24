@@ -1,31 +1,30 @@
-/* global HAS_FETCH */
-// HAS_FETCH is a constant defined in our webpack config. It helps us exclude
-// the fetch polyfill from the library build if the targets do not include IE.
-// However, when the code is used as module it becomes part of a project, that
-// gets built with another build tool and the fetch polyfill might not be excluded!
-// @ts-ignore
-if (typeof HAS_FETCH == "undefined" || !HAS_FETCH && typeof window.fetch != "function") {
-  require("whatwg-fetch");
-} // In Browsers we create an adapter, get the SMART api from it and build the
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.oauth2 = exports.client = void 0;
+
+var _BrowserAdapter = _interopRequireDefault(require("./adapters/BrowserAdapter"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// In Browsers we create an adapter, get the SMART api from it and build the
 // global FHIR object
-
-
-const smart = require("./adapters/BrowserAdapter");
-
 const {
   ready,
   authorize,
   init,
   client,
   options
-} = smart(); // $lab:coverage:off$
+} = (0, _BrowserAdapter.default)(); // $lab:coverage:off$
 
-module.exports = {
-  client,
-  oauth2: {
-    settings: options,
-    ready,
-    authorize,
-    init
-  }
+exports.client = client;
+const oauth2 = {
+  settings: options,
+  ready,
+  authorize,
+  init
 }; // $lab:coverage:on$
+
+exports.oauth2 = oauth2;

@@ -1,13 +1,6 @@
-const fetch = require("node-fetch-npm");
-Object.assign(global, {
-    fetch,
-    Headers : fetch.Headers,
-    Request : fetch.Request,
-    Response: fetch.Response
-});
-const ServerStorage = require("../../src/storage/ServerStorage");
+import ServerStorage from "../../src/storage/ServerStorage";
 
-class ServerEnvironment
+export default class ServerEnvironment
 {
     constructor(request, response, storage)
     {
@@ -58,5 +51,3 @@ class ServerEnvironment
         return new URL(url, this.getUrl()).href;
     }
 }
-
-module.exports = ServerEnvironment;

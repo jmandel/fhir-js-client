@@ -97,12 +97,14 @@ window["FHIR"] =
 /**
  * Helpers.
  */
+
 var s = 1000;
 var m = s * 60;
 var h = m * 60;
 var d = h * 24;
 var w = d * 7;
 var y = d * 365.25;
+
 /**
  * Parse or format the given `val`.
  *
@@ -117,18 +119,20 @@ var y = d * 365.25;
  * @api public
  */
 
-module.exports = function (val, options) {
+module.exports = function(val, options) {
   options = options || {};
   var type = typeof val;
-
   if (type === 'string' && val.length > 0) {
     return parse(val);
   } else if (type === 'number' && isNaN(val) === false) {
     return options.long ? fmtLong(val) : fmtShort(val);
   }
-
-  throw new Error('val is not a non-empty string or a valid number. val=' + JSON.stringify(val));
+  throw new Error(
+    'val is not a non-empty string or a valid number. val=' +
+      JSON.stringify(val)
+  );
 };
+
 /**
  * Parse the given `str` and return milliseconds.
  *
@@ -137,23 +141,19 @@ module.exports = function (val, options) {
  * @api private
  */
 
-
 function parse(str) {
   str = String(str);
-
   if (str.length > 100) {
     return;
   }
-
-  var match = /^((?:\d+)?\-?\d?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(str);
-
+  var match = /^((?:\d+)?\-?\d?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
+    str
+  );
   if (!match) {
     return;
   }
-
   var n = parseFloat(match[1]);
   var type = (match[2] || 'ms').toLowerCase();
-
   switch (type) {
     case 'years':
     case 'year':
@@ -161,49 +161,43 @@ function parse(str) {
     case 'yr':
     case 'y':
       return n * y;
-
     case 'weeks':
     case 'week':
     case 'w':
       return n * w;
-
     case 'days':
     case 'day':
     case 'd':
       return n * d;
-
     case 'hours':
     case 'hour':
     case 'hrs':
     case 'hr':
     case 'h':
       return n * h;
-
     case 'minutes':
     case 'minute':
     case 'mins':
     case 'min':
     case 'm':
       return n * m;
-
     case 'seconds':
     case 'second':
     case 'secs':
     case 'sec':
     case 's':
       return n * s;
-
     case 'milliseconds':
     case 'millisecond':
     case 'msecs':
     case 'msec':
     case 'ms':
       return n;
-
     default:
       return undefined;
   }
 }
+
 /**
  * Short format for `ms`.
  *
@@ -212,28 +206,23 @@ function parse(str) {
  * @api private
  */
 
-
 function fmtShort(ms) {
   var msAbs = Math.abs(ms);
-
   if (msAbs >= d) {
     return Math.round(ms / d) + 'd';
   }
-
   if (msAbs >= h) {
     return Math.round(ms / h) + 'h';
   }
-
   if (msAbs >= m) {
     return Math.round(ms / m) + 'm';
   }
-
   if (msAbs >= s) {
     return Math.round(ms / s) + 's';
   }
-
   return ms + 'ms';
 }
+
 /**
  * Long format for `ms`.
  *
@@ -242,37 +231,32 @@ function fmtShort(ms) {
  * @api private
  */
 
-
 function fmtLong(ms) {
   var msAbs = Math.abs(ms);
-
   if (msAbs >= d) {
     return plural(ms, msAbs, d, 'day');
   }
-
   if (msAbs >= h) {
     return plural(ms, msAbs, h, 'hour');
   }
-
   if (msAbs >= m) {
     return plural(ms, msAbs, m, 'minute');
   }
-
   if (msAbs >= s) {
     return plural(ms, msAbs, s, 'second');
   }
-
   return ms + ' ms';
 }
+
 /**
  * Pluralization helper.
  */
-
 
 function plural(ms, msAbs, n, name) {
   var isPlural = msAbs >= n * 1.5;
   return Math.round(ms / n) + ' ' + name + (isPlural ? 's' : '');
 }
+
 
 /***/ }),
 
@@ -280,7 +264,7 @@ function plural(ms, msAbs, n, name) {
 /*!*******************************************!*\
   !*** ./node_modules/debug/src/browser.js ***!
   \*******************************************/
-/*! all exports used */
+/*! exports used: default */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process) {/* eslint-env browser */
@@ -288,17 +272,97 @@ function plural(ms, msAbs, n, name) {
 /**
  * This is the web browser implementation of `debug()`.
  */
+
 exports.log = log;
 exports.formatArgs = formatArgs;
 exports.save = save;
 exports.load = load;
 exports.useColors = useColors;
 exports.storage = localstorage();
+
 /**
  * Colors.
  */
 
-exports.colors = ['#0000CC', '#0000FF', '#0033CC', '#0033FF', '#0066CC', '#0066FF', '#0099CC', '#0099FF', '#00CC00', '#00CC33', '#00CC66', '#00CC99', '#00CCCC', '#00CCFF', '#3300CC', '#3300FF', '#3333CC', '#3333FF', '#3366CC', '#3366FF', '#3399CC', '#3399FF', '#33CC00', '#33CC33', '#33CC66', '#33CC99', '#33CCCC', '#33CCFF', '#6600CC', '#6600FF', '#6633CC', '#6633FF', '#66CC00', '#66CC33', '#9900CC', '#9900FF', '#9933CC', '#9933FF', '#99CC00', '#99CC33', '#CC0000', '#CC0033', '#CC0066', '#CC0099', '#CC00CC', '#CC00FF', '#CC3300', '#CC3333', '#CC3366', '#CC3399', '#CC33CC', '#CC33FF', '#CC6600', '#CC6633', '#CC9900', '#CC9933', '#CCCC00', '#CCCC33', '#FF0000', '#FF0033', '#FF0066', '#FF0099', '#FF00CC', '#FF00FF', '#FF3300', '#FF3333', '#FF3366', '#FF3399', '#FF33CC', '#FF33FF', '#FF6600', '#FF6633', '#FF9900', '#FF9933', '#FFCC00', '#FFCC33'];
+exports.colors = [
+	'#0000CC',
+	'#0000FF',
+	'#0033CC',
+	'#0033FF',
+	'#0066CC',
+	'#0066FF',
+	'#0099CC',
+	'#0099FF',
+	'#00CC00',
+	'#00CC33',
+	'#00CC66',
+	'#00CC99',
+	'#00CCCC',
+	'#00CCFF',
+	'#3300CC',
+	'#3300FF',
+	'#3333CC',
+	'#3333FF',
+	'#3366CC',
+	'#3366FF',
+	'#3399CC',
+	'#3399FF',
+	'#33CC00',
+	'#33CC33',
+	'#33CC66',
+	'#33CC99',
+	'#33CCCC',
+	'#33CCFF',
+	'#6600CC',
+	'#6600FF',
+	'#6633CC',
+	'#6633FF',
+	'#66CC00',
+	'#66CC33',
+	'#9900CC',
+	'#9900FF',
+	'#9933CC',
+	'#9933FF',
+	'#99CC00',
+	'#99CC33',
+	'#CC0000',
+	'#CC0033',
+	'#CC0066',
+	'#CC0099',
+	'#CC00CC',
+	'#CC00FF',
+	'#CC3300',
+	'#CC3333',
+	'#CC3366',
+	'#CC3399',
+	'#CC33CC',
+	'#CC33FF',
+	'#CC6600',
+	'#CC6633',
+	'#CC9900',
+	'#CC9933',
+	'#CCCC00',
+	'#CCCC33',
+	'#FF0000',
+	'#FF0033',
+	'#FF0066',
+	'#FF0099',
+	'#FF00CC',
+	'#FF00FF',
+	'#FF3300',
+	'#FF3333',
+	'#FF3366',
+	'#FF3399',
+	'#FF33CC',
+	'#FF33FF',
+	'#FF6600',
+	'#FF6633',
+	'#FF9900',
+	'#FF9933',
+	'#FFCC00',
+	'#FFCC33'
+];
+
 /**
  * Currently only WebKit-based Web Inspectors, Firefox >= v31,
  * and the Firebug extension (any Firefox version) are known
@@ -306,121 +370,130 @@ exports.colors = ['#0000CC', '#0000FF', '#0033CC', '#0033FF', '#0066CC', '#0066F
  *
  * TODO: add a `localStorage` variable to explicitly enable/disable colors
  */
+
 // eslint-disable-next-line complexity
-
 function useColors() {
-  // NB: In an Electron preload script, document will be defined but not fully
-  // initialized. Since we know we're in Chrome, we'll just detect this case
-  // explicitly
-  if (typeof window !== 'undefined' && window.process && (window.process.type === 'renderer' || window.process.__nwjs)) {
-    return true;
-  } // Internet Explorer and Edge do not support colors.
+	// NB: In an Electron preload script, document will be defined but not fully
+	// initialized. Since we know we're in Chrome, we'll just detect this case
+	// explicitly
+	if (typeof window !== 'undefined' && window.process && (window.process.type === 'renderer' || window.process.__nwjs)) {
+		return true;
+	}
 
+	// Internet Explorer and Edge do not support colors.
+	if (typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) {
+		return false;
+	}
 
-  if (typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) {
-    return false;
-  } // Is webkit? http://stackoverflow.com/a/16459606/376773
-  // document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
-
-
-  return typeof document !== 'undefined' && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance || // Is firebug? http://stackoverflow.com/a/398120/376773
-  typeof window !== 'undefined' && window.console && (window.console.firebug || window.console.exception && window.console.table) || // Is firefox >= v31?
-  // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-  typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31 || // Double check webkit in userAgent just in case we are in a worker
-  typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
+	// Is webkit? http://stackoverflow.com/a/16459606/376773
+	// document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
+	return (typeof document !== 'undefined' && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance) ||
+		// Is firebug? http://stackoverflow.com/a/398120/376773
+		(typeof window !== 'undefined' && window.console && (window.console.firebug || (window.console.exception && window.console.table))) ||
+		// Is firefox >= v31?
+		// https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
+		(typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31) ||
+		// Double check webkit in userAgent just in case we are in a worker
+		(typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/));
 }
+
 /**
  * Colorize log arguments if enabled.
  *
  * @api public
  */
 
-
 function formatArgs(args) {
-  args[0] = (this.useColors ? '%c' : '') + this.namespace + (this.useColors ? ' %c' : ' ') + args[0] + (this.useColors ? '%c ' : ' ') + '+' + module.exports.humanize(this.diff);
+	args[0] = (this.useColors ? '%c' : '') +
+		this.namespace +
+		(this.useColors ? ' %c' : ' ') +
+		args[0] +
+		(this.useColors ? '%c ' : ' ') +
+		'+' + module.exports.humanize(this.diff);
 
-  if (!this.useColors) {
-    return;
-  }
+	if (!this.useColors) {
+		return;
+	}
 
-  const c = 'color: ' + this.color;
-  args.splice(1, 0, c, 'color: inherit'); // The final "%c" is somewhat tricky, because there could be other
-  // arguments passed either before or after the %c, so we need to
-  // figure out the correct index to insert the CSS into
+	const c = 'color: ' + this.color;
+	args.splice(1, 0, c, 'color: inherit');
 
-  let index = 0;
-  let lastC = 0;
-  args[0].replace(/%[a-zA-Z%]/g, match => {
-    if (match === '%%') {
-      return;
-    }
+	// The final "%c" is somewhat tricky, because there could be other
+	// arguments passed either before or after the %c, so we need to
+	// figure out the correct index to insert the CSS into
+	let index = 0;
+	let lastC = 0;
+	args[0].replace(/%[a-zA-Z%]/g, match => {
+		if (match === '%%') {
+			return;
+		}
+		index++;
+		if (match === '%c') {
+			// We only are interested in the *last* %c
+			// (the user may have provided their own)
+			lastC = index;
+		}
+	});
 
-    index++;
-
-    if (match === '%c') {
-      // We only are interested in the *last* %c
-      // (the user may have provided their own)
-      lastC = index;
-    }
-  });
-  args.splice(lastC, 0, c);
+	args.splice(lastC, 0, c);
 }
+
 /**
  * Invokes `console.log()` when available.
  * No-op when `console.log` is not a "function".
  *
  * @api public
  */
-
-
 function log(...args) {
-  // This hackery is required for IE8/9, where
-  // the `console.log` function doesn't have 'apply'
-  return typeof console === 'object' && console.log && console.log(...args);
+	// This hackery is required for IE8/9, where
+	// the `console.log` function doesn't have 'apply'
+	return typeof console === 'object' &&
+		console.log &&
+		console.log(...args);
 }
+
 /**
  * Save `namespaces`.
  *
  * @param {String} namespaces
  * @api private
  */
-
-
 function save(namespaces) {
-  try {
-    if (namespaces) {
-      exports.storage.setItem('debug', namespaces);
-    } else {
-      exports.storage.removeItem('debug');
-    }
-  } catch (error) {// Swallow
-    // XXX (@Qix-) should we be logging these?
-  }
+	try {
+		if (namespaces) {
+			exports.storage.setItem('debug', namespaces);
+		} else {
+			exports.storage.removeItem('debug');
+		}
+	} catch (error) {
+		// Swallow
+		// XXX (@Qix-) should we be logging these?
+	}
 }
+
 /**
  * Load `namespaces`.
  *
  * @return {String} returns the previously persisted debug modes
  * @api private
  */
-
-
 function load() {
-  let r;
+	let r;
+	try {
+		r = exports.storage.getItem('debug');
+	} catch (error) {
+		// Swallow
+		// XXX (@Qix-) should we be logging these?
+	}
 
-  try {
-    r = exports.storage.getItem('debug');
-  } catch (error) {} // Swallow
-  // XXX (@Qix-) should we be logging these?
-  // If debug isn't set in LS, and we're in Electron, try to load $DEBUG
+	// If debug isn't set in LS, and we're in Electron, try to load $DEBUG
+	if (!r && typeof process !== 'undefined' && 'env' in process) {
+		r = process.env.DEBUG;
+	}
 
-
-  if (!r && typeof process !== 'undefined' && 'env' in process) {
-    r = process.env.DEBUG;
-  }
-
-  return r;
+	return r;
 }
+
 /**
  * Localstorage attempts to return the localstorage.
  *
@@ -432,32 +505,33 @@ function load() {
  * @api private
  */
 
-
 function localstorage() {
-  try {
-    // TVMLKit (Apple TV JS Runtime) does not have a window object, just localStorage in the global context
-    // The Browser also has localStorage in the global context.
-    return localStorage;
-  } catch (error) {// Swallow
-    // XXX (@Qix-) should we be logging these?
-  }
+	try {
+		// TVMLKit (Apple TV JS Runtime) does not have a window object, just localStorage in the global context
+		// The Browser also has localStorage in the global context.
+		return localStorage;
+	} catch (error) {
+		// Swallow
+		// XXX (@Qix-) should we be logging these?
+	}
 }
 
 module.exports = __webpack_require__(/*! ./common */ "./node_modules/debug/src/common.js")(exports);
-const {
-  formatters
-} = module.exports;
+
+const {formatters} = module.exports;
+
 /**
  * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
  */
 
 formatters.j = function (v) {
-  try {
-    return JSON.stringify(v);
-  } catch (error) {
-    return '[UnexpectedJSONParseError]: ' + error.message;
-  }
+	try {
+		return JSON.stringify(v);
+	} catch (error) {
+		return '[UnexpectedJSONParseError]: ' + error.message;
+	}
 };
+
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../process/browser.js */ "./node_modules/process/browser.js")))
 
 /***/ }),
@@ -469,265 +543,273 @@ formatters.j = function (v) {
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
+
 /**
  * This is the common logic for both the Node.js and web browser
  * implementations of `debug()`.
  */
+
 function setup(env) {
-  createDebug.debug = createDebug;
-  createDebug.default = createDebug;
-  createDebug.coerce = coerce;
-  createDebug.disable = disable;
-  createDebug.enable = enable;
-  createDebug.enabled = enabled;
-  createDebug.humanize = __webpack_require__(/*! ms */ "./node_modules/debug/node_modules/ms/index.js");
-  Object.keys(env).forEach(key => {
-    createDebug[key] = env[key];
-  });
-  /**
-  * Active `debug` instances.
-  */
+	createDebug.debug = createDebug;
+	createDebug.default = createDebug;
+	createDebug.coerce = coerce;
+	createDebug.disable = disable;
+	createDebug.enable = enable;
+	createDebug.enabled = enabled;
+	createDebug.humanize = __webpack_require__(/*! ms */ "./node_modules/debug/node_modules/ms/index.js");
 
-  createDebug.instances = [];
-  /**
-  * The currently active debug mode names, and names to skip.
-  */
+	Object.keys(env).forEach(key => {
+		createDebug[key] = env[key];
+	});
 
-  createDebug.names = [];
-  createDebug.skips = [];
-  /**
-  * Map of special "%n" handling functions, for the debug "format" argument.
-  *
-  * Valid key names are a single, lower or upper-case letter, i.e. "n" and "N".
-  */
+	/**
+	* Active `debug` instances.
+	*/
+	createDebug.instances = [];
 
-  createDebug.formatters = {};
-  /**
-  * Selects a color for a debug namespace
-  * @param {String} namespace The namespace string for the for the debug instance to be colored
-  * @return {Number|String} An ANSI color code for the given namespace
-  * @api private
-  */
+	/**
+	* The currently active debug mode names, and names to skip.
+	*/
 
-  function selectColor(namespace) {
-    let hash = 0;
+	createDebug.names = [];
+	createDebug.skips = [];
 
-    for (let i = 0; i < namespace.length; i++) {
-      hash = (hash << 5) - hash + namespace.charCodeAt(i);
-      hash |= 0; // Convert to 32bit integer
-    }
+	/**
+	* Map of special "%n" handling functions, for the debug "format" argument.
+	*
+	* Valid key names are a single, lower or upper-case letter, i.e. "n" and "N".
+	*/
+	createDebug.formatters = {};
 
-    return createDebug.colors[Math.abs(hash) % createDebug.colors.length];
-  }
+	/**
+	* Selects a color for a debug namespace
+	* @param {String} namespace The namespace string for the for the debug instance to be colored
+	* @return {Number|String} An ANSI color code for the given namespace
+	* @api private
+	*/
+	function selectColor(namespace) {
+		let hash = 0;
 
-  createDebug.selectColor = selectColor;
-  /**
-  * Create a debugger with the given `namespace`.
-  *
-  * @param {String} namespace
-  * @return {Function}
-  * @api public
-  */
+		for (let i = 0; i < namespace.length; i++) {
+			hash = ((hash << 5) - hash) + namespace.charCodeAt(i);
+			hash |= 0; // Convert to 32bit integer
+		}
 
-  function createDebug(namespace) {
-    let prevTime;
+		return createDebug.colors[Math.abs(hash) % createDebug.colors.length];
+	}
+	createDebug.selectColor = selectColor;
 
-    function debug(...args) {
-      // Disabled?
-      if (!debug.enabled) {
-        return;
-      }
+	/**
+	* Create a debugger with the given `namespace`.
+	*
+	* @param {String} namespace
+	* @return {Function}
+	* @api public
+	*/
+	function createDebug(namespace) {
+		let prevTime;
 
-      const self = debug; // Set `diff` timestamp
+		function debug(...args) {
+			// Disabled?
+			if (!debug.enabled) {
+				return;
+			}
 
-      const curr = Number(new Date());
-      const ms = curr - (prevTime || curr);
-      self.diff = ms;
-      self.prev = prevTime;
-      self.curr = curr;
-      prevTime = curr;
-      args[0] = createDebug.coerce(args[0]);
+			const self = debug;
 
-      if (typeof args[0] !== 'string') {
-        // Anything else let's inspect with %O
-        args.unshift('%O');
-      } // Apply any `formatters` transformations
+			// Set `diff` timestamp
+			const curr = Number(new Date());
+			const ms = curr - (prevTime || curr);
+			self.diff = ms;
+			self.prev = prevTime;
+			self.curr = curr;
+			prevTime = curr;
 
+			args[0] = createDebug.coerce(args[0]);
 
-      let index = 0;
-      args[0] = args[0].replace(/%([a-zA-Z%])/g, (match, format) => {
-        // If we encounter an escaped % then don't increase the array index
-        if (match === '%%') {
-          return match;
-        }
+			if (typeof args[0] !== 'string') {
+				// Anything else let's inspect with %O
+				args.unshift('%O');
+			}
 
-        index++;
-        const formatter = createDebug.formatters[format];
+			// Apply any `formatters` transformations
+			let index = 0;
+			args[0] = args[0].replace(/%([a-zA-Z%])/g, (match, format) => {
+				// If we encounter an escaped % then don't increase the array index
+				if (match === '%%') {
+					return match;
+				}
+				index++;
+				const formatter = createDebug.formatters[format];
+				if (typeof formatter === 'function') {
+					const val = args[index];
+					match = formatter.call(self, val);
 
-        if (typeof formatter === 'function') {
-          const val = args[index];
-          match = formatter.call(self, val); // Now we need to remove `args[index]` since it's inlined in the `format`
+					// Now we need to remove `args[index]` since it's inlined in the `format`
+					args.splice(index, 1);
+					index--;
+				}
+				return match;
+			});
 
-          args.splice(index, 1);
-          index--;
-        }
+			// Apply env-specific formatting (colors, etc.)
+			createDebug.formatArgs.call(self, args);
 
-        return match;
-      }); // Apply env-specific formatting (colors, etc.)
+			const logFn = self.log || createDebug.log;
+			logFn.apply(self, args);
+		}
 
-      createDebug.formatArgs.call(self, args);
-      const logFn = self.log || createDebug.log;
-      logFn.apply(self, args);
-    }
+		debug.namespace = namespace;
+		debug.enabled = createDebug.enabled(namespace);
+		debug.useColors = createDebug.useColors();
+		debug.color = selectColor(namespace);
+		debug.destroy = destroy;
+		debug.extend = extend;
+		// Debug.formatArgs = formatArgs;
+		// debug.rawLog = rawLog;
 
-    debug.namespace = namespace;
-    debug.enabled = createDebug.enabled(namespace);
-    debug.useColors = createDebug.useColors();
-    debug.color = selectColor(namespace);
-    debug.destroy = destroy;
-    debug.extend = extend; // Debug.formatArgs = formatArgs;
-    // debug.rawLog = rawLog;
-    // env-specific initialization logic for debug instances
+		// env-specific initialization logic for debug instances
+		if (typeof createDebug.init === 'function') {
+			createDebug.init(debug);
+		}
 
-    if (typeof createDebug.init === 'function') {
-      createDebug.init(debug);
-    }
+		createDebug.instances.push(debug);
 
-    createDebug.instances.push(debug);
-    return debug;
-  }
+		return debug;
+	}
 
-  function destroy() {
-    const index = createDebug.instances.indexOf(this);
+	function destroy() {
+		const index = createDebug.instances.indexOf(this);
+		if (index !== -1) {
+			createDebug.instances.splice(index, 1);
+			return true;
+		}
+		return false;
+	}
 
-    if (index !== -1) {
-      createDebug.instances.splice(index, 1);
-      return true;
-    }
+	function extend(namespace, delimiter) {
+		const newDebug = createDebug(this.namespace + (typeof delimiter === 'undefined' ? ':' : delimiter) + namespace);
+		newDebug.log = this.log;
+		return newDebug;
+	}
 
-    return false;
-  }
+	/**
+	* Enables a debug mode by namespaces. This can include modes
+	* separated by a colon and wildcards.
+	*
+	* @param {String} namespaces
+	* @api public
+	*/
+	function enable(namespaces) {
+		createDebug.save(namespaces);
 
-  function extend(namespace, delimiter) {
-    const newDebug = createDebug(this.namespace + (typeof delimiter === 'undefined' ? ':' : delimiter) + namespace);
-    newDebug.log = this.log;
-    return newDebug;
-  }
-  /**
-  * Enables a debug mode by namespaces. This can include modes
-  * separated by a colon and wildcards.
-  *
-  * @param {String} namespaces
-  * @api public
-  */
+		createDebug.names = [];
+		createDebug.skips = [];
 
+		let i;
+		const split = (typeof namespaces === 'string' ? namespaces : '').split(/[\s,]+/);
+		const len = split.length;
 
-  function enable(namespaces) {
-    createDebug.save(namespaces);
-    createDebug.names = [];
-    createDebug.skips = [];
-    let i;
-    const split = (typeof namespaces === 'string' ? namespaces : '').split(/[\s,]+/);
-    const len = split.length;
+		for (i = 0; i < len; i++) {
+			if (!split[i]) {
+				// ignore empty strings
+				continue;
+			}
 
-    for (i = 0; i < len; i++) {
-      if (!split[i]) {
-        // ignore empty strings
-        continue;
-      }
+			namespaces = split[i].replace(/\*/g, '.*?');
 
-      namespaces = split[i].replace(/\*/g, '.*?');
+			if (namespaces[0] === '-') {
+				createDebug.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
+			} else {
+				createDebug.names.push(new RegExp('^' + namespaces + '$'));
+			}
+		}
 
-      if (namespaces[0] === '-') {
-        createDebug.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
-      } else {
-        createDebug.names.push(new RegExp('^' + namespaces + '$'));
-      }
-    }
+		for (i = 0; i < createDebug.instances.length; i++) {
+			const instance = createDebug.instances[i];
+			instance.enabled = createDebug.enabled(instance.namespace);
+		}
+	}
 
-    for (i = 0; i < createDebug.instances.length; i++) {
-      const instance = createDebug.instances[i];
-      instance.enabled = createDebug.enabled(instance.namespace);
-    }
-  }
-  /**
-  * Disable debug output.
-  *
-  * @return {String} namespaces
-  * @api public
-  */
+	/**
+	* Disable debug output.
+	*
+	* @return {String} namespaces
+	* @api public
+	*/
+	function disable() {
+		const namespaces = [
+			...createDebug.names.map(toNamespace),
+			...createDebug.skips.map(toNamespace).map(namespace => '-' + namespace)
+		].join(',');
+		createDebug.enable('');
+		return namespaces;
+	}
 
+	/**
+	* Returns true if the given mode name is enabled, false otherwise.
+	*
+	* @param {String} name
+	* @return {Boolean}
+	* @api public
+	*/
+	function enabled(name) {
+		if (name[name.length - 1] === '*') {
+			return true;
+		}
 
-  function disable() {
-    const namespaces = [...createDebug.names.map(toNamespace), ...createDebug.skips.map(toNamespace).map(namespace => '-' + namespace)].join(',');
-    createDebug.enable('');
-    return namespaces;
-  }
-  /**
-  * Returns true if the given mode name is enabled, false otherwise.
-  *
-  * @param {String} name
-  * @return {Boolean}
-  * @api public
-  */
+		let i;
+		let len;
 
+		for (i = 0, len = createDebug.skips.length; i < len; i++) {
+			if (createDebug.skips[i].test(name)) {
+				return false;
+			}
+		}
 
-  function enabled(name) {
-    if (name[name.length - 1] === '*') {
-      return true;
-    }
+		for (i = 0, len = createDebug.names.length; i < len; i++) {
+			if (createDebug.names[i].test(name)) {
+				return true;
+			}
+		}
 
-    let i;
-    let len;
+		return false;
+	}
 
-    for (i = 0, len = createDebug.skips.length; i < len; i++) {
-      if (createDebug.skips[i].test(name)) {
-        return false;
-      }
-    }
+	/**
+	* Convert regexp to namespace
+	*
+	* @param {RegExp} regxep
+	* @return {String} namespace
+	* @api private
+	*/
+	function toNamespace(regexp) {
+		return regexp.toString()
+			.substring(2, regexp.toString().length - 2)
+			.replace(/\.\*\?$/, '*');
+	}
 
-    for (i = 0, len = createDebug.names.length; i < len; i++) {
-      if (createDebug.names[i].test(name)) {
-        return true;
-      }
-    }
+	/**
+	* Coerce `val`.
+	*
+	* @param {Mixed} val
+	* @return {Mixed}
+	* @api private
+	*/
+	function coerce(val) {
+		if (val instanceof Error) {
+			return val.stack || val.message;
+		}
+		return val;
+	}
 
-    return false;
-  }
-  /**
-  * Convert regexp to namespace
-  *
-  * @param {RegExp} regxep
-  * @return {String} namespace
-  * @api private
-  */
+	createDebug.enable(createDebug.load());
 
-
-  function toNamespace(regexp) {
-    return regexp.toString().substring(2, regexp.toString().length - 2).replace(/\.\*\?$/, '*');
-  }
-  /**
-  * Coerce `val`.
-  *
-  * @param {Mixed} val
-  * @return {Mixed}
-  * @api private
-  */
-
-
-  function coerce(val) {
-    if (val instanceof Error) {
-      return val.stack || val.message;
-    }
-
-    return val;
-  }
-
-  createDebug.enable(createDebug.load());
-  return createDebug;
+	return createDebug;
 }
 
 module.exports = setup;
+
 
 /***/ }),
 
@@ -961,39 +1043,27 @@ module.exports = g;
 /*!***********************!*\
   !*** ./src/Client.js ***!
   \***********************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
+/*! exports used: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return FhirClient; });
+/* harmony import */ var _lib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./lib */ "./src/lib.js");
+/* harmony import */ var _strings__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./strings */ "./src/strings.js");
+/* harmony import */ var _smart__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./smart */ "./src/smart.js");
+/* harmony import */ var _settings__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./settings */ "./src/settings.js");
 /// <reference path="types.d.ts" />
-const {
-  absolute,
-  debug: _debug,
-  getPath,
-  setPath,
-  jwtDecode,
-  makeArray,
-  request,
-  btoa,
-  byCode,
-  byCodes,
-  units,
-  getPatientParam
-} = __webpack_require__(/*! ./lib */ "./src/lib.js");
 
-const debug = _debug.extend("client");
 
-const str = __webpack_require__(/*! ./strings */ "./src/strings.js");
+
+ // @ts-ignore
+// eslint-disable-next-line no-undef
 
 const {
-  fetchConformanceStatement,
-  fetchFhirVersion
-} = __webpack_require__(/*! ./smart */ "./src/smart.js");
+  Response
+} =  true ? window : undefined;
 
-const {
-  SMART_KEY,
-  patientCompartment,
-  fhirVersions
-} = __webpack_require__(/*! ./settings */ "./src/settings.js");
+const debug = _lib__WEBPACK_IMPORTED_MODULE_0__["debug"].extend("client");
 /**
  * Adds patient context to requestOptions object to be used with fhirclient.Client.request
  * @param {Object|String} requestOptions Can be a string URL (relative to
@@ -1009,17 +1079,17 @@ async function contextualize(requestOptions, client) {
   //   const fetchFhirVersion = require("./smart").fetchFhirVersion;
   //   const fhirVersion = client.state.fhirVersion || await fetchFhirVersion(client.state.serverUrl) || "";
   //   const fhirRelease = fhirVersionsMap[fhirVersion];
-  const base = absolute("/", client.state.serverUrl);
+  const base = Object(_lib__WEBPACK_IMPORTED_MODULE_0__["absolute"])("/", client.state.serverUrl);
 
   async function contextualURL(url) {
     const resourceType = url.pathname.split("/").pop();
 
-    if (patientCompartment.indexOf(resourceType) == -1) {
+    if (_settings__WEBPACK_IMPORTED_MODULE_3__["patientCompartment"].indexOf(resourceType) == -1) {
       throw new Error(`Cannot filter "${resourceType}" resources by patient`);
     }
 
-    const conformance = await fetchConformanceStatement(client.state.serverUrl);
-    const searchParam = getPatientParam(conformance, resourceType);
+    const conformance = await Object(_smart__WEBPACK_IMPORTED_MODULE_2__["fetchConformanceStatement"])(client.state.serverUrl);
+    const searchParam = Object(_lib__WEBPACK_IMPORTED_MODULE_0__["getPatientParam"])(conformance, resourceType);
     url.searchParams.set(searchParam, client.patient.id);
     return url.href;
   }
@@ -1069,20 +1139,20 @@ function getRef(refId, cache, client) {
 
 
 function resolveRef(obj, path, graph, cache, client) {
-  const node = getPath(obj, path);
+  const node = Object(_lib__WEBPACK_IMPORTED_MODULE_0__["getPath"])(obj, path);
 
   if (node) {
     const isArray = Array.isArray(node);
-    return Promise.all(makeArray(node).map((item, i) => {
+    return Promise.all(Object(_lib__WEBPACK_IMPORTED_MODULE_0__["makeArray"])(node).map((item, i) => {
       const ref = item.reference;
 
       if (ref) {
         return getRef(ref, cache, client).then(sub => {
           if (graph) {
             if (isArray) {
-              setPath(obj, `${path}.${i}`, sub);
+              Object(_lib__WEBPACK_IMPORTED_MODULE_0__["setPath"])(obj, `${path}.${i}`, sub);
             } else {
-              setPath(obj, path, sub);
+              Object(_lib__WEBPACK_IMPORTED_MODULE_0__["setPath"])(obj, path, sub);
             }
           }
         }).catch(() => {
@@ -1104,7 +1174,7 @@ function resolveRef(obj, path, graph, cache, client) {
 
 function resolveRefs(obj, fhirOptions, cache, client) {
   // 1. Sanitize paths, remove any invalid ones
-  let paths = makeArray(fhirOptions.resolveReferences).filter(Boolean) // No false, 0, null, undefined or ""
+  let paths = Object(_lib__WEBPACK_IMPORTED_MODULE_0__["makeArray"])(fhirOptions.resolveReferences).filter(Boolean) // No false, 0, null, undefined or ""
   .map(path => String(path).trim()).filter(Boolean); // No space-only strings
   // 2. Remove duplicates
 
@@ -1239,7 +1309,7 @@ class FhirClient {
       const options = {
         baseUrl: this.state.serverUrl.replace(/\/$/, "")
       };
-      const accessToken = getPath(this, "state.tokenResponse.access_token");
+      const accessToken = Object(_lib__WEBPACK_IMPORTED_MODULE_0__["getPath"])(this, "state.tokenResponse.access_token");
 
       if (accessToken) {
         options.auth = {
@@ -1260,7 +1330,7 @@ class FhirClient {
       }
 
       this.api = fhirJs(options);
-      const patientId = getPath(this, "state.tokenResponse.patient");
+      const patientId = Object(_lib__WEBPACK_IMPORTED_MODULE_0__["getPath"])(this, "state.tokenResponse.patient");
 
       if (patientId) {
         this.patient.api = fhirJs({ ...options,
@@ -1283,7 +1353,7 @@ class FhirClient {
       // the patient. This should be a scope issue.
       if (!tokenResponse.patient) {
         if (!(this.state.scope || "").match(/\blaunch(\/patient)?\b/)) {
-          debug(str.noScopeForId, "patient", "patient");
+          debug(_strings__WEBPACK_IMPORTED_MODULE_1__["default"].noScopeForId, "patient", "patient");
         } else {
           // The server should have returned the patient!
           debug("The ID of the selected patient is not available. Please check if your server supports that.");
@@ -1296,9 +1366,9 @@ class FhirClient {
     }
 
     if (this.state.authorizeUri) {
-      debug(str.noIfNoAuth, "the ID of the selected patient");
+      debug(_strings__WEBPACK_IMPORTED_MODULE_1__["default"].noIfNoAuth, "the ID of the selected patient");
     } else {
-      debug(str.noFreeContext, "selected patient");
+      debug(_strings__WEBPACK_IMPORTED_MODULE_1__["default"].noFreeContext, "selected patient");
     }
 
     return null;
@@ -1319,7 +1389,7 @@ class FhirClient {
       // the encounter. This should be a scope issue.
       if (!tokenResponse.encounter) {
         if (!(this.state.scope || "").match(/\blaunch(\/encounter)?\b/)) {
-          debug(str.noScopeForId, "encounter", "encounter");
+          debug(_strings__WEBPACK_IMPORTED_MODULE_1__["default"].noScopeForId, "encounter", "encounter");
         } else {
           // The server should have returned the encounter!
           debug("The ID of the selected encounter is not available. Please check if your server supports that, and that the selected patient has any recorded encounters.");
@@ -1332,9 +1402,9 @@ class FhirClient {
     }
 
     if (this.state.authorizeUri) {
-      debug(str.noIfNoAuth, "the ID of the selected encounter");
+      debug(_strings__WEBPACK_IMPORTED_MODULE_1__["default"].noIfNoAuth, "the ID of the selected encounter");
     } else {
-      debug(str.noFreeContext, "selected encounter");
+      debug(_strings__WEBPACK_IMPORTED_MODULE_1__["default"].noFreeContext, "selected encounter");
     }
 
     return null;
@@ -1369,13 +1439,13 @@ class FhirClient {
         return null;
       }
 
-      return jwtDecode(idToken);
+      return Object(_lib__WEBPACK_IMPORTED_MODULE_0__["jwtDecode"])(idToken);
     }
 
     if (this.state.authorizeUri) {
-      debug(str.noIfNoAuth, "the id_token");
+      debug(_strings__WEBPACK_IMPORTED_MODULE_1__["default"].noIfNoAuth, "the id_token");
     } else {
-      debug(str.noFreeContext, "id_token");
+      debug(_strings__WEBPACK_IMPORTED_MODULE_1__["default"].noFreeContext, "id_token");
     }
 
     return null;
@@ -1427,7 +1497,7 @@ class FhirClient {
   }
 
   getAuthorizationHeader() {
-    const accessToken = getPath(this, "state.tokenResponse.access_token");
+    const accessToken = Object(_lib__WEBPACK_IMPORTED_MODULE_0__["getPath"])(this, "state.tokenResponse.access_token");
 
     if (accessToken) {
       return "Bearer " + accessToken;
@@ -1439,7 +1509,7 @@ class FhirClient {
     } = this.state;
 
     if (username && password) {
-      return "Basic " + btoa(username + ":" + password);
+      return "Basic " + Object(_lib__WEBPACK_IMPORTED_MODULE_0__["btoa"])(username + ":" + password);
     }
 
     return null;
@@ -1447,13 +1517,13 @@ class FhirClient {
 
   async _clearState() {
     const storage = this.environment.getStorage();
-    const key = await storage.get(SMART_KEY);
+    const key = await storage.get(_settings__WEBPACK_IMPORTED_MODULE_3__["SMART_KEY"]);
 
     if (key) {
       await storage.unset(key);
     }
 
-    await storage.unset(SMART_KEY);
+    await storage.unset(_settings__WEBPACK_IMPORTED_MODULE_3__["SMART_KEY"]);
     this.state.tokenResponse = {};
   }
   /**
@@ -1507,7 +1577,7 @@ class FhirClient {
 
 
   async request(requestOptions, fhirOptions = {}, _resolvedRefs = {}) {
-    const debug = _debug.extend("client:request");
+    const debug = _lib__WEBPACK_IMPORTED_MODULE_0__["debug"].extend("client:request");
 
     if (!requestOptions) {
       throw new Error("request requires an url or request options as argument");
@@ -1523,7 +1593,7 @@ class FhirClient {
       url = String(requestOptions.url);
     }
 
-    url = absolute(url, this.state.serverUrl); // authentication ------------------------------------------------------
+    url = Object(_lib__WEBPACK_IMPORTED_MODULE_0__["absolute"])(url, this.state.serverUrl); // authentication ------------------------------------------------------
 
     const authHeader = this.getAuthorizationHeader();
 
@@ -1544,12 +1614,12 @@ class FhirClient {
 
     const hasPageCallback = typeof fhirOptions.onPage == "function";
     debug("%s, options: %O, fhirOptions: %O", url, requestOptions, fhirOptions);
-    return request(url, requestOptions) // Automatic re-auth via refresh token -----------------------------
+    return Object(_lib__WEBPACK_IMPORTED_MODULE_0__["request"])(url, requestOptions) // Automatic re-auth via refresh token -----------------------------
     .catch(error => {
       debug("%o", error);
 
       if (error.status == 401 && fhirOptions.useRefreshToken !== false) {
-        const hasRefreshToken = getPath(this, "state.tokenResponse.refresh_token");
+        const hasRefreshToken = Object(_lib__WEBPACK_IMPORTED_MODULE_0__["getPath"])(this, "state.tokenResponse.refresh_token");
 
         if (hasRefreshToken) {
           return this.refresh().then(() => this.request({ ...requestOptions,
@@ -1563,7 +1633,7 @@ class FhirClient {
     .catch(async error => {
       if (error.status == 401) {
         // !accessToken -> not authorized -> No session. Need to launch.
-        if (!getPath(this, "state.tokenResponse.access_token")) {
+        if (!Object(_lib__WEBPACK_IMPORTED_MODULE_0__["getPath"])(this, "state.tokenResponse.access_token")) {
           throw new Error("This app cannot be accessed directly. Please launch it as SMART app!");
         } // !fhirOptions.useRefreshToken -> auto-refresh not enabled
         // Session expired. Need to re-launch. Clear state to
@@ -1573,14 +1643,14 @@ class FhirClient {
         if (fhirOptions.useRefreshToken === false) {
           debug("Your session has expired and the useRefreshToken option is set to false. Please re-launch the app.");
           await this._clearState();
-          throw new Error(str.expired);
+          throw new Error(_strings__WEBPACK_IMPORTED_MODULE_1__["default"].expired);
         } // otherwise -> auto-refresh failed. Session expired.
         // Need to re-launch. Clear state to start over!
 
 
         debug("Auto-refresh failed! Please re-launch the app.");
         await this._clearState();
-        throw new Error(str.expired);
+        throw new Error(_strings__WEBPACK_IMPORTED_MODULE_1__["default"].expired);
       }
 
       throw error;
@@ -1623,7 +1693,7 @@ class FhirClient {
 
           if (--fhirOptions.pageLimit) {
             const next = links.find(l => l.relation == "next");
-            data = makeArray(data);
+            data = Object(_lib__WEBPACK_IMPORTED_MODULE_0__["makeArray"])(data);
 
             if (next && next.url) {
               const nextPage = await this.request(next.url, fhirOptions, _resolvedRefs);
@@ -1634,10 +1704,10 @@ class FhirClient {
 
               if (fhirOptions.resolveReferences && fhirOptions.resolveReferences.length) {
                 Object.assign(_resolvedRefs, nextPage.references);
-                return data.concat(makeArray(nextPage.data || nextPage));
+                return data.concat(Object(_lib__WEBPACK_IMPORTED_MODULE_0__["makeArray"])(nextPage.data || nextPage));
               }
 
-              return data.concat(makeArray(nextPage));
+              return data.concat(Object(_lib__WEBPACK_IMPORTED_MODULE_0__["makeArray"])(nextPage));
             }
           }
         }
@@ -1666,10 +1736,10 @@ class FhirClient {
 
 
   refresh() {
-    const debug = _debug.extend("client:refresh");
+    const debug = _lib__WEBPACK_IMPORTED_MODULE_0__["debug"].extend("client:refresh");
 
     debug("Attempting to refresh with refresh_token...");
-    const refreshToken = getPath(this, "state.tokenResponse.refresh_token");
+    const refreshToken = Object(_lib__WEBPACK_IMPORTED_MODULE_0__["getPath"])(this, "state.tokenResponse.refresh_token");
 
     if (!refreshToken) {
       throw new Error("Unable to refresh. No refresh_token found.");
@@ -1681,7 +1751,7 @@ class FhirClient {
       throw new Error("Unable to refresh. No tokenUri found.");
     }
 
-    const scopes = getPath(this, "state.tokenResponse.scope") || "";
+    const scopes = Object(_lib__WEBPACK_IMPORTED_MODULE_0__["getPath"])(this, "state.tokenResponse.scope") || "";
 
     if (scopes.indexOf("offline_access") == -1) {
       throw new Error("Unable to refresh. No offline_access scope found.");
@@ -1692,7 +1762,7 @@ class FhirClient {
 
 
     if (!this._refreshTask) {
-      this._refreshTask = request(tokenUri, {
+      this._refreshTask = Object(_lib__WEBPACK_IMPORTED_MODULE_0__["request"])(tokenUri, {
         mode: "cors",
         method: "POST",
         headers: {
@@ -1729,7 +1799,7 @@ class FhirClient {
 
 
   byCode(observations, property) {
-    return byCode(observations, property);
+    return Object(_lib__WEBPACK_IMPORTED_MODULE_0__["byCode"])(observations, property);
   }
   /**
    * @param {object|object[]} observations
@@ -1739,15 +1809,15 @@ class FhirClient {
 
 
   byCodes(observations, property) {
-    return byCodes(observations, property);
+    return Object(_lib__WEBPACK_IMPORTED_MODULE_0__["byCodes"])(observations, property);
   }
 
   get units() {
-    return units;
+    return _lib__WEBPACK_IMPORTED_MODULE_0__["units"];
   }
 
   getPath(object, path) {
-    return getPath(object, path);
+    return Object(_lib__WEBPACK_IMPORTED_MODULE_0__["getPath"])(object, path);
   }
   /**
    * Returns a promise that will be resolved with the fhir version as defined
@@ -1756,7 +1826,7 @@ class FhirClient {
 
 
   getFhirVersion() {
-    return fetchFhirVersion(this.state.serverUrl);
+    return Object(_smart__WEBPACK_IMPORTED_MODULE_2__["fetchFhirVersion"])(this.state.serverUrl);
   }
   /**
    * Returns a promise that will be resolved with the numeric fhir version
@@ -1768,12 +1838,10 @@ class FhirClient {
 
 
   getFhirRelease() {
-    return this.getFhirVersion().then(v => fhirVersions[v || ""] || 0);
+    return this.getFhirVersion().then(v => _settings__WEBPACK_IMPORTED_MODULE_3__["fhirVersions"][v || ""] || 0);
   }
 
 }
-
-module.exports = FhirClient;
 
 /***/ }),
 
@@ -1781,9 +1849,11 @@ module.exports = FhirClient;
 /*!**************************!*\
   !*** ./src/HttpError.js ***!
   \**************************/
-/*! all exports used */
-/***/ (function(module, exports) {
+/*! exports used: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return HttpError; });
 class HttpError extends Error {
   constructor(message, statusCode, statusText) {
     super(message);
@@ -1832,26 +1902,26 @@ class HttpError extends Error {
 
 }
 
-module.exports = HttpError;
-
 /***/ }),
 
 /***/ "./src/adapters/BaseAdapter.js":
 /*!*************************************!*\
   !*** ./src/adapters/BaseAdapter.js ***!
   \*************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
+/*! exports used: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-const smart = __webpack_require__(/*! ../smart */ "./src/smart.js");
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return BaseAdapter; });
+/* harmony import */ var _smart__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../smart */ "./src/smart.js");
+/* harmony import */ var _Client__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../Client */ "./src/Client.js");
 
-const Client = __webpack_require__(/*! ../Client */ "./src/Client.js");
+
 /**
  * This is the abstract base class that adapters must inherit. It just a
  * collection of environment-specific methods that subclasses have to implement.
  * @type { fhirclient.Adapter }
  */
-
 
 class BaseAdapter {
   /**
@@ -1901,17 +1971,15 @@ class BaseAdapter {
 
   getSmartApi() {
     return {
-      ready: (...args) => smart.ready(this, ...args),
-      authorize: options => smart.authorize(this, options),
-      init: (...args) => smart.init(this, ...args),
-      client: state => new Client(this, state),
+      ready: (...args) => _smart__WEBPACK_IMPORTED_MODULE_0__["ready"](this, ...args),
+      authorize: options => _smart__WEBPACK_IMPORTED_MODULE_0__["authorize"](this, options),
+      init: (...args) => _smart__WEBPACK_IMPORTED_MODULE_0__["init"](this, ...args),
+      client: state => new _Client__WEBPACK_IMPORTED_MODULE_1__["default"](this, state),
       options: this.options
     };
   }
 
 }
-
-module.exports = BaseAdapter;
 
 /***/ }),
 
@@ -1919,20 +1987,24 @@ module.exports = BaseAdapter;
 /*!****************************************!*\
   !*** ./src/adapters/BrowserAdapter.js ***!
   \****************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
+/*! exports used: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export Adapter */
+/* harmony import */ var _storage_BrowserStorage__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../storage/BrowserStorage */ "./src/storage/BrowserStorage.js");
+/* harmony import */ var _BaseAdapter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./BaseAdapter */ "./src/adapters/BaseAdapter.js");
+/* eslint-env browser */
 
 /* global fhir */
-const BrowserStorage = __webpack_require__(/*! ../storage/BrowserStorage */ "./src/storage/BrowserStorage.js");
 
-const BaseAdapter = __webpack_require__(/*! ./BaseAdapter */ "./src/adapters/BaseAdapter.js");
+
 /**
  * Browser Adapter
  * @type {fhirclient.Adapter}
  */
 
-
-class BrowserAdapter extends BaseAdapter {
+class BrowserAdapter extends _BaseAdapter__WEBPACK_IMPORTED_MODULE_1__["default"] {
   /**
    * In browsers we need to be able to (dynamically) check if fhir.js is
    * included in the page. If it is, it should have created a "fhir" variable
@@ -1976,7 +2048,7 @@ class BrowserAdapter extends BaseAdapter {
 
   getStorage() {
     if (!this._storage) {
-      this._storage = new BrowserStorage();
+      this._storage = new _storage_BrowserStorage__WEBPACK_IMPORTED_MODULE_0__["default"]();
     }
 
     return this._storage;
@@ -1988,8 +2060,8 @@ class BrowserAdapter extends BaseAdapter {
 
 }
 
-module.exports = BrowserAdapter.smart;
-module.exports.Adapter = BrowserAdapter;
+/* harmony default export */ __webpack_exports__["default"] = (BrowserAdapter.smart);
+
 
 /***/ }),
 
@@ -1998,19 +2070,15 @@ module.exports.Adapter = BrowserAdapter;
   !*** ./src/browser.js ***!
   \************************/
 /*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-/* global HAS_FETCH */
-// HAS_FETCH is a constant defined in our webpack config. It helps us exclude
-// the fetch polyfill from the library build if the targets do not include IE.
-// However, when the code is used as module it becomes part of a project, that
-// gets built with another build tool and the fetch polyfill might not be excluded!
-// @ts-ignore
-if (false) {} // In Browsers we create an adapter, get the SMART api from it and build the
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "client", function() { return client; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "oauth2", function() { return oauth2; });
+/* harmony import */ var _adapters_BrowserAdapter__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./adapters/BrowserAdapter */ "./src/adapters/BrowserAdapter.js");
+// In Browsers we create an adapter, get the SMART api from it and build the
 // global FHIR object
-
-
-const smart = __webpack_require__(/*! ./adapters/BrowserAdapter */ "./src/adapters/BrowserAdapter.js");
 
 const {
   ready,
@@ -2018,16 +2086,14 @@ const {
   init,
   client,
   options
-} = smart(); // $lab:coverage:off$
+} = Object(_adapters_BrowserAdapter__WEBPACK_IMPORTED_MODULE_0__["default"])(); // $lab:coverage:off$
 
-module.exports = {
-  client,
-  oauth2: {
-    settings: options,
-    ready,
-    authorize,
-    init
-  }
+
+const oauth2 = {
+  settings: options,
+  ready,
+  authorize,
+  init
 }; // $lab:coverage:on$
 
 /***/ }),
@@ -2036,20 +2102,48 @@ module.exports = {
 /*!********************!*\
   !*** ./src/lib.js ***!
   \********************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
+/*! exports used: absolute, btoa, byCode, byCodes, debug, getAndCache, getPath, getPatientParam, isBrowser, jwtDecode, makeArray, randomString, request, setPath, units */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(global) {/*
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "debug", function() { return _debug; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isBrowser", function() { return isBrowser; });
+/* unused harmony export checkResponse */
+/* unused harmony export responseToJSON */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "request", function() { return request; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getAndCache", function() { return getAndCache; });
+/* unused harmony export humanizeError */
+/* unused harmony export stripTrailingSlash */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getPath", function() { return getPath; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setPath", function() { return setPath; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "makeArray", function() { return makeArray; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "absolute", function() { return absolute; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "randomString", function() { return randomString; });
+/* unused harmony export atob */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "btoa", function() { return btoa; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "jwtDecode", function() { return jwtDecode; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "byCode", function() { return byCode; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "byCodes", function() { return byCodes; });
+/* unused harmony export ensureNumerical */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "units", function() { return units; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getPatientParam", function() { return getPatientParam; });
+/* harmony import */ var _HttpError__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./HttpError */ "./src/HttpError.js");
+/* harmony import */ var _settings__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./settings */ "./src/settings.js");
+/* harmony import */ var debug__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! debug */ "./node_modules/debug/src/browser.js");
+/* harmony import */ var debug__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(debug__WEBPACK_IMPORTED_MODULE_2__);
+/*
  * This file contains some shared functions. The are used by other modules, but
  * are defined here so that tests can import this library and test them.
  */
-const HttpError = __webpack_require__(/*! ./HttpError */ "./src/HttpError.js");
 
-const debug = __webpack_require__(/*! debug */ "./node_modules/debug/src/browser.js")("FHIR");
 
-const {
-  patientParams
-} = __webpack_require__(/*! ./settings */ "./src/settings.js");
+ // @ts-ignore
+// eslint-disable-next-line no-undef
+
+const fetch =  true ? window.fetch : undefined;
+
+const _debug = debug__WEBPACK_IMPORTED_MODULE_2___default()("FHIR");
+
 
 function isBrowser() {
   return typeof window === "object";
@@ -2057,7 +2151,6 @@ function isBrowser() {
 /**
  * Used in fetch Promise chains to reject if the "ok" property is not true
  */
-
 
 async function checkResponse(resp) {
   if (!resp.ok) {
@@ -2074,7 +2167,6 @@ async function checkResponse(resp) {
  * @returns {Promise<object|string>}
  */
 
-
 function responseToJSON(resp) {
   return resp.text().then(text => text.length ? JSON.parse(text) : "");
 }
@@ -2090,7 +2182,6 @@ function responseToJSON(resp) {
  * @param {String|Request} url
  * @param {Object} options
  */
-
 
 function request(url, options = {}) {
   return fetch(url, {
@@ -2114,7 +2205,6 @@ function request(url, options = {}) {
     return res;
   });
 }
-
 const getAndCache = (() => {
   let cache = {};
   return (url, force = "development" === "test") => {
@@ -2125,7 +2215,6 @@ const getAndCache = (() => {
     return cache[url];
   };
 })();
-
 async function humanizeError(resp) {
   let msg = `${resp.status} ${resp.statusText}\nURL: ${resp.url}`;
 
@@ -2156,9 +2245,8 @@ async function humanizeError(resp) {
   } catch (_) {// ignore
   }
 
-  throw new HttpError(msg, resp.status, resp.statusText);
+  throw new _HttpError__WEBPACK_IMPORTED_MODULE_0__["default"](msg, resp.status, resp.statusText);
 }
-
 function stripTrailingSlash(str) {
   return String(str || "").replace(/\/+$/, "");
 }
@@ -2171,7 +2259,6 @@ function stripTrailingSlash(str) {
  * @param {String} path The path (eg. "a.b.4.c")
  * @returns {*} Whatever is found in the path or undefined
  */
-
 
 function getPath(obj, path = "") {
   path = path.trim();
@@ -2190,7 +2277,6 @@ function getPath(obj, path = "") {
  * @returns {Object} The modified object
  */
 
-
 function setPath(obj, path, value) {
   path.trim().split(".").reduce((out, key, idx, arr) => {
     if (out && idx === arr.length - 1) {
@@ -2201,7 +2287,6 @@ function setPath(obj, path, value) {
   }, obj);
   return obj;
 }
-
 function makeArray(arg) {
   if (Array.isArray(arg)) {
     return arg;
@@ -2209,7 +2294,6 @@ function makeArray(arg) {
 
   return [arg];
 }
-
 function absolute(path, baseUrl) {
   if (path.match(/^http/)) return path;
   if (path.match(/^urn/)) return path;
@@ -2223,7 +2307,6 @@ function absolute(path, baseUrl) {
  *     Defaults to all the upper and lower-case letters plus digits.
  */
 
-
 function randomString(strLength = 8, charSet = null) {
   const result = [];
   charSet = charSet || "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "abcdefghijklmnopqrstuvwxyz" + "0123456789";
@@ -2235,9 +2318,9 @@ function randomString(strLength = 8, charSet = null) {
 
   return result.join("");
 }
-
 function atob(str) {
   if (isBrowser()) {
+    // eslint-disable-next-line no-undef
     return window.atob(str);
   } // The "global." makes Webpack understand that it doesn't have to include
   // the Buffer code in the bundle
@@ -2245,9 +2328,9 @@ function atob(str) {
 
   return global.Buffer.from(str, "base64").toString("ascii");
 }
-
 function btoa(str) {
   if (isBrowser()) {
+    // eslint-disable-next-line no-undef
     return window.btoa(str);
   } // The "global." makes Webpack understand that it doesn't have to include
   // the Buffer code in the bundle
@@ -2255,7 +2338,6 @@ function btoa(str) {
 
   return global.Buffer.from(str).toString("base64");
 }
-
 function jwtDecode(token) {
   const payload = token.split(".")[1];
   return JSON.parse(atob(payload));
@@ -2270,7 +2352,6 @@ function jwtDecode(token) {
  * @param {String} property The name of a CodeableConcept property to group by
  * @returns {Object}
  */
-
 
 function byCode(observations, property) {
   const ret = {};
@@ -2306,12 +2387,10 @@ function byCode(observations, property) {
  * @returns {(codes: string[]) => object[]}
  */
 
-
 function byCodes(observations, property) {
   const bank = byCode(observations, property);
   return (...codes) => codes.filter(code => code + "" in bank).reduce((prev, code) => [...prev, ...bank[code + ""]], []);
 }
-
 function ensureNumerical({
   value,
   code
@@ -2320,7 +2399,6 @@ function ensureNumerical({
     throw new Error("Found a non-numerical unit: " + value + " " + code);
   }
 }
-
 const units = {
   cm({
     code,
@@ -2379,34 +2457,11 @@ function getPatientParam(conformance, resourceType) {
 
   if (resourceType == "Patient" && meta.searchParam.find(x => x.name == "_id")) return "_id"; // Now find the first possible parameter name
 
-  let out = patientParams.find(p => meta.searchParam.find(x => x.name == p)); // If there is no match
+  let out = _settings__WEBPACK_IMPORTED_MODULE_1__["patientParams"].find(p => meta.searchParam.find(x => x.name == p)); // If there is no match
 
   if (!out) throw new Error("I don't know what param to use for " + resourceType);
   return out;
 }
-
-module.exports = {
-  stripTrailingSlash,
-  absolute,
-  getPath,
-  setPath,
-  makeArray,
-  randomString,
-  isBrowser,
-  debug,
-  checkResponse,
-  responseToJSON,
-  humanizeError,
-  jwtDecode,
-  request,
-  atob,
-  btoa,
-  byCode,
-  byCodes,
-  units,
-  getPatientParam,
-  getAndCache
-};
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
@@ -2415,9 +2470,14 @@ module.exports = {
 /*!*************************!*\
   !*** ./src/settings.js ***!
   \*************************/
-/*! all exports used */
-/***/ (function(module, exports) {
+/*! exports used: SMART_KEY, fhirVersions, patientCompartment, patientParams */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "patientCompartment", function() { return patientCompartment; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fhirVersions", function() { return fhirVersions; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "patientParams", function() { return patientParams; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SMART_KEY", function() { return SMART_KEY; });
 /**
  * Combined list of FHIR resource types accepting patient parameter in FHIR R2-R4
  */
@@ -2453,12 +2513,6 @@ const patientParams = ["requester", "patient", "subject", "member", "actor", "be
  */
 
 const SMART_KEY = "SMART_KEY";
-module.exports = {
-  SMART_KEY,
-  patientParams,
-  fhirVersions,
-  patientCompartment
-};
 
 /***/ }),
 
@@ -2466,39 +2520,30 @@ module.exports = {
 /*!**********************!*\
   !*** ./src/smart.js ***!
   \**********************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
+/*! exports used: authorize, fetchConformanceStatement, fetchFhirVersion, init, ready */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-const {
-  isBrowser,
-  debug: _debug,
-  request,
-  getPath,
-  randomString,
-  btoa,
-  getAndCache
-} = __webpack_require__(/*! ./lib */ "./src/lib.js");
-
-const debug = _debug.extend("oauth2");
-
-const {
-  SMART_KEY
-} = __webpack_require__(/*! ./settings */ "./src/settings.js");
-/**
- * Creates and returns a Client instance.
- * Note that this is done within a function to postpone the "./Client" import
- * and avoid cyclic dependency.
- * @param {fhirclient.JsonObject} env The adapter
- * @param {string | fhirclient.ClientState} state The client state or baseUrl
- * @returns {fhirclient.Client}
- */
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fetchConformanceStatement", function() { return fetchConformanceStatement; });
+/* unused harmony export fetchWellKnownJson */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fetchFhirVersion", function() { return fetchFhirVersion; });
+/* unused harmony export getSecurityExtensions */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "authorize", function() { return authorize; });
+/* unused harmony export completeAuth */
+/* unused harmony export buildTokenRequest */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ready", function() { return ready; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "init", function() { return init; });
+/* harmony import */ var _lib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./lib */ "./src/lib.js");
+/* harmony import */ var _Client__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Client */ "./src/Client.js");
+/* harmony import */ var _settings__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./settings */ "./src/settings.js");
+/* global window */
 
 
-function createClient(env, state) {
-  const Client = __webpack_require__(/*! ./Client */ "./src/Client.js");
 
-  return new Client(env, state);
-}
+
+const debug = _lib__WEBPACK_IMPORTED_MODULE_0__["debug"].extend("oauth2");
+
+
 /**
  * Fetches the conformance statement from the given base URL.
  * Note that the result is cached in memory (until the page is reloaded in the
@@ -2507,21 +2552,18 @@ function createClient(env, state) {
  * @returns {Promise<fhirclient.JsonObject>}
  */
 
-
 function fetchConformanceStatement(baseUrl = "/") {
   const url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
-  return getAndCache(url).catch(ex => {
+  return Object(_lib__WEBPACK_IMPORTED_MODULE_0__["getAndCache"])(url).catch(ex => {
     throw new Error(`Failed to fetch the conformance statement from "${url}". ${ex}`);
   });
 }
-
 function fetchWellKnownJson(baseUrl = "/") {
   const url = String(baseUrl).replace(/\/*$/, "/") + ".well-known/smart-configuration";
-  return getAndCache(url).catch(ex => {
+  return Object(_lib__WEBPACK_IMPORTED_MODULE_0__["getAndCache"])(url).catch(ex => {
     throw new Error(`Failed to fetch the well-known json "${url}". ${ex.message}`);
   });
 }
-
 function fetchFhirVersion(baseUrl = "/") {
   return fetchConformanceStatement(baseUrl).then(metadata => metadata.fhirVersion);
 }
@@ -2531,7 +2573,6 @@ function fetchFhirVersion(baseUrl = "/") {
  * @param {String} baseUrl Fhir server base URL
  * @returns { Promise<fhirclient.OAuthSecurityExtensions> }
  */
-
 
 function getSecurityExtensions(baseUrl = "/") {
   return fetchWellKnownJson(baseUrl).then(meta => {
@@ -2546,7 +2587,7 @@ function getSecurityExtensions(baseUrl = "/") {
     };
   }).catch(() => fetchConformanceStatement(baseUrl).then(metadata => {
     const nsUri = "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris";
-    const extensions = (getPath(metadata || {}, "rest.0.security.extension") || []).filter(e => e.url === nsUri).map(o => o.extension)[0];
+    const extensions = (Object(_lib__WEBPACK_IMPORTED_MODULE_0__["getPath"])(metadata || {}, "rest.0.security.extension") || []).filter(e => e.url === nsUri).map(o => o.extension)[0];
     const out = {
       registrationUri: "",
       authorizeUri: "",
@@ -2579,7 +2620,6 @@ function getSecurityExtensions(baseUrl = "/") {
  * without trying to redirect to it
  * @returns { Promise<never|string> }
  */
-
 
 async function authorize(env, params = {}, _noRedirect = false) {
   // Obtain input
@@ -2634,9 +2674,9 @@ async function authorize(env, params = {}, _noRedirect = false) {
   } // prevent inheritance of tokenResponse from parent window
 
 
-  await storage.unset(SMART_KEY); // create initial state
+  await storage.unset(_settings__WEBPACK_IMPORTED_MODULE_2__["SMART_KEY"]); // create initial state
 
-  const stateKey = randomString(16);
+  const stateKey = Object(_lib__WEBPACK_IMPORTED_MODULE_0__["randomString"])(16);
   const state = {
     clientId,
     scope,
@@ -2714,7 +2754,6 @@ async function authorize(env, params = {}, _noRedirect = false) {
  * @returns { Promise<fhirclient.Client> }
  */
 
-
 async function completeAuth(env) {
   const url = env.getUrl();
   const Storage = env.getStorage();
@@ -2725,7 +2764,7 @@ async function completeAuth(env) {
   const authErrorDescription = params.get("error_description");
 
   if (!key) {
-    key = await Storage.get(SMART_KEY);
+    key = await Storage.get(_settings__WEBPACK_IMPORTED_MODULE_2__["SMART_KEY"]);
   } // Start by checking the url for `error` and `error_description` parameters.
   // This happens when the auth server rejects our authorization attempt. In
   // this case it has no other way to tell us what the error was, other than
@@ -2750,11 +2789,11 @@ async function completeAuth(env) {
 
 
   let state = await Storage.get(key);
-  const fullSessionStorageSupport = isBrowser() ? getPath(env, "options.fullSessionStorageSupport") : true; // Do we have to remove the `code` and `state` params from the URL?
+  const fullSessionStorageSupport = Object(_lib__WEBPACK_IMPORTED_MODULE_0__["isBrowser"])() ? Object(_lib__WEBPACK_IMPORTED_MODULE_0__["getPath"])(env, "options.fullSessionStorageSupport") : true; // Do we have to remove the `code` and `state` params from the URL?
 
   const hasState = params.has("state");
 
-  if (isBrowser() && getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
+  if (Object(_lib__WEBPACK_IMPORTED_MODULE_0__["isBrowser"])() && Object(_lib__WEBPACK_IMPORTED_MODULE_0__["getPath"])(env, "options.replaceBrowserHistory") && (code || hasState)) {
     // `code` is the flag that tell us to request an access token.
     // We have to remove it, otherwise the page will authorize on
     // every load!
@@ -2802,7 +2841,7 @@ async function completeAuth(env) {
     // includes an access token or a message indicating that the
     // authorization request has been denied.
 
-    let tokenResponse = await request(state.tokenUri, requestOptions);
+    let tokenResponse = await Object(_lib__WEBPACK_IMPORTED_MODULE_0__["request"])(state.tokenUri, requestOptions);
     debug("Token response: %O", tokenResponse);
 
     if (!tokenResponse.access_token) {
@@ -2821,10 +2860,10 @@ async function completeAuth(env) {
   }
 
   if (fullSessionStorageSupport) {
-    await Storage.set(SMART_KEY, key);
+    await Storage.set(_settings__WEBPACK_IMPORTED_MODULE_2__["SMART_KEY"], key);
   }
 
-  const client = createClient(env, state);
+  const client = new _Client__WEBPACK_IMPORTED_MODULE_1__["default"](env, state);
   debug("Created client instance: %O", client);
   return client;
 }
@@ -2832,7 +2871,6 @@ async function completeAuth(env) {
  * Builds the token request options. Does not make the request, just
  * creates it's configuration and returns it in a Promise.
  */
-
 
 function buildTokenRequest(code, state) {
   const {
@@ -2869,7 +2907,7 @@ function buildTokenRequest(code, state) {
   // client_id and the password is the app’s client_secret (see example).
 
   if (clientSecret) {
-    requestOptions.headers.Authorization = "Basic " + btoa(clientId + ":" + clientSecret);
+    requestOptions.headers.Authorization = "Basic " + Object(_lib__WEBPACK_IMPORTED_MODULE_0__["btoa"])(clientId + ":" + clientSecret);
     debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
   } else {
     debug("No clientSecret found in state. Adding the clientId to the POST body");
@@ -2885,7 +2923,6 @@ function buildTokenRequest(code, state) {
  * @returns { Promise<fhirclient.Client> }
  */
 
-
 async function ready(env, onSuccess, onError) {
   let task = completeAuth(env);
 
@@ -2899,7 +2936,6 @@ async function ready(env, onSuccess, onError) {
 
   return task;
 }
-
 async function init(env, options) {
   const url = env.getUrl();
   const code = url.searchParams.get("code");
@@ -2913,11 +2949,11 @@ async function init(env, options) {
 
 
   const storage = env.getStorage();
-  const key = state || (await storage.get(SMART_KEY));
+  const key = state || (await storage.get(_settings__WEBPACK_IMPORTED_MODULE_2__["SMART_KEY"]));
   const cached = await storage.get(key);
 
   if (cached) {
-    return Promise.resolve(createClient(env, cached));
+    return new _Client__WEBPACK_IMPORTED_MODULE_1__["default"](env, cached);
   } // Otherwise try to launch
 
 
@@ -2935,28 +2971,18 @@ async function init(env, options) {
   });
 }
 
-module.exports = {
-  fetchConformanceStatement,
-  fetchWellKnownJson,
-  getSecurityExtensions,
-  buildTokenRequest,
-  fetchFhirVersion,
-  authorize,
-  completeAuth,
-  ready,
-  init,
-  KEY: SMART_KEY
-};
-
 /***/ }),
 
 /***/ "./src/storage/BrowserStorage.js":
 /*!***************************************!*\
   !*** ./src/storage/BrowserStorage.js ***!
   \***************************************/
-/*! all exports used */
-/***/ (function(module, exports) {
+/*! exports used: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Storage; });
+/* eslint-env browser */
 class Storage {
   /**
    * Gets the value at `key`. Returns a promise that will be resolved
@@ -3006,24 +3032,23 @@ class Storage {
 
 }
 
-module.exports = Storage;
-
 /***/ }),
 
 /***/ "./src/strings.js":
 /*!************************!*\
   !*** ./src/strings.js ***!
   \************************/
-/*! all exports used */
-/***/ (function(module, exports) {
+/*! exports used: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
+"use strict";
 // This map contains reusable debug messages (only those used in multiple places)
-module.exports = {
+/* harmony default export */ __webpack_exports__["default"] = ({
   expired: "Session expired! Please re-launch the app",
   noScopeForId: "Trying to get the ID of the selected %s. Please add 'launch' or 'launch/%s' to the requested scopes and try again.",
   noIfNoAuth: "You are trying to get %s but the app is not authorized yet.",
   noFreeContext: "Please don't use open fhir servers if you need to access launch context items like the %S."
-};
+});
 
 /***/ })
 

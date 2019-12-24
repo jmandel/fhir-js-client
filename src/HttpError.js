@@ -1,5 +1,4 @@
-
-class HttpError extends Error
+export default class HttpError extends Error
 {
     constructor(message, statusCode, statusText) {
         super(message);
@@ -47,5 +46,3 @@ class HttpError extends Error
         return new HttpError(message, status, statusText);
     }
 }
-
-module.exports = HttpError;

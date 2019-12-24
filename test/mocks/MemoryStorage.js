@@ -1,5 +1,5 @@
 
-class MemoryStorage
+export default class MemoryStorage
 {
     constructor()
     {
@@ -12,7 +12,7 @@ class MemoryStorage
     }
 
     async get(key) {
-        return this.__data.hasOwnProperty(key) ? this.__data[key] : null;
+        return Object.prototype.hasOwnProperty.call(this.__data, key) ? this.__data[key] : null;
     }
 
     async unset(key) {
@@ -23,5 +23,3 @@ class MemoryStorage
         return false;
     }
 }
-
-module.exports = MemoryStorage;

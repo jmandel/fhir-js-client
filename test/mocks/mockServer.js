@@ -1,8 +1,11 @@
-const express = require("express");
-const cors    = require("cors");
+import express from "express";
+import cors    from "cors";
 
-
+/**
+ * @type any
+ */
 const app = express();
+export default app;
 app.use(cors());
 
 const mocks = [];
@@ -42,14 +45,16 @@ app.all("*", (req, res, next) => {
 
 
 app.use((err, _req, res, _next) => { // eslint-disable-line
-    res.status(500).send(err.meassage);
+    res.status(500).send(err.message);
 });
 
 if (!module.parent) {
     const server = app.listen(3456, "0.0.0.0", () => {
+
+        /**
+         * @type any
+         */
         const addr = server.address();
         console.log(`Server listening at 0.0.0.0:${addr.port}`);
     });
 }
-
-module.exports = app;

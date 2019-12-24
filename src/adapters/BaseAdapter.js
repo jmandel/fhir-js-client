@@ -1,12 +1,12 @@
-const smart  = require("../smart");
-const Client = require("../Client");
+import * as smart from "../smart";
+import Client from "../Client";
 
 /**
  * This is the abstract base class that adapters must inherit. It just a
  * collection of environment-specific methods that subclasses have to implement.
  * @type { fhirclient.Adapter }
  */
-class BaseAdapter
+export default class BaseAdapter
 {
     /**
      * @param {Object} options Environment-specific options
@@ -67,5 +67,3 @@ class BaseAdapter
         };
     }
 }
-
-module.exports = BaseAdapter;

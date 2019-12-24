@@ -1,27 +1,25 @@
-const FS         = require("fs");
-const { expect } = require("@hapi/code");
-const lab        = require("@hapi/lab").script();
-const Lib        = require("../src/lib");
-const str        = require("../src/strings");
-
-Lib.debug = (...args) => debugLog.push(args);
-Lib.debug.extend = () => Lib.debug;
-
-const Client     = require("../src/Client");
-const { KEY }    = require("../src/smart");
-
-
 // Mocks
-const mockServer     = require("./mocks/mockServer");
-const ServerEnv      = require("./mocks/ServerEnvironment");
-const BrowserEnv     = require("./mocks/BrowserEnvironment");
-const BrowserEnvFhir = require("./mocks/BrowserEnvironmentWithFhirJs");
+import mockDebug      from "./mocks/mockDebug";
+import mockServer     from "./mocks/mockServer";
+import ServerEnv      from "./mocks/ServerEnvironment";
+import BrowserEnv     from "./mocks/BrowserEnvironment";
+import BrowserEnvFhir from "./mocks/BrowserEnvironmentWithFhirJs";
 
+import { expect } from "@hapi/code";
+import Lab        from "@hapi/lab";
+import FS         from "fs";
 
+import str        from "../src/strings";
+
+import Client     from "../src/Client";
+import { KEY }    from "../src/smart";
+
+export const lab = Lab.script();
 const { it, describe, before, after, afterEach } = lab;
-exports.lab = lab;
 
-let mockDataServer, mockUrl, debugLog = [];
+const clientDebug = mockDebug.instances.find(instance => instance.namespace === "FHIR:client");
+
+let mockDataServer, mockUrl;
 
 before(() => {
     return new Promise((resolve, reject) => {
@@ -55,7 +53,7 @@ after(() => {
 
 afterEach(() => {
     mockServer.clear();
-    debugLog = [];
+    clientDebug._calls.length = 0;
 });
 
 
@@ -994,7 +992,7 @@ describe("FHIR.client", () => {
                     patient: { resourceType: "Patient" }
                 });
 
-                expect(debugLog.find(o => o[0] === "Duplicated reference path \"%s\"")).to.exist();
+                expect(clientDebug._calls.find(o => o[0] === "Duplicated reference path \"%s\"")).to.exist();
             });
         });
 
@@ -2338,7 +2336,7 @@ describe("FHIR.client", () => {
         crossPlatformTest(async (env) => {
             const client = new Client(env, mockUrl);
             expect(client.getPatientId()).to.equal(null);
-            expect(debugLog).to.equal([[str.noFreeContext, "selected patient"]]);
+            expect(clientDebug._calls).to.equal([[str.noFreeContext, "selected patient"]]);
         });
     });
 
@@ -2349,7 +2347,7 @@ describe("FHIR.client", () => {
                 authorizeUri: "whatever"
             });
             expect(client.getPatientId()).to.equal(null);
-            expect(debugLog).to.equal([[str.noIfNoAuth, "the ID of the selected patient"]]);
+            expect(clientDebug._calls).to.equal([[str.noIfNoAuth, "the ID of the selected patient"]]);
         });
     });
 
@@ -2360,7 +2358,7 @@ describe("FHIR.client", () => {
                 tokenResponse: {}
             });
             expect(client.getPatientId()).to.equal(null);
-            expect(debugLog).to.equal([[str.noScopeForId, "patient", "patient"]]);
+            expect(clientDebug._calls).to.equal([[str.noScopeForId, "patient", "patient"]]);
         });
     });
 
@@ -2372,7 +2370,7 @@ describe("FHIR.client", () => {
                 tokenResponse: {}
             });
             expect(client.getPatientId()).to.equal(null);
-            expect(debugLog).to.equal([[
+            expect(clientDebug._calls).to.equal([[
                 "The ID of the selected patient is not available. " +
                 "Please check if your server supports that."
             ]]);
@@ -2383,7 +2381,7 @@ describe("FHIR.client", () => {
         crossPlatformTest(async (env) => {
             const client = new Client(env, mockUrl);
             expect(client.getEncounterId()).to.equal(null);
-            expect(debugLog).to.equal([[str.noFreeContext, "selected encounter"]]);
+            expect(clientDebug._calls).to.equal([[str.noFreeContext, "selected encounter"]]);
         });
     });
 
@@ -2394,7 +2392,7 @@ describe("FHIR.client", () => {
                 authorizeUri: "whatever"
             });
             expect(client.getEncounterId()).to.equal(null);
-            expect(debugLog).to.equal([[str.noIfNoAuth, "the ID of the selected encounter"]]);
+            expect(clientDebug._calls).to.equal([[str.noIfNoAuth, "the ID of the selected encounter"]]);
         });
     });
 
@@ -2405,7 +2403,7 @@ describe("FHIR.client", () => {
                 tokenResponse: {}
             });
             expect(client.getEncounterId()).to.equal(null);
-            expect(debugLog).to.equal([[str.noScopeForId, "encounter", "encounter"]]);
+            expect(clientDebug._calls).to.equal([[str.noScopeForId, "encounter", "encounter"]]);
         });
     });
 
@@ -2417,7 +2415,7 @@ describe("FHIR.client", () => {
                 tokenResponse: {}
             });
             expect(client.getEncounterId()).to.equal(null);
-            expect(debugLog).to.equal([[
+            expect(clientDebug._calls).to.equal([[
                 "The ID of the selected encounter is not available. " +
                 "Please check if your server supports that, and that " +
                 "the selected patient has any recorded encounters."
@@ -2429,7 +2427,7 @@ describe("FHIR.client", () => {
         crossPlatformTest(async (env) => {
             const client = new Client(env, mockUrl);
             expect(client.getIdToken()).to.equal(null);
-            expect(debugLog).to.equal([[str.noFreeContext, "id_token"]]);
+            expect(clientDebug._calls).to.equal([[str.noFreeContext, "id_token"]]);
         });
     });
 
@@ -2440,7 +2438,7 @@ describe("FHIR.client", () => {
                 authorizeUri: "whatever"
             });
             expect(client.getIdToken()).to.equal(null);
-            expect(debugLog).to.equal([[str.noIfNoAuth, "the id_token"]]);
+            expect(clientDebug._calls).to.equal([[str.noIfNoAuth, "the id_token"]]);
         });
     });
 
@@ -2452,7 +2450,7 @@ describe("FHIR.client", () => {
                 tokenResponse: {}
             });
             expect(client.getIdToken()).to.equal(null);
-            expect(debugLog).to.equal([["You are trying to get the id_token but you are not using the right scopes. Please add 'openid' and 'fhirUser' or 'profile' to the scopes you are requesting."]]);
+            expect(clientDebug._calls).to.equal([["You are trying to get the id_token but you are not using the right scopes. Please add 'openid' and 'fhirUser' or 'profile' to the scopes you are requesting."]]);
         });
     });
 
@@ -2464,7 +2462,7 @@ describe("FHIR.client", () => {
                 tokenResponse: {}
             });
             expect(client.getIdToken()).to.equal(null);
-            expect(debugLog).to.equal([[
+            expect(clientDebug._calls).to.equal([[
                 "The id_token is not available. Please check if your " +
                 "server supports that."
             ]]);

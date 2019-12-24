@@ -143,13 +143,13 @@ declare namespace fhirclient {
     /**
      * A Client instance that can be used to query the FHIR server.
      */
-    interface Client {
+    class Client {
 
         /**
          * The current state including options and tokenResponse
          */
-        state: JsonObject;
-        environment: JsonObject;
+        state: ClientState;
+        environment: Adapter;
         api?: JsonObject;
         patient: {
             id: string;
@@ -166,6 +166,8 @@ declare namespace fhirclient {
             resourceType: string;
             read(): Promise<JsonObject>;
         }
+
+        constructor(environment: Adapter, state: ClientState);
 
         /**
          * Returns the ID of the current patient (if any) or null

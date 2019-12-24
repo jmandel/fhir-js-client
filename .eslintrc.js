@@ -1,16 +1,16 @@
 module.exports = {
     "env": {
-        "browser" : true,
-        "commonjs": true,
-        "es6"     : true,
-        "node"    : true
+        "commonjs"           : true,
+        "es6"                : true,
+        "shared-node-browser": true
+    },
+    "globals": {
+        "process": true
     },
     "extends": "eslint:recommended",
     "parserOptions": {
         "ecmaVersion": 10,
-        "ecmaFeatures": {
-            "impliedStrict": true
-        }
+        "sourceType": "module"
     },
     "rules": {
         "indent"            : [ "warn", 4 ],
@@ -20,5 +20,16 @@ module.exports = {
         "no-trailing-spaces": 1,
         "no-await-in-loop"  : 2,
         "no-console"        : 1
-    }
+    },
+    "overrides": [
+        {
+            "files": [
+                "test/**/*",
+                "webpack.config.js"
+            ],
+            "env": {
+                "node": true
+            }
+        }
+    ]
 };
