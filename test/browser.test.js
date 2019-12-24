@@ -59,6 +59,7 @@ beforeEach(() => {
 afterEach(() => {
     mockServer.clear();
     delete global.window;
+    delete global.fetch;
     // window.FHIR.oauth2.settings.fullSessionStorageSupport = true;
     // window.FHIR.oauth2.settings.replaceBrowserHistory = true;
 });
