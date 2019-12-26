@@ -9,7 +9,7 @@ import debug from "debug";
 
 // @ts-ignore
 // eslint-disable-next-line no-undef
-const fetch = global.FHIRCLIENT_PURE ? window.fetch : require("cross-fetch").fetch;
+const { fetch } = global.FHIRCLIENT_PURE ? window : require("cross-fetch");
 
 const _debug     = debug("FHIR");
 export { _debug as debug };

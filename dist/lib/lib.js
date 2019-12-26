@@ -1,11 +1,5 @@
 "use strict";
 
-require("core-js/modules/es.array.iterator");
-
-require("core-js/modules/es.promise");
-
-require("core-js/modules/es.string.replace");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -43,7 +37,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  */
 // @ts-ignore
 // eslint-disable-next-line no-undef
-const fetch = global.FHIRCLIENT_PURE ? window.fetch : require("cross-fetch").fetch;
+const {
+  fetch
+} = global.FHIRCLIENT_PURE ? window : require("cross-fetch");
 
 const _debug = (0, _debug2.default)("FHIR");
 

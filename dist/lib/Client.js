@@ -2,19 +2,7 @@
 
 require("core-js/modules/es.array.flat");
 
-require("core-js/modules/es.array.iterator");
-
-require("core-js/modules/es.array.sort");
-
 require("core-js/modules/es.array.unscopables.flat");
-
-require("core-js/modules/es.promise");
-
-require("core-js/modules/es.promise.finally");
-
-require("core-js/modules/es.string.replace");
-
-require("core-js/modules/web.url");
 
 Object.defineProperty(exports, "__esModule", {
   value: true

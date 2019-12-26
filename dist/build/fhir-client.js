@@ -1526,57 +1526,6 @@ module.exports = function (METHOD_NAME) {
 
 /***/ }),
 
-/***/ "./node_modules/core-js/internals/array-reduce.js":
-/*!********************************************************!*\
-  !*** ./node_modules/core-js/internals/array-reduce.js ***!
-  \********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var aFunction = __webpack_require__(/*! ../internals/a-function */ "./node_modules/core-js/internals/a-function.js");
-var toObject = __webpack_require__(/*! ../internals/to-object */ "./node_modules/core-js/internals/to-object.js");
-var IndexedObject = __webpack_require__(/*! ../internals/indexed-object */ "./node_modules/core-js/internals/indexed-object.js");
-var toLength = __webpack_require__(/*! ../internals/to-length */ "./node_modules/core-js/internals/to-length.js");
-
-// `Array.prototype.{ reduce, reduceRight }` methods implementation
-var createMethod = function (IS_RIGHT) {
-  return function (that, callbackfn, argumentsLength, memo) {
-    aFunction(callbackfn);
-    var O = toObject(that);
-    var self = IndexedObject(O);
-    var length = toLength(O.length);
-    var index = IS_RIGHT ? length - 1 : 0;
-    var i = IS_RIGHT ? -1 : 1;
-    if (argumentsLength < 2) while (true) {
-      if (index in self) {
-        memo = self[index];
-        index += i;
-        break;
-      }
-      index += i;
-      if (IS_RIGHT ? index < 0 : length <= index) {
-        throw TypeError('Reduce of empty array with no initial value');
-      }
-    }
-    for (;IS_RIGHT ? index >= 0 : length > index; index += i) if (index in self) {
-      memo = callbackfn(memo, self[index], index, O);
-    }
-    return memo;
-  };
-};
-
-module.exports = {
-  // `Array.prototype.reduce` method
-  // https://tc39.github.io/ecma262/#sec-array.prototype.reduce
-  left: createMethod(false),
-  // `Array.prototype.reduceRight` method
-  // https://tc39.github.io/ecma262/#sec-array.prototype.reduceright
-  right: createMethod(true)
-};
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/internals/array-species-create.js":
 /*!****************************************************************!*\
   !*** ./node_modules/core-js/internals/array-species-create.js ***!
@@ -3654,56 +3603,6 @@ module.exports = getBuiltIn('Reflect', 'ownKeys') || function ownKeys(it) {
 
 /***/ }),
 
-/***/ "./node_modules/core-js/internals/parse-float.js":
-/*!*******************************************************!*\
-  !*** ./node_modules/core-js/internals/parse-float.js ***!
-  \*******************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var global = __webpack_require__(/*! ../internals/global */ "./node_modules/core-js/internals/global.js");
-var trim = __webpack_require__(/*! ../internals/string-trim */ "./node_modules/core-js/internals/string-trim.js").trim;
-var whitespaces = __webpack_require__(/*! ../internals/whitespaces */ "./node_modules/core-js/internals/whitespaces.js");
-
-var nativeParseFloat = global.parseFloat;
-var FORCED = 1 / nativeParseFloat(whitespaces + '-0') !== -Infinity;
-
-// `parseFloat` method
-// https://tc39.github.io/ecma262/#sec-parsefloat-string
-module.exports = FORCED ? function parseFloat(string) {
-  var trimmedString = trim(String(string));
-  var result = nativeParseFloat(trimmedString);
-  return result === 0 && trimmedString.charAt(0) == '-' ? -0 : result;
-} : nativeParseFloat;
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/parse-int.js":
-/*!*****************************************************!*\
-  !*** ./node_modules/core-js/internals/parse-int.js ***!
-  \*****************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var global = __webpack_require__(/*! ../internals/global */ "./node_modules/core-js/internals/global.js");
-var trim = __webpack_require__(/*! ../internals/string-trim */ "./node_modules/core-js/internals/string-trim.js").trim;
-var whitespaces = __webpack_require__(/*! ../internals/whitespaces */ "./node_modules/core-js/internals/whitespaces.js");
-
-var nativeParseInt = global.parseInt;
-var hex = /^[+-]?0[Xx]/;
-var FORCED = nativeParseInt(whitespaces + '08') !== 8 || nativeParseInt(whitespaces + '0x16') !== 22;
-
-// `parseInt` method
-// https://tc39.github.io/ecma262/#sec-parseint-string-radix
-module.exports = FORCED ? function parseInt(string, radix) {
-  var S = trim(String(string));
-  return nativeParseInt(S, (radix >>> 0) || (hex.test(S) ? 16 : 10));
-} : nativeParseInt;
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/internals/path.js":
 /*!************************************************!*\
   !*** ./node_modules/core-js/internals/path.js ***!
@@ -5013,78 +4912,6 @@ $({ target: 'Array', proto: true }, {
 
 /***/ }),
 
-/***/ "./node_modules/core-js/modules/es.array.for-each.js":
-/*!***********************************************************!*\
-  !*** ./node_modules/core-js/modules/es.array.for-each.js ***!
-  \***********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var forEach = __webpack_require__(/*! ../internals/array-for-each */ "./node_modules/core-js/internals/array-for-each.js");
-
-// `Array.prototype.forEach` method
-// https://tc39.github.io/ecma262/#sec-array.prototype.foreach
-$({ target: 'Array', proto: true, forced: [].forEach != forEach }, {
-  forEach: forEach
-});
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/es.array.index-of.js":
-/*!***********************************************************!*\
-  !*** ./node_modules/core-js/modules/es.array.index-of.js ***!
-  \***********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var $indexOf = __webpack_require__(/*! ../internals/array-includes */ "./node_modules/core-js/internals/array-includes.js").indexOf;
-var sloppyArrayMethod = __webpack_require__(/*! ../internals/sloppy-array-method */ "./node_modules/core-js/internals/sloppy-array-method.js");
-
-var nativeIndexOf = [].indexOf;
-
-var NEGATIVE_ZERO = !!nativeIndexOf && 1 / [1].indexOf(1, -0) < 0;
-var SLOPPY_METHOD = sloppyArrayMethod('indexOf');
-
-// `Array.prototype.indexOf` method
-// https://tc39.github.io/ecma262/#sec-array.prototype.indexof
-$({ target: 'Array', proto: true, forced: NEGATIVE_ZERO || SLOPPY_METHOD }, {
-  indexOf: function indexOf(searchElement /* , fromIndex = 0 */) {
-    return NEGATIVE_ZERO
-      // convert -0 to +0
-      ? nativeIndexOf.apply(this, arguments) || 0
-      : $indexOf(this, searchElement, arguments.length > 1 ? arguments[1] : undefined);
-  }
-});
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/es.array.is-array.js":
-/*!***********************************************************!*\
-  !*** ./node_modules/core-js/modules/es.array.is-array.js ***!
-  \***********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var isArray = __webpack_require__(/*! ../internals/is-array */ "./node_modules/core-js/internals/is-array.js");
-
-// `Array.isArray` method
-// https://tc39.github.io/ecma262/#sec-array.isarray
-$({ target: 'Array', stat: true }, {
-  isArray: isArray
-});
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/modules/es.array.iterator.js":
 /*!***********************************************************!*\
   !*** ./node_modules/core-js/modules/es.array.iterator.js ***!
@@ -5212,74 +5039,6 @@ $({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT || !USES_TO_LENGT
 
 /***/ }),
 
-/***/ "./node_modules/core-js/modules/es.array.reduce.js":
-/*!*********************************************************!*\
-  !*** ./node_modules/core-js/modules/es.array.reduce.js ***!
-  \*********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var $reduce = __webpack_require__(/*! ../internals/array-reduce */ "./node_modules/core-js/internals/array-reduce.js").left;
-var sloppyArrayMethod = __webpack_require__(/*! ../internals/sloppy-array-method */ "./node_modules/core-js/internals/sloppy-array-method.js");
-
-// `Array.prototype.reduce` method
-// https://tc39.github.io/ecma262/#sec-array.prototype.reduce
-$({ target: 'Array', proto: true, forced: sloppyArrayMethod('reduce') }, {
-  reduce: function reduce(callbackfn /* , initialValue */) {
-    return $reduce(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : undefined);
-  }
-});
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/es.array.sort.js":
-/*!*******************************************************!*\
-  !*** ./node_modules/core-js/modules/es.array.sort.js ***!
-  \*******************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var aFunction = __webpack_require__(/*! ../internals/a-function */ "./node_modules/core-js/internals/a-function.js");
-var toObject = __webpack_require__(/*! ../internals/to-object */ "./node_modules/core-js/internals/to-object.js");
-var fails = __webpack_require__(/*! ../internals/fails */ "./node_modules/core-js/internals/fails.js");
-var sloppyArrayMethod = __webpack_require__(/*! ../internals/sloppy-array-method */ "./node_modules/core-js/internals/sloppy-array-method.js");
-
-var test = [];
-var nativeSort = test.sort;
-
-// IE8-
-var FAILS_ON_UNDEFINED = fails(function () {
-  test.sort(undefined);
-});
-// V8 bug
-var FAILS_ON_NULL = fails(function () {
-  test.sort(null);
-});
-// Old WebKit
-var SLOPPY_METHOD = sloppyArrayMethod('sort');
-
-var FORCED = FAILS_ON_UNDEFINED || !FAILS_ON_NULL || SLOPPY_METHOD;
-
-// `Array.prototype.sort` method
-// https://tc39.github.io/ecma262/#sec-array.prototype.sort
-$({ target: 'Array', proto: true, forced: FORCED }, {
-  sort: function sort(comparefn) {
-    return comparefn === undefined
-      ? nativeSort.call(toObject(this))
-      : nativeSort.call(toObject(this), aFunction(comparefn));
-  }
-});
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/modules/es.array.splice.js":
 /*!*********************************************************!*\
   !*** ./node_modules/core-js/modules/es.array.splice.js ***!
@@ -5370,67 +5129,6 @@ $({ target: 'Array', proto: true, forced: !arrayMethodHasSpeciesSupport('splice'
 var addToUnscopables = __webpack_require__(/*! ../internals/add-to-unscopables */ "./node_modules/core-js/internals/add-to-unscopables.js");
 
 addToUnscopables('flat');
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/es.date.to-json.js":
-/*!*********************************************************!*\
-  !*** ./node_modules/core-js/modules/es.date.to-json.js ***!
-  \*********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var fails = __webpack_require__(/*! ../internals/fails */ "./node_modules/core-js/internals/fails.js");
-var toObject = __webpack_require__(/*! ../internals/to-object */ "./node_modules/core-js/internals/to-object.js");
-var toPrimitive = __webpack_require__(/*! ../internals/to-primitive */ "./node_modules/core-js/internals/to-primitive.js");
-
-var FORCED = fails(function () {
-  return new Date(NaN).toJSON() !== null
-    || Date.prototype.toJSON.call({ toISOString: function () { return 1; } }) !== 1;
-});
-
-// `Date.prototype.toJSON` method
-// https://tc39.github.io/ecma262/#sec-date.prototype.tojson
-$({ target: 'Date', proto: true, forced: FORCED }, {
-  // eslint-disable-next-line no-unused-vars
-  toJSON: function toJSON(key) {
-    var O = toObject(this);
-    var pv = toPrimitive(O);
-    return typeof pv == 'number' && !isFinite(pv) ? null : O.toISOString();
-  }
-});
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/es.date.to-string.js":
-/*!***********************************************************!*\
-  !*** ./node_modules/core-js/modules/es.date.to-string.js ***!
-  \***********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var redefine = __webpack_require__(/*! ../internals/redefine */ "./node_modules/core-js/internals/redefine.js");
-
-var DatePrototype = Date.prototype;
-var INVALID_DATE = 'Invalid Date';
-var TO_STRING = 'toString';
-var nativeDateToString = DatePrototype[TO_STRING];
-var getTime = DatePrototype.getTime;
-
-// `Date.prototype.toString` method
-// https://tc39.github.io/ecma262/#sec-date.prototype.tostring
-if (new Date(NaN) + '' != INVALID_DATE) {
-  redefine(DatePrototype, TO_STRING, function toString() {
-    var value = getTime.call(this);
-    // eslint-disable-next-line no-self-compare
-    return value === value ? nativeDateToString.call(this) : INVALID_DATE;
-  });
-}
 
 
 /***/ }),
@@ -5618,44 +5316,6 @@ var toString = __webpack_require__(/*! ../internals/object-to-string */ "./node_
 if (!TO_STRING_TAG_SUPPORT) {
   redefine(Object.prototype, 'toString', toString, { unsafe: true });
 }
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/es.parse-float.js":
-/*!********************************************************!*\
-  !*** ./node_modules/core-js/modules/es.parse-float.js ***!
-  \********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var parseFloatImplementation = __webpack_require__(/*! ../internals/parse-float */ "./node_modules/core-js/internals/parse-float.js");
-
-// `parseFloat` method
-// https://tc39.github.io/ecma262/#sec-parsefloat-string
-$({ global: true, forced: parseFloat != parseFloatImplementation }, {
-  parseFloat: parseFloatImplementation
-});
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/es.parse-int.js":
-/*!******************************************************!*\
-  !*** ./node_modules/core-js/modules/es.parse-int.js ***!
-  \******************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var parseIntImplementation = __webpack_require__(/*! ../internals/parse-int */ "./node_modules/core-js/internals/parse-int.js");
-
-// `parseInt` method
-// https://tc39.github.io/ecma262/#sec-parseint-string-radix
-$({ global: true, forced: parseInt != parseIntImplementation }, {
-  parseInt: parseIntImplementation
-});
 
 
 /***/ }),
@@ -8717,8 +8377,6 @@ module.exports = exports
 "use strict";
 
 
-__webpack_require__(/*! core-js/modules/es.parse-float */ "./node_modules/core-js/modules/es.parse-float.js");
-
 __webpack_require__(/*! core-js/modules/es.regexp.exec */ "./node_modules/core-js/modules/es.regexp.exec.js");
 
 /**
@@ -8751,7 +8409,7 @@ module.exports = function (val, options) {
   if (type === 'string' && val.length > 0) {
     return parse(val);
   } else if (type === 'number' && isNaN(val) === false) {
-    return options["long"] ? fmtLong(val) : fmtShort(val);
+    return options.long ? fmtLong(val) : fmtShort(val);
   }
 
   throw new Error('val is not a non-empty string or a valid number. val=' + JSON.stringify(val));
@@ -8914,8 +8572,6 @@ function plural(ms, msAbs, n, name) {
 /* WEBPACK VAR INJECTION */(function(process) {
 
 __webpack_require__(/*! core-js/modules/es.array.splice */ "./node_modules/core-js/modules/es.array.splice.js");
-
-__webpack_require__(/*! core-js/modules/es.parse-int */ "./node_modules/core-js/modules/es.parse-int.js");
 
 __webpack_require__(/*! core-js/modules/es.regexp.constructor */ "./node_modules/core-js/modules/es.regexp.constructor.js");
 
@@ -9118,17 +8774,11 @@ formatters.j = function (v) {
 
 __webpack_require__(/*! core-js/modules/es.array.concat */ "./node_modules/core-js/modules/es.array.concat.js");
 
-__webpack_require__(/*! core-js/modules/es.array.for-each */ "./node_modules/core-js/modules/es.array.for-each.js");
-
-__webpack_require__(/*! core-js/modules/es.array.index-of */ "./node_modules/core-js/modules/es.array.index-of.js");
-
 __webpack_require__(/*! core-js/modules/es.array.join */ "./node_modules/core-js/modules/es.array.join.js");
 
 __webpack_require__(/*! core-js/modules/es.array.map */ "./node_modules/core-js/modules/es.array.map.js");
 
 __webpack_require__(/*! core-js/modules/es.array.splice */ "./node_modules/core-js/modules/es.array.splice.js");
-
-__webpack_require__(/*! core-js/modules/es.date.to-string */ "./node_modules/core-js/modules/es.date.to-string.js");
 
 __webpack_require__(/*! core-js/modules/es.number.constructor */ "./node_modules/core-js/modules/es.number.constructor.js");
 
@@ -9154,7 +8804,7 @@ __webpack_require__(/*! core-js/modules/web.dom-collections.for-each */ "./node_
  */
 function setup(env) {
   createDebug.debug = createDebug;
-  createDebug["default"] = createDebug;
+  createDebug.default = createDebug;
   createDebug.coerce = coerce;
   createDebug.disable = disable;
   createDebug.enable = enable;
@@ -10410,17 +10060,9 @@ __webpack_require__(/*! core-js/modules/es.array.find */ "./node_modules/core-js
 
 __webpack_require__(/*! core-js/modules/es.array.flat */ "./node_modules/core-js/modules/es.array.flat.js");
 
-__webpack_require__(/*! core-js/modules/es.array.for-each */ "./node_modules/core-js/modules/es.array.for-each.js");
-
-__webpack_require__(/*! core-js/modules/es.array.index-of */ "./node_modules/core-js/modules/es.array.index-of.js");
-
-__webpack_require__(/*! core-js/modules/es.array.is-array */ "./node_modules/core-js/modules/es.array.is-array.js");
-
 __webpack_require__(/*! core-js/modules/es.array.iterator */ "./node_modules/core-js/modules/es.array.iterator.js");
 
 __webpack_require__(/*! core-js/modules/es.array.map */ "./node_modules/core-js/modules/es.array.map.js");
-
-__webpack_require__(/*! core-js/modules/es.array.sort */ "./node_modules/core-js/modules/es.array.sort.js");
 
 __webpack_require__(/*! core-js/modules/es.array.unscopables.flat */ "./node_modules/core-js/modules/es.array.unscopables.flat.js");
 
@@ -10455,7 +10097,7 @@ __webpack_require__(/*! core-js/modules/web.dom-collections.iterator */ "./node_
 __webpack_require__(/*! core-js/modules/web.url */ "./node_modules/core-js/modules/web.url.js");
 
 exports.__esModule = true;
-exports["default"] = void 0;
+exports.default = void 0;
 
 var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js"));
 
@@ -10503,21 +10145,21 @@ function contextualize(_x, _x2) {
 
 
 function _contextualize() {
-  _contextualize = (0, _asyncToGenerator2["default"])(
+  _contextualize = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
-  _regenerator["default"].mark(function _callee8(requestOptions, client) {
+  _regenerator.default.mark(function _callee8(requestOptions, client) {
     var base, contextualURL, _contextualURL, _url, url;
 
-    return _regenerator["default"].wrap(function _callee8$(_context8) {
+    return _regenerator.default.wrap(function _callee8$(_context8) {
       while (1) {
         switch (_context8.prev = _context8.next) {
           case 0:
             _contextualURL = function _ref7() {
-              _contextualURL = (0, _asyncToGenerator2["default"])(
+              _contextualURL = (0, _asyncToGenerator2.default)(
               /*#__PURE__*/
-              _regenerator["default"].mark(function _callee7(url) {
+              _regenerator.default.mark(function _callee7(url) {
                 var resourceType, conformance, searchParam;
-                return _regenerator["default"].wrap(function _callee7$(_context7) {
+                return _regenerator.default.wrap(function _callee7$(_context7) {
                   while (1) {
                     switch (_context7.prev = _context7.next) {
                       case 0:
@@ -10630,7 +10272,7 @@ function resolveRef(obj, path, graph, cache, client) {
               (0, _lib.setPath)(obj, path, sub);
             }
           }
-        })["catch"](function () {
+        }).catch(function () {
           /* ignore */
         });
       }
@@ -10745,11 +10387,11 @@ function () {
         }
 
         if (_this.patient.id) {
-          return (0, _asyncToGenerator2["default"])(
+          return (0, _asyncToGenerator2.default)(
           /*#__PURE__*/
-          _regenerator["default"].mark(function _callee() {
+          _regenerator.default.mark(function _callee() {
             var options;
-            return _regenerator["default"].wrap(function _callee$(_context) {
+            return _regenerator.default.wrap(function _callee$(_context) {
               while (1) {
                 switch (_context.prev = _context.next) {
                   case 0:
@@ -10859,7 +10501,7 @@ function () {
       // the patient. This should be a scope issue.
       if (!tokenResponse.patient) {
         if (!(this.state.scope || "").match(/\blaunch(\/patient)?\b/)) {
-          debug(_strings["default"].noScopeForId, "patient", "patient");
+          debug(_strings.default.noScopeForId, "patient", "patient");
         } else {
           // The server should have returned the patient!
           debug("The ID of the selected patient is not available. Please check if your server supports that.");
@@ -10872,9 +10514,9 @@ function () {
     }
 
     if (this.state.authorizeUri) {
-      debug(_strings["default"].noIfNoAuth, "the ID of the selected patient");
+      debug(_strings.default.noIfNoAuth, "the ID of the selected patient");
     } else {
-      debug(_strings["default"].noFreeContext, "selected patient");
+      debug(_strings.default.noFreeContext, "selected patient");
     }
 
     return null;
@@ -10895,7 +10537,7 @@ function () {
       // the encounter. This should be a scope issue.
       if (!tokenResponse.encounter) {
         if (!(this.state.scope || "").match(/\blaunch(\/encounter)?\b/)) {
-          debug(_strings["default"].noScopeForId, "encounter", "encounter");
+          debug(_strings.default.noScopeForId, "encounter", "encounter");
         } else {
           // The server should have returned the encounter!
           debug("The ID of the selected encounter is not available. Please check if your server supports that, and that the selected patient has any recorded encounters.");
@@ -10908,9 +10550,9 @@ function () {
     }
 
     if (this.state.authorizeUri) {
-      debug(_strings["default"].noIfNoAuth, "the ID of the selected encounter");
+      debug(_strings.default.noIfNoAuth, "the ID of the selected encounter");
     } else {
-      debug(_strings["default"].noFreeContext, "selected encounter");
+      debug(_strings.default.noFreeContext, "selected encounter");
     }
 
     return null;
@@ -10949,9 +10591,9 @@ function () {
     }
 
     if (this.state.authorizeUri) {
-      debug(_strings["default"].noIfNoAuth, "the id_token");
+      debug(_strings.default.noIfNoAuth, "the id_token");
     } else {
-      debug(_strings["default"].noFreeContext, "id_token");
+      debug(_strings.default.noFreeContext, "id_token");
     }
 
     return null;
@@ -11023,11 +10665,11 @@ function () {
   _proto._clearState =
   /*#__PURE__*/
   function () {
-    var _clearState2 = (0, _asyncToGenerator2["default"])(
+    var _clearState2 = (0, _asyncToGenerator2.default)(
     /*#__PURE__*/
-    _regenerator["default"].mark(function _callee2() {
+    _regenerator.default.mark(function _callee2() {
       var storage, key;
-      return _regenerator["default"].wrap(function _callee2$(_context2) {
+      return _regenerator.default.wrap(function _callee2$(_context2) {
         while (1) {
           switch (_context2.prev = _context2.next) {
             case 0:
@@ -11103,7 +10745,7 @@ function () {
    */
   ;
 
-  _proto["delete"] = function _delete(url) {
+  _proto.delete = function _delete(url) {
     return this.request({
       url: url,
       method: "DELETE"
@@ -11120,13 +10762,13 @@ function () {
   _proto.request =
   /*#__PURE__*/
   function () {
-    var _request2 = (0, _asyncToGenerator2["default"])(
+    var _request2 = (0, _asyncToGenerator2.default)(
     /*#__PURE__*/
-    _regenerator["default"].mark(function _callee6(requestOptions, fhirOptions, _resolvedRefs) {
+    _regenerator.default.mark(function _callee6(requestOptions, fhirOptions, _resolvedRefs) {
       var _this2 = this;
 
       var debug, url, authHeader, hasPageCallback;
-      return _regenerator["default"].wrap(function _callee6$(_context6) {
+      return _regenerator.default.wrap(function _callee6$(_context6) {
         while (1) {
           switch (_context6.prev = _context6.next) {
             case 0:
@@ -11177,7 +10819,7 @@ function () {
               hasPageCallback = typeof fhirOptions.onPage == "function";
               debug("%s, options: %O, fhirOptions: %O", url, requestOptions, fhirOptions);
               return _context6.abrupt("return", (0, _lib.request)(url, requestOptions) // Automatic re-auth via refresh token -----------------------------
-              ["catch"](function (error) {
+              .catch(function (error) {
                 debug("%o", error);
 
                 if (error.status == 401 && fhirOptions.useRefreshToken !== false) {
@@ -11194,13 +10836,13 @@ function () {
 
                 throw error;
               }) // Handle 401 ------------------------------------------------------
-              ["catch"](
+              .catch(
               /*#__PURE__*/
               function () {
-                var _ref3 = (0, _asyncToGenerator2["default"])(
+                var _ref3 = (0, _asyncToGenerator2.default)(
                 /*#__PURE__*/
-                _regenerator["default"].mark(function _callee3(error) {
-                  return _regenerator["default"].wrap(function _callee3$(_context3) {
+                _regenerator.default.mark(function _callee3(error) {
+                  return _regenerator.default.wrap(function _callee3$(_context3) {
                     while (1) {
                       switch (_context3.prev = _context3.next) {
                         case 0:
@@ -11227,7 +10869,7 @@ function () {
                           return _this2._clearState();
 
                         case 7:
-                          throw new Error(_strings["default"].expired);
+                          throw new Error(_strings.default.expired);
 
                         case 8:
                           // otherwise -> auto-refresh failed. Session expired.
@@ -11237,7 +10879,7 @@ function () {
                           return _this2._clearState();
 
                         case 11:
-                          throw new Error(_strings["default"].expired);
+                          throw new Error(_strings.default.expired);
 
                         case 12:
                           throw error;
@@ -11254,7 +10896,7 @@ function () {
                   return _ref3.apply(this, arguments);
                 };
               }()) // Handle 403 ------------------------------------------------------
-              ["catch"](function (error) {
+              .catch(function (error) {
                 if (error.status == 403) {
                   debug("Permission denied! Please make sure that you have requested the proper scopes.");
                 }
@@ -11267,10 +10909,10 @@ function () {
                 if (typeof data == "object" && data instanceof Response) return data; // Resolve References ----------------------------------------------
 
                 return function () {
-                  var _ref4 = (0, _asyncToGenerator2["default"])(
+                  var _ref4 = (0, _asyncToGenerator2.default)(
                   /*#__PURE__*/
-                  _regenerator["default"].mark(function _callee4(data) {
-                    return _regenerator["default"].wrap(function _callee4$(_context4) {
+                  _regenerator.default.mark(function _callee4(data) {
+                    return _regenerator.default.wrap(function _callee4$(_context4) {
                       while (1) {
                         switch (_context4.prev = _context4.next) {
                           case 0:
@@ -11315,11 +10957,11 @@ function () {
                 .then(
                 /*#__PURE__*/
                 function () {
-                  var _ref5 = (0, _asyncToGenerator2["default"])(
+                  var _ref5 = (0, _asyncToGenerator2.default)(
                   /*#__PURE__*/
-                  _regenerator["default"].mark(function _callee5(data) {
+                  _regenerator.default.mark(function _callee5(data) {
                     var links, next, nextPage;
-                    return _regenerator["default"].wrap(function _callee5$(_context5) {
+                    return _regenerator.default.wrap(function _callee5$(_context5) {
                       while (1) {
                         switch (_context5.prev = _context5.next) {
                           case 0:
@@ -11481,11 +11123,11 @@ function () {
         debug("Received new access token %O", data);
         Object.assign(_this3.state.tokenResponse, data);
         return _this3.state;
-      })["catch"](function (error) {
+      }).catch(function (error) {
         debug("Deleting the expired or invalid refresh token.");
         delete _this3.state.tokenResponse.refresh_token;
         throw error;
-      })["finally"](function () {
+      }).finally(function () {
         _this3._refreshTask = null;
 
         _this3.environment.getStorage().set(_this3.state.key, _this3.state);
@@ -11542,7 +11184,7 @@ function () {
     });
   };
 
-  (0, _createClass2["default"])(FhirClient, [{
+  (0, _createClass2.default)(FhirClient, [{
     key: "units",
     get: function get() {
       return _lib.units;
@@ -11551,7 +11193,7 @@ function () {
   return FhirClient;
 }();
 
-exports["default"] = FhirClient;
+exports.default = FhirClient;
 
 /***/ }),
 
@@ -11567,14 +11209,12 @@ exports["default"] = FhirClient;
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/interopRequireDefault.js");
 
-__webpack_require__(/*! core-js/modules/es.date.to-json */ "./node_modules/core-js/modules/es.date.to-json.js");
-
 __webpack_require__(/*! core-js/modules/es.function.name */ "./node_modules/core-js/modules/es.function.name.js");
 
 __webpack_require__(/*! core-js/modules/web.url.to-json */ "./node_modules/core-js/modules/web.url.to-json.js");
 
 exports.__esModule = true;
-exports["default"] = void 0;
+exports.default = void 0;
 
 var _inheritsLoose2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/inheritsLoose */ "./node_modules/@babel/runtime/helpers/inheritsLoose.js"));
 
@@ -11583,7 +11223,7 @@ var _wrapNativeSuper2 = _interopRequireDefault(__webpack_require__(/*! @babel/ru
 var HttpError =
 /*#__PURE__*/
 function (_Error) {
-  (0, _inheritsLoose2["default"])(HttpError, _Error);
+  (0, _inheritsLoose2.default)(HttpError, _Error);
 
   function HttpError(message, statusCode, statusText) {
     var _this;
@@ -11636,9 +11276,9 @@ function (_Error) {
   };
 
   return HttpError;
-}((0, _wrapNativeSuper2["default"])(Error));
+}((0, _wrapNativeSuper2.default)(Error));
 
-exports["default"] = HttpError;
+exports.default = HttpError;
 
 /***/ }),
 
@@ -11671,7 +11311,7 @@ __webpack_require__(/*! core-js/modules/web.dom-collections.iterator */ "./node_
 __webpack_require__(/*! core-js/modules/web.url */ "./node_modules/core-js/modules/web.url.js");
 
 exports.__esModule = true;
-exports["default"] = void 0;
+exports.default = void 0;
 
 var smart = _interopRequireWildcard(__webpack_require__(/*! ../smart */ "./src/smart.js"));
 
@@ -11757,7 +11397,7 @@ function () {
         return smart.init.apply(smart, [_this].concat(args));
       },
       client: function client(state) {
-        return new _Client["default"](_this, state);
+        return new _Client.default(_this, state);
       },
       options: this.options
     };
@@ -11766,7 +11406,7 @@ function () {
   return BaseAdapter;
 }();
 
-exports["default"] = BaseAdapter;
+exports.default = BaseAdapter;
 
 /***/ }),
 
@@ -11793,7 +11433,7 @@ __webpack_require__(/*! core-js/modules/web.dom-collections.iterator */ "./node_
 __webpack_require__(/*! core-js/modules/web.url */ "./node_modules/core-js/modules/web.url.js");
 
 exports.__esModule = true;
-exports.Adapter = exports["default"] = void 0;
+exports.Adapter = exports.default = void 0;
 
 var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ "./node_modules/@babel/runtime/helpers/createClass.js"));
 
@@ -11814,7 +11454,7 @@ var _BaseAdapter2 = _interopRequireDefault(__webpack_require__(/*! ./BaseAdapter
 var BrowserAdapter =
 /*#__PURE__*/
 function (_BaseAdapter) {
-  (0, _inheritsLoose2["default"])(BrowserAdapter, _BaseAdapter);
+  (0, _inheritsLoose2.default)(BrowserAdapter, _BaseAdapter);
 
   function BrowserAdapter() {
     return _BaseAdapter.apply(this, arguments) || this;
@@ -11854,7 +11494,7 @@ function (_BaseAdapter) {
 
   _proto.getStorage = function getStorage() {
     if (!this._storage) {
-      this._storage = new _BrowserStorage["default"]();
+      this._storage = new _BrowserStorage.default();
     }
 
     return this._storage;
@@ -11864,7 +11504,7 @@ function (_BaseAdapter) {
     return new BrowserAdapter(options).getSmartApi();
   };
 
-  (0, _createClass2["default"])(BrowserAdapter, [{
+  (0, _createClass2.default)(BrowserAdapter, [{
     key: "fhir",
 
     /**
@@ -11878,11 +11518,11 @@ function (_BaseAdapter) {
     }
   }]);
   return BrowserAdapter;
-}(_BaseAdapter2["default"]);
+}(_BaseAdapter2.default);
 
 exports.Adapter = BrowserAdapter;
 var _default = BrowserAdapter.smart;
-exports["default"] = _default;
+exports.default = _default;
 
 /***/ }),
 
@@ -11898,22 +11538,46 @@ exports["default"] = _default;
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/interopRequireDefault.js");
 
+__webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
+
+__webpack_require__(/*! core-js/modules/es.promise */ "./node_modules/core-js/modules/es.promise.js");
+
 exports.__esModule = true;
 exports.oauth2 = exports.client = void 0;
 
 var _BrowserAdapter = _interopRequireDefault(__webpack_require__(/*! ./adapters/BrowserAdapter */ "./src/adapters/BrowserAdapter.js"));
 
+/* eslint-env browser */
 // In Browsers we create an adapter, get the SMART api from it and build the
 // global FHIR object
-var _smart = (0, _BrowserAdapter["default"])(),
+var _smart = (0, _BrowserAdapter.default)(),
     ready = _smart.ready,
     authorize = _smart.authorize,
     init = _smart.init,
     client = _smart.client,
-    options = _smart.options; // $lab:coverage:off$
+    options = _smart.options; // We have two kinds of browser builds - "pure" for new browsers and "legacy"
+// for old ones. In pure builds we assume that the browser supports everything
+// we need. In legacy mode, the library also acts as a polyfill. Babel will
+// automatically polyfill everything except "fetch", which we have to handle
+// manually.
+// @ts-ignore
+// eslint-disable-next-line no-undef
 
 
 exports.client = client;
+
+if (!undefined) {
+  var fetch = __webpack_require__(/*! cross-fetch */ "./node_modules/cross-fetch/dist/browser-ponyfill.js");
+
+  if (!window.fetch) {
+    window.fetch = fetch.default;
+    window.Headers = fetch.Headers;
+    window.Request = fetch.Request;
+    window.Response = fetch.Response;
+  }
+} // $lab:coverage:off$
+
+
 var oauth2 = {
   settings: options,
   ready: ready,
@@ -11943,23 +11607,13 @@ __webpack_require__(/*! core-js/modules/es.array.filter */ "./node_modules/core-
 
 __webpack_require__(/*! core-js/modules/es.array.find */ "./node_modules/core-js/modules/es.array.find.js");
 
-__webpack_require__(/*! core-js/modules/es.array.for-each */ "./node_modules/core-js/modules/es.array.for-each.js");
-
-__webpack_require__(/*! core-js/modules/es.array.is-array */ "./node_modules/core-js/modules/es.array.is-array.js");
-
 __webpack_require__(/*! core-js/modules/es.array.join */ "./node_modules/core-js/modules/es.array.join.js");
-
-__webpack_require__(/*! core-js/modules/es.array.reduce */ "./node_modules/core-js/modules/es.array.reduce.js");
-
-__webpack_require__(/*! core-js/modules/es.date.to-string */ "./node_modules/core-js/modules/es.date.to-string.js");
 
 __webpack_require__(/*! core-js/modules/es.function.name */ "./node_modules/core-js/modules/es.function.name.js");
 
 __webpack_require__(/*! core-js/modules/es.object.assign */ "./node_modules/core-js/modules/es.object.assign.js");
 
 __webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
-
-__webpack_require__(/*! core-js/modules/es.promise */ "./node_modules/core-js/modules/es.promise.js");
 
 __webpack_require__(/*! core-js/modules/es.regexp.exec */ "./node_modules/core-js/modules/es.regexp.exec.js");
 
@@ -12014,9 +11668,10 @@ var _debug2 = _interopRequireDefault(__webpack_require__(/*! debug */ "./node_mo
  */
 // @ts-ignore
 // eslint-disable-next-line no-undef
-var fetch = undefined ? window.fetch : __webpack_require__(/*! cross-fetch */ "./node_modules/cross-fetch/dist/browser-ponyfill.js").fetch;
+var _ref = undefined ? window : __webpack_require__(/*! cross-fetch */ "./node_modules/cross-fetch/dist/browser-ponyfill.js"),
+    fetch = _ref.fetch;
 
-var _debug = (0, _debug2["default"])("FHIR");
+var _debug = (0, _debug2.default)("FHIR");
 
 exports.debug = _debug;
 
@@ -12041,10 +11696,10 @@ function checkResponse(_x) {
 
 
 function _checkResponse() {
-  _checkResponse = (0, _asyncToGenerator2["default"])(
+  _checkResponse = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
-  _regenerator["default"].mark(function _callee(resp) {
-    return _regenerator["default"].wrap(function _callee$(_context) {
+  _regenerator.default.mark(function _callee(resp) {
+    return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
@@ -12139,11 +11794,11 @@ function humanizeError(_x2) {
 }
 
 function _humanizeError() {
-  _humanizeError = (0, _asyncToGenerator2["default"])(
+  _humanizeError = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
-  _regenerator["default"].mark(function _callee2(resp) {
+  _regenerator.default.mark(function _callee2(resp) {
     var msg, type, json, text;
-    return _regenerator["default"].wrap(function _callee2$(_context2) {
+    return _regenerator.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
@@ -12197,7 +11852,7 @@ function _humanizeError() {
             _context2.t0 = _context2["catch"](1);
 
           case 17:
-            throw new _HttpError["default"](msg, resp.status, resp.statusText);
+            throw new _HttpError.default(msg, resp.status, resp.statusText);
 
           case 18:
           case "end":
@@ -12343,8 +11998,8 @@ function byCode(observations, property) {
 
   function handleCodeableConcept(concept, observation) {
     if (concept && Array.isArray(concept.coding)) {
-      concept.coding.forEach(function (_ref) {
-        var code = _ref.code;
+      concept.coding.forEach(function (_ref2) {
+        var code = _ref2.code;
         ret[code] = ret[code] || [];
         ret[code].push(observation);
       });
@@ -12389,9 +12044,9 @@ function byCodes(observations, property) {
   };
 }
 
-function ensureNumerical(_ref2) {
-  var value = _ref2.value,
-      code = _ref2.code;
+function ensureNumerical(_ref3) {
+  var value = _ref3.value,
+      code = _ref3.code;
 
   if (typeof value !== "number") {
     throw new Error("Found a non-numerical unit: " + value + " " + code);
@@ -12399,9 +12054,9 @@ function ensureNumerical(_ref2) {
 }
 
 var units = {
-  cm: function cm(_ref3) {
-    var code = _ref3.code,
-        value = _ref3.value;
+  cm: function cm(_ref4) {
+    var code = _ref4.code,
+        value = _ref4.value;
     ensureNumerical({
       code: code,
       value: value
@@ -12415,9 +12070,9 @@ var units = {
     if (code == "[ft_us]") return value * 30.48;
     throw new Error("Unrecognized length unit: " + code);
   },
-  kg: function kg(_ref4) {
-    var code = _ref4.code,
-        value = _ref4.value;
+  kg: function kg(_ref5) {
+    var code = _ref5.code,
+        value = _ref5.value;
     ensureNumerical({
       code: code,
       value: value
@@ -12540,8 +12195,6 @@ var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/inte
 
 __webpack_require__(/*! core-js/modules/es.array.filter */ "./node_modules/core-js/modules/es.array.filter.js");
 
-__webpack_require__(/*! core-js/modules/es.array.for-each */ "./node_modules/core-js/modules/es.array.for-each.js");
-
 __webpack_require__(/*! core-js/modules/es.array.join */ "./node_modules/core-js/modules/es.array.join.js");
 
 __webpack_require__(/*! core-js/modules/es.array.map */ "./node_modules/core-js/modules/es.array.map.js");
@@ -12601,7 +12254,7 @@ function fetchConformanceStatement(baseUrl) {
   }
 
   var url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
-  return (0, _lib.getAndCache)(url)["catch"](function (ex) {
+  return (0, _lib.getAndCache)(url).catch(function (ex) {
     throw new Error("Failed to fetch the conformance statement from \"" + url + "\". " + ex);
   });
 }
@@ -12612,7 +12265,7 @@ function fetchWellKnownJson(baseUrl) {
   }
 
   var url = String(baseUrl).replace(/\/*$/, "/") + ".well-known/smart-configuration";
-  return (0, _lib.getAndCache)(url)["catch"](function (ex) {
+  return (0, _lib.getAndCache)(url).catch(function (ex) {
     throw new Error("Failed to fetch the well-known json \"" + url + "\". " + ex.message);
   });
 }
@@ -12649,7 +12302,7 @@ function getSecurityExtensions(baseUrl) {
       authorizeUri: meta.authorization_endpoint,
       tokenUri: meta.token_endpoint
     };
-  })["catch"](function () {
+  }).catch(function () {
     return fetchConformanceStatement(baseUrl).then(function (metadata) {
       var nsUri = "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris";
       var extensions = ((0, _lib.getPath)(metadata || {}, "rest.0.security.extension") || []).filter(function (e) {
@@ -12704,12 +12357,12 @@ function authorize(_x, _x2, _x3) {
 
 
 function _authorize() {
-  _authorize = (0, _asyncToGenerator2["default"])(
+  _authorize = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
-  _regenerator["default"].mark(function _callee(env, params, _noRedirect) {
+  _regenerator.default.mark(function _callee(env, params, _noRedirect) {
     var _params, iss, launch, fhirServiceUrl, redirect_uri, redirectUri, _params$scope, scope, clientSecret, fakeTokenResponse, patientId, encounterId, client_id, clientId, url, storage, serverUrl, stateKey, state, redirectUrl, extensions, redirectParams;
 
-    return _regenerator["default"].wrap(function _callee$(_context) {
+    return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
@@ -12899,11 +12552,11 @@ function completeAuth(_x4) {
 
 
 function _completeAuth() {
-  _completeAuth = (0, _asyncToGenerator2["default"])(
+  _completeAuth = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
-  _regenerator["default"].mark(function _callee2(env) {
+  _regenerator.default.mark(function _callee2(env) {
     var url, Storage, params, key, code, authError, authErrorDescription, msg, state, fullSessionStorageSupport, hasState, authorized, requestOptions, tokenResponse, client;
-    return _regenerator["default"].wrap(function _callee2$(_context2) {
+    return _regenerator.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
@@ -12960,7 +12613,7 @@ function _completeAuth() {
               // We have to remove it, otherwise the page will authorize on
               // every load!
               if (code) {
-                params["delete"]("code");
+                params.delete("code");
                 debug("Removed code parameter from the url.");
               } // If we have `fullSessionStorageSupport` it means we no longer
               // need the `state` key. It will be stored to a well know
@@ -12971,7 +12624,7 @@ function _completeAuth() {
 
 
               if (hasState && fullSessionStorageSupport) {
-                params["delete"]("state");
+                params.delete("state");
                 debug("Removed state parameter from the url.");
               } // If the browser does not support the replaceState method for the
               // History Web API, the "code" parameter cannot be removed. As a
@@ -13056,7 +12709,7 @@ function _completeAuth() {
             return Storage.set(_settings.SMART_KEY, key);
 
           case 48:
-            client = new _Client["default"](env, state);
+            client = new _Client.default(env, state);
             debug("Created client instance: %O", client);
             return _context2.abrupt("return", client);
 
@@ -13125,11 +12778,11 @@ function ready(_x5, _x6, _x7) {
 }
 
 function _ready() {
-  _ready = (0, _asyncToGenerator2["default"])(
+  _ready = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
-  _regenerator["default"].mark(function _callee3(env, onSuccess, onError) {
+  _regenerator.default.mark(function _callee3(env, onSuccess, onError) {
     var task;
-    return _regenerator["default"].wrap(function _callee3$(_context3) {
+    return _regenerator.default.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
@@ -13140,7 +12793,7 @@ function _ready() {
             }
 
             if (onError) {
-              task = task["catch"](onError);
+              task = task.catch(onError);
             }
 
             return _context3.abrupt("return", task);
@@ -13160,11 +12813,11 @@ function init(_x8, _x9) {
 }
 
 function _init() {
-  _init = (0, _asyncToGenerator2["default"])(
+  _init = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
-  _regenerator["default"].mark(function _callee4(env, options) {
+  _regenerator.default.mark(function _callee4(env, options) {
     var url, code, state, storage, key, cached;
-    return _regenerator["default"].wrap(function _callee4$(_context4) {
+    return _regenerator.default.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
@@ -13210,7 +12863,7 @@ function _init() {
               break;
             }
 
-            return _context4.abrupt("return", new _Client["default"](env, cached));
+            return _context4.abrupt("return", new _Client.default(env, cached));
 
           case 17:
             return _context4.abrupt("return", authorize(env, options).then(function () {
@@ -13251,7 +12904,7 @@ function _init() {
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/interopRequireDefault.js");
 
 exports.__esModule = true;
-exports["default"] = void 0;
+exports.default = void 0;
 
 var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js"));
 
@@ -13276,11 +12929,11 @@ function () {
   _proto.get =
   /*#__PURE__*/
   function () {
-    var _get = (0, _asyncToGenerator2["default"])(
+    var _get = (0, _asyncToGenerator2.default)(
     /*#__PURE__*/
-    _regenerator["default"].mark(function _callee(key) {
+    _regenerator.default.mark(function _callee(key) {
       var value;
-      return _regenerator["default"].wrap(function _callee$(_context) {
+      return _regenerator.default.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
@@ -13322,10 +12975,10 @@ function () {
   _proto.set =
   /*#__PURE__*/
   function () {
-    var _set = (0, _asyncToGenerator2["default"])(
+    var _set = (0, _asyncToGenerator2.default)(
     /*#__PURE__*/
-    _regenerator["default"].mark(function _callee2(key, value) {
-      return _regenerator["default"].wrap(function _callee2$(_context2) {
+    _regenerator.default.mark(function _callee2(key, value) {
+      return _regenerator.default.wrap(function _callee2$(_context2) {
         while (1) {
           switch (_context2.prev = _context2.next) {
             case 0:
@@ -13358,10 +13011,10 @@ function () {
   _proto.unset =
   /*#__PURE__*/
   function () {
-    var _unset = (0, _asyncToGenerator2["default"])(
+    var _unset = (0, _asyncToGenerator2.default)(
     /*#__PURE__*/
-    _regenerator["default"].mark(function _callee3(key) {
-      return _regenerator["default"].wrap(function _callee3$(_context3) {
+    _regenerator.default.mark(function _callee3(key) {
+      return _regenerator.default.wrap(function _callee3$(_context3) {
         while (1) {
           switch (_context3.prev = _context3.next) {
             case 0:
@@ -13394,7 +13047,7 @@ function () {
   return Storage;
 }();
 
-exports["default"] = Storage;
+exports.default = Storage;
 
 /***/ }),
 
@@ -13409,7 +13062,7 @@ exports["default"] = Storage;
 
 
 exports.__esModule = true;
-exports["default"] = void 0;
+exports.default = void 0;
 // This map contains reusable debug messages (only those used in multiple places)
 var _default = {
   expired: "Session expired! Please re-launch the app",
@@ -13417,7 +13070,7 @@ var _default = {
   noIfNoAuth: "You are trying to get %s but the app is not authorized yet.",
   noFreeContext: "Please don't use open fhir servers if you need to access launch context items like the %S."
 };
-exports["default"] = _default;
+exports.default = _default;
 
 /***/ })
 

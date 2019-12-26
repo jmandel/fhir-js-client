@@ -6,7 +6,7 @@ const moduleConfig = {
             corejs: {
                 version: 3
             },
-            targets: "maintained node versions"
+            targets: "node 10"
         }]
     ]
 }
@@ -15,12 +15,14 @@ module.exports = {
     env: {
         pure: {},
         browser: {
+            plugins: ["@babel/plugin-transform-runtime"],
             presets: [
                 ["@babel/preset-env", {
                     useBuiltIns: "usage",
-                    modules: false,
+                    modules: "commonjs",
                     corejs: {
-                        version: 3
+                        version: 3,
+                        proposals: true
                     },
                     targets: [
                         "last 2 Chrome versions",

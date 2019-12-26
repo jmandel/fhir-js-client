@@ -1,9 +1,5 @@
 "use strict";
 
-require("core-js/modules/es.promise");
-
-require("core-js/modules/es.string.replace");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });

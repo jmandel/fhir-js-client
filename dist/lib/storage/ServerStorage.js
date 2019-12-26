@@ -1,7 +1,5 @@
 "use strict";
 
-require("core-js/modules/es.promise");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });

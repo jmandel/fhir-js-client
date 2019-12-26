@@ -1,9 +1,5 @@
 "use strict";
 
-require("core-js/modules/es.array.iterator");
-
-require("core-js/modules/web.url");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });

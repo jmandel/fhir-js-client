@@ -28,9 +28,9 @@ module.exports = function(env, argv) {
                     test: /\.js$/,
                     include: [
                         path.join(__dirname, "src"),
-                        require.resolve("debug")
+                        path.join(__dirname, "node_modules/debug")
                     ],
-                    use:  "babel-loader"
+                    use: "babel-loader?configFile=./.babelrc.js"
                 }
             ]
         },
