@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 
 declare namespace fhirclient {
 
@@ -141,15 +142,23 @@ declare namespace fhirclient {
     }
 
     /**
+     * Options that must contain an `url` property (String|URL). Any other
+     * properties will be passed to the underlying `fetch()` call.
+     */
+    interface RequestOptions extends RequestInit {
+        url: string | URL;
+    }
+
+    /**
      * A Client instance that can be used to query the FHIR server.
      */
-    interface Client {
+    class Client {
 
         /**
          * The current state including options and tokenResponse
          */
-        state: JsonObject;
-        environment: JsonObject;
+        state: ClientState;
+        environment: Adapter;
         api?: JsonObject;
         patient: {
             id: string;
@@ -166,6 +175,8 @@ declare namespace fhirclient {
             resourceType: string;
             read(): Promise<JsonObject>;
         }
+
+        constructor(environment: Adapter, state: ClientState);
 
         /**
          * Returns the ID of the current patient (if any) or null
@@ -204,19 +215,19 @@ declare namespace fhirclient {
          * Wrapper for `client.request` implementing the FHIR resource create operation
          * @param {Object} resource A FHIR resource to be created
          */
-        create(resource: object): Promise<RequestResult>
+        create(resource: object): Promise<Response>
 
         /**
          * Wrapper for `client.request` implementing the FHIR resource update operation
          * @param {Object} resource A FHIR resource to be updated
          */
-        update(resource: object): Promise<RequestResult>
+        update(resource: object): Promise<Response>
 
         /**
          * Wrapper for `client.request` implementing the FHIR resource delete operation
          * @param {String} uri Relative URI of the FHIR resource to be deleted (format: `resourceType/id`)
          */
-        delete(uri: string): Promise<RequestResult>
+        delete(uri: string): Promise<Response>
 
         /**
          * Use this method to query the FHIR server
@@ -224,9 +235,9 @@ declare namespace fhirclient {
          * @param fhirOptions Additional options to control the behavior
          * @param _resolvedRefs DO NOT USE! Used internally.
          */
-        request(uri: string, fhirOptions?: FhirOptions, _resolvedRefs?: object): Promise<RequestResult>
-        request(url: URL, fhirOptions?: FhirOptions, _resolvedRefs?: object): Promise<RequestResult>;
-        request(requestOptions: RequestOptions, fhirOptions?: FhirOptions, _resolvedRefs?: object): Promise<RequestResult>;
+        request(uri: string, fhirOptions?: FhirOptions, _resolvedRefs?: object): Promise<Response>
+        request(url: URL, fhirOptions?: FhirOptions, _resolvedRefs?: object): Promise<Response>;
+        request(requestOptions: RequestOptions, fhirOptions?: FhirOptions, _resolvedRefs?: object): Promise<Response>;
 
         /**
          * Use the refresh token to obtain new access token. If the refresh token is

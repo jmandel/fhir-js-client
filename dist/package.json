@@ -15,6 +15,7 @@
   "license": "Apache-2.0",
   "main": "lib/index.js",
   "browser": "lib/browser.js",
+  "types": "index.d.ts",
   "dependencies": {
     "core-js": "^3.5.0",
     "cross-fetch": "^3.0.4",
