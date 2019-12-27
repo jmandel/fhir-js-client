@@ -2240,7 +2240,7 @@ describe("FHIR.client", () => {
                     scope        : "test"
                 }
             }).refresh(),
-            "throws with no offline_access scope"
+            "throws with no offline_access or online_access scope"
         ).to.throw(Error, /\boffline_access\b/);
 
         expect(
@@ -2275,6 +2275,28 @@ describe("FHIR.client", () => {
                 return client.refresh();
             })(),
             "throws if the token endpoint does not return access_token"
+        ).to.reject(Error, "No access token received");
+
+        await expect(
+            (() => {
+                const env = new BrowserEnv();
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: { result: false }
+                });
+                const client = new Client(env, {
+                    serverUrl: "http://whatever",
+                    tokenUri : mockUrl,
+                    tokenResponse: {
+                        access_token : "whatever",
+                        refresh_token: "whatever",
+                        scope        : "online_access"
+                    }
+                });
+                return client.refresh();
+            })(),
+            "throws if the token endpoint does not return access_token for online_access"
         ).to.reject(Error, "No access token received");
     });
 
