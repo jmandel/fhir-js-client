@@ -1,4 +1,4 @@
-import "lib/types"
+import "./lib/types"
 
 export namespace oauth2 {
     const settings: fhirclient.fhirSettings;
