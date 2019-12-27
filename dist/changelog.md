@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.1.1
+- Switched to ES modules (thanks to @kherock)
+- Updated type definitions to fix some issues with Angular projects
+
 ## v2.1.0
 - Added convenience wrappers for the FHIR create/update/delete operations #56
 - Added patient context aware request wrapper #57
