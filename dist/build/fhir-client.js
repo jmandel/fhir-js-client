@@ -11097,8 +11097,8 @@ function () {
 
     var scopes = (0, _lib.getPath)(this, "state.tokenResponse.scope") || "";
 
-    if (scopes.indexOf("offline_access") == -1) {
-      throw new Error("Unable to refresh. No offline_access scope found.");
+    if (scopes.indexOf("offline_access") == -1 && scopes.indexOf("online_access") == -1) {
+      throw new Error("Unable to refresh. No offline_access or online_access scope found.");
     } // This method is typically called internally from `request` if certain
     // request fails with 401. However, clients will often run multiple
     // requests in parallel which may result in multiple refresh calls.
@@ -11112,7 +11112,8 @@ function () {
         headers: {
           "content-type": "application/x-www-form-urlencoded"
         },
-        body: "grant_type=refresh_token&refresh_token=" + encodeURIComponent(refreshToken)
+        body: "grant_type=refresh_token&refresh_token=" + encodeURIComponent(refreshToken),
+        credentials: "include"
       }).then(function (data) {
         if (!data.access_token) {
           throw new Error("No access token received");

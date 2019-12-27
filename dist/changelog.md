@@ -3,6 +3,7 @@
 ## v2.1.1
 - Switched to ES modules (thanks to @kherock)
 - Updated type definitions to fix some issues with Angular projects
+- other minor bug fixes
 
 ## v2.1.0
 - Added convenience wrappers for the FHIR create/update/delete operations #56
