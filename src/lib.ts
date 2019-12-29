@@ -21,7 +21,7 @@ export function isBrowser() {
 /**
  * Used in fetch Promise chains to reject if the "ok" property is not true
  */
-export async function checkResponse(resp) {
+export async function checkResponse(resp: Response): Promise<Response> {
     if (!resp.ok) {
         throw (await humanizeError(resp));
     }
@@ -32,10 +32,8 @@ export async function checkResponse(resp) {
  * Used in fetch Promise chains to return the JSON version of the response.
  * Note that `resp.json()` will throw on empty body so we use resp.text()
  * instead.
- * @param {Response} resp
- * @returns {Promise<object|string>}
  */
-export function responseToJSON(resp) {
+export function responseToJSON(resp: Response): Promise<object|string> {
     return resp.text().then(text => text.length ? JSON.parse(text) : "");
 }
 
@@ -48,10 +46,12 @@ export function responseToJSON(resp) {
  * - If the response is json return the json object
  * - If the response is text return the result text
  * - Otherwise return the response object on which we call stuff like `.blob()`
- * @param {String|Request} url
- * @param {Object} options
  */
-export function request(url, options = {}) {
+export function request(
+    url: string | Request,
+    options: fhirclient.JsonObject = {}
+): Promise<Response | fhirclient.JsonObject | string>
+{
     return fetch(url, {
         mode: "cors",
         ...options,
@@ -61,7 +61,7 @@ export function request(url, options = {}) {
         }
     })
         .then(checkResponse)
-        .then(res => {
+        .then((res: Response) => {
             const type = res.headers.get("Content-Type") + "";
             if (type.match(/\bjson\b/i)) {
                 return responseToJSON(res);
@@ -74,9 +74,9 @@ export function request(url, options = {}) {
 }
 
 export const getAndCache = (() => {
-    let cache = {};
+    let cache: fhirclient.JsonObject = {};
 
-    return (url, force = process.env.NODE_ENV === "test") => {
+    return (url: string, force = process.env.NODE_ENV === "test") => {
         if (force || !cache[url]) {
             cache[url] = request(url);
         }
@@ -84,7 +84,7 @@ export const getAndCache = (() => {
     };
 })();
 
-export async function humanizeError(resp) {
+export async function humanizeError(resp: fhirclient.JsonObject) {
     let msg = `${resp.status} ${resp.statusText}\nURL: ${resp.url}`;
 
     try {
@@ -114,7 +114,7 @@ export async function humanizeError(resp) {
     throw new HttpError(msg, resp.status, resp.statusText);
 }
 
-export function stripTrailingSlash(str) {
+export function stripTrailingSlash(str: string) {
     return String(str || "").replace(/\/+$/, "");
 }
 
@@ -123,11 +123,11 @@ export function stripTrailingSlash(str) {
  * provided path. This function is very simple so it intentionally does not
  * support any argument polymorphism, meaning that the path can only be a
  * dot-separated string. If the path is invalid returns undefined.
- * @param {Object} obj The object (or Array) to walk through
- * @param {String} path The path (eg. "a.b.4.c")
+ * @param obj The object (or Array) to walk through
+ * @param path The path (eg. "a.b.4.c")
  * @returns {*} Whatever is found in the path or undefined
  */
-export function getPath(obj, path = "") {
+export function getPath(obj: fhirclient.JsonObject, path = ""): any {
     path = path.trim();
     if (!path) {
         return obj;
@@ -140,12 +140,12 @@ export function getPath(obj, path = "") {
 
 /**
  * Like getPath, but if the node is found, its value is set to @value
- * @param {Object} obj The object (or Array) to walk through
- * @param {String} path The path (eg. "a.b.4.c")
- * @param {*} value The value to set
- * @returns {Object} The modified object
+ * @param obj   The object (or Array) to walk through
+ * @param path  The path (eg. "a.b.4.c")
+ * @param value The value to set
+ * @returns The modified object
  */
-export function setPath(obj, path, value) {
+export function setPath(obj: fhirclient.JsonObject, path: string, value: any): fhirclient.JsonObject {
     path.trim().split(".").reduce(
         (out, key, idx, arr) => {
             if (out && idx === arr.length - 1) {
@@ -159,14 +159,14 @@ export function setPath(obj, path, value) {
     return obj;
 }
 
-export function makeArray(arg) {
+export function makeArray(arg: any) {
     if (Array.isArray(arg)) {
         return arg;
     }
     return [arg];
 }
 
-export function absolute(path, baseUrl) {
+export function absolute(path: string, baseUrl: string) {
     if (path.match(/^http/)) return path;
     if (path.match(/^urn/)) return path;
     return baseUrl.replace(/\/+$/, "") + "/" + path.replace(/^\/+/, "");
@@ -175,11 +175,11 @@ export function absolute(path, baseUrl) {
 /**
  * Generates random strings. By default this returns random 8 characters long
  * alphanumeric strings.
- * @param {Number} strLength The length of the output string. Defaults to 8.
- * @param {String} charSet A string containing all the possible characters.
+ * @param strLength The length of the output string. Defaults to 8.
+ * @param charSet A string containing all the possible characters.
  *     Defaults to all the upper and lower-case letters plus digits.
  */
-export function randomString(strLength = 8, charSet = null) {
+export function randomString(strLength = 8, charSet?: string) {
     const result = [];
 
     charSet = charSet || "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
@@ -193,7 +193,7 @@ export function randomString(strLength = 8, charSet = null) {
     return result.join("");
 }
 
-export function atob(str)
+export function atob(str: string)
 {
     if (isBrowser()) {
         // eslint-disable-next-line no-undef
@@ -205,7 +205,7 @@ export function atob(str)
     return global.Buffer.from(str, "base64").toString("ascii");
 }
 
-export function btoa(str)
+export function btoa(str: string)
 {
     if (isBrowser()) {
         // eslint-disable-next-line no-undef
@@ -217,27 +217,39 @@ export function btoa(str)
     return global.Buffer.from(str).toString("base64");
 }
 
-export function jwtDecode(token)
+export function jwtDecode(token: string)
 {
     const payload = token.split(".")[1];
     return JSON.parse(atob(payload));
 }
+// -----------------------------------------------------------------------------
+interface CodeValue {
+    code: string
+    value: number
+}
+interface Observation {
 
+}
+interface CodeableConcept {
+    coding?: {
+        code: any
+    }
+}
+// -----------------------------------------------------------------------------
 /**
  * Groups the observations by code. Returns a map that will look like:
  * {
  *   "55284-4": [ observation1, observation2 ],
  *   "6082-2" : [ observation3 ]
  * }
- * @param {Object|Object[]} observations Array of observations
- * @param {String} property The name of a CodeableConcept property to group by
- * @returns {Object}
+ * @param observations Array of observations
+ * @param property The name of a CodeableConcept property to group by
  */
-export function byCode(observations, property)
+export function byCode(observations: Observation | Observation[], property: string): fhirclient.JsonObject
 {
-    const ret = {};
+    const ret: fhirclient.JsonObject = {};
 
-    function handleCodeableConcept(concept, observation) {
+    function handleCodeableConcept(concept: CodeableConcept, observation: Observation) {
         if (concept && Array.isArray(concept.coding)) {
             concept.coding.forEach(({ code }) => {
                 ret[code] = ret[code] || [];
@@ -249,7 +261,7 @@ export function byCode(observations, property)
     makeArray(observations).forEach(o => {
         if (o.resourceType === "Observation" && o[property]) {
             if (Array.isArray(o[property])) {
-                o[property].forEach(concept => handleCodeableConcept(concept, o));
+                o[property].forEach((concept: CodeableConcept) => handleCodeableConcept(concept, o));
             } else {
                 handleCodeableConcept(o[property], o);
             }
@@ -263,11 +275,10 @@ export function byCode(observations, property)
  * First groups the observations by code using `byCode`. Then returns a function
  * that accepts codes as arguments and will return a flat array of observations
  * having that codes
- * @param {Object|Object[]} observations Array of observations
- * @param {String} property The name of a CodeableConcept property to group by
- * @returns {(codes: string[]) => object[]}
+ * @param observations Array of observations
+ * @param property The name of a CodeableConcept property to group by
  */
-export function byCodes(observations, property)
+export function byCodes(observations: Observation | Observation[], property: string): (codes: string[]) => any[]
 {
     const bank = byCode(observations, property);
     return (...codes) => codes
@@ -275,14 +286,14 @@ export function byCodes(observations, property)
         .reduce((prev, code) => [...prev, ...bank[code + ""]], []);
 }
 
-export function ensureNumerical({ value, code }) {
+export function ensureNumerical({ value, code }: CodeValue) {
     if (typeof value !== "number") {
         throw new Error("Found a non-numerical unit: " + value + " " + code);
     }
 }
 
 export const units = {
-    cm({ code, value }) {
+    cm({ code, value }: CodeValue) {
         ensureNumerical({ code, value });
         if (code == "cm"     ) return value;
         if (code == "m"      ) return value *   100;
@@ -293,7 +304,7 @@ export const units = {
         if (code == "[ft_us]") return value * 30.48;
         throw new Error("Unrecognized length unit: " + code);
     },
-    kg({ code, value }){
+    kg({ code, value }: CodeValue){
         ensureNumerical({ code, value });
         if(code == "kg"    ) return value;
         if(code == "g"     ) return value / 1000;
@@ -301,7 +312,7 @@ export const units = {
         if(code.match(/oz/)) return value / 35.274;
         throw new Error("Unrecognized weight unit: " + code);
     },
-    any(pq){
+    any(pq: CodeValue){
         ensureNumerical(pq);
         return pq.value;
     }
@@ -310,16 +321,14 @@ export const units = {
 /**
  * Given a conformance statement and a resource type, returns the name of the
  * URL parameter that can be used to scope the resource type by patient ID.
- * @param {fhirclient.JsonObject} conformance
- * @param {string} resourceType
  */
-export function getPatientParam(conformance, resourceType)
+export function getPatientParam(conformance: fhirclient.JsonObject, resourceType: string)
 {
     // Find what resources are supported by this server
     const resources = getPath(conformance, "rest.0.resource") || [];
 
     // Check if this resource is supported
-    const meta = resources.find(r => r.type === resourceType);
+    const meta = resources.find((r: any) => r.type === resourceType);
     if (!meta)
         throw new Error("Resource not supported");
 
@@ -328,11 +337,11 @@ export function getPatientParam(conformance, resourceType)
         throw new Error(`No search parameters supported for "${resourceType}" on this FHIR server`);
 
     // This is a rare case vut could happen in generic workflows
-    if (resourceType == "Patient" && meta.searchParam.find(x => x.name == "_id"))
+    if (resourceType == "Patient" && meta.searchParam.find((x: any) => x.name == "_id"))
         return "_id";
 
     // Now find the first possible parameter name
-    let out = patientParams.find(p => meta.searchParam.find(x => x.name == p));
+    let out = patientParams.find(p => meta.searchParam.find((x: any) => x.name == p));
 
     // If there is no match
     if (!out)

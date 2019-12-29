@@ -5,16 +5,25 @@ import BaseAdapter    from "./BaseAdapter";
 
 /**
  * Browser Adapter
- * @type {fhirclient.Adapter}
  */
 class BrowserAdapter extends BaseAdapter
 {
+    /**
+     * Stores the URL instance associated with this adapter
+     */
+    private _url: URL | null = null;
+
+    /**
+     * Holds the Storage instance associated with this instance
+     */
+    private _storage: fhirclient.Storage | null = null;
+
     /**
      * In browsers we need to be able to (dynamically) check if fhir.js is
      * included in the page. If it is, it should have created a "fhir" variable
      * in the global scope.
      */
-    get fhir()
+    public get fhir()
     {
         // @ts-ignore
         return typeof fhir === "function" ? fhir : null;
@@ -23,9 +32,8 @@ class BrowserAdapter extends BaseAdapter
     /**
      * Given the current environment, this method must return the current url
      * as URL instance
-     * @returns {URL}
      */
-    getUrl()
+    public getUrl(): URL
     {
         if (!this._url) {
             this._url = new URL(location + "");
@@ -36,10 +44,8 @@ class BrowserAdapter extends BaseAdapter
     /**
      * Given the current environment, this method must redirect to the given
      * path
-     * @param {String} to The path to redirect to
-     * @returns {void}
      */
-    redirect(to)
+    public redirect(to: string): void
     {
         location.href = to;
     }
@@ -47,9 +53,8 @@ class BrowserAdapter extends BaseAdapter
     /**
      * Returns a BrowserStorage object which is just a wrapper around
      * sessionStorage
-     * @returns {BrowserStorage}
      */
-    getStorage()
+    public getStorage(): BrowserStorage
     {
         if (!this._storage) {
             this._storage = new BrowserStorage();
@@ -57,7 +62,7 @@ class BrowserAdapter extends BaseAdapter
         return this._storage;
     }
 
-    static smart(options)
+    public static smart(options?: fhirclient.fhirSettings): fhirclient.SMART
     {
         return new BrowserAdapter(options).getSmartApi();
     }

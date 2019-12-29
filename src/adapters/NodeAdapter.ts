@@ -1,18 +1,22 @@
 import ServerStorage from "../storage/ServerStorage";
 import BaseAdapter   from "./BaseAdapter";
+import { ClientRequest, ServerResponse } from "http";
 
 /**
  * Node Adapter - works with native NodeJS and with Express
- * @type {fhirclient.Adapter}
  */
 class NodeAdapter extends BaseAdapter
 {
     /**
+     * Holds the Storage instance associated with this instance
+     */
+    private _storage: fhirclient.Storage | null = null;
+
+    /**
      * Given the current environment, this method must return the current url
      * as URL instance. In Node we might be behind a proxy!
-     * @returns {URL}
      */
-    getUrl()
+    public getUrl(): URL
     {
         const req = this.options.request;
 
@@ -32,10 +36,9 @@ class NodeAdapter extends BaseAdapter
     /**
      * Given the current environment, this method must redirect to the given
      * path
-     * @param {String} location The path to redirect to
-     * @returns {void}
+     * @param location The path to redirect to
      */
-    redirect(location)
+    public redirect(location: string): void
     {
         this.options.response.writeHead(302, { location });
         this.options.response.end();
@@ -45,7 +48,7 @@ class NodeAdapter extends BaseAdapter
      * Returns a ServerStorage instance
      * @returns {ServerStorage}
      */
-    getStorage()
+    public getStorage(): fhirclient.Storage
     {
         if (!this._storage) {
             if (this.options.storage) {
@@ -63,12 +66,16 @@ class NodeAdapter extends BaseAdapter
 
     /**
      * This is the static entry point and MUST be provided
-     * @param {Object} req The http request
-     * @param {Object} res The http response
-     * @param {Object|Function} storage Custom storage instance or a storage
+     * @param req The http request
+     * @param res The http response
+     * @param storage Custom storage instance or a storage
      *  factory function
      */
-    static smart(req, res, storage)
+    public static smart(
+        req: ClientRequest,
+        res: ServerResponse,
+        storage: fhirclient.Storage | ((options?: fhirclient.JsonObject) => fhirclient.Storage)
+    )
     {
         return new NodeAdapter({
             request: req,

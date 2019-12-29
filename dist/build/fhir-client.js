@@ -87,96 +87,6 @@ window["FHIR"] =
 /************************************************************************/
 /******/ ({
 
-/***/ "./node_modules/@babel/runtime/helpers/asyncToGenerator.js":
-/*!*****************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/asyncToGenerator.js ***!
-  \*****************************************************************/
-/*! all exports used */
-/***/ (function(module, exports) {
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
-  try {
-    var info = gen[key](arg);
-    var value = info.value;
-  } catch (error) {
-    reject(error);
-    return;
-  }
-
-  if (info.done) {
-    resolve(value);
-  } else {
-    Promise.resolve(value).then(_next, _throw);
-  }
-}
-
-function _asyncToGenerator(fn) {
-  return function () {
-    var self = this,
-        args = arguments;
-    return new Promise(function (resolve, reject) {
-      var gen = fn.apply(self, args);
-
-      function _next(value) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
-      }
-
-      function _throw(err) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
-      }
-
-      _next(undefined);
-    });
-  };
-}
-
-module.exports = _asyncToGenerator;
-
-/***/ }),
-
-/***/ "./node_modules/@babel/runtime/helpers/construct.js":
-/*!**********************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/construct.js ***!
-  \**********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var setPrototypeOf = __webpack_require__(/*! ./setPrototypeOf */ "./node_modules/@babel/runtime/helpers/setPrototypeOf.js");
-
-function isNativeReflectConstruct() {
-  if (typeof Reflect === "undefined" || !Reflect.construct) return false;
-  if (Reflect.construct.sham) return false;
-  if (typeof Proxy === "function") return true;
-
-  try {
-    Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-
-function _construct(Parent, args, Class) {
-  if (isNativeReflectConstruct()) {
-    module.exports = _construct = Reflect.construct;
-  } else {
-    module.exports = _construct = function _construct(Parent, args, Class) {
-      var a = [null];
-      a.push.apply(a, args);
-      var Constructor = Function.bind.apply(Parent, a);
-      var instance = new Constructor();
-      if (Class) setPrototypeOf(instance, Class.prototype);
-      return instance;
-    };
-  }
-
-  return _construct.apply(null, arguments);
-}
-
-module.exports = _construct;
-
-/***/ }),
-
 /***/ "./node_modules/@babel/runtime/helpers/createClass.js":
 /*!************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/createClass.js ***!
@@ -201,24 +111,6 @@ function _createClass(Constructor, protoProps, staticProps) {
 }
 
 module.exports = _createClass;
-
-/***/ }),
-
-/***/ "./node_modules/@babel/runtime/helpers/getPrototypeOf.js":
-/*!***************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/getPrototypeOf.js ***!
-  \***************************************************************/
-/*! all exports used */
-/***/ (function(module, exports) {
-
-function _getPrototypeOf(o) {
-  module.exports = _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
-    return o.__proto__ || Object.getPrototypeOf(o);
-  };
-  return _getPrototypeOf(o);
-}
-
-module.exports = _getPrototypeOf;
 
 /***/ }),
 
@@ -321,41 +213,6 @@ module.exports = _interopRequireWildcard;
 
 /***/ }),
 
-/***/ "./node_modules/@babel/runtime/helpers/isNativeFunction.js":
-/*!*****************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/isNativeFunction.js ***!
-  \*****************************************************************/
-/*! all exports used */
-/***/ (function(module, exports) {
-
-function _isNativeFunction(fn) {
-  return Function.toString.call(fn).indexOf("[native code]") !== -1;
-}
-
-module.exports = _isNativeFunction;
-
-/***/ }),
-
-/***/ "./node_modules/@babel/runtime/helpers/setPrototypeOf.js":
-/*!***************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/setPrototypeOf.js ***!
-  \***************************************************************/
-/*! all exports used */
-/***/ (function(module, exports) {
-
-function _setPrototypeOf(o, p) {
-  module.exports = _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
-    o.__proto__ = p;
-    return o;
-  };
-
-  return _setPrototypeOf(o, p);
-}
-
-module.exports = _setPrototypeOf;
-
-/***/ }),
-
 /***/ "./node_modules/@babel/runtime/helpers/typeof.js":
 /*!*******************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/typeof.js ***!
@@ -378,808 +235,6 @@ function _typeof(obj) {
 }
 
 module.exports = _typeof;
-
-/***/ }),
-
-/***/ "./node_modules/@babel/runtime/helpers/wrapNativeSuper.js":
-/*!****************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/wrapNativeSuper.js ***!
-  \****************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var getPrototypeOf = __webpack_require__(/*! ./getPrototypeOf */ "./node_modules/@babel/runtime/helpers/getPrototypeOf.js");
-
-var setPrototypeOf = __webpack_require__(/*! ./setPrototypeOf */ "./node_modules/@babel/runtime/helpers/setPrototypeOf.js");
-
-var isNativeFunction = __webpack_require__(/*! ./isNativeFunction */ "./node_modules/@babel/runtime/helpers/isNativeFunction.js");
-
-var construct = __webpack_require__(/*! ./construct */ "./node_modules/@babel/runtime/helpers/construct.js");
-
-function _wrapNativeSuper(Class) {
-  var _cache = typeof Map === "function" ? new Map() : undefined;
-
-  module.exports = _wrapNativeSuper = function _wrapNativeSuper(Class) {
-    if (Class === null || !isNativeFunction(Class)) return Class;
-
-    if (typeof Class !== "function") {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-
-    if (typeof _cache !== "undefined") {
-      if (_cache.has(Class)) return _cache.get(Class);
-
-      _cache.set(Class, Wrapper);
-    }
-
-    function Wrapper() {
-      return construct(Class, arguments, getPrototypeOf(this).constructor);
-    }
-
-    Wrapper.prototype = Object.create(Class.prototype, {
-      constructor: {
-        value: Wrapper,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
-    return setPrototypeOf(Wrapper, Class);
-  };
-
-  return _wrapNativeSuper(Class);
-}
-
-module.exports = _wrapNativeSuper;
-
-/***/ }),
-
-/***/ "./node_modules/@babel/runtime/node_modules/regenerator-runtime/runtime.js":
-/*!*********************************************************************************!*\
-  !*** ./node_modules/@babel/runtime/node_modules/regenerator-runtime/runtime.js ***!
-  \*********************************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-/**
- * Copyright (c) 2014-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-var runtime = (function (exports) {
-  "use strict";
-
-  var Op = Object.prototype;
-  var hasOwn = Op.hasOwnProperty;
-  var undefined; // More compressible than void 0.
-  var $Symbol = typeof Symbol === "function" ? Symbol : {};
-  var iteratorSymbol = $Symbol.iterator || "@@iterator";
-  var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
-  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
-
-  function wrap(innerFn, outerFn, self, tryLocsList) {
-    // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
-    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
-    var generator = Object.create(protoGenerator.prototype);
-    var context = new Context(tryLocsList || []);
-
-    // The ._invoke method unifies the implementations of the .next,
-    // .throw, and .return methods.
-    generator._invoke = makeInvokeMethod(innerFn, self, context);
-
-    return generator;
-  }
-  exports.wrap = wrap;
-
-  // Try/catch helper to minimize deoptimizations. Returns a completion
-  // record like context.tryEntries[i].completion. This interface could
-  // have been (and was previously) designed to take a closure to be
-  // invoked without arguments, but in all the cases we care about we
-  // already have an existing method we want to call, so there's no need
-  // to create a new function object. We can even get away with assuming
-  // the method takes exactly one argument, since that happens to be true
-  // in every case, so we don't have to touch the arguments object. The
-  // only additional allocation required is the completion record, which
-  // has a stable shape and so hopefully should be cheap to allocate.
-  function tryCatch(fn, obj, arg) {
-    try {
-      return { type: "normal", arg: fn.call(obj, arg) };
-    } catch (err) {
-      return { type: "throw", arg: err };
-    }
-  }
-
-  var GenStateSuspendedStart = "suspendedStart";
-  var GenStateSuspendedYield = "suspendedYield";
-  var GenStateExecuting = "executing";
-  var GenStateCompleted = "completed";
-
-  // Returning this object from the innerFn has the same effect as
-  // breaking out of the dispatch switch statement.
-  var ContinueSentinel = {};
-
-  // Dummy constructor functions that we use as the .constructor and
-  // .constructor.prototype properties for functions that return Generator
-  // objects. For full spec compliance, you may wish to configure your
-  // minifier not to mangle the names of these two functions.
-  function Generator() {}
-  function GeneratorFunction() {}
-  function GeneratorFunctionPrototype() {}
-
-  // This is a polyfill for %IteratorPrototype% for environments that
-  // don't natively support it.
-  var IteratorPrototype = {};
-  IteratorPrototype[iteratorSymbol] = function () {
-    return this;
-  };
-
-  var getProto = Object.getPrototypeOf;
-  var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
-  if (NativeIteratorPrototype &&
-      NativeIteratorPrototype !== Op &&
-      hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) {
-    // This environment has a native %IteratorPrototype%; use it instead
-    // of the polyfill.
-    IteratorPrototype = NativeIteratorPrototype;
-  }
-
-  var Gp = GeneratorFunctionPrototype.prototype =
-    Generator.prototype = Object.create(IteratorPrototype);
-  GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
-  GeneratorFunctionPrototype.constructor = GeneratorFunction;
-  GeneratorFunctionPrototype[toStringTagSymbol] =
-    GeneratorFunction.displayName = "GeneratorFunction";
-
-  // Helper for defining the .next, .throw, and .return methods of the
-  // Iterator interface in terms of a single ._invoke method.
-  function defineIteratorMethods(prototype) {
-    ["next", "throw", "return"].forEach(function(method) {
-      prototype[method] = function(arg) {
-        return this._invoke(method, arg);
-      };
-    });
-  }
-
-  exports.isGeneratorFunction = function(genFun) {
-    var ctor = typeof genFun === "function" && genFun.constructor;
-    return ctor
-      ? ctor === GeneratorFunction ||
-        // For the native GeneratorFunction constructor, the best we can
-        // do is to check its .name property.
-        (ctor.displayName || ctor.name) === "GeneratorFunction"
-      : false;
-  };
-
-  exports.mark = function(genFun) {
-    if (Object.setPrototypeOf) {
-      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
-    } else {
-      genFun.__proto__ = GeneratorFunctionPrototype;
-      if (!(toStringTagSymbol in genFun)) {
-        genFun[toStringTagSymbol] = "GeneratorFunction";
-      }
-    }
-    genFun.prototype = Object.create(Gp);
-    return genFun;
-  };
-
-  // Within the body of any async function, `await x` is transformed to
-  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
-  // `hasOwn.call(value, "__await")` to determine if the yielded value is
-  // meant to be awaited.
-  exports.awrap = function(arg) {
-    return { __await: arg };
-  };
-
-  function AsyncIterator(generator) {
-    function invoke(method, arg, resolve, reject) {
-      var record = tryCatch(generator[method], generator, arg);
-      if (record.type === "throw") {
-        reject(record.arg);
-      } else {
-        var result = record.arg;
-        var value = result.value;
-        if (value &&
-            typeof value === "object" &&
-            hasOwn.call(value, "__await")) {
-          return Promise.resolve(value.__await).then(function(value) {
-            invoke("next", value, resolve, reject);
-          }, function(err) {
-            invoke("throw", err, resolve, reject);
-          });
-        }
-
-        return Promise.resolve(value).then(function(unwrapped) {
-          // When a yielded Promise is resolved, its final value becomes
-          // the .value of the Promise<{value,done}> result for the
-          // current iteration.
-          result.value = unwrapped;
-          resolve(result);
-        }, function(error) {
-          // If a rejected Promise was yielded, throw the rejection back
-          // into the async generator function so it can be handled there.
-          return invoke("throw", error, resolve, reject);
-        });
-      }
-    }
-
-    var previousPromise;
-
-    function enqueue(method, arg) {
-      function callInvokeWithMethodAndArg() {
-        return new Promise(function(resolve, reject) {
-          invoke(method, arg, resolve, reject);
-        });
-      }
-
-      return previousPromise =
-        // If enqueue has been called before, then we want to wait until
-        // all previous Promises have been resolved before calling invoke,
-        // so that results are always delivered in the correct order. If
-        // enqueue has not been called before, then it is important to
-        // call invoke immediately, without waiting on a callback to fire,
-        // so that the async generator function has the opportunity to do
-        // any necessary setup in a predictable way. This predictability
-        // is why the Promise constructor synchronously invokes its
-        // executor callback, and why async functions synchronously
-        // execute code before the first await. Since we implement simple
-        // async functions in terms of async generators, it is especially
-        // important to get this right, even though it requires care.
-        previousPromise ? previousPromise.then(
-          callInvokeWithMethodAndArg,
-          // Avoid propagating failures to Promises returned by later
-          // invocations of the iterator.
-          callInvokeWithMethodAndArg
-        ) : callInvokeWithMethodAndArg();
-    }
-
-    // Define the unified helper method that is used to implement .next,
-    // .throw, and .return (see defineIteratorMethods).
-    this._invoke = enqueue;
-  }
-
-  defineIteratorMethods(AsyncIterator.prototype);
-  AsyncIterator.prototype[asyncIteratorSymbol] = function () {
-    return this;
-  };
-  exports.AsyncIterator = AsyncIterator;
-
-  // Note that simple async functions are implemented on top of
-  // AsyncIterator objects; they just return a Promise for the value of
-  // the final result produced by the iterator.
-  exports.async = function(innerFn, outerFn, self, tryLocsList) {
-    var iter = new AsyncIterator(
-      wrap(innerFn, outerFn, self, tryLocsList)
-    );
-
-    return exports.isGeneratorFunction(outerFn)
-      ? iter // If outerFn is a generator, return the full iterator.
-      : iter.next().then(function(result) {
-          return result.done ? result.value : iter.next();
-        });
-  };
-
-  function makeInvokeMethod(innerFn, self, context) {
-    var state = GenStateSuspendedStart;
-
-    return function invoke(method, arg) {
-      if (state === GenStateExecuting) {
-        throw new Error("Generator is already running");
-      }
-
-      if (state === GenStateCompleted) {
-        if (method === "throw") {
-          throw arg;
-        }
-
-        // Be forgiving, per 25.3.3.3.3 of the spec:
-        // https://people.mozilla.org/~jorendorff/es6-draft.html#sec-generatorresume
-        return doneResult();
-      }
-
-      context.method = method;
-      context.arg = arg;
-
-      while (true) {
-        var delegate = context.delegate;
-        if (delegate) {
-          var delegateResult = maybeInvokeDelegate(delegate, context);
-          if (delegateResult) {
-            if (delegateResult === ContinueSentinel) continue;
-            return delegateResult;
-          }
-        }
-
-        if (context.method === "next") {
-          // Setting context._sent for legacy support of Babel's
-          // function.sent implementation.
-          context.sent = context._sent = context.arg;
-
-        } else if (context.method === "throw") {
-          if (state === GenStateSuspendedStart) {
-            state = GenStateCompleted;
-            throw context.arg;
-          }
-
-          context.dispatchException(context.arg);
-
-        } else if (context.method === "return") {
-          context.abrupt("return", context.arg);
-        }
-
-        state = GenStateExecuting;
-
-        var record = tryCatch(innerFn, self, context);
-        if (record.type === "normal") {
-          // If an exception is thrown from innerFn, we leave state ===
-          // GenStateExecuting and loop back for another invocation.
-          state = context.done
-            ? GenStateCompleted
-            : GenStateSuspendedYield;
-
-          if (record.arg === ContinueSentinel) {
-            continue;
-          }
-
-          return {
-            value: record.arg,
-            done: context.done
-          };
-
-        } else if (record.type === "throw") {
-          state = GenStateCompleted;
-          // Dispatch the exception by looping back around to the
-          // context.dispatchException(context.arg) call above.
-          context.method = "throw";
-          context.arg = record.arg;
-        }
-      }
-    };
-  }
-
-  // Call delegate.iterator[context.method](context.arg) and handle the
-  // result, either by returning a { value, done } result from the
-  // delegate iterator, or by modifying context.method and context.arg,
-  // setting context.delegate to null, and returning the ContinueSentinel.
-  function maybeInvokeDelegate(delegate, context) {
-    var method = delegate.iterator[context.method];
-    if (method === undefined) {
-      // A .throw or .return when the delegate iterator has no .throw
-      // method always terminates the yield* loop.
-      context.delegate = null;
-
-      if (context.method === "throw") {
-        // Note: ["return"] must be used for ES3 parsing compatibility.
-        if (delegate.iterator["return"]) {
-          // If the delegate iterator has a return method, give it a
-          // chance to clean up.
-          context.method = "return";
-          context.arg = undefined;
-          maybeInvokeDelegate(delegate, context);
-
-          if (context.method === "throw") {
-            // If maybeInvokeDelegate(context) changed context.method from
-            // "return" to "throw", let that override the TypeError below.
-            return ContinueSentinel;
-          }
-        }
-
-        context.method = "throw";
-        context.arg = new TypeError(
-          "The iterator does not provide a 'throw' method");
-      }
-
-      return ContinueSentinel;
-    }
-
-    var record = tryCatch(method, delegate.iterator, context.arg);
-
-    if (record.type === "throw") {
-      context.method = "throw";
-      context.arg = record.arg;
-      context.delegate = null;
-      return ContinueSentinel;
-    }
-
-    var info = record.arg;
-
-    if (! info) {
-      context.method = "throw";
-      context.arg = new TypeError("iterator result is not an object");
-      context.delegate = null;
-      return ContinueSentinel;
-    }
-
-    if (info.done) {
-      // Assign the result of the finished delegate to the temporary
-      // variable specified by delegate.resultName (see delegateYield).
-      context[delegate.resultName] = info.value;
-
-      // Resume execution at the desired location (see delegateYield).
-      context.next = delegate.nextLoc;
-
-      // If context.method was "throw" but the delegate handled the
-      // exception, let the outer generator proceed normally. If
-      // context.method was "next", forget context.arg since it has been
-      // "consumed" by the delegate iterator. If context.method was
-      // "return", allow the original .return call to continue in the
-      // outer generator.
-      if (context.method !== "return") {
-        context.method = "next";
-        context.arg = undefined;
-      }
-
-    } else {
-      // Re-yield the result returned by the delegate method.
-      return info;
-    }
-
-    // The delegate iterator is finished, so forget it and continue with
-    // the outer generator.
-    context.delegate = null;
-    return ContinueSentinel;
-  }
-
-  // Define Generator.prototype.{next,throw,return} in terms of the
-  // unified ._invoke helper method.
-  defineIteratorMethods(Gp);
-
-  Gp[toStringTagSymbol] = "Generator";
-
-  // A Generator should always return itself as the iterator object when the
-  // @@iterator function is called on it. Some browsers' implementations of the
-  // iterator prototype chain incorrectly implement this, causing the Generator
-  // object to not be returned from this call. This ensures that doesn't happen.
-  // See https://github.com/facebook/regenerator/issues/274 for more details.
-  Gp[iteratorSymbol] = function() {
-    return this;
-  };
-
-  Gp.toString = function() {
-    return "[object Generator]";
-  };
-
-  function pushTryEntry(locs) {
-    var entry = { tryLoc: locs[0] };
-
-    if (1 in locs) {
-      entry.catchLoc = locs[1];
-    }
-
-    if (2 in locs) {
-      entry.finallyLoc = locs[2];
-      entry.afterLoc = locs[3];
-    }
-
-    this.tryEntries.push(entry);
-  }
-
-  function resetTryEntry(entry) {
-    var record = entry.completion || {};
-    record.type = "normal";
-    delete record.arg;
-    entry.completion = record;
-  }
-
-  function Context(tryLocsList) {
-    // The root entry object (effectively a try statement without a catch
-    // or a finally block) gives us a place to store values thrown from
-    // locations where there is no enclosing try statement.
-    this.tryEntries = [{ tryLoc: "root" }];
-    tryLocsList.forEach(pushTryEntry, this);
-    this.reset(true);
-  }
-
-  exports.keys = function(object) {
-    var keys = [];
-    for (var key in object) {
-      keys.push(key);
-    }
-    keys.reverse();
-
-    // Rather than returning an object with a next method, we keep
-    // things simple and return the next function itself.
-    return function next() {
-      while (keys.length) {
-        var key = keys.pop();
-        if (key in object) {
-          next.value = key;
-          next.done = false;
-          return next;
-        }
-      }
-
-      // To avoid creating an additional object, we just hang the .value
-      // and .done properties off the next function object itself. This
-      // also ensures that the minifier will not anonymize the function.
-      next.done = true;
-      return next;
-    };
-  };
-
-  function values(iterable) {
-    if (iterable) {
-      var iteratorMethod = iterable[iteratorSymbol];
-      if (iteratorMethod) {
-        return iteratorMethod.call(iterable);
-      }
-
-      if (typeof iterable.next === "function") {
-        return iterable;
-      }
-
-      if (!isNaN(iterable.length)) {
-        var i = -1, next = function next() {
-          while (++i < iterable.length) {
-            if (hasOwn.call(iterable, i)) {
-              next.value = iterable[i];
-              next.done = false;
-              return next;
-            }
-          }
-
-          next.value = undefined;
-          next.done = true;
-
-          return next;
-        };
-
-        return next.next = next;
-      }
-    }
-
-    // Return an iterator with no values.
-    return { next: doneResult };
-  }
-  exports.values = values;
-
-  function doneResult() {
-    return { value: undefined, done: true };
-  }
-
-  Context.prototype = {
-    constructor: Context,
-
-    reset: function(skipTempReset) {
-      this.prev = 0;
-      this.next = 0;
-      // Resetting context._sent for legacy support of Babel's
-      // function.sent implementation.
-      this.sent = this._sent = undefined;
-      this.done = false;
-      this.delegate = null;
-
-      this.method = "next";
-      this.arg = undefined;
-
-      this.tryEntries.forEach(resetTryEntry);
-
-      if (!skipTempReset) {
-        for (var name in this) {
-          // Not sure about the optimal order of these conditions:
-          if (name.charAt(0) === "t" &&
-              hasOwn.call(this, name) &&
-              !isNaN(+name.slice(1))) {
-            this[name] = undefined;
-          }
-        }
-      }
-    },
-
-    stop: function() {
-      this.done = true;
-
-      var rootEntry = this.tryEntries[0];
-      var rootRecord = rootEntry.completion;
-      if (rootRecord.type === "throw") {
-        throw rootRecord.arg;
-      }
-
-      return this.rval;
-    },
-
-    dispatchException: function(exception) {
-      if (this.done) {
-        throw exception;
-      }
-
-      var context = this;
-      function handle(loc, caught) {
-        record.type = "throw";
-        record.arg = exception;
-        context.next = loc;
-
-        if (caught) {
-          // If the dispatched exception was caught by a catch block,
-          // then let that catch block handle the exception normally.
-          context.method = "next";
-          context.arg = undefined;
-        }
-
-        return !! caught;
-      }
-
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        var record = entry.completion;
-
-        if (entry.tryLoc === "root") {
-          // Exception thrown outside of any try block that could handle
-          // it, so set the completion value of the entire function to
-          // throw the exception.
-          return handle("end");
-        }
-
-        if (entry.tryLoc <= this.prev) {
-          var hasCatch = hasOwn.call(entry, "catchLoc");
-          var hasFinally = hasOwn.call(entry, "finallyLoc");
-
-          if (hasCatch && hasFinally) {
-            if (this.prev < entry.catchLoc) {
-              return handle(entry.catchLoc, true);
-            } else if (this.prev < entry.finallyLoc) {
-              return handle(entry.finallyLoc);
-            }
-
-          } else if (hasCatch) {
-            if (this.prev < entry.catchLoc) {
-              return handle(entry.catchLoc, true);
-            }
-
-          } else if (hasFinally) {
-            if (this.prev < entry.finallyLoc) {
-              return handle(entry.finallyLoc);
-            }
-
-          } else {
-            throw new Error("try statement without catch or finally");
-          }
-        }
-      }
-    },
-
-    abrupt: function(type, arg) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        if (entry.tryLoc <= this.prev &&
-            hasOwn.call(entry, "finallyLoc") &&
-            this.prev < entry.finallyLoc) {
-          var finallyEntry = entry;
-          break;
-        }
-      }
-
-      if (finallyEntry &&
-          (type === "break" ||
-           type === "continue") &&
-          finallyEntry.tryLoc <= arg &&
-          arg <= finallyEntry.finallyLoc) {
-        // Ignore the finally entry if control is not jumping to a
-        // location outside the try/catch block.
-        finallyEntry = null;
-      }
-
-      var record = finallyEntry ? finallyEntry.completion : {};
-      record.type = type;
-      record.arg = arg;
-
-      if (finallyEntry) {
-        this.method = "next";
-        this.next = finallyEntry.finallyLoc;
-        return ContinueSentinel;
-      }
-
-      return this.complete(record);
-    },
-
-    complete: function(record, afterLoc) {
-      if (record.type === "throw") {
-        throw record.arg;
-      }
-
-      if (record.type === "break" ||
-          record.type === "continue") {
-        this.next = record.arg;
-      } else if (record.type === "return") {
-        this.rval = this.arg = record.arg;
-        this.method = "return";
-        this.next = "end";
-      } else if (record.type === "normal" && afterLoc) {
-        this.next = afterLoc;
-      }
-
-      return ContinueSentinel;
-    },
-
-    finish: function(finallyLoc) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        if (entry.finallyLoc === finallyLoc) {
-          this.complete(entry.completion, entry.afterLoc);
-          resetTryEntry(entry);
-          return ContinueSentinel;
-        }
-      }
-    },
-
-    "catch": function(tryLoc) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        if (entry.tryLoc === tryLoc) {
-          var record = entry.completion;
-          if (record.type === "throw") {
-            var thrown = record.arg;
-            resetTryEntry(entry);
-          }
-          return thrown;
-        }
-      }
-
-      // The context.catch method must only be called with a location
-      // argument that corresponds to a known catch block.
-      throw new Error("illegal catch attempt");
-    },
-
-    delegateYield: function(iterable, resultName, nextLoc) {
-      this.delegate = {
-        iterator: values(iterable),
-        resultName: resultName,
-        nextLoc: nextLoc
-      };
-
-      if (this.method === "next") {
-        // Deliberately forget the last sent value so that we don't
-        // accidentally pass it on to the delegate.
-        this.arg = undefined;
-      }
-
-      return ContinueSentinel;
-    }
-  };
-
-  // Regardless of whether this script is executing as a CommonJS module
-  // or not, return the runtime object so that we can declare the variable
-  // regeneratorRuntime in the outer scope, which allows this module to be
-  // injected easily by `bin/regenerator --include-runtime script.js`.
-  return exports;
-
-}(
-  // If this script is executing as a CommonJS module, use module.exports
-  // as the regeneratorRuntime namespace. Otherwise create a new empty
-  // object. Either way, the resulting object will be used to initialize
-  // the regeneratorRuntime variable at the top of this file.
-   true ? module.exports : undefined
-));
-
-try {
-  regeneratorRuntime = runtime;
-} catch (accidentalStrictMode) {
-  // This module should not be running in strict mode, so the above
-  // assignment should always work unless something is misconfigured. Just
-  // in case runtime.js accidentally runs in strict mode, we can escape
-  // strict mode using a global Function call. This could conceivably fail
-  // if a Content Security Policy forbids using Function, but in that case
-  // the proper solution is to fix the accidental strict mode problem. If
-  // you've misconfigured your bundler to force strict mode and applied a
-  // CSP to forbid Function, and you're not willing to fix either of those
-  // problems, please detail your unique predicament in a GitHub issue.
-  Function("r", "regeneratorRuntime = r")(runtime);
-}
-
-
-/***/ }),
-
-/***/ "./node_modules/@babel/runtime/regenerator/index.js":
-/*!**********************************************************!*\
-  !*** ./node_modules/@babel/runtime/regenerator/index.js ***!
-  \**********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(/*! regenerator-runtime */ "./node_modules/@babel/runtime/node_modules/regenerator-runtime/runtime.js");
-
 
 /***/ }),
 
@@ -1761,29 +816,6 @@ module.exports = !fails(function () {
 
 /***/ }),
 
-/***/ "./node_modules/core-js/internals/create-html.js":
-/*!*******************************************************!*\
-  !*** ./node_modules/core-js/internals/create-html.js ***!
-  \*******************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var requireObjectCoercible = __webpack_require__(/*! ../internals/require-object-coercible */ "./node_modules/core-js/internals/require-object-coercible.js");
-
-var quot = /"/g;
-
-// B.2.3.2.1 CreateHTML(string, tag, attribute, value)
-// https://tc39.github.io/ecma262/#sec-createhtml
-module.exports = function (string, tag, attribute, value) {
-  var S = String(requireObjectCoercible(string));
-  var p1 = '<' + tag;
-  if (attribute !== '') p1 += ' ' + attribute + '="' + String(value).replace(quot, '&quot;') + '"';
-  return p1 + '>' + S + '</' + tag + '>';
-};
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/internals/create-iterator-constructor.js":
 /*!***********************************************************************!*\
   !*** ./node_modules/core-js/internals/create-iterator-constructor.js ***!
@@ -2278,94 +1310,6 @@ module.exports = function (KEY, length, exec, sham) {
   }
 
   if (sham) createNonEnumerableProperty(RegExp.prototype[SYMBOL], 'sham', true);
-};
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/flatten-into-array.js":
-/*!**************************************************************!*\
-  !*** ./node_modules/core-js/internals/flatten-into-array.js ***!
-  \**************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var isArray = __webpack_require__(/*! ../internals/is-array */ "./node_modules/core-js/internals/is-array.js");
-var toLength = __webpack_require__(/*! ../internals/to-length */ "./node_modules/core-js/internals/to-length.js");
-var bind = __webpack_require__(/*! ../internals/bind-context */ "./node_modules/core-js/internals/bind-context.js");
-
-// `FlattenIntoArray` abstract operation
-// https://tc39.github.io/proposal-flatMap/#sec-FlattenIntoArray
-var flattenIntoArray = function (target, original, source, sourceLen, start, depth, mapper, thisArg) {
-  var targetIndex = start;
-  var sourceIndex = 0;
-  var mapFn = mapper ? bind(mapper, thisArg, 3) : false;
-  var element;
-
-  while (sourceIndex < sourceLen) {
-    if (sourceIndex in source) {
-      element = mapFn ? mapFn(source[sourceIndex], sourceIndex, original) : source[sourceIndex];
-
-      if (depth > 0 && isArray(element)) {
-        targetIndex = flattenIntoArray(target, original, element, toLength(element.length), targetIndex, depth - 1) - 1;
-      } else {
-        if (targetIndex >= 0x1FFFFFFFFFFFFF) throw TypeError('Exceed the acceptable array length');
-        target[targetIndex] = element;
-      }
-
-      targetIndex++;
-    }
-    sourceIndex++;
-  }
-  return targetIndex;
-};
-
-module.exports = flattenIntoArray;
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/forced-string-html-method.js":
-/*!*********************************************************************!*\
-  !*** ./node_modules/core-js/internals/forced-string-html-method.js ***!
-  \*********************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var fails = __webpack_require__(/*! ../internals/fails */ "./node_modules/core-js/internals/fails.js");
-
-// check the existence of a method, lowercase
-// of a tag and escaping quotes in arguments
-module.exports = function (METHOD_NAME) {
-  return fails(function () {
-    var test = ''[METHOD_NAME]('"');
-    return test !== test.toLowerCase() || test.split('"').length > 3;
-  });
-};
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/forced-string-trim-method.js":
-/*!*********************************************************************!*\
-  !*** ./node_modules/core-js/internals/forced-string-trim-method.js ***!
-  \*********************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var fails = __webpack_require__(/*! ../internals/fails */ "./node_modules/core-js/internals/fails.js");
-var whitespaces = __webpack_require__(/*! ../internals/whitespaces */ "./node_modules/core-js/internals/whitespaces.js");
-
-var non = '\u200B\u0085\u180E';
-
-// check that a method works with the correct list
-// of whitespaces and has a correct name
-module.exports = function (METHOD_NAME) {
-  return fails(function () {
-    return !!whitespaces[METHOD_NAME]() || non[METHOD_NAME]() != non || whitespaces[METHOD_NAME].name !== METHOD_NAME;
-  });
 };
 
 
@@ -4815,103 +3759,6 @@ $({ target: 'Array', proto: true, forced: FORCED }, {
 
 /***/ }),
 
-/***/ "./node_modules/core-js/modules/es.array.filter.js":
-/*!*********************************************************!*\
-  !*** ./node_modules/core-js/modules/es.array.filter.js ***!
-  \*********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var $filter = __webpack_require__(/*! ../internals/array-iteration */ "./node_modules/core-js/internals/array-iteration.js").filter;
-var fails = __webpack_require__(/*! ../internals/fails */ "./node_modules/core-js/internals/fails.js");
-var arrayMethodHasSpeciesSupport = __webpack_require__(/*! ../internals/array-method-has-species-support */ "./node_modules/core-js/internals/array-method-has-species-support.js");
-
-var HAS_SPECIES_SUPPORT = arrayMethodHasSpeciesSupport('filter');
-// Edge 14- issue
-var USES_TO_LENGTH = HAS_SPECIES_SUPPORT && !fails(function () {
-  [].filter.call({ length: -1, 0: 1 }, function (it) { throw it; });
-});
-
-// `Array.prototype.filter` method
-// https://tc39.github.io/ecma262/#sec-array.prototype.filter
-// with adding support of @@species
-$({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT || !USES_TO_LENGTH }, {
-  filter: function filter(callbackfn /* , thisArg */) {
-    return $filter(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-  }
-});
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/es.array.find.js":
-/*!*******************************************************!*\
-  !*** ./node_modules/core-js/modules/es.array.find.js ***!
-  \*******************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var $find = __webpack_require__(/*! ../internals/array-iteration */ "./node_modules/core-js/internals/array-iteration.js").find;
-var addToUnscopables = __webpack_require__(/*! ../internals/add-to-unscopables */ "./node_modules/core-js/internals/add-to-unscopables.js");
-
-var FIND = 'find';
-var SKIPS_HOLES = true;
-
-// Shouldn't skip holes
-if (FIND in []) Array(1)[FIND](function () { SKIPS_HOLES = false; });
-
-// `Array.prototype.find` method
-// https://tc39.github.io/ecma262/#sec-array.prototype.find
-$({ target: 'Array', proto: true, forced: SKIPS_HOLES }, {
-  find: function find(callbackfn /* , that = undefined */) {
-    return $find(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-  }
-});
-
-// https://tc39.github.io/ecma262/#sec-array.prototype-@@unscopables
-addToUnscopables(FIND);
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/es.array.flat.js":
-/*!*******************************************************!*\
-  !*** ./node_modules/core-js/modules/es.array.flat.js ***!
-  \*******************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var flattenIntoArray = __webpack_require__(/*! ../internals/flatten-into-array */ "./node_modules/core-js/internals/flatten-into-array.js");
-var toObject = __webpack_require__(/*! ../internals/to-object */ "./node_modules/core-js/internals/to-object.js");
-var toLength = __webpack_require__(/*! ../internals/to-length */ "./node_modules/core-js/internals/to-length.js");
-var toInteger = __webpack_require__(/*! ../internals/to-integer */ "./node_modules/core-js/internals/to-integer.js");
-var arraySpeciesCreate = __webpack_require__(/*! ../internals/array-species-create */ "./node_modules/core-js/internals/array-species-create.js");
-
-// `Array.prototype.flat` method
-// https://github.com/tc39/proposal-flatMap
-$({ target: 'Array', proto: true }, {
-  flat: function flat(/* depthArg = 1 */) {
-    var depthArg = arguments.length ? arguments[0] : undefined;
-    var O = toObject(this);
-    var sourceLen = toLength(O.length);
-    var A = arraySpeciesCreate(O, 0);
-    A.length = flattenIntoArray(A, O, O, sourceLen, 0, depthArg === undefined ? 1 : toInteger(depthArg));
-    return A;
-  }
-});
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/modules/es.array.iterator.js":
 /*!***********************************************************!*\
   !*** ./node_modules/core-js/modules/es.array.iterator.js ***!
@@ -5117,55 +3964,6 @@ $({ target: 'Array', proto: true, forced: !arrayMethodHasSpeciesSupport('splice'
 
 /***/ }),
 
-/***/ "./node_modules/core-js/modules/es.array.unscopables.flat.js":
-/*!*******************************************************************!*\
-  !*** ./node_modules/core-js/modules/es.array.unscopables.flat.js ***!
-  \*******************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-// this method was added to unscopables after implementation
-// in popular engines, so it's moved to a separate module
-var addToUnscopables = __webpack_require__(/*! ../internals/add-to-unscopables */ "./node_modules/core-js/internals/add-to-unscopables.js");
-
-addToUnscopables('flat');
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/es.function.name.js":
-/*!**********************************************************!*\
-  !*** ./node_modules/core-js/modules/es.function.name.js ***!
-  \**********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var DESCRIPTORS = __webpack_require__(/*! ../internals/descriptors */ "./node_modules/core-js/internals/descriptors.js");
-var defineProperty = __webpack_require__(/*! ../internals/object-define-property */ "./node_modules/core-js/internals/object-define-property.js").f;
-
-var FunctionPrototype = Function.prototype;
-var FunctionPrototypeToString = FunctionPrototype.toString;
-var nameRE = /^\s*function ([^ (]*)/;
-var NAME = 'name';
-
-// Function instances `.name` property
-// https://tc39.github.io/ecma262/#sec-function-instances-name
-if (DESCRIPTORS && !(NAME in FunctionPrototype)) {
-  defineProperty(FunctionPrototype, NAME, {
-    configurable: true,
-    get: function () {
-      try {
-        return FunctionPrototypeToString.call(this).match(nameRE)[1];
-      } catch (error) {
-        return '';
-      }
-    }
-  });
-}
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/modules/es.number.constructor.js":
 /*!***************************************************************!*\
   !*** ./node_modules/core-js/modules/es.number.constructor.js ***!
@@ -5315,54 +4113,6 @@ var toString = __webpack_require__(/*! ../internals/object-to-string */ "./node_
 // https://tc39.github.io/ecma262/#sec-object.prototype.tostring
 if (!TO_STRING_TAG_SUPPORT) {
   redefine(Object.prototype, 'toString', toString, { unsafe: true });
-}
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/es.promise.finally.js":
-/*!************************************************************!*\
-  !*** ./node_modules/core-js/modules/es.promise.finally.js ***!
-  \************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var IS_PURE = __webpack_require__(/*! ../internals/is-pure */ "./node_modules/core-js/internals/is-pure.js");
-var NativePromise = __webpack_require__(/*! ../internals/native-promise-constructor */ "./node_modules/core-js/internals/native-promise-constructor.js");
-var fails = __webpack_require__(/*! ../internals/fails */ "./node_modules/core-js/internals/fails.js");
-var getBuiltIn = __webpack_require__(/*! ../internals/get-built-in */ "./node_modules/core-js/internals/get-built-in.js");
-var speciesConstructor = __webpack_require__(/*! ../internals/species-constructor */ "./node_modules/core-js/internals/species-constructor.js");
-var promiseResolve = __webpack_require__(/*! ../internals/promise-resolve */ "./node_modules/core-js/internals/promise-resolve.js");
-var redefine = __webpack_require__(/*! ../internals/redefine */ "./node_modules/core-js/internals/redefine.js");
-
-// Safari bug https://bugs.webkit.org/show_bug.cgi?id=200829
-var NON_GENERIC = !!NativePromise && fails(function () {
-  NativePromise.prototype['finally'].call({ then: function () { /* empty */ } }, function () { /* empty */ });
-});
-
-// `Promise.prototype.finally` method
-// https://tc39.github.io/ecma262/#sec-promise.prototype.finally
-$({ target: 'Promise', proto: true, real: true, forced: NON_GENERIC }, {
-  'finally': function (onFinally) {
-    var C = speciesConstructor(this, getBuiltIn('Promise'));
-    var isFunction = typeof onFinally == 'function';
-    return this.then(
-      isFunction ? function (x) {
-        return promiseResolve(C, onFinally()).then(function () { return x; });
-      } : onFinally,
-      isFunction ? function (e) {
-        return promiseResolve(C, onFinally()).then(function () { throw e; });
-      } : onFinally
-    );
-  }
-});
-
-// patch native Promise.prototype for native async functions
-if (!IS_PURE && typeof NativePromise == 'function' && !NativePromise.prototype['finally']) {
-  redefine(NativePromise.prototype, 'finally', getBuiltIn('Promise').prototype['finally']);
 }
 
 
@@ -5951,30 +4701,6 @@ defineIterator(String, 'String', function (iterated) {
 
 /***/ }),
 
-/***/ "./node_modules/core-js/modules/es.string.link.js":
-/*!********************************************************!*\
-  !*** ./node_modules/core-js/modules/es.string.link.js ***!
-  \********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var createHTML = __webpack_require__(/*! ../internals/create-html */ "./node_modules/core-js/internals/create-html.js");
-var forcedStringHTMLMethod = __webpack_require__(/*! ../internals/forced-string-html-method */ "./node_modules/core-js/internals/forced-string-html-method.js");
-
-// `String.prototype.link` method
-// https://tc39.github.io/ecma262/#sec-string.prototype.link
-$({ target: 'String', proto: true, forced: forcedStringHTMLMethod('link') }, {
-  link: function link(url) {
-    return createHTML(this, 'a', 'href', url);
-  }
-});
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/modules/es.string.match.js":
 /*!*********************************************************!*\
   !*** ./node_modules/core-js/modules/es.string.match.js ***!
@@ -6313,30 +5039,6 @@ fixRegExpWellKnownSymbolLogic('split', 2, function (SPLIT, nativeSplit, maybeCal
     }
   ];
 }, !SUPPORTS_Y);
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/es.string.trim.js":
-/*!********************************************************!*\
-  !*** ./node_modules/core-js/modules/es.string.trim.js ***!
-  \********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var $trim = __webpack_require__(/*! ../internals/string-trim */ "./node_modules/core-js/internals/string-trim.js").trim;
-var forcedStringTrimMethod = __webpack_require__(/*! ../internals/forced-string-trim-method */ "./node_modules/core-js/internals/forced-string-trim-method.js");
-
-// `String.prototype.trim` method
-// https://tc39.github.io/ecma262/#sec-string.prototype.trim
-$({ target: 'String', proto: true, forced: forcedStringTrimMethod('trim') }, {
-  trim: function trim() {
-    return $trim(this);
-  }
-});
 
 
 /***/ }),
@@ -7784,28 +6486,6 @@ setToStringTag(URLConstructor, 'URL');
 
 $({ global: true, forced: !USE_NATIVE_URL, sham: !DESCRIPTORS }, {
   URL: URLConstructor
-});
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/web.url.to-json.js":
-/*!*********************************************************!*\
-  !*** ./node_modules/core-js/modules/web.url.to-json.js ***!
-  \*********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-
-// `URL.prototype.toJSON` method
-// https://url.spec.whatwg.org/#dom-url-tojson
-$({ target: 'URL', proto: true, enumerable: true }, {
-  toJSON: function toJSON() {
-    return URL.prototype.toString.call(this);
-  }
 });
 
 
@@ -9261,754 +7941,6 @@ process.umask = function() { return 0; };
 
 /***/ }),
 
-/***/ "./node_modules/regenerator-runtime/runtime.js":
-/*!*****************************************************!*\
-  !*** ./node_modules/regenerator-runtime/runtime.js ***!
-  \*****************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-/* WEBPACK VAR INJECTION */(function(global) {/**
- * Copyright (c) 2014, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * https://raw.github.com/facebook/regenerator/master/LICENSE file. An
- * additional grant of patent rights can be found in the PATENTS file in
- * the same directory.
- */
-
-!(function(global) {
-  "use strict";
-
-  var Op = Object.prototype;
-  var hasOwn = Op.hasOwnProperty;
-  var undefined; // More compressible than void 0.
-  var $Symbol = typeof Symbol === "function" ? Symbol : {};
-  var iteratorSymbol = $Symbol.iterator || "@@iterator";
-  var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
-  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
-
-  var inModule = typeof module === "object";
-  var runtime = global.regeneratorRuntime;
-  if (runtime) {
-    if (inModule) {
-      // If regeneratorRuntime is defined globally and we're in a module,
-      // make the exports object identical to regeneratorRuntime.
-      module.exports = runtime;
-    }
-    // Don't bother evaluating the rest of this file if the runtime was
-    // already defined globally.
-    return;
-  }
-
-  // Define the runtime globally (as expected by generated code) as either
-  // module.exports (if we're in a module) or a new, empty object.
-  runtime = global.regeneratorRuntime = inModule ? module.exports : {};
-
-  function wrap(innerFn, outerFn, self, tryLocsList) {
-    // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
-    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
-    var generator = Object.create(protoGenerator.prototype);
-    var context = new Context(tryLocsList || []);
-
-    // The ._invoke method unifies the implementations of the .next,
-    // .throw, and .return methods.
-    generator._invoke = makeInvokeMethod(innerFn, self, context);
-
-    return generator;
-  }
-  runtime.wrap = wrap;
-
-  // Try/catch helper to minimize deoptimizations. Returns a completion
-  // record like context.tryEntries[i].completion. This interface could
-  // have been (and was previously) designed to take a closure to be
-  // invoked without arguments, but in all the cases we care about we
-  // already have an existing method we want to call, so there's no need
-  // to create a new function object. We can even get away with assuming
-  // the method takes exactly one argument, since that happens to be true
-  // in every case, so we don't have to touch the arguments object. The
-  // only additional allocation required is the completion record, which
-  // has a stable shape and so hopefully should be cheap to allocate.
-  function tryCatch(fn, obj, arg) {
-    try {
-      return { type: "normal", arg: fn.call(obj, arg) };
-    } catch (err) {
-      return { type: "throw", arg: err };
-    }
-  }
-
-  var GenStateSuspendedStart = "suspendedStart";
-  var GenStateSuspendedYield = "suspendedYield";
-  var GenStateExecuting = "executing";
-  var GenStateCompleted = "completed";
-
-  // Returning this object from the innerFn has the same effect as
-  // breaking out of the dispatch switch statement.
-  var ContinueSentinel = {};
-
-  // Dummy constructor functions that we use as the .constructor and
-  // .constructor.prototype properties for functions that return Generator
-  // objects. For full spec compliance, you may wish to configure your
-  // minifier not to mangle the names of these two functions.
-  function Generator() {}
-  function GeneratorFunction() {}
-  function GeneratorFunctionPrototype() {}
-
-  // This is a polyfill for %IteratorPrototype% for environments that
-  // don't natively support it.
-  var IteratorPrototype = {};
-  IteratorPrototype[iteratorSymbol] = function () {
-    return this;
-  };
-
-  var getProto = Object.getPrototypeOf;
-  var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
-  if (NativeIteratorPrototype &&
-      NativeIteratorPrototype !== Op &&
-      hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) {
-    // This environment has a native %IteratorPrototype%; use it instead
-    // of the polyfill.
-    IteratorPrototype = NativeIteratorPrototype;
-  }
-
-  var Gp = GeneratorFunctionPrototype.prototype =
-    Generator.prototype = Object.create(IteratorPrototype);
-  GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
-  GeneratorFunctionPrototype.constructor = GeneratorFunction;
-  GeneratorFunctionPrototype[toStringTagSymbol] =
-    GeneratorFunction.displayName = "GeneratorFunction";
-
-  // Helper for defining the .next, .throw, and .return methods of the
-  // Iterator interface in terms of a single ._invoke method.
-  function defineIteratorMethods(prototype) {
-    ["next", "throw", "return"].forEach(function(method) {
-      prototype[method] = function(arg) {
-        return this._invoke(method, arg);
-      };
-    });
-  }
-
-  runtime.isGeneratorFunction = function(genFun) {
-    var ctor = typeof genFun === "function" && genFun.constructor;
-    return ctor
-      ? ctor === GeneratorFunction ||
-        // For the native GeneratorFunction constructor, the best we can
-        // do is to check its .name property.
-        (ctor.displayName || ctor.name) === "GeneratorFunction"
-      : false;
-  };
-
-  runtime.mark = function(genFun) {
-    if (Object.setPrototypeOf) {
-      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
-    } else {
-      genFun.__proto__ = GeneratorFunctionPrototype;
-      if (!(toStringTagSymbol in genFun)) {
-        genFun[toStringTagSymbol] = "GeneratorFunction";
-      }
-    }
-    genFun.prototype = Object.create(Gp);
-    return genFun;
-  };
-
-  // Within the body of any async function, `await x` is transformed to
-  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
-  // `hasOwn.call(value, "__await")` to determine if the yielded value is
-  // meant to be awaited.
-  runtime.awrap = function(arg) {
-    return { __await: arg };
-  };
-
-  function AsyncIterator(generator) {
-    function invoke(method, arg, resolve, reject) {
-      var record = tryCatch(generator[method], generator, arg);
-      if (record.type === "throw") {
-        reject(record.arg);
-      } else {
-        var result = record.arg;
-        var value = result.value;
-        if (value &&
-            typeof value === "object" &&
-            hasOwn.call(value, "__await")) {
-          return Promise.resolve(value.__await).then(function(value) {
-            invoke("next", value, resolve, reject);
-          }, function(err) {
-            invoke("throw", err, resolve, reject);
-          });
-        }
-
-        return Promise.resolve(value).then(function(unwrapped) {
-          // When a yielded Promise is resolved, its final value becomes
-          // the .value of the Promise<{value,done}> result for the
-          // current iteration. If the Promise is rejected, however, the
-          // result for this iteration will be rejected with the same
-          // reason. Note that rejections of yielded Promises are not
-          // thrown back into the generator function, as is the case
-          // when an awaited Promise is rejected. This difference in
-          // behavior between yield and await is important, because it
-          // allows the consumer to decide what to do with the yielded
-          // rejection (swallow it and continue, manually .throw it back
-          // into the generator, abandon iteration, whatever). With
-          // await, by contrast, there is no opportunity to examine the
-          // rejection reason outside the generator function, so the
-          // only option is to throw it from the await expression, and
-          // let the generator function handle the exception.
-          result.value = unwrapped;
-          resolve(result);
-        }, reject);
-      }
-    }
-
-    if (typeof global.process === "object" && global.process.domain) {
-      invoke = global.process.domain.bind(invoke);
-    }
-
-    var previousPromise;
-
-    function enqueue(method, arg) {
-      function callInvokeWithMethodAndArg() {
-        return new Promise(function(resolve, reject) {
-          invoke(method, arg, resolve, reject);
-        });
-      }
-
-      return previousPromise =
-        // If enqueue has been called before, then we want to wait until
-        // all previous Promises have been resolved before calling invoke,
-        // so that results are always delivered in the correct order. If
-        // enqueue has not been called before, then it is important to
-        // call invoke immediately, without waiting on a callback to fire,
-        // so that the async generator function has the opportunity to do
-        // any necessary setup in a predictable way. This predictability
-        // is why the Promise constructor synchronously invokes its
-        // executor callback, and why async functions synchronously
-        // execute code before the first await. Since we implement simple
-        // async functions in terms of async generators, it is especially
-        // important to get this right, even though it requires care.
-        previousPromise ? previousPromise.then(
-          callInvokeWithMethodAndArg,
-          // Avoid propagating failures to Promises returned by later
-          // invocations of the iterator.
-          callInvokeWithMethodAndArg
-        ) : callInvokeWithMethodAndArg();
-    }
-
-    // Define the unified helper method that is used to implement .next,
-    // .throw, and .return (see defineIteratorMethods).
-    this._invoke = enqueue;
-  }
-
-  defineIteratorMethods(AsyncIterator.prototype);
-  AsyncIterator.prototype[asyncIteratorSymbol] = function () {
-    return this;
-  };
-  runtime.AsyncIterator = AsyncIterator;
-
-  // Note that simple async functions are implemented on top of
-  // AsyncIterator objects; they just return a Promise for the value of
-  // the final result produced by the iterator.
-  runtime.async = function(innerFn, outerFn, self, tryLocsList) {
-    var iter = new AsyncIterator(
-      wrap(innerFn, outerFn, self, tryLocsList)
-    );
-
-    return runtime.isGeneratorFunction(outerFn)
-      ? iter // If outerFn is a generator, return the full iterator.
-      : iter.next().then(function(result) {
-          return result.done ? result.value : iter.next();
-        });
-  };
-
-  function makeInvokeMethod(innerFn, self, context) {
-    var state = GenStateSuspendedStart;
-
-    return function invoke(method, arg) {
-      if (state === GenStateExecuting) {
-        throw new Error("Generator is already running");
-      }
-
-      if (state === GenStateCompleted) {
-        if (method === "throw") {
-          throw arg;
-        }
-
-        // Be forgiving, per 25.3.3.3.3 of the spec:
-        // https://people.mozilla.org/~jorendorff/es6-draft.html#sec-generatorresume
-        return doneResult();
-      }
-
-      context.method = method;
-      context.arg = arg;
-
-      while (true) {
-        var delegate = context.delegate;
-        if (delegate) {
-          var delegateResult = maybeInvokeDelegate(delegate, context);
-          if (delegateResult) {
-            if (delegateResult === ContinueSentinel) continue;
-            return delegateResult;
-          }
-        }
-
-        if (context.method === "next") {
-          // Setting context._sent for legacy support of Babel's
-          // function.sent implementation.
-          context.sent = context._sent = context.arg;
-
-        } else if (context.method === "throw") {
-          if (state === GenStateSuspendedStart) {
-            state = GenStateCompleted;
-            throw context.arg;
-          }
-
-          context.dispatchException(context.arg);
-
-        } else if (context.method === "return") {
-          context.abrupt("return", context.arg);
-        }
-
-        state = GenStateExecuting;
-
-        var record = tryCatch(innerFn, self, context);
-        if (record.type === "normal") {
-          // If an exception is thrown from innerFn, we leave state ===
-          // GenStateExecuting and loop back for another invocation.
-          state = context.done
-            ? GenStateCompleted
-            : GenStateSuspendedYield;
-
-          if (record.arg === ContinueSentinel) {
-            continue;
-          }
-
-          return {
-            value: record.arg,
-            done: context.done
-          };
-
-        } else if (record.type === "throw") {
-          state = GenStateCompleted;
-          // Dispatch the exception by looping back around to the
-          // context.dispatchException(context.arg) call above.
-          context.method = "throw";
-          context.arg = record.arg;
-        }
-      }
-    };
-  }
-
-  // Call delegate.iterator[context.method](context.arg) and handle the
-  // result, either by returning a { value, done } result from the
-  // delegate iterator, or by modifying context.method and context.arg,
-  // setting context.delegate to null, and returning the ContinueSentinel.
-  function maybeInvokeDelegate(delegate, context) {
-    var method = delegate.iterator[context.method];
-    if (method === undefined) {
-      // A .throw or .return when the delegate iterator has no .throw
-      // method always terminates the yield* loop.
-      context.delegate = null;
-
-      if (context.method === "throw") {
-        if (delegate.iterator.return) {
-          // If the delegate iterator has a return method, give it a
-          // chance to clean up.
-          context.method = "return";
-          context.arg = undefined;
-          maybeInvokeDelegate(delegate, context);
-
-          if (context.method === "throw") {
-            // If maybeInvokeDelegate(context) changed context.method from
-            // "return" to "throw", let that override the TypeError below.
-            return ContinueSentinel;
-          }
-        }
-
-        context.method = "throw";
-        context.arg = new TypeError(
-          "The iterator does not provide a 'throw' method");
-      }
-
-      return ContinueSentinel;
-    }
-
-    var record = tryCatch(method, delegate.iterator, context.arg);
-
-    if (record.type === "throw") {
-      context.method = "throw";
-      context.arg = record.arg;
-      context.delegate = null;
-      return ContinueSentinel;
-    }
-
-    var info = record.arg;
-
-    if (! info) {
-      context.method = "throw";
-      context.arg = new TypeError("iterator result is not an object");
-      context.delegate = null;
-      return ContinueSentinel;
-    }
-
-    if (info.done) {
-      // Assign the result of the finished delegate to the temporary
-      // variable specified by delegate.resultName (see delegateYield).
-      context[delegate.resultName] = info.value;
-
-      // Resume execution at the desired location (see delegateYield).
-      context.next = delegate.nextLoc;
-
-      // If context.method was "throw" but the delegate handled the
-      // exception, let the outer generator proceed normally. If
-      // context.method was "next", forget context.arg since it has been
-      // "consumed" by the delegate iterator. If context.method was
-      // "return", allow the original .return call to continue in the
-      // outer generator.
-      if (context.method !== "return") {
-        context.method = "next";
-        context.arg = undefined;
-      }
-
-    } else {
-      // Re-yield the result returned by the delegate method.
-      return info;
-    }
-
-    // The delegate iterator is finished, so forget it and continue with
-    // the outer generator.
-    context.delegate = null;
-    return ContinueSentinel;
-  }
-
-  // Define Generator.prototype.{next,throw,return} in terms of the
-  // unified ._invoke helper method.
-  defineIteratorMethods(Gp);
-
-  Gp[toStringTagSymbol] = "Generator";
-
-  // A Generator should always return itself as the iterator object when the
-  // @@iterator function is called on it. Some browsers' implementations of the
-  // iterator prototype chain incorrectly implement this, causing the Generator
-  // object to not be returned from this call. This ensures that doesn't happen.
-  // See https://github.com/facebook/regenerator/issues/274 for more details.
-  Gp[iteratorSymbol] = function() {
-    return this;
-  };
-
-  Gp.toString = function() {
-    return "[object Generator]";
-  };
-
-  function pushTryEntry(locs) {
-    var entry = { tryLoc: locs[0] };
-
-    if (1 in locs) {
-      entry.catchLoc = locs[1];
-    }
-
-    if (2 in locs) {
-      entry.finallyLoc = locs[2];
-      entry.afterLoc = locs[3];
-    }
-
-    this.tryEntries.push(entry);
-  }
-
-  function resetTryEntry(entry) {
-    var record = entry.completion || {};
-    record.type = "normal";
-    delete record.arg;
-    entry.completion = record;
-  }
-
-  function Context(tryLocsList) {
-    // The root entry object (effectively a try statement without a catch
-    // or a finally block) gives us a place to store values thrown from
-    // locations where there is no enclosing try statement.
-    this.tryEntries = [{ tryLoc: "root" }];
-    tryLocsList.forEach(pushTryEntry, this);
-    this.reset(true);
-  }
-
-  runtime.keys = function(object) {
-    var keys = [];
-    for (var key in object) {
-      keys.push(key);
-    }
-    keys.reverse();
-
-    // Rather than returning an object with a next method, we keep
-    // things simple and return the next function itself.
-    return function next() {
-      while (keys.length) {
-        var key = keys.pop();
-        if (key in object) {
-          next.value = key;
-          next.done = false;
-          return next;
-        }
-      }
-
-      // To avoid creating an additional object, we just hang the .value
-      // and .done properties off the next function object itself. This
-      // also ensures that the minifier will not anonymize the function.
-      next.done = true;
-      return next;
-    };
-  };
-
-  function values(iterable) {
-    if (iterable) {
-      var iteratorMethod = iterable[iteratorSymbol];
-      if (iteratorMethod) {
-        return iteratorMethod.call(iterable);
-      }
-
-      if (typeof iterable.next === "function") {
-        return iterable;
-      }
-
-      if (!isNaN(iterable.length)) {
-        var i = -1, next = function next() {
-          while (++i < iterable.length) {
-            if (hasOwn.call(iterable, i)) {
-              next.value = iterable[i];
-              next.done = false;
-              return next;
-            }
-          }
-
-          next.value = undefined;
-          next.done = true;
-
-          return next;
-        };
-
-        return next.next = next;
-      }
-    }
-
-    // Return an iterator with no values.
-    return { next: doneResult };
-  }
-  runtime.values = values;
-
-  function doneResult() {
-    return { value: undefined, done: true };
-  }
-
-  Context.prototype = {
-    constructor: Context,
-
-    reset: function(skipTempReset) {
-      this.prev = 0;
-      this.next = 0;
-      // Resetting context._sent for legacy support of Babel's
-      // function.sent implementation.
-      this.sent = this._sent = undefined;
-      this.done = false;
-      this.delegate = null;
-
-      this.method = "next";
-      this.arg = undefined;
-
-      this.tryEntries.forEach(resetTryEntry);
-
-      if (!skipTempReset) {
-        for (var name in this) {
-          // Not sure about the optimal order of these conditions:
-          if (name.charAt(0) === "t" &&
-              hasOwn.call(this, name) &&
-              !isNaN(+name.slice(1))) {
-            this[name] = undefined;
-          }
-        }
-      }
-    },
-
-    stop: function() {
-      this.done = true;
-
-      var rootEntry = this.tryEntries[0];
-      var rootRecord = rootEntry.completion;
-      if (rootRecord.type === "throw") {
-        throw rootRecord.arg;
-      }
-
-      return this.rval;
-    },
-
-    dispatchException: function(exception) {
-      if (this.done) {
-        throw exception;
-      }
-
-      var context = this;
-      function handle(loc, caught) {
-        record.type = "throw";
-        record.arg = exception;
-        context.next = loc;
-
-        if (caught) {
-          // If the dispatched exception was caught by a catch block,
-          // then let that catch block handle the exception normally.
-          context.method = "next";
-          context.arg = undefined;
-        }
-
-        return !! caught;
-      }
-
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        var record = entry.completion;
-
-        if (entry.tryLoc === "root") {
-          // Exception thrown outside of any try block that could handle
-          // it, so set the completion value of the entire function to
-          // throw the exception.
-          return handle("end");
-        }
-
-        if (entry.tryLoc <= this.prev) {
-          var hasCatch = hasOwn.call(entry, "catchLoc");
-          var hasFinally = hasOwn.call(entry, "finallyLoc");
-
-          if (hasCatch && hasFinally) {
-            if (this.prev < entry.catchLoc) {
-              return handle(entry.catchLoc, true);
-            } else if (this.prev < entry.finallyLoc) {
-              return handle(entry.finallyLoc);
-            }
-
-          } else if (hasCatch) {
-            if (this.prev < entry.catchLoc) {
-              return handle(entry.catchLoc, true);
-            }
-
-          } else if (hasFinally) {
-            if (this.prev < entry.finallyLoc) {
-              return handle(entry.finallyLoc);
-            }
-
-          } else {
-            throw new Error("try statement without catch or finally");
-          }
-        }
-      }
-    },
-
-    abrupt: function(type, arg) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        if (entry.tryLoc <= this.prev &&
-            hasOwn.call(entry, "finallyLoc") &&
-            this.prev < entry.finallyLoc) {
-          var finallyEntry = entry;
-          break;
-        }
-      }
-
-      if (finallyEntry &&
-          (type === "break" ||
-           type === "continue") &&
-          finallyEntry.tryLoc <= arg &&
-          arg <= finallyEntry.finallyLoc) {
-        // Ignore the finally entry if control is not jumping to a
-        // location outside the try/catch block.
-        finallyEntry = null;
-      }
-
-      var record = finallyEntry ? finallyEntry.completion : {};
-      record.type = type;
-      record.arg = arg;
-
-      if (finallyEntry) {
-        this.method = "next";
-        this.next = finallyEntry.finallyLoc;
-        return ContinueSentinel;
-      }
-
-      return this.complete(record);
-    },
-
-    complete: function(record, afterLoc) {
-      if (record.type === "throw") {
-        throw record.arg;
-      }
-
-      if (record.type === "break" ||
-          record.type === "continue") {
-        this.next = record.arg;
-      } else if (record.type === "return") {
-        this.rval = this.arg = record.arg;
-        this.method = "return";
-        this.next = "end";
-      } else if (record.type === "normal" && afterLoc) {
-        this.next = afterLoc;
-      }
-
-      return ContinueSentinel;
-    },
-
-    finish: function(finallyLoc) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        if (entry.finallyLoc === finallyLoc) {
-          this.complete(entry.completion, entry.afterLoc);
-          resetTryEntry(entry);
-          return ContinueSentinel;
-        }
-      }
-    },
-
-    "catch": function(tryLoc) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        if (entry.tryLoc === tryLoc) {
-          var record = entry.completion;
-          if (record.type === "throw") {
-            var thrown = record.arg;
-            resetTryEntry(entry);
-          }
-          return thrown;
-        }
-      }
-
-      // The context.catch method must only be called with a location
-      // argument that corresponds to a known catch block.
-      throw new Error("illegal catch attempt");
-    },
-
-    delegateYield: function(iterable, resultName, nextLoc) {
-      this.delegate = {
-        iterator: values(iterable),
-        resultName: resultName,
-        nextLoc: nextLoc
-      };
-
-      if (this.method === "next") {
-        // Deliberately forget the last sent value so that we don't
-        // accidentally pass it on to the delegate.
-        this.arg = undefined;
-      }
-
-      return ContinueSentinel;
-    }
-  };
-})(
-  // Among the various tricks for obtaining a reference to the global
-  // object, this seems to be the most reliable technique that does not
-  // use indirect eval (which violates Content Security Policy).
-  typeof global === "object" ? global :
-  typeof window === "object" ? window :
-  typeof self === "object" ? self : this
-);
-
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
-
-/***/ }),
-
 /***/ "./node_modules/webpack/buildin/global.js":
 /*!***********************************!*\
   !*** (webpack)/buildin/global.js ***!
@@ -10040,88 +7972,34 @@ module.exports = g;
 
 /***/ }),
 
-/***/ "./src/Client.js":
+/***/ "./src/Client.ts":
 /*!***********************!*\
-  !*** ./src/Client.js ***!
+  !*** ./src/Client.ts ***!
   \***********************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-
-__webpack_require__(/*! core-js/modules/es.array.concat */ "./node_modules/core-js/modules/es.array.concat.js");
-
-__webpack_require__(/*! core-js/modules/es.array.filter */ "./node_modules/core-js/modules/es.array.filter.js");
-
-__webpack_require__(/*! core-js/modules/es.array.find */ "./node_modules/core-js/modules/es.array.find.js");
-
-__webpack_require__(/*! core-js/modules/es.array.flat */ "./node_modules/core-js/modules/es.array.flat.js");
-
-__webpack_require__(/*! core-js/modules/es.array.iterator */ "./node_modules/core-js/modules/es.array.iterator.js");
-
-__webpack_require__(/*! core-js/modules/es.array.map */ "./node_modules/core-js/modules/es.array.map.js");
-
-__webpack_require__(/*! core-js/modules/es.array.unscopables.flat */ "./node_modules/core-js/modules/es.array.unscopables.flat.js");
-
-__webpack_require__(/*! core-js/modules/es.object.assign */ "./node_modules/core-js/modules/es.object.assign.js");
-
-__webpack_require__(/*! core-js/modules/es.object.keys */ "./node_modules/core-js/modules/es.object.keys.js");
-
-__webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
-
-__webpack_require__(/*! core-js/modules/es.promise */ "./node_modules/core-js/modules/es.promise.js");
-
-__webpack_require__(/*! core-js/modules/es.promise.finally */ "./node_modules/core-js/modules/es.promise.finally.js");
-
-__webpack_require__(/*! core-js/modules/es.regexp.exec */ "./node_modules/core-js/modules/es.regexp.exec.js");
-
-__webpack_require__(/*! core-js/modules/es.string.iterator */ "./node_modules/core-js/modules/es.string.iterator.js");
-
-__webpack_require__(/*! core-js/modules/es.string.match */ "./node_modules/core-js/modules/es.string.match.js");
-
-__webpack_require__(/*! core-js/modules/es.string.replace */ "./node_modules/core-js/modules/es.string.replace.js");
-
-__webpack_require__(/*! core-js/modules/es.string.split */ "./node_modules/core-js/modules/es.string.split.js");
-
-__webpack_require__(/*! core-js/modules/es.string.trim */ "./node_modules/core-js/modules/es.string.trim.js");
-
-__webpack_require__(/*! core-js/modules/es.string.link */ "./node_modules/core-js/modules/es.string.link.js");
-
-__webpack_require__(/*! core-js/modules/web.dom-collections.for-each */ "./node_modules/core-js/modules/web.dom-collections.for-each.js");
-
-__webpack_require__(/*! core-js/modules/web.dom-collections.iterator */ "./node_modules/core-js/modules/web.dom-collections.iterator.js");
-
-__webpack_require__(/*! core-js/modules/web.url */ "./node_modules/core-js/modules/web.url.js");
-
-exports.__esModule = true;
-exports.default = void 0;
-
-var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js"));
-
-__webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
-
-var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ "./node_modules/@babel/runtime/helpers/createClass.js"));
-
-var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/asyncToGenerator.js"));
-
-var _lib = __webpack_require__(/*! ./lib */ "./src/lib.js");
-
-var _strings = _interopRequireDefault(__webpack_require__(/*! ./strings */ "./src/strings.js"));
-
-var _smart = __webpack_require__(/*! ./smart */ "./src/smart.js");
-
-var _settings = __webpack_require__(/*! ./settings */ "./src/settings.js");
-
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
 /// <reference path="types.d.ts" />
+const lib_1 = __webpack_require__(/*! ./lib */ "./src/lib.ts");
+const strings_1 = __webpack_require__(/*! ./strings */ "./src/strings.ts");
+const smart_1 = __webpack_require__(/*! ./smart */ "./src/smart.ts");
+const settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts");
 // @ts-ignore
 // eslint-disable-next-line no-undef
-var _ref = undefined ? window : __webpack_require__(/*! cross-fetch */ "./node_modules/cross-fetch/dist/browser-ponyfill.js"),
-    Response = _ref.Response;
-
-var debug = _lib.debug.extend("client");
+const { Response } = undefined ? window : __webpack_require__(/*! cross-fetch */ "./node_modules/cross-fetch/dist/browser-ponyfill.js");
+const debug = lib_1.debug.extend("client");
 /**
  * Adds patient context to requestOptions object to be used with fhirclient.Client.request
  * @param {Object|String} requestOptions Can be a string URL (relative to
@@ -10129,10 +8007,34 @@ var debug = _lib.debug.extend("client");
  * @param {fhirclient.Client} client Current FHIR client object containing patient context
  * @return {Promise<Object|String>} requestOptions object contextualized to current patient
  */
-
-
-function contextualize(_x, _x2) {
-  return _contextualize.apply(this, arguments);
+function contextualize(requestOptions, client) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // This code could be useful for implementing FHIR version awareness in the future:
+        //   const fhirVersionsMap = require("./data/fhir-versions");
+        //   const fetchFhirVersion = require("./smart").fetchFhirVersion;
+        //   const fhirVersion = client.state.fhirVersion || await fetchFhirVersion(client.state.serverUrl) || "";
+        //   const fhirRelease = fhirVersionsMap[fhirVersion];
+        const base = lib_1.absolute("/", client.state.serverUrl);
+        function contextualURL(url) {
+            return __awaiter(this, void 0, void 0, function* () {
+                const resourceType = url.pathname.split("/").pop();
+                if (settings_1.patientCompartment.indexOf(resourceType) == -1) {
+                    throw new Error(`Cannot filter "${resourceType}" resources by patient`);
+                }
+                const conformance = yield smart_1.fetchConformanceStatement(client.state.serverUrl);
+                const searchParam = lib_1.getPatientParam(conformance, resourceType);
+                url.searchParams.set(searchParam, client.patient.id);
+                return url.href;
+            });
+        }
+        if (typeof requestOptions == "string" || requestOptions instanceof URL) {
+            let url = new URL(requestOptions + "", base);
+            return contextualURL(url);
+        }
+        let url = new URL(requestOptions.url, base);
+        requestOptions.url = yield contextualURL(url);
+        return requestOptions;
+    });
 }
 /**
  * Gets single reference by id. Caches the result.
@@ -10142,142 +8044,47 @@ function contextualize(_x, _x2) {
  * @returns {Promise<Object>} The resolved reference
  * @private
  */
-
-
-function _contextualize() {
-  _contextualize = (0, _asyncToGenerator2.default)(
-  /*#__PURE__*/
-  _regenerator.default.mark(function _callee8(requestOptions, client) {
-    var base, contextualURL, _contextualURL, _url, url;
-
-    return _regenerator.default.wrap(function _callee8$(_context8) {
-      while (1) {
-        switch (_context8.prev = _context8.next) {
-          case 0:
-            _contextualURL = function _ref7() {
-              _contextualURL = (0, _asyncToGenerator2.default)(
-              /*#__PURE__*/
-              _regenerator.default.mark(function _callee7(url) {
-                var resourceType, conformance, searchParam;
-                return _regenerator.default.wrap(function _callee7$(_context7) {
-                  while (1) {
-                    switch (_context7.prev = _context7.next) {
-                      case 0:
-                        resourceType = url.pathname.split("/").pop();
-
-                        if (!(_settings.patientCompartment.indexOf(resourceType) == -1)) {
-                          _context7.next = 3;
-                          break;
-                        }
-
-                        throw new Error("Cannot filter \"" + resourceType + "\" resources by patient");
-
-                      case 3:
-                        _context7.next = 5;
-                        return (0, _smart.fetchConformanceStatement)(client.state.serverUrl);
-
-                      case 5:
-                        conformance = _context7.sent;
-                        searchParam = (0, _lib.getPatientParam)(conformance, resourceType);
-                        url.searchParams.set(searchParam, client.patient.id);
-                        return _context7.abrupt("return", url.href);
-
-                      case 9:
-                      case "end":
-                        return _context7.stop();
-                    }
-                  }
-                }, _callee7);
-              }));
-              return _contextualURL.apply(this, arguments);
-            };
-
-            contextualURL = function _ref6(_x9) {
-              return _contextualURL.apply(this, arguments);
-            };
-
-            // This code could be useful for implementing FHIR version awareness in the future:
-            //   const fhirVersionsMap = require("./data/fhir-versions");
-            //   const fetchFhirVersion = require("./smart").fetchFhirVersion;
-            //   const fhirVersion = client.state.fhirVersion || await fetchFhirVersion(client.state.serverUrl) || "";
-            //   const fhirRelease = fhirVersionsMap[fhirVersion];
-            base = (0, _lib.absolute)("/", client.state.serverUrl);
-
-            if (!(typeof requestOptions == "string" || requestOptions instanceof URL)) {
-              _context8.next = 6;
-              break;
-            }
-
-            _url = new URL(requestOptions + "", base);
-            return _context8.abrupt("return", contextualURL(_url));
-
-          case 6:
-            url = new URL(requestOptions.url, base);
-            _context8.next = 9;
-            return contextualURL(url);
-
-          case 9:
-            requestOptions.url = _context8.sent;
-            return _context8.abrupt("return", requestOptions);
-
-          case 11:
-          case "end":
-            return _context8.stop();
-        }
-      }
-    }, _callee8);
-  }));
-  return _contextualize.apply(this, arguments);
-}
-
 function getRef(refId, cache, client) {
-  var sub = cache[refId];
-
-  if (!sub) {
-    // Note that we set cache[refId] immediately! When the promise is settled
-    // it will be updated. This is to avoid a ref being fetched twice because
-    // some of these requests are executed in parallel.
-    cache[refId] = client.request(refId).then(function (sub) {
-      cache[refId] = sub;
-      return sub;
-    }, function (error) {
-      delete cache[refId];
-      throw error;
-    });
-    return cache[refId];
-  }
-
-  return sub;
+    let sub = cache[refId];
+    if (!sub) {
+        // Note that we set cache[refId] immediately! When the promise is settled
+        // it will be updated. This is to avoid a ref being fetched twice because
+        // some of these requests are executed in parallel.
+        cache[refId] = client.request(refId).then(sub => {
+            cache[refId] = sub;
+            return sub;
+        }, error => {
+            delete cache[refId];
+            throw error;
+        });
+        return cache[refId];
+    }
+    return sub;
 }
 /**
  * Resolves a reference in the given resource.
  * @param {Object} obj FHIR Resource
  */
-
-
 function resolveRef(obj, path, graph, cache, client) {
-  var node = (0, _lib.getPath)(obj, path);
-
-  if (node) {
-    var isArray = Array.isArray(node);
-    return Promise.all((0, _lib.makeArray)(node).map(function (item, i) {
-      var ref = item.reference;
-
-      if (ref) {
-        return getRef(ref, cache, client).then(function (sub) {
-          if (graph) {
-            if (isArray) {
-              (0, _lib.setPath)(obj, path + "." + i, sub);
-            } else {
-              (0, _lib.setPath)(obj, path, sub);
+    const node = lib_1.getPath(obj, path);
+    if (node) {
+        const isArray = Array.isArray(node);
+        return Promise.all(lib_1.makeArray(node).map((item, i) => {
+            const ref = item.reference;
+            if (ref) {
+                return getRef(ref, cache, client).then(sub => {
+                    if (graph) {
+                        if (isArray) {
+                            lib_1.setPath(obj, `${path}.${i}`, sub);
+                        }
+                        else {
+                            lib_1.setPath(obj, path, sub);
+                        }
+                    }
+                }).catch(() => { });
             }
-          }
-        }).catch(function () {
-          /* ignore */
-        });
-      }
-    }));
-  }
+        }));
+    }
 }
 /**
  * Given a resource and a list of ref paths - resolves them all
@@ -10287,999 +8094,625 @@ function resolveRef(obj, path, graph, cache, client) {
  * @param {FhirClient} client The client instance
  * @private
  */
-
-
 function resolveRefs(obj, fhirOptions, cache, client) {
-  // 1. Sanitize paths, remove any invalid ones
-  var paths = (0, _lib.makeArray)(fhirOptions.resolveReferences).filter(Boolean) // No false, 0, null, undefined or ""
-  .map(function (path) {
-    return String(path).trim();
-  }).filter(Boolean); // No space-only strings
-  // 2. Remove duplicates
-
-  paths = paths.filter(function (p, i) {
-    var index = paths.indexOf(p, i + 1);
-
-    if (index > -1) {
-      debug("Duplicated reference path \"%s\"", p);
-      return false;
-    }
-
-    return true;
-  }); // 3. Early exit if no valid paths are found
-
-  if (!paths.length) {
-    return Promise.resolve();
-  } // 4. Group the paths by depth so that child refs are looked up
-  // after their parents!
-
-
-  var groups = {};
-  paths.forEach(function (path) {
-    var len = path.split(".").length;
-
-    if (!groups[len]) {
-      groups[len] = [];
-    }
-
-    groups[len].push(path);
-  }); // 5. Execute groups sequentially! Paths within same group are
-  // fetched in parallel!
-
-  /**
-   * @type any
-   */
-
-  var task = Promise.resolve();
-  Object.keys(groups).sort().forEach(function (len) {
-    var group = groups[len];
-    task = task.then(function () {
-      return Promise.all(group.map(function (path) {
-        return resolveRef(obj, path, fhirOptions.graph, cache, client);
-      }));
+    // 1. Sanitize paths, remove any invalid ones
+    let paths = lib_1.makeArray(fhirOptions.resolveReferences)
+        .filter(Boolean) // No false, 0, null, undefined or ""
+        .map(path => String(path).trim())
+        .filter(Boolean); // No space-only strings
+    // 2. Remove duplicates
+    paths = paths.filter((p, i) => {
+        let index = paths.indexOf(p, i + 1);
+        if (index > -1) {
+            debug("Duplicated reference path \"%s\"", p);
+            return false;
+        }
+        return true;
     });
-  });
-  return task;
+    // 3. Early exit if no valid paths are found
+    if (!paths.length) {
+        return Promise.resolve();
+    }
+    // 4. Group the paths by depth so that child refs are looked up
+    // after their parents!
+    const groups = {};
+    paths.forEach(path => {
+        const len = path.split(".").length;
+        if (!groups[len]) {
+            groups[len] = [];
+        }
+        groups[len].push(path);
+    });
+    // 5. Execute groups sequentially! Paths within same group are
+    // fetched in parallel!
+    /**
+     * @type any
+     */
+    let task = Promise.resolve();
+    Object.keys(groups).sort().forEach(len => {
+        const group = groups[len];
+        task = task.then(() => Promise.all(group.map(path => {
+            return resolveRef(obj, path, fhirOptions.graph, cache, client);
+        })));
+    });
+    return task;
 }
 /**
  * @implements { fhirclient.Client }
  */
-
-
-var FhirClient =
-/*#__PURE__*/
-function () {
-  /**
-   * @param {object} environment
-   * @param {fhirclient.ClientState|string} state
-   */
-  function FhirClient(environment, state) {
-    var _this = this;
-
+class FhirClient {
     /**
-     * @type fhirclient.ClientState
+     * @param {object} environment
+     * @param {fhirclient.ClientState|string} state
      */
-    var _state = typeof state == "string" ? {
-      serverUrl: state
-    } : state; // Valid serverUrl is required!
-
-
-    if (!_state.serverUrl || !_state.serverUrl.match(/https?:\/\/.+/)) {
-      throw new Error("A \"serverUrl\" option is required and must begin with \"http(s)\"");
-    }
-
-    this.state = _state;
-    this.environment = environment;
-    var client = this; // patient api ---------------------------------------------------------
-
-    this.patient = {
-      get id() {
-        return client.getPatientId();
-      },
-
-      read: function read() {
-        var id = _this.patient.id;
-        return id ? _this.request("Patient/" + id) : Promise.reject(new Error("Patient is not available"));
-      },
-      request: function request(requestOptions, fhirOptions) {
-        if (fhirOptions === void 0) {
-          fhirOptions = {};
+    constructor(environment, state) {
+        /**
+         * @type fhirclient.ClientState
+         */
+        const _state = typeof state == "string" ? { serverUrl: state } : state;
+        // Valid serverUrl is required!
+        if (!_state.serverUrl || !_state.serverUrl.match(/https?:\/\/.+/)) {
+            throw new Error("A \"serverUrl\" option is required and must begin with \"http(s)\"");
         }
-
-        if (_this.patient.id) {
-          return (0, _asyncToGenerator2.default)(
-          /*#__PURE__*/
-          _regenerator.default.mark(function _callee() {
-            var options;
-            return _regenerator.default.wrap(function _callee$(_context) {
-              while (1) {
-                switch (_context.prev = _context.next) {
-                  case 0:
-                    _context.next = 2;
-                    return contextualize(requestOptions, _this);
-
-                  case 2:
-                    options = _context.sent;
-                    return _context.abrupt("return", _this.request(options, fhirOptions));
-
-                  case 4:
-                  case "end":
-                    return _context.stop();
+        this.state = _state;
+        this.environment = environment;
+        const client = this;
+        // patient api ---------------------------------------------------------
+        this.patient = {
+            get id() { return client.getPatientId(); },
+            read: () => {
+                const id = this.patient.id;
+                return id ?
+                    this.request(`Patient/${id}`) :
+                    Promise.reject(new Error("Patient is not available"));
+            },
+            request: (requestOptions, fhirOptions = {}) => {
+                if (this.patient.id) {
+                    return (() => __awaiter(this, void 0, void 0, function* () {
+                        const options = yield contextualize(requestOptions, this);
+                        return this.request(options, fhirOptions);
+                    }))();
                 }
-              }
-            }, _callee);
-          }))();
-        } else {
-          return Promise.reject(new Error("Patient is not available"));
-        }
-      }
-    }; // encounter api -------------------------------------------------------
-
-    this.encounter = {
-      get id() {
-        return client.getEncounterId();
-      },
-
-      read: function read() {
-        var id = _this.encounter.id;
-        return id ? _this.request("Encounter/" + id) : Promise.reject(new Error("Encounter is not available"));
-      }
-    }; // user api ------------------------------------------------------------
-
-    this.user = {
-      get fhirUser() {
-        return client.getFhirUser();
-      },
-
-      get id() {
-        return client.getUserId();
-      },
-
-      get resourceType() {
-        return client.getUserType();
-      },
-
-      read: function read() {
-        var fhirUser = _this.user.fhirUser;
-        return fhirUser ? _this.request(fhirUser) : Promise.reject(new Error("User is not available"));
-      }
-    }; // fhir.js api (attached automatically in browser)
-    // ---------------------------------------------------------------------
-
-    if (environment.fhir) {
-      this.connect(environment.fhir);
-    }
-  }
-
-  var _proto = FhirClient.prototype;
-
-  _proto.connect = function connect(fhirJs) {
-    if (typeof fhirJs == "function") {
-      var options = {
-        baseUrl: this.state.serverUrl.replace(/\/$/, "")
-      };
-      var accessToken = (0, _lib.getPath)(this, "state.tokenResponse.access_token");
-
-      if (accessToken) {
-        options.auth = {
-          token: accessToken
+                else {
+                    return Promise.reject(new Error("Patient is not available"));
+                }
+            }
         };
-      } else {
-        var _this$state = this.state,
-            username = _this$state.username,
-            password = _this$state.password;
-
+        // encounter api -------------------------------------------------------
+        this.encounter = {
+            get id() { return client.getEncounterId(); },
+            read: () => {
+                const id = this.encounter.id;
+                return id ?
+                    this.request(`Encounter/${id}`) :
+                    Promise.reject(new Error("Encounter is not available"));
+            }
+        };
+        // user api ------------------------------------------------------------
+        this.user = {
+            get fhirUser() { return client.getFhirUser(); },
+            get id() { return client.getUserId(); },
+            get resourceType() { return client.getUserType(); },
+            read: () => {
+                const fhirUser = this.user.fhirUser;
+                return fhirUser ?
+                    this.request(fhirUser) :
+                    Promise.reject(new Error("User is not available"));
+            }
+        };
+        // fhir.js api (attached automatically in browser)
+        // ---------------------------------------------------------------------
+        if (environment.fhir) {
+            this.connect(environment.fhir);
+        }
+    }
+    connect(fhirJs) {
+        if (typeof fhirJs == "function") {
+            const options = {
+                baseUrl: this.state.serverUrl.replace(/\/$/, "")
+            };
+            const accessToken = lib_1.getPath(this, "state.tokenResponse.access_token");
+            if (accessToken) {
+                options.auth = { token: accessToken };
+            }
+            else {
+                const { username, password } = this.state;
+                if (username && password) {
+                    options.auth = {
+                        user: username,
+                        pass: password
+                    };
+                }
+            }
+            this.api = fhirJs(options);
+            const patientId = lib_1.getPath(this, "state.tokenResponse.patient");
+            if (patientId) {
+                this.patient.api = fhirJs(Object.assign(Object.assign({}, options), { patient: patientId }));
+            }
+        }
+    }
+    /**
+     * Returns the ID of the selected patient or null. You should have requested
+     * "launch/patient" scope. Otherwise this will return null.
+     */
+    getPatientId() {
+        const tokenResponse = this.state.tokenResponse;
+        if (tokenResponse) {
+            // We have been authorized against this server but we don't know
+            // the patient. This should be a scope issue.
+            if (!tokenResponse.patient) {
+                if (!(this.state.scope || "").match(/\blaunch(\/patient)?\b/)) {
+                    debug(strings_1.default.noScopeForId, "patient", "patient");
+                }
+                else {
+                    // The server should have returned the patient!
+                    debug("The ID of the selected patient is not available. Please check if your server supports that.");
+                }
+                return null;
+            }
+            return tokenResponse.patient;
+        }
+        if (this.state.authorizeUri) {
+            debug(strings_1.default.noIfNoAuth, "the ID of the selected patient");
+        }
+        else {
+            debug(strings_1.default.noFreeContext, "selected patient");
+        }
+        return null;
+    }
+    /**
+     * Returns the ID of the selected encounter or null. You should have
+     * requested "launch/encounter" scope. Otherwise this will return null.
+     * Note that not all servers support the "launch/encounter" scope so this
+     * will be null if they don't.
+     */
+    getEncounterId() {
+        const tokenResponse = this.state.tokenResponse;
+        if (tokenResponse) {
+            // We have been authorized against this server but we don't know
+            // the encounter. This should be a scope issue.
+            if (!tokenResponse.encounter) {
+                if (!(this.state.scope || "").match(/\blaunch(\/encounter)?\b/)) {
+                    debug(strings_1.default.noScopeForId, "encounter", "encounter");
+                }
+                else {
+                    // The server should have returned the encounter!
+                    debug("The ID of the selected encounter is not available. Please check if your server supports that, and that the selected patient has any recorded encounters.");
+                }
+                return null;
+            }
+            return tokenResponse.encounter;
+        }
+        if (this.state.authorizeUri) {
+            debug(strings_1.default.noIfNoAuth, "the ID of the selected encounter");
+        }
+        else {
+            debug(strings_1.default.noFreeContext, "selected encounter");
+        }
+        return null;
+    }
+    /**
+     * Returns the (decoded) id_token if any. You need to request "openid" and
+     * "profile" scopes if you need to receive an id_token (if you need to know
+     * who the logged-in user is).
+     */
+    getIdToken() {
+        const tokenResponse = this.state.tokenResponse;
+        if (tokenResponse) {
+            const idToken = tokenResponse.id_token;
+            const scope = this.state.scope || "";
+            // We have been authorized against this server but we don't have
+            // the id_token. This should be a scope issue.
+            if (!idToken) {
+                const hasOpenid = scope.match(/\bopenid\b/);
+                const hasProfile = scope.match(/\bprofile\b/);
+                const hasFhirUser = scope.match(/\bfhirUser\b/);
+                if (!hasOpenid || !(hasFhirUser || hasProfile)) {
+                    debug("You are trying to get the id_token but you are not using the right scopes. Please add 'openid' and 'fhirUser' or 'profile' to the scopes you are requesting.");
+                }
+                else {
+                    // The server should have returned the id_token!
+                    debug("The id_token is not available. Please check if your server supports that.");
+                }
+                return null;
+            }
+            return lib_1.jwtDecode(idToken);
+        }
+        if (this.state.authorizeUri) {
+            debug(strings_1.default.noIfNoAuth, "the id_token");
+        }
+        else {
+            debug(strings_1.default.noFreeContext, "id_token");
+        }
+        return null;
+    }
+    /**
+     * Returns the profile of the logged_in user (if any). This is a string
+     * having the following shape "{user type}/{user id}". For example:
+     * "Practitioner/abc" or "Patient/xyz".
+     */
+    getFhirUser() {
+        const idToken = this.getIdToken();
+        if (idToken) {
+            return idToken.profile;
+        }
+        return null;
+    }
+    /**
+     * Returns the user ID or null.
+     */
+    getUserId() {
+        const profile = this.getFhirUser();
+        if (profile) {
+            return profile.split("/")[1];
+        }
+        return null;
+    }
+    /**
+     * Returns the type of the logged-in user or null. The result can be
+     * "Practitioner", "Patient" or "RelatedPerson".
+     */
+    getUserType() {
+        const profile = this.getFhirUser();
+        if (profile) {
+            return profile.split("/")[0];
+        }
+        return null;
+    }
+    getAuthorizationHeader() {
+        const accessToken = lib_1.getPath(this, "state.tokenResponse.access_token");
+        if (accessToken) {
+            return "Bearer " + accessToken;
+        }
+        const { username, password } = this.state;
         if (username && password) {
-          options.auth = {
-            user: username,
-            pass: password
-          };
+            return "Basic " + lib_1.btoa(username + ":" + password);
         }
-      }
-
-      this.api = fhirJs(options);
-      var patientId = (0, _lib.getPath)(this, "state.tokenResponse.patient");
-
-      if (patientId) {
-        this.patient.api = fhirJs(Object.assign({}, options, {
-          patient: patientId
-        }));
-      }
-    }
-  }
-  /**
-   * Returns the ID of the selected patient or null. You should have requested
-   * "launch/patient" scope. Otherwise this will return null.
-   */
-  ;
-
-  _proto.getPatientId = function getPatientId() {
-    var tokenResponse = this.state.tokenResponse;
-
-    if (tokenResponse) {
-      // We have been authorized against this server but we don't know
-      // the patient. This should be a scope issue.
-      if (!tokenResponse.patient) {
-        if (!(this.state.scope || "").match(/\blaunch(\/patient)?\b/)) {
-          debug(_strings.default.noScopeForId, "patient", "patient");
-        } else {
-          // The server should have returned the patient!
-          debug("The ID of the selected patient is not available. Please check if your server supports that.");
-        }
-
         return null;
-      }
-
-      return tokenResponse.patient;
     }
-
-    if (this.state.authorizeUri) {
-      debug(_strings.default.noIfNoAuth, "the ID of the selected patient");
-    } else {
-      debug(_strings.default.noFreeContext, "selected patient");
+    _clearState() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const storage = this.environment.getStorage();
+            const key = yield storage.get(settings_1.SMART_KEY);
+            if (key) {
+                yield storage.unset(key);
+            }
+            yield storage.unset(settings_1.SMART_KEY);
+            this.state.tokenResponse = {};
+        });
     }
-
-    return null;
-  }
-  /**
-   * Returns the ID of the selected encounter or null. You should have
-   * requested "launch/encounter" scope. Otherwise this will return null.
-   * Note that not all servers support the "launch/encounter" scope so this
-   * will be null if they don't.
-   */
-  ;
-
-  _proto.getEncounterId = function getEncounterId() {
-    var tokenResponse = this.state.tokenResponse;
-
-    if (tokenResponse) {
-      // We have been authorized against this server but we don't know
-      // the encounter. This should be a scope issue.
-      if (!tokenResponse.encounter) {
-        if (!(this.state.scope || "").match(/\blaunch(\/encounter)?\b/)) {
-          debug(_strings.default.noScopeForId, "encounter", "encounter");
-        } else {
-          // The server should have returned the encounter!
-          debug("The ID of the selected encounter is not available. Please check if your server supports that, and that the selected patient has any recorded encounters.");
-        }
-
-        return null;
-      }
-
-      return tokenResponse.encounter;
+    /**
+     * @param {Object} resource A FHIR resource to be created
+     */
+    create(resource) {
+        return this.request({
+            url: `${resource.resourceType}`,
+            method: "POST",
+            body: JSON.stringify(resource),
+            headers: {
+                "Content-Type": "application/fhir+json"
+            }
+        });
     }
-
-    if (this.state.authorizeUri) {
-      debug(_strings.default.noIfNoAuth, "the ID of the selected encounter");
-    } else {
-      debug(_strings.default.noFreeContext, "selected encounter");
+    /**
+     * @param {Object} resource A FHIR resource to be updated
+     */
+    update(resource) {
+        return this.request({
+            url: `${resource.resourceType}/${resource.id}`,
+            method: "PUT",
+            body: JSON.stringify(resource),
+            headers: {
+                "Content-Type": "application/fhir+json"
+            }
+        });
     }
-
-    return null;
-  }
-  /**
-   * Returns the (decoded) id_token if any. You need to request "openid" and
-   * "profile" scopes if you need to receive an id_token (if you need to know
-   * who the logged-in user is).
-   */
-  ;
-
-  _proto.getIdToken = function getIdToken() {
-    var tokenResponse = this.state.tokenResponse;
-
-    if (tokenResponse) {
-      var idToken = tokenResponse.id_token;
-      var scope = this.state.scope || ""; // We have been authorized against this server but we don't have
-      // the id_token. This should be a scope issue.
-
-      if (!idToken) {
-        var hasOpenid = scope.match(/\bopenid\b/);
-        var hasProfile = scope.match(/\bprofile\b/);
-        var hasFhirUser = scope.match(/\bfhirUser\b/);
-
-        if (!hasOpenid || !(hasFhirUser || hasProfile)) {
-          debug("You are trying to get the id_token but you are not using the right scopes. Please add 'openid' and 'fhirUser' or 'profile' to the scopes you are requesting.");
-        } else {
-          // The server should have returned the id_token!
-          debug("The id_token is not available. Please check if your server supports that.");
-        }
-
-        return null;
-      }
-
-      return (0, _lib.jwtDecode)(idToken);
+    /**
+     * @param {String} url Relative URI of the FHIR resource to be deleted
+     * (format: `resourceType/id`)
+     */
+    delete(url) {
+        return this.request({
+            url,
+            method: "DELETE"
+        });
     }
-
-    if (this.state.authorizeUri) {
-      debug(_strings.default.noIfNoAuth, "the id_token");
-    } else {
-      debug(_strings.default.noFreeContext, "id_token");
-    }
-
-    return null;
-  }
-  /**
-   * Returns the profile of the logged_in user (if any). This is a string
-   * having the following shape "{user type}/{user id}". For example:
-   * "Practitioner/abc" or "Patient/xyz".
-   */
-  ;
-
-  _proto.getFhirUser = function getFhirUser() {
-    var idToken = this.getIdToken();
-
-    if (idToken) {
-      return idToken.profile;
-    }
-
-    return null;
-  }
-  /**
-   * Returns the user ID or null.
-   */
-  ;
-
-  _proto.getUserId = function getUserId() {
-    var profile = this.getFhirUser();
-
-    if (profile) {
-      return profile.split("/")[1];
-    }
-
-    return null;
-  }
-  /**
-   * Returns the type of the logged-in user or null. The result can be
-   * "Practitioner", "Patient" or "RelatedPerson".
-   */
-  ;
-
-  _proto.getUserType = function getUserType() {
-    var profile = this.getFhirUser();
-
-    if (profile) {
-      return profile.split("/")[0];
-    }
-
-    return null;
-  };
-
-  _proto.getAuthorizationHeader = function getAuthorizationHeader() {
-    var accessToken = (0, _lib.getPath)(this, "state.tokenResponse.access_token");
-
-    if (accessToken) {
-      return "Bearer " + accessToken;
-    }
-
-    var _this$state2 = this.state,
-        username = _this$state2.username,
-        password = _this$state2.password;
-
-    if (username && password) {
-      return "Basic " + (0, _lib.btoa)(username + ":" + password);
-    }
-
-    return null;
-  };
-
-  _proto._clearState =
-  /*#__PURE__*/
-  function () {
-    var _clearState2 = (0, _asyncToGenerator2.default)(
-    /*#__PURE__*/
-    _regenerator.default.mark(function _callee2() {
-      var storage, key;
-      return _regenerator.default.wrap(function _callee2$(_context2) {
-        while (1) {
-          switch (_context2.prev = _context2.next) {
-            case 0:
-              storage = this.environment.getStorage();
-              _context2.next = 3;
-              return storage.get(_settings.SMART_KEY);
-
-            case 3:
-              key = _context2.sent;
-
-              if (!key) {
-                _context2.next = 7;
-                break;
-              }
-
-              _context2.next = 7;
-              return storage.unset(key);
-
-            case 7:
-              _context2.next = 9;
-              return storage.unset(_settings.SMART_KEY);
-
-            case 9:
-              this.state.tokenResponse = {};
-
-            case 10:
-            case "end":
-              return _context2.stop();
-          }
-        }
-      }, _callee2, this);
-    }));
-
-    function _clearState() {
-      return _clearState2.apply(this, arguments);
-    }
-
-    return _clearState;
-  }()
-  /**
-   * @param {Object} resource A FHIR resource to be created
-   */
-  ;
-
-  _proto.create = function create(resource) {
-    return this.request({
-      url: "" + resource.resourceType,
-      method: "POST",
-      body: JSON.stringify(resource),
-      headers: {
-        "Content-Type": "application/fhir+json"
-      }
-    });
-  }
-  /**
-   * @param {Object} resource A FHIR resource to be updated
-   */
-  ;
-
-  _proto.update = function update(resource) {
-    return this.request({
-      url: resource.resourceType + "/" + resource.id,
-      method: "PUT",
-      body: JSON.stringify(resource),
-      headers: {
-        "Content-Type": "application/fhir+json"
-      }
-    });
-  }
-  /**
-   * @param {String} url Relative URI of the FHIR resource to be deleted
-   * (format: `resourceType/id`)
-   */
-  ;
-
-  _proto.delete = function _delete(url) {
-    return this.request({
-      url: url,
-      method: "DELETE"
-    });
-  }
-  /**
-   * @param {Object|String} requestOptions Can be a string URL (relative to
-   *  the serviceUrl), or an object which will be passed to fetch()
-   * @param {fhirclient.FhirOptions} fhirOptions Additional options to control the behavior
-   * @param {object} _resolvedRefs DO NOT USE! Used internally.
-   */
-  ;
-
-  _proto.request =
-  /*#__PURE__*/
-  function () {
-    var _request2 = (0, _asyncToGenerator2.default)(
-    /*#__PURE__*/
-    _regenerator.default.mark(function _callee6(requestOptions, fhirOptions, _resolvedRefs) {
-      var _this2 = this;
-
-      var debug, url, authHeader, hasPageCallback;
-      return _regenerator.default.wrap(function _callee6$(_context6) {
-        while (1) {
-          switch (_context6.prev = _context6.next) {
-            case 0:
-              if (fhirOptions === void 0) {
-                fhirOptions = {};
-              }
-
-              if (_resolvedRefs === void 0) {
-                _resolvedRefs = {};
-              }
-
-              debug = _lib.debug.extend("client:request");
-
-              if (requestOptions) {
-                _context6.next = 5;
-                break;
-              }
-
-              throw new Error("request requires an url or request options as argument");
-
-            case 5:
-              if (typeof requestOptions == "string" || requestOptions instanceof URL) {
+    /**
+     * @param {Object|String} requestOptions Can be a string URL (relative to
+     *  the serviceUrl), or an object which will be passed to fetch()
+     * @param {fhirclient.FhirOptions} fhirOptions Additional options to control the behavior
+     * @param {object} _resolvedRefs DO NOT USE! Used internally.
+     */
+    request(requestOptions, fhirOptions = {}, _resolvedRefs = {}) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const debug = lib_1.debug.extend("client:request");
+            if (!requestOptions) {
+                throw new Error("request requires an url or request options as argument");
+            }
+            // url -----------------------------------------------------------------
+            let url;
+            if (typeof requestOptions == "string" || requestOptions instanceof URL) {
                 url = String(requestOptions);
                 requestOptions = {};
-              } else {
+            }
+            else {
                 url = String(requestOptions.url);
-              }
-
-              url = (0, _lib.absolute)(url, this.state.serverUrl); // authentication ------------------------------------------------------
-
-              authHeader = this.getAuthorizationHeader();
-
-              if (authHeader) {
-                requestOptions.headers = Object.assign({}, requestOptions.headers, {
-                  Authorization: authHeader
-                });
-              } // fhirOptions.graph ---------------------------------------------------
-
-
-              fhirOptions.graph = fhirOptions.graph !== false; // fhirOptions.flat ----------------------------------------------------
-
-              fhirOptions.flat = !!fhirOptions.flat; // fhirOptions.pageLimit -----------------------------------------------
-
-              if (!fhirOptions.pageLimit && fhirOptions.pageLimit !== 0) {
+            }
+            url = lib_1.absolute(url, this.state.serverUrl);
+            // authentication ------------------------------------------------------
+            const authHeader = this.getAuthorizationHeader();
+            if (authHeader) {
+                requestOptions.headers = Object.assign(Object.assign({}, requestOptions.headers), { Authorization: authHeader });
+            }
+            // fhirOptions.graph ---------------------------------------------------
+            fhirOptions.graph = (fhirOptions.graph !== false);
+            // fhirOptions.flat ----------------------------------------------------
+            fhirOptions.flat = !!fhirOptions.flat;
+            // fhirOptions.pageLimit -----------------------------------------------
+            if (!fhirOptions.pageLimit && fhirOptions.pageLimit !== 0) {
                 fhirOptions.pageLimit = 1;
-              }
-
-              hasPageCallback = typeof fhirOptions.onPage == "function";
-              debug("%s, options: %O, fhirOptions: %O", url, requestOptions, fhirOptions);
-              return _context6.abrupt("return", (0, _lib.request)(url, requestOptions) // Automatic re-auth via refresh token -----------------------------
-              .catch(function (error) {
+            }
+            const hasPageCallback = typeof fhirOptions.onPage == "function";
+            debug("%s, options: %O, fhirOptions: %O", url, requestOptions, fhirOptions);
+            return lib_1.request(url, requestOptions)
+                // Automatic re-auth via refresh token -----------------------------
+                .catch(error => {
                 debug("%o", error);
-
                 if (error.status == 401 && fhirOptions.useRefreshToken !== false) {
-                  var hasRefreshToken = (0, _lib.getPath)(_this2, "state.tokenResponse.refresh_token");
-
-                  if (hasRefreshToken) {
-                    return _this2.refresh().then(function () {
-                      return _this2.request(Object.assign({}, requestOptions, {
-                        url: url
-                      }), fhirOptions, _resolvedRefs);
-                    });
-                  }
-                }
-
-                throw error;
-              }) // Handle 401 ------------------------------------------------------
-              .catch(
-              /*#__PURE__*/
-              function () {
-                var _ref3 = (0, _asyncToGenerator2.default)(
-                /*#__PURE__*/
-                _regenerator.default.mark(function _callee3(error) {
-                  return _regenerator.default.wrap(function _callee3$(_context3) {
-                    while (1) {
-                      switch (_context3.prev = _context3.next) {
-                        case 0:
-                          if (!(error.status == 401)) {
-                            _context3.next = 12;
-                            break;
-                          }
-
-                          if ((0, _lib.getPath)(_this2, "state.tokenResponse.access_token")) {
-                            _context3.next = 3;
-                            break;
-                          }
-
-                          throw new Error("This app cannot be accessed directly. Please launch it as SMART app!");
-
-                        case 3:
-                          if (!(fhirOptions.useRefreshToken === false)) {
-                            _context3.next = 8;
-                            break;
-                          }
-
-                          debug("Your session has expired and the useRefreshToken option is set to false. Please re-launch the app.");
-                          _context3.next = 7;
-                          return _this2._clearState();
-
-                        case 7:
-                          throw new Error(_strings.default.expired);
-
-                        case 8:
-                          // otherwise -> auto-refresh failed. Session expired.
-                          // Need to re-launch. Clear state to start over!
-                          debug("Auto-refresh failed! Please re-launch the app.");
-                          _context3.next = 11;
-                          return _this2._clearState();
-
-                        case 11:
-                          throw new Error(_strings.default.expired);
-
-                        case 12:
-                          throw error;
-
-                        case 13:
-                        case "end":
-                          return _context3.stop();
-                      }
+                    const hasRefreshToken = lib_1.getPath(this, "state.tokenResponse.refresh_token");
+                    if (hasRefreshToken) {
+                        return this.refresh().then(() => this.request(Object.assign(Object.assign({}, requestOptions), { url }), fhirOptions, _resolvedRefs));
                     }
-                  }, _callee3);
-                }));
-
-                return function (_x6) {
-                  return _ref3.apply(this, arguments);
-                };
-              }()) // Handle 403 ------------------------------------------------------
-              .catch(function (error) {
-                if (error.status == 403) {
-                  debug("Permission denied! Please make sure that you have requested the proper scopes.");
                 }
-
                 throw error;
-              }) // Handle raw requests (anything other than json) ------------------
-              .then(function (data) {
-                if (!data) return data;
-                if (typeof data == "string") return data;
-                if (typeof data == "object" && data instanceof Response) return data; // Resolve References ----------------------------------------------
-
-                return function () {
-                  var _ref4 = (0, _asyncToGenerator2.default)(
-                  /*#__PURE__*/
-                  _regenerator.default.mark(function _callee4(data) {
-                    return _regenerator.default.wrap(function _callee4$(_context4) {
-                      while (1) {
-                        switch (_context4.prev = _context4.next) {
-                          case 0:
-                            if (!data) {
-                              _context4.next = 8;
-                              break;
-                            }
-
-                            if (!(data.resourceType == "Bundle")) {
-                              _context4.next = 6;
-                              break;
-                            }
-
-                            _context4.next = 4;
-                            return Promise.all((data.entry || []).map(function (item) {
-                              return resolveRefs(item.resource, fhirOptions, _resolvedRefs, _this2);
-                            }));
-
-                          case 4:
-                            _context4.next = 8;
-                            break;
-
-                          case 6:
-                            _context4.next = 8;
-                            return resolveRefs(data, fhirOptions, _resolvedRefs, _this2);
-
-                          case 8:
-                            return _context4.abrupt("return", data);
-
-                          case 9:
-                          case "end":
-                            return _context4.stop();
+            })
+                // Handle 401 ------------------------------------------------------
+                .catch((error) => __awaiter(this, void 0, void 0, function* () {
+                if (error.status == 401) {
+                    // !accessToken -> not authorized -> No session. Need to launch.
+                    if (!lib_1.getPath(this, "state.tokenResponse.access_token")) {
+                        throw new Error("This app cannot be accessed directly. Please launch it as SMART app!");
+                    }
+                    // !fhirOptions.useRefreshToken -> auto-refresh not enabled
+                    // Session expired. Need to re-launch. Clear state to
+                    // start over!
+                    if (fhirOptions.useRefreshToken === false) {
+                        debug("Your session has expired and the useRefreshToken option is set to false. Please re-launch the app.");
+                        yield this._clearState();
+                        throw new Error(strings_1.default.expired);
+                    }
+                    // otherwise -> auto-refresh failed. Session expired.
+                    // Need to re-launch. Clear state to start over!
+                    debug("Auto-refresh failed! Please re-launch the app.");
+                    yield this._clearState();
+                    throw new Error(strings_1.default.expired);
+                }
+                throw error;
+            }))
+                // Handle 403 ------------------------------------------------------
+                .catch(error => {
+                if (error.status == 403) {
+                    debug("Permission denied! Please make sure that you have requested the proper scopes.");
+                }
+                throw error;
+            })
+                // Handle raw requests (anything other than json) ------------------
+                .then(data => {
+                if (!data)
+                    return data;
+                if (typeof data == "string")
+                    return data;
+                if (typeof data == "object" && data instanceof Response)
+                    return data;
+                // Resolve References ----------------------------------------------
+                return ((data) => __awaiter(this, void 0, void 0, function* () {
+                    if (data) {
+                        if (data.resourceType == "Bundle") {
+                            yield Promise.all((data.entry || []).map(item => resolveRefs(item.resource, fhirOptions, _resolvedRefs, this)));
                         }
-                      }
-                    }, _callee4);
-                  }));
-
-                  return function (_x7) {
-                    return _ref4.apply(this, arguments);
-                  };
-                }()(data) // Pagination ------------------------------------------------------
-                .then(
-                /*#__PURE__*/
-                function () {
-                  var _ref5 = (0, _asyncToGenerator2.default)(
-                  /*#__PURE__*/
-                  _regenerator.default.mark(function _callee5(data) {
-                    var links, next, nextPage;
-                    return _regenerator.default.wrap(function _callee5$(_context5) {
-                      while (1) {
-                        switch (_context5.prev = _context5.next) {
-                          case 0:
-                            if (!(data && data.resourceType == "Bundle")) {
-                              _context5.next = 19;
-                              break;
-                            }
-
-                            links = data.link || [];
-
-                            if (fhirOptions.flat) {
-                              data = (data.entry || []).map(function (entry) {
-                                return entry.resource;
-                              });
-                            }
-
-                            if (!hasPageCallback) {
-                              _context5.next = 6;
-                              break;
-                            }
-
-                            _context5.next = 6;
-                            return fhirOptions.onPage(data, Object.assign({}, _resolvedRefs));
-
-                          case 6:
-                            if (! --fhirOptions.pageLimit) {
-                              _context5.next = 19;
-                              break;
-                            }
-
-                            next = links.find(function (l) {
-                              return l.relation == "next";
-                            });
-                            data = (0, _lib.makeArray)(data);
-
-                            if (!(next && next.url)) {
-                              _context5.next = 19;
-                              break;
-                            }
-
-                            _context5.next = 12;
-                            return _this2.request(next.url, fhirOptions, _resolvedRefs);
-
-                          case 12:
-                            nextPage = _context5.sent;
-
-                            if (!hasPageCallback) {
-                              _context5.next = 15;
-                              break;
-                            }
-
-                            return _context5.abrupt("return", null);
-
-                          case 15:
-                            if (!(fhirOptions.resolveReferences && fhirOptions.resolveReferences.length)) {
-                              _context5.next = 18;
-                              break;
-                            }
-
-                            Object.assign(_resolvedRefs, nextPage.references);
-                            return _context5.abrupt("return", data.concat((0, _lib.makeArray)(nextPage.data || nextPage)));
-
-                          case 18:
-                            return _context5.abrupt("return", data.concat((0, _lib.makeArray)(nextPage)));
-
-                          case 19:
-                            return _context5.abrupt("return", data);
-
-                          case 20:
-                          case "end":
-                            return _context5.stop();
+                        else {
+                            yield resolveRefs(data, fhirOptions, _resolvedRefs, this);
                         }
-                      }
-                    }, _callee5);
-                  }));
-
-                  return function (_x8) {
-                    return _ref5.apply(this, arguments);
-                  };
-                }()) // Finalize --------------------------------------------------------
-                .then(function (data) {
-                  if (fhirOptions.graph) {
-                    _resolvedRefs = {};
-                  } else if (!hasPageCallback && fhirOptions.resolveReferences.length) {
-                    return {
-                      data: data,
-                      references: _resolvedRefs
-                    };
-                  }
-
-                  return data;
+                    }
+                    return data;
+                }))(data)
+                    // Pagination ------------------------------------------------------
+                    .then((data) => __awaiter(this, void 0, void 0, function* () {
+                    if (data && data.resourceType == "Bundle") {
+                        const links = data.link || [];
+                        if (fhirOptions.flat) {
+                            data = (data.entry || []).map(entry => entry.resource);
+                        }
+                        if (hasPageCallback) {
+                            yield fhirOptions.onPage(data, Object.assign({}, _resolvedRefs));
+                        }
+                        if (--fhirOptions.pageLimit) {
+                            const next = links.find(l => l.relation == "next");
+                            data = lib_1.makeArray(data);
+                            if (next && next.url) {
+                                const nextPage = yield this.request(next.url, fhirOptions, _resolvedRefs);
+                                if (hasPageCallback) {
+                                    return null;
+                                }
+                                if (fhirOptions.resolveReferences && fhirOptions.resolveReferences.length) {
+                                    Object.assign(_resolvedRefs, nextPage.references);
+                                    return data.concat(lib_1.makeArray(nextPage.data || nextPage));
+                                }
+                                return data.concat(lib_1.makeArray(nextPage));
+                            }
+                        }
+                    }
+                    return data;
+                }))
+                    // Finalize --------------------------------------------------------
+                    .then(data => {
+                    if (fhirOptions.graph) {
+                        _resolvedRefs = {};
+                    }
+                    else if (!hasPageCallback && fhirOptions.resolveReferences.length) {
+                        return {
+                            data,
+                            references: _resolvedRefs
+                        };
+                    }
+                    return data;
                 });
-              }));
-
-            case 15:
-            case "end":
-              return _context6.stop();
-          }
+            });
+        });
+    }
+    /**
+     * Use the refresh token to obtain new access token. If the refresh token is
+     * expired (or this fails for any other reason) it will be deleted from the
+     * state, so that we don't enter into loops trying to re-authorize.
+     */
+    refresh() {
+        const debug = lib_1.debug.extend("client:refresh");
+        debug("Attempting to refresh with refresh_token...");
+        const refreshToken = lib_1.getPath(this, "state.tokenResponse.refresh_token");
+        if (!refreshToken) {
+            throw new Error("Unable to refresh. No refresh_token found.");
         }
-      }, _callee6, this);
-    }));
-
-    function request(_x3, _x4, _x5) {
-      return _request2.apply(this, arguments);
-    }
-
-    return request;
-  }()
-  /**
-   * Use the refresh token to obtain new access token. If the refresh token is
-   * expired (or this fails for any other reason) it will be deleted from the
-   * state, so that we don't enter into loops trying to re-authorize.
-   */
-  ;
-
-  _proto.refresh = function refresh() {
-    var _this3 = this;
-
-    var debug = _lib.debug.extend("client:refresh");
-
-    debug("Attempting to refresh with refresh_token...");
-    var refreshToken = (0, _lib.getPath)(this, "state.tokenResponse.refresh_token");
-
-    if (!refreshToken) {
-      throw new Error("Unable to refresh. No refresh_token found.");
-    }
-
-    var tokenUri = this.state.tokenUri;
-
-    if (!tokenUri) {
-      throw new Error("Unable to refresh. No tokenUri found.");
-    }
-
-    var scopes = (0, _lib.getPath)(this, "state.tokenResponse.scope") || "";
-
-    if (scopes.indexOf("offline_access") == -1 && scopes.indexOf("online_access") == -1) {
-      throw new Error("Unable to refresh. No offline_access or online_access scope found.");
-    } // This method is typically called internally from `request` if certain
-    // request fails with 401. However, clients will often run multiple
-    // requests in parallel which may result in multiple refresh calls.
-    // To avoid that, we keep a to the current refresh task (if any).
-
-
-    if (!this._refreshTask) {
-      this._refreshTask = (0, _lib.request)(tokenUri, {
-        mode: "cors",
-        method: "POST",
-        headers: {
-          "content-type": "application/x-www-form-urlencoded"
-        },
-        body: "grant_type=refresh_token&refresh_token=" + encodeURIComponent(refreshToken),
-        credentials: "include"
-      }).then(function (data) {
-        if (!data.access_token) {
-          throw new Error("No access token received");
+        const tokenUri = this.state.tokenUri;
+        if (!tokenUri) {
+            throw new Error("Unable to refresh. No tokenUri found.");
         }
-
-        return data;
-      }).then(function (data) {
-        debug("Received new access token %O", data);
-        Object.assign(_this3.state.tokenResponse, data);
-        return _this3.state;
-      }).catch(function (error) {
-        debug("Deleting the expired or invalid refresh token.");
-        delete _this3.state.tokenResponse.refresh_token;
-        throw error;
-      }).finally(function () {
-        _this3._refreshTask = null;
-
-        _this3.environment.getStorage().set(_this3.state.key, _this3.state);
-      });
+        const scopes = lib_1.getPath(this, "state.tokenResponse.scope") || "";
+        if (scopes.indexOf("offline_access") == -1 && scopes.indexOf("online_access") == -1) {
+            throw new Error("Unable to refresh. No offline_access or online_access scope found.");
+        }
+        // This method is typically called internally from `request` if certain
+        // request fails with 401. However, clients will often run multiple
+        // requests in parallel which may result in multiple refresh calls.
+        // To avoid that, we keep a to the current refresh task (if any).
+        if (!this._refreshTask) {
+            this._refreshTask = lib_1.request(tokenUri, {
+                mode: "cors",
+                method: "POST",
+                headers: {
+                    "content-type": "application/x-www-form-urlencoded"
+                },
+                body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}`,
+                credentials: "include"
+            }).then(data => {
+                if (!data.access_token) {
+                    throw new Error("No access token received");
+                }
+                return data;
+            }).then(data => {
+                debug("Received new access token %O", data);
+                Object.assign(this.state.tokenResponse, data);
+                return this.state;
+            }).catch(error => {
+                debug("Deleting the expired or invalid refresh token.");
+                delete this.state.tokenResponse.refresh_token;
+                throw error;
+            }).finally(() => {
+                this._refreshTask = null;
+                this.environment.getStorage().set(this.state.key, this.state);
+            });
+        }
+        return this._refreshTask;
     }
-
-    return this._refreshTask;
-  } // utils -------------------------------------------------------------------
-
-  /**
-   * @param {object|object[]} observations
-   * @param {string} property
-   */
-  ;
-
-  _proto.byCode = function byCode(observations, property) {
-    return (0, _lib.byCode)(observations, property);
-  }
-  /**
-   * @param {object|object[]} observations
-   * @param {string} property
-   * @returns {(codes: string[]) => object[]}
-   */
-  ;
-
-  _proto.byCodes = function byCodes(observations, property) {
-    return (0, _lib.byCodes)(observations, property);
-  };
-
-  _proto.getPath = function getPath(object, path) {
-    return (0, _lib.getPath)(object, path);
-  }
-  /**
-   * Returns a promise that will be resolved with the fhir version as defined
-   * in the conformance statement.
-   */
-  ;
-
-  _proto.getFhirVersion = function getFhirVersion() {
-    return (0, _smart.fetchFhirVersion)(this.state.serverUrl);
-  }
-  /**
-   * Returns a promise that will be resolved with the numeric fhir version
-   * - 2 for DSTU2
-   * - 3 for STU3
-   * - 4 for R4
-   * - 0 if the version is not known
-   */
-  ;
-
-  _proto.getFhirRelease = function getFhirRelease() {
-    return this.getFhirVersion().then(function (v) {
-      return _settings.fhirVersions[v || ""] || 0;
-    });
-  };
-
-  (0, _createClass2.default)(FhirClient, [{
-    key: "units",
-    get: function get() {
-      return _lib.units;
+    // utils -------------------------------------------------------------------
+    /**
+     * @param {object|object[]} observations
+     * @param {string} property
+     */
+    byCode(observations, property) {
+        return lib_1.byCode(observations, property);
     }
-  }]);
-  return FhirClient;
-}();
-
+    /**
+     * @param {object|object[]} observations
+     * @param {string} property
+     * @returns {(codes: string[]) => object[]}
+     */
+    byCodes(observations, property) {
+        return lib_1.byCodes(observations, property);
+    }
+    get units() {
+        return lib_1.units;
+    }
+    getPath(object, path) {
+        return lib_1.getPath(object, path);
+    }
+    /**
+     * Returns a promise that will be resolved with the fhir version as defined
+     * in the conformance statement.
+     */
+    getFhirVersion() {
+        return smart_1.fetchFhirVersion(this.state.serverUrl);
+    }
+    /**
+     * Returns a promise that will be resolved with the numeric fhir version
+     * - 2 for DSTU2
+     * - 3 for STU3
+     * - 4 for R4
+     * - 0 if the version is not known
+     */
+    getFhirRelease() {
+        return this.getFhirVersion().then(v => settings_1.fhirVersions[v || ""] || 0);
+    }
+}
 exports.default = FhirClient;
+
 
 /***/ }),
 
-/***/ "./src/HttpError.js":
+/***/ "./src/HttpError.ts":
 /*!**************************!*\
-  !*** ./src/HttpError.js ***!
+  !*** ./src/HttpError.ts ***!
   \**************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-
-__webpack_require__(/*! core-js/modules/es.function.name */ "./node_modules/core-js/modules/es.function.name.js");
-
-__webpack_require__(/*! core-js/modules/web.url.to-json */ "./node_modules/core-js/modules/web.url.to-json.js");
-
-exports.__esModule = true;
-exports.default = void 0;
-
-var _inheritsLoose2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/inheritsLoose */ "./node_modules/@babel/runtime/helpers/inheritsLoose.js"));
-
-var _wrapNativeSuper2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/wrapNativeSuper */ "./node_modules/@babel/runtime/helpers/wrapNativeSuper.js"));
-
-var HttpError =
-/*#__PURE__*/
-function (_Error) {
-  (0, _inheritsLoose2.default)(HttpError, _Error);
-
-  function HttpError(message, statusCode, statusText) {
-    var _this;
-
-    _this = _Error.call(this, message) || this;
-    _this.message = message;
-    _this.name = "HttpError";
-    _this.statusCode = statusCode;
-    _this.status = statusCode;
-    _this.statusText = statusText;
-    return _this;
-  }
-
-  var _proto = HttpError.prototype;
-
-  _proto.toJSON = function toJSON() {
-    return {
-      name: this.name,
-      statusCode: this.statusCode,
-      status: this.status,
-      statusText: this.statusText,
-      message: this.message
-    };
-  };
-
-  HttpError.create = function create(failure) {
-    // start with generic values
-    var status = 0;
-    var statusText = "Error";
-    var message = "Unknown error";
-
-    if (failure) {
-      if (typeof failure == "object") {
-        if (failure instanceof Error) {
-          message = failure.message;
-        } else if (failure.error) {
-          status = failure.error.status || 0;
-          statusText = failure.error.statusText || "Error";
-
-          if (failure.error.responseText) {
-            message = failure.error.responseText;
-          }
-        }
-      } else if (typeof failure == "string") {
-        message = failure;
-      }
+Object.defineProperty(exports, "__esModule", { value: true });
+class HttpError extends Error {
+    constructor(message, statusCode, statusText) {
+        super(message);
+        this.message = message;
+        this.name = "HttpError";
+        this.statusCode = statusCode;
+        this.status = statusCode;
+        this.statusText = statusText;
     }
-
-    return new HttpError(message, status, statusText);
-  };
-
-  return HttpError;
-}((0, _wrapNativeSuper2.default)(Error));
-
+    toJSON() {
+        return {
+            name: this.name,
+            statusCode: this.statusCode,
+            status: this.status,
+            statusText: this.statusText,
+            message: this.message
+        };
+    }
+    static create(failure) {
+        // start with generic values
+        var status = 0;
+        var statusText = "Error";
+        var message = "Unknown error";
+        if (failure) {
+            if (typeof failure == "object") {
+                if (failure instanceof Error) {
+                    message = failure.message;
+                }
+                else if (failure.error) {
+                    status = failure.error.status || 0;
+                    statusText = failure.error.statusText || "Error";
+                    if (failure.error.responseText) {
+                        message = failure.error.responseText;
+                    }
+                }
+            }
+            else if (typeof failure == "string") {
+                message = failure;
+            }
+        }
+        return new HttpError(message, status, statusText);
+    }
+}
 exports.default = HttpError;
+
 
 /***/ }),
 
@@ -11314,9 +8747,9 @@ __webpack_require__(/*! core-js/modules/web.url */ "./node_modules/core-js/modul
 exports.__esModule = true;
 exports.default = void 0;
 
-var smart = _interopRequireWildcard(__webpack_require__(/*! ../smart */ "./src/smart.js"));
+var smart = _interopRequireWildcard(__webpack_require__(/*! ../smart */ "./src/smart.ts"));
 
-var _Client = _interopRequireDefault(__webpack_require__(/*! ../Client */ "./src/Client.js"));
+var _Client = _interopRequireDefault(__webpack_require__(/*! ../Client */ "./src/Client.ts"));
 
 /**
  * This is the abstract base class that adapters must inherit. It just a
@@ -11440,7 +8873,7 @@ var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtim
 
 var _inheritsLoose2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/inheritsLoose */ "./node_modules/@babel/runtime/helpers/inheritsLoose.js"));
 
-var _BrowserStorage = _interopRequireDefault(__webpack_require__(/*! ../storage/BrowserStorage */ "./src/storage/BrowserStorage.js"));
+var _BrowserStorage = _interopRequireDefault(__webpack_require__(/*! ../storage/BrowserStorage */ "./src/storage/BrowserStorage.ts"));
 
 var _BaseAdapter2 = _interopRequireDefault(__webpack_require__(/*! ./BaseAdapter */ "./src/adapters/BaseAdapter.js"));
 
@@ -11590,149 +9023,62 @@ exports.oauth2 = oauth2;
 
 /***/ }),
 
-/***/ "./src/lib.js":
+/***/ "./src/lib.ts":
 /*!********************!*\
-  !*** ./src/lib.js ***!
+  !*** ./src/lib.ts ***!
   \********************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-
-__webpack_require__(/*! core-js/modules/es.array.concat */ "./node_modules/core-js/modules/es.array.concat.js");
-
-__webpack_require__(/*! core-js/modules/es.array.filter */ "./node_modules/core-js/modules/es.array.filter.js");
-
-__webpack_require__(/*! core-js/modules/es.array.find */ "./node_modules/core-js/modules/es.array.find.js");
-
-__webpack_require__(/*! core-js/modules/es.array.join */ "./node_modules/core-js/modules/es.array.join.js");
-
-__webpack_require__(/*! core-js/modules/es.function.name */ "./node_modules/core-js/modules/es.function.name.js");
-
-__webpack_require__(/*! core-js/modules/es.object.assign */ "./node_modules/core-js/modules/es.object.assign.js");
-
-__webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
-
-__webpack_require__(/*! core-js/modules/es.regexp.exec */ "./node_modules/core-js/modules/es.regexp.exec.js");
-
-__webpack_require__(/*! core-js/modules/es.regexp.to-string */ "./node_modules/core-js/modules/es.regexp.to-string.js");
-
-__webpack_require__(/*! core-js/modules/es.string.match */ "./node_modules/core-js/modules/es.string.match.js");
-
-__webpack_require__(/*! core-js/modules/es.string.replace */ "./node_modules/core-js/modules/es.string.replace.js");
-
-__webpack_require__(/*! core-js/modules/es.string.split */ "./node_modules/core-js/modules/es.string.split.js");
-
-__webpack_require__(/*! core-js/modules/es.string.trim */ "./node_modules/core-js/modules/es.string.trim.js");
-
-__webpack_require__(/*! core-js/modules/web.dom-collections.for-each */ "./node_modules/core-js/modules/web.dom-collections.for-each.js");
-
-exports.__esModule = true;
-exports.isBrowser = isBrowser;
-exports.checkResponse = checkResponse;
-exports.responseToJSON = responseToJSON;
-exports.request = request;
-exports.humanizeError = humanizeError;
-exports.stripTrailingSlash = stripTrailingSlash;
-exports.getPath = getPath;
-exports.setPath = setPath;
-exports.makeArray = makeArray;
-exports.absolute = absolute;
-exports.randomString = randomString;
-exports.atob = atob;
-exports.btoa = btoa;
-exports.jwtDecode = jwtDecode;
-exports.byCode = byCode;
-exports.byCodes = byCodes;
-exports.ensureNumerical = ensureNumerical;
-exports.getPatientParam = getPatientParam;
-exports.units = exports.getAndCache = exports.debug = void 0;
-
-var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js"));
-
-__webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
-
-var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/asyncToGenerator.js"));
-
-var _HttpError = _interopRequireDefault(__webpack_require__(/*! ./HttpError */ "./src/HttpError.js"));
-
-var _settings = __webpack_require__(/*! ./settings */ "./src/settings.js");
-
-var _debug2 = _interopRequireDefault(__webpack_require__(/*! debug */ "./node_modules/debug/src/browser.js"));
-
 /*
  * This file contains some shared functions. The are used by other modules, but
  * are defined here so that tests can import this library and test them.
  */
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const HttpError_1 = __webpack_require__(/*! ./HttpError */ "./src/HttpError.ts");
+const settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts");
+const debug_1 = __webpack_require__(/*! debug */ "./node_modules/debug/src/browser.js");
 // @ts-ignore
 // eslint-disable-next-line no-undef
-var _ref = undefined ? window : __webpack_require__(/*! cross-fetch */ "./node_modules/cross-fetch/dist/browser-ponyfill.js"),
-    fetch = _ref.fetch;
-
-var _debug = (0, _debug2.default)("FHIR");
-
+const { fetch } = undefined ? window : __webpack_require__(/*! cross-fetch */ "./node_modules/cross-fetch/dist/browser-ponyfill.js");
+const _debug = debug_1.default("FHIR");
 exports.debug = _debug;
-
 function isBrowser() {
-  return typeof window === "object";
+    return typeof window === "object";
 }
+exports.isBrowser = isBrowser;
 /**
  * Used in fetch Promise chains to reject if the "ok" property is not true
  */
-
-
-function checkResponse(_x) {
-  return _checkResponse.apply(this, arguments);
+function checkResponse(resp) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!resp.ok) {
+            throw (yield humanizeError(resp));
+        }
+        return resp;
+    });
 }
+exports.checkResponse = checkResponse;
 /**
  * Used in fetch Promise chains to return the JSON version of the response.
  * Note that `resp.json()` will throw on empty body so we use resp.text()
  * instead.
- * @param {Response} resp
- * @returns {Promise<object|string>}
  */
-
-
-function _checkResponse() {
-  _checkResponse = (0, _asyncToGenerator2.default)(
-  /*#__PURE__*/
-  _regenerator.default.mark(function _callee(resp) {
-    return _regenerator.default.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            if (resp.ok) {
-              _context.next = 4;
-              break;
-            }
-
-            _context.next = 3;
-            return humanizeError(resp);
-
-          case 3:
-            throw _context.sent;
-
-          case 4:
-            return _context.abrupt("return", resp);
-
-          case 5:
-          case "end":
-            return _context.stop();
-        }
-      }
-    }, _callee);
-  }));
-  return _checkResponse.apply(this, arguments);
-}
-
 function responseToJSON(resp) {
-  return resp.text().then(function (text) {
-    return text.length ? JSON.parse(text) : "";
-  });
+    return resp.text().then(text => text.length ? JSON.parse(text) : "");
 }
+exports.responseToJSON = responseToJSON;
 /**
  * This is our built-in request function. It does a few things by default
  * (unless told otherwise):
@@ -11742,132 +9088,66 @@ function responseToJSON(resp) {
  * - If the response is json return the json object
  * - If the response is text return the result text
  * - Otherwise return the response object on which we call stuff like `.blob()`
- * @param {String|Request} url
- * @param {Object} options
  */
-
-
-function request(url, options) {
-  if (options === void 0) {
-    options = {};
-  }
-
-  return fetch(url, Object.assign({
-    mode: "cors"
-  }, options, {
-    headers: Object.assign({
-      accept: "application/json"
-    }, options.headers)
-  })).then(checkResponse).then(function (res) {
-    var type = res.headers.get("Content-Type") + "";
-
-    if (type.match(/\bjson\b/i)) {
-      return responseToJSON(res);
-    }
-
-    if (type.match(/^text\//i)) {
-      return res.text();
-    }
-
-    return res;
-  });
-}
-
-var getAndCache = function () {
-  var cache = {};
-  return function (url, force) {
-    if (force === void 0) {
-      force = "development" === "test";
-    }
-
-    if (force || !cache[url]) {
-      cache[url] = request(url);
-    }
-
-    return cache[url];
-  };
-}();
-
-exports.getAndCache = getAndCache;
-
-function humanizeError(_x2) {
-  return _humanizeError.apply(this, arguments);
-}
-
-function _humanizeError() {
-  _humanizeError = (0, _asyncToGenerator2.default)(
-  /*#__PURE__*/
-  _regenerator.default.mark(function _callee2(resp) {
-    var msg, type, json, text;
-    return _regenerator.default.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            msg = resp.status + " " + resp.statusText + "\nURL: " + resp.url;
-            _context2.prev = 1;
-            type = resp.headers.get("Content-Type") || "text/plain";
-
-            if (!type.match(/\bjson\b/i)) {
-              _context2.next = 8;
-              break;
-            }
-
-            _context2.next = 6;
-            return resp.json();
-
-          case 6:
-            json = _context2.sent;
-
-            if (json.error) {
-              msg += "\n" + json.error;
-
-              if (json.error_description) {
-                msg += ": " + json.error_description;
-              }
-            } else {
-              msg += "\n\n" + JSON.stringify(json, null, 4);
-            }
-
-          case 8:
-            if (!type.match(/^text\//i)) {
-              _context2.next = 13;
-              break;
-            }
-
-            _context2.next = 11;
-            return resp.text();
-
-          case 11:
-            text = _context2.sent;
-
-            if (text) {
-              msg += "\n\n" + text;
-            }
-
-          case 13:
-            _context2.next = 17;
-            break;
-
-          case 15:
-            _context2.prev = 15;
-            _context2.t0 = _context2["catch"](1);
-
-          case 17:
-            throw new _HttpError.default(msg, resp.status, resp.statusText);
-
-          case 18:
-          case "end":
-            return _context2.stop();
+function request(url, options = {}) {
+    return fetch(url, Object.assign(Object.assign({ mode: "cors" }, options), { headers: Object.assign({ accept: "application/json" }, options.headers) }))
+        .then(checkResponse)
+        .then((res) => {
+        const type = res.headers.get("Content-Type") + "";
+        if (type.match(/\bjson\b/i)) {
+            return responseToJSON(res);
         }
-      }
-    }, _callee2, null, [[1, 15]]);
-  }));
-  return _humanizeError.apply(this, arguments);
+        if (type.match(/^text\//i)) {
+            return res.text();
+        }
+        return res;
+    });
 }
-
+exports.request = request;
+exports.getAndCache = (() => {
+    let cache = {};
+    return (url, force = "development" === "test") => {
+        if (force || !cache[url]) {
+            cache[url] = request(url);
+        }
+        return cache[url];
+    };
+})();
+function humanizeError(resp) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let msg = `${resp.status} ${resp.statusText}\nURL: ${resp.url}`;
+        try {
+            const type = resp.headers.get("Content-Type") || "text/plain";
+            if (type.match(/\bjson\b/i)) {
+                const json = yield resp.json();
+                if (json.error) {
+                    msg += "\n" + json.error;
+                    if (json.error_description) {
+                        msg += ": " + json.error_description;
+                    }
+                }
+                else {
+                    msg += "\n\n" + JSON.stringify(json, null, 4);
+                }
+            }
+            if (type.match(/^text\//i)) {
+                const text = yield resp.text();
+                if (text) {
+                    msg += "\n\n" + text;
+                }
+            }
+        }
+        catch (_) {
+            // ignore
+        }
+        throw new HttpError_1.default(msg, resp.status, resp.statusText);
+    });
+}
+exports.humanizeError = humanizeError;
 function stripTrailingSlash(str) {
-  return String(str || "").replace(/\/+$/, "");
+    return String(str || "").replace(/\/+$/, "");
 }
+exports.stripTrailingSlash = stripTrailingSlash;
 /**
  * Walks through an object (or array) and returns the value found at the
  * provided path. This function is very simple so it intentionally does not
@@ -11877,466 +9157,439 @@ function stripTrailingSlash(str) {
  * @param {String} path The path (eg. "a.b.4.c")
  * @returns {*} Whatever is found in the path or undefined
  */
-
-
-function getPath(obj, path) {
-  if (path === void 0) {
-    path = "";
-  }
-
-  path = path.trim();
-
-  if (!path) {
-    return obj;
-  }
-
-  return path.split(".").reduce(function (out, key) {
-    return out ? out[key] : undefined;
-  }, obj);
+function getPath(obj, path = "") {
+    path = path.trim();
+    if (!path) {
+        return obj;
+    }
+    return path.split(".").reduce((out, key) => out ? out[key] : undefined, obj);
 }
+exports.getPath = getPath;
 /**
  * Like getPath, but if the node is found, its value is set to @value
- * @param {Object} obj The object (or Array) to walk through
- * @param {String} path The path (eg. "a.b.4.c")
- * @param {*} value The value to set
- * @returns {Object} The modified object
+ * @param obj   The object (or Array) to walk through
+ * @param path  The path (eg. "a.b.4.c")
+ * @param value The value to set
+ * @returns The modified object
  */
-
-
 function setPath(obj, path, value) {
-  path.trim().split(".").reduce(function (out, key, idx, arr) {
-    if (out && idx === arr.length - 1) {
-      out[key] = value;
-    } else {
-      return out ? out[key] : undefined;
-    }
-  }, obj);
-  return obj;
+    path.trim().split(".").reduce((out, key, idx, arr) => {
+        if (out && idx === arr.length - 1) {
+            out[key] = value;
+        }
+        else {
+            return out ? out[key] : undefined;
+        }
+    }, obj);
+    return obj;
 }
-
+exports.setPath = setPath;
 function makeArray(arg) {
-  if (Array.isArray(arg)) {
-    return arg;
-  }
-
-  return [arg];
+    if (Array.isArray(arg)) {
+        return arg;
+    }
+    return [arg];
 }
-
+exports.makeArray = makeArray;
 function absolute(path, baseUrl) {
-  if (path.match(/^http/)) return path;
-  if (path.match(/^urn/)) return path;
-  return baseUrl.replace(/\/+$/, "") + "/" + path.replace(/^\/+/, "");
+    if (path.match(/^http/))
+        return path;
+    if (path.match(/^urn/))
+        return path;
+    return baseUrl.replace(/\/+$/, "") + "/" + path.replace(/^\/+/, "");
 }
+exports.absolute = absolute;
 /**
  * Generates random strings. By default this returns random 8 characters long
  * alphanumeric strings.
- * @param {Number} strLength The length of the output string. Defaults to 8.
- * @param {String} charSet A string containing all the possible characters.
+ * @param strLength The length of the output string. Defaults to 8.
+ * @param charSet A string containing all the possible characters.
  *     Defaults to all the upper and lower-case letters plus digits.
  */
-
-
-function randomString(strLength, charSet) {
-  if (strLength === void 0) {
-    strLength = 8;
-  }
-
-  if (charSet === void 0) {
-    charSet = null;
-  }
-
-  var result = [];
-  charSet = charSet || "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "abcdefghijklmnopqrstuvwxyz" + "0123456789";
-  var len = charSet.length;
-
-  while (strLength--) {
-    result.push(charSet.charAt(Math.floor(Math.random() * len)));
-  }
-
-  return result.join("");
+function randomString(strLength = 8, charSet) {
+    const result = [];
+    charSet = charSet || "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+        "abcdefghijklmnopqrstuvwxyz" +
+        "0123456789";
+    const len = charSet.length;
+    while (strLength--) {
+        result.push(charSet.charAt(Math.floor(Math.random() * len)));
+    }
+    return result.join("");
 }
-
+exports.randomString = randomString;
 function atob(str) {
-  if (isBrowser()) {
-    // eslint-disable-next-line no-undef
-    return window.atob(str);
-  } // The "global." makes Webpack understand that it doesn't have to include
-  // the Buffer code in the bundle
-
-
-  return global.Buffer.from(str, "base64").toString("ascii");
+    if (isBrowser()) {
+        // eslint-disable-next-line no-undef
+        return window.atob(str);
+    }
+    // The "global." makes Webpack understand that it doesn't have to include
+    // the Buffer code in the bundle
+    return global.Buffer.from(str, "base64").toString("ascii");
 }
-
+exports.atob = atob;
 function btoa(str) {
-  if (isBrowser()) {
-    // eslint-disable-next-line no-undef
-    return window.btoa(str);
-  } // The "global." makes Webpack understand that it doesn't have to include
-  // the Buffer code in the bundle
-
-
-  return global.Buffer.from(str).toString("base64");
+    if (isBrowser()) {
+        // eslint-disable-next-line no-undef
+        return window.btoa(str);
+    }
+    // The "global." makes Webpack understand that it doesn't have to include
+    // the Buffer code in the bundle
+    return global.Buffer.from(str).toString("base64");
 }
-
+exports.btoa = btoa;
 function jwtDecode(token) {
-  var payload = token.split(".")[1];
-  return JSON.parse(atob(payload));
+    const payload = token.split(".")[1];
+    return JSON.parse(atob(payload));
 }
+exports.jwtDecode = jwtDecode;
+// -----------------------------------------------------------------------------
 /**
  * Groups the observations by code. Returns a map that will look like:
  * {
  *   "55284-4": [ observation1, observation2 ],
  *   "6082-2" : [ observation3 ]
  * }
- * @param {Object|Object[]} observations Array of observations
- * @param {String} property The name of a CodeableConcept property to group by
- * @returns {Object}
+ * @param observations Array of observations
+ * @param property The name of a CodeableConcept property to group by
  */
-
-
 function byCode(observations, property) {
-  var ret = {};
-
-  function handleCodeableConcept(concept, observation) {
-    if (concept && Array.isArray(concept.coding)) {
-      concept.coding.forEach(function (_ref2) {
-        var code = _ref2.code;
-        ret[code] = ret[code] || [];
-        ret[code].push(observation);
-      });
+    const ret = {};
+    function handleCodeableConcept(concept, observation) {
+        if (concept && Array.isArray(concept.coding)) {
+            concept.coding.forEach(({ code }) => {
+                ret[code] = ret[code] || [];
+                ret[code].push(observation);
+            });
+        }
     }
-  }
-
-  makeArray(observations).forEach(function (o) {
-    if (o.resourceType === "Observation" && o[property]) {
-      if (Array.isArray(o[property])) {
-        o[property].forEach(function (concept) {
-          return handleCodeableConcept(concept, o);
-        });
-      } else {
-        handleCodeableConcept(o[property], o);
-      }
-    }
-  });
-  return ret;
+    makeArray(observations).forEach(o => {
+        if (o.resourceType === "Observation" && o[property]) {
+            if (Array.isArray(o[property])) {
+                o[property].forEach((concept) => handleCodeableConcept(concept, o));
+            }
+            else {
+                handleCodeableConcept(o[property], o);
+            }
+        }
+    });
+    return ret;
 }
+exports.byCode = byCode;
 /**
  * First groups the observations by code using `byCode`. Then returns a function
  * that accepts codes as arguments and will return a flat array of observations
  * having that codes
- * @param {Object|Object[]} observations Array of observations
- * @param {String} property The name of a CodeableConcept property to group by
- * @returns {(codes: string[]) => object[]}
+ * @param observations Array of observations
+ * @param property The name of a CodeableConcept property to group by
  */
-
-
 function byCodes(observations, property) {
-  var bank = byCode(observations, property);
-  return function () {
-    for (var _len = arguments.length, codes = new Array(_len), _key = 0; _key < _len; _key++) {
-      codes[_key] = arguments[_key];
+    const bank = byCode(observations, property);
+    return (...codes) => codes
+        .filter(code => (code + "") in bank)
+        .reduce((prev, code) => [...prev, ...bank[code + ""]], []);
+}
+exports.byCodes = byCodes;
+function ensureNumerical({ value, code }) {
+    if (typeof value !== "number") {
+        throw new Error("Found a non-numerical unit: " + value + " " + code);
     }
-
-    return codes.filter(function (code) {
-      return code + "" in bank;
-    }).reduce(function (prev, code) {
-      return [].concat(prev, bank[code + ""]);
-    }, []);
-  };
 }
-
-function ensureNumerical(_ref3) {
-  var value = _ref3.value,
-      code = _ref3.code;
-
-  if (typeof value !== "number") {
-    throw new Error("Found a non-numerical unit: " + value + " " + code);
-  }
-}
-
-var units = {
-  cm: function cm(_ref4) {
-    var code = _ref4.code,
-        value = _ref4.value;
-    ensureNumerical({
-      code: code,
-      value: value
-    });
-    if (code == "cm") return value;
-    if (code == "m") return value * 100;
-    if (code == "in") return value * 2.54;
-    if (code == "[in_us]") return value * 2.54;
-    if (code == "[in_i]") return value * 2.54;
-    if (code == "ft") return value * 30.48;
-    if (code == "[ft_us]") return value * 30.48;
-    throw new Error("Unrecognized length unit: " + code);
-  },
-  kg: function kg(_ref5) {
-    var code = _ref5.code,
-        value = _ref5.value;
-    ensureNumerical({
-      code: code,
-      value: value
-    });
-    if (code == "kg") return value;
-    if (code == "g") return value / 1000;
-    if (code.match(/lb/)) return value / 2.20462;
-    if (code.match(/oz/)) return value / 35.274;
-    throw new Error("Unrecognized weight unit: " + code);
-  },
-  any: function any(pq) {
-    ensureNumerical(pq);
-    return pq.value;
-  }
+exports.ensureNumerical = ensureNumerical;
+exports.units = {
+    cm({ code, value }) {
+        ensureNumerical({ code, value });
+        if (code == "cm")
+            return value;
+        if (code == "m")
+            return value * 100;
+        if (code == "in")
+            return value * 2.54;
+        if (code == "[in_us]")
+            return value * 2.54;
+        if (code == "[in_i]")
+            return value * 2.54;
+        if (code == "ft")
+            return value * 30.48;
+        if (code == "[ft_us]")
+            return value * 30.48;
+        throw new Error("Unrecognized length unit: " + code);
+    },
+    kg({ code, value }) {
+        ensureNumerical({ code, value });
+        if (code == "kg")
+            return value;
+        if (code == "g")
+            return value / 1000;
+        if (code.match(/lb/))
+            return value / 2.20462;
+        if (code.match(/oz/))
+            return value / 35.274;
+        throw new Error("Unrecognized weight unit: " + code);
+    },
+    any(pq) {
+        ensureNumerical(pq);
+        return pq.value;
+    }
 };
 /**
  * Given a conformance statement and a resource type, returns the name of the
  * URL parameter that can be used to scope the resource type by patient ID.
- * @param {fhirclient.JsonObject} conformance
- * @param {string} resourceType
  */
-
-exports.units = units;
-
 function getPatientParam(conformance, resourceType) {
-  // Find what resources are supported by this server
-  var resources = getPath(conformance, "rest.0.resource") || []; // Check if this resource is supported
-
-  var meta = resources.find(function (r) {
-    return r.type === resourceType;
-  });
-  if (!meta) throw new Error("Resource not supported"); // Check if any search parameters are available for this resource
-
-  if (!Array.isArray(meta.searchParam)) throw new Error("No search parameters supported for \"" + resourceType + "\" on this FHIR server"); // This is a rare case vut could happen in generic workflows
-
-  if (resourceType == "Patient" && meta.searchParam.find(function (x) {
-    return x.name == "_id";
-  })) return "_id"; // Now find the first possible parameter name
-
-  var out = _settings.patientParams.find(function (p) {
-    return meta.searchParam.find(function (x) {
-      return x.name == p;
-    });
-  }); // If there is no match
-
-
-  if (!out) throw new Error("I don't know what param to use for " + resourceType);
-  return out;
+    // Find what resources are supported by this server
+    const resources = getPath(conformance, "rest.0.resource") || [];
+    // Check if this resource is supported
+    const meta = resources.find((r) => r.type === resourceType);
+    if (!meta)
+        throw new Error("Resource not supported");
+    // Check if any search parameters are available for this resource
+    if (!Array.isArray(meta.searchParam))
+        throw new Error(`No search parameters supported for "${resourceType}" on this FHIR server`);
+    // This is a rare case vut could happen in generic workflows
+    if (resourceType == "Patient" && meta.searchParam.find((x) => x.name == "_id"))
+        return "_id";
+    // Now find the first possible parameter name
+    let out = settings_1.patientParams.find(p => meta.searchParam.find((x) => x.name == p));
+    // If there is no match
+    if (!out)
+        throw new Error("I don't know what param to use for " + resourceType);
+    return out;
 }
+exports.getPatientParam = getPatientParam;
+
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
 
-/***/ "./src/settings.js":
+/***/ "./src/settings.ts":
 /*!*************************!*\
-  !*** ./src/settings.js ***!
+  !*** ./src/settings.ts ***!
   \*************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-
-exports.__esModule = true;
-exports.SMART_KEY = exports.patientParams = exports.fhirVersions = exports.patientCompartment = void 0;
-
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * Combined list of FHIR resource types accepting patient parameter in FHIR R2-R4
  */
-var patientCompartment = ["Account", "AdverseEvent", "AllergyIntolerance", "Appointment", "AppointmentResponse", "AuditEvent", "Basic", "BodySite", "BodyStructure", "CarePlan", "CareTeam", "ChargeItem", "Claim", "ClaimResponse", "ClinicalImpression", "Communication", "CommunicationRequest", "Composition", "Condition", "Consent", "Coverage", "CoverageEligibilityRequest", "CoverageEligibilityResponse", "DetectedIssue", "DeviceRequest", "DeviceUseRequest", "DeviceUseStatement", "DiagnosticOrder", "DiagnosticReport", "DocumentManifest", "DocumentReference", "EligibilityRequest", "Encounter", "EnrollmentRequest", "EpisodeOfCare", "ExplanationOfBenefit", "FamilyMemberHistory", "Flag", "Goal", "Group", "ImagingManifest", "ImagingObjectSelection", "ImagingStudy", "Immunization", "ImmunizationEvaluation", "ImmunizationRecommendation", "Invoice", "List", "MeasureReport", "Media", "MedicationAdministration", "MedicationDispense", "MedicationOrder", "MedicationRequest", "MedicationStatement", "MolecularSequence", "NutritionOrder", "Observation", "Order", "Patient", "Person", "Procedure", "ProcedureRequest", "Provenance", "QuestionnaireResponse", "ReferralRequest", "RelatedPerson", "RequestGroup", "ResearchSubject", "RiskAssessment", "Schedule", "ServiceRequest", "Specimen", "SupplyDelivery", "SupplyRequest", "VisionPrescription"];
+exports.patientCompartment = [
+    "Account",
+    "AdverseEvent",
+    "AllergyIntolerance",
+    "Appointment",
+    "AppointmentResponse",
+    "AuditEvent",
+    "Basic",
+    "BodySite",
+    "BodyStructure",
+    "CarePlan",
+    "CareTeam",
+    "ChargeItem",
+    "Claim",
+    "ClaimResponse",
+    "ClinicalImpression",
+    "Communication",
+    "CommunicationRequest",
+    "Composition",
+    "Condition",
+    "Consent",
+    "Coverage",
+    "CoverageEligibilityRequest",
+    "CoverageEligibilityResponse",
+    "DetectedIssue",
+    "DeviceRequest",
+    "DeviceUseRequest",
+    "DeviceUseStatement",
+    "DiagnosticOrder",
+    "DiagnosticReport",
+    "DocumentManifest",
+    "DocumentReference",
+    "EligibilityRequest",
+    "Encounter",
+    "EnrollmentRequest",
+    "EpisodeOfCare",
+    "ExplanationOfBenefit",
+    "FamilyMemberHistory",
+    "Flag",
+    "Goal",
+    "Group",
+    "ImagingManifest",
+    "ImagingObjectSelection",
+    "ImagingStudy",
+    "Immunization",
+    "ImmunizationEvaluation",
+    "ImmunizationRecommendation",
+    "Invoice",
+    "List",
+    "MeasureReport",
+    "Media",
+    "MedicationAdministration",
+    "MedicationDispense",
+    "MedicationOrder",
+    "MedicationRequest",
+    "MedicationStatement",
+    "MolecularSequence",
+    "NutritionOrder",
+    "Observation",
+    "Order",
+    "Patient",
+    "Person",
+    "Procedure",
+    "ProcedureRequest",
+    "Provenance",
+    "QuestionnaireResponse",
+    "ReferralRequest",
+    "RelatedPerson",
+    "RequestGroup",
+    "ResearchSubject",
+    "RiskAssessment",
+    "Schedule",
+    "ServiceRequest",
+    "Specimen",
+    "SupplyDelivery",
+    "SupplyRequest",
+    "VisionPrescription"
+];
 /**
  * Map of FHIR releases and their abstract version as number
  */
-
-exports.patientCompartment = patientCompartment;
-var fhirVersions = {
-  "0.4.0": 2,
-  "0.5.0": 2,
-  "1.0.0": 2,
-  "1.0.1": 2,
-  "1.0.2": 2,
-  "1.1.0": 3,
-  "1.4.0": 3,
-  "1.6.0": 3,
-  "1.8.0": 3,
-  "3.0.0": 3,
-  "3.0.1": 3,
-  "3.3.0": 4,
-  "3.5.0": 4,
-  "4.0.0": 4
+exports.fhirVersions = {
+    "0.4.0": 2,
+    "0.5.0": 2,
+    "1.0.0": 2,
+    "1.0.1": 2,
+    "1.0.2": 2,
+    "1.1.0": 3,
+    "1.4.0": 3,
+    "1.6.0": 3,
+    "1.8.0": 3,
+    "3.0.0": 3,
+    "3.0.1": 3,
+    "3.3.0": 4,
+    "3.5.0": 4,
+    "4.0.0": 4
 };
 /**
  * Combined (FHIR R2-R4) list of search parameters that can be used to scope
  * a request by patient ID.
  */
-
-exports.fhirVersions = fhirVersions;
-var patientParams = ["requester", "patient", "subject", "member", "actor", "beneficiary"];
+exports.patientParams = [
+    "requester",
+    "patient",
+    "subject",
+    "member",
+    "actor",
+    "beneficiary"
+];
 /**
  * The name of the sessionStorage entry that contains the current key
  */
+exports.SMART_KEY = "SMART_KEY";
 
-exports.patientParams = patientParams;
-var SMART_KEY = "SMART_KEY";
-exports.SMART_KEY = SMART_KEY;
 
 /***/ }),
 
-/***/ "./src/smart.js":
+/***/ "./src/smart.ts":
 /*!**********************!*\
-  !*** ./src/smart.js ***!
+  !*** ./src/smart.ts ***!
   \**********************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-
-__webpack_require__(/*! core-js/modules/es.array.filter */ "./node_modules/core-js/modules/es.array.filter.js");
-
-__webpack_require__(/*! core-js/modules/es.array.join */ "./node_modules/core-js/modules/es.array.join.js");
-
-__webpack_require__(/*! core-js/modules/es.array.map */ "./node_modules/core-js/modules/es.array.map.js");
-
-__webpack_require__(/*! core-js/modules/es.object.assign */ "./node_modules/core-js/modules/es.object.assign.js");
-
-__webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
-
-__webpack_require__(/*! core-js/modules/es.promise */ "./node_modules/core-js/modules/es.promise.js");
-
-__webpack_require__(/*! core-js/modules/es.regexp.exec */ "./node_modules/core-js/modules/es.regexp.exec.js");
-
-__webpack_require__(/*! core-js/modules/es.string.match */ "./node_modules/core-js/modules/es.string.match.js");
-
-__webpack_require__(/*! core-js/modules/es.string.replace */ "./node_modules/core-js/modules/es.string.replace.js");
-
-__webpack_require__(/*! core-js/modules/web.dom-collections.for-each */ "./node_modules/core-js/modules/web.dom-collections.for-each.js");
-
-exports.__esModule = true;
-exports.fetchConformanceStatement = fetchConformanceStatement;
-exports.fetchWellKnownJson = fetchWellKnownJson;
-exports.fetchFhirVersion = fetchFhirVersion;
-exports.getSecurityExtensions = getSecurityExtensions;
-exports.authorize = authorize;
-exports.completeAuth = completeAuth;
-exports.buildTokenRequest = buildTokenRequest;
-exports.ready = ready;
-exports.init = init;
-
-var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js"));
-
-__webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
-
-var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/asyncToGenerator.js"));
-
-var _lib = __webpack_require__(/*! ./lib */ "./src/lib.js");
-
-var _Client = _interopRequireDefault(__webpack_require__(/*! ./Client */ "./src/Client.js"));
-
-var _settings = __webpack_require__(/*! ./settings */ "./src/settings.js");
-
-exports.KEY = _settings.SMART_KEY;
-
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
 /* global window */
-var debug = _lib.debug.extend("oauth2");
-
+const lib_1 = __webpack_require__(/*! ./lib */ "./src/lib.ts");
+const Client_1 = __webpack_require__(/*! ./Client */ "./src/Client.ts");
+const settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts");
+exports.KEY = settings_1.SMART_KEY;
+const debug = lib_1.debug.extend("oauth2");
 /**
  * Fetches the conformance statement from the given base URL.
  * Note that the result is cached in memory (until the page is reloaded in the
  * browser) because it might have to be re-used by the client
- * @param {String} baseUrl The base URL of the FHIR server
- * @returns {Promise<fhirclient.JsonObject>}
+ * @param baseUrl The base URL of the FHIR server
  */
-function fetchConformanceStatement(baseUrl) {
-  if (baseUrl === void 0) {
-    baseUrl = "/";
-  }
-
-  var url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
-  return (0, _lib.getAndCache)(url).catch(function (ex) {
-    throw new Error("Failed to fetch the conformance statement from \"" + url + "\". " + ex);
-  });
+function fetchConformanceStatement(baseUrl = "/") {
+    const url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
+    return lib_1.getAndCache(url).catch((ex) => {
+        throw new Error(`Failed to fetch the conformance statement from "${url}". ${ex}`);
+    });
 }
-
-function fetchWellKnownJson(baseUrl) {
-  if (baseUrl === void 0) {
-    baseUrl = "/";
-  }
-
-  var url = String(baseUrl).replace(/\/*$/, "/") + ".well-known/smart-configuration";
-  return (0, _lib.getAndCache)(url).catch(function (ex) {
-    throw new Error("Failed to fetch the well-known json \"" + url + "\". " + ex.message);
-  });
+exports.fetchConformanceStatement = fetchConformanceStatement;
+/**
+ * Fetches the well-known json file from the given base URL.
+ * Note that the result is cached in memory (until the page is reloaded in the
+ * browser) because it might have to be re-used by the client
+ * @param baseUrl The base URL of the FHIR server
+ */
+function fetchWellKnownJson(baseUrl = "/") {
+    const url = String(baseUrl).replace(/\/*$/, "/") + ".well-known/smart-configuration";
+    return lib_1.getAndCache(url).catch((ex) => {
+        throw new Error(`Failed to fetch the well-known json "${url}". ${ex.message}`);
+    });
 }
-
-function fetchFhirVersion(baseUrl) {
-  if (baseUrl === void 0) {
-    baseUrl = "/";
-  }
-
-  return fetchConformanceStatement(baseUrl).then(function (metadata) {
-    return metadata.fhirVersion;
-  });
+exports.fetchWellKnownJson = fetchWellKnownJson;
+function fetchFhirVersion(baseUrl = "/") {
+    return fetchConformanceStatement(baseUrl).then((metadata) => metadata.fhirVersion);
 }
+exports.fetchFhirVersion = fetchFhirVersion;
 /**
  * Given a fhir server returns an object with it's Oauth security endpoints that
  * we are interested in
  * @param {String} baseUrl Fhir server base URL
  * @returns { Promise<fhirclient.OAuthSecurityExtensions> }
  */
-
-
-function getSecurityExtensions(baseUrl) {
-  if (baseUrl === void 0) {
-    baseUrl = "/";
-  }
-
-  return fetchWellKnownJson(baseUrl).then(function (meta) {
-    if (!meta.authorization_endpoint || !meta.token_endpoint) {
-      throw new Error("Invalid wellKnownJson");
-    }
-
-    return {
-      registrationUri: meta.registration_endpoint || "",
-      authorizeUri: meta.authorization_endpoint,
-      tokenUri: meta.token_endpoint
-    };
-  }).catch(function () {
-    return fetchConformanceStatement(baseUrl).then(function (metadata) {
-      var nsUri = "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris";
-      var extensions = ((0, _lib.getPath)(metadata || {}, "rest.0.security.extension") || []).filter(function (e) {
-        return e.url === nsUri;
-      }).map(function (o) {
-        return o.extension;
-      })[0];
-      var out = {
-        registrationUri: "",
-        authorizeUri: "",
-        tokenUri: ""
-      };
-
-      if (extensions) {
-        extensions.forEach(function (ext) {
-          if (ext.url === "register") {
-            out.registrationUri = ext.valueUri;
-          }
-
-          if (ext.url === "authorize") {
-            out.authorizeUri = ext.valueUri;
-          }
-
-          if (ext.url === "token") {
-            out.tokenUri = ext.valueUri;
-          }
-        });
-      }
-
-      return out;
-    });
-  });
+function getSecurityExtensions(baseUrl = "/") {
+    return fetchWellKnownJson(baseUrl).then(meta => {
+        if (!meta.authorization_endpoint || !meta.token_endpoint) {
+            throw new Error("Invalid wellKnownJson");
+        }
+        return {
+            registrationUri: meta.registration_endpoint || "",
+            authorizeUri: meta.authorization_endpoint,
+            tokenUri: meta.token_endpoint
+        };
+    }).catch(() => fetchConformanceStatement(baseUrl).then(metadata => {
+        const nsUri = "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris";
+        const extensions = (lib_1.getPath(metadata || {}, "rest.0.security.extension") || [])
+            .filter(e => e.url === nsUri)
+            .map(o => o.extension)[0];
+        const out = {
+            registrationUri: "",
+            authorizeUri: "",
+            tokenUri: ""
+        };
+        if (extensions) {
+            extensions.forEach(ext => {
+                if (ext.url === "register") {
+                    out.registrationUri = ext.valueUri;
+                }
+                if (ext.url === "authorize") {
+                    out.authorizeUri = ext.valueUri;
+                }
+                if (ext.url === "token") {
+                    out.tokenUri = ext.valueUri;
+                }
+            });
+        }
+        return out;
+    }));
 }
+exports.getSecurityExtensions = getSecurityExtensions;
 /**
  * @param {Object} env
  * @param {fhirclient.AuthorizeParams} params
@@ -12344,734 +9597,397 @@ function getSecurityExtensions(baseUrl) {
  * without trying to redirect to it
  * @returns { Promise<never|string> }
  */
-
-
-function authorize(_x, _x2, _x3) {
-  return _authorize.apply(this, arguments);
+function authorize(env, params = {}, _noRedirect = false) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // Obtain input
+        let { iss, launch, fhirServiceUrl, redirect_uri, redirectUri, scope = "", clientSecret, fakeTokenResponse, patientId, encounterId, client_id, clientId } = params;
+        const url = env.getUrl();
+        const storage = env.getStorage();
+        // For these three an url param takes precedence over inline option
+        iss = url.searchParams.get("iss") || iss;
+        fhirServiceUrl = url.searchParams.get("fhirServiceUrl") || fhirServiceUrl;
+        launch = url.searchParams.get("launch") || launch;
+        if (!clientId) {
+            clientId = client_id;
+        }
+        if (!redirectUri) {
+            redirectUri = redirect_uri;
+        }
+        if (!redirectUri) {
+            redirectUri = env.relative(".");
+        }
+        else {
+            redirectUri = env.relative(redirectUri);
+        }
+        const serverUrl = String(iss || fhirServiceUrl || "");
+        // Validate input
+        if (!serverUrl) {
+            throw new Error("No server url found. It must be specified as `iss` or as " +
+                "`fhirServiceUrl` parameter");
+        }
+        if (iss) {
+            debug("Making %s launch...", launch ? "EHR" : "standalone");
+        }
+        // append launch scope if needed
+        if (launch && !scope.match(/launch/)) {
+            scope += " launch";
+        }
+        // prevent inheritance of tokenResponse from parent window
+        yield storage.unset(settings_1.SMART_KEY);
+        // create initial state
+        const stateKey = lib_1.randomString(16);
+        const state = {
+            clientId,
+            scope,
+            redirectUri,
+            serverUrl,
+            clientSecret,
+            tokenResponse: {},
+            key: stateKey
+        };
+        // fakeTokenResponse to override stuff (useful in development)
+        if (fakeTokenResponse) {
+            Object.assign(state.tokenResponse, fakeTokenResponse);
+        }
+        // Fixed patientId (useful in development)
+        if (patientId) {
+            Object.assign(state.tokenResponse, { patient: patientId });
+        }
+        // Fixed encounterId (useful in development)
+        if (encounterId) {
+            Object.assign(state.tokenResponse, { encounter: encounterId });
+        }
+        let redirectUrl = redirectUri + "?state=" + encodeURIComponent(stateKey);
+        // bypass oauth if fhirServiceUrl is used (but iss takes precedence)
+        if (fhirServiceUrl && !iss) {
+            debug("Making fake launch...");
+            // Storage.set(stateKey, state);
+            yield storage.set(stateKey, state);
+            if (_noRedirect) {
+                return redirectUrl;
+            }
+            return yield env.redirect(redirectUrl);
+        }
+        // Get oauth endpoints and add them to the state
+        const extensions = yield getSecurityExtensions(serverUrl);
+        Object.assign(state, extensions);
+        yield storage.set(stateKey, state);
+        // If this happens to be an open server and there is no authorizeUri
+        if (!state.authorizeUri) {
+            if (_noRedirect) {
+                return redirectUrl;
+            }
+            return yield env.redirect(redirectUrl);
+        }
+        // build the redirect uri
+        const redirectParams = [
+            "response_type=code",
+            "client_id=" + encodeURIComponent(clientId || ""),
+            "scope=" + encodeURIComponent(scope),
+            "redirect_uri=" + encodeURIComponent(redirectUri),
+            "aud=" + encodeURIComponent(serverUrl),
+            "state=" + encodeURIComponent(stateKey)
+        ];
+        // also pass this in case of EHR launch
+        if (launch) {
+            redirectParams.push("launch=" + encodeURIComponent(launch));
+        }
+        redirectUrl = state.authorizeUri + "?" + redirectParams.join("&");
+        if (_noRedirect) {
+            return redirectUrl;
+        }
+        return yield env.redirect(redirectUrl);
+    });
 }
+exports.authorize = authorize;
 /**
  * The completeAuth function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
  * authorization server..
  * @returns { Promise<fhirclient.Client> }
  */
-
-
-function _authorize() {
-  _authorize = (0, _asyncToGenerator2.default)(
-  /*#__PURE__*/
-  _regenerator.default.mark(function _callee(env, params, _noRedirect) {
-    var _params, iss, launch, fhirServiceUrl, redirect_uri, redirectUri, _params$scope, scope, clientSecret, fakeTokenResponse, patientId, encounterId, client_id, clientId, url, storage, serverUrl, stateKey, state, redirectUrl, extensions, redirectParams;
-
-    return _regenerator.default.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            if (params === void 0) {
-              params = {};
-            }
-
-            if (_noRedirect === void 0) {
-              _noRedirect = false;
-            }
-
-            // Obtain input
-            _params = params, iss = _params.iss, launch = _params.launch, fhirServiceUrl = _params.fhirServiceUrl, redirect_uri = _params.redirect_uri, redirectUri = _params.redirectUri, _params$scope = _params.scope, scope = _params$scope === void 0 ? "" : _params$scope, clientSecret = _params.clientSecret, fakeTokenResponse = _params.fakeTokenResponse, patientId = _params.patientId, encounterId = _params.encounterId, client_id = _params.client_id, clientId = _params.clientId;
-            url = env.getUrl();
-            storage = env.getStorage(); // For these three an url param takes precedence over inline option
-
-            iss = url.searchParams.get("iss") || iss;
-            fhirServiceUrl = url.searchParams.get("fhirServiceUrl") || fhirServiceUrl;
-            launch = url.searchParams.get("launch") || launch;
-
-            if (!clientId) {
-              clientId = client_id;
-            }
-
-            if (!redirectUri) {
-              redirectUri = redirect_uri;
-            }
-
-            if (!redirectUri) {
-              redirectUri = env.relative(".");
-            } else {
-              redirectUri = env.relative(redirectUri);
-            }
-
-            serverUrl = String(iss || fhirServiceUrl || ""); // Validate input
-
-            if (serverUrl) {
-              _context.next = 14;
-              break;
-            }
-
-            throw new Error("No server url found. It must be specified as `iss` or as " + "`fhirServiceUrl` parameter");
-
-          case 14:
-            if (iss) {
-              debug("Making %s launch...", launch ? "EHR" : "standalone");
-            } // append launch scope if needed
-
-
-            if (launch && !scope.match(/launch/)) {
-              scope += " launch";
-            } // prevent inheritance of tokenResponse from parent window
-
-
-            _context.next = 18;
-            return storage.unset(_settings.SMART_KEY);
-
-          case 18:
-            // create initial state
-            stateKey = (0, _lib.randomString)(16);
-            state = {
-              clientId: clientId,
-              scope: scope,
-              redirectUri: redirectUri,
-              serverUrl: serverUrl,
-              clientSecret: clientSecret,
-              tokenResponse: {},
-              key: stateKey
-            }; // fakeTokenResponse to override stuff (useful in development)
-
-            if (fakeTokenResponse) {
-              Object.assign(state.tokenResponse, fakeTokenResponse);
-            } // Fixed patientId (useful in development)
-
-
-            if (patientId) {
-              Object.assign(state.tokenResponse, {
-                patient: patientId
-              });
-            } // Fixed encounterId (useful in development)
-
-
-            if (encounterId) {
-              Object.assign(state.tokenResponse, {
-                encounter: encounterId
-              });
-            }
-
-            redirectUrl = redirectUri + "?state=" + encodeURIComponent(stateKey); // bypass oauth if fhirServiceUrl is used (but iss takes precedence)
-
-            if (!(fhirServiceUrl && !iss)) {
-              _context.next = 33;
-              break;
-            }
-
-            debug("Making fake launch..."); // Storage.set(stateKey, state);
-
-            _context.next = 28;
-            return storage.set(stateKey, state);
-
-          case 28:
-            if (!_noRedirect) {
-              _context.next = 30;
-              break;
-            }
-
-            return _context.abrupt("return", redirectUrl);
-
-          case 30:
-            _context.next = 32;
-            return env.redirect(redirectUrl);
-
-          case 32:
-            return _context.abrupt("return", _context.sent);
-
-          case 33:
-            _context.next = 35;
-            return getSecurityExtensions(serverUrl);
-
-          case 35:
-            extensions = _context.sent;
-            Object.assign(state, extensions);
-            _context.next = 39;
-            return storage.set(stateKey, state);
-
-          case 39:
-            if (state.authorizeUri) {
-              _context.next = 45;
-              break;
-            }
-
-            if (!_noRedirect) {
-              _context.next = 42;
-              break;
-            }
-
-            return _context.abrupt("return", redirectUrl);
-
-          case 42:
-            _context.next = 44;
-            return env.redirect(redirectUrl);
-
-          case 44:
-            return _context.abrupt("return", _context.sent);
-
-          case 45:
-            // build the redirect uri
-            redirectParams = ["response_type=code", "client_id=" + encodeURIComponent(clientId), "scope=" + encodeURIComponent(scope), "redirect_uri=" + encodeURIComponent(redirectUri), "aud=" + encodeURIComponent(serverUrl), "state=" + encodeURIComponent(stateKey)]; // also pass this in case of EHR launch
-
-            if (launch) {
-              redirectParams.push("launch=" + encodeURIComponent(launch));
-            }
-
-            redirectUrl = state.authorizeUri + "?" + redirectParams.join("&");
-
-            if (!_noRedirect) {
-              _context.next = 50;
-              break;
-            }
-
-            return _context.abrupt("return", redirectUrl);
-
-          case 50:
-            _context.next = 52;
-            return env.redirect(redirectUrl);
-
-          case 52:
-            return _context.abrupt("return", _context.sent);
-
-          case 53:
-          case "end":
-            return _context.stop();
+function completeAuth(env) {
+    var _a, _b, _c, _d;
+    return __awaiter(this, void 0, void 0, function* () {
+        const url = env.getUrl();
+        const Storage = env.getStorage();
+        const params = url.searchParams;
+        let key = params.get("state");
+        const code = params.get("code");
+        const authError = params.get("error");
+        const authErrorDescription = params.get("error_description");
+        if (!key) {
+            key = yield Storage.get(settings_1.SMART_KEY);
         }
-      }
-    }, _callee);
-  }));
-  return _authorize.apply(this, arguments);
+        // Start by checking the url for `error` and `error_description` parameters.
+        // This happens when the auth server rejects our authorization attempt. In
+        // this case it has no other way to tell us what the error was, other than
+        // appending these parameters to the redirect url.
+        // From client's point of view, this is not very reliable (because we can't
+        // know how we have landed on this page - was it a redirect or was it loaded
+        // manually). However, if `completeAuth()` is being called, we can assume
+        // that the url comes from the auth server (otherwise the app won't work
+        // anyway).
+        if (authError || authErrorDescription) {
+            let msg = [authError, authErrorDescription].filter(Boolean).join(": ");
+            throw new Error(msg);
+        }
+        debug("key: %s, code: %O", key, code);
+        // key might be coming from the page url so it might be empty or missing
+        if (!key) {
+            throw new Error("No 'state' parameter found. Please (re)launch the app.");
+        }
+        // Check if we have a previous state
+        let state = (yield Storage.get(key));
+        const fullSessionStorageSupport = lib_1.isBrowser() ?
+            lib_1.getPath(env, "options.fullSessionStorageSupport") :
+            true;
+        // Do we have to remove the `code` and `state` params from the URL?
+        const hasState = params.has("state");
+        if (lib_1.isBrowser() && lib_1.getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
+            // `code` is the flag that tell us to request an access token.
+            // We have to remove it, otherwise the page will authorize on
+            // every load!
+            if (code) {
+                params.delete("code");
+                debug("Removed code parameter from the url.");
+            }
+            // If we have `fullSessionStorageSupport` it means we no longer
+            // need the `state` key. It will be stored to a well know
+            // location - sessionStorage[SMART_KEY]. However, no
+            // fullSessionStorageSupport means that this "well know location"
+            // might be shared between windows and tabs. In this case we
+            // MUST keep the `state` url parameter.
+            if (hasState && fullSessionStorageSupport) {
+                params.delete("state");
+                debug("Removed state parameter from the url.");
+            }
+            // If the browser does not support the replaceState method for the
+            // History Web API, the "code" parameter cannot be removed. As a
+            // consequence, the page will (re)authorize on every load. The
+            // workaround is to reload the page to new location without those
+            // parameters. If that is not acceptable replaceBrowserHistory
+            // should be set to false.
+            if (window.history.replaceState) {
+                window.history.replaceState({}, "", url.href);
+            }
+        }
+        // If the state does not exist, it means the page has been loaded directly.
+        if (!state) {
+            throw new Error("No state found! Please (re)launch the app.");
+        }
+        // Assume the client has already completed a token exchange when
+        // there is no code (but we have a state) or access token is found in state
+        const authorized = !code || ((_b = (_a = state) === null || _a === void 0 ? void 0 : _a.tokenResponse) === null || _b === void 0 ? void 0 : _b.access_token);
+        // If we are authorized already, then this is just a reload.
+        // Otherwise, we have to complete the code flow
+        if (!authorized) {
+            debug("Preparing to exchange the code for access token...");
+            const requestOptions = yield buildTokenRequest(code, state);
+            debug("Token request options: %O", requestOptions);
+            // The EHR authorization server SHALL return a JSON structure that
+            // includes an access token or a message indicating that the
+            // authorization request has been denied.
+            let tokenResponse = yield lib_1.request(state.tokenUri, requestOptions);
+            debug("Token response: %O", tokenResponse);
+            if (!tokenResponse.access_token) {
+                throw new Error("Failed to obtain access token.");
+            }
+            // save the tokenResponse so that we don't have to re-authorize on
+            // every page reload
+            state = Object.assign(Object.assign({}, state), { tokenResponse });
+            yield Storage.set(key, state);
+            debug("Authorization successful!");
+        }
+        else {
+            debug(((_d = (_c = state) === null || _c === void 0 ? void 0 : _c.tokenResponse) === null || _d === void 0 ? void 0 : _d.access_token) ?
+                "Already authorized" :
+                "No authorization needed");
+        }
+        if (fullSessionStorageSupport) {
+            yield Storage.set(settings_1.SMART_KEY, key);
+        }
+        const client = new Client_1.default(env, state);
+        debug("Created client instance: %O", client);
+        return client;
+    });
 }
-
-function completeAuth(_x4) {
-  return _completeAuth.apply(this, arguments);
-}
+exports.completeAuth = completeAuth;
 /**
  * Builds the token request options. Does not make the request, just
  * creates it's configuration and returns it in a Promise.
  */
-
-
-function _completeAuth() {
-  _completeAuth = (0, _asyncToGenerator2.default)(
-  /*#__PURE__*/
-  _regenerator.default.mark(function _callee2(env) {
-    var url, Storage, params, key, code, authError, authErrorDescription, msg, state, fullSessionStorageSupport, hasState, authorized, requestOptions, tokenResponse, client;
-    return _regenerator.default.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            url = env.getUrl();
-            Storage = env.getStorage();
-            params = url.searchParams;
-            key = params.get("state");
-            code = params.get("code");
-            authError = params.get("error");
-            authErrorDescription = params.get("error_description");
-
-            if (key) {
-              _context2.next = 11;
-              break;
-            }
-
-            _context2.next = 10;
-            return Storage.get(_settings.SMART_KEY);
-
-          case 10:
-            key = _context2.sent;
-
-          case 11:
-            if (!(authError || authErrorDescription)) {
-              _context2.next = 14;
-              break;
-            }
-
-            msg = [authError, authErrorDescription].filter(Boolean).join(": ");
-            throw new Error(msg);
-
-          case 14:
-            debug("key: %s, code: %O", key, code); // key might be coming from the page url so it might be empty or missing
-
-            if (key) {
-              _context2.next = 17;
-              break;
-            }
-
-            throw new Error("No 'state' parameter found. Please (re)launch the app.");
-
-          case 17:
-            _context2.next = 19;
-            return Storage.get(key);
-
-          case 19:
-            state = _context2.sent;
-            fullSessionStorageSupport = (0, _lib.isBrowser)() ? (0, _lib.getPath)(env, "options.fullSessionStorageSupport") : true; // Do we have to remove the `code` and `state` params from the URL?
-
-            hasState = params.has("state");
-
-            if ((0, _lib.isBrowser)() && (0, _lib.getPath)(env, "options.replaceBrowserHistory") && (code || hasState)) {
-              // `code` is the flag that tell us to request an access token.
-              // We have to remove it, otherwise the page will authorize on
-              // every load!
-              if (code) {
-                params.delete("code");
-                debug("Removed code parameter from the url.");
-              } // If we have `fullSessionStorageSupport` it means we no longer
-              // need the `state` key. It will be stored to a well know
-              // location - sessionStorage[SMART_KEY]. However, no
-              // fullSessionStorageSupport means that this "well know location"
-              // might be shared between windows and tabs. In this case we
-              // MUST keep the `state` url parameter.
-
-
-              if (hasState && fullSessionStorageSupport) {
-                params.delete("state");
-                debug("Removed state parameter from the url.");
-              } // If the browser does not support the replaceState method for the
-              // History Web API, the "code" parameter cannot be removed. As a
-              // consequence, the page will (re)authorize on every load. The
-              // workaround is to reload the page to new location without those
-              // parameters. If that is not acceptable replaceBrowserHistory
-              // should be set to false.
-
-
-              if (window.history.replaceState) {
-                window.history.replaceState({}, "", url.href);
-              }
-            } // If the state does not exist, it means the page has been loaded directly.
-
-
-            if (state) {
-              _context2.next = 25;
-              break;
-            }
-
-            throw new Error("No state found! Please (re)launch the app.");
-
-          case 25:
-            // Assume the client has already completed a token exchange when
-            // there is no code (but we have a state) or access token is found in state
-            authorized = !code || state.tokenResponse.access_token; // If we are authorized already, then this is just a reload.
-            // Otherwise, we have to complete the code flow
-
-            if (authorized) {
-              _context2.next = 44;
-              break;
-            }
-
-            debug("Preparing to exchange the code for access token...");
-            _context2.next = 30;
-            return buildTokenRequest(code, state);
-
-          case 30:
-            requestOptions = _context2.sent;
-            debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
-            // includes an access token or a message indicating that the
-            // authorization request has been denied.
-
-            _context2.next = 34;
-            return (0, _lib.request)(state.tokenUri, requestOptions);
-
-          case 34:
-            tokenResponse = _context2.sent;
-            debug("Token response: %O", tokenResponse);
-
-            if (tokenResponse.access_token) {
-              _context2.next = 38;
-              break;
-            }
-
-            throw new Error("Failed to obtain access token.");
-
-          case 38:
-            // save the tokenResponse so that we don't have to re-authorize on
-            // every page reload
-            state = Object.assign({}, state, {
-              tokenResponse: tokenResponse
-            });
-            _context2.next = 41;
-            return Storage.set(key, state);
-
-          case 41:
-            debug("Authorization successful!");
-            _context2.next = 45;
-            break;
-
-          case 44:
-            debug(state.tokenResponse.access_token ? "Already authorized" : "No authorization needed");
-
-          case 45:
-            if (!fullSessionStorageSupport) {
-              _context2.next = 48;
-              break;
-            }
-
-            _context2.next = 48;
-            return Storage.set(_settings.SMART_KEY, key);
-
-          case 48:
-            client = new _Client.default(env, state);
-            debug("Created client instance: %O", client);
-            return _context2.abrupt("return", client);
-
-          case 51:
-          case "end":
-            return _context2.stop();
-        }
-      }
-    }, _callee2);
-  }));
-  return _completeAuth.apply(this, arguments);
-}
-
 function buildTokenRequest(code, state) {
-  var redirectUri = state.redirectUri,
-      clientSecret = state.clientSecret,
-      tokenUri = state.tokenUri,
-      clientId = state.clientId;
-
-  if (!redirectUri) {
-    throw new Error("Missing state.redirectUri");
-  }
-
-  if (!tokenUri) {
-    throw new Error("Missing state.tokenUri");
-  }
-
-  if (!clientId) {
-    throw new Error("Missing state.clientId");
-  }
-
-  var requestOptions = {
-    method: "POST",
-    headers: {
-      "content-type": "application/x-www-form-urlencoded"
-    },
-    body: "code=" + code + "&grant_type=authorization_code&redirect_uri=" + encodeURIComponent(redirectUri)
-  }; // For public apps, authentication is not possible (and thus not required),
-  // since a client with no secret cannot prove its identity when it issues a
-  // call. (The end-to-end system can still be secure because the client comes
-  // from a known, https protected endpoint specified and enforced by the
-  // redirect uri.) For confidential apps, an Authorization header using HTTP
-  // Basic authentication is required, where the username is the app’s
-  // client_id and the password is the app’s client_secret (see example).
-
-  if (clientSecret) {
-    requestOptions.headers.Authorization = "Basic " + (0, _lib.btoa)(clientId + ":" + clientSecret);
-    debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
-  } else {
-    debug("No clientSecret found in state. Adding the clientId to the POST body");
-    requestOptions.body += "&client_id=" + encodeURIComponent(clientId);
-  }
-
-  return requestOptions;
+    const { redirectUri, clientSecret, tokenUri, clientId } = state;
+    if (!redirectUri) {
+        throw new Error("Missing state.redirectUri");
+    }
+    if (!tokenUri) {
+        throw new Error("Missing state.tokenUri");
+    }
+    if (!clientId) {
+        throw new Error("Missing state.clientId");
+    }
+    const requestOptions = {
+        method: "POST",
+        headers: { "content-type": "application/x-www-form-urlencoded" },
+        body: `code=${code}&grant_type=authorization_code&redirect_uri=${encodeURIComponent(redirectUri)}`
+    };
+    // For public apps, authentication is not possible (and thus not required),
+    // since a client with no secret cannot prove its identity when it issues a
+    // call. (The end-to-end system can still be secure because the client comes
+    // from a known, https protected endpoint specified and enforced by the
+    // redirect uri.) For confidential apps, an Authorization header using HTTP
+    // Basic authentication is required, where the username is the app’s
+    // client_id and the password is the app’s client_secret (see example).
+    if (clientSecret) {
+        requestOptions.headers.Authorization = "Basic " + lib_1.btoa(clientId + ":" + clientSecret);
+        debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
+    }
+    else {
+        debug("No clientSecret found in state. Adding the clientId to the POST body");
+        requestOptions.body += `&client_id=${encodeURIComponent(clientId)}`;
+    }
+    return requestOptions;
 }
+exports.buildTokenRequest = buildTokenRequest;
 /**
  * @param {Object} env
  * @param {() => Promise<fhirclient.Client>} [onSuccess]
  * @param {() => never} [onError]
  * @returns { Promise<fhirclient.Client> }
  */
-
-
-function ready(_x5, _x6, _x7) {
-  return _ready.apply(this, arguments);
-}
-
-function _ready() {
-  _ready = (0, _asyncToGenerator2.default)(
-  /*#__PURE__*/
-  _regenerator.default.mark(function _callee3(env, onSuccess, onError) {
-    var task;
-    return _regenerator.default.wrap(function _callee3$(_context3) {
-      while (1) {
-        switch (_context3.prev = _context3.next) {
-          case 0:
-            task = completeAuth(env);
-
-            if (onSuccess) {
-              task = task.then(onSuccess);
-            }
-
-            if (onError) {
-              task = task.catch(onError);
-            }
-
-            return _context3.abrupt("return", task);
-
-          case 4:
-          case "end":
-            return _context3.stop();
+function ready(env, onSuccess, onError) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let task = completeAuth(env);
+        if (onSuccess) {
+            task = task.then(onSuccess);
         }
-      }
-    }, _callee3);
-  }));
-  return _ready.apply(this, arguments);
-}
-
-function init(_x8, _x9) {
-  return _init.apply(this, arguments);
-}
-
-function _init() {
-  _init = (0, _asyncToGenerator2.default)(
-  /*#__PURE__*/
-  _regenerator.default.mark(function _callee4(env, options) {
-    var url, code, state, storage, key, cached;
-    return _regenerator.default.wrap(function _callee4$(_context4) {
-      while (1) {
-        switch (_context4.prev = _context4.next) {
-          case 0:
-            url = env.getUrl();
-            code = url.searchParams.get("code");
-            state = url.searchParams.get("state"); // if `code` and `state` params are present we need to complete the auth flow
-
-            if (!(code && state)) {
-              _context4.next = 5;
-              break;
-            }
-
-            return _context4.abrupt("return", completeAuth(env));
-
-          case 5:
-            // Check for existing client state. If state is found, it means a client
-            // instance have already been created in this session and we should try to
-            // "revive" it.
-            storage = env.getStorage();
-            _context4.t0 = state;
-
-            if (_context4.t0) {
-              _context4.next = 11;
-              break;
-            }
-
-            _context4.next = 10;
-            return storage.get(_settings.SMART_KEY);
-
-          case 10:
-            _context4.t0 = _context4.sent;
-
-          case 11:
-            key = _context4.t0;
-            _context4.next = 14;
-            return storage.get(key);
-
-          case 14:
-            cached = _context4.sent;
-
-            if (!cached) {
-              _context4.next = 17;
-              break;
-            }
-
-            return _context4.abrupt("return", new _Client.default(env, cached));
-
-          case 17:
-            return _context4.abrupt("return", authorize(env, options).then(function () {
-              // `init` promises a Client but that cannot happen in this case. The
-              // browser will be redirected (unload the page and be redirected back
-              // to it later and the same init function will be called again). On
-              // success, authorize will resolve with the redirect url but we don't
-              // want to return that from this promise chain because it is not a
-              // Client instance. At the same time, if authorize fails, we do want to
-              // pass the error to those waiting for a client instance.
-              return new Promise(function () {
-                /* leave it pending!!! */
-              });
-            }));
-
-          case 18:
-          case "end":
-            return _context4.stop();
+        if (onError) {
+            task = task.catch(onError);
         }
-      }
-    }, _callee4);
-  }));
-  return _init.apply(this, arguments);
+        return task;
+    });
 }
+exports.ready = ready;
+function init(env, options) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const url = env.getUrl();
+        const code = url.searchParams.get("code");
+        const state = url.searchParams.get("state");
+        // if `code` and `state` params are present we need to complete the auth flow
+        if (code && state) {
+            return completeAuth(env);
+        }
+        // Check for existing client state. If state is found, it means a client
+        // instance have already been created in this session and we should try to
+        // "revive" it.
+        const storage = env.getStorage();
+        const key = state || (yield storage.get(settings_1.SMART_KEY));
+        const cached = yield storage.get(key);
+        if (cached) {
+            return new Client_1.default(env, cached);
+        }
+        // Otherwise try to launch
+        return authorize(env, options).then(() => {
+            // `init` promises a Client but that cannot happen in this case. The
+            // browser will be redirected (unload the page and be redirected back
+            // to it later and the same init function will be called again). On
+            // success, authorize will resolve with the redirect url but we don't
+            // want to return that from this promise chain because it is not a
+            // Client instance. At the same time, if authorize fails, we do want to
+            // pass the error to those waiting for a client instance.
+            return new Promise(() => { });
+        });
+    });
+}
+exports.init = init;
+
 
 /***/ }),
 
-/***/ "./src/storage/BrowserStorage.js":
+/***/ "./src/storage/BrowserStorage.ts":
 /*!***************************************!*\
-  !*** ./src/storage/BrowserStorage.js ***!
+  !*** ./src/storage/BrowserStorage.ts ***!
   \***************************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-
-exports.__esModule = true;
-exports.default = void 0;
-
-var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js"));
-
-__webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
-
-var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/asyncToGenerator.js"));
-
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-env browser */
-var Storage =
-/*#__PURE__*/
-function () {
-  function Storage() {}
-
-  var _proto = Storage.prototype;
-
-  /**
-   * Gets the value at `key`. Returns a promise that will be resolved
-   * with that value (or undefined for missing keys).
-   * @param {String} key
-   * @returns {Promise<any>}
-   */
-  _proto.get =
-  /*#__PURE__*/
-  function () {
-    var _get = (0, _asyncToGenerator2.default)(
-    /*#__PURE__*/
-    _regenerator.default.mark(function _callee(key) {
-      var value;
-      return _regenerator.default.wrap(function _callee$(_context) {
-        while (1) {
-          switch (_context.prev = _context.next) {
-            case 0:
-              value = sessionStorage[key];
-
-              if (!value) {
-                _context.next = 3;
-                break;
-              }
-
-              return _context.abrupt("return", JSON.parse(value));
-
-            case 3:
-              return _context.abrupt("return", null);
-
-            case 4:
-            case "end":
-              return _context.stop();
-          }
-        }
-      }, _callee);
-    }));
-
-    function get(_x) {
-      return _get.apply(this, arguments);
+class Storage {
+    /**
+     * Gets the value at `key`. Returns a promise that will be resolved
+     * with that value (or undefined for missing keys).
+     */
+    get(key) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const value = sessionStorage[key];
+            if (value) {
+                return JSON.parse(value);
+            }
+            return null;
+        });
     }
-
-    return get;
-  }()
-  /**
-   * Sets the `value` on `key` and returns a promise that will be resolved
-   * with the value that was set.
-   * @param {String} key
-   * @param {any} value
-   * @returns {Promise<any>}
-   */
-  ;
-
-  _proto.set =
-  /*#__PURE__*/
-  function () {
-    var _set = (0, _asyncToGenerator2.default)(
-    /*#__PURE__*/
-    _regenerator.default.mark(function _callee2(key, value) {
-      return _regenerator.default.wrap(function _callee2$(_context2) {
-        while (1) {
-          switch (_context2.prev = _context2.next) {
-            case 0:
-              sessionStorage[key] = JSON.stringify(value);
-              return _context2.abrupt("return", value);
-
-            case 2:
-            case "end":
-              return _context2.stop();
-          }
-        }
-      }, _callee2);
-    }));
-
-    function set(_x2, _x3) {
-      return _set.apply(this, arguments);
+    /**
+     * Sets the `value` on `key` and returns a promise that will be resolved
+     * with the value that was set.
+     */
+    set(key, value) {
+        return __awaiter(this, void 0, void 0, function* () {
+            sessionStorage[key] = JSON.stringify(value);
+            return value;
+        });
     }
-
-    return set;
-  }()
-  /**
-   * Deletes the value at `key`. Returns a promise that will be resolved
-   * with true if the key was deleted or with false if it was not (eg. if
-   * did not exist).
-   * @param {String} key
-   * @returns {Promise<Boolean>}
-   */
-  ;
-
-  _proto.unset =
-  /*#__PURE__*/
-  function () {
-    var _unset = (0, _asyncToGenerator2.default)(
-    /*#__PURE__*/
-    _regenerator.default.mark(function _callee3(key) {
-      return _regenerator.default.wrap(function _callee3$(_context3) {
-        while (1) {
-          switch (_context3.prev = _context3.next) {
-            case 0:
-              if (!(key in sessionStorage)) {
-                _context3.next = 3;
-                break;
-              }
-
-              delete sessionStorage[key];
-              return _context3.abrupt("return", true);
-
-            case 3:
-              return _context3.abrupt("return", false);
-
-            case 4:
-            case "end":
-              return _context3.stop();
-          }
-        }
-      }, _callee3);
-    }));
-
-    function unset(_x4) {
-      return _unset.apply(this, arguments);
+    /**
+     * Deletes the value at `key`. Returns a promise that will be resolved
+     * with true if the key was deleted or with false if it was not (eg. if
+     * did not exist).
+     */
+    unset(key) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (key in sessionStorage) {
+                delete sessionStorage[key];
+                return true;
+            }
+            return false;
+        });
     }
-
-    return unset;
-  }();
-
-  return Storage;
-}();
-
+}
 exports.default = Storage;
+
 
 /***/ }),
 
-/***/ "./src/strings.js":
+/***/ "./src/strings.ts":
 /*!************************!*\
-  !*** ./src/strings.js ***!
+  !*** ./src/strings.ts ***!
   \************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-
-exports.__esModule = true;
-exports.default = void 0;
+Object.defineProperty(exports, "__esModule", { value: true });
 // This map contains reusable debug messages (only those used in multiple places)
-var _default = {
-  expired: "Session expired! Please re-launch the app",
-  noScopeForId: "Trying to get the ID of the selected %s. Please add 'launch' or 'launch/%s' to the requested scopes and try again.",
-  noIfNoAuth: "You are trying to get %s but the app is not authorized yet.",
-  noFreeContext: "Please don't use open fhir servers if you need to access launch context items like the %S."
+exports.default = {
+    expired: "Session expired! Please re-launch the app",
+    noScopeForId: "Trying to get the ID of the selected %s. Please add 'launch' or 'launch/%s' to the requested scopes and try again.",
+    noIfNoAuth: "You are trying to get %s but the app is not authorized yet.",
+    noFreeContext: "Please don't use open fhir servers if you need to access launch context items like the %S."
 };
-exports.default = _default;
+
 
 /***/ })
 

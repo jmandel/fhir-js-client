@@ -60,7 +60,7 @@ declare namespace fhirclient {
          *
          * ONLY RELEVANT IN BROWSERS!
          */
-        replaceBrowserHistory: boolean;
+        replaceBrowserHistory?: boolean;
 
         /**
          * When set to true, this variable will fully utilize HTML5
@@ -71,7 +71,9 @@ declare namespace fhirclient {
          * instantiated on a single thread to continue to function without
          * having sessionStorage data shared across the embedded IE instances.
          */
-        fullSessionStorageSupport: boolean;
+        fullSessionStorageSupport?: boolean;
+
+        storage?: Storage | ((options?: JsonObject) => Storage);
     }
 
     class Adapter {
@@ -317,7 +319,7 @@ declare namespace fhirclient {
          * The URI to redirect to after successful authorization, as set in the
          * configuration options.
          */
-        // redirectUri: string;
+        redirectUri?: string;
 
         /**
          * The access scopes that you requested in your options (or an empty string).
@@ -664,5 +666,210 @@ declare namespace fhirclient {
 
     interface JsonObject {
         [key: string]: any
+    }
+
+    // Capabilities ------------------------------------------------------------
+
+    type SMARTAuthenticationMethod = "client_secret_post" | "client_secret_basic";
+
+    type launchMode = "launch-ehr" | "launch-standalone";
+
+    type clientType = "client-public" | "client-confidential-symmetric";
+
+    type singleSignOn = "sso-openid-connect";
+
+    type launchContext = "context-banner" | "context-style";
+
+    type launchContextEHR = "context-ehr-patient" | "context-ehr-encounter";
+
+    type launchContextStandalone = "context-standalone-patient" | "context-standalone-encounter";
+
+    type permissions = "permission-offline" | "permission-patient" | "permission-user";
+
+    interface WellKnownSmartConfiguration {
+        /**
+         * URL to the OAuth2 authorization endpoint.
+         */
+        authorization_endpoint: string;
+        
+        /**
+         * URL to the OAuth2 token endpoint.
+         */
+        token_endpoint: string;
+        
+        /**
+         * If available, URL to the OAuth2 dynamic registration endpoint for the
+         * FHIR server.
+         */
+        registration_endpoint?: string;
+        
+        /**
+         * RECOMMENDED! URL where an end-user can view which applications currently
+         * have access to data and can make adjustments to these access rights.
+         */
+        management_endpoint?: string;
+
+        /**
+         * RECOMMENDED! URL to a server’s introspection endpoint that can be used
+         * to validate a token.
+         */
+        introspection_endpoint?: string;
+
+        /**
+         * RECOMMENDED! URL to a server’s revoke endpoint that can be used to
+         * revoke a token.
+         */
+        revocation_endpoint?: string;
+        
+        /**
+         * Array of client authentication methods supported by the token endpoint.
+         * The options are “client_secret_post” and “client_secret_basic”.
+         */
+        token_endpoint_auth_methods?: SMARTAuthenticationMethod[];
+        
+        /**
+         * Array of scopes a client may request.
+         */
+        scopes_supported?: string[];
+        
+        /**
+         * Array of OAuth2 response_type values that are supported
+         */
+        response_types_supported?: string[];
+
+        /**
+         * Array of strings representing SMART capabilities (e.g., single-sign-on
+         * or launch-standalone) that the server supports.
+         */
+        capabilities: (
+            SMARTAuthenticationMethod |
+            launchMode |
+            clientType |
+            singleSignOn |
+            launchContext |
+            launchContextEHR |
+            launchContextStandalone |
+            permissions
+        )[]; 
+    }
+
+    namespace FHIR {
+
+        /**
+         * Any combination of upper or lower case ASCII letters ('A'..'Z', and
+         * 'a'..'z', numerals ('0'..'9'), '-' and '.', with a length limit of 64
+         * characters. (This might be an integer, an un-prefixed OID, UUID or any
+         * other identifier pattern that meets these constraints.)
+         * Regex: `[A-Za-z0-9\-\.]{1,64}`
+         */
+        type id = string;
+
+        /**
+         * A Uniform Resource Identifier Reference (RFC 3986 ). Note: URIs are case
+         * sensitive. For UUID (urn:uuid:53fefa32-fcbb-4ff8-8a92-55ee120877b7) use
+         * all lowercase. URIs can be absolute or relative, and may have an optional
+         * fragment identifier.	
+         */
+        type uri = string;
+
+        /**
+         * Indicates that the value is taken from a set of controlled strings
+         * defined elsewhere. Technically,  a code is restricted to a string which
+         * has at least one character and no leading or trailing whitespace, and
+         * where there is no whitespace other than single spaces in the contents
+         * Regex: [^\s]+([\s]?[^\s]+)*
+         */
+        type code = string;
+
+        /**
+         * An instant in time - known at least to the second and always includes a
+         * time zone. Note: This is intended for precisely observed times (typically
+         * system logs etc.), and not human-reported times - for them, use date and
+         * dateTime. instant is a more constrained dateTime.
+         * 
+         * Patterns:
+         * - `YYYY-MM-DDTHH:mm:ss.SSSSZ`
+         * - `YYYY-MM-DDTHH:mm:ss.SSSZ`
+         * - `YYYY-MM-DDTHH:mm:ssZ`
+         */
+        type instant = string;  // "2018-04-30T13:31:44.140-04:00"
+
+        type valueX = "valueInteger" | "valueUnsignedInt" | "valuePositiveInt" |
+            "valueDecimal"|"valueDateTime"|"valueDate"|"valueTime"|"valueInstant"|
+            "valueString"|"valueUri"|"valueOid"|"valueUuid"|"valueId"|
+            "valueBoolean"|"valueCode"|"valueMarkdown"|"valueBase64Binary"|
+            "valueCoding"|"valueCodeableConcept"|"valueAttachment"|
+            "valueIdentifier"|"valueQuantity"|"valueSampledData"|"valueRange"|
+            "valuePeriod"|"valueRatio"|"valueHumanName"|"valueAddress"|
+            "valueContactPoint"|"valueTiming"|"valueReference"|"valueAnnotation"|
+            "valueSignature"|"valueMeta";
+
+        interface Element {
+            id?: id;
+            extension?: Extension<valueX>[];
+        }
+    
+        interface Extension<T> extends Element {
+            /**
+             * identifies the meaning of the extension
+             */
+            url: uri;
+    
+            [T: string]: any;
+        }
+
+        interface CapabilityStatement {
+            resourceType: string;
+            fhirVersion: string;
+            rest: {
+                security?: {
+                    cors?: boolean;
+                    extension?: {
+                        url: string;
+                        extension: Extension<"valueUri">[]
+                    }[]
+                };
+                resource: {
+                    type: string
+                }[]
+            }[];
+        }
+
+        interface Resource {
+            /**
+             * Logical id of this artifact
+             */
+            id ?: id;
+
+            resourceType: string;
+    
+            /**
+             * Metadata about the resource
+             */
+            meta ?: Meta;
+    
+            /**
+             * A set of rules under which this content was created
+             */
+            implicitRules ?: uri;
+    
+            /**
+             * Language of the resource content
+             */
+            language ?: code;
+        }
+
+        interface Meta extends Element {
+        
+            /**
+             * When the resource version last changed
+             */
+            lastUpdated: instant;
+        }
+
+        interface Observation extends Resource {
+
+        }
+    
     }
 }

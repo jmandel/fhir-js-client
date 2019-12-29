@@ -4,14 +4,15 @@ import Client from "../Client";
 /**
  * This is the abstract base class that adapters must inherit. It just a
  * collection of environment-specific methods that subclasses have to implement.
- * @type { fhirclient.Adapter }
  */
-export default class BaseAdapter
+export default abstract class BaseAdapter
 {
+    public options: fhirclient.fhirSettings;
+
     /**
-     * @param {Object} options Environment-specific options
+     * @param options Environment-specific options
      */
-    constructor(options = {})
+    public constructor(options: fhirclient.fhirSettings = {})
     {
         this.options = {
             // Replaces the browser's current URL
@@ -34,16 +35,14 @@ export default class BaseAdapter
     }
 
 
-    getUrl() {
+    public getUrl(): URL {
         return new URL("");
     }
 
-    getStorage() {}
+    abstract getStorage(): fhirclient.Storage;
+    abstract redirect(to: string): void;
 
-    /**
-     * @param {String} path
-     */
-    relative(path)
+    relative(path: string): string
     {
         return new URL(path, this.getUrl().href).href;
     }
@@ -54,9 +53,8 @@ export default class BaseAdapter
      * Those who override this method are free to require any environment-specific
      * arguments. For example in node we will need a request, a response and
      * optionally a storage or storage factory function.
-     * @returns { fhirclient.SMART }
      */
-    getSmartApi()
+    getSmartApi(): fhirclient.SMART
     {
         return {
             ready    : (...args) => smart.ready(this, ...args),

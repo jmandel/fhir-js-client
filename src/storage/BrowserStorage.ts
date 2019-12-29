@@ -4,10 +4,8 @@ export default class Storage
     /**
      * Gets the value at `key`. Returns a promise that will be resolved
      * with that value (or undefined for missing keys).
-     * @param {String} key
-     * @returns {Promise<any>}
      */
-    async get(key)
+    async get(key: string): Promise<any>
     {
         const value = sessionStorage[key];
         if (value) {
@@ -19,11 +17,8 @@ export default class Storage
     /**
      * Sets the `value` on `key` and returns a promise that will be resolved
      * with the value that was set.
-     * @param {String} key
-     * @param {any} value
-     * @returns {Promise<any>}
      */
-    async set(key, value)
+    async set(key: string, value: any): Promise<any>
     {
         sessionStorage[key] = JSON.stringify(value);
         return value;
@@ -33,10 +28,8 @@ export default class Storage
      * Deletes the value at `key`. Returns a promise that will be resolved
      * with true if the key was deleted or with false if it was not (eg. if
      * did not exist).
-     * @param {String} key
-     * @returns {Promise<Boolean>}
      */
-    async unset(key)
+    async unset(key: string): Promise<boolean>
     {
         if (key in sessionStorage) {
             delete sessionStorage[key];

@@ -1,6 +1,30 @@
+interface ErrorResponse {
+    error?: {
+        status?: number
+        statusText?: string
+        responseText?: string
+    }
+}
 export default class HttpError extends Error
 {
-    constructor(message, statusCode, statusText) {
+    /**
+     * The HTTP status code for this error
+     */
+    public statusCode: number;
+
+    /**
+     * The HTTP status code for this error.
+     * Note that this is the same as `status`, i.e. the code is available
+     * through any of these.
+     */
+    public status: number;
+
+    /**
+     * The HTTP status text corresponding to this error
+     */
+    public statusText: string;
+
+    public constructor(message: string, statusCode: number, statusText: string) {
         super(message);
         this.message    = message;
         this.name       = "HttpError";
@@ -9,7 +33,7 @@ export default class HttpError extends Error
         this.statusText = statusText;
     }
 
-    toJSON() {
+    public toJSON() {
         return {
             name      : this.name,
             statusCode: this.statusCode,
@@ -19,9 +43,9 @@ export default class HttpError extends Error
         };
     }
 
-    static create(failure) {
+    public static create(failure?: string | Error | ErrorResponse) {
         // start with generic values
-        var status     = 0;
+        var status: string | number     = 0;
         var statusText = "Error";
         var message    = "Unknown error";
 

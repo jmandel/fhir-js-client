@@ -1,10 +1,16 @@
+interface RequestWithSession {
+    session: fhirclient.JsonObject
+}
+
 export default class ServerStorage
 {
+    public request: RequestWithSession;
+
     /**
-     * @param {Object} request The HTTP request that is expected to have a
+     * @param request The HTTP request that is expected to have a
      * "session" object property.
      */
-    constructor(request)
+    constructor(request: RequestWithSession)
     {
         this.request = request;
     }
@@ -12,10 +18,8 @@ export default class ServerStorage
     /**
      * Gets the value at `key`. Returns a promise that will be resolved
      * with that value (or undefined for missing keys).
-     * @param {String} key
-     * @returns {Promise<any>}
      */
-    async get(key)
+    async get(key: string): Promise<any>
     {
         return this.request.session[key];
     }
@@ -23,11 +27,8 @@ export default class ServerStorage
     /**
      * Sets the `value` on `key` and returns a promise that will be resolved
      * with the value that was set.
-     * @param {String} key
-     * @param {any} value
-     * @returns {Promise<any>}
      */
-    async set(key, value)
+    async set(key: string, value: any): Promise<any>
     {
         this.request.session[key] = value;
         return value;
@@ -37,10 +38,8 @@ export default class ServerStorage
      * Deletes the value at `key`. Returns a promise that will be resolved
      * with true if the key was deleted or with false if it was not (eg. if
      * did not exist).
-     * @param {String} key
-     * @returns {Promise<Boolean>}
      */
-    async unset(key)
+    async unset(key: string): Promise<boolean>
     {
         if (Object.prototype.hasOwnProperty.call(this.request.session, key)) {
             delete this.request.session[key];

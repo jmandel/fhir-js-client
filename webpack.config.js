@@ -25,17 +25,33 @@ module.exports = function(env, argv) {
         module: {
             rules: [
                 {
+                    test: /\.ts$/,
+                    exclude: /node_modules/,
+                    use: [
+                        {
+                            loader: "ts-loader"
+                        }
+                    ]
+                },
+                {
                     test: /\.js$/,
                     include: [
                         path.join(__dirname, "src"),
                         path.join(__dirname, "node_modules/debug")
                     ],
                     use: "babel-loader?configFile=./.babelrc.js"
+                },
+
+                // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
+                {
+                    enforce: "pre",
+                    test: /\.js$/,
+                    loader: "source-map-loader"
                 }
             ]
         },
         resolve: {
-            extensions: [".js"]
+            extensions: [".ts", ".js"]
         },
         plugins: [
             new DefinePlugin({

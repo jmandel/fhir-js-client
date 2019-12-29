@@ -1,4 +1,3 @@
-/// <reference path="types.d.ts" />
 import {
     absolute,
     debug as _debug,
@@ -17,6 +16,9 @@ import {
 import str from "./strings";
 import { fetchConformanceStatement, fetchFhirVersion } from "./smart";
 import { SMART_KEY, patientCompartment, fhirVersions } from "./settings";
+import HttpError from "./HttpError";
+import BaseAdapter from "./adapters/BaseAdapter";
+import { Adapter as BrowserAdapter } from "./adapters/BrowserAdapter";
 
 // @ts-ignore
 // eslint-disable-next-line no-undef
@@ -27,10 +29,10 @@ const debug = _debug.extend("client");
  * Adds patient context to requestOptions object to be used with fhirclient.Client.request
  * @param {Object|String} requestOptions Can be a string URL (relative to
  *  the serviceUrl), or an object which will be passed to fetch()
- * @param {fhirclient.Client} client Current FHIR client object containing patient context
+ * @param client Current FHIR client object containing patient context
  * @return {Promise<Object|String>} requestOptions object contextualized to current patient
  */
-async function contextualize(requestOptions, client) {
+async function contextualize(requestOptions: string|URL|fhirclient.RequestOptions, client: Client) {
 
     // This code could be useful for implementing FHIR version awareness in the future:
     //   const fhirVersionsMap = require("./data/fhir-versions");
@@ -40,8 +42,12 @@ async function contextualize(requestOptions, client) {
 
     const base = absolute("/", client.state.serverUrl);
 
-    async function contextualURL(url) {
+    async function contextualURL(url: URL) {
         const resourceType = url.pathname.split("/").pop();
+
+        if (!resourceType) {
+            throw new Error(`Invalid url "${url}"`);
+        }
 
         if (patientCompartment.indexOf(resourceType) == -1) {
             throw new Error(`Cannot filter "${resourceType}" resources by patient`);
@@ -49,7 +55,7 @@ async function contextualize(requestOptions, client) {
 
         const conformance = await fetchConformanceStatement(client.state.serverUrl);
         const searchParam = getPatientParam(conformance, resourceType);
-        url.searchParams.set(searchParam, client.patient.id);
+        url.searchParams.set(searchParam, client.patient.id as string);
         return url.href;
     }
 
@@ -58,29 +64,34 @@ async function contextualize(requestOptions, client) {
         return contextualURL(url);
     }
 
-    let url = new URL(requestOptions.url, base);
+    let url = new URL(requestOptions.url + "", base);
     requestOptions.url = await contextualURL(url);
     return requestOptions;
 }
 
 /**
  * Gets single reference by id. Caches the result.
- * @param {String} refId
- * @param {Object} cache A map to store the resolved refs
- * @param {FhirClient} client The client instance
+ * @param refId
+ * @param cache A map to store the resolved refs
+ * @param client The client instance
  * @returns {Promise<Object>} The resolved reference
  * @private
  */
-function getRef(refId, cache, client) {
+function getRef(
+    refId: string,
+    cache: fhirclient.JsonObject,
+    client: Client
+): Promise<fhirclient.JsonObject> {
     let sub = cache[refId];
     if (!sub) {
-        // Note that we set cache[refId] immediately! When the promise is settled
-        // it will be updated. This is to avoid a ref being fetched twice because
-        // some of these requests are executed in parallel.
+
+        // Note that we set cache[refId] immediately! When the promise is
+        // settled it will be updated. This is to avoid a ref being fetched
+        // twice because some of these requests are executed in parallel.
         cache[refId] = client.request(refId).then(sub => {
             cache[refId] = sub;
             return sub;
-        }, error => {
+        }, (error: Error) => {
             delete cache[refId];
             throw error;
         });
@@ -93,7 +104,13 @@ function getRef(refId, cache, client) {
  * Resolves a reference in the given resource.
  * @param {Object} obj FHIR Resource
  */
-function resolveRef(obj, path, graph, cache, client) {
+function resolveRef(
+    obj: fhirclient.FHIR.Resource,
+    path: string,
+    graph: boolean,
+    cache: fhirclient.JsonObject,
+    client: Client
+) {
     const node = getPath(obj, path);
     if (node) {
         const isArray = Array.isArray(node);
@@ -116,13 +133,18 @@ function resolveRef(obj, path, graph, cache, client) {
 
 /**
  * Given a resource and a list of ref paths - resolves them all
- * @param {Object} obj FHIR Resource
+ * @param obj FHIR Resource
  * @param {Object} fhirOptions The fhir options of the initiating request call
- * @param {Object} cache A map to store fetched refs
- * @param {FhirClient} client The client instance
+ * @param cache A map to store fetched refs
+ * @param client The client instance
  * @private
  */
-function resolveRefs(obj, fhirOptions, cache, client) {
+function resolveRefs(
+    obj: fhirclient.FHIR.Resource,
+    fhirOptions: fhirclient.FhirOptions,
+    cache: fhirclient.JsonObject,
+    client: Client
+) {
 
     // 1. Sanitize paths, remove any invalid ones
     let paths = makeArray(fhirOptions.resolveReferences)
@@ -147,7 +169,7 @@ function resolveRefs(obj, fhirOptions, cache, client) {
 
     // 4. Group the paths by depth so that child refs are looked up
     // after their parents!
-    const groups = {};
+    const groups: fhirclient.JsonObject = {};
     paths.forEach(path => {
         const len = path.split(".").length;
         if (!groups[len]) {
@@ -158,29 +180,50 @@ function resolveRefs(obj, fhirOptions, cache, client) {
 
     // 5. Execute groups sequentially! Paths within same group are
     // fetched in parallel!
-    /**
-     * @type any
-     */
-    let task = Promise.resolve();
+    let task: Promise<any> = Promise.resolve();
     Object.keys(groups).sort().forEach(len => {
         const group = groups[len];
-        task = task.then(() => Promise.all(group.map(path => {
-            return resolveRef(obj, path, fhirOptions.graph, cache, client);
+        task = task.then(() => Promise.all(group.map((path: string) => {
+            return resolveRef(obj, path, !!fhirOptions.graph, cache, client);
         })));
     });
     return task;
 }
 
-/**
- * @implements { fhirclient.Client }
- */
-export default class FhirClient
+export default class Client
 {
+    public state: fhirclient.ClientState;
+
+    public environment: BaseAdapter;
+
+    public patient: {
+        id: string | null
+        read: () => Promise<fhirclient.JsonObject>
+        request: (requestOptions: string|URL|fhirclient.RequestOptions, fhirOptions?: fhirclient.FhirOptions) => Promise<fhirclient.JsonObject>
+        api?: fhirclient.JsonObject
+    };
+
+    public encounter: {
+        id: string | null
+        read: () => Promise<fhirclient.JsonObject>
+    };
+
+    public user: {
+        id: string | null
+        read: () => Promise<fhirclient.JsonObject>
+        fhirUser: string | null
+        resourceType: string | null
+    };
+
+    public api: fhirclient.JsonObject | undefined;
+
+    private _refreshTask: Promise<any> | null = null;
+
     /**
      * @param {object} environment
      * @param {fhirclient.ClientState|string} state
      */
-    constructor(environment, state)
+    constructor(environment: BaseAdapter, state: fhirclient.ClientState)
     {
         /**
          * @type fhirclient.ClientState
@@ -244,15 +287,15 @@ export default class FhirClient
 
         // fhir.js api (attached automatically in browser)
         // ---------------------------------------------------------------------
-        if (environment.fhir) {
-            this.connect(environment.fhir);
+        if ((environment as BrowserAdapter).fhir) {
+            this.connect((environment as BrowserAdapter).fhir);
         }
     }
 
-    connect(fhirJs)
+    connect(fhirJs: (options: fhirclient.JsonObject) => fhirclient.JsonObject)
     {
         if (typeof fhirJs == "function") {
-            const options = {
+            const options: fhirclient.JsonObject = {
                 baseUrl: this.state.serverUrl.replace(/\/$/, "")
             };
 
@@ -448,9 +491,9 @@ export default class FhirClient
     }
 
     /**
-     * @param {Object} resource A FHIR resource to be created
+     * @param resource A FHIR resource to be created
      */
-    create(resource)
+    create(resource: fhirclient.FHIR.Resource)
     {
         return this.request({
             url: `${resource.resourceType}`,
@@ -463,9 +506,9 @@ export default class FhirClient
     }
 
     /**
-     * @param {Object} resource A FHIR resource to be updated
+     * @param resource A FHIR resource to be updated
      */
-    update(resource)
+    update(resource: fhirclient.FHIR.Resource)
     {
         return this.request({
             url: `${resource.resourceType}/${resource.id}`,
@@ -478,10 +521,10 @@ export default class FhirClient
     }
 
     /**
-     * @param {String} url Relative URI of the FHIR resource to be deleted
+     * @param url Relative URI of the FHIR resource to be deleted
      * (format: `resourceType/id`)
      */
-    delete(url)
+    delete(url: string)
     {
         return this.request({
             url,
@@ -490,12 +533,16 @@ export default class FhirClient
     }
 
     /**
-     * @param {Object|String} requestOptions Can be a string URL (relative to
-     *  the serviceUrl), or an object which will be passed to fetch()
-     * @param {fhirclient.FhirOptions} fhirOptions Additional options to control the behavior
-     * @param {object} _resolvedRefs DO NOT USE! Used internally.
+     * @param requestOptions Can be a string URL (relative to the serviceUrl),
+     * or an object which will be passed to fetch()
+     * @param fhirOptions Additional options to control the behavior
+     * @param _resolvedRefs DO NOT USE! Used internally.
      */
-    async request(requestOptions, fhirOptions = {}, _resolvedRefs = {})
+    async request(
+        requestOptions: string|URL|fhirclient.RequestOptions,
+        fhirOptions: fhirclient.FhirOptions = {},
+        _resolvedRefs: fhirclient.JsonObject = {}
+    )
     {
         const debug = _debug.extend("client:request");
         if (!requestOptions) {
@@ -503,10 +550,10 @@ export default class FhirClient
         }
 
         // url -----------------------------------------------------------------
-        let url;
+        let url: string;
         if (typeof requestOptions == "string" || requestOptions instanceof URL) {
             url = String(requestOptions);
-            requestOptions = {};
+            requestOptions = {} as fhirclient.RequestOptions;
         }
         else {
             url = String(requestOptions.url);
@@ -546,12 +593,12 @@ export default class FhirClient
         return request(url, requestOptions)
 
             // Automatic re-auth via refresh token -----------------------------
-            .catch(error => {
+            .catch((error: HttpError) => {
                 debug("%o", error);
                 if (error.status == 401 && fhirOptions.useRefreshToken !== false) {
                     const hasRefreshToken = getPath(this, "state.tokenResponse.refresh_token");
                     if (hasRefreshToken) {
-                        return this.refresh().then(() => this.request(
+                        return (this.refresh() as Promise<any>).then(() => this.request(
                             { ...requestOptions, url },
                             fhirOptions,
                             _resolvedRefs
@@ -562,7 +609,7 @@ export default class FhirClient
             })
 
             // Handle 401 ------------------------------------------------------
-            .catch(async error => {
+            .catch(async (error: HttpError) => {
                 if (error.status == 401) {
 
                     // !accessToken -> not authorized -> No session. Need to launch.
@@ -589,7 +636,7 @@ export default class FhirClient
             })
 
             // Handle 403 ------------------------------------------------------
-            .catch(error => {
+            .catch((error: HttpError) => {
                 if (error.status == 403) {
                     debug("Permission denied! Please make sure that you have requested the proper scopes.");
                 }
@@ -694,7 +741,7 @@ export default class FhirClient
         const debug = _debug.extend("client:refresh");
         debug("Attempting to refresh with refresh_token...");
 
-        const refreshToken = getPath(this, "state.tokenResponse.refresh_token");
+        const refreshToken = this.state?.tokenResponse?.refresh_token;
         if (!refreshToken) {
             throw new Error("Unable to refresh. No refresh_token found.");
         }
@@ -722,7 +769,7 @@ export default class FhirClient
                 },
                 body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}`,
                 credentials: "include"
-            }).then(data => {
+            }).then((data: fhirclient.JsonObject) => {
                 if (!data.access_token) {
                     throw new Error("No access token received");
                 }
@@ -731,7 +778,7 @@ export default class FhirClient
                 debug("Received new access token %O", data);
                 Object.assign(this.state.tokenResponse, data);
                 return this.state;
-            }).catch(error => {
+            }).catch((error: Error) => {
                 debug("Deleting the expired or invalid refresh token.");
                 delete this.state.tokenResponse.refresh_token;
                 throw error;
@@ -745,20 +792,11 @@ export default class FhirClient
     }
 
     // utils -------------------------------------------------------------------
-    /**
-     * @param {object|object[]} observations
-     * @param {string} property
-     */
-    byCode(observations, property) {
+    byCode(observations: fhirclient.FHIR.Observation | fhirclient.FHIR.Observation[], property: string) {
         return byCode(observations, property);
     }
 
-    /**
-     * @param {object|object[]} observations
-     * @param {string} property
-     * @returns {(codes: string[]) => object[]}
-     */
-    byCodes(observations, property) {
+    byCodes(observations: fhirclient.FHIR.Observation | fhirclient.FHIR.Observation[], property: string) {
         return byCodes(observations, property);
     }
 
@@ -766,7 +804,7 @@ export default class FhirClient
         return units;
     }
 
-    getPath(object, path) {
+    getPath(object: fhirclient.JsonObject, path: string) {
         return getPath(object, path);
     }
 
@@ -774,7 +812,7 @@ export default class FhirClient
      * Returns a promise that will be resolved with the fhir version as defined
      * in the conformance statement.
      */
-    getFhirVersion() {
+    getFhirVersion(): Promise<string> {
         return fetchFhirVersion(this.state.serverUrl);
     }
 
@@ -785,7 +823,7 @@ export default class FhirClient
      * - 4 for R4
      * - 0 if the version is not known
      */
-    getFhirRelease() {
-        return this.getFhirVersion().then(v => fhirVersions[v || ""] || 0);
+    getFhirRelease(): Promise<number> {
+        return this.getFhirVersion().then(v => (fhirVersions as fhirclient.JsonObject)[v] ?? 0);
     }
 }

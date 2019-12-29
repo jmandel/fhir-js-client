@@ -10,8 +10,9 @@ import {
 } from "./lib";
 
 import Client from "./Client";
-
+import BaseAdapter from "./adapters/BaseAdapter"
 import { SMART_KEY } from "./settings";
+
 
 const debug = _debug.extend("oauth2");
 
@@ -21,28 +22,33 @@ export { SMART_KEY as KEY };
  * Fetches the conformance statement from the given base URL.
  * Note that the result is cached in memory (until the page is reloaded in the
  * browser) because it might have to be re-used by the client
- * @param {String} baseUrl The base URL of the FHIR server
- * @returns {Promise<fhirclient.JsonObject>}
+ * @param baseUrl The base URL of the FHIR server
  */
-export function fetchConformanceStatement(baseUrl = "/") {
-
+export function fetchConformanceStatement(baseUrl = "/"): Promise<fhirclient.FHIR.CapabilityStatement>
+{
     const url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
-    return getAndCache(url).catch(ex => {
+    return getAndCache(url).catch((ex: Error) => {
         throw new Error(
             `Failed to fetch the conformance statement from "${url}". ${ex}`
         );
     });
 }
 
-export function fetchWellKnownJson(baseUrl = "/")
+/**
+ * Fetches the well-known json file from the given base URL.
+ * Note that the result is cached in memory (until the page is reloaded in the
+ * browser) because it might have to be re-used by the client
+ * @param baseUrl The base URL of the FHIR server
+ */
+export function fetchWellKnownJson(baseUrl = "/"): Promise<fhirclient.WellKnownSmartConfiguration>
 {
     const url = String(baseUrl).replace(/\/*$/, "/") + ".well-known/smart-configuration";
-    return getAndCache(url).catch(ex => {
+    return getAndCache(url).catch((ex: Error) => {
         throw new Error(`Failed to fetch the well-known json "${url}". ${ex.message}`);
     });
 }
 
-export function fetchFhirVersion(baseUrl = "/") {
+export function fetchFhirVersion(baseUrl = "/"): Promise<string> {
     return fetchConformanceStatement(baseUrl).then((metadata) => metadata.fhirVersion);
 }
 
@@ -65,7 +71,7 @@ export function getSecurityExtensions(baseUrl = "/")
         };
     }).catch(() => fetchConformanceStatement(baseUrl).then(metadata => {
         const nsUri = "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris";
-        const extensions = (getPath(metadata || {}, "rest.0.security.extension") || [])
+        const extensions = ((getPath(metadata || {}, "rest.0.security.extension") || []) as fhirclient.FHIR.Extension<"valueUri">[])
             .filter(e => e.url === nsUri)
             .map(o => o.extension)[0];
 
@@ -100,7 +106,7 @@ export function getSecurityExtensions(baseUrl = "/")
  * without trying to redirect to it
  * @returns { Promise<never|string> }
  */
-export async function authorize(env, params = {}, _noRedirect = false)
+export async function authorize(env: BaseAdapter, params: fhirclient.AuthorizeParams = {}, _noRedirect = false)
 {
     // Obtain input
     let {
@@ -164,7 +170,7 @@ export async function authorize(env, params = {}, _noRedirect = false)
 
     // create initial state
     const stateKey = randomString(16);
-    const state = {
+    const state: fhirclient.ClientState = {
         clientId,
         scope,
         redirectUri,
@@ -218,7 +224,7 @@ export async function authorize(env, params = {}, _noRedirect = false)
     // build the redirect uri
     const redirectParams = [
         "response_type=code",
-        "client_id="    + encodeURIComponent(clientId),
+        "client_id="    + encodeURIComponent(clientId || ""),
         "scope="        + encodeURIComponent(scope),
         "redirect_uri=" + encodeURIComponent(redirectUri),
         "aud="          + encodeURIComponent(serverUrl),
@@ -245,7 +251,7 @@ export async function authorize(env, params = {}, _noRedirect = false)
  * authorization server..
  * @returns { Promise<fhirclient.Client> }
  */
-export async function completeAuth(env)
+export async function completeAuth(env: BaseAdapter)
 {
     const url = env.getUrl();
     const Storage = env.getStorage();
@@ -282,7 +288,7 @@ export async function completeAuth(env)
     }
 
     // Check if we have a previous state
-    let state = await Storage.get(key);
+    let state = (await Storage.get(key)) as fhirclient.ClientState;
 
     const fullSessionStorageSupport = isBrowser() ?
         getPath(env, "options.fullSessionStorageSupport") :
@@ -329,11 +335,16 @@ export async function completeAuth(env)
 
     // Assume the client has already completed a token exchange when
     // there is no code (but we have a state) or access token is found in state
-    const authorized = !code || state.tokenResponse.access_token;
+    const authorized = !code || state?.tokenResponse?.access_token;
 
     // If we are authorized already, then this is just a reload.
     // Otherwise, we have to complete the code flow
-    if (!authorized) {
+    if (!authorized && state.tokenUri) {
+
+        if (!code) {
+            throw new Error("'code' url parameter is required");
+        }
+
         debug("Preparing to exchange the code for access token...");
         const requestOptions = await buildTokenRequest(code, state);
         debug("Token request options: %O", requestOptions);
@@ -352,7 +363,7 @@ export async function completeAuth(env)
         debug("Authorization successful!");
     }
     else {
-        debug(state.tokenResponse.access_token ?
+        debug(state?.tokenResponse?.access_token ?
             "Already authorized" :
             "No authorization needed"
         );
@@ -371,7 +382,7 @@ export async function completeAuth(env)
  * Builds the token request options. Does not make the request, just
  * creates it's configuration and returns it in a Promise.
  */
-export function buildTokenRequest(code, state)
+export function buildTokenRequest(code: string, state: fhirclient.ClientState)
 {
     const { redirectUri, clientSecret, tokenUri, clientId } = state;
 
@@ -387,7 +398,7 @@ export function buildTokenRequest(code, state)
         throw new Error("Missing state.clientId");
     }
 
-    const requestOptions = {
+    const requestOptions: fhirclient.JsonObject = {
         method: "POST",
         headers: { "content-type": "application/x-www-form-urlencoded" },
         body: `code=${code}&grant_type=authorization_code&redirect_uri=${
@@ -420,7 +431,7 @@ export function buildTokenRequest(code, state)
  * @param {() => never} [onError]
  * @returns { Promise<fhirclient.Client> }
  */
-export async function ready(env, onSuccess, onError)
+export async function ready(env: BaseAdapter, onSuccess?: () => any, onError?: () => any)
 {
     let task = completeAuth(env);
     if (onSuccess) {
@@ -432,7 +443,7 @@ export async function ready(env, onSuccess, onError)
     return task;
 }
 
-export async function init(env, options)
+export async function init(env: BaseAdapter, options: fhirclient.AuthorizeParams)
 {
     const url   = env.getUrl();
     const code  = url.searchParams.get("code");
