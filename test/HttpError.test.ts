@@ -1,5 +1,5 @@
 import { expect } from "@hapi/code";
-import Lab        from "@hapi/lab";
+import * as Lab   from "@hapi/lab";
 import HttpError  from "../src/HttpError";
 
 export const lab = Lab.script();

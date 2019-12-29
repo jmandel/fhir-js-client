@@ -22,7 +22,7 @@
     "debug": "^4.1.1"
   },
   "scripts": {
-    "test": "lab -S -T ./test/transform -P test -I __core-js_shared__ --threshold 90 --verbose --coverage-exclude lib -r console -r html -o stdout -o test/coverage.html",
+    "test": "lab -S -T node_modules/lab-transform-typescript -I __core-js_shared__ --threshold 90 --verbose --coverage-exclude lib -r console -r html -o stdout -o test/coverage.html test/**.ts",
     "pack:prod": "webpack --config webpack.config.js --mode production",
     "pack:dev": "webpack --config webpack.config.js --mode development",
     "pack:prod:pure": "npm run pack:prod -- --pure",
@@ -50,6 +50,7 @@
     "express": "^4.17.1",
     "fhir.js": "0.0.22",
     "jsdom": "^15.2.1",
+    "lab-transform-typescript": "^3.0.1",
     "source-map-loader": "^0.2.4",
     "ts-loader": "^6.2.1",
     "tslint": "^5.20.1",

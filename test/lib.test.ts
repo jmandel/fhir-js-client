@@ -1,8 +1,8 @@
-import { expect } from "@hapi/code";
-import Lab        from "@hapi/lab";
+import { expect }   from "@hapi/code";
+import * as Lab     from "@hapi/lab";
 import { Response } from "cross-fetch";
-import * as lib   from "../src/lib";
-import HttpError  from "../src/HttpError";
+import * as lib     from "../src/lib";
+import HttpError    from "../src/HttpError";
 
 export const lab = Lab.script();
 const { it, describe } = lab;
@@ -36,10 +36,14 @@ describe("Lib", () => {
 
         it ("works with non-string argument", () => {
             expect(lib.stripTrailingSlash(null)).to.equal("");
+            // @ts-ignore
             expect(lib.stripTrailingSlash(false)).to.equal("");
             expect(lib.stripTrailingSlash(undefined)).to.equal("");
+            // @ts-ignore
             expect(lib.stripTrailingSlash()).to.equal("");
+            // @ts-ignore
             expect(lib.stripTrailingSlash(53)).to.equal("53");
+            // @ts-ignore
             expect(lib.stripTrailingSlash(/abc/)).to.equal("/abc");
         });
     });

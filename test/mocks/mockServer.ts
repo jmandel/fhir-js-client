@@ -1,10 +1,8 @@
 import express from "express";
 import cors    from "cors";
 
-/**
- * @type any
- */
-const app = express();
+
+const app: any = express();
 export default app;
 app.use(cors());
 

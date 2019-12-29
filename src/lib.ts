@@ -166,10 +166,10 @@ export function makeArray(arg: any) {
     return [arg];
 }
 
-export function absolute(path: string, baseUrl: string) {
+export function absolute(path: string, baseUrl?: string) {
     if (path.match(/^http/)) return path;
     if (path.match(/^urn/)) return path;
-    return baseUrl.replace(/\/+$/, "") + "/" + path.replace(/^\/+/, "");
+    return String(baseUrl || "").replace(/\/+$/, "") + "/" + path.replace(/^\/+/, "");
 }
 
 /**

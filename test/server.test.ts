@@ -1,9 +1,9 @@
 
-import { expect } from "@hapi/code";
-import Lab        from "@hapi/lab";
+import { expect }        from "@hapi/code";
+import * as Lab          from "@hapi/lab";
 import FHIR, { Adapter } from "../src/adapters/NodeAdapter";
-import { KEY }    from "../src/smart";
-import ServerStorage from "../src/storage/ServerStorage";
+import { KEY }           from "../src/smart";
+import ServerStorage     from "../src/storage/ServerStorage";
 
 // Mocks
 import mockServer        from "./mocks/mockServer";
