@@ -1,10 +1,12 @@
-export default function Location(url)
+export default class Location
 {
-    return {
-        href: url,
+    public href: string;
 
-        toString() {
-            return url;
-        }
-    };
+    constructor(url: string) {
+        this.href = url;
+    }
+
+    public toString() {
+        return this.href;
+    }
 }

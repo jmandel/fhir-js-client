@@ -2,6 +2,7 @@
 /* global fhir */
 import BrowserStorage from "../storage/BrowserStorage";
 import BaseAdapter    from "./BaseAdapter";
+import { fhirclient } from "../types";
 
 /**
  * Browser Adapter

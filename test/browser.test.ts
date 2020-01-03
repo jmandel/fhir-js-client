@@ -2,7 +2,7 @@
 /* eslint-env browser */
 import { URL }    from "url";
 import { expect } from "@hapi/code";
-import Lab        from "@hapi/lab";
+import * as Lab        from "@hapi/lab";
 import * as smart from "../src/smart";
 
 // mocks

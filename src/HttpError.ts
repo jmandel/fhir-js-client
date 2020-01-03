@@ -3,7 +3,7 @@ interface ErrorResponse {
         status?: number
         statusText?: string
         responseText?: string
-    }
+    };
 }
 export default class HttpError extends Error
 {
@@ -45,9 +45,9 @@ export default class HttpError extends Error
 
     public static create(failure?: string | Error | ErrorResponse) {
         // start with generic values
-        var status: string | number     = 0;
-        var statusText = "Error";
-        var message    = "Unknown error";
+        let status: string | number = 0;
+        let statusText = "Error";
+        let message = "Unknown error";
 
         if (failure) {
             if (typeof failure == "object") {

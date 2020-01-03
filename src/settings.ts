@@ -106,9 +106,9 @@ export const fhirVersions = {
  * a request by patient ID.
  */
 export const patientParams = [
-    "requester",
     "patient",
     "subject",
+    "requester",
     "member",
     "actor",
     "beneficiary"

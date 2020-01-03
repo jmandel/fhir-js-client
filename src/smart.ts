@@ -10,8 +10,9 @@ import {
 } from "./lib";
 
 import Client from "./Client";
-import BaseAdapter from "./adapters/BaseAdapter"
+import BaseAdapter from "./adapters/BaseAdapter";
 import { SMART_KEY } from "./settings";
+import { fhirclient } from "./types";
 
 
 const debug = _debug.extend("oauth2");
@@ -48,17 +49,22 @@ export function fetchWellKnownJson(baseUrl = "/"): Promise<fhirclient.WellKnownS
     });
 }
 
-export function fetchFhirVersion(baseUrl = "/"): Promise<string> {
+/**
+ * Fetch and return the FHIR version. This is done by fetching (and caching) the
+ * CapabilityStatement of the FHIR server
+ * @param [baseUrl] The base URL of the FHIR server
+ */
+export function fetchFhirVersion(baseUrl = "/"): Promise<string>
+{
     return fetchConformanceStatement(baseUrl).then((metadata) => metadata.fhirVersion);
 }
 
 /**
  * Given a fhir server returns an object with it's Oauth security endpoints that
  * we are interested in
- * @param {String} baseUrl Fhir server base URL
- * @returns { Promise<fhirclient.OAuthSecurityExtensions> }
+ * @param [baseUrl] Fhir server base URL
  */
-export function getSecurityExtensions(baseUrl = "/")
+export function getSecurityExtensions(baseUrl = "/"): Promise<fhirclient.OAuthSecurityExtensions>
 {
     return fetchWellKnownJson(baseUrl).then(meta => {
         if (!meta.authorization_endpoint || !meta.token_endpoint) {
@@ -71,7 +77,7 @@ export function getSecurityExtensions(baseUrl = "/")
         };
     }).catch(() => fetchConformanceStatement(baseUrl).then(metadata => {
         const nsUri = "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris";
-        const extensions = ((getPath(metadata || {}, "rest.0.security.extension") || []) as fhirclient.FHIR.Extension<"valueUri">[])
+        const extensions = ((getPath(metadata || {}, "rest.0.security.extension") || []) as Array<fhirclient.FHIR.Extension<"valueUri">>)
             .filter(e => e.url === nsUri)
             .map(o => o.extension)[0];
 
@@ -100,27 +106,28 @@ export function getSecurityExtensions(baseUrl = "/")
 }
 
 /**
- * @param {Object} env
- * @param {fhirclient.AuthorizeParams} params
- * @param {Boolean} [_noRedirect = false] If true, resolve with the redirect url
- * without trying to redirect to it
- * @returns { Promise<never|string> }
+ * @param env
+ * @param [params]
+ * @param [_noRedirect] If true, resolve with the redirect url without trying to redirect to it
  */
-export async function authorize(env: BaseAdapter, params: fhirclient.AuthorizeParams = {}, _noRedirect = false)
+export async function authorize(env: BaseAdapter, params: fhirclient.AuthorizeParams = {}, _noRedirect: boolean = false): Promise<string|void>
 {
     // Obtain input
-    let {
-        iss,
-        launch,
-        fhirServiceUrl,
+    const {
         redirect_uri,
-        redirectUri,
-        scope = "",
         clientSecret,
         fakeTokenResponse,
         patientId,
         encounterId,
-        client_id,
+        client_id
+    } = params;
+
+    let {
+        iss,
+        launch,
+        fhirServiceUrl,
+        redirectUri,
+        scope = "",
         clientId
     } = params;
 
@@ -249,9 +256,8 @@ export async function authorize(env: BaseAdapter, params: fhirclient.AuthorizePa
  * The completeAuth function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
  * authorization server..
- * @returns { Promise<fhirclient.Client> }
  */
-export async function completeAuth(env: BaseAdapter)
+export async function completeAuth(env: BaseAdapter): Promise<Client>
 {
     const url = env.getUrl();
     const Storage = env.getStorage();
@@ -276,8 +282,10 @@ export async function completeAuth(env: BaseAdapter)
     // that the url comes from the auth server (otherwise the app won't work
     // anyway).
     if (authError || authErrorDescription) {
-        let msg = [authError, authErrorDescription].filter(Boolean).join(": ");
-        throw new Error(msg);
+        throw new Error([
+            authError,
+            authErrorDescription
+        ].filter(Boolean).join(": "));
     }
 
     debug("key: %s, code: %O", key, code);
@@ -346,12 +354,12 @@ export async function completeAuth(env: BaseAdapter)
         }
 
         debug("Preparing to exchange the code for access token...");
-        const requestOptions = await buildTokenRequest(code, state);
+        const requestOptions = buildTokenRequest(code, state);
         debug("Token request options: %O", requestOptions);
         // The EHR authorization server SHALL return a JSON structure that
         // includes an access token or a message indicating that the
         // authorization request has been denied.
-        let tokenResponse = await request(state.tokenUri, requestOptions);
+        const tokenResponse = await request<fhirclient.TokenResponse>(state.tokenUri, requestOptions);
         debug("Token response: %O", tokenResponse);
         if (!tokenResponse.access_token) {
             throw new Error("Failed to obtain access token.");
@@ -382,7 +390,7 @@ export async function completeAuth(env: BaseAdapter)
  * Builds the token request options. Does not make the request, just
  * creates it's configuration and returns it in a Promise.
  */
-export function buildTokenRequest(code: string, state: fhirclient.ClientState)
+export function buildTokenRequest(code: string, state: fhirclient.ClientState): RequestInit
 {
     const { redirectUri, clientSecret, tokenUri, clientId } = state;
 
@@ -422,16 +430,15 @@ export function buildTokenRequest(code: string, state: fhirclient.ClientState)
         requestOptions.body += `&client_id=${encodeURIComponent(clientId)}`;
     }
 
-    return requestOptions;
+    return requestOptions as RequestInit;
 }
 
 /**
- * @param {Object} env
- * @param {() => Promise<fhirclient.Client>} [onSuccess]
- * @param {() => never} [onError]
- * @returns { Promise<fhirclient.Client> }
+ * @param env
+ * @param [onSuccess]
+ * @param [onError]
  */
-export async function ready(env: BaseAdapter, onSuccess?: () => any, onError?: () => any)
+export async function ready(env: BaseAdapter, onSuccess?: () => any, onError?: () => any): Promise<Client>
 {
     let task = completeAuth(env);
     if (onSuccess) {
@@ -443,7 +450,7 @@ export async function ready(env: BaseAdapter, onSuccess?: () => any, onError?: (
     return task;
 }
 
-export async function init(env: BaseAdapter, options: fhirclient.AuthorizeParams)
+export async function init(env: BaseAdapter, options: fhirclient.AuthorizeParams): Promise<Client|never>
 {
     const url   = env.getUrl();
     const code  = url.searchParams.get("code");

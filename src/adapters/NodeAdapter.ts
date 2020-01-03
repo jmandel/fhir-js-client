@@ -1,6 +1,7 @@
 import ServerStorage from "../storage/ServerStorage";
 import BaseAdapter   from "./BaseAdapter";
 import { ClientRequest, ServerResponse } from "http";
+import { fhirclient } from "../types";
 
 /**
  * Node Adapter - works with native NodeJS and with Express

@@ -1,5 +1,6 @@
-import * as smart from "../smart";
+import { ready, authorize, init } from "../smart";
 import Client from "../Client";
+import { fhirclient } from "../types";
 
 /**
  * This is the abstract base class that adapters must inherit. It just a
@@ -35,14 +36,11 @@ export default abstract class BaseAdapter
     }
 
 
-    public getUrl(): URL {
-        return new URL("");
-    }
+    public abstract getUrl(): URL;
+    public abstract getStorage(): fhirclient.Storage;
+    public abstract redirect(to: string): void | Promise<any>;
 
-    abstract getStorage(): fhirclient.Storage;
-    abstract redirect(to: string): void;
-
-    relative(path: string): string
+    public relative(path: string): string
     {
         return new URL(path, this.getUrl().href).href;
     }
@@ -54,13 +52,13 @@ export default abstract class BaseAdapter
      * arguments. For example in node we will need a request, a response and
      * optionally a storage or storage factory function.
      */
-    getSmartApi(): fhirclient.SMART
+    public getSmartApi(): fhirclient.SMART
     {
         return {
-            ready    : (...args) => smart.ready(this, ...args),
-            authorize: options   => smart.authorize(this, options),
-            init     : (...args) => smart.init(this, ...args),
-            client   : state     => new Client(this, state),
+            ready    : (...args) => ready(this, ...args),
+            authorize: options   => authorize(this, options),
+            init     : (...args) => init(this, ...args),
+            client   : (state: fhirclient.ClientState) => new Client(this, state),
             options  : this.options
         };
     }

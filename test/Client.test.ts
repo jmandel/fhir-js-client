@@ -4,15 +4,12 @@ import mockServer     from "./mocks/mockServer";
 import ServerEnv      from "./mocks/ServerEnvironment";
 import BrowserEnv     from "./mocks/BrowserEnvironment";
 import BrowserEnvFhir from "./mocks/BrowserEnvironmentWithFhirJs";
-
-import { expect } from "@hapi/code";
-import Lab        from "@hapi/lab";
-import FS         from "fs";
-
-import str        from "../src/strings";
-
-import Client     from "../src/Client";
-import { KEY }    from "../src/smart";
+import { expect }     from "@hapi/code";
+import * as Lab       from "@hapi/lab";
+import * as FS        from "fs";
+import str            from "../src/strings";
+import Client         from "../src/Client";
+import { KEY }        from "../src/smart";
 
 export const lab = Lab.script();
 const { it, describe, before, after, afterEach } = lab;
@@ -28,7 +25,7 @@ before(() => {
             if (error) {
                 return reject(error);
             }
-            let addr = mockDataServer.address();
+            const addr = mockDataServer.address();
             mockUrl = `http://127.0.0.1:${addr.port}`;
             // console.log(`Mock Data Server listening at ${mockUrl}`);
             resolve();
@@ -65,7 +62,8 @@ function crossPlatformTest(callback) {
         "works on the server" : new ServerEnv({ session: {} })
     };
 
-    for (let name in tests) {
+    // tslint:disable-next-line:forin
+    for (const name in tests) {
         it (name, () => callback(tests[name]));
     }
 }
@@ -74,18 +72,22 @@ describe("FHIR.client", () => {
 
     describe("constructor", () => {
         it ("throws if initialized without arguments", () => {
+            // @ts-ignore
             expect(() => new Client()).to.throw();
         });
 
         it ("throws if initialized without serverUrl", () => {
+            // @ts-ignore
             expect(() => new Client({}, {})).to.throw();
         });
 
         it ("throws if initialized with invalid serverUrl", () => {
+            // @ts-ignore
             expect(() => new Client({}, "invalid-url")).to.throw();
         });
 
         it ("accepts string as second argument", () => {
+            // @ts-ignore
             expect(new Client({}, "http://test").state).to.equal({ serverUrl: "http://test" });
         });
     });
@@ -117,7 +119,8 @@ describe("FHIR.client", () => {
             "works on the server" : new ServerEnv()
         };
 
-        for (let name in tests) {
+        // tslint:disable-next-line:forin
+        for (const name in tests) {
             it (name, async () => {
                 const client = new Client(tests[name], {
                     serverUrl: mockUrl,
@@ -141,6 +144,20 @@ describe("FHIR.client", () => {
                 });
                 await expect(client.patient.request("Observation")).to.reject(
                     Error, "Patient is not available"
+                );
+            });
+        });
+
+        describe("throws on incorrect path", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        patient: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
+                    }
+                });
+                await expect(client.patient.request("/")).to.reject(
+                    Error, `Invalid url "${mockUrl + "/"}"`
                 );
             });
         });
@@ -172,7 +189,7 @@ describe("FHIR.client", () => {
 
                 await expect(client.patient.request("Observation")).to.reject(
                     Error,
-                    "Resource not supported"
+                    "Resource \"Observation\" is not supported by this FHIR server"
                 );
             });
         });
@@ -502,8 +519,22 @@ describe("FHIR.client", () => {
     });
 
     describe("fhir.js api", () => {
+        it ("does not work without fhir.js", async () => {
+            const env    = new BrowserEnv();
+            // @ts-ignore
+            const client = new Client(env, {
+                serverUrl: "https://r2.smarthealthit.org",
+                tokenResponse: {
+                    patient: "bd7cb541-732b-4e39-ab49-ae507aa49326"
+                }
+            });
+            expect(client.api).to.be.undefined();
+            expect(client.patient.api).to.be.undefined();
+        });
+
         it ("works in the browser", async () => {
             const env    = new BrowserEnvFhir();
+            // @ts-ignore
             const client = new Client(env, {
                 serverUrl: "https://r2.smarthealthit.org",
                 tokenResponse: {
@@ -516,13 +547,67 @@ describe("FHIR.client", () => {
         });
     });
 
+    describe("client.connect", () => {
+        it ("works as expected", () => {
+            const env    = new BrowserEnv();
+            // @ts-ignore
+            const client = new Client(env, {
+                serverUrl: "https://r2.smarthealthit.org",
+                tokenResponse: {
+                    access_token: "my access token"
+                }
+            });
+
+            let _passedOptions = null;
+
+            const fhirJs = (options) => {
+                _passedOptions = options;
+                return options;
+            };
+
+            client.connect(fhirJs);
+
+            expect(_passedOptions.baseUrl).to.equal("https://r2.smarthealthit.org");
+            expect(_passedOptions.auth).to.equal({ token: "my access token" });
+
+            client.state.tokenResponse.access_token = null;
+            client.connect(fhirJs);
+            expect(_passedOptions.auth).to.be.undefined();
+            expect(client.patient.api).to.be.undefined();
+
+            client.state.username = "my username";
+            client.connect(fhirJs);
+            expect(_passedOptions.auth).to.be.undefined();
+
+            client.state.password = "my password";
+            client.connect(fhirJs);
+            expect(_passedOptions.auth).to.equal({
+                user: "my username",
+                pass: "my password"
+            });
+
+            client.state.password = "my password";
+            client.connect(fhirJs);
+            expect(_passedOptions.auth).to.equal({
+                user: "my username",
+                pass: "my password"
+            });
+
+            client.state.tokenResponse.patient = "bd7cb541-732b-4e39-ab49-ae507aa49326";
+            client.connect(fhirJs);
+            expect(client.patient.api).to.not.be.undefined();
+        });
+    });
+
     describe("client.request", () => {
         it("rejects if no url is provided", async () => {
+            // @ts-ignore
             const client = new Client({}, "http://localhost");
             await expect(client.request()).to.reject();
         });
 
         it("rejects on 401 with no refresh token", async () => {
+            // @ts-ignore
             const client = new Client({}, mockUrl);
             const mock = {
                 status: 401,
@@ -533,6 +618,7 @@ describe("FHIR.client", () => {
         });
 
         it("rejects on 401 with useRefreshToken = false", async () => {
+            // @ts-ignore
             const client = new Client({}, {
                 serverUrl: mockUrl,
                 tokenResponse: {
@@ -558,7 +644,8 @@ describe("FHIR.client", () => {
                 "works on the server" : new ServerEnv()
             };
 
-            for (let name in tests) {
+            // tslint:disable-next-line:forin
+            for (const name in tests) {
                 it (name, async () => {
                     const client = new Client(tests[name], { serverUrl: mockUrl });
                     mockServer.mock(mock);
@@ -578,7 +665,8 @@ describe("FHIR.client", () => {
                 "works in the browser": new BrowserEnv(),
                 "works on the server" : new ServerEnv()
             };
-            for (let name in tests) {
+            // tslint:disable-next-line:forin
+            for (const name in tests) {
                 it (name, async () => {
                     const client = new Client(tests[name], { serverUrl: mockUrl });
                     mockServer.mock(mock);
@@ -599,7 +687,8 @@ describe("FHIR.client", () => {
                 "works on the server" : new ServerEnv()
             };
 
-            for (let name in tests) {
+            // tslint:disable-next-line:forin
+            for (const name in tests) {
                 it (name, async () => {
                     const client = new Client(tests[name], { serverUrl: mockUrl });
                     mockServer.mock(mock);
@@ -775,7 +864,7 @@ describe("FHIR.client", () => {
                     pageLimit: 0,
                     onPage
                 }).catch(error => {
-                    expect(error).to.be.error("Error", "test error");
+                    expect(error).to.be.error(Error, "test error");
                 });
                 expect(pages.length, "onPage should be called once").to.equal(1);
                 expect(pages[0]).to.include({ pageId: 1 });
@@ -807,7 +896,7 @@ describe("FHIR.client", () => {
                     pageLimit: 0,
                     onPage
                 }).catch(error => {
-                    expect(error).to.be.error("Error", "test error");
+                    expect(error).to.be.error(Error, "test error");
                 });
                 expect(pages.length, "onPage should be called once").to.equal(1);
                 expect(pages[0]).to.include({ pageId: 1 });
@@ -960,6 +1049,30 @@ describe("FHIR.client", () => {
 
                 expect(result).to.equal({
                     patient: { reference: "ref/1" }
+                });
+            });
+        });
+
+        describe ("ignores missing ref from source", async () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        patient: { reference: null }
+                    }
+                });
+
+                const result = await client.request("Observation/id", {
+                    resolveReferences: "patient"
+                });
+
+                expect(result).to.equal({
+                    patient: { reference: null }
                 });
             });
         });
@@ -2160,7 +2273,7 @@ describe("FHIR.client", () => {
     // -------------------------------------------------------------------------
 
     describe ("client.user", () => {
-        const id_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJwcm9maWxlIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MjA4MDQxNiIsImZoaXJVc2VyIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MjA4MDQxNiIsInN1YiI6IjM2YTEwYmM0ZDJhNzM1OGI0YWZkYWFhZjlhZjMyYmFjY2FjYmFhYmQxMDkxYmQ0YTgwMjg0MmFkNWNhZGQxNzgiLCJpc3MiOiJodHRwOi8vbGF1bmNoLnNtYXJ0aGVhbHRoaXQub3JnIiwiaWF0IjoxNTU5MzkyMjk1LCJleHAiOjE1NTkzOTU4OTV9.niEs55G4AFJZtU_b9Y1Y6DQmXurUZZkh3WCudZgwvYasxVU8x3gJiX3jqONttqPhkh7418EFssCKnnaBlUDwsbhp7xdWN4o1L1NvH4bp_R_zJ25F1s6jLmNm2Qp9LqU133PEdcRIqQPgBMyZBWUTyxQ9ihKY1RAjlztAULQ3wKea-rfe0BXJZeUJBsQPzYCnbKY1dON_NRd8N9pTImqf41MpIbEe7YEOHuirIb6HBpurhAHjTLDv1IuHpEAOxpmtxVVHiVf-FYXzTFmn4cGe2PsNJfBl8R_zow2n6qaSANdvSxJDE4DUgIJ6H18wiSJJHp6Plf_bapccAwxbx-zZCw";
+        const idToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJwcm9maWxlIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MjA4MDQxNiIsImZoaXJVc2VyIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MjA4MDQxNiIsInN1YiI6IjM2YTEwYmM0ZDJhNzM1OGI0YWZkYWFhZjlhZjMyYmFjY2FjYmFhYmQxMDkxYmQ0YTgwMjg0MmFkNWNhZGQxNzgiLCJpc3MiOiJodHRwOi8vbGF1bmNoLnNtYXJ0aGVhbHRoaXQub3JnIiwiaWF0IjoxNTU5MzkyMjk1LCJleHAiOjE1NTkzOTU4OTV9.niEs55G4AFJZtU_b9Y1Y6DQmXurUZZkh3WCudZgwvYasxVU8x3gJiX3jqONttqPhkh7418EFssCKnnaBlUDwsbhp7xdWN4o1L1NvH4bp_R_zJ25F1s6jLmNm2Qp9LqU133PEdcRIqQPgBMyZBWUTyxQ9ihKY1RAjlztAULQ3wKea-rfe0BXJZeUJBsQPzYCnbKY1dON_NRd8N9pTImqf41MpIbEe7YEOHuirIb6HBpurhAHjTLDv1IuHpEAOxpmtxVVHiVf-FYXzTFmn4cGe2PsNJfBl8R_zow2n6qaSANdvSxJDE4DUgIJ6H18wiSJJHp6Plf_bapccAwxbx-zZCw";
         crossPlatformTest(async (env) => {
             const client1 = new Client(env, {
                 serverUrl: mockUrl,
@@ -2173,7 +2286,7 @@ describe("FHIR.client", () => {
 
             const client2 = new Client(env, {
                 serverUrl: mockUrl,
-                tokenResponse: { id_token }
+                tokenResponse: { id_token: idToken }
             });
             expect(client2.user.id).to.equal("smart-Practitioner-72080416");
             expect(client2.getUserId()).to.equal("smart-Practitioner-72080416");
@@ -2207,6 +2320,7 @@ describe("FHIR.client", () => {
     it ("client.refresh validates state and throws if needed", async () => {
 
         expect(
+            // @ts-ignore
             () => (new Client({}, {
                 serverUrl: "http://whatever",
                 tokenUri : "whatever",
@@ -2219,6 +2333,7 @@ describe("FHIR.client", () => {
         ).to.throw(Error, /\brefresh_token\b/);
 
         expect(
+            // @ts-ignore
             () => new Client({}, {
                 serverUrl: "http://whatever",
                 tokenResponse: {
@@ -2231,6 +2346,7 @@ describe("FHIR.client", () => {
         ).to.throw(Error, /\btokenUri\b/);
 
         expect(
+            // @ts-ignore
             () => new Client({}, {
                 serverUrl: "http://whatever",
                 tokenUri : "whatever",
@@ -2244,6 +2360,7 @@ describe("FHIR.client", () => {
         ).to.throw(Error, /\boffline_access\b/);
 
         expect(
+            // @ts-ignore
             () => new Client({}, {
                 serverUrl: "http://whatever",
                 tokenUri : "whatever",
@@ -2263,6 +2380,7 @@ describe("FHIR.client", () => {
                     status: 200,
                     body: { result: false }
                 });
+                // @ts-ignore
                 const client = new Client(env, {
                     serverUrl: "http://whatever",
                     tokenUri : mockUrl,
@@ -2285,6 +2403,7 @@ describe("FHIR.client", () => {
                     status: 200,
                     body: { result: false }
                 });
+                // @ts-ignore
                 const client = new Client(env, {
                     serverUrl: "http://whatever",
                     tokenUri : mockUrl,
@@ -2319,6 +2438,7 @@ describe("FHIR.client", () => {
         storage.set(KEY, key);
         storage.set(key, state);
 
+        // @ts-ignore
         const client = new Client(env, state);
         // console.log("===> ", env, storage);
 
@@ -2502,6 +2622,7 @@ describe("FHIR.client", () => {
             const key = "my-key";
             await storage.set(KEY, key);
             await storage.set(key, "whatever");
+            // @ts-ignore
             await client._clearState();
             expect(client.state.tokenResponse).to.equal({});
             expect(storage.get(KEY)).to.be.empty();
@@ -2529,6 +2650,18 @@ describe("FHIR.client", () => {
                         null,
                         {
                             codding: null
+                        }
+                    ]
+                },
+                {
+                    resourceType: "Observation",
+                    category: [
+                        {
+                            coding: [
+                                {
+                                    code: null
+                                }
+                            ]
                         }
                     ]
                 }
@@ -2581,6 +2714,7 @@ describe("FHIR.client", () => {
                 expect(client.units.cm({ code: "ft", value: 3 })).to.equal(3 * 30.48);
                 expect(client.units.cm({ code: "[ft_us]", value: 3 })).to.equal(3 * 30.48);
                 expect(() => client.units.cm({ code: "xx", value: 3 })).to.throw();
+                // @ts-ignore
                 expect(() => client.units.cm({ code: "m", value: "x" })).to.throw();
             });
         });
@@ -2592,13 +2726,16 @@ describe("FHIR.client", () => {
                 expect(client.units.kg({ code: "lb", value: 3 })).to.equal(3 / 2.20462);
                 expect(client.units.kg({ code: "oz", value: 3 })).to.equal(3 / 35.274);
                 expect(() => client.units.kg({ code: "xx", value: 3 })).to.throw();
+                // @ts-ignore
                 expect(() => client.units.kg({ code: "lb", value: "x" })).to.throw();
             });
         });
         describe ("any", () => {
             crossPlatformTest(async (env) => {
                 const client = new Client(env, "http://localhost");
+                // @ts-ignore
                 expect(client.units.any({ value: 3 })).to.equal(3);
+                // @ts-ignore
                 expect(() => client.units.kg({ value: "x" })).to.throw();
             });
         });
@@ -2606,16 +2743,19 @@ describe("FHIR.client", () => {
 
     describe("getPath", () => {
         it ("returns the first arg if no path", () => {
+            // @ts-ignore
             const client = new Client({}, "http://localhost");
             const data = {};
             expect(client.getPath(data)).to.equal(data);
         });
         it ("returns the first arg for empty path", () => {
+            // @ts-ignore
             const client = new Client({}, "http://localhost");
             const data = {};
             expect(client.getPath(data, "")).to.equal(data);
         });
         it ("works as expected", () => {
+            // @ts-ignore
             const client = new Client({}, "http://localhost");
             const data = { a: 1, b: [0, { a: 2 }] };
             expect(client.getPath(data, "b.1.a")).to.equal(2);
@@ -2627,8 +2767,8 @@ describe("FHIR.client", () => {
         crossPlatformTest(async (env) => {
             const client = new Client(env, mockUrl);
             const resource = { resourceType: "Patient" };
-            client.request = async options => options;
-            const result = await client.create(resource);
+            client.request = async (options: any) => options;
+            const result: any = await client.create(resource);
             expect(result).to.equal({
                 url    : "Patient",
                 method : "POST",
@@ -2643,9 +2783,9 @@ describe("FHIR.client", () => {
     describe("update", () => {
         crossPlatformTest(async (env) => {
             const client = new Client(env, mockUrl);
-            const resource = { resourceType: "Patient", id: 2 };
-            client.request = async options => options;
-            const result = await client.update(resource);
+            const resource = { resourceType: "Patient", id: "2" };
+            client.request = async (options: any) => options;
+            const result: any = await client.update(resource);
             expect(result).to.equal({
                 url    : "Patient/2",
                 method : "PUT",
@@ -2660,8 +2800,8 @@ describe("FHIR.client", () => {
     describe("delete", () => {
         crossPlatformTest(async (env) => {
             const client = new Client(env, mockUrl);
-            client.request = async options => options;
-            const result = await client.delete("Patient/2");
+            client.request = async (options: any) => options;
+            const result: any = await client.delete("Patient/2");
             expect(result).to.equal({
                 url   : "Patient/2",
                 method: "DELETE"

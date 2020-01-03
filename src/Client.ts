@@ -19,34 +19,36 @@ import { SMART_KEY, patientCompartment, fhirVersions } from "./settings";
 import HttpError from "./HttpError";
 import BaseAdapter from "./adapters/BaseAdapter";
 import { Adapter as BrowserAdapter } from "./adapters/BrowserAdapter";
+import { fhirclient } from "./types";
 
+// $lab:coverage:off$
 // @ts-ignore
 // eslint-disable-next-line no-undef
 const { Response } = global.FHIRCLIENT_PURE ? window : require("cross-fetch");
+// $lab:coverage:on$
+
 const debug = _debug.extend("client");
 
 /**
- * Adds patient context to requestOptions object to be used with fhirclient.Client.request
- * @param {Object|String} requestOptions Can be a string URL (relative to
- *  the serviceUrl), or an object which will be passed to fetch()
+ * Adds patient context to requestOptions object to be used with
+ * fhirclient.Client.request
+ * @param requestOptions Can be a string URL (relative to the serviceUrl), or an
+ * object which will be passed to fetch()
  * @param client Current FHIR client object containing patient context
- * @return {Promise<Object|String>} requestOptions object contextualized to current patient
+ * @return requestOptions object contextualized to current patient
  */
-async function contextualize(requestOptions: string|URL|fhirclient.RequestOptions, client: Client) {
-
-    // This code could be useful for implementing FHIR version awareness in the future:
-    //   const fhirVersionsMap = require("./data/fhir-versions");
-    //   const fetchFhirVersion = require("./smart").fetchFhirVersion;
-    //   const fhirVersion = client.state.fhirVersion || await fetchFhirVersion(client.state.serverUrl) || "";
-    //   const fhirRelease = fhirVersionsMap[fhirVersion];
-
+async function contextualize(
+    requestOptions: string | URL | fhirclient.RequestOptions,
+    client: Client
+): Promise<fhirclient.RequestOptions>
+{
     const base = absolute("/", client.state.serverUrl);
 
-    async function contextualURL(url: URL) {
-        const resourceType = url.pathname.split("/").pop();
+    async function contextualURL(_url: URL) {
+        const resourceType = _url.pathname.split("/").pop();
 
         if (!resourceType) {
-            throw new Error(`Invalid url "${url}"`);
+            throw new Error(`Invalid url "${_url}"`);
         }
 
         if (patientCompartment.indexOf(resourceType) == -1) {
@@ -55,17 +57,15 @@ async function contextualize(requestOptions: string|URL|fhirclient.RequestOption
 
         const conformance = await fetchConformanceStatement(client.state.serverUrl);
         const searchParam = getPatientParam(conformance, resourceType);
-        url.searchParams.set(searchParam, client.patient.id as string);
-        return url.href;
+        _url.searchParams.set(searchParam, client.patient.id as string);
+        return _url.href;
     }
 
     if (typeof requestOptions == "string" || requestOptions instanceof URL) {
-        let url = new URL(requestOptions + "", base);
-        return contextualURL(url);
+        return { url: await contextualURL(new URL(requestOptions + "", base)) };
     }
 
-    let url = new URL(requestOptions.url + "", base);
-    requestOptions.url = await contextualURL(url);
+    requestOptions.url = await contextualURL(new URL(requestOptions.url + "", base));
     return requestOptions;
 }
 
@@ -74,7 +74,7 @@ async function contextualize(requestOptions: string|URL|fhirclient.RequestOption
  * @param refId
  * @param cache A map to store the resolved refs
  * @param client The client instance
- * @returns {Promise<Object>} The resolved reference
+ * @returns The resolved reference
  * @private
  */
 function getRef(
@@ -82,15 +82,15 @@ function getRef(
     cache: fhirclient.JsonObject,
     client: Client
 ): Promise<fhirclient.JsonObject> {
-    let sub = cache[refId];
+    const sub = cache[refId];
     if (!sub) {
 
         // Note that we set cache[refId] immediately! When the promise is
         // settled it will be updated. This is to avoid a ref being fetched
         // twice because some of these requests are executed in parallel.
-        cache[refId] = client.request(refId).then(sub => {
-            cache[refId] = sub;
-            return sub;
+        cache[refId] = client.request(refId).then(res => {
+            cache[refId] = res;
+            return res;
         }, (error: Error) => {
             delete cache[refId];
             throw error;
@@ -154,7 +154,7 @@ function resolveRefs(
 
     // 2. Remove duplicates
     paths = paths.filter((p, i) => {
-        let index = paths.indexOf(p, i + 1);
+        const index = paths.indexOf(p, i + 1);
         if (index > -1) {
             debug("Duplicated reference path \"%s\"", p);
             return false;
@@ -190,6 +190,9 @@ function resolveRefs(
     return task;
 }
 
+/**
+ * @implements { fhirclient.Client }
+ */
 export default class Client
 {
     public state: fhirclient.ClientState;
@@ -223,7 +226,7 @@ export default class Client
      * @param {object} environment
      * @param {fhirclient.ClientState|string} state
      */
-    constructor(environment: BaseAdapter, state: fhirclient.ClientState)
+    constructor(environment: BaseAdapter, state: fhirclient.ClientState | string)
     {
         /**
          * @type fhirclient.ClientState
@@ -287,12 +290,10 @@ export default class Client
 
         // fhir.js api (attached automatically in browser)
         // ---------------------------------------------------------------------
-        if ((environment as BrowserAdapter).fhir) {
-            this.connect((environment as BrowserAdapter).fhir);
-        }
+        this.connect((environment as BrowserAdapter).fhir);
     }
 
-    connect(fhirJs: (options: fhirclient.JsonObject) => fhirclient.JsonObject)
+    public connect(fhirJs?: (options: fhirclient.JsonObject) => fhirclient.JsonObject): Client
     {
         if (typeof fhirJs == "function") {
             const options: fhirclient.JsonObject = {
@@ -322,13 +323,14 @@ export default class Client
                 });
             }
         }
+        return this;
     }
 
     /**
      * Returns the ID of the selected patient or null. You should have requested
      * "launch/patient" scope. Otherwise this will return null.
      */
-    getPatientId()
+    public getPatientId(): string | null
     {
         const tokenResponse = this.state.tokenResponse;
         if (tokenResponse) {
@@ -362,7 +364,7 @@ export default class Client
      * Note that not all servers support the "launch/encounter" scope so this
      * will be null if they don't.
      */
-    getEncounterId()
+    public getEncounterId(): string | null
     {
         const tokenResponse = this.state.tokenResponse;
         if (tokenResponse) {
@@ -395,7 +397,7 @@ export default class Client
      * "profile" scopes if you need to receive an id_token (if you need to know
      * who the logged-in user is).
      */
-    getIdToken()
+    public getIdToken(): fhirclient.IDToken | null
     {
         const tokenResponse = this.state.tokenResponse;
         if (tokenResponse) {
@@ -409,7 +411,12 @@ export default class Client
                 const hasProfile  = scope.match(/\bprofile\b/);
                 const hasFhirUser = scope.match(/\bfhirUser\b/);
                 if (!hasOpenid || !(hasFhirUser || hasProfile)) {
-                    debug("You are trying to get the id_token but you are not using the right scopes. Please add 'openid' and 'fhirUser' or 'profile' to the scopes you are requesting.");
+                    debug(
+                        "You are trying to get the id_token but you are not " +
+                        "using the right scopes. Please add 'openid' and " +
+                        "'fhirUser' or 'profile' to the scopes you are " +
+                        "requesting."
+                    );
                 }
                 else {
                     // The server should have returned the id_token!
@@ -433,7 +440,7 @@ export default class Client
      * having the following shape "{user type}/{user id}". For example:
      * "Practitioner/abc" or "Patient/xyz".
      */
-    getFhirUser()
+    public getFhirUser(): string | null
     {
         const idToken = this.getIdToken();
         if (idToken) {
@@ -445,7 +452,7 @@ export default class Client
     /**
      * Returns the user ID or null.
      */
-    getUserId()
+    public getUserId(): string | null
     {
         const profile = this.getFhirUser();
         if (profile) {
@@ -458,7 +465,7 @@ export default class Client
      * Returns the type of the logged-in user or null. The result can be
      * "Practitioner", "Patient" or "RelatedPerson".
      */
-    getUserType()
+    public getUserType(): string | null
     {
         const profile = this.getFhirUser();
         if (profile) {
@@ -467,7 +474,11 @@ export default class Client
         return null;
     }
 
-    getAuthorizationHeader()
+    /**
+     * Builds and returns the value of the `Authorization` header that can be
+     * sent to the FHIR server
+     */
+    public getAuthorizationHeader(): string | null
     {
         const accessToken = getPath(this, "state.tokenResponse.access_token");
         if (accessToken) {
@@ -480,7 +491,7 @@ export default class Client
         return null;
     }
 
-    async _clearState() {
+    private async _clearState() {
         const storage = this.environment.getStorage();
         const key = await storage.get(SMART_KEY);
         if (key) {
@@ -493,13 +504,13 @@ export default class Client
     /**
      * @param resource A FHIR resource to be created
      */
-    create(resource: fhirclient.FHIR.Resource)
+    public create(resource: fhirclient.FHIR.Resource): Promise<fhirclient.FHIR.Resource>
     {
-        return this.request({
+        return this.request<fhirclient.FHIR.Resource>({
             url: `${resource.resourceType}`,
             method: "POST",
             body: JSON.stringify(resource),
-            headers:{
+            headers: {
                 "Content-Type": "application/fhir+json"
             }
         });
@@ -508,13 +519,13 @@ export default class Client
     /**
      * @param resource A FHIR resource to be updated
      */
-    update(resource: fhirclient.FHIR.Resource)
+    public update(resource: fhirclient.FHIR.Resource): Promise<fhirclient.FHIR.Resource>
     {
-        return this.request({
+        return this.request<fhirclient.FHIR.Resource>({
             url: `${resource.resourceType}/${resource.id}`,
             method: "PUT",
             body: JSON.stringify(resource),
-            headers:{
+            headers: {
                 "Content-Type": "application/fhir+json"
             }
         });
@@ -524,9 +535,9 @@ export default class Client
      * @param url Relative URI of the FHIR resource to be deleted
      * (format: `resourceType/id`)
      */
-    delete(url: string)
+    public delete(url: string): Promise<fhirclient.FHIR.Resource>
     {
-        return this.request({
+        return this.request<fhirclient.FHIR.Resource>({
             url,
             method: "DELETE"
         });
@@ -538,13 +549,13 @@ export default class Client
      * @param fhirOptions Additional options to control the behavior
      * @param _resolvedRefs DO NOT USE! Used internally.
      */
-    async request(
+    public async request<T = any>(
         requestOptions: string|URL|fhirclient.RequestOptions,
         fhirOptions: fhirclient.FhirOptions = {},
         _resolvedRefs: fhirclient.JsonObject = {}
-    )
+    ): Promise<T>
     {
-        const debug = _debug.extend("client:request");
+        const debugRequest = _debug.extend("client:request");
         if (!requestOptions) {
             throw new Error("request requires an url or request options as argument");
         }
@@ -570,37 +581,37 @@ export default class Client
             };
         }
 
-        // fhirOptions.graph ---------------------------------------------------
-        fhirOptions.graph = (fhirOptions.graph !== false);
+        const options = {
+            graph: fhirOptions.graph !== false,
+            flat : !!fhirOptions.flat,
+            pageLimit: fhirOptions.pageLimit ?? 1,
+            resolveReferences: (fhirOptions.resolveReferences || []) as string[],
+            useRefreshToken: fhirOptions.useRefreshToken !== false,
+            onPage: typeof fhirOptions.onPage == "function" ?
+                fhirOptions.onPage as (
+                    data: fhirclient.JsonObject | fhirclient.JsonObject[],
+                    references?: fhirclient.JsonObject | undefined) => any :
+                undefined
+        };
 
-        // fhirOptions.flat ----------------------------------------------------
-        fhirOptions.flat = !!fhirOptions.flat;
-
-        // fhirOptions.pageLimit -----------------------------------------------
-        if (!fhirOptions.pageLimit && fhirOptions.pageLimit !== 0) {
-            fhirOptions.pageLimit = 1;
-        }
-
-        const hasPageCallback = typeof fhirOptions.onPage == "function";
-
-        debug(
+        debugRequest(
             "%s, options: %O, fhirOptions: %O",
             url,
             requestOptions,
-            fhirOptions
+            options
         );
 
         return request(url, requestOptions)
 
             // Automatic re-auth via refresh token -----------------------------
             .catch((error: HttpError) => {
-                debug("%o", error);
-                if (error.status == 401 && fhirOptions.useRefreshToken !== false) {
+                debugRequest("%o", error);
+                if (error.status == 401 && options.useRefreshToken) {
                     const hasRefreshToken = getPath(this, "state.tokenResponse.refresh_token");
                     if (hasRefreshToken) {
-                        return (this.refresh() as Promise<any>).then(() => this.request(
-                            { ...requestOptions, url },
-                            fhirOptions,
+                        return this.refresh().then(() => this.request(
+                            { ...(requestOptions as fhirclient.RequestOptions), url },
+                            options,
                             _resolvedRefs
                         ));
                     }
@@ -617,18 +628,17 @@ export default class Client
                         throw new Error("This app cannot be accessed directly. Please launch it as SMART app!");
                     }
 
-                    // !fhirOptions.useRefreshToken -> auto-refresh not enabled
-                    // Session expired. Need to re-launch. Clear state to
-                    // start over!
-                    if (fhirOptions.useRefreshToken === false) {
-                        debug("Your session has expired and the useRefreshToken option is set to false. Please re-launch the app.");
+                    // auto-refresh not enabled and Session expired.
+                    // Need to re-launch. Clear state to start over!
+                    if (!options.useRefreshToken) {
+                        debugRequest("Your session has expired and the useRefreshToken option is set to false. Please re-launch the app.");
                         await this._clearState();
                         throw new Error(str.expired);
                     }
 
                     // otherwise -> auto-refresh failed. Session expired.
                     // Need to re-launch. Clear state to start over!
-                    debug("Auto-refresh failed! Please re-launch the app.");
+                    debugRequest("Auto-refresh failed! Please re-launch the app.");
                     await this._clearState();
                     throw new Error(str.expired);
                 }
@@ -638,7 +648,7 @@ export default class Client
             // Handle 403 ------------------------------------------------------
             .catch((error: HttpError) => {
                 if (error.status == 403) {
-                    debug("Permission denied! Please make sure that you have requested the proper scopes.");
+                    debugRequest("Permission denied! Please make sure that you have requested the proper scopes.");
                 }
                 throw error;
             })
@@ -652,81 +662,83 @@ export default class Client
                 if (typeof data == "object" && data instanceof Response)
                     return data;
 
-                // Resolve References ----------------------------------------------
-                return (async (data) => {
+                // Resolve References ------------------------------------------
+                return (async (_data) => {
 
-                    if (data) {
-                        if (data.resourceType == "Bundle") {
-                            await Promise.all((data.entry || []).map(item => resolveRefs(
+                    if (_data) {
+                        if (_data.resourceType == "Bundle") {
+                            await Promise.all((_data.entry as fhirclient.FHIR.BundleEntry[] || []).map(item => resolveRefs(
                                 item.resource,
-                                fhirOptions,
+                                options,
                                 _resolvedRefs,
                                 this
                             )));
                         }
                         else {
                             await resolveRefs(
-                                data,
-                                fhirOptions,
+                                _data,
+                                options,
                                 _resolvedRefs,
                                 this
                             );
                         }
                     }
 
-                    return data;
+                    return _data;
                 })(data)
 
-                    // Pagination ------------------------------------------------------
-                    .then(async (data) => {
-                        if (data && data.resourceType == "Bundle") {
-                            const links = data.link || [];
+                    // Pagination ----------------------------------------------
+                    .then(async _data => {
+                        if (_data && _data.resourceType == "Bundle") {
+                            const links = (_data.link || []) as fhirclient.FHIR.BundleLink[];
 
-                            if (fhirOptions.flat) {
-                                data = (data.entry || []).map(entry => entry.resource);
+                            if (options.flat) {
+                                _data = (_data.entry || []).map(
+                                    (entry: fhirclient.FHIR.BundleEntry) => entry.resource
+                                );
                             }
 
-                            if (hasPageCallback) {
-                                await fhirOptions.onPage(data, { ..._resolvedRefs });
+                            if (options.onPage) {
+                                await options.onPage(_data, { ..._resolvedRefs });
                             }
 
-                            if (--fhirOptions.pageLimit) {
+                            if (--options.pageLimit) {
                                 const next = links.find(l => l.relation == "next");
-                                data = makeArray(data);
+                                _data = makeArray(_data);
                                 if (next && next.url) {
                                     const nextPage = await this.request(
                                         next.url,
-                                        fhirOptions,
+                                        options,
                                         _resolvedRefs
                                     );
 
-                                    if (hasPageCallback) {
+                                    if (options.onPage) {
                                         return null;
                                     }
 
-                                    if (fhirOptions.resolveReferences && fhirOptions.resolveReferences.length) {
+                                    if (options.resolveReferences.length) {
                                         Object.assign(_resolvedRefs, nextPage.references);
-                                        return data.concat(makeArray(nextPage.data || nextPage));
+                                        return _data.concat(makeArray(nextPage.data || nextPage));
                                     }
-                                    return data.concat(makeArray(nextPage));
+                                    return _data.concat(makeArray(nextPage));
                                 }
                             }
                         }
-                        return data;
+                        return _data;
                     })
 
-                    // Finalize --------------------------------------------------------
-                    .then(data => {
-                        if (fhirOptions.graph) {
+                    // Finalize ------------------------------------------------
+                    .then(_data => {
+                        if (options.graph) {
                             _resolvedRefs = {};
                         }
-                        else if (!hasPageCallback && fhirOptions.resolveReferences.length) {
+                        else if (!options.onPage && options.resolveReferences.length) {
                             return {
-                                data,
+                                data: _data,
                                 references: _resolvedRefs
                             };
                         }
-                        return data;
+                        return _data;
                     });
             });
     }
@@ -736,10 +748,10 @@ export default class Client
      * expired (or this fails for any other reason) it will be deleted from the
      * state, so that we don't enter into loops trying to re-authorize.
      */
-    refresh()
+    public refresh(): Promise<fhirclient.ClientState>
     {
-        const debug = _debug.extend("client:refresh");
-        debug("Attempting to refresh with refresh_token...");
+        const debugRefresh = _debug.extend("client:refresh");
+        debugRefresh("Attempting to refresh with refresh_token...");
 
         const refreshToken = this.state?.tokenResponse?.refresh_token;
         if (!refreshToken) {
@@ -761,7 +773,7 @@ export default class Client
         // requests in parallel which may result in multiple refresh calls.
         // To avoid that, we keep a to the current refresh task (if any).
         if (!this._refreshTask) {
-            this._refreshTask = request(tokenUri, {
+            this._refreshTask = request<fhirclient.TokenResponse>(tokenUri, {
                 mode   : "cors",
                 method : "POST",
                 headers: {
@@ -769,22 +781,29 @@ export default class Client
                 },
                 body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}`,
                 credentials: "include"
-            }).then((data: fhirclient.JsonObject) => {
+            }).then(data => {
                 if (!data.access_token) {
                     throw new Error("No access token received");
                 }
                 return data;
             }).then(data => {
-                debug("Received new access token %O", data);
+                debugRefresh("Received new access token %O", data);
                 Object.assign(this.state.tokenResponse, data);
                 return this.state;
             }).catch((error: Error) => {
-                debug("Deleting the expired or invalid refresh token.");
-                delete this.state.tokenResponse.refresh_token;
+                if (this.state?.tokenResponse?.refresh_token) {
+                    debugRefresh("Deleting the expired or invalid refresh token.");
+                    delete this.state.tokenResponse.refresh_token;
+                }
                 throw error;
             }).finally(() => {
                 this._refreshTask = null;
-                this.environment.getStorage().set(this.state.key, this.state);
+                const key = this.state.key;
+                if (key) {
+                    this.environment.getStorage().set(key, this.state);
+                } else {
+                    debugRefresh("No 'key' found in Clint.state. Cannot persist the instance.");
+                }
             });
         }
 
@@ -792,27 +811,16 @@ export default class Client
     }
 
     // utils -------------------------------------------------------------------
-    byCode(observations: fhirclient.FHIR.Observation | fhirclient.FHIR.Observation[], property: string) {
-        return byCode(observations, property);
-    }
-
-    byCodes(observations: fhirclient.FHIR.Observation | fhirclient.FHIR.Observation[], property: string) {
-        return byCodes(observations, property);
-    }
-
-    get units() {
-        return units;
-    }
-
-    getPath(object: fhirclient.JsonObject, path: string) {
-        return getPath(object, path);
-    }
+    public byCode  = byCode;
+    public byCodes = byCodes;
+    public units   = units;
+    public getPath = getPath;
 
     /**
      * Returns a promise that will be resolved with the fhir version as defined
      * in the conformance statement.
      */
-    getFhirVersion(): Promise<string> {
+    public getFhirVersion(): Promise<string> {
         return fetchFhirVersion(this.state.serverUrl);
     }
 
@@ -823,7 +831,7 @@ export default class Client
      * - 4 for R4
      * - 0 if the version is not known
      */
-    getFhirRelease(): Promise<number> {
+    public getFhirRelease(): Promise<number> {
         return this.getFhirVersion().then(v => (fhirVersions as fhirclient.JsonObject)[v] ?? 0);
     }
 }

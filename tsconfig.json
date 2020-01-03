@@ -4,14 +4,22 @@
         "sourceMap": true,
         "noImplicitAny": true,
         "module": "commonjs",
-        "target": "es6",
+        "target": "ES2017",
         "strict": true,
-        "esModuleInterop": true
+        // "esModuleInterop": true,
+        "declaration": true,
+        "declarationDir": "./dist/tsc/types",
+        "importHelpers": false,
+        "lib": ["ES6"],
+        // "noEmitHelpers": true,
+        "resolveJsonModule": true,
+        // "inlineSourceMap": true
+        "alwaysStrict": true
     },
     "include": [
         "src"
     ],
     "exclude": [
         "node_modules"
-    ]
+    ],
 }

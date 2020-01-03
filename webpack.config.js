@@ -8,7 +8,7 @@ module.exports = function(env, argv) {
 
     return {
         context: __dirname,
-        entry: "./src/browser.js",
+        entry: "./src/browser.ts",
         target: "web",
         output: {
             path      : path.resolve(__dirname, "dist/build"),

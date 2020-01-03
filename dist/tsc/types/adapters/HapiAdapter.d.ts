@@ -1,38 +1,22 @@
+/// <reference types="node" />
 import { Adapter as NodeAdapter } from "./NodeAdapter";
 import { ClientRequest } from "http";
 import { fhirclient } from "../types";
-
-class HapiAdapter extends NodeAdapter
-{
+declare class HapiAdapter extends NodeAdapter {
     /**
      * Given the current environment, this method must redirect to the given
      * path
      * @param location The path to redirect to
      */
-    public redirect(location: string): void
-    {
-        return this.options.responseToolkit.redirect(location);
-    }
-
+    redirect(location: string): void;
     /**
      * This is the static entry point and MUST be provided
      * @param request The hapi request
      * @param h The hapi response toolkit
      * @param storage Custom storage instance or a storage factory function
      */
-    public static smart(
-        request: ClientRequest,
-        h: fhirclient.JsonObject,
-        storage: fhirclient.Storage | ((options?: fhirclient.JsonObject) => fhirclient.Storage)
-    )
-    {
-        return new HapiAdapter({
-            request,
-            responseToolkit: h,
-            storage
-        }).getSmartApi();
-    }
+    static smart(request: ClientRequest, h: fhirclient.JsonObject, storage: fhirclient.Storage | ((options?: fhirclient.JsonObject) => fhirclient.Storage)): fhirclient.SMART;
 }
-
-export default HapiAdapter.smart;
+declare const _default: typeof HapiAdapter.smart;
+export default _default;
 export { HapiAdapter as Adapter };

@@ -82,161 +82,10 @@ window["FHIR"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./src/browser.js");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./src/browser.ts");
 /******/ })
 /************************************************************************/
 /******/ ({
-
-/***/ "./node_modules/@babel/runtime/helpers/createClass.js":
-/*!************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/createClass.js ***!
-  \************************************************************/
-/*! all exports used */
-/***/ (function(module, exports) {
-
-function _defineProperties(target, props) {
-  for (var i = 0; i < props.length; i++) {
-    var descriptor = props[i];
-    descriptor.enumerable = descriptor.enumerable || false;
-    descriptor.configurable = true;
-    if ("value" in descriptor) descriptor.writable = true;
-    Object.defineProperty(target, descriptor.key, descriptor);
-  }
-}
-
-function _createClass(Constructor, protoProps, staticProps) {
-  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
-  if (staticProps) _defineProperties(Constructor, staticProps);
-  return Constructor;
-}
-
-module.exports = _createClass;
-
-/***/ }),
-
-/***/ "./node_modules/@babel/runtime/helpers/inheritsLoose.js":
-/*!**************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/inheritsLoose.js ***!
-  \**************************************************************/
-/*! all exports used */
-/***/ (function(module, exports) {
-
-function _inheritsLoose(subClass, superClass) {
-  subClass.prototype = Object.create(superClass.prototype);
-  subClass.prototype.constructor = subClass;
-  subClass.__proto__ = superClass;
-}
-
-module.exports = _inheritsLoose;
-
-/***/ }),
-
-/***/ "./node_modules/@babel/runtime/helpers/interopRequireDefault.js":
-/*!**********************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/interopRequireDefault.js ***!
-  \**********************************************************************/
-/*! all exports used */
-/***/ (function(module, exports) {
-
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : {
-    "default": obj
-  };
-}
-
-module.exports = _interopRequireDefault;
-
-/***/ }),
-
-/***/ "./node_modules/@babel/runtime/helpers/interopRequireWildcard.js":
-/*!***********************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/interopRequireWildcard.js ***!
-  \***********************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var _typeof = __webpack_require__(/*! ../helpers/typeof */ "./node_modules/@babel/runtime/helpers/typeof.js");
-
-function _getRequireWildcardCache() {
-  if (typeof WeakMap !== "function") return null;
-  var cache = new WeakMap();
-
-  _getRequireWildcardCache = function _getRequireWildcardCache() {
-    return cache;
-  };
-
-  return cache;
-}
-
-function _interopRequireWildcard(obj) {
-  if (obj && obj.__esModule) {
-    return obj;
-  }
-
-  if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") {
-    return {
-      "default": obj
-    };
-  }
-
-  var cache = _getRequireWildcardCache();
-
-  if (cache && cache.has(obj)) {
-    return cache.get(obj);
-  }
-
-  var newObj = {};
-  var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;
-
-  for (var key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;
-
-      if (desc && (desc.get || desc.set)) {
-        Object.defineProperty(newObj, key, desc);
-      } else {
-        newObj[key] = obj[key];
-      }
-    }
-  }
-
-  newObj["default"] = obj;
-
-  if (cache) {
-    cache.set(obj, newObj);
-  }
-
-  return newObj;
-}
-
-module.exports = _interopRequireWildcard;
-
-/***/ }),
-
-/***/ "./node_modules/@babel/runtime/helpers/typeof.js":
-/*!*******************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/typeof.js ***!
-  \*******************************************************/
-/*! all exports used */
-/***/ (function(module, exports) {
-
-function _typeof(obj) {
-  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-    module.exports = _typeof = function _typeof(obj) {
-      return typeof obj;
-    };
-  } else {
-    module.exports = _typeof = function _typeof(obj) {
-      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    };
-  }
-
-  return _typeof(obj);
-}
-
-module.exports = _typeof;
-
-/***/ }),
 
 /***/ "./node_modules/core-js/internals/a-function.js":
 /*!******************************************************!*\
@@ -272,37 +121,6 @@ module.exports = function (it) {
 
 /***/ }),
 
-/***/ "./node_modules/core-js/internals/add-to-unscopables.js":
-/*!**************************************************************!*\
-  !*** ./node_modules/core-js/internals/add-to-unscopables.js ***!
-  \**************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_modules/core-js/internals/well-known-symbol.js");
-var create = __webpack_require__(/*! ../internals/object-create */ "./node_modules/core-js/internals/object-create.js");
-var definePropertyModule = __webpack_require__(/*! ../internals/object-define-property */ "./node_modules/core-js/internals/object-define-property.js");
-
-var UNSCOPABLES = wellKnownSymbol('unscopables');
-var ArrayPrototype = Array.prototype;
-
-// Array.prototype[@@unscopables]
-// https://tc39.github.io/ecma262/#sec-array.prototype-@@unscopables
-if (ArrayPrototype[UNSCOPABLES] == undefined) {
-  definePropertyModule.f(ArrayPrototype, UNSCOPABLES, {
-    configurable: true,
-    value: create(null)
-  });
-}
-
-// add a key to Array.prototype[@@unscopables]
-module.exports = function (key) {
-  ArrayPrototype[UNSCOPABLES][key] = true;
-};
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/internals/advance-string-index.js":
 /*!****************************************************************!*\
   !*** ./node_modules/core-js/internals/advance-string-index.js ***!
@@ -318,22 +136,6 @@ var charAt = __webpack_require__(/*! ../internals/string-multibyte */ "./node_mo
 // https://tc39.github.io/ecma262/#sec-advancestringindex
 module.exports = function (S, index, unicode) {
   return index + (unicode ? charAt(S, index).length : 1);
-};
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/an-instance.js":
-/*!*******************************************************!*\
-  !*** ./node_modules/core-js/internals/an-instance.js ***!
-  \*******************************************************/
-/*! all exports used */
-/***/ (function(module, exports) {
-
-module.exports = function (it, Constructor, name) {
-  if (!(it instanceof Constructor)) {
-    throw TypeError('Incorrect ' + (name ? name + ' ' : '') + 'invocation');
-  } return it;
 };
 
 
@@ -374,60 +176,6 @@ var sloppyArrayMethod = __webpack_require__(/*! ../internals/sloppy-array-method
 module.exports = sloppyArrayMethod('forEach') ? function forEach(callbackfn /* , thisArg */) {
   return $forEach(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
 } : [].forEach;
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/array-from.js":
-/*!******************************************************!*\
-  !*** ./node_modules/core-js/internals/array-from.js ***!
-  \******************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var bind = __webpack_require__(/*! ../internals/bind-context */ "./node_modules/core-js/internals/bind-context.js");
-var toObject = __webpack_require__(/*! ../internals/to-object */ "./node_modules/core-js/internals/to-object.js");
-var callWithSafeIterationClosing = __webpack_require__(/*! ../internals/call-with-safe-iteration-closing */ "./node_modules/core-js/internals/call-with-safe-iteration-closing.js");
-var isArrayIteratorMethod = __webpack_require__(/*! ../internals/is-array-iterator-method */ "./node_modules/core-js/internals/is-array-iterator-method.js");
-var toLength = __webpack_require__(/*! ../internals/to-length */ "./node_modules/core-js/internals/to-length.js");
-var createProperty = __webpack_require__(/*! ../internals/create-property */ "./node_modules/core-js/internals/create-property.js");
-var getIteratorMethod = __webpack_require__(/*! ../internals/get-iterator-method */ "./node_modules/core-js/internals/get-iterator-method.js");
-
-// `Array.from` method implementation
-// https://tc39.github.io/ecma262/#sec-array.from
-module.exports = function from(arrayLike /* , mapfn = undefined, thisArg = undefined */) {
-  var O = toObject(arrayLike);
-  var C = typeof this == 'function' ? this : Array;
-  var argumentsLength = arguments.length;
-  var mapfn = argumentsLength > 1 ? arguments[1] : undefined;
-  var mapping = mapfn !== undefined;
-  var index = 0;
-  var iteratorMethod = getIteratorMethod(O);
-  var length, result, step, iterator, next;
-  if (mapping) mapfn = bind(mapfn, argumentsLength > 2 ? arguments[2] : undefined, 2);
-  // if the target is not iterable or it's an array with the default iterator - use a simple case
-  if (iteratorMethod != undefined && !(C == Array && isArrayIteratorMethod(iteratorMethod))) {
-    iterator = iteratorMethod.call(O);
-    next = iterator.next;
-    result = new C();
-    for (;!(step = next.call(iterator)).done; index++) {
-      createProperty(result, index, mapping
-        ? callWithSafeIterationClosing(iterator, mapfn, [step.value, index], true)
-        : step.value
-      );
-    }
-  } else {
-    length = toLength(O.length);
-    result = new C(length);
-    for (;length > index; index++) {
-      createProperty(result, index, mapping ? mapfn(O[index], index) : O[index]);
-    }
-  }
-  result.length = index;
-  return result;
-};
 
 
 /***/ }),
@@ -647,79 +395,6 @@ module.exports = function (fn, that, length) {
 
 /***/ }),
 
-/***/ "./node_modules/core-js/internals/call-with-safe-iteration-closing.js":
-/*!****************************************************************************!*\
-  !*** ./node_modules/core-js/internals/call-with-safe-iteration-closing.js ***!
-  \****************************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var anObject = __webpack_require__(/*! ../internals/an-object */ "./node_modules/core-js/internals/an-object.js");
-
-// call something on iterator step with safe closing on error
-module.exports = function (iterator, fn, value, ENTRIES) {
-  try {
-    return ENTRIES ? fn(anObject(value)[0], value[1]) : fn(value);
-  // 7.4.6 IteratorClose(iterator, completion)
-  } catch (error) {
-    var returnMethod = iterator['return'];
-    if (returnMethod !== undefined) anObject(returnMethod.call(iterator));
-    throw error;
-  }
-};
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/check-correctness-of-iteration.js":
-/*!**************************************************************************!*\
-  !*** ./node_modules/core-js/internals/check-correctness-of-iteration.js ***!
-  \**************************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_modules/core-js/internals/well-known-symbol.js");
-
-var ITERATOR = wellKnownSymbol('iterator');
-var SAFE_CLOSING = false;
-
-try {
-  var called = 0;
-  var iteratorWithReturn = {
-    next: function () {
-      return { done: !!called++ };
-    },
-    'return': function () {
-      SAFE_CLOSING = true;
-    }
-  };
-  iteratorWithReturn[ITERATOR] = function () {
-    return this;
-  };
-  // eslint-disable-next-line no-throw-literal
-  Array.from(iteratorWithReturn, function () { throw 2; });
-} catch (error) { /* empty */ }
-
-module.exports = function (exec, SKIP_CLOSING) {
-  if (!SKIP_CLOSING && !SAFE_CLOSING) return false;
-  var ITERATION_SUPPORT = false;
-  try {
-    var object = {};
-    object[ITERATOR] = function () {
-      return {
-        next: function () {
-          return { done: ITERATION_SUPPORT = true };
-        }
-      };
-    };
-    exec(object);
-  } catch (error) { /* empty */ }
-  return ITERATION_SUPPORT;
-};
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/internals/classof-raw.js":
 /*!*******************************************************!*\
   !*** ./node_modules/core-js/internals/classof-raw.js ***!
@@ -798,52 +473,6 @@ module.exports = function (target, source) {
 
 /***/ }),
 
-/***/ "./node_modules/core-js/internals/correct-prototype-getter.js":
-/*!********************************************************************!*\
-  !*** ./node_modules/core-js/internals/correct-prototype-getter.js ***!
-  \********************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var fails = __webpack_require__(/*! ../internals/fails */ "./node_modules/core-js/internals/fails.js");
-
-module.exports = !fails(function () {
-  function F() { /* empty */ }
-  F.prototype.constructor = null;
-  return Object.getPrototypeOf(new F()) !== F.prototype;
-});
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/create-iterator-constructor.js":
-/*!***********************************************************************!*\
-  !*** ./node_modules/core-js/internals/create-iterator-constructor.js ***!
-  \***********************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var IteratorPrototype = __webpack_require__(/*! ../internals/iterators-core */ "./node_modules/core-js/internals/iterators-core.js").IteratorPrototype;
-var create = __webpack_require__(/*! ../internals/object-create */ "./node_modules/core-js/internals/object-create.js");
-var createPropertyDescriptor = __webpack_require__(/*! ../internals/create-property-descriptor */ "./node_modules/core-js/internals/create-property-descriptor.js");
-var setToStringTag = __webpack_require__(/*! ../internals/set-to-string-tag */ "./node_modules/core-js/internals/set-to-string-tag.js");
-var Iterators = __webpack_require__(/*! ../internals/iterators */ "./node_modules/core-js/internals/iterators.js");
-
-var returnThis = function () { return this; };
-
-module.exports = function (IteratorConstructor, NAME, next) {
-  var TO_STRING_TAG = NAME + ' Iterator';
-  IteratorConstructor.prototype = create(IteratorPrototype, { next: createPropertyDescriptor(1, next) });
-  setToStringTag(IteratorConstructor, TO_STRING_TAG, false, true);
-  Iterators[TO_STRING_TAG] = returnThis;
-  return IteratorConstructor;
-};
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/internals/create-non-enumerable-property.js":
 /*!**************************************************************************!*\
   !*** ./node_modules/core-js/internals/create-non-enumerable-property.js ***!
@@ -901,108 +530,6 @@ module.exports = function (object, key, value) {
   var propertyKey = toPrimitive(key);
   if (propertyKey in object) definePropertyModule.f(object, propertyKey, createPropertyDescriptor(0, value));
   else object[propertyKey] = value;
-};
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/define-iterator.js":
-/*!***********************************************************!*\
-  !*** ./node_modules/core-js/internals/define-iterator.js ***!
-  \***********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var createIteratorConstructor = __webpack_require__(/*! ../internals/create-iterator-constructor */ "./node_modules/core-js/internals/create-iterator-constructor.js");
-var getPrototypeOf = __webpack_require__(/*! ../internals/object-get-prototype-of */ "./node_modules/core-js/internals/object-get-prototype-of.js");
-var setPrototypeOf = __webpack_require__(/*! ../internals/object-set-prototype-of */ "./node_modules/core-js/internals/object-set-prototype-of.js");
-var setToStringTag = __webpack_require__(/*! ../internals/set-to-string-tag */ "./node_modules/core-js/internals/set-to-string-tag.js");
-var createNonEnumerableProperty = __webpack_require__(/*! ../internals/create-non-enumerable-property */ "./node_modules/core-js/internals/create-non-enumerable-property.js");
-var redefine = __webpack_require__(/*! ../internals/redefine */ "./node_modules/core-js/internals/redefine.js");
-var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_modules/core-js/internals/well-known-symbol.js");
-var IS_PURE = __webpack_require__(/*! ../internals/is-pure */ "./node_modules/core-js/internals/is-pure.js");
-var Iterators = __webpack_require__(/*! ../internals/iterators */ "./node_modules/core-js/internals/iterators.js");
-var IteratorsCore = __webpack_require__(/*! ../internals/iterators-core */ "./node_modules/core-js/internals/iterators-core.js");
-
-var IteratorPrototype = IteratorsCore.IteratorPrototype;
-var BUGGY_SAFARI_ITERATORS = IteratorsCore.BUGGY_SAFARI_ITERATORS;
-var ITERATOR = wellKnownSymbol('iterator');
-var KEYS = 'keys';
-var VALUES = 'values';
-var ENTRIES = 'entries';
-
-var returnThis = function () { return this; };
-
-module.exports = function (Iterable, NAME, IteratorConstructor, next, DEFAULT, IS_SET, FORCED) {
-  createIteratorConstructor(IteratorConstructor, NAME, next);
-
-  var getIterationMethod = function (KIND) {
-    if (KIND === DEFAULT && defaultIterator) return defaultIterator;
-    if (!BUGGY_SAFARI_ITERATORS && KIND in IterablePrototype) return IterablePrototype[KIND];
-    switch (KIND) {
-      case KEYS: return function keys() { return new IteratorConstructor(this, KIND); };
-      case VALUES: return function values() { return new IteratorConstructor(this, KIND); };
-      case ENTRIES: return function entries() { return new IteratorConstructor(this, KIND); };
-    } return function () { return new IteratorConstructor(this); };
-  };
-
-  var TO_STRING_TAG = NAME + ' Iterator';
-  var INCORRECT_VALUES_NAME = false;
-  var IterablePrototype = Iterable.prototype;
-  var nativeIterator = IterablePrototype[ITERATOR]
-    || IterablePrototype['@@iterator']
-    || DEFAULT && IterablePrototype[DEFAULT];
-  var defaultIterator = !BUGGY_SAFARI_ITERATORS && nativeIterator || getIterationMethod(DEFAULT);
-  var anyNativeIterator = NAME == 'Array' ? IterablePrototype.entries || nativeIterator : nativeIterator;
-  var CurrentIteratorPrototype, methods, KEY;
-
-  // fix native
-  if (anyNativeIterator) {
-    CurrentIteratorPrototype = getPrototypeOf(anyNativeIterator.call(new Iterable()));
-    if (IteratorPrototype !== Object.prototype && CurrentIteratorPrototype.next) {
-      if (!IS_PURE && getPrototypeOf(CurrentIteratorPrototype) !== IteratorPrototype) {
-        if (setPrototypeOf) {
-          setPrototypeOf(CurrentIteratorPrototype, IteratorPrototype);
-        } else if (typeof CurrentIteratorPrototype[ITERATOR] != 'function') {
-          createNonEnumerableProperty(CurrentIteratorPrototype, ITERATOR, returnThis);
-        }
-      }
-      // Set @@toStringTag to native iterators
-      setToStringTag(CurrentIteratorPrototype, TO_STRING_TAG, true, true);
-      if (IS_PURE) Iterators[TO_STRING_TAG] = returnThis;
-    }
-  }
-
-  // fix Array#{values, @@iterator}.name in V8 / FF
-  if (DEFAULT == VALUES && nativeIterator && nativeIterator.name !== VALUES) {
-    INCORRECT_VALUES_NAME = true;
-    defaultIterator = function values() { return nativeIterator.call(this); };
-  }
-
-  // define iterator
-  if ((!IS_PURE || FORCED) && IterablePrototype[ITERATOR] !== defaultIterator) {
-    createNonEnumerableProperty(IterablePrototype, ITERATOR, defaultIterator);
-  }
-  Iterators[NAME] = defaultIterator;
-
-  // export additional methods
-  if (DEFAULT) {
-    methods = {
-      values: getIterationMethod(VALUES),
-      keys: IS_SET ? defaultIterator : getIterationMethod(KEYS),
-      entries: getIterationMethod(ENTRIES)
-    };
-    if (FORCED) for (KEY in methods) {
-      if (BUGGY_SAFARI_ITERATORS || INCORRECT_VALUES_NAME || !(KEY in IterablePrototype)) {
-        redefine(IterablePrototype, KEY, methods[KEY]);
-      }
-    } else $({ target: NAME, proto: true, forced: BUGGY_SAFARI_ITERATORS || INCORRECT_VALUES_NAME }, methods);
-  }
-
-  return methods;
 };
 
 
@@ -1337,48 +864,6 @@ module.exports = function (namespace, method) {
 
 /***/ }),
 
-/***/ "./node_modules/core-js/internals/get-iterator-method.js":
-/*!***************************************************************!*\
-  !*** ./node_modules/core-js/internals/get-iterator-method.js ***!
-  \***************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var classof = __webpack_require__(/*! ../internals/classof */ "./node_modules/core-js/internals/classof.js");
-var Iterators = __webpack_require__(/*! ../internals/iterators */ "./node_modules/core-js/internals/iterators.js");
-var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_modules/core-js/internals/well-known-symbol.js");
-
-var ITERATOR = wellKnownSymbol('iterator');
-
-module.exports = function (it) {
-  if (it != undefined) return it[ITERATOR]
-    || it['@@iterator']
-    || Iterators[classof(it)];
-};
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/get-iterator.js":
-/*!********************************************************!*\
-  !*** ./node_modules/core-js/internals/get-iterator.js ***!
-  \********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var anObject = __webpack_require__(/*! ../internals/an-object */ "./node_modules/core-js/internals/an-object.js");
-var getIteratorMethod = __webpack_require__(/*! ../internals/get-iterator-method */ "./node_modules/core-js/internals/get-iterator-method.js");
-
-module.exports = function (it) {
-  var iteratorMethod = getIteratorMethod(it);
-  if (typeof iteratorMethod != 'function') {
-    throw TypeError(String(it) + ' is not iterable');
-  } return anObject(iteratorMethod.call(it));
-};
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/internals/global.js":
 /*!**************************************************!*\
   !*** ./node_modules/core-js/internals/global.js ***!
@@ -1428,25 +913,6 @@ module.exports = function (it, key) {
 /***/ (function(module, exports) {
 
 module.exports = {};
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/host-report-errors.js":
-/*!**************************************************************!*\
-  !*** ./node_modules/core-js/internals/host-report-errors.js ***!
-  \**************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var global = __webpack_require__(/*! ../internals/global */ "./node_modules/core-js/internals/global.js");
-
-module.exports = function (a, b) {
-  var console = global.console;
-  if (console && console.error) {
-    arguments.length === 1 ? console.error(a) : console.error(a, b);
-  }
-};
 
 
 /***/ }),
@@ -1633,27 +1099,6 @@ module.exports = {
 
 /***/ }),
 
-/***/ "./node_modules/core-js/internals/is-array-iterator-method.js":
-/*!********************************************************************!*\
-  !*** ./node_modules/core-js/internals/is-array-iterator-method.js ***!
-  \********************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_modules/core-js/internals/well-known-symbol.js");
-var Iterators = __webpack_require__(/*! ../internals/iterators */ "./node_modules/core-js/internals/iterators.js");
-
-var ITERATOR = wellKnownSymbol('iterator');
-var ArrayPrototype = Array.prototype;
-
-// check on default Array iterator
-module.exports = function (it) {
-  return it !== undefined && (Iterators.Array === it || ArrayPrototype[ITERATOR] === it);
-};
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/internals/is-array.js":
 /*!****************************************************!*\
   !*** ./node_modules/core-js/internals/is-array.js ***!
@@ -1700,20 +1145,6 @@ var NATIVE = isForced.NATIVE = 'N';
 var POLYFILL = isForced.POLYFILL = 'P';
 
 module.exports = isForced;
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/is-ios.js":
-/*!**************************************************!*\
-  !*** ./node_modules/core-js/internals/is-ios.js ***!
-  \**************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var userAgent = __webpack_require__(/*! ../internals/user-agent */ "./node_modules/core-js/internals/user-agent.js");
-
-module.exports = /(iphone|ipod|ipad).*applewebkit/i.test(userAgent);
 
 
 /***/ }),
@@ -1767,224 +1198,6 @@ module.exports = function (it) {
 
 /***/ }),
 
-/***/ "./node_modules/core-js/internals/iterate.js":
-/*!***************************************************!*\
-  !*** ./node_modules/core-js/internals/iterate.js ***!
-  \***************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var anObject = __webpack_require__(/*! ../internals/an-object */ "./node_modules/core-js/internals/an-object.js");
-var isArrayIteratorMethod = __webpack_require__(/*! ../internals/is-array-iterator-method */ "./node_modules/core-js/internals/is-array-iterator-method.js");
-var toLength = __webpack_require__(/*! ../internals/to-length */ "./node_modules/core-js/internals/to-length.js");
-var bind = __webpack_require__(/*! ../internals/bind-context */ "./node_modules/core-js/internals/bind-context.js");
-var getIteratorMethod = __webpack_require__(/*! ../internals/get-iterator-method */ "./node_modules/core-js/internals/get-iterator-method.js");
-var callWithSafeIterationClosing = __webpack_require__(/*! ../internals/call-with-safe-iteration-closing */ "./node_modules/core-js/internals/call-with-safe-iteration-closing.js");
-
-var Result = function (stopped, result) {
-  this.stopped = stopped;
-  this.result = result;
-};
-
-var iterate = module.exports = function (iterable, fn, that, AS_ENTRIES, IS_ITERATOR) {
-  var boundFunction = bind(fn, that, AS_ENTRIES ? 2 : 1);
-  var iterator, iterFn, index, length, result, next, step;
-
-  if (IS_ITERATOR) {
-    iterator = iterable;
-  } else {
-    iterFn = getIteratorMethod(iterable);
-    if (typeof iterFn != 'function') throw TypeError('Target is not iterable');
-    // optimisation for array iterators
-    if (isArrayIteratorMethod(iterFn)) {
-      for (index = 0, length = toLength(iterable.length); length > index; index++) {
-        result = AS_ENTRIES
-          ? boundFunction(anObject(step = iterable[index])[0], step[1])
-          : boundFunction(iterable[index]);
-        if (result && result instanceof Result) return result;
-      } return new Result(false);
-    }
-    iterator = iterFn.call(iterable);
-  }
-
-  next = iterator.next;
-  while (!(step = next.call(iterator)).done) {
-    result = callWithSafeIterationClosing(iterator, boundFunction, step.value, AS_ENTRIES);
-    if (typeof result == 'object' && result && result instanceof Result) return result;
-  } return new Result(false);
-};
-
-iterate.stop = function (result) {
-  return new Result(true, result);
-};
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/iterators-core.js":
-/*!**********************************************************!*\
-  !*** ./node_modules/core-js/internals/iterators-core.js ***!
-  \**********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var getPrototypeOf = __webpack_require__(/*! ../internals/object-get-prototype-of */ "./node_modules/core-js/internals/object-get-prototype-of.js");
-var createNonEnumerableProperty = __webpack_require__(/*! ../internals/create-non-enumerable-property */ "./node_modules/core-js/internals/create-non-enumerable-property.js");
-var has = __webpack_require__(/*! ../internals/has */ "./node_modules/core-js/internals/has.js");
-var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_modules/core-js/internals/well-known-symbol.js");
-var IS_PURE = __webpack_require__(/*! ../internals/is-pure */ "./node_modules/core-js/internals/is-pure.js");
-
-var ITERATOR = wellKnownSymbol('iterator');
-var BUGGY_SAFARI_ITERATORS = false;
-
-var returnThis = function () { return this; };
-
-// `%IteratorPrototype%` object
-// https://tc39.github.io/ecma262/#sec-%iteratorprototype%-object
-var IteratorPrototype, PrototypeOfArrayIteratorPrototype, arrayIterator;
-
-if ([].keys) {
-  arrayIterator = [].keys();
-  // Safari 8 has buggy iterators w/o `next`
-  if (!('next' in arrayIterator)) BUGGY_SAFARI_ITERATORS = true;
-  else {
-    PrototypeOfArrayIteratorPrototype = getPrototypeOf(getPrototypeOf(arrayIterator));
-    if (PrototypeOfArrayIteratorPrototype !== Object.prototype) IteratorPrototype = PrototypeOfArrayIteratorPrototype;
-  }
-}
-
-if (IteratorPrototype == undefined) IteratorPrototype = {};
-
-// 25.1.2.1.1 %IteratorPrototype%[@@iterator]()
-if (!IS_PURE && !has(IteratorPrototype, ITERATOR)) {
-  createNonEnumerableProperty(IteratorPrototype, ITERATOR, returnThis);
-}
-
-module.exports = {
-  IteratorPrototype: IteratorPrototype,
-  BUGGY_SAFARI_ITERATORS: BUGGY_SAFARI_ITERATORS
-};
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/iterators.js":
-/*!*****************************************************!*\
-  !*** ./node_modules/core-js/internals/iterators.js ***!
-  \*****************************************************/
-/*! all exports used */
-/***/ (function(module, exports) {
-
-module.exports = {};
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/microtask.js":
-/*!*****************************************************!*\
-  !*** ./node_modules/core-js/internals/microtask.js ***!
-  \*****************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var global = __webpack_require__(/*! ../internals/global */ "./node_modules/core-js/internals/global.js");
-var getOwnPropertyDescriptor = __webpack_require__(/*! ../internals/object-get-own-property-descriptor */ "./node_modules/core-js/internals/object-get-own-property-descriptor.js").f;
-var classof = __webpack_require__(/*! ../internals/classof-raw */ "./node_modules/core-js/internals/classof-raw.js");
-var macrotask = __webpack_require__(/*! ../internals/task */ "./node_modules/core-js/internals/task.js").set;
-var IS_IOS = __webpack_require__(/*! ../internals/is-ios */ "./node_modules/core-js/internals/is-ios.js");
-
-var MutationObserver = global.MutationObserver || global.WebKitMutationObserver;
-var process = global.process;
-var Promise = global.Promise;
-var IS_NODE = classof(process) == 'process';
-// Node.js 11 shows ExperimentalWarning on getting `queueMicrotask`
-var queueMicrotaskDescriptor = getOwnPropertyDescriptor(global, 'queueMicrotask');
-var queueMicrotask = queueMicrotaskDescriptor && queueMicrotaskDescriptor.value;
-
-var flush, head, last, notify, toggle, node, promise, then;
-
-// modern engines have queueMicrotask method
-if (!queueMicrotask) {
-  flush = function () {
-    var parent, fn;
-    if (IS_NODE && (parent = process.domain)) parent.exit();
-    while (head) {
-      fn = head.fn;
-      head = head.next;
-      try {
-        fn();
-      } catch (error) {
-        if (head) notify();
-        else last = undefined;
-        throw error;
-      }
-    } last = undefined;
-    if (parent) parent.enter();
-  };
-
-  // Node.js
-  if (IS_NODE) {
-    notify = function () {
-      process.nextTick(flush);
-    };
-  // browsers with MutationObserver, except iOS - https://github.com/zloirock/core-js/issues/339
-  } else if (MutationObserver && !IS_IOS) {
-    toggle = true;
-    node = document.createTextNode('');
-    new MutationObserver(flush).observe(node, { characterData: true });
-    notify = function () {
-      node.data = toggle = !toggle;
-    };
-  // environments with maybe non-completely correct, but existent Promise
-  } else if (Promise && Promise.resolve) {
-    // Promise.resolve without an argument throws an error in LG WebOS 2
-    promise = Promise.resolve(undefined);
-    then = promise.then;
-    notify = function () {
-      then.call(promise, flush);
-    };
-  // for other environments - macrotask based on:
-  // - setImmediate
-  // - MessageChannel
-  // - window.postMessag
-  // - onreadystatechange
-  // - setTimeout
-  } else {
-    notify = function () {
-      // strange IE + webpack dev server bug - use .call(global)
-      macrotask.call(global, flush);
-    };
-  }
-}
-
-module.exports = queueMicrotask || function (fn) {
-  var task = { fn: fn, next: undefined };
-  if (last) last.next = task;
-  if (!head) {
-    head = task;
-    notify();
-  } last = task;
-};
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/native-promise-constructor.js":
-/*!**********************************************************************!*\
-  !*** ./node_modules/core-js/internals/native-promise-constructor.js ***!
-  \**********************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var global = __webpack_require__(/*! ../internals/global */ "./node_modules/core-js/internals/global.js");
-
-module.exports = global.Promise;
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/internals/native-symbol.js":
 /*!*********************************************************!*\
   !*** ./node_modules/core-js/internals/native-symbol.js ***!
@@ -2003,50 +1216,6 @@ module.exports = !!Object.getOwnPropertySymbols && !fails(function () {
 
 /***/ }),
 
-/***/ "./node_modules/core-js/internals/native-url.js":
-/*!******************************************************!*\
-  !*** ./node_modules/core-js/internals/native-url.js ***!
-  \******************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var fails = __webpack_require__(/*! ../internals/fails */ "./node_modules/core-js/internals/fails.js");
-var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_modules/core-js/internals/well-known-symbol.js");
-var IS_PURE = __webpack_require__(/*! ../internals/is-pure */ "./node_modules/core-js/internals/is-pure.js");
-
-var ITERATOR = wellKnownSymbol('iterator');
-
-module.exports = !fails(function () {
-  var url = new URL('b?a=1&b=2&c=3', 'http://a');
-  var searchParams = url.searchParams;
-  var result = '';
-  url.pathname = 'c%20d';
-  searchParams.forEach(function (value, key) {
-    searchParams['delete']('b');
-    result += key + value;
-  });
-  return (IS_PURE && !url.toJSON)
-    || !searchParams.sort
-    || url.href !== 'http://a/c%20d?a=1&c=3'
-    || searchParams.get('c') !== '3'
-    || String(new URLSearchParams('?a=1')) !== 'a=1'
-    || !searchParams[ITERATOR]
-    // throws in Edge
-    || new URL('https://a@b').username !== 'a'
-    || new URLSearchParams(new URLSearchParams('a=b')).get('a') !== 'b'
-    // not punycoded in Edge
-    || new URL('http://тест').host !== 'xn--e1aybc'
-    // not escaped in Chrome 62-
-    || new URL('http://a#б').hash !== '#%D0%B1'
-    // fails in Chrome 66-
-    || result !== 'a1c3'
-    // throws in Safari
-    || new URL('http://x', undefined).host !== 'x';
-});
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/internals/native-weak-map.js":
 /*!***********************************************************!*\
   !*** ./node_modules/core-js/internals/native-weak-map.js ***!
@@ -2060,100 +1229,6 @@ var inspectSource = __webpack_require__(/*! ../internals/inspect-source */ "./no
 var WeakMap = global.WeakMap;
 
 module.exports = typeof WeakMap === 'function' && /native code/.test(inspectSource(WeakMap));
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/new-promise-capability.js":
-/*!******************************************************************!*\
-  !*** ./node_modules/core-js/internals/new-promise-capability.js ***!
-  \******************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var aFunction = __webpack_require__(/*! ../internals/a-function */ "./node_modules/core-js/internals/a-function.js");
-
-var PromiseCapability = function (C) {
-  var resolve, reject;
-  this.promise = new C(function ($$resolve, $$reject) {
-    if (resolve !== undefined || reject !== undefined) throw TypeError('Bad Promise constructor');
-    resolve = $$resolve;
-    reject = $$reject;
-  });
-  this.resolve = aFunction(resolve);
-  this.reject = aFunction(reject);
-};
-
-// 25.4.1.5 NewPromiseCapability(C)
-module.exports.f = function (C) {
-  return new PromiseCapability(C);
-};
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/object-assign.js":
-/*!*********************************************************!*\
-  !*** ./node_modules/core-js/internals/object-assign.js ***!
-  \*********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var DESCRIPTORS = __webpack_require__(/*! ../internals/descriptors */ "./node_modules/core-js/internals/descriptors.js");
-var fails = __webpack_require__(/*! ../internals/fails */ "./node_modules/core-js/internals/fails.js");
-var objectKeys = __webpack_require__(/*! ../internals/object-keys */ "./node_modules/core-js/internals/object-keys.js");
-var getOwnPropertySymbolsModule = __webpack_require__(/*! ../internals/object-get-own-property-symbols */ "./node_modules/core-js/internals/object-get-own-property-symbols.js");
-var propertyIsEnumerableModule = __webpack_require__(/*! ../internals/object-property-is-enumerable */ "./node_modules/core-js/internals/object-property-is-enumerable.js");
-var toObject = __webpack_require__(/*! ../internals/to-object */ "./node_modules/core-js/internals/to-object.js");
-var IndexedObject = __webpack_require__(/*! ../internals/indexed-object */ "./node_modules/core-js/internals/indexed-object.js");
-
-var nativeAssign = Object.assign;
-var defineProperty = Object.defineProperty;
-
-// `Object.assign` method
-// https://tc39.github.io/ecma262/#sec-object.assign
-module.exports = !nativeAssign || fails(function () {
-  // should have correct order of operations (Edge bug)
-  if (DESCRIPTORS && nativeAssign({ b: 1 }, nativeAssign(defineProperty({}, 'a', {
-    enumerable: true,
-    get: function () {
-      defineProperty(this, 'b', {
-        value: 3,
-        enumerable: false
-      });
-    }
-  }), { b: 2 })).b !== 1) return true;
-  // should work with symbols and should have deterministic property order (V8 bug)
-  var A = {};
-  var B = {};
-  // eslint-disable-next-line no-undef
-  var symbol = Symbol();
-  var alphabet = 'abcdefghijklmnopqrst';
-  A[symbol] = 7;
-  alphabet.split('').forEach(function (chr) { B[chr] = chr; });
-  return nativeAssign({}, A)[symbol] != 7 || objectKeys(nativeAssign({}, B)).join('') != alphabet;
-}) ? function assign(target, source) { // eslint-disable-line no-unused-vars
-  var T = toObject(target);
-  var argumentsLength = arguments.length;
-  var index = 1;
-  var getOwnPropertySymbols = getOwnPropertySymbolsModule.f;
-  var propertyIsEnumerable = propertyIsEnumerableModule.f;
-  while (argumentsLength > index) {
-    var S = IndexedObject(arguments[index++]);
-    var keys = getOwnPropertySymbols ? objectKeys(S).concat(getOwnPropertySymbols(S)) : objectKeys(S);
-    var length = keys.length;
-    var j = 0;
-    var key;
-    while (length > j) {
-      key = keys[j++];
-      if (!DESCRIPTORS || propertyIsEnumerable.call(S, key)) T[key] = S[key];
-    }
-  } return T;
-} : nativeAssign;
 
 
 /***/ }),
@@ -2369,34 +1444,6 @@ exports.f = Object.getOwnPropertySymbols;
 
 /***/ }),
 
-/***/ "./node_modules/core-js/internals/object-get-prototype-of.js":
-/*!*******************************************************************!*\
-  !*** ./node_modules/core-js/internals/object-get-prototype-of.js ***!
-  \*******************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var has = __webpack_require__(/*! ../internals/has */ "./node_modules/core-js/internals/has.js");
-var toObject = __webpack_require__(/*! ../internals/to-object */ "./node_modules/core-js/internals/to-object.js");
-var sharedKey = __webpack_require__(/*! ../internals/shared-key */ "./node_modules/core-js/internals/shared-key.js");
-var CORRECT_PROTOTYPE_GETTER = __webpack_require__(/*! ../internals/correct-prototype-getter */ "./node_modules/core-js/internals/correct-prototype-getter.js");
-
-var IE_PROTO = sharedKey('IE_PROTO');
-var ObjectPrototype = Object.prototype;
-
-// `Object.getPrototypeOf` method
-// https://tc39.github.io/ecma262/#sec-object.getprototypeof
-module.exports = CORRECT_PROTOTYPE_GETTER ? Object.getPrototypeOf : function (O) {
-  O = toObject(O);
-  if (has(O, IE_PROTO)) return O[IE_PROTO];
-  if (typeof O.constructor == 'function' && O instanceof O.constructor) {
-    return O.constructor.prototype;
-  } return O instanceof Object ? ObjectPrototype : null;
-};
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/internals/object-keys-internal.js":
 /*!****************************************************************!*\
   !*** ./node_modules/core-js/internals/object-keys-internal.js ***!
@@ -2557,244 +1604,6 @@ module.exports = getBuiltIn('Reflect', 'ownKeys') || function ownKeys(it) {
 var global = __webpack_require__(/*! ../internals/global */ "./node_modules/core-js/internals/global.js");
 
 module.exports = global;
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/perform.js":
-/*!***************************************************!*\
-  !*** ./node_modules/core-js/internals/perform.js ***!
-  \***************************************************/
-/*! all exports used */
-/***/ (function(module, exports) {
-
-module.exports = function (exec) {
-  try {
-    return { error: false, value: exec() };
-  } catch (error) {
-    return { error: true, value: error };
-  }
-};
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/promise-resolve.js":
-/*!***********************************************************!*\
-  !*** ./node_modules/core-js/internals/promise-resolve.js ***!
-  \***********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var anObject = __webpack_require__(/*! ../internals/an-object */ "./node_modules/core-js/internals/an-object.js");
-var isObject = __webpack_require__(/*! ../internals/is-object */ "./node_modules/core-js/internals/is-object.js");
-var newPromiseCapability = __webpack_require__(/*! ../internals/new-promise-capability */ "./node_modules/core-js/internals/new-promise-capability.js");
-
-module.exports = function (C, x) {
-  anObject(C);
-  if (isObject(x) && x.constructor === C) return x;
-  var promiseCapability = newPromiseCapability.f(C);
-  var resolve = promiseCapability.resolve;
-  resolve(x);
-  return promiseCapability.promise;
-};
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/punycode-to-ascii.js":
-/*!*************************************************************!*\
-  !*** ./node_modules/core-js/internals/punycode-to-ascii.js ***!
-  \*************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-// based on https://github.com/bestiejs/punycode.js/blob/master/punycode.js
-var maxInt = 2147483647; // aka. 0x7FFFFFFF or 2^31-1
-var base = 36;
-var tMin = 1;
-var tMax = 26;
-var skew = 38;
-var damp = 700;
-var initialBias = 72;
-var initialN = 128; // 0x80
-var delimiter = '-'; // '\x2D'
-var regexNonASCII = /[^\0-\u007E]/; // non-ASCII chars
-var regexSeparators = /[.\u3002\uFF0E\uFF61]/g; // RFC 3490 separators
-var OVERFLOW_ERROR = 'Overflow: input needs wider integers to process';
-var baseMinusTMin = base - tMin;
-var floor = Math.floor;
-var stringFromCharCode = String.fromCharCode;
-
-/**
- * Creates an array containing the numeric code points of each Unicode
- * character in the string. While JavaScript uses UCS-2 internally,
- * this function will convert a pair of surrogate halves (each of which
- * UCS-2 exposes as separate characters) into a single code point,
- * matching UTF-16.
- */
-var ucs2decode = function (string) {
-  var output = [];
-  var counter = 0;
-  var length = string.length;
-  while (counter < length) {
-    var value = string.charCodeAt(counter++);
-    if (value >= 0xD800 && value <= 0xDBFF && counter < length) {
-      // It's a high surrogate, and there is a next character.
-      var extra = string.charCodeAt(counter++);
-      if ((extra & 0xFC00) == 0xDC00) { // Low surrogate.
-        output.push(((value & 0x3FF) << 10) + (extra & 0x3FF) + 0x10000);
-      } else {
-        // It's an unmatched surrogate; only append this code unit, in case the
-        // next code unit is the high surrogate of a surrogate pair.
-        output.push(value);
-        counter--;
-      }
-    } else {
-      output.push(value);
-    }
-  }
-  return output;
-};
-
-/**
- * Converts a digit/integer into a basic code point.
- */
-var digitToBasic = function (digit) {
-  //  0..25 map to ASCII a..z or A..Z
-  // 26..35 map to ASCII 0..9
-  return digit + 22 + 75 * (digit < 26);
-};
-
-/**
- * Bias adaptation function as per section 3.4 of RFC 3492.
- * https://tools.ietf.org/html/rfc3492#section-3.4
- */
-var adapt = function (delta, numPoints, firstTime) {
-  var k = 0;
-  delta = firstTime ? floor(delta / damp) : delta >> 1;
-  delta += floor(delta / numPoints);
-  for (; delta > baseMinusTMin * tMax >> 1; k += base) {
-    delta = floor(delta / baseMinusTMin);
-  }
-  return floor(k + (baseMinusTMin + 1) * delta / (delta + skew));
-};
-
-/**
- * Converts a string of Unicode symbols (e.g. a domain name label) to a
- * Punycode string of ASCII-only symbols.
- */
-// eslint-disable-next-line  max-statements
-var encode = function (input) {
-  var output = [];
-
-  // Convert the input in UCS-2 to an array of Unicode code points.
-  input = ucs2decode(input);
-
-  // Cache the length.
-  var inputLength = input.length;
-
-  // Initialize the state.
-  var n = initialN;
-  var delta = 0;
-  var bias = initialBias;
-  var i, currentValue;
-
-  // Handle the basic code points.
-  for (i = 0; i < input.length; i++) {
-    currentValue = input[i];
-    if (currentValue < 0x80) {
-      output.push(stringFromCharCode(currentValue));
-    }
-  }
-
-  var basicLength = output.length; // number of basic code points.
-  var handledCPCount = basicLength; // number of code points that have been handled;
-
-  // Finish the basic string with a delimiter unless it's empty.
-  if (basicLength) {
-    output.push(delimiter);
-  }
-
-  // Main encoding loop:
-  while (handledCPCount < inputLength) {
-    // All non-basic code points < n have been handled already. Find the next larger one:
-    var m = maxInt;
-    for (i = 0; i < input.length; i++) {
-      currentValue = input[i];
-      if (currentValue >= n && currentValue < m) {
-        m = currentValue;
-      }
-    }
-
-    // Increase `delta` enough to advance the decoder's <n,i> state to <m,0>, but guard against overflow.
-    var handledCPCountPlusOne = handledCPCount + 1;
-    if (m - n > floor((maxInt - delta) / handledCPCountPlusOne)) {
-      throw RangeError(OVERFLOW_ERROR);
-    }
-
-    delta += (m - n) * handledCPCountPlusOne;
-    n = m;
-
-    for (i = 0; i < input.length; i++) {
-      currentValue = input[i];
-      if (currentValue < n && ++delta > maxInt) {
-        throw RangeError(OVERFLOW_ERROR);
-      }
-      if (currentValue == n) {
-        // Represent delta as a generalized variable-length integer.
-        var q = delta;
-        for (var k = base; /* no condition */; k += base) {
-          var t = k <= bias ? tMin : (k >= bias + tMax ? tMax : k - bias);
-          if (q < t) break;
-          var qMinusT = q - t;
-          var baseMinusT = base - t;
-          output.push(stringFromCharCode(digitToBasic(t + qMinusT % baseMinusT)));
-          q = floor(qMinusT / baseMinusT);
-        }
-
-        output.push(stringFromCharCode(digitToBasic(q)));
-        bias = adapt(delta, handledCPCountPlusOne, handledCPCount == basicLength);
-        delta = 0;
-        ++handledCPCount;
-      }
-    }
-
-    ++delta;
-    ++n;
-  }
-  return output.join('');
-};
-
-module.exports = function (input) {
-  var encoded = [];
-  var labels = input.toLowerCase().replace(regexSeparators, '\u002E').split('.');
-  var i, label;
-  for (i = 0; i < labels.length; i++) {
-    label = labels[i];
-    encoded.push(regexNonASCII.test(label) ? 'xn--' + encode(label) : label);
-  }
-  return encoded.join('.');
-};
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/redefine-all.js":
-/*!********************************************************!*\
-  !*** ./node_modules/core-js/internals/redefine-all.js ***!
-  \********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var redefine = __webpack_require__(/*! ../internals/redefine */ "./node_modules/core-js/internals/redefine.js");
-
-module.exports = function (target, src, options) {
-  for (var key in src) redefine(target, key, src[key], options);
-  return target;
-};
 
 
 /***/ }),
@@ -3108,28 +1917,6 @@ module.exports = function (CONSTRUCTOR_NAME) {
 
 /***/ }),
 
-/***/ "./node_modules/core-js/internals/set-to-string-tag.js":
-/*!*************************************************************!*\
-  !*** ./node_modules/core-js/internals/set-to-string-tag.js ***!
-  \*************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var defineProperty = __webpack_require__(/*! ../internals/object-define-property */ "./node_modules/core-js/internals/object-define-property.js").f;
-var has = __webpack_require__(/*! ../internals/has */ "./node_modules/core-js/internals/has.js");
-var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_modules/core-js/internals/well-known-symbol.js");
-
-var TO_STRING_TAG = wellKnownSymbol('toStringTag');
-
-module.exports = function (it, TAG, STATIC) {
-  if (it && !has(it = STATIC ? it : it.prototype, TO_STRING_TAG)) {
-    defineProperty(it, TO_STRING_TAG, { configurable: true, value: TAG });
-  }
-};
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/internals/shared-key.js":
 /*!******************************************************!*\
   !*** ./node_modules/core-js/internals/shared-key.js ***!
@@ -3306,118 +2093,6 @@ module.exports = {
   // `String.prototype.trim` method
   // https://tc39.github.io/ecma262/#sec-string.prototype.trim
   trim: createMethod(3)
-};
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/internals/task.js":
-/*!************************************************!*\
-  !*** ./node_modules/core-js/internals/task.js ***!
-  \************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var global = __webpack_require__(/*! ../internals/global */ "./node_modules/core-js/internals/global.js");
-var fails = __webpack_require__(/*! ../internals/fails */ "./node_modules/core-js/internals/fails.js");
-var classof = __webpack_require__(/*! ../internals/classof-raw */ "./node_modules/core-js/internals/classof-raw.js");
-var bind = __webpack_require__(/*! ../internals/bind-context */ "./node_modules/core-js/internals/bind-context.js");
-var html = __webpack_require__(/*! ../internals/html */ "./node_modules/core-js/internals/html.js");
-var createElement = __webpack_require__(/*! ../internals/document-create-element */ "./node_modules/core-js/internals/document-create-element.js");
-var IS_IOS = __webpack_require__(/*! ../internals/is-ios */ "./node_modules/core-js/internals/is-ios.js");
-
-var location = global.location;
-var set = global.setImmediate;
-var clear = global.clearImmediate;
-var process = global.process;
-var MessageChannel = global.MessageChannel;
-var Dispatch = global.Dispatch;
-var counter = 0;
-var queue = {};
-var ONREADYSTATECHANGE = 'onreadystatechange';
-var defer, channel, port;
-
-var run = function (id) {
-  // eslint-disable-next-line no-prototype-builtins
-  if (queue.hasOwnProperty(id)) {
-    var fn = queue[id];
-    delete queue[id];
-    fn();
-  }
-};
-
-var runner = function (id) {
-  return function () {
-    run(id);
-  };
-};
-
-var listener = function (event) {
-  run(event.data);
-};
-
-var post = function (id) {
-  // old engines have not location.origin
-  global.postMessage(id + '', location.protocol + '//' + location.host);
-};
-
-// Node.js 0.9+ & IE10+ has setImmediate, otherwise:
-if (!set || !clear) {
-  set = function setImmediate(fn) {
-    var args = [];
-    var i = 1;
-    while (arguments.length > i) args.push(arguments[i++]);
-    queue[++counter] = function () {
-      // eslint-disable-next-line no-new-func
-      (typeof fn == 'function' ? fn : Function(fn)).apply(undefined, args);
-    };
-    defer(counter);
-    return counter;
-  };
-  clear = function clearImmediate(id) {
-    delete queue[id];
-  };
-  // Node.js 0.8-
-  if (classof(process) == 'process') {
-    defer = function (id) {
-      process.nextTick(runner(id));
-    };
-  // Sphere (JS game engine) Dispatch API
-  } else if (Dispatch && Dispatch.now) {
-    defer = function (id) {
-      Dispatch.now(runner(id));
-    };
-  // Browsers with MessageChannel, includes WebWorkers
-  // except iOS - https://github.com/zloirock/core-js/issues/624
-  } else if (MessageChannel && !IS_IOS) {
-    channel = new MessageChannel();
-    port = channel.port2;
-    channel.port1.onmessage = listener;
-    defer = bind(port.postMessage, port, 1);
-  // Browsers with postMessage, skip WebWorkers
-  // IE8 has postMessage, but it's sync & typeof its postMessage is 'object'
-  } else if (global.addEventListener && typeof postMessage == 'function' && !global.importScripts && !fails(post)) {
-    defer = post;
-    global.addEventListener('message', listener, false);
-  // IE8-
-  } else if (ONREADYSTATECHANGE in createElement('script')) {
-    defer = function (id) {
-      html.appendChild(createElement('script'))[ONREADYSTATECHANGE] = function () {
-        html.removeChild(this);
-        run(id);
-      };
-    };
-  // Rest old browsers
-  } else {
-    defer = function (id) {
-      setTimeout(runner(id), 0);
-    };
-  }
-}
-
-module.exports = {
-  set: set,
-  clear: clear
 };
 
 
@@ -3759,71 +2434,6 @@ $({ target: 'Array', proto: true, forced: FORCED }, {
 
 /***/ }),
 
-/***/ "./node_modules/core-js/modules/es.array.iterator.js":
-/*!***********************************************************!*\
-  !*** ./node_modules/core-js/modules/es.array.iterator.js ***!
-  \***********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var toIndexedObject = __webpack_require__(/*! ../internals/to-indexed-object */ "./node_modules/core-js/internals/to-indexed-object.js");
-var addToUnscopables = __webpack_require__(/*! ../internals/add-to-unscopables */ "./node_modules/core-js/internals/add-to-unscopables.js");
-var Iterators = __webpack_require__(/*! ../internals/iterators */ "./node_modules/core-js/internals/iterators.js");
-var InternalStateModule = __webpack_require__(/*! ../internals/internal-state */ "./node_modules/core-js/internals/internal-state.js");
-var defineIterator = __webpack_require__(/*! ../internals/define-iterator */ "./node_modules/core-js/internals/define-iterator.js");
-
-var ARRAY_ITERATOR = 'Array Iterator';
-var setInternalState = InternalStateModule.set;
-var getInternalState = InternalStateModule.getterFor(ARRAY_ITERATOR);
-
-// `Array.prototype.entries` method
-// https://tc39.github.io/ecma262/#sec-array.prototype.entries
-// `Array.prototype.keys` method
-// https://tc39.github.io/ecma262/#sec-array.prototype.keys
-// `Array.prototype.values` method
-// https://tc39.github.io/ecma262/#sec-array.prototype.values
-// `Array.prototype[@@iterator]` method
-// https://tc39.github.io/ecma262/#sec-array.prototype-@@iterator
-// `CreateArrayIterator` internal method
-// https://tc39.github.io/ecma262/#sec-createarrayiterator
-module.exports = defineIterator(Array, 'Array', function (iterated, kind) {
-  setInternalState(this, {
-    type: ARRAY_ITERATOR,
-    target: toIndexedObject(iterated), // target
-    index: 0,                          // next index
-    kind: kind                         // kind
-  });
-// `%ArrayIteratorPrototype%.next` method
-// https://tc39.github.io/ecma262/#sec-%arrayiteratorprototype%.next
-}, function () {
-  var state = getInternalState(this);
-  var target = state.target;
-  var kind = state.kind;
-  var index = state.index++;
-  if (!target || index >= target.length) {
-    state.target = undefined;
-    return { value: undefined, done: true };
-  }
-  if (kind == 'keys') return { value: index, done: false };
-  if (kind == 'values') return { value: target[index], done: false };
-  return { value: [index, target[index]], done: false };
-}, 'values');
-
-// argumentsList[@@iterator] is %ArrayProto_values%
-// https://tc39.github.io/ecma262/#sec-createunmappedargumentsobject
-// https://tc39.github.io/ecma262/#sec-createmappedargumentsobject
-Iterators.Arguments = Iterators.Array;
-
-// https://tc39.github.io/ecma262/#sec-array.prototype-@@unscopables
-addToUnscopables('keys');
-addToUnscopables('values');
-addToUnscopables('entries');
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/modules/es.array.join.js":
 /*!*******************************************************!*\
   !*** ./node_modules/core-js/modules/es.array.join.js ***!
@@ -4054,25 +2664,6 @@ if (isForced(NUMBER, !NativeNumber(' 0o1') || !NativeNumber('0b1') || NativeNumb
 
 /***/ }),
 
-/***/ "./node_modules/core-js/modules/es.object.assign.js":
-/*!**********************************************************!*\
-  !*** ./node_modules/core-js/modules/es.object.assign.js ***!
-  \**********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var assign = __webpack_require__(/*! ../internals/object-assign */ "./node_modules/core-js/internals/object-assign.js");
-
-// `Object.assign` method
-// https://tc39.github.io/ecma262/#sec-object.assign
-$({ target: 'Object', stat: true, forced: Object.assign !== assign }, {
-  assign: assign
-});
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/modules/es.object.keys.js":
 /*!********************************************************!*\
   !*** ./node_modules/core-js/modules/es.object.keys.js ***!
@@ -4114,397 +2705,6 @@ var toString = __webpack_require__(/*! ../internals/object-to-string */ "./node_
 if (!TO_STRING_TAG_SUPPORT) {
   redefine(Object.prototype, 'toString', toString, { unsafe: true });
 }
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/es.promise.js":
-/*!****************************************************!*\
-  !*** ./node_modules/core-js/modules/es.promise.js ***!
-  \****************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var IS_PURE = __webpack_require__(/*! ../internals/is-pure */ "./node_modules/core-js/internals/is-pure.js");
-var global = __webpack_require__(/*! ../internals/global */ "./node_modules/core-js/internals/global.js");
-var getBuiltIn = __webpack_require__(/*! ../internals/get-built-in */ "./node_modules/core-js/internals/get-built-in.js");
-var NativePromise = __webpack_require__(/*! ../internals/native-promise-constructor */ "./node_modules/core-js/internals/native-promise-constructor.js");
-var redefine = __webpack_require__(/*! ../internals/redefine */ "./node_modules/core-js/internals/redefine.js");
-var redefineAll = __webpack_require__(/*! ../internals/redefine-all */ "./node_modules/core-js/internals/redefine-all.js");
-var setToStringTag = __webpack_require__(/*! ../internals/set-to-string-tag */ "./node_modules/core-js/internals/set-to-string-tag.js");
-var setSpecies = __webpack_require__(/*! ../internals/set-species */ "./node_modules/core-js/internals/set-species.js");
-var isObject = __webpack_require__(/*! ../internals/is-object */ "./node_modules/core-js/internals/is-object.js");
-var aFunction = __webpack_require__(/*! ../internals/a-function */ "./node_modules/core-js/internals/a-function.js");
-var anInstance = __webpack_require__(/*! ../internals/an-instance */ "./node_modules/core-js/internals/an-instance.js");
-var classof = __webpack_require__(/*! ../internals/classof-raw */ "./node_modules/core-js/internals/classof-raw.js");
-var inspectSource = __webpack_require__(/*! ../internals/inspect-source */ "./node_modules/core-js/internals/inspect-source.js");
-var iterate = __webpack_require__(/*! ../internals/iterate */ "./node_modules/core-js/internals/iterate.js");
-var checkCorrectnessOfIteration = __webpack_require__(/*! ../internals/check-correctness-of-iteration */ "./node_modules/core-js/internals/check-correctness-of-iteration.js");
-var speciesConstructor = __webpack_require__(/*! ../internals/species-constructor */ "./node_modules/core-js/internals/species-constructor.js");
-var task = __webpack_require__(/*! ../internals/task */ "./node_modules/core-js/internals/task.js").set;
-var microtask = __webpack_require__(/*! ../internals/microtask */ "./node_modules/core-js/internals/microtask.js");
-var promiseResolve = __webpack_require__(/*! ../internals/promise-resolve */ "./node_modules/core-js/internals/promise-resolve.js");
-var hostReportErrors = __webpack_require__(/*! ../internals/host-report-errors */ "./node_modules/core-js/internals/host-report-errors.js");
-var newPromiseCapabilityModule = __webpack_require__(/*! ../internals/new-promise-capability */ "./node_modules/core-js/internals/new-promise-capability.js");
-var perform = __webpack_require__(/*! ../internals/perform */ "./node_modules/core-js/internals/perform.js");
-var InternalStateModule = __webpack_require__(/*! ../internals/internal-state */ "./node_modules/core-js/internals/internal-state.js");
-var isForced = __webpack_require__(/*! ../internals/is-forced */ "./node_modules/core-js/internals/is-forced.js");
-var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_modules/core-js/internals/well-known-symbol.js");
-var V8_VERSION = __webpack_require__(/*! ../internals/v8-version */ "./node_modules/core-js/internals/v8-version.js");
-
-var SPECIES = wellKnownSymbol('species');
-var PROMISE = 'Promise';
-var getInternalState = InternalStateModule.get;
-var setInternalState = InternalStateModule.set;
-var getInternalPromiseState = InternalStateModule.getterFor(PROMISE);
-var PromiseConstructor = NativePromise;
-var TypeError = global.TypeError;
-var document = global.document;
-var process = global.process;
-var $fetch = getBuiltIn('fetch');
-var newPromiseCapability = newPromiseCapabilityModule.f;
-var newGenericPromiseCapability = newPromiseCapability;
-var IS_NODE = classof(process) == 'process';
-var DISPATCH_EVENT = !!(document && document.createEvent && global.dispatchEvent);
-var UNHANDLED_REJECTION = 'unhandledrejection';
-var REJECTION_HANDLED = 'rejectionhandled';
-var PENDING = 0;
-var FULFILLED = 1;
-var REJECTED = 2;
-var HANDLED = 1;
-var UNHANDLED = 2;
-var Internal, OwnPromiseCapability, PromiseWrapper, nativeThen;
-
-var FORCED = isForced(PROMISE, function () {
-  var GLOBAL_CORE_JS_PROMISE = inspectSource(PromiseConstructor) !== String(PromiseConstructor);
-  if (!GLOBAL_CORE_JS_PROMISE) {
-    // V8 6.6 (Node 10 and Chrome 66) have a bug with resolving custom thenables
-    // https://bugs.chromium.org/p/chromium/issues/detail?id=830565
-    // We can't detect it synchronously, so just check versions
-    if (V8_VERSION === 66) return true;
-    // Unhandled rejections tracking support, NodeJS Promise without it fails @@species test
-    if (!IS_NODE && typeof PromiseRejectionEvent != 'function') return true;
-  }
-  // We need Promise#finally in the pure version for preventing prototype pollution
-  if (IS_PURE && !PromiseConstructor.prototype['finally']) return true;
-  // We can't use @@species feature detection in V8 since it causes
-  // deoptimization and performance degradation
-  // https://github.com/zloirock/core-js/issues/679
-  if (V8_VERSION >= 51 && /native code/.test(PromiseConstructor)) return false;
-  // Detect correctness of subclassing with @@species support
-  var promise = PromiseConstructor.resolve(1);
-  var FakePromise = function (exec) {
-    exec(function () { /* empty */ }, function () { /* empty */ });
-  };
-  var constructor = promise.constructor = {};
-  constructor[SPECIES] = FakePromise;
-  return !(promise.then(function () { /* empty */ }) instanceof FakePromise);
-});
-
-var INCORRECT_ITERATION = FORCED || !checkCorrectnessOfIteration(function (iterable) {
-  PromiseConstructor.all(iterable)['catch'](function () { /* empty */ });
-});
-
-// helpers
-var isThenable = function (it) {
-  var then;
-  return isObject(it) && typeof (then = it.then) == 'function' ? then : false;
-};
-
-var notify = function (promise, state, isReject) {
-  if (state.notified) return;
-  state.notified = true;
-  var chain = state.reactions;
-  microtask(function () {
-    var value = state.value;
-    var ok = state.state == FULFILLED;
-    var index = 0;
-    // variable length - can't use forEach
-    while (chain.length > index) {
-      var reaction = chain[index++];
-      var handler = ok ? reaction.ok : reaction.fail;
-      var resolve = reaction.resolve;
-      var reject = reaction.reject;
-      var domain = reaction.domain;
-      var result, then, exited;
-      try {
-        if (handler) {
-          if (!ok) {
-            if (state.rejection === UNHANDLED) onHandleUnhandled(promise, state);
-            state.rejection = HANDLED;
-          }
-          if (handler === true) result = value;
-          else {
-            if (domain) domain.enter();
-            result = handler(value); // can throw
-            if (domain) {
-              domain.exit();
-              exited = true;
-            }
-          }
-          if (result === reaction.promise) {
-            reject(TypeError('Promise-chain cycle'));
-          } else if (then = isThenable(result)) {
-            then.call(result, resolve, reject);
-          } else resolve(result);
-        } else reject(value);
-      } catch (error) {
-        if (domain && !exited) domain.exit();
-        reject(error);
-      }
-    }
-    state.reactions = [];
-    state.notified = false;
-    if (isReject && !state.rejection) onUnhandled(promise, state);
-  });
-};
-
-var dispatchEvent = function (name, promise, reason) {
-  var event, handler;
-  if (DISPATCH_EVENT) {
-    event = document.createEvent('Event');
-    event.promise = promise;
-    event.reason = reason;
-    event.initEvent(name, false, true);
-    global.dispatchEvent(event);
-  } else event = { promise: promise, reason: reason };
-  if (handler = global['on' + name]) handler(event);
-  else if (name === UNHANDLED_REJECTION) hostReportErrors('Unhandled promise rejection', reason);
-};
-
-var onUnhandled = function (promise, state) {
-  task.call(global, function () {
-    var value = state.value;
-    var IS_UNHANDLED = isUnhandled(state);
-    var result;
-    if (IS_UNHANDLED) {
-      result = perform(function () {
-        if (IS_NODE) {
-          process.emit('unhandledRejection', value, promise);
-        } else dispatchEvent(UNHANDLED_REJECTION, promise, value);
-      });
-      // Browsers should not trigger `rejectionHandled` event if it was handled here, NodeJS - should
-      state.rejection = IS_NODE || isUnhandled(state) ? UNHANDLED : HANDLED;
-      if (result.error) throw result.value;
-    }
-  });
-};
-
-var isUnhandled = function (state) {
-  return state.rejection !== HANDLED && !state.parent;
-};
-
-var onHandleUnhandled = function (promise, state) {
-  task.call(global, function () {
-    if (IS_NODE) {
-      process.emit('rejectionHandled', promise);
-    } else dispatchEvent(REJECTION_HANDLED, promise, state.value);
-  });
-};
-
-var bind = function (fn, promise, state, unwrap) {
-  return function (value) {
-    fn(promise, state, value, unwrap);
-  };
-};
-
-var internalReject = function (promise, state, value, unwrap) {
-  if (state.done) return;
-  state.done = true;
-  if (unwrap) state = unwrap;
-  state.value = value;
-  state.state = REJECTED;
-  notify(promise, state, true);
-};
-
-var internalResolve = function (promise, state, value, unwrap) {
-  if (state.done) return;
-  state.done = true;
-  if (unwrap) state = unwrap;
-  try {
-    if (promise === value) throw TypeError("Promise can't be resolved itself");
-    var then = isThenable(value);
-    if (then) {
-      microtask(function () {
-        var wrapper = { done: false };
-        try {
-          then.call(value,
-            bind(internalResolve, promise, wrapper, state),
-            bind(internalReject, promise, wrapper, state)
-          );
-        } catch (error) {
-          internalReject(promise, wrapper, error, state);
-        }
-      });
-    } else {
-      state.value = value;
-      state.state = FULFILLED;
-      notify(promise, state, false);
-    }
-  } catch (error) {
-    internalReject(promise, { done: false }, error, state);
-  }
-};
-
-// constructor polyfill
-if (FORCED) {
-  // 25.4.3.1 Promise(executor)
-  PromiseConstructor = function Promise(executor) {
-    anInstance(this, PromiseConstructor, PROMISE);
-    aFunction(executor);
-    Internal.call(this);
-    var state = getInternalState(this);
-    try {
-      executor(bind(internalResolve, this, state), bind(internalReject, this, state));
-    } catch (error) {
-      internalReject(this, state, error);
-    }
-  };
-  // eslint-disable-next-line no-unused-vars
-  Internal = function Promise(executor) {
-    setInternalState(this, {
-      type: PROMISE,
-      done: false,
-      notified: false,
-      parent: false,
-      reactions: [],
-      rejection: false,
-      state: PENDING,
-      value: undefined
-    });
-  };
-  Internal.prototype = redefineAll(PromiseConstructor.prototype, {
-    // `Promise.prototype.then` method
-    // https://tc39.github.io/ecma262/#sec-promise.prototype.then
-    then: function then(onFulfilled, onRejected) {
-      var state = getInternalPromiseState(this);
-      var reaction = newPromiseCapability(speciesConstructor(this, PromiseConstructor));
-      reaction.ok = typeof onFulfilled == 'function' ? onFulfilled : true;
-      reaction.fail = typeof onRejected == 'function' && onRejected;
-      reaction.domain = IS_NODE ? process.domain : undefined;
-      state.parent = true;
-      state.reactions.push(reaction);
-      if (state.state != PENDING) notify(this, state, false);
-      return reaction.promise;
-    },
-    // `Promise.prototype.catch` method
-    // https://tc39.github.io/ecma262/#sec-promise.prototype.catch
-    'catch': function (onRejected) {
-      return this.then(undefined, onRejected);
-    }
-  });
-  OwnPromiseCapability = function () {
-    var promise = new Internal();
-    var state = getInternalState(promise);
-    this.promise = promise;
-    this.resolve = bind(internalResolve, promise, state);
-    this.reject = bind(internalReject, promise, state);
-  };
-  newPromiseCapabilityModule.f = newPromiseCapability = function (C) {
-    return C === PromiseConstructor || C === PromiseWrapper
-      ? new OwnPromiseCapability(C)
-      : newGenericPromiseCapability(C);
-  };
-
-  if (!IS_PURE && typeof NativePromise == 'function') {
-    nativeThen = NativePromise.prototype.then;
-
-    // wrap native Promise#then for native async functions
-    redefine(NativePromise.prototype, 'then', function then(onFulfilled, onRejected) {
-      var that = this;
-      return new PromiseConstructor(function (resolve, reject) {
-        nativeThen.call(that, resolve, reject);
-      }).then(onFulfilled, onRejected);
-    // https://github.com/zloirock/core-js/issues/640
-    }, { unsafe: true });
-
-    // wrap fetch result
-    if (typeof $fetch == 'function') $({ global: true, enumerable: true, forced: true }, {
-      // eslint-disable-next-line no-unused-vars
-      fetch: function fetch(input /* , init */) {
-        return promiseResolve(PromiseConstructor, $fetch.apply(global, arguments));
-      }
-    });
-  }
-}
-
-$({ global: true, wrap: true, forced: FORCED }, {
-  Promise: PromiseConstructor
-});
-
-setToStringTag(PromiseConstructor, PROMISE, false, true);
-setSpecies(PROMISE);
-
-PromiseWrapper = getBuiltIn(PROMISE);
-
-// statics
-$({ target: PROMISE, stat: true, forced: FORCED }, {
-  // `Promise.reject` method
-  // https://tc39.github.io/ecma262/#sec-promise.reject
-  reject: function reject(r) {
-    var capability = newPromiseCapability(this);
-    capability.reject.call(undefined, r);
-    return capability.promise;
-  }
-});
-
-$({ target: PROMISE, stat: true, forced: IS_PURE || FORCED }, {
-  // `Promise.resolve` method
-  // https://tc39.github.io/ecma262/#sec-promise.resolve
-  resolve: function resolve(x) {
-    return promiseResolve(IS_PURE && this === PromiseWrapper ? PromiseConstructor : this, x);
-  }
-});
-
-$({ target: PROMISE, stat: true, forced: INCORRECT_ITERATION }, {
-  // `Promise.all` method
-  // https://tc39.github.io/ecma262/#sec-promise.all
-  all: function all(iterable) {
-    var C = this;
-    var capability = newPromiseCapability(C);
-    var resolve = capability.resolve;
-    var reject = capability.reject;
-    var result = perform(function () {
-      var $promiseResolve = aFunction(C.resolve);
-      var values = [];
-      var counter = 0;
-      var remaining = 1;
-      iterate(iterable, function (promise) {
-        var index = counter++;
-        var alreadyCalled = false;
-        values.push(undefined);
-        remaining++;
-        $promiseResolve.call(C, promise).then(function (value) {
-          if (alreadyCalled) return;
-          alreadyCalled = true;
-          values[index] = value;
-          --remaining || resolve(values);
-        }, reject);
-      });
-      --remaining || resolve(values);
-    });
-    if (result.error) reject(result.value);
-    return capability.promise;
-  },
-  // `Promise.race` method
-  // https://tc39.github.io/ecma262/#sec-promise.race
-  race: function race(iterable) {
-    var C = this;
-    var capability = newPromiseCapability(C);
-    var reject = capability.reject;
-    var result = perform(function () {
-      var $promiseResolve = aFunction(C.resolve);
-      iterate(iterable, function (promise) {
-        $promiseResolve.call(C, promise).then(capability.resolve, reject);
-      });
-    });
-    if (result.error) reject(result.value);
-    return capability.promise;
-  }
-});
 
 
 /***/ }),
@@ -4656,47 +2856,6 @@ if (NOT_GENERIC || INCORRECT_NAME) {
     return '/' + p + '/' + f;
   }, { unsafe: true });
 }
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/es.string.iterator.js":
-/*!************************************************************!*\
-  !*** ./node_modules/core-js/modules/es.string.iterator.js ***!
-  \************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var charAt = __webpack_require__(/*! ../internals/string-multibyte */ "./node_modules/core-js/internals/string-multibyte.js").charAt;
-var InternalStateModule = __webpack_require__(/*! ../internals/internal-state */ "./node_modules/core-js/internals/internal-state.js");
-var defineIterator = __webpack_require__(/*! ../internals/define-iterator */ "./node_modules/core-js/internals/define-iterator.js");
-
-var STRING_ITERATOR = 'String Iterator';
-var setInternalState = InternalStateModule.set;
-var getInternalState = InternalStateModule.getterFor(STRING_ITERATOR);
-
-// `String.prototype[@@iterator]` method
-// https://tc39.github.io/ecma262/#sec-string.prototype-@@iterator
-defineIterator(String, 'String', function (iterated) {
-  setInternalState(this, {
-    type: STRING_ITERATOR,
-    string: String(iterated),
-    index: 0
-  });
-// `%StringIteratorPrototype%.next` method
-// https://tc39.github.io/ecma262/#sec-%stringiteratorprototype%.next
-}, function next() {
-  var state = getInternalState(this);
-  var string = state.string;
-  var index = state.index;
-  var point;
-  if (index >= string.length) return { value: undefined, done: true };
-  point = charAt(string, index);
-  state.index += point.length;
-  return { value: point, done: false };
-});
 
 
 /***/ }),
@@ -5065,1428 +3224,6 @@ for (var COLLECTION_NAME in DOMIterables) {
     CollectionPrototype.forEach = forEach;
   }
 }
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/web.dom-collections.iterator.js":
-/*!**********************************************************************!*\
-  !*** ./node_modules/core-js/modules/web.dom-collections.iterator.js ***!
-  \**********************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var global = __webpack_require__(/*! ../internals/global */ "./node_modules/core-js/internals/global.js");
-var DOMIterables = __webpack_require__(/*! ../internals/dom-iterables */ "./node_modules/core-js/internals/dom-iterables.js");
-var ArrayIteratorMethods = __webpack_require__(/*! ../modules/es.array.iterator */ "./node_modules/core-js/modules/es.array.iterator.js");
-var createNonEnumerableProperty = __webpack_require__(/*! ../internals/create-non-enumerable-property */ "./node_modules/core-js/internals/create-non-enumerable-property.js");
-var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_modules/core-js/internals/well-known-symbol.js");
-
-var ITERATOR = wellKnownSymbol('iterator');
-var TO_STRING_TAG = wellKnownSymbol('toStringTag');
-var ArrayValues = ArrayIteratorMethods.values;
-
-for (var COLLECTION_NAME in DOMIterables) {
-  var Collection = global[COLLECTION_NAME];
-  var CollectionPrototype = Collection && Collection.prototype;
-  if (CollectionPrototype) {
-    // some Chrome versions have non-configurable methods on DOMTokenList
-    if (CollectionPrototype[ITERATOR] !== ArrayValues) try {
-      createNonEnumerableProperty(CollectionPrototype, ITERATOR, ArrayValues);
-    } catch (error) {
-      CollectionPrototype[ITERATOR] = ArrayValues;
-    }
-    if (!CollectionPrototype[TO_STRING_TAG]) {
-      createNonEnumerableProperty(CollectionPrototype, TO_STRING_TAG, COLLECTION_NAME);
-    }
-    if (DOMIterables[COLLECTION_NAME]) for (var METHOD_NAME in ArrayIteratorMethods) {
-      // some Chrome versions have non-configurable methods on DOMTokenList
-      if (CollectionPrototype[METHOD_NAME] !== ArrayIteratorMethods[METHOD_NAME]) try {
-        createNonEnumerableProperty(CollectionPrototype, METHOD_NAME, ArrayIteratorMethods[METHOD_NAME]);
-      } catch (error) {
-        CollectionPrototype[METHOD_NAME] = ArrayIteratorMethods[METHOD_NAME];
-      }
-    }
-  }
-}
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/web.url-search-params.js":
-/*!***************************************************************!*\
-  !*** ./node_modules/core-js/modules/web.url-search-params.js ***!
-  \***************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-// TODO: in core-js@4, move /modules/ dependencies to public entries for better optimization by tools like `preset-env`
-__webpack_require__(/*! ../modules/es.array.iterator */ "./node_modules/core-js/modules/es.array.iterator.js");
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var getBuiltIn = __webpack_require__(/*! ../internals/get-built-in */ "./node_modules/core-js/internals/get-built-in.js");
-var USE_NATIVE_URL = __webpack_require__(/*! ../internals/native-url */ "./node_modules/core-js/internals/native-url.js");
-var redefine = __webpack_require__(/*! ../internals/redefine */ "./node_modules/core-js/internals/redefine.js");
-var redefineAll = __webpack_require__(/*! ../internals/redefine-all */ "./node_modules/core-js/internals/redefine-all.js");
-var setToStringTag = __webpack_require__(/*! ../internals/set-to-string-tag */ "./node_modules/core-js/internals/set-to-string-tag.js");
-var createIteratorConstructor = __webpack_require__(/*! ../internals/create-iterator-constructor */ "./node_modules/core-js/internals/create-iterator-constructor.js");
-var InternalStateModule = __webpack_require__(/*! ../internals/internal-state */ "./node_modules/core-js/internals/internal-state.js");
-var anInstance = __webpack_require__(/*! ../internals/an-instance */ "./node_modules/core-js/internals/an-instance.js");
-var hasOwn = __webpack_require__(/*! ../internals/has */ "./node_modules/core-js/internals/has.js");
-var bind = __webpack_require__(/*! ../internals/bind-context */ "./node_modules/core-js/internals/bind-context.js");
-var classof = __webpack_require__(/*! ../internals/classof */ "./node_modules/core-js/internals/classof.js");
-var anObject = __webpack_require__(/*! ../internals/an-object */ "./node_modules/core-js/internals/an-object.js");
-var isObject = __webpack_require__(/*! ../internals/is-object */ "./node_modules/core-js/internals/is-object.js");
-var create = __webpack_require__(/*! ../internals/object-create */ "./node_modules/core-js/internals/object-create.js");
-var createPropertyDescriptor = __webpack_require__(/*! ../internals/create-property-descriptor */ "./node_modules/core-js/internals/create-property-descriptor.js");
-var getIterator = __webpack_require__(/*! ../internals/get-iterator */ "./node_modules/core-js/internals/get-iterator.js");
-var getIteratorMethod = __webpack_require__(/*! ../internals/get-iterator-method */ "./node_modules/core-js/internals/get-iterator-method.js");
-var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_modules/core-js/internals/well-known-symbol.js");
-
-var $fetch = getBuiltIn('fetch');
-var Headers = getBuiltIn('Headers');
-var ITERATOR = wellKnownSymbol('iterator');
-var URL_SEARCH_PARAMS = 'URLSearchParams';
-var URL_SEARCH_PARAMS_ITERATOR = URL_SEARCH_PARAMS + 'Iterator';
-var setInternalState = InternalStateModule.set;
-var getInternalParamsState = InternalStateModule.getterFor(URL_SEARCH_PARAMS);
-var getInternalIteratorState = InternalStateModule.getterFor(URL_SEARCH_PARAMS_ITERATOR);
-
-var plus = /\+/g;
-var sequences = Array(4);
-
-var percentSequence = function (bytes) {
-  return sequences[bytes - 1] || (sequences[bytes - 1] = RegExp('((?:%[\\da-f]{2}){' + bytes + '})', 'gi'));
-};
-
-var percentDecode = function (sequence) {
-  try {
-    return decodeURIComponent(sequence);
-  } catch (error) {
-    return sequence;
-  }
-};
-
-var deserialize = function (it) {
-  var result = it.replace(plus, ' ');
-  var bytes = 4;
-  try {
-    return decodeURIComponent(result);
-  } catch (error) {
-    while (bytes) {
-      result = result.replace(percentSequence(bytes--), percentDecode);
-    }
-    return result;
-  }
-};
-
-var find = /[!'()~]|%20/g;
-
-var replace = {
-  '!': '%21',
-  "'": '%27',
-  '(': '%28',
-  ')': '%29',
-  '~': '%7E',
-  '%20': '+'
-};
-
-var replacer = function (match) {
-  return replace[match];
-};
-
-var serialize = function (it) {
-  return encodeURIComponent(it).replace(find, replacer);
-};
-
-var parseSearchParams = function (result, query) {
-  if (query) {
-    var attributes = query.split('&');
-    var index = 0;
-    var attribute, entry;
-    while (index < attributes.length) {
-      attribute = attributes[index++];
-      if (attribute.length) {
-        entry = attribute.split('=');
-        result.push({
-          key: deserialize(entry.shift()),
-          value: deserialize(entry.join('='))
-        });
-      }
-    }
-  }
-};
-
-var updateSearchParams = function (query) {
-  this.entries.length = 0;
-  parseSearchParams(this.entries, query);
-};
-
-var validateArgumentsLength = function (passed, required) {
-  if (passed < required) throw TypeError('Not enough arguments');
-};
-
-var URLSearchParamsIterator = createIteratorConstructor(function Iterator(params, kind) {
-  setInternalState(this, {
-    type: URL_SEARCH_PARAMS_ITERATOR,
-    iterator: getIterator(getInternalParamsState(params).entries),
-    kind: kind
-  });
-}, 'Iterator', function next() {
-  var state = getInternalIteratorState(this);
-  var kind = state.kind;
-  var step = state.iterator.next();
-  var entry = step.value;
-  if (!step.done) {
-    step.value = kind === 'keys' ? entry.key : kind === 'values' ? entry.value : [entry.key, entry.value];
-  } return step;
-});
-
-// `URLSearchParams` constructor
-// https://url.spec.whatwg.org/#interface-urlsearchparams
-var URLSearchParamsConstructor = function URLSearchParams(/* init */) {
-  anInstance(this, URLSearchParamsConstructor, URL_SEARCH_PARAMS);
-  var init = arguments.length > 0 ? arguments[0] : undefined;
-  var that = this;
-  var entries = [];
-  var iteratorMethod, iterator, next, step, entryIterator, entryNext, first, second, key;
-
-  setInternalState(that, {
-    type: URL_SEARCH_PARAMS,
-    entries: entries,
-    updateURL: function () { /* empty */ },
-    updateSearchParams: updateSearchParams
-  });
-
-  if (init !== undefined) {
-    if (isObject(init)) {
-      iteratorMethod = getIteratorMethod(init);
-      if (typeof iteratorMethod === 'function') {
-        iterator = iteratorMethod.call(init);
-        next = iterator.next;
-        while (!(step = next.call(iterator)).done) {
-          entryIterator = getIterator(anObject(step.value));
-          entryNext = entryIterator.next;
-          if (
-            (first = entryNext.call(entryIterator)).done ||
-            (second = entryNext.call(entryIterator)).done ||
-            !entryNext.call(entryIterator).done
-          ) throw TypeError('Expected sequence with length 2');
-          entries.push({ key: first.value + '', value: second.value + '' });
-        }
-      } else for (key in init) if (hasOwn(init, key)) entries.push({ key: key, value: init[key] + '' });
-    } else {
-      parseSearchParams(entries, typeof init === 'string' ? init.charAt(0) === '?' ? init.slice(1) : init : init + '');
-    }
-  }
-};
-
-var URLSearchParamsPrototype = URLSearchParamsConstructor.prototype;
-
-redefineAll(URLSearchParamsPrototype, {
-  // `URLSearchParams.prototype.appent` method
-  // https://url.spec.whatwg.org/#dom-urlsearchparams-append
-  append: function append(name, value) {
-    validateArgumentsLength(arguments.length, 2);
-    var state = getInternalParamsState(this);
-    state.entries.push({ key: name + '', value: value + '' });
-    state.updateURL();
-  },
-  // `URLSearchParams.prototype.delete` method
-  // https://url.spec.whatwg.org/#dom-urlsearchparams-delete
-  'delete': function (name) {
-    validateArgumentsLength(arguments.length, 1);
-    var state = getInternalParamsState(this);
-    var entries = state.entries;
-    var key = name + '';
-    var index = 0;
-    while (index < entries.length) {
-      if (entries[index].key === key) entries.splice(index, 1);
-      else index++;
-    }
-    state.updateURL();
-  },
-  // `URLSearchParams.prototype.get` method
-  // https://url.spec.whatwg.org/#dom-urlsearchparams-get
-  get: function get(name) {
-    validateArgumentsLength(arguments.length, 1);
-    var entries = getInternalParamsState(this).entries;
-    var key = name + '';
-    var index = 0;
-    for (; index < entries.length; index++) {
-      if (entries[index].key === key) return entries[index].value;
-    }
-    return null;
-  },
-  // `URLSearchParams.prototype.getAll` method
-  // https://url.spec.whatwg.org/#dom-urlsearchparams-getall
-  getAll: function getAll(name) {
-    validateArgumentsLength(arguments.length, 1);
-    var entries = getInternalParamsState(this).entries;
-    var key = name + '';
-    var result = [];
-    var index = 0;
-    for (; index < entries.length; index++) {
-      if (entries[index].key === key) result.push(entries[index].value);
-    }
-    return result;
-  },
-  // `URLSearchParams.prototype.has` method
-  // https://url.spec.whatwg.org/#dom-urlsearchparams-has
-  has: function has(name) {
-    validateArgumentsLength(arguments.length, 1);
-    var entries = getInternalParamsState(this).entries;
-    var key = name + '';
-    var index = 0;
-    while (index < entries.length) {
-      if (entries[index++].key === key) return true;
-    }
-    return false;
-  },
-  // `URLSearchParams.prototype.set` method
-  // https://url.spec.whatwg.org/#dom-urlsearchparams-set
-  set: function set(name, value) {
-    validateArgumentsLength(arguments.length, 1);
-    var state = getInternalParamsState(this);
-    var entries = state.entries;
-    var found = false;
-    var key = name + '';
-    var val = value + '';
-    var index = 0;
-    var entry;
-    for (; index < entries.length; index++) {
-      entry = entries[index];
-      if (entry.key === key) {
-        if (found) entries.splice(index--, 1);
-        else {
-          found = true;
-          entry.value = val;
-        }
-      }
-    }
-    if (!found) entries.push({ key: key, value: val });
-    state.updateURL();
-  },
-  // `URLSearchParams.prototype.sort` method
-  // https://url.spec.whatwg.org/#dom-urlsearchparams-sort
-  sort: function sort() {
-    var state = getInternalParamsState(this);
-    var entries = state.entries;
-    // Array#sort is not stable in some engines
-    var slice = entries.slice();
-    var entry, entriesIndex, sliceIndex;
-    entries.length = 0;
-    for (sliceIndex = 0; sliceIndex < slice.length; sliceIndex++) {
-      entry = slice[sliceIndex];
-      for (entriesIndex = 0; entriesIndex < sliceIndex; entriesIndex++) {
-        if (entries[entriesIndex].key > entry.key) {
-          entries.splice(entriesIndex, 0, entry);
-          break;
-        }
-      }
-      if (entriesIndex === sliceIndex) entries.push(entry);
-    }
-    state.updateURL();
-  },
-  // `URLSearchParams.prototype.forEach` method
-  forEach: function forEach(callback /* , thisArg */) {
-    var entries = getInternalParamsState(this).entries;
-    var boundFunction = bind(callback, arguments.length > 1 ? arguments[1] : undefined, 3);
-    var index = 0;
-    var entry;
-    while (index < entries.length) {
-      entry = entries[index++];
-      boundFunction(entry.value, entry.key, this);
-    }
-  },
-  // `URLSearchParams.prototype.keys` method
-  keys: function keys() {
-    return new URLSearchParamsIterator(this, 'keys');
-  },
-  // `URLSearchParams.prototype.values` method
-  values: function values() {
-    return new URLSearchParamsIterator(this, 'values');
-  },
-  // `URLSearchParams.prototype.entries` method
-  entries: function entries() {
-    return new URLSearchParamsIterator(this, 'entries');
-  }
-}, { enumerable: true });
-
-// `URLSearchParams.prototype[@@iterator]` method
-redefine(URLSearchParamsPrototype, ITERATOR, URLSearchParamsPrototype.entries);
-
-// `URLSearchParams.prototype.toString` method
-// https://url.spec.whatwg.org/#urlsearchparams-stringification-behavior
-redefine(URLSearchParamsPrototype, 'toString', function toString() {
-  var entries = getInternalParamsState(this).entries;
-  var result = [];
-  var index = 0;
-  var entry;
-  while (index < entries.length) {
-    entry = entries[index++];
-    result.push(serialize(entry.key) + '=' + serialize(entry.value));
-  } return result.join('&');
-}, { enumerable: true });
-
-setToStringTag(URLSearchParamsConstructor, URL_SEARCH_PARAMS);
-
-$({ global: true, forced: !USE_NATIVE_URL }, {
-  URLSearchParams: URLSearchParamsConstructor
-});
-
-// Wrap `fetch` for correct work with polyfilled `URLSearchParams`
-// https://github.com/zloirock/core-js/issues/674
-if (!USE_NATIVE_URL && typeof $fetch == 'function' && typeof Headers == 'function') {
-  $({ global: true, enumerable: true, forced: true }, {
-    fetch: function fetch(input /* , init */) {
-      var args = [input];
-      var init, body, headers;
-      if (arguments.length > 1) {
-        init = arguments[1];
-        if (isObject(init)) {
-          body = init.body;
-          if (classof(body) === URL_SEARCH_PARAMS) {
-            headers = init.headers ? new Headers(init.headers) : new Headers();
-            if (!headers.has('content-type')) {
-              headers.set('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
-            }
-            init = create(init, {
-              body: createPropertyDescriptor(0, String(body)),
-              headers: createPropertyDescriptor(0, headers)
-            });
-          }
-        }
-        args.push(init);
-      } return $fetch.apply(this, args);
-    }
-  });
-}
-
-module.exports = {
-  URLSearchParams: URLSearchParamsConstructor,
-  getState: getInternalParamsState
-};
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/web.url.js":
-/*!*************************************************!*\
-  !*** ./node_modules/core-js/modules/web.url.js ***!
-  \*************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-// TODO: in core-js@4, move /modules/ dependencies to public entries for better optimization by tools like `preset-env`
-__webpack_require__(/*! ../modules/es.string.iterator */ "./node_modules/core-js/modules/es.string.iterator.js");
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var DESCRIPTORS = __webpack_require__(/*! ../internals/descriptors */ "./node_modules/core-js/internals/descriptors.js");
-var USE_NATIVE_URL = __webpack_require__(/*! ../internals/native-url */ "./node_modules/core-js/internals/native-url.js");
-var global = __webpack_require__(/*! ../internals/global */ "./node_modules/core-js/internals/global.js");
-var defineProperties = __webpack_require__(/*! ../internals/object-define-properties */ "./node_modules/core-js/internals/object-define-properties.js");
-var redefine = __webpack_require__(/*! ../internals/redefine */ "./node_modules/core-js/internals/redefine.js");
-var anInstance = __webpack_require__(/*! ../internals/an-instance */ "./node_modules/core-js/internals/an-instance.js");
-var has = __webpack_require__(/*! ../internals/has */ "./node_modules/core-js/internals/has.js");
-var assign = __webpack_require__(/*! ../internals/object-assign */ "./node_modules/core-js/internals/object-assign.js");
-var arrayFrom = __webpack_require__(/*! ../internals/array-from */ "./node_modules/core-js/internals/array-from.js");
-var codeAt = __webpack_require__(/*! ../internals/string-multibyte */ "./node_modules/core-js/internals/string-multibyte.js").codeAt;
-var toASCII = __webpack_require__(/*! ../internals/punycode-to-ascii */ "./node_modules/core-js/internals/punycode-to-ascii.js");
-var setToStringTag = __webpack_require__(/*! ../internals/set-to-string-tag */ "./node_modules/core-js/internals/set-to-string-tag.js");
-var URLSearchParamsModule = __webpack_require__(/*! ../modules/web.url-search-params */ "./node_modules/core-js/modules/web.url-search-params.js");
-var InternalStateModule = __webpack_require__(/*! ../internals/internal-state */ "./node_modules/core-js/internals/internal-state.js");
-
-var NativeURL = global.URL;
-var URLSearchParams = URLSearchParamsModule.URLSearchParams;
-var getInternalSearchParamsState = URLSearchParamsModule.getState;
-var setInternalState = InternalStateModule.set;
-var getInternalURLState = InternalStateModule.getterFor('URL');
-var floor = Math.floor;
-var pow = Math.pow;
-
-var INVALID_AUTHORITY = 'Invalid authority';
-var INVALID_SCHEME = 'Invalid scheme';
-var INVALID_HOST = 'Invalid host';
-var INVALID_PORT = 'Invalid port';
-
-var ALPHA = /[A-Za-z]/;
-var ALPHANUMERIC = /[\d+\-.A-Za-z]/;
-var DIGIT = /\d/;
-var HEX_START = /^(0x|0X)/;
-var OCT = /^[0-7]+$/;
-var DEC = /^\d+$/;
-var HEX = /^[\dA-Fa-f]+$/;
-// eslint-disable-next-line no-control-regex
-var FORBIDDEN_HOST_CODE_POINT = /[\u0000\u0009\u000A\u000D #%/:?@[\\]]/;
-// eslint-disable-next-line no-control-regex
-var FORBIDDEN_HOST_CODE_POINT_EXCLUDING_PERCENT = /[\u0000\u0009\u000A\u000D #/:?@[\\]]/;
-// eslint-disable-next-line no-control-regex
-var LEADING_AND_TRAILING_C0_CONTROL_OR_SPACE = /^[\u0000-\u001F ]+|[\u0000-\u001F ]+$/g;
-// eslint-disable-next-line no-control-regex
-var TAB_AND_NEW_LINE = /[\u0009\u000A\u000D]/g;
-var EOF;
-
-var parseHost = function (url, input) {
-  var result, codePoints, index;
-  if (input.charAt(0) == '[') {
-    if (input.charAt(input.length - 1) != ']') return INVALID_HOST;
-    result = parseIPv6(input.slice(1, -1));
-    if (!result) return INVALID_HOST;
-    url.host = result;
-  // opaque host
-  } else if (!isSpecial(url)) {
-    if (FORBIDDEN_HOST_CODE_POINT_EXCLUDING_PERCENT.test(input)) return INVALID_HOST;
-    result = '';
-    codePoints = arrayFrom(input);
-    for (index = 0; index < codePoints.length; index++) {
-      result += percentEncode(codePoints[index], C0ControlPercentEncodeSet);
-    }
-    url.host = result;
-  } else {
-    input = toASCII(input);
-    if (FORBIDDEN_HOST_CODE_POINT.test(input)) return INVALID_HOST;
-    result = parseIPv4(input);
-    if (result === null) return INVALID_HOST;
-    url.host = result;
-  }
-};
-
-var parseIPv4 = function (input) {
-  var parts = input.split('.');
-  var partsLength, numbers, index, part, radix, number, ipv4;
-  if (parts.length && parts[parts.length - 1] == '') {
-    parts.pop();
-  }
-  partsLength = parts.length;
-  if (partsLength > 4) return input;
-  numbers = [];
-  for (index = 0; index < partsLength; index++) {
-    part = parts[index];
-    if (part == '') return input;
-    radix = 10;
-    if (part.length > 1 && part.charAt(0) == '0') {
-      radix = HEX_START.test(part) ? 16 : 8;
-      part = part.slice(radix == 8 ? 1 : 2);
-    }
-    if (part === '') {
-      number = 0;
-    } else {
-      if (!(radix == 10 ? DEC : radix == 8 ? OCT : HEX).test(part)) return input;
-      number = parseInt(part, radix);
-    }
-    numbers.push(number);
-  }
-  for (index = 0; index < partsLength; index++) {
-    number = numbers[index];
-    if (index == partsLength - 1) {
-      if (number >= pow(256, 5 - partsLength)) return null;
-    } else if (number > 255) return null;
-  }
-  ipv4 = numbers.pop();
-  for (index = 0; index < numbers.length; index++) {
-    ipv4 += numbers[index] * pow(256, 3 - index);
-  }
-  return ipv4;
-};
-
-// eslint-disable-next-line max-statements
-var parseIPv6 = function (input) {
-  var address = [0, 0, 0, 0, 0, 0, 0, 0];
-  var pieceIndex = 0;
-  var compress = null;
-  var pointer = 0;
-  var value, length, numbersSeen, ipv4Piece, number, swaps, swap;
-
-  var char = function () {
-    return input.charAt(pointer);
-  };
-
-  if (char() == ':') {
-    if (input.charAt(1) != ':') return;
-    pointer += 2;
-    pieceIndex++;
-    compress = pieceIndex;
-  }
-  while (char()) {
-    if (pieceIndex == 8) return;
-    if (char() == ':') {
-      if (compress !== null) return;
-      pointer++;
-      pieceIndex++;
-      compress = pieceIndex;
-      continue;
-    }
-    value = length = 0;
-    while (length < 4 && HEX.test(char())) {
-      value = value * 16 + parseInt(char(), 16);
-      pointer++;
-      length++;
-    }
-    if (char() == '.') {
-      if (length == 0) return;
-      pointer -= length;
-      if (pieceIndex > 6) return;
-      numbersSeen = 0;
-      while (char()) {
-        ipv4Piece = null;
-        if (numbersSeen > 0) {
-          if (char() == '.' && numbersSeen < 4) pointer++;
-          else return;
-        }
-        if (!DIGIT.test(char())) return;
-        while (DIGIT.test(char())) {
-          number = parseInt(char(), 10);
-          if (ipv4Piece === null) ipv4Piece = number;
-          else if (ipv4Piece == 0) return;
-          else ipv4Piece = ipv4Piece * 10 + number;
-          if (ipv4Piece > 255) return;
-          pointer++;
-        }
-        address[pieceIndex] = address[pieceIndex] * 256 + ipv4Piece;
-        numbersSeen++;
-        if (numbersSeen == 2 || numbersSeen == 4) pieceIndex++;
-      }
-      if (numbersSeen != 4) return;
-      break;
-    } else if (char() == ':') {
-      pointer++;
-      if (!char()) return;
-    } else if (char()) return;
-    address[pieceIndex++] = value;
-  }
-  if (compress !== null) {
-    swaps = pieceIndex - compress;
-    pieceIndex = 7;
-    while (pieceIndex != 0 && swaps > 0) {
-      swap = address[pieceIndex];
-      address[pieceIndex--] = address[compress + swaps - 1];
-      address[compress + --swaps] = swap;
-    }
-  } else if (pieceIndex != 8) return;
-  return address;
-};
-
-var findLongestZeroSequence = function (ipv6) {
-  var maxIndex = null;
-  var maxLength = 1;
-  var currStart = null;
-  var currLength = 0;
-  var index = 0;
-  for (; index < 8; index++) {
-    if (ipv6[index] !== 0) {
-      if (currLength > maxLength) {
-        maxIndex = currStart;
-        maxLength = currLength;
-      }
-      currStart = null;
-      currLength = 0;
-    } else {
-      if (currStart === null) currStart = index;
-      ++currLength;
-    }
-  }
-  if (currLength > maxLength) {
-    maxIndex = currStart;
-    maxLength = currLength;
-  }
-  return maxIndex;
-};
-
-var serializeHost = function (host) {
-  var result, index, compress, ignore0;
-  // ipv4
-  if (typeof host == 'number') {
-    result = [];
-    for (index = 0; index < 4; index++) {
-      result.unshift(host % 256);
-      host = floor(host / 256);
-    } return result.join('.');
-  // ipv6
-  } else if (typeof host == 'object') {
-    result = '';
-    compress = findLongestZeroSequence(host);
-    for (index = 0; index < 8; index++) {
-      if (ignore0 && host[index] === 0) continue;
-      if (ignore0) ignore0 = false;
-      if (compress === index) {
-        result += index ? ':' : '::';
-        ignore0 = true;
-      } else {
-        result += host[index].toString(16);
-        if (index < 7) result += ':';
-      }
-    }
-    return '[' + result + ']';
-  } return host;
-};
-
-var C0ControlPercentEncodeSet = {};
-var fragmentPercentEncodeSet = assign({}, C0ControlPercentEncodeSet, {
-  ' ': 1, '"': 1, '<': 1, '>': 1, '`': 1
-});
-var pathPercentEncodeSet = assign({}, fragmentPercentEncodeSet, {
-  '#': 1, '?': 1, '{': 1, '}': 1
-});
-var userinfoPercentEncodeSet = assign({}, pathPercentEncodeSet, {
-  '/': 1, ':': 1, ';': 1, '=': 1, '@': 1, '[': 1, '\\': 1, ']': 1, '^': 1, '|': 1
-});
-
-var percentEncode = function (char, set) {
-  var code = codeAt(char, 0);
-  return code > 0x20 && code < 0x7F && !has(set, char) ? char : encodeURIComponent(char);
-};
-
-var specialSchemes = {
-  ftp: 21,
-  file: null,
-  http: 80,
-  https: 443,
-  ws: 80,
-  wss: 443
-};
-
-var isSpecial = function (url) {
-  return has(specialSchemes, url.scheme);
-};
-
-var includesCredentials = function (url) {
-  return url.username != '' || url.password != '';
-};
-
-var cannotHaveUsernamePasswordPort = function (url) {
-  return !url.host || url.cannotBeABaseURL || url.scheme == 'file';
-};
-
-var isWindowsDriveLetter = function (string, normalized) {
-  var second;
-  return string.length == 2 && ALPHA.test(string.charAt(0))
-    && ((second = string.charAt(1)) == ':' || (!normalized && second == '|'));
-};
-
-var startsWithWindowsDriveLetter = function (string) {
-  var third;
-  return string.length > 1 && isWindowsDriveLetter(string.slice(0, 2)) && (
-    string.length == 2 ||
-    ((third = string.charAt(2)) === '/' || third === '\\' || third === '?' || third === '#')
-  );
-};
-
-var shortenURLsPath = function (url) {
-  var path = url.path;
-  var pathSize = path.length;
-  if (pathSize && (url.scheme != 'file' || pathSize != 1 || !isWindowsDriveLetter(path[0], true))) {
-    path.pop();
-  }
-};
-
-var isSingleDot = function (segment) {
-  return segment === '.' || segment.toLowerCase() === '%2e';
-};
-
-var isDoubleDot = function (segment) {
-  segment = segment.toLowerCase();
-  return segment === '..' || segment === '%2e.' || segment === '.%2e' || segment === '%2e%2e';
-};
-
-// States:
-var SCHEME_START = {};
-var SCHEME = {};
-var NO_SCHEME = {};
-var SPECIAL_RELATIVE_OR_AUTHORITY = {};
-var PATH_OR_AUTHORITY = {};
-var RELATIVE = {};
-var RELATIVE_SLASH = {};
-var SPECIAL_AUTHORITY_SLASHES = {};
-var SPECIAL_AUTHORITY_IGNORE_SLASHES = {};
-var AUTHORITY = {};
-var HOST = {};
-var HOSTNAME = {};
-var PORT = {};
-var FILE = {};
-var FILE_SLASH = {};
-var FILE_HOST = {};
-var PATH_START = {};
-var PATH = {};
-var CANNOT_BE_A_BASE_URL_PATH = {};
-var QUERY = {};
-var FRAGMENT = {};
-
-// eslint-disable-next-line max-statements
-var parseURL = function (url, input, stateOverride, base) {
-  var state = stateOverride || SCHEME_START;
-  var pointer = 0;
-  var buffer = '';
-  var seenAt = false;
-  var seenBracket = false;
-  var seenPasswordToken = false;
-  var codePoints, char, bufferCodePoints, failure;
-
-  if (!stateOverride) {
-    url.scheme = '';
-    url.username = '';
-    url.password = '';
-    url.host = null;
-    url.port = null;
-    url.path = [];
-    url.query = null;
-    url.fragment = null;
-    url.cannotBeABaseURL = false;
-    input = input.replace(LEADING_AND_TRAILING_C0_CONTROL_OR_SPACE, '');
-  }
-
-  input = input.replace(TAB_AND_NEW_LINE, '');
-
-  codePoints = arrayFrom(input);
-
-  while (pointer <= codePoints.length) {
-    char = codePoints[pointer];
-    switch (state) {
-      case SCHEME_START:
-        if (char && ALPHA.test(char)) {
-          buffer += char.toLowerCase();
-          state = SCHEME;
-        } else if (!stateOverride) {
-          state = NO_SCHEME;
-          continue;
-        } else return INVALID_SCHEME;
-        break;
-
-      case SCHEME:
-        if (char && (ALPHANUMERIC.test(char) || char == '+' || char == '-' || char == '.')) {
-          buffer += char.toLowerCase();
-        } else if (char == ':') {
-          if (stateOverride && (
-            (isSpecial(url) != has(specialSchemes, buffer)) ||
-            (buffer == 'file' && (includesCredentials(url) || url.port !== null)) ||
-            (url.scheme == 'file' && !url.host)
-          )) return;
-          url.scheme = buffer;
-          if (stateOverride) {
-            if (isSpecial(url) && specialSchemes[url.scheme] == url.port) url.port = null;
-            return;
-          }
-          buffer = '';
-          if (url.scheme == 'file') {
-            state = FILE;
-          } else if (isSpecial(url) && base && base.scheme == url.scheme) {
-            state = SPECIAL_RELATIVE_OR_AUTHORITY;
-          } else if (isSpecial(url)) {
-            state = SPECIAL_AUTHORITY_SLASHES;
-          } else if (codePoints[pointer + 1] == '/') {
-            state = PATH_OR_AUTHORITY;
-            pointer++;
-          } else {
-            url.cannotBeABaseURL = true;
-            url.path.push('');
-            state = CANNOT_BE_A_BASE_URL_PATH;
-          }
-        } else if (!stateOverride) {
-          buffer = '';
-          state = NO_SCHEME;
-          pointer = 0;
-          continue;
-        } else return INVALID_SCHEME;
-        break;
-
-      case NO_SCHEME:
-        if (!base || (base.cannotBeABaseURL && char != '#')) return INVALID_SCHEME;
-        if (base.cannotBeABaseURL && char == '#') {
-          url.scheme = base.scheme;
-          url.path = base.path.slice();
-          url.query = base.query;
-          url.fragment = '';
-          url.cannotBeABaseURL = true;
-          state = FRAGMENT;
-          break;
-        }
-        state = base.scheme == 'file' ? FILE : RELATIVE;
-        continue;
-
-      case SPECIAL_RELATIVE_OR_AUTHORITY:
-        if (char == '/' && codePoints[pointer + 1] == '/') {
-          state = SPECIAL_AUTHORITY_IGNORE_SLASHES;
-          pointer++;
-        } else {
-          state = RELATIVE;
-          continue;
-        } break;
-
-      case PATH_OR_AUTHORITY:
-        if (char == '/') {
-          state = AUTHORITY;
-          break;
-        } else {
-          state = PATH;
-          continue;
-        }
-
-      case RELATIVE:
-        url.scheme = base.scheme;
-        if (char == EOF) {
-          url.username = base.username;
-          url.password = base.password;
-          url.host = base.host;
-          url.port = base.port;
-          url.path = base.path.slice();
-          url.query = base.query;
-        } else if (char == '/' || (char == '\\' && isSpecial(url))) {
-          state = RELATIVE_SLASH;
-        } else if (char == '?') {
-          url.username = base.username;
-          url.password = base.password;
-          url.host = base.host;
-          url.port = base.port;
-          url.path = base.path.slice();
-          url.query = '';
-          state = QUERY;
-        } else if (char == '#') {
-          url.username = base.username;
-          url.password = base.password;
-          url.host = base.host;
-          url.port = base.port;
-          url.path = base.path.slice();
-          url.query = base.query;
-          url.fragment = '';
-          state = FRAGMENT;
-        } else {
-          url.username = base.username;
-          url.password = base.password;
-          url.host = base.host;
-          url.port = base.port;
-          url.path = base.path.slice();
-          url.path.pop();
-          state = PATH;
-          continue;
-        } break;
-
-      case RELATIVE_SLASH:
-        if (isSpecial(url) && (char == '/' || char == '\\')) {
-          state = SPECIAL_AUTHORITY_IGNORE_SLASHES;
-        } else if (char == '/') {
-          state = AUTHORITY;
-        } else {
-          url.username = base.username;
-          url.password = base.password;
-          url.host = base.host;
-          url.port = base.port;
-          state = PATH;
-          continue;
-        } break;
-
-      case SPECIAL_AUTHORITY_SLASHES:
-        state = SPECIAL_AUTHORITY_IGNORE_SLASHES;
-        if (char != '/' || buffer.charAt(pointer + 1) != '/') continue;
-        pointer++;
-        break;
-
-      case SPECIAL_AUTHORITY_IGNORE_SLASHES:
-        if (char != '/' && char != '\\') {
-          state = AUTHORITY;
-          continue;
-        } break;
-
-      case AUTHORITY:
-        if (char == '@') {
-          if (seenAt) buffer = '%40' + buffer;
-          seenAt = true;
-          bufferCodePoints = arrayFrom(buffer);
-          for (var i = 0; i < bufferCodePoints.length; i++) {
-            var codePoint = bufferCodePoints[i];
-            if (codePoint == ':' && !seenPasswordToken) {
-              seenPasswordToken = true;
-              continue;
-            }
-            var encodedCodePoints = percentEncode(codePoint, userinfoPercentEncodeSet);
-            if (seenPasswordToken) url.password += encodedCodePoints;
-            else url.username += encodedCodePoints;
-          }
-          buffer = '';
-        } else if (
-          char == EOF || char == '/' || char == '?' || char == '#' ||
-          (char == '\\' && isSpecial(url))
-        ) {
-          if (seenAt && buffer == '') return INVALID_AUTHORITY;
-          pointer -= arrayFrom(buffer).length + 1;
-          buffer = '';
-          state = HOST;
-        } else buffer += char;
-        break;
-
-      case HOST:
-      case HOSTNAME:
-        if (stateOverride && url.scheme == 'file') {
-          state = FILE_HOST;
-          continue;
-        } else if (char == ':' && !seenBracket) {
-          if (buffer == '') return INVALID_HOST;
-          failure = parseHost(url, buffer);
-          if (failure) return failure;
-          buffer = '';
-          state = PORT;
-          if (stateOverride == HOSTNAME) return;
-        } else if (
-          char == EOF || char == '/' || char == '?' || char == '#' ||
-          (char == '\\' && isSpecial(url))
-        ) {
-          if (isSpecial(url) && buffer == '') return INVALID_HOST;
-          if (stateOverride && buffer == '' && (includesCredentials(url) || url.port !== null)) return;
-          failure = parseHost(url, buffer);
-          if (failure) return failure;
-          buffer = '';
-          state = PATH_START;
-          if (stateOverride) return;
-          continue;
-        } else {
-          if (char == '[') seenBracket = true;
-          else if (char == ']') seenBracket = false;
-          buffer += char;
-        } break;
-
-      case PORT:
-        if (DIGIT.test(char)) {
-          buffer += char;
-        } else if (
-          char == EOF || char == '/' || char == '?' || char == '#' ||
-          (char == '\\' && isSpecial(url)) ||
-          stateOverride
-        ) {
-          if (buffer != '') {
-            var port = parseInt(buffer, 10);
-            if (port > 0xFFFF) return INVALID_PORT;
-            url.port = (isSpecial(url) && port === specialSchemes[url.scheme]) ? null : port;
-            buffer = '';
-          }
-          if (stateOverride) return;
-          state = PATH_START;
-          continue;
-        } else return INVALID_PORT;
-        break;
-
-      case FILE:
-        url.scheme = 'file';
-        if (char == '/' || char == '\\') state = FILE_SLASH;
-        else if (base && base.scheme == 'file') {
-          if (char == EOF) {
-            url.host = base.host;
-            url.path = base.path.slice();
-            url.query = base.query;
-          } else if (char == '?') {
-            url.host = base.host;
-            url.path = base.path.slice();
-            url.query = '';
-            state = QUERY;
-          } else if (char == '#') {
-            url.host = base.host;
-            url.path = base.path.slice();
-            url.query = base.query;
-            url.fragment = '';
-            state = FRAGMENT;
-          } else {
-            if (!startsWithWindowsDriveLetter(codePoints.slice(pointer).join(''))) {
-              url.host = base.host;
-              url.path = base.path.slice();
-              shortenURLsPath(url);
-            }
-            state = PATH;
-            continue;
-          }
-        } else {
-          state = PATH;
-          continue;
-        } break;
-
-      case FILE_SLASH:
-        if (char == '/' || char == '\\') {
-          state = FILE_HOST;
-          break;
-        }
-        if (base && base.scheme == 'file' && !startsWithWindowsDriveLetter(codePoints.slice(pointer).join(''))) {
-          if (isWindowsDriveLetter(base.path[0], true)) url.path.push(base.path[0]);
-          else url.host = base.host;
-        }
-        state = PATH;
-        continue;
-
-      case FILE_HOST:
-        if (char == EOF || char == '/' || char == '\\' || char == '?' || char == '#') {
-          if (!stateOverride && isWindowsDriveLetter(buffer)) {
-            state = PATH;
-          } else if (buffer == '') {
-            url.host = '';
-            if (stateOverride) return;
-            state = PATH_START;
-          } else {
-            failure = parseHost(url, buffer);
-            if (failure) return failure;
-            if (url.host == 'localhost') url.host = '';
-            if (stateOverride) return;
-            buffer = '';
-            state = PATH_START;
-          } continue;
-        } else buffer += char;
-        break;
-
-      case PATH_START:
-        if (isSpecial(url)) {
-          state = PATH;
-          if (char != '/' && char != '\\') continue;
-        } else if (!stateOverride && char == '?') {
-          url.query = '';
-          state = QUERY;
-        } else if (!stateOverride && char == '#') {
-          url.fragment = '';
-          state = FRAGMENT;
-        } else if (char != EOF) {
-          state = PATH;
-          if (char != '/') continue;
-        } break;
-
-      case PATH:
-        if (
-          char == EOF || char == '/' ||
-          (char == '\\' && isSpecial(url)) ||
-          (!stateOverride && (char == '?' || char == '#'))
-        ) {
-          if (isDoubleDot(buffer)) {
-            shortenURLsPath(url);
-            if (char != '/' && !(char == '\\' && isSpecial(url))) {
-              url.path.push('');
-            }
-          } else if (isSingleDot(buffer)) {
-            if (char != '/' && !(char == '\\' && isSpecial(url))) {
-              url.path.push('');
-            }
-          } else {
-            if (url.scheme == 'file' && !url.path.length && isWindowsDriveLetter(buffer)) {
-              if (url.host) url.host = '';
-              buffer = buffer.charAt(0) + ':'; // normalize windows drive letter
-            }
-            url.path.push(buffer);
-          }
-          buffer = '';
-          if (url.scheme == 'file' && (char == EOF || char == '?' || char == '#')) {
-            while (url.path.length > 1 && url.path[0] === '') {
-              url.path.shift();
-            }
-          }
-          if (char == '?') {
-            url.query = '';
-            state = QUERY;
-          } else if (char == '#') {
-            url.fragment = '';
-            state = FRAGMENT;
-          }
-        } else {
-          buffer += percentEncode(char, pathPercentEncodeSet);
-        } break;
-
-      case CANNOT_BE_A_BASE_URL_PATH:
-        if (char == '?') {
-          url.query = '';
-          state = QUERY;
-        } else if (char == '#') {
-          url.fragment = '';
-          state = FRAGMENT;
-        } else if (char != EOF) {
-          url.path[0] += percentEncode(char, C0ControlPercentEncodeSet);
-        } break;
-
-      case QUERY:
-        if (!stateOverride && char == '#') {
-          url.fragment = '';
-          state = FRAGMENT;
-        } else if (char != EOF) {
-          if (char == "'" && isSpecial(url)) url.query += '%27';
-          else if (char == '#') url.query += '%23';
-          else url.query += percentEncode(char, C0ControlPercentEncodeSet);
-        } break;
-
-      case FRAGMENT:
-        if (char != EOF) url.fragment += percentEncode(char, fragmentPercentEncodeSet);
-        break;
-    }
-
-    pointer++;
-  }
-};
-
-// `URL` constructor
-// https://url.spec.whatwg.org/#url-class
-var URLConstructor = function URL(url /* , base */) {
-  var that = anInstance(this, URLConstructor, 'URL');
-  var base = arguments.length > 1 ? arguments[1] : undefined;
-  var urlString = String(url);
-  var state = setInternalState(that, { type: 'URL' });
-  var baseState, failure;
-  if (base !== undefined) {
-    if (base instanceof URLConstructor) baseState = getInternalURLState(base);
-    else {
-      failure = parseURL(baseState = {}, String(base));
-      if (failure) throw TypeError(failure);
-    }
-  }
-  failure = parseURL(state, urlString, null, baseState);
-  if (failure) throw TypeError(failure);
-  var searchParams = state.searchParams = new URLSearchParams();
-  var searchParamsState = getInternalSearchParamsState(searchParams);
-  searchParamsState.updateSearchParams(state.query);
-  searchParamsState.updateURL = function () {
-    state.query = String(searchParams) || null;
-  };
-  if (!DESCRIPTORS) {
-    that.href = serializeURL.call(that);
-    that.origin = getOrigin.call(that);
-    that.protocol = getProtocol.call(that);
-    that.username = getUsername.call(that);
-    that.password = getPassword.call(that);
-    that.host = getHost.call(that);
-    that.hostname = getHostname.call(that);
-    that.port = getPort.call(that);
-    that.pathname = getPathname.call(that);
-    that.search = getSearch.call(that);
-    that.searchParams = getSearchParams.call(that);
-    that.hash = getHash.call(that);
-  }
-};
-
-var URLPrototype = URLConstructor.prototype;
-
-var serializeURL = function () {
-  var url = getInternalURLState(this);
-  var scheme = url.scheme;
-  var username = url.username;
-  var password = url.password;
-  var host = url.host;
-  var port = url.port;
-  var path = url.path;
-  var query = url.query;
-  var fragment = url.fragment;
-  var output = scheme + ':';
-  if (host !== null) {
-    output += '//';
-    if (includesCredentials(url)) {
-      output += username + (password ? ':' + password : '') + '@';
-    }
-    output += serializeHost(host);
-    if (port !== null) output += ':' + port;
-  } else if (scheme == 'file') output += '//';
-  output += url.cannotBeABaseURL ? path[0] : path.length ? '/' + path.join('/') : '';
-  if (query !== null) output += '?' + query;
-  if (fragment !== null) output += '#' + fragment;
-  return output;
-};
-
-var getOrigin = function () {
-  var url = getInternalURLState(this);
-  var scheme = url.scheme;
-  var port = url.port;
-  if (scheme == 'blob') try {
-    return new URL(scheme.path[0]).origin;
-  } catch (error) {
-    return 'null';
-  }
-  if (scheme == 'file' || !isSpecial(url)) return 'null';
-  return scheme + '://' + serializeHost(url.host) + (port !== null ? ':' + port : '');
-};
-
-var getProtocol = function () {
-  return getInternalURLState(this).scheme + ':';
-};
-
-var getUsername = function () {
-  return getInternalURLState(this).username;
-};
-
-var getPassword = function () {
-  return getInternalURLState(this).password;
-};
-
-var getHost = function () {
-  var url = getInternalURLState(this);
-  var host = url.host;
-  var port = url.port;
-  return host === null ? ''
-    : port === null ? serializeHost(host)
-    : serializeHost(host) + ':' + port;
-};
-
-var getHostname = function () {
-  var host = getInternalURLState(this).host;
-  return host === null ? '' : serializeHost(host);
-};
-
-var getPort = function () {
-  var port = getInternalURLState(this).port;
-  return port === null ? '' : String(port);
-};
-
-var getPathname = function () {
-  var url = getInternalURLState(this);
-  var path = url.path;
-  return url.cannotBeABaseURL ? path[0] : path.length ? '/' + path.join('/') : '';
-};
-
-var getSearch = function () {
-  var query = getInternalURLState(this).query;
-  return query ? '?' + query : '';
-};
-
-var getSearchParams = function () {
-  return getInternalURLState(this).searchParams;
-};
-
-var getHash = function () {
-  var fragment = getInternalURLState(this).fragment;
-  return fragment ? '#' + fragment : '';
-};
-
-var accessorDescriptor = function (getter, setter) {
-  return { get: getter, set: setter, configurable: true, enumerable: true };
-};
-
-if (DESCRIPTORS) {
-  defineProperties(URLPrototype, {
-    // `URL.prototype.href` accessors pair
-    // https://url.spec.whatwg.org/#dom-url-href
-    href: accessorDescriptor(serializeURL, function (href) {
-      var url = getInternalURLState(this);
-      var urlString = String(href);
-      var failure = parseURL(url, urlString);
-      if (failure) throw TypeError(failure);
-      getInternalSearchParamsState(url.searchParams).updateSearchParams(url.query);
-    }),
-    // `URL.prototype.origin` getter
-    // https://url.spec.whatwg.org/#dom-url-origin
-    origin: accessorDescriptor(getOrigin),
-    // `URL.prototype.protocol` accessors pair
-    // https://url.spec.whatwg.org/#dom-url-protocol
-    protocol: accessorDescriptor(getProtocol, function (protocol) {
-      var url = getInternalURLState(this);
-      parseURL(url, String(protocol) + ':', SCHEME_START);
-    }),
-    // `URL.prototype.username` accessors pair
-    // https://url.spec.whatwg.org/#dom-url-username
-    username: accessorDescriptor(getUsername, function (username) {
-      var url = getInternalURLState(this);
-      var codePoints = arrayFrom(String(username));
-      if (cannotHaveUsernamePasswordPort(url)) return;
-      url.username = '';
-      for (var i = 0; i < codePoints.length; i++) {
-        url.username += percentEncode(codePoints[i], userinfoPercentEncodeSet);
-      }
-    }),
-    // `URL.prototype.password` accessors pair
-    // https://url.spec.whatwg.org/#dom-url-password
-    password: accessorDescriptor(getPassword, function (password) {
-      var url = getInternalURLState(this);
-      var codePoints = arrayFrom(String(password));
-      if (cannotHaveUsernamePasswordPort(url)) return;
-      url.password = '';
-      for (var i = 0; i < codePoints.length; i++) {
-        url.password += percentEncode(codePoints[i], userinfoPercentEncodeSet);
-      }
-    }),
-    // `URL.prototype.host` accessors pair
-    // https://url.spec.whatwg.org/#dom-url-host
-    host: accessorDescriptor(getHost, function (host) {
-      var url = getInternalURLState(this);
-      if (url.cannotBeABaseURL) return;
-      parseURL(url, String(host), HOST);
-    }),
-    // `URL.prototype.hostname` accessors pair
-    // https://url.spec.whatwg.org/#dom-url-hostname
-    hostname: accessorDescriptor(getHostname, function (hostname) {
-      var url = getInternalURLState(this);
-      if (url.cannotBeABaseURL) return;
-      parseURL(url, String(hostname), HOSTNAME);
-    }),
-    // `URL.prototype.port` accessors pair
-    // https://url.spec.whatwg.org/#dom-url-port
-    port: accessorDescriptor(getPort, function (port) {
-      var url = getInternalURLState(this);
-      if (cannotHaveUsernamePasswordPort(url)) return;
-      port = String(port);
-      if (port == '') url.port = null;
-      else parseURL(url, port, PORT);
-    }),
-    // `URL.prototype.pathname` accessors pair
-    // https://url.spec.whatwg.org/#dom-url-pathname
-    pathname: accessorDescriptor(getPathname, function (pathname) {
-      var url = getInternalURLState(this);
-      if (url.cannotBeABaseURL) return;
-      url.path = [];
-      parseURL(url, pathname + '', PATH_START);
-    }),
-    // `URL.prototype.search` accessors pair
-    // https://url.spec.whatwg.org/#dom-url-search
-    search: accessorDescriptor(getSearch, function (search) {
-      var url = getInternalURLState(this);
-      search = String(search);
-      if (search == '') {
-        url.query = null;
-      } else {
-        if ('?' == search.charAt(0)) search = search.slice(1);
-        url.query = '';
-        parseURL(url, search, QUERY);
-      }
-      getInternalSearchParamsState(url.searchParams).updateSearchParams(url.query);
-    }),
-    // `URL.prototype.searchParams` getter
-    // https://url.spec.whatwg.org/#dom-url-searchparams
-    searchParams: accessorDescriptor(getSearchParams),
-    // `URL.prototype.hash` accessors pair
-    // https://url.spec.whatwg.org/#dom-url-hash
-    hash: accessorDescriptor(getHash, function (hash) {
-      var url = getInternalURLState(this);
-      hash = String(hash);
-      if (hash == '') {
-        url.fragment = null;
-        return;
-      }
-      if ('#' == hash.charAt(0)) hash = hash.slice(1);
-      url.fragment = '';
-      parseURL(url, hash, FRAGMENT);
-    })
-  });
-}
-
-// `URL.prototype.toJSON` method
-// https://url.spec.whatwg.org/#dom-url-tojson
-redefine(URLPrototype, 'toJSON', function toJSON() {
-  return serializeURL.call(this);
-}, { enumerable: true });
-
-// `URL.prototype.toString` method
-// https://url.spec.whatwg.org/#URL-stringification-behavior
-redefine(URLPrototype, 'toString', function toString() {
-  return serializeURL.call(this);
-}, { enumerable: true });
-
-if (NativeURL) {
-  var nativeCreateObjectURL = NativeURL.createObjectURL;
-  var nativeRevokeObjectURL = NativeURL.revokeObjectURL;
-  // `URL.createObjectURL` method
-  // https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL
-  // eslint-disable-next-line no-unused-vars
-  if (nativeCreateObjectURL) redefine(URLConstructor, 'createObjectURL', function createObjectURL(blob) {
-    return nativeCreateObjectURL.apply(NativeURL, arguments);
-  });
-  // `URL.revokeObjectURL` method
-  // https://developer.mozilla.org/en-US/docs/Web/API/URL/revokeObjectURL
-  // eslint-disable-next-line no-unused-vars
-  if (nativeRevokeObjectURL) redefine(URLConstructor, 'revokeObjectURL', function revokeObjectURL(url) {
-    return nativeRevokeObjectURL.apply(NativeURL, arguments);
-  });
-}
-
-setToStringTag(URLConstructor, 'URL');
-
-$({ global: true, forced: !USE_NATIVE_URL, sham: !DESCRIPTORS }, {
-  URL: URLConstructor
-});
 
 
 /***/ }),
@@ -7981,79 +4718,64 @@ module.exports = g;
 
 "use strict";
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-/// <reference path="types.d.ts" />
 const lib_1 = __webpack_require__(/*! ./lib */ "./src/lib.ts");
 const strings_1 = __webpack_require__(/*! ./strings */ "./src/strings.ts");
 const smart_1 = __webpack_require__(/*! ./smart */ "./src/smart.ts");
 const settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts");
+// $lab:coverage:off$
 // @ts-ignore
 // eslint-disable-next-line no-undef
 const { Response } = undefined ? window : __webpack_require__(/*! cross-fetch */ "./node_modules/cross-fetch/dist/browser-ponyfill.js");
+// $lab:coverage:on$
 const debug = lib_1.debug.extend("client");
 /**
- * Adds patient context to requestOptions object to be used with fhirclient.Client.request
- * @param {Object|String} requestOptions Can be a string URL (relative to
- *  the serviceUrl), or an object which will be passed to fetch()
- * @param {fhirclient.Client} client Current FHIR client object containing patient context
- * @return {Promise<Object|String>} requestOptions object contextualized to current patient
+ * Adds patient context to requestOptions object to be used with
+ * fhirclient.Client.request
+ * @param requestOptions Can be a string URL (relative to the serviceUrl), or an
+ * object which will be passed to fetch()
+ * @param client Current FHIR client object containing patient context
+ * @return requestOptions object contextualized to current patient
  */
-function contextualize(requestOptions, client) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // This code could be useful for implementing FHIR version awareness in the future:
-        //   const fhirVersionsMap = require("./data/fhir-versions");
-        //   const fetchFhirVersion = require("./smart").fetchFhirVersion;
-        //   const fhirVersion = client.state.fhirVersion || await fetchFhirVersion(client.state.serverUrl) || "";
-        //   const fhirRelease = fhirVersionsMap[fhirVersion];
-        const base = lib_1.absolute("/", client.state.serverUrl);
-        function contextualURL(url) {
-            return __awaiter(this, void 0, void 0, function* () {
-                const resourceType = url.pathname.split("/").pop();
-                if (settings_1.patientCompartment.indexOf(resourceType) == -1) {
-                    throw new Error(`Cannot filter "${resourceType}" resources by patient`);
-                }
-                const conformance = yield smart_1.fetchConformanceStatement(client.state.serverUrl);
-                const searchParam = lib_1.getPatientParam(conformance, resourceType);
-                url.searchParams.set(searchParam, client.patient.id);
-                return url.href;
-            });
+async function contextualize(requestOptions, client) {
+    const base = lib_1.absolute("/", client.state.serverUrl);
+    async function contextualURL(_url) {
+        const resourceType = _url.pathname.split("/").pop();
+        if (!resourceType) {
+            throw new Error(`Invalid url "${_url}"`);
         }
-        if (typeof requestOptions == "string" || requestOptions instanceof URL) {
-            let url = new URL(requestOptions + "", base);
-            return contextualURL(url);
+        if (settings_1.patientCompartment.indexOf(resourceType) == -1) {
+            throw new Error(`Cannot filter "${resourceType}" resources by patient`);
         }
-        let url = new URL(requestOptions.url, base);
-        requestOptions.url = yield contextualURL(url);
-        return requestOptions;
-    });
+        const conformance = await smart_1.fetchConformanceStatement(client.state.serverUrl);
+        const searchParam = lib_1.getPatientParam(conformance, resourceType);
+        _url.searchParams.set(searchParam, client.patient.id);
+        return _url.href;
+    }
+    if (typeof requestOptions == "string" || requestOptions instanceof URL) {
+        return { url: await contextualURL(new URL(requestOptions + "", base)) };
+    }
+    requestOptions.url = await contextualURL(new URL(requestOptions.url + "", base));
+    return requestOptions;
 }
 /**
  * Gets single reference by id. Caches the result.
- * @param {String} refId
- * @param {Object} cache A map to store the resolved refs
- * @param {FhirClient} client The client instance
- * @returns {Promise<Object>} The resolved reference
+ * @param refId
+ * @param cache A map to store the resolved refs
+ * @param client The client instance
+ * @returns The resolved reference
  * @private
  */
 function getRef(refId, cache, client) {
-    let sub = cache[refId];
+    const sub = cache[refId];
     if (!sub) {
-        // Note that we set cache[refId] immediately! When the promise is settled
-        // it will be updated. This is to avoid a ref being fetched twice because
-        // some of these requests are executed in parallel.
-        cache[refId] = client.request(refId).then(sub => {
-            cache[refId] = sub;
-            return sub;
-        }, error => {
+        // Note that we set cache[refId] immediately! When the promise is
+        // settled it will be updated. This is to avoid a ref being fetched
+        // twice because some of these requests are executed in parallel.
+        cache[refId] = client.request(refId).then(res => {
+            cache[refId] = res;
+            return res;
+        }, (error) => {
             delete cache[refId];
             throw error;
         });
@@ -8088,10 +4810,10 @@ function resolveRef(obj, path, graph, cache, client) {
 }
 /**
  * Given a resource and a list of ref paths - resolves them all
- * @param {Object} obj FHIR Resource
+ * @param obj FHIR Resource
  * @param {Object} fhirOptions The fhir options of the initiating request call
- * @param {Object} cache A map to store fetched refs
- * @param {FhirClient} client The client instance
+ * @param cache A map to store fetched refs
+ * @param client The client instance
  * @private
  */
 function resolveRefs(obj, fhirOptions, cache, client) {
@@ -8102,7 +4824,7 @@ function resolveRefs(obj, fhirOptions, cache, client) {
         .filter(Boolean); // No space-only strings
     // 2. Remove duplicates
     paths = paths.filter((p, i) => {
-        let index = paths.indexOf(p, i + 1);
+        const index = paths.indexOf(p, i + 1);
         if (index > -1) {
             debug("Duplicated reference path \"%s\"", p);
             return false;
@@ -8125,14 +4847,11 @@ function resolveRefs(obj, fhirOptions, cache, client) {
     });
     // 5. Execute groups sequentially! Paths within same group are
     // fetched in parallel!
-    /**
-     * @type any
-     */
     let task = Promise.resolve();
     Object.keys(groups).sort().forEach(len => {
         const group = groups[len];
-        task = task.then(() => Promise.all(group.map(path => {
-            return resolveRef(obj, path, fhirOptions.graph, cache, client);
+        task = task.then(() => Promise.all(group.map((path) => {
+            return resolveRef(obj, path, !!fhirOptions.graph, cache, client);
         })));
     });
     return task;
@@ -8140,12 +4859,18 @@ function resolveRefs(obj, fhirOptions, cache, client) {
 /**
  * @implements { fhirclient.Client }
  */
-class FhirClient {
+class Client {
     /**
      * @param {object} environment
      * @param {fhirclient.ClientState|string} state
      */
     constructor(environment, state) {
+        this._refreshTask = null;
+        // utils -------------------------------------------------------------------
+        this.byCode = lib_1.byCode;
+        this.byCodes = lib_1.byCodes;
+        this.units = lib_1.units;
+        this.getPath = lib_1.getPath;
         /**
          * @type fhirclient.ClientState
          */
@@ -8168,10 +4893,10 @@ class FhirClient {
             },
             request: (requestOptions, fhirOptions = {}) => {
                 if (this.patient.id) {
-                    return (() => __awaiter(this, void 0, void 0, function* () {
-                        const options = yield contextualize(requestOptions, this);
+                    return (async () => {
+                        const options = await contextualize(requestOptions, this);
                         return this.request(options, fhirOptions);
-                    }))();
+                    })();
                 }
                 else {
                     return Promise.reject(new Error("Patient is not available"));
@@ -8202,9 +4927,7 @@ class FhirClient {
         };
         // fhir.js api (attached automatically in browser)
         // ---------------------------------------------------------------------
-        if (environment.fhir) {
-            this.connect(environment.fhir);
-        }
+        this.connect(environment.fhir);
     }
     connect(fhirJs) {
         if (typeof fhirJs == "function") {
@@ -8230,6 +4953,7 @@ class FhirClient {
                 this.patient.api = fhirJs(Object.assign(Object.assign({}, options), { patient: patientId }));
             }
         }
+        return this;
     }
     /**
      * Returns the ID of the selected patient or null. You should have requested
@@ -8308,7 +5032,10 @@ class FhirClient {
                 const hasProfile = scope.match(/\bprofile\b/);
                 const hasFhirUser = scope.match(/\bfhirUser\b/);
                 if (!hasOpenid || !(hasFhirUser || hasProfile)) {
-                    debug("You are trying to get the id_token but you are not using the right scopes. Please add 'openid' and 'fhirUser' or 'profile' to the scopes you are requesting.");
+                    debug("You are trying to get the id_token but you are not " +
+                        "using the right scopes. Please add 'openid' and " +
+                        "'fhirUser' or 'profile' to the scopes you are " +
+                        "requesting.");
                 }
                 else {
                     // The server should have returned the id_token!
@@ -8359,6 +5086,10 @@ class FhirClient {
         }
         return null;
     }
+    /**
+     * Builds and returns the value of the `Authorization` header that can be
+     * sent to the FHIR server
+     */
     getAuthorizationHeader() {
         const accessToken = lib_1.getPath(this, "state.tokenResponse.access_token");
         if (accessToken) {
@@ -8370,19 +5101,17 @@ class FhirClient {
         }
         return null;
     }
-    _clearState() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const storage = this.environment.getStorage();
-            const key = yield storage.get(settings_1.SMART_KEY);
-            if (key) {
-                yield storage.unset(key);
-            }
-            yield storage.unset(settings_1.SMART_KEY);
-            this.state.tokenResponse = {};
-        });
+    async _clearState() {
+        const storage = this.environment.getStorage();
+        const key = await storage.get(settings_1.SMART_KEY);
+        if (key) {
+            await storage.unset(key);
+        }
+        await storage.unset(settings_1.SMART_KEY);
+        this.state.tokenResponse = {};
     }
     /**
-     * @param {Object} resource A FHIR resource to be created
+     * @param resource A FHIR resource to be created
      */
     create(resource) {
         return this.request({
@@ -8395,7 +5124,7 @@ class FhirClient {
         });
     }
     /**
-     * @param {Object} resource A FHIR resource to be updated
+     * @param resource A FHIR resource to be updated
      */
     update(resource) {
         return this.request({
@@ -8408,7 +5137,7 @@ class FhirClient {
         });
     }
     /**
-     * @param {String} url Relative URI of the FHIR resource to be deleted
+     * @param url Relative URI of the FHIR resource to be deleted
      * (format: `resourceType/id`)
      */
     delete(url) {
@@ -8418,145 +5147,144 @@ class FhirClient {
         });
     }
     /**
-     * @param {Object|String} requestOptions Can be a string URL (relative to
-     *  the serviceUrl), or an object which will be passed to fetch()
-     * @param {fhirclient.FhirOptions} fhirOptions Additional options to control the behavior
-     * @param {object} _resolvedRefs DO NOT USE! Used internally.
+     * @param requestOptions Can be a string URL (relative to the serviceUrl),
+     * or an object which will be passed to fetch()
+     * @param fhirOptions Additional options to control the behavior
+     * @param _resolvedRefs DO NOT USE! Used internally.
      */
-    request(requestOptions, fhirOptions = {}, _resolvedRefs = {}) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const debug = lib_1.debug.extend("client:request");
-            if (!requestOptions) {
-                throw new Error("request requires an url or request options as argument");
-            }
-            // url -----------------------------------------------------------------
-            let url;
-            if (typeof requestOptions == "string" || requestOptions instanceof URL) {
-                url = String(requestOptions);
-                requestOptions = {};
-            }
-            else {
-                url = String(requestOptions.url);
-            }
-            url = lib_1.absolute(url, this.state.serverUrl);
-            // authentication ------------------------------------------------------
-            const authHeader = this.getAuthorizationHeader();
-            if (authHeader) {
-                requestOptions.headers = Object.assign(Object.assign({}, requestOptions.headers), { Authorization: authHeader });
-            }
-            // fhirOptions.graph ---------------------------------------------------
-            fhirOptions.graph = (fhirOptions.graph !== false);
-            // fhirOptions.flat ----------------------------------------------------
-            fhirOptions.flat = !!fhirOptions.flat;
-            // fhirOptions.pageLimit -----------------------------------------------
-            if (!fhirOptions.pageLimit && fhirOptions.pageLimit !== 0) {
-                fhirOptions.pageLimit = 1;
-            }
-            const hasPageCallback = typeof fhirOptions.onPage == "function";
-            debug("%s, options: %O, fhirOptions: %O", url, requestOptions, fhirOptions);
-            return lib_1.request(url, requestOptions)
-                // Automatic re-auth via refresh token -----------------------------
-                .catch(error => {
-                debug("%o", error);
-                if (error.status == 401 && fhirOptions.useRefreshToken !== false) {
-                    const hasRefreshToken = lib_1.getPath(this, "state.tokenResponse.refresh_token");
-                    if (hasRefreshToken) {
-                        return this.refresh().then(() => this.request(Object.assign(Object.assign({}, requestOptions), { url }), fhirOptions, _resolvedRefs));
-                    }
+    async request(requestOptions, fhirOptions = {}, _resolvedRefs = {}) {
+        var _a;
+        const debugRequest = lib_1.debug.extend("client:request");
+        if (!requestOptions) {
+            throw new Error("request requires an url or request options as argument");
+        }
+        // url -----------------------------------------------------------------
+        let url;
+        if (typeof requestOptions == "string" || requestOptions instanceof URL) {
+            url = String(requestOptions);
+            requestOptions = {};
+        }
+        else {
+            url = String(requestOptions.url);
+        }
+        url = lib_1.absolute(url, this.state.serverUrl);
+        // authentication ------------------------------------------------------
+        const authHeader = this.getAuthorizationHeader();
+        if (authHeader) {
+            requestOptions.headers = Object.assign(Object.assign({}, requestOptions.headers), { Authorization: authHeader });
+        }
+        const options = {
+            graph: fhirOptions.graph !== false,
+            flat: !!fhirOptions.flat,
+            pageLimit: (_a = fhirOptions.pageLimit, (_a !== null && _a !== void 0 ? _a : 1)),
+            resolveReferences: (fhirOptions.resolveReferences || []),
+            useRefreshToken: fhirOptions.useRefreshToken !== false,
+            onPage: typeof fhirOptions.onPage == "function" ?
+                fhirOptions.onPage :
+                undefined
+        };
+        debugRequest("%s, options: %O, fhirOptions: %O", url, requestOptions, options);
+        return lib_1.request(url, requestOptions)
+            // Automatic re-auth via refresh token -----------------------------
+            .catch((error) => {
+            debugRequest("%o", error);
+            if (error.status == 401 && options.useRefreshToken) {
+                const hasRefreshToken = lib_1.getPath(this, "state.tokenResponse.refresh_token");
+                if (hasRefreshToken) {
+                    return this.refresh().then(() => this.request(Object.assign(Object.assign({}, requestOptions), { url }), options, _resolvedRefs));
                 }
-                throw error;
-            })
-                // Handle 401 ------------------------------------------------------
-                .catch((error) => __awaiter(this, void 0, void 0, function* () {
-                if (error.status == 401) {
-                    // !accessToken -> not authorized -> No session. Need to launch.
-                    if (!lib_1.getPath(this, "state.tokenResponse.access_token")) {
-                        throw new Error("This app cannot be accessed directly. Please launch it as SMART app!");
-                    }
-                    // !fhirOptions.useRefreshToken -> auto-refresh not enabled
-                    // Session expired. Need to re-launch. Clear state to
-                    // start over!
-                    if (fhirOptions.useRefreshToken === false) {
-                        debug("Your session has expired and the useRefreshToken option is set to false. Please re-launch the app.");
-                        yield this._clearState();
-                        throw new Error(strings_1.default.expired);
-                    }
-                    // otherwise -> auto-refresh failed. Session expired.
-                    // Need to re-launch. Clear state to start over!
-                    debug("Auto-refresh failed! Please re-launch the app.");
-                    yield this._clearState();
+            }
+            throw error;
+        })
+            // Handle 401 ------------------------------------------------------
+            .catch(async (error) => {
+            if (error.status == 401) {
+                // !accessToken -> not authorized -> No session. Need to launch.
+                if (!lib_1.getPath(this, "state.tokenResponse.access_token")) {
+                    throw new Error("This app cannot be accessed directly. Please launch it as SMART app!");
+                }
+                // auto-refresh not enabled and Session expired.
+                // Need to re-launch. Clear state to start over!
+                if (!options.useRefreshToken) {
+                    debugRequest("Your session has expired and the useRefreshToken option is set to false. Please re-launch the app.");
+                    await this._clearState();
                     throw new Error(strings_1.default.expired);
                 }
-                throw error;
-            }))
-                // Handle 403 ------------------------------------------------------
-                .catch(error => {
-                if (error.status == 403) {
-                    debug("Permission denied! Please make sure that you have requested the proper scopes.");
+                // otherwise -> auto-refresh failed. Session expired.
+                // Need to re-launch. Clear state to start over!
+                debugRequest("Auto-refresh failed! Please re-launch the app.");
+                await this._clearState();
+                throw new Error(strings_1.default.expired);
+            }
+            throw error;
+        })
+            // Handle 403 ------------------------------------------------------
+            .catch((error) => {
+            if (error.status == 403) {
+                debugRequest("Permission denied! Please make sure that you have requested the proper scopes.");
+            }
+            throw error;
+        })
+            // Handle raw requests (anything other than json) ------------------
+            .then(data => {
+            if (!data)
+                return data;
+            if (typeof data == "string")
+                return data;
+            if (typeof data == "object" && data instanceof Response)
+                return data;
+            // Resolve References ------------------------------------------
+            return (async (_data) => {
+                if (_data) {
+                    if (_data.resourceType == "Bundle") {
+                        await Promise.all((_data.entry || []).map(item => resolveRefs(item.resource, options, _resolvedRefs, this)));
+                    }
+                    else {
+                        await resolveRefs(_data, options, _resolvedRefs, this);
+                    }
                 }
-                throw error;
-            })
-                // Handle raw requests (anything other than json) ------------------
-                .then(data => {
-                if (!data)
-                    return data;
-                if (typeof data == "string")
-                    return data;
-                if (typeof data == "object" && data instanceof Response)
-                    return data;
-                // Resolve References ----------------------------------------------
-                return ((data) => __awaiter(this, void 0, void 0, function* () {
-                    if (data) {
-                        if (data.resourceType == "Bundle") {
-                            yield Promise.all((data.entry || []).map(item => resolveRefs(item.resource, fhirOptions, _resolvedRefs, this)));
-                        }
-                        else {
-                            yield resolveRefs(data, fhirOptions, _resolvedRefs, this);
-                        }
+                return _data;
+            })(data)
+                // Pagination ----------------------------------------------
+                .then(async (_data) => {
+                if (_data && _data.resourceType == "Bundle") {
+                    const links = (_data.link || []);
+                    if (options.flat) {
+                        _data = (_data.entry || []).map((entry) => entry.resource);
                     }
-                    return data;
-                }))(data)
-                    // Pagination ------------------------------------------------------
-                    .then((data) => __awaiter(this, void 0, void 0, function* () {
-                    if (data && data.resourceType == "Bundle") {
-                        const links = data.link || [];
-                        if (fhirOptions.flat) {
-                            data = (data.entry || []).map(entry => entry.resource);
-                        }
-                        if (hasPageCallback) {
-                            yield fhirOptions.onPage(data, Object.assign({}, _resolvedRefs));
-                        }
-                        if (--fhirOptions.pageLimit) {
-                            const next = links.find(l => l.relation == "next");
-                            data = lib_1.makeArray(data);
-                            if (next && next.url) {
-                                const nextPage = yield this.request(next.url, fhirOptions, _resolvedRefs);
-                                if (hasPageCallback) {
-                                    return null;
-                                }
-                                if (fhirOptions.resolveReferences && fhirOptions.resolveReferences.length) {
-                                    Object.assign(_resolvedRefs, nextPage.references);
-                                    return data.concat(lib_1.makeArray(nextPage.data || nextPage));
-                                }
-                                return data.concat(lib_1.makeArray(nextPage));
+                    if (options.onPage) {
+                        await options.onPage(_data, Object.assign({}, _resolvedRefs));
+                    }
+                    if (--options.pageLimit) {
+                        const next = links.find(l => l.relation == "next");
+                        _data = lib_1.makeArray(_data);
+                        if (next && next.url) {
+                            const nextPage = await this.request(next.url, options, _resolvedRefs);
+                            if (options.onPage) {
+                                return null;
                             }
+                            if (options.resolveReferences.length) {
+                                Object.assign(_resolvedRefs, nextPage.references);
+                                return _data.concat(lib_1.makeArray(nextPage.data || nextPage));
+                            }
+                            return _data.concat(lib_1.makeArray(nextPage));
                         }
                     }
-                    return data;
-                }))
-                    // Finalize --------------------------------------------------------
-                    .then(data => {
-                    if (fhirOptions.graph) {
-                        _resolvedRefs = {};
-                    }
-                    else if (!hasPageCallback && fhirOptions.resolveReferences.length) {
-                        return {
-                            data,
-                            references: _resolvedRefs
-                        };
-                    }
-                    return data;
-                });
+                }
+                return _data;
+            })
+                // Finalize ------------------------------------------------
+                .then(_data => {
+                if (options.graph) {
+                    _resolvedRefs = {};
+                }
+                else if (!options.onPage && options.resolveReferences.length) {
+                    return {
+                        data: _data,
+                        references: _resolvedRefs
+                    };
+                }
+                return _data;
             });
         });
     }
@@ -8566,9 +5294,10 @@ class FhirClient {
      * state, so that we don't enter into loops trying to re-authorize.
      */
     refresh() {
-        const debug = lib_1.debug.extend("client:refresh");
-        debug("Attempting to refresh with refresh_token...");
-        const refreshToken = lib_1.getPath(this, "state.tokenResponse.refresh_token");
+        var _a, _b;
+        const debugRefresh = lib_1.debug.extend("client:refresh");
+        debugRefresh("Attempting to refresh with refresh_token...");
+        const refreshToken = (_b = (_a = this.state) === null || _a === void 0 ? void 0 : _a.tokenResponse) === null || _b === void 0 ? void 0 : _b.refresh_token;
         if (!refreshToken) {
             throw new Error("Unable to refresh. No refresh_token found.");
         }
@@ -8599,41 +5328,28 @@ class FhirClient {
                 }
                 return data;
             }).then(data => {
-                debug("Received new access token %O", data);
+                debugRefresh("Received new access token %O", data);
                 Object.assign(this.state.tokenResponse, data);
                 return this.state;
-            }).catch(error => {
-                debug("Deleting the expired or invalid refresh token.");
-                delete this.state.tokenResponse.refresh_token;
+            }).catch((error) => {
+                var _a, _b;
+                if ((_b = (_a = this.state) === null || _a === void 0 ? void 0 : _a.tokenResponse) === null || _b === void 0 ? void 0 : _b.refresh_token) {
+                    debugRefresh("Deleting the expired or invalid refresh token.");
+                    delete this.state.tokenResponse.refresh_token;
+                }
                 throw error;
             }).finally(() => {
                 this._refreshTask = null;
-                this.environment.getStorage().set(this.state.key, this.state);
+                const key = this.state.key;
+                if (key) {
+                    this.environment.getStorage().set(key, this.state);
+                }
+                else {
+                    debugRefresh("No 'key' found in Clint.state. Cannot persist the instance.");
+                }
             });
         }
         return this._refreshTask;
-    }
-    // utils -------------------------------------------------------------------
-    /**
-     * @param {object|object[]} observations
-     * @param {string} property
-     */
-    byCode(observations, property) {
-        return lib_1.byCode(observations, property);
-    }
-    /**
-     * @param {object|object[]} observations
-     * @param {string} property
-     * @returns {(codes: string[]) => object[]}
-     */
-    byCodes(observations, property) {
-        return lib_1.byCodes(observations, property);
-    }
-    get units() {
-        return lib_1.units;
-    }
-    getPath(object, path) {
-        return lib_1.getPath(object, path);
     }
     /**
      * Returns a promise that will be resolved with the fhir version as defined
@@ -8650,10 +5366,10 @@ class FhirClient {
      * - 0 if the version is not known
      */
     getFhirRelease() {
-        return this.getFhirVersion().then(v => settings_1.fhirVersions[v || ""] || 0);
+        return this.getFhirVersion().then(v => { var _a; return _a = settings_1.fhirVersions[v], (_a !== null && _a !== void 0 ? _a : 0); });
     }
 }
-exports.default = FhirClient;
+exports.default = Client;
 
 
 /***/ }),
@@ -8688,9 +5404,9 @@ class HttpError extends Error {
     }
     static create(failure) {
         // start with generic values
-        var status = 0;
-        var statusText = "Error";
-        var message = "Unknown error";
+        let status = 0;
+        let statusText = "Error";
+        let message = "Unknown error";
         if (failure) {
             if (typeof failure == "object") {
                 if (failure instanceof Error) {
@@ -8716,310 +5432,182 @@ exports.default = HttpError;
 
 /***/ }),
 
-/***/ "./src/adapters/BaseAdapter.js":
+/***/ "./src/adapters/BaseAdapter.ts":
 /*!*************************************!*\
-  !*** ./src/adapters/BaseAdapter.js ***!
+  !*** ./src/adapters/BaseAdapter.ts ***!
   \*************************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-
-var _interopRequireWildcard = __webpack_require__(/*! @babel/runtime/helpers/interopRequireWildcard */ "./node_modules/@babel/runtime/helpers/interopRequireWildcard.js");
-
-__webpack_require__(/*! core-js/modules/es.array.concat */ "./node_modules/core-js/modules/es.array.concat.js");
-
-__webpack_require__(/*! core-js/modules/es.array.iterator */ "./node_modules/core-js/modules/es.array.iterator.js");
-
-__webpack_require__(/*! core-js/modules/es.object.assign */ "./node_modules/core-js/modules/es.object.assign.js");
-
-__webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
-
-__webpack_require__(/*! core-js/modules/es.string.iterator */ "./node_modules/core-js/modules/es.string.iterator.js");
-
-__webpack_require__(/*! core-js/modules/web.dom-collections.iterator */ "./node_modules/core-js/modules/web.dom-collections.iterator.js");
-
-__webpack_require__(/*! core-js/modules/web.url */ "./node_modules/core-js/modules/web.url.js");
-
-exports.__esModule = true;
-exports.default = void 0;
-
-var smart = _interopRequireWildcard(__webpack_require__(/*! ../smart */ "./src/smart.ts"));
-
-var _Client = _interopRequireDefault(__webpack_require__(/*! ../Client */ "./src/Client.ts"));
-
+Object.defineProperty(exports, "__esModule", { value: true });
+const smart_1 = __webpack_require__(/*! ../smart */ "./src/smart.ts");
+const Client_1 = __webpack_require__(/*! ../Client */ "./src/Client.ts");
 /**
  * This is the abstract base class that adapters must inherit. It just a
  * collection of environment-specific methods that subclasses have to implement.
- * @type { fhirclient.Adapter }
  */
-var BaseAdapter =
-/*#__PURE__*/
-function () {
-  /**
-   * @param {Object} options Environment-specific options
-   */
-  function BaseAdapter(options) {
-    if (options === void 0) {
-      options = {};
+class BaseAdapter {
+    /**
+     * @param options Environment-specific options
+     */
+    constructor(options = {}) {
+        this.options = Object.assign({ 
+            // Replaces the browser's current URL
+            // using window.history.replaceState API or by reloading.
+            replaceBrowserHistory: true, 
+            // When set to true, this variable will fully utilize
+            // HTML5 sessionStorage API.
+            // This variable can be overridden to false by setting
+            // FHIR.oauth2.settings.fullSessionStorageSupport = false.
+            // When set to false, the sessionStorage will be keyed
+            // by a state variable. This is to allow the embedded IE browser
+            // instances instantiated on a single thread to continue to
+            // function without having sessionStorage data shared
+            // across the embedded IE instances.
+            fullSessionStorageSupport: true }, options);
     }
-
-    this.options = Object.assign({
-      // Replaces the browser's current URL
-      // using window.history.replaceState API or by reloading.
-      replaceBrowserHistory: true,
-      // When set to true, this variable will fully utilize
-      // HTML5 sessionStorage API.
-      // This variable can be overridden to false by setting
-      // FHIR.oauth2.settings.fullSessionStorageSupport = false.
-      // When set to false, the sessionStorage will be keyed
-      // by a state variable. This is to allow the embedded IE browser
-      // instances instantiated on a single thread to continue to
-      // function without having sessionStorage data shared
-      // across the embedded IE instances.
-      fullSessionStorageSupport: true
-    }, options);
-  }
-
-  var _proto = BaseAdapter.prototype;
-
-  _proto.getUrl = function getUrl() {
-    return new URL("");
-  };
-
-  _proto.getStorage = function getStorage() {}
-  /**
-   * @param {String} path
-   */
-  ;
-
-  _proto.relative = function relative(path) {
-    return new URL(path, this.getUrl().href).href;
-  }
-  /**
-   * Creates and returns adapter-aware SMART api. Not that while the shape of
-   * the returned object is well known, the arguments to this function are not.
-   * Those who override this method are free to require any environment-specific
-   * arguments. For example in node we will need a request, a response and
-   * optionally a storage or storage factory function.
-   * @returns { fhirclient.SMART }
-   */
-  ;
-
-  _proto.getSmartApi = function getSmartApi() {
-    var _this = this;
-
-    return {
-      ready: function ready() {
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
-        }
-
-        return smart.ready.apply(smart, [_this].concat(args));
-      },
-      authorize: function authorize(options) {
-        return smart.authorize(_this, options);
-      },
-      init: function init() {
-        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-          args[_key2] = arguments[_key2];
-        }
-
-        return smart.init.apply(smart, [_this].concat(args));
-      },
-      client: function client(state) {
-        return new _Client.default(_this, state);
-      },
-      options: this.options
-    };
-  };
-
-  return BaseAdapter;
-}();
-
+    relative(path) {
+        return new URL(path, this.getUrl().href).href;
+    }
+    /**
+     * Creates and returns adapter-aware SMART api. Not that while the shape of
+     * the returned object is well known, the arguments to this function are not.
+     * Those who override this method are free to require any environment-specific
+     * arguments. For example in node we will need a request, a response and
+     * optionally a storage or storage factory function.
+     */
+    getSmartApi() {
+        return {
+            ready: (...args) => smart_1.ready(this, ...args),
+            authorize: options => smart_1.authorize(this, options),
+            init: (...args) => smart_1.init(this, ...args),
+            client: (state) => new Client_1.default(this, state),
+            options: this.options
+        };
+    }
+}
 exports.default = BaseAdapter;
+
 
 /***/ }),
 
-/***/ "./src/adapters/BrowserAdapter.js":
+/***/ "./src/adapters/BrowserAdapter.ts":
 /*!****************************************!*\
-  !*** ./src/adapters/BrowserAdapter.js ***!
+  !*** ./src/adapters/BrowserAdapter.ts ***!
   \****************************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-
-__webpack_require__(/*! core-js/modules/es.array.iterator */ "./node_modules/core-js/modules/es.array.iterator.js");
-
-__webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
-
-__webpack_require__(/*! core-js/modules/es.string.iterator */ "./node_modules/core-js/modules/es.string.iterator.js");
-
-__webpack_require__(/*! core-js/modules/web.dom-collections.iterator */ "./node_modules/core-js/modules/web.dom-collections.iterator.js");
-
-__webpack_require__(/*! core-js/modules/web.url */ "./node_modules/core-js/modules/web.url.js");
-
-exports.__esModule = true;
-exports.Adapter = exports.default = void 0;
-
-var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ "./node_modules/@babel/runtime/helpers/createClass.js"));
-
-var _inheritsLoose2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/inheritsLoose */ "./node_modules/@babel/runtime/helpers/inheritsLoose.js"));
-
-var _BrowserStorage = _interopRequireDefault(__webpack_require__(/*! ../storage/BrowserStorage */ "./src/storage/BrowserStorage.ts"));
-
-var _BaseAdapter2 = _interopRequireDefault(__webpack_require__(/*! ./BaseAdapter */ "./src/adapters/BaseAdapter.js"));
-
+Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-env browser */
-
 /* global fhir */
-
+const BrowserStorage_1 = __webpack_require__(/*! ../storage/BrowserStorage */ "./src/storage/BrowserStorage.ts");
+const BaseAdapter_1 = __webpack_require__(/*! ./BaseAdapter */ "./src/adapters/BaseAdapter.ts");
 /**
  * Browser Adapter
- * @type {fhirclient.Adapter}
  */
-var BrowserAdapter =
-/*#__PURE__*/
-function (_BaseAdapter) {
-  (0, _inheritsLoose2.default)(BrowserAdapter, _BaseAdapter);
-
-  function BrowserAdapter() {
-    return _BaseAdapter.apply(this, arguments) || this;
-  }
-
-  var _proto = BrowserAdapter.prototype;
-
-  /**
-   * Given the current environment, this method must return the current url
-   * as URL instance
-   * @returns {URL}
-   */
-  _proto.getUrl = function getUrl() {
-    if (!this._url) {
-      this._url = new URL(location + "");
+class BrowserAdapter extends BaseAdapter_1.default {
+    constructor() {
+        super(...arguments);
+        /**
+         * Stores the URL instance associated with this adapter
+         */
+        this._url = null;
+        /**
+         * Holds the Storage instance associated with this instance
+         */
+        this._storage = null;
     }
-
-    return this._url;
-  }
-  /**
-   * Given the current environment, this method must redirect to the given
-   * path
-   * @param {String} to The path to redirect to
-   * @returns {void}
-   */
-  ;
-
-  _proto.redirect = function redirect(to) {
-    location.href = to;
-  }
-  /**
-   * Returns a BrowserStorage object which is just a wrapper around
-   * sessionStorage
-   * @returns {BrowserStorage}
-   */
-  ;
-
-  _proto.getStorage = function getStorage() {
-    if (!this._storage) {
-      this._storage = new _BrowserStorage.default();
-    }
-
-    return this._storage;
-  };
-
-  BrowserAdapter.smart = function smart(options) {
-    return new BrowserAdapter(options).getSmartApi();
-  };
-
-  (0, _createClass2.default)(BrowserAdapter, [{
-    key: "fhir",
-
     /**
      * In browsers we need to be able to (dynamically) check if fhir.js is
      * included in the page. If it is, it should have created a "fhir" variable
      * in the global scope.
      */
-    get: function get() {
-      // @ts-ignore
-      return typeof fhir === "function" ? fhir : null;
+    get fhir() {
+        // @ts-ignore
+        return typeof fhir === "function" ? fhir : null;
     }
-  }]);
-  return BrowserAdapter;
-}(_BaseAdapter2.default);
-
+    /**
+     * Given the current environment, this method must return the current url
+     * as URL instance
+     */
+    getUrl() {
+        if (!this._url) {
+            this._url = new URL(location + "");
+        }
+        return this._url;
+    }
+    /**
+     * Given the current environment, this method must redirect to the given
+     * path
+     */
+    redirect(to) {
+        location.href = to;
+    }
+    /**
+     * Returns a BrowserStorage object which is just a wrapper around
+     * sessionStorage
+     */
+    getStorage() {
+        if (!this._storage) {
+            this._storage = new BrowserStorage_1.default();
+        }
+        return this._storage;
+    }
+    static smart(options) {
+        return new BrowserAdapter(options).getSmartApi();
+    }
+}
 exports.Adapter = BrowserAdapter;
-var _default = BrowserAdapter.smart;
-exports.default = _default;
+exports.default = BrowserAdapter.smart;
+
 
 /***/ }),
 
-/***/ "./src/browser.js":
+/***/ "./src/browser.ts":
 /*!************************!*\
-  !*** ./src/browser.js ***!
+  !*** ./src/browser.ts ***!
   \************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-
-__webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
-
-__webpack_require__(/*! core-js/modules/es.promise */ "./node_modules/core-js/modules/es.promise.js");
-
-exports.__esModule = true;
-exports.oauth2 = exports.client = void 0;
-
-var _BrowserAdapter = _interopRequireDefault(__webpack_require__(/*! ./adapters/BrowserAdapter */ "./src/adapters/BrowserAdapter.js"));
-
 /* eslint-env browser */
+Object.defineProperty(exports, "__esModule", { value: true });
 // In Browsers we create an adapter, get the SMART api from it and build the
 // global FHIR object
-var _smart = (0, _BrowserAdapter.default)(),
-    ready = _smart.ready,
-    authorize = _smart.authorize,
-    init = _smart.init,
-    client = _smart.client,
-    options = _smart.options; // We have two kinds of browser builds - "pure" for new browsers and "legacy"
+const BrowserAdapter_1 = __webpack_require__(/*! ./adapters/BrowserAdapter */ "./src/adapters/BrowserAdapter.ts");
+const { ready, authorize, init, client, options } = BrowserAdapter_1.default();
+exports.client = client;
+// We have two kinds of browser builds - "pure" for new browsers and "legacy"
 // for old ones. In pure builds we assume that the browser supports everything
 // we need. In legacy mode, the library also acts as a polyfill. Babel will
 // automatically polyfill everything except "fetch", which we have to handle
 // manually.
 // @ts-ignore
 // eslint-disable-next-line no-undef
-
-
-exports.client = client;
-
 if (!undefined) {
-  var fetch = __webpack_require__(/*! cross-fetch */ "./node_modules/cross-fetch/dist/browser-ponyfill.js");
+    const fetch = __webpack_require__(/*! cross-fetch */ "./node_modules/cross-fetch/dist/browser-ponyfill.js");
+    if (!window.fetch) {
+        window.fetch = fetch.default;
+        window.Headers = fetch.Headers;
+        window.Request = fetch.Request;
+        window.Response = fetch.Response;
+    }
+}
+exports.oauth2 = {
+    settings: options,
+    ready,
+    authorize,
+    init
+};
+// $lab:coverage:on$
 
-  if (!window.fetch) {
-    window.fetch = fetch.default;
-    window.Headers = fetch.Headers;
-    window.Request = fetch.Request;
-    window.Response = fetch.Response;
-  }
-} // $lab:coverage:off$
-
-
-var oauth2 = {
-  settings: options,
-  ready: ready,
-  authorize: authorize,
-  init: init
-}; // $lab:coverage:on$
-
-exports.oauth2 = oauth2;
 
 /***/ }),
 
@@ -9036,23 +5624,16 @@ exports.oauth2 = oauth2;
  * This file contains some shared functions. The are used by other modules, but
  * are defined here so that tests can import this library and test them.
  */
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const HttpError_1 = __webpack_require__(/*! ./HttpError */ "./src/HttpError.ts");
 const settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts");
-const debug_1 = __webpack_require__(/*! debug */ "./node_modules/debug/src/browser.js");
+const debug = __webpack_require__(/*! debug */ "./node_modules/debug/src/browser.js");
+// $lab:coverage:off$
 // @ts-ignore
 // eslint-disable-next-line no-undef
 const { fetch } = undefined ? window : __webpack_require__(/*! cross-fetch */ "./node_modules/cross-fetch/dist/browser-ponyfill.js");
-const _debug = debug_1.default("FHIR");
+// $lab:coverage:on$
+const _debug = debug("FHIR");
 exports.debug = _debug;
 function isBrowser() {
     return typeof window === "object";
@@ -9061,13 +5642,11 @@ exports.isBrowser = isBrowser;
 /**
  * Used in fetch Promise chains to reject if the "ok" property is not true
  */
-function checkResponse(resp) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (!resp.ok) {
-            throw (yield humanizeError(resp));
-        }
-        return resp;
-    });
+async function checkResponse(resp) {
+    if (!resp.ok) {
+        throw (await humanizeError(resp));
+    }
+    return resp;
 }
 exports.checkResponse = checkResponse;
 /**
@@ -9105,43 +5684,42 @@ function request(url, options = {}) {
 }
 exports.request = request;
 exports.getAndCache = (() => {
-    let cache = {};
+    const cache = {};
     return (url, force = "development" === "test") => {
         if (force || !cache[url]) {
             cache[url] = request(url);
+            return cache[url];
         }
-        return cache[url];
+        return Promise.resolve(cache[url]);
     };
 })();
-function humanizeError(resp) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let msg = `${resp.status} ${resp.statusText}\nURL: ${resp.url}`;
-        try {
-            const type = resp.headers.get("Content-Type") || "text/plain";
-            if (type.match(/\bjson\b/i)) {
-                const json = yield resp.json();
-                if (json.error) {
-                    msg += "\n" + json.error;
-                    if (json.error_description) {
-                        msg += ": " + json.error_description;
-                    }
-                }
-                else {
-                    msg += "\n\n" + JSON.stringify(json, null, 4);
+async function humanizeError(resp) {
+    let msg = `${resp.status} ${resp.statusText}\nURL: ${resp.url}`;
+    try {
+        const type = resp.headers.get("Content-Type") || "text/plain";
+        if (type.match(/\bjson\b/i)) {
+            const json = await resp.json();
+            if (json.error) {
+                msg += "\n" + json.error;
+                if (json.error_description) {
+                    msg += ": " + json.error_description;
                 }
             }
-            if (type.match(/^text\//i)) {
-                const text = yield resp.text();
-                if (text) {
-                    msg += "\n\n" + text;
-                }
+            else {
+                msg += "\n\n" + JSON.stringify(json, null, 4);
             }
         }
-        catch (_) {
-            // ignore
+        if (type.match(/^text\//i)) {
+            const text = await resp.text();
+            if (text) {
+                msg += "\n\n" + text;
+            }
         }
-        throw new HttpError_1.default(msg, resp.status, resp.statusText);
-    });
+    }
+    catch (_) {
+        // ignore
+    }
+    throw new HttpError_1.default(msg, resp.status, resp.statusText);
 }
 exports.humanizeError = humanizeError;
 function stripTrailingSlash(str) {
@@ -9153,8 +5731,8 @@ exports.stripTrailingSlash = stripTrailingSlash;
  * provided path. This function is very simple so it intentionally does not
  * support any argument polymorphism, meaning that the path can only be a
  * dot-separated string. If the path is invalid returns undefined.
- * @param {Object} obj The object (or Array) to walk through
- * @param {String} path The path (eg. "a.b.4.c")
+ * @param obj The object (or Array) to walk through
+ * @param path The path (eg. "a.b.4.c")
  * @returns {*} Whatever is found in the path or undefined
  */
 function getPath(obj, path = "") {
@@ -9196,7 +5774,7 @@ function absolute(path, baseUrl) {
         return path;
     if (path.match(/^urn/))
         return path;
-    return baseUrl.replace(/\/+$/, "") + "/" + path.replace(/^\/+/, "");
+    return String(baseUrl || "").replace(/\/+$/, "") + "/" + path.replace(/^\/+/, "");
 }
 exports.absolute = absolute;
 /**
@@ -9246,10 +5824,13 @@ exports.jwtDecode = jwtDecode;
 // -----------------------------------------------------------------------------
 /**
  * Groups the observations by code. Returns a map that will look like:
- * {
- *   "55284-4": [ observation1, observation2 ],
- *   "6082-2" : [ observation3 ]
- * }
+ * ```js
+ * const map = client.byCodes(observations, "code");
+ * // map = {
+ * //     "55284-4": [ observation1, observation2 ],
+ * //     "6082-2": [ observation3 ]
+ * // }
+ * ```
  * @param observations Array of observations
  * @param property The name of a CodeableConcept property to group by
  */
@@ -9258,8 +5839,10 @@ function byCode(observations, property) {
     function handleCodeableConcept(concept, observation) {
         if (concept && Array.isArray(concept.coding)) {
             concept.coding.forEach(({ code }) => {
-                ret[code] = ret[code] || [];
-                ret[code].push(observation);
+                if (code) {
+                    ret[code] = ret[code] || [];
+                    ret[code].push(observation);
+                }
             });
         }
     }
@@ -9279,7 +5862,13 @@ exports.byCode = byCode;
 /**
  * First groups the observations by code using `byCode`. Then returns a function
  * that accepts codes as arguments and will return a flat array of observations
- * having that codes
+ * having that codes. Example:
+ * ```js
+ * const filter = client.byCodes(observations, "category");
+ * filter("laboratory") // => [ observation1, observation2 ]
+ * filter("vital-signs") // => [ observation3 ]
+ * filter("laboratory", "vital-signs") // => [ observation1, observation2, observation3 ]
+ * ```
  * @param observations Array of observations
  * @param property The name of a CodeableConcept property to group by
  */
@@ -9287,7 +5876,7 @@ function byCodes(observations, property) {
     const bank = byCode(observations, property);
     return (...codes) => codes
         .filter(code => (code + "") in bank)
-        .reduce((prev, code) => [...prev, ...bank[code + ""]], []);
+        .reduce((prev, code) => prev.concat(bank[code + ""]), []);
 }
 exports.byCodes = byCodes;
 function ensureNumerical({ value, code }) {
@@ -9341,19 +5930,23 @@ function getPatientParam(conformance, resourceType) {
     const resources = getPath(conformance, "rest.0.resource") || [];
     // Check if this resource is supported
     const meta = resources.find((r) => r.type === resourceType);
-    if (!meta)
-        throw new Error("Resource not supported");
+    if (!meta) {
+        throw new Error(`Resource "${resourceType}" is not supported by this FHIR server`);
+    }
     // Check if any search parameters are available for this resource
-    if (!Array.isArray(meta.searchParam))
+    if (!Array.isArray(meta.searchParam)) {
         throw new Error(`No search parameters supported for "${resourceType}" on this FHIR server`);
-    // This is a rare case vut could happen in generic workflows
-    if (resourceType == "Patient" && meta.searchParam.find((x) => x.name == "_id"))
+    }
+    // This is a rare case but could happen in generic workflows
+    if (resourceType == "Patient" && meta.searchParam.find((x) => x.name == "_id")) {
         return "_id";
+    }
     // Now find the first possible parameter name
-    let out = settings_1.patientParams.find(p => meta.searchParam.find((x) => x.name == p));
+    const out = settings_1.patientParams.find(p => meta.searchParam.find((x) => x.name == p));
     // If there is no match
-    if (!out)
+    if (!out) {
         throw new Error("I don't know what param to use for " + resourceType);
+    }
     return out;
 }
 exports.getPatientParam = getPatientParam;
@@ -9470,16 +6063,17 @@ exports.fhirVersions = {
     "3.0.1": 3,
     "3.3.0": 4,
     "3.5.0": 4,
-    "4.0.0": 4
+    "4.0.0": 4,
+    "4.0.1": 4
 };
 /**
  * Combined (FHIR R2-R4) list of search parameters that can be used to scope
  * a request by patient ID.
  */
 exports.patientParams = [
-    "requester",
     "patient",
     "subject",
+    "requester",
     "member",
     "actor",
     "beneficiary"
@@ -9501,15 +6095,6 @@ exports.SMART_KEY = "SMART_KEY";
 
 "use strict";
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 /* global window */
 const lib_1 = __webpack_require__(/*! ./lib */ "./src/lib.ts");
@@ -9543,6 +6128,11 @@ function fetchWellKnownJson(baseUrl = "/") {
     });
 }
 exports.fetchWellKnownJson = fetchWellKnownJson;
+/**
+ * Fetch and return the FHIR version. This is done by fetching (and caching) the
+ * CapabilityStatement of the FHIR server
+ * @param [baseUrl] The base URL of the FHIR server
+ */
 function fetchFhirVersion(baseUrl = "/") {
     return fetchConformanceStatement(baseUrl).then((metadata) => metadata.fhirVersion);
 }
@@ -9550,8 +6140,7 @@ exports.fetchFhirVersion = fetchFhirVersion;
 /**
  * Given a fhir server returns an object with it's Oauth security endpoints that
  * we are interested in
- * @param {String} baseUrl Fhir server base URL
- * @returns { Promise<fhirclient.OAuthSecurityExtensions> }
+ * @param [baseUrl] Fhir server base URL
  */
 function getSecurityExtensions(baseUrl = "/") {
     return fetchWellKnownJson(baseUrl).then(meta => {
@@ -9591,226 +6180,225 @@ function getSecurityExtensions(baseUrl = "/") {
 }
 exports.getSecurityExtensions = getSecurityExtensions;
 /**
- * @param {Object} env
- * @param {fhirclient.AuthorizeParams} params
- * @param {Boolean} [_noRedirect = false] If true, resolve with the redirect url
- * without trying to redirect to it
- * @returns { Promise<never|string> }
+ * @param env
+ * @param [params]
+ * @param [_noRedirect] If true, resolve with the redirect url without trying to redirect to it
  */
-function authorize(env, params = {}, _noRedirect = false) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // Obtain input
-        let { iss, launch, fhirServiceUrl, redirect_uri, redirectUri, scope = "", clientSecret, fakeTokenResponse, patientId, encounterId, client_id, clientId } = params;
-        const url = env.getUrl();
-        const storage = env.getStorage();
-        // For these three an url param takes precedence over inline option
-        iss = url.searchParams.get("iss") || iss;
-        fhirServiceUrl = url.searchParams.get("fhirServiceUrl") || fhirServiceUrl;
-        launch = url.searchParams.get("launch") || launch;
-        if (!clientId) {
-            clientId = client_id;
-        }
-        if (!redirectUri) {
-            redirectUri = redirect_uri;
-        }
-        if (!redirectUri) {
-            redirectUri = env.relative(".");
-        }
-        else {
-            redirectUri = env.relative(redirectUri);
-        }
-        const serverUrl = String(iss || fhirServiceUrl || "");
-        // Validate input
-        if (!serverUrl) {
-            throw new Error("No server url found. It must be specified as `iss` or as " +
-                "`fhirServiceUrl` parameter");
-        }
-        if (iss) {
-            debug("Making %s launch...", launch ? "EHR" : "standalone");
-        }
-        // append launch scope if needed
-        if (launch && !scope.match(/launch/)) {
-            scope += " launch";
-        }
-        // prevent inheritance of tokenResponse from parent window
-        yield storage.unset(settings_1.SMART_KEY);
-        // create initial state
-        const stateKey = lib_1.randomString(16);
-        const state = {
-            clientId,
-            scope,
-            redirectUri,
-            serverUrl,
-            clientSecret,
-            tokenResponse: {},
-            key: stateKey
-        };
-        // fakeTokenResponse to override stuff (useful in development)
-        if (fakeTokenResponse) {
-            Object.assign(state.tokenResponse, fakeTokenResponse);
-        }
-        // Fixed patientId (useful in development)
-        if (patientId) {
-            Object.assign(state.tokenResponse, { patient: patientId });
-        }
-        // Fixed encounterId (useful in development)
-        if (encounterId) {
-            Object.assign(state.tokenResponse, { encounter: encounterId });
-        }
-        let redirectUrl = redirectUri + "?state=" + encodeURIComponent(stateKey);
-        // bypass oauth if fhirServiceUrl is used (but iss takes precedence)
-        if (fhirServiceUrl && !iss) {
-            debug("Making fake launch...");
-            // Storage.set(stateKey, state);
-            yield storage.set(stateKey, state);
-            if (_noRedirect) {
-                return redirectUrl;
-            }
-            return yield env.redirect(redirectUrl);
-        }
-        // Get oauth endpoints and add them to the state
-        const extensions = yield getSecurityExtensions(serverUrl);
-        Object.assign(state, extensions);
-        yield storage.set(stateKey, state);
-        // If this happens to be an open server and there is no authorizeUri
-        if (!state.authorizeUri) {
-            if (_noRedirect) {
-                return redirectUrl;
-            }
-            return yield env.redirect(redirectUrl);
-        }
-        // build the redirect uri
-        const redirectParams = [
-            "response_type=code",
-            "client_id=" + encodeURIComponent(clientId || ""),
-            "scope=" + encodeURIComponent(scope),
-            "redirect_uri=" + encodeURIComponent(redirectUri),
-            "aud=" + encodeURIComponent(serverUrl),
-            "state=" + encodeURIComponent(stateKey)
-        ];
-        // also pass this in case of EHR launch
-        if (launch) {
-            redirectParams.push("launch=" + encodeURIComponent(launch));
-        }
-        redirectUrl = state.authorizeUri + "?" + redirectParams.join("&");
+async function authorize(env, params = {}, _noRedirect = false) {
+    // Obtain input
+    const { redirect_uri, clientSecret, fakeTokenResponse, patientId, encounterId, client_id } = params;
+    let { iss, launch, fhirServiceUrl, redirectUri, scope = "", clientId } = params;
+    const url = env.getUrl();
+    const storage = env.getStorage();
+    // For these three an url param takes precedence over inline option
+    iss = url.searchParams.get("iss") || iss;
+    fhirServiceUrl = url.searchParams.get("fhirServiceUrl") || fhirServiceUrl;
+    launch = url.searchParams.get("launch") || launch;
+    if (!clientId) {
+        clientId = client_id;
+    }
+    if (!redirectUri) {
+        redirectUri = redirect_uri;
+    }
+    if (!redirectUri) {
+        redirectUri = env.relative(".");
+    }
+    else {
+        redirectUri = env.relative(redirectUri);
+    }
+    const serverUrl = String(iss || fhirServiceUrl || "");
+    // Validate input
+    if (!serverUrl) {
+        throw new Error("No server url found. It must be specified as `iss` or as " +
+            "`fhirServiceUrl` parameter");
+    }
+    if (iss) {
+        debug("Making %s launch...", launch ? "EHR" : "standalone");
+    }
+    // append launch scope if needed
+    if (launch && !scope.match(/launch/)) {
+        scope += " launch";
+    }
+    // prevent inheritance of tokenResponse from parent window
+    await storage.unset(settings_1.SMART_KEY);
+    // create initial state
+    const stateKey = lib_1.randomString(16);
+    const state = {
+        clientId,
+        scope,
+        redirectUri,
+        serverUrl,
+        clientSecret,
+        tokenResponse: {},
+        key: stateKey
+    };
+    // fakeTokenResponse to override stuff (useful in development)
+    if (fakeTokenResponse) {
+        Object.assign(state.tokenResponse, fakeTokenResponse);
+    }
+    // Fixed patientId (useful in development)
+    if (patientId) {
+        Object.assign(state.tokenResponse, { patient: patientId });
+    }
+    // Fixed encounterId (useful in development)
+    if (encounterId) {
+        Object.assign(state.tokenResponse, { encounter: encounterId });
+    }
+    let redirectUrl = redirectUri + "?state=" + encodeURIComponent(stateKey);
+    // bypass oauth if fhirServiceUrl is used (but iss takes precedence)
+    if (fhirServiceUrl && !iss) {
+        debug("Making fake launch...");
+        // Storage.set(stateKey, state);
+        await storage.set(stateKey, state);
         if (_noRedirect) {
             return redirectUrl;
         }
-        return yield env.redirect(redirectUrl);
-    });
+        return await env.redirect(redirectUrl);
+    }
+    // Get oauth endpoints and add them to the state
+    const extensions = await getSecurityExtensions(serverUrl);
+    Object.assign(state, extensions);
+    await storage.set(stateKey, state);
+    // If this happens to be an open server and there is no authorizeUri
+    if (!state.authorizeUri) {
+        if (_noRedirect) {
+            return redirectUrl;
+        }
+        return await env.redirect(redirectUrl);
+    }
+    // build the redirect uri
+    const redirectParams = [
+        "response_type=code",
+        "client_id=" + encodeURIComponent(clientId || ""),
+        "scope=" + encodeURIComponent(scope),
+        "redirect_uri=" + encodeURIComponent(redirectUri),
+        "aud=" + encodeURIComponent(serverUrl),
+        "state=" + encodeURIComponent(stateKey)
+    ];
+    // also pass this in case of EHR launch
+    if (launch) {
+        redirectParams.push("launch=" + encodeURIComponent(launch));
+    }
+    redirectUrl = state.authorizeUri + "?" + redirectParams.join("&");
+    if (_noRedirect) {
+        return redirectUrl;
+    }
+    return await env.redirect(redirectUrl);
 }
 exports.authorize = authorize;
 /**
  * The completeAuth function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
  * authorization server..
- * @returns { Promise<fhirclient.Client> }
  */
-function completeAuth(env) {
+async function completeAuth(env) {
     var _a, _b, _c, _d;
-    return __awaiter(this, void 0, void 0, function* () {
-        const url = env.getUrl();
-        const Storage = env.getStorage();
-        const params = url.searchParams;
-        let key = params.get("state");
-        const code = params.get("code");
-        const authError = params.get("error");
-        const authErrorDescription = params.get("error_description");
-        if (!key) {
-            key = yield Storage.get(settings_1.SMART_KEY);
+    const url = env.getUrl();
+    const Storage = env.getStorage();
+    const params = url.searchParams;
+    let key = params.get("state");
+    const code = params.get("code");
+    const authError = params.get("error");
+    const authErrorDescription = params.get("error_description");
+    if (!key) {
+        key = await Storage.get(settings_1.SMART_KEY);
+    }
+    // Start by checking the url for `error` and `error_description` parameters.
+    // This happens when the auth server rejects our authorization attempt. In
+    // this case it has no other way to tell us what the error was, other than
+    // appending these parameters to the redirect url.
+    // From client's point of view, this is not very reliable (because we can't
+    // know how we have landed on this page - was it a redirect or was it loaded
+    // manually). However, if `completeAuth()` is being called, we can assume
+    // that the url comes from the auth server (otherwise the app won't work
+    // anyway).
+    if (authError || authErrorDescription) {
+        throw new Error([
+            authError,
+            authErrorDescription
+        ].filter(Boolean).join(": "));
+    }
+    debug("key: %s, code: %O", key, code);
+    // key might be coming from the page url so it might be empty or missing
+    if (!key) {
+        throw new Error("No 'state' parameter found. Please (re)launch the app.");
+    }
+    // Check if we have a previous state
+    let state = (await Storage.get(key));
+    const fullSessionStorageSupport = lib_1.isBrowser() ?
+        lib_1.getPath(env, "options.fullSessionStorageSupport") :
+        true;
+    // Do we have to remove the `code` and `state` params from the URL?
+    const hasState = params.has("state");
+    if (lib_1.isBrowser() && lib_1.getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
+        // `code` is the flag that tell us to request an access token.
+        // We have to remove it, otherwise the page will authorize on
+        // every load!
+        if (code) {
+            params.delete("code");
+            debug("Removed code parameter from the url.");
         }
-        // Start by checking the url for `error` and `error_description` parameters.
-        // This happens when the auth server rejects our authorization attempt. In
-        // this case it has no other way to tell us what the error was, other than
-        // appending these parameters to the redirect url.
-        // From client's point of view, this is not very reliable (because we can't
-        // know how we have landed on this page - was it a redirect or was it loaded
-        // manually). However, if `completeAuth()` is being called, we can assume
-        // that the url comes from the auth server (otherwise the app won't work
-        // anyway).
-        if (authError || authErrorDescription) {
-            let msg = [authError, authErrorDescription].filter(Boolean).join(": ");
-            throw new Error(msg);
+        // If we have `fullSessionStorageSupport` it means we no longer
+        // need the `state` key. It will be stored to a well know
+        // location - sessionStorage[SMART_KEY]. However, no
+        // fullSessionStorageSupport means that this "well know location"
+        // might be shared between windows and tabs. In this case we
+        // MUST keep the `state` url parameter.
+        if (hasState && fullSessionStorageSupport) {
+            params.delete("state");
+            debug("Removed state parameter from the url.");
         }
-        debug("key: %s, code: %O", key, code);
-        // key might be coming from the page url so it might be empty or missing
-        if (!key) {
-            throw new Error("No 'state' parameter found. Please (re)launch the app.");
+        // If the browser does not support the replaceState method for the
+        // History Web API, the "code" parameter cannot be removed. As a
+        // consequence, the page will (re)authorize on every load. The
+        // workaround is to reload the page to new location without those
+        // parameters. If that is not acceptable replaceBrowserHistory
+        // should be set to false.
+        if (window.history.replaceState) {
+            window.history.replaceState({}, "", url.href);
         }
-        // Check if we have a previous state
-        let state = (yield Storage.get(key));
-        const fullSessionStorageSupport = lib_1.isBrowser() ?
-            lib_1.getPath(env, "options.fullSessionStorageSupport") :
-            true;
-        // Do we have to remove the `code` and `state` params from the URL?
-        const hasState = params.has("state");
-        if (lib_1.isBrowser() && lib_1.getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
-            // `code` is the flag that tell us to request an access token.
-            // We have to remove it, otherwise the page will authorize on
-            // every load!
-            if (code) {
-                params.delete("code");
-                debug("Removed code parameter from the url.");
-            }
-            // If we have `fullSessionStorageSupport` it means we no longer
-            // need the `state` key. It will be stored to a well know
-            // location - sessionStorage[SMART_KEY]. However, no
-            // fullSessionStorageSupport means that this "well know location"
-            // might be shared between windows and tabs. In this case we
-            // MUST keep the `state` url parameter.
-            if (hasState && fullSessionStorageSupport) {
-                params.delete("state");
-                debug("Removed state parameter from the url.");
-            }
-            // If the browser does not support the replaceState method for the
-            // History Web API, the "code" parameter cannot be removed. As a
-            // consequence, the page will (re)authorize on every load. The
-            // workaround is to reload the page to new location without those
-            // parameters. If that is not acceptable replaceBrowserHistory
-            // should be set to false.
-            if (window.history.replaceState) {
-                window.history.replaceState({}, "", url.href);
-            }
+    }
+    // If the state does not exist, it means the page has been loaded directly.
+    if (!state) {
+        throw new Error("No state found! Please (re)launch the app.");
+    }
+    // Assume the client has already completed a token exchange when
+    // there is no code (but we have a state) or access token is found in state
+    const authorized = !code || ((_b = (_a = state) === null || _a === void 0 ? void 0 : _a.tokenResponse) === null || _b === void 0 ? void 0 : _b.access_token);
+    // If we are authorized already, then this is just a reload.
+    // Otherwise, we have to complete the code flow
+    if (!authorized && state.tokenUri) {
+        if (!code) {
+            throw new Error("'code' url parameter is required");
         }
-        // If the state does not exist, it means the page has been loaded directly.
-        if (!state) {
-            throw new Error("No state found! Please (re)launch the app.");
+        debug("Preparing to exchange the code for access token...");
+        const requestOptions = buildTokenRequest(code, state);
+        debug("Token request options: %O", requestOptions);
+        // The EHR authorization server SHALL return a JSON structure that
+        // includes an access token or a message indicating that the
+        // authorization request has been denied.
+        const tokenResponse = await lib_1.request(state.tokenUri, requestOptions);
+        debug("Token response: %O", tokenResponse);
+        if (!tokenResponse.access_token) {
+            throw new Error("Failed to obtain access token.");
         }
-        // Assume the client has already completed a token exchange when
-        // there is no code (but we have a state) or access token is found in state
-        const authorized = !code || ((_b = (_a = state) === null || _a === void 0 ? void 0 : _a.tokenResponse) === null || _b === void 0 ? void 0 : _b.access_token);
-        // If we are authorized already, then this is just a reload.
-        // Otherwise, we have to complete the code flow
-        if (!authorized) {
-            debug("Preparing to exchange the code for access token...");
-            const requestOptions = yield buildTokenRequest(code, state);
-            debug("Token request options: %O", requestOptions);
-            // The EHR authorization server SHALL return a JSON structure that
-            // includes an access token or a message indicating that the
-            // authorization request has been denied.
-            let tokenResponse = yield lib_1.request(state.tokenUri, requestOptions);
-            debug("Token response: %O", tokenResponse);
-            if (!tokenResponse.access_token) {
-                throw new Error("Failed to obtain access token.");
-            }
-            // save the tokenResponse so that we don't have to re-authorize on
-            // every page reload
-            state = Object.assign(Object.assign({}, state), { tokenResponse });
-            yield Storage.set(key, state);
-            debug("Authorization successful!");
-        }
-        else {
-            debug(((_d = (_c = state) === null || _c === void 0 ? void 0 : _c.tokenResponse) === null || _d === void 0 ? void 0 : _d.access_token) ?
-                "Already authorized" :
-                "No authorization needed");
-        }
-        if (fullSessionStorageSupport) {
-            yield Storage.set(settings_1.SMART_KEY, key);
-        }
-        const client = new Client_1.default(env, state);
-        debug("Created client instance: %O", client);
-        return client;
-    });
+        // save the tokenResponse so that we don't have to re-authorize on
+        // every page reload
+        state = Object.assign(Object.assign({}, state), { tokenResponse });
+        await Storage.set(key, state);
+        debug("Authorization successful!");
+    }
+    else {
+        debug(((_d = (_c = state) === null || _c === void 0 ? void 0 : _c.tokenResponse) === null || _d === void 0 ? void 0 : _d.access_token) ?
+            "Already authorized" :
+            "No authorization needed");
+    }
+    if (fullSessionStorageSupport) {
+        await Storage.set(settings_1.SMART_KEY, key);
+    }
+    const client = new Client_1.default(env, state);
+    debug("Created client instance: %O", client);
+    return client;
 }
 exports.completeAuth = completeAuth;
 /**
@@ -9852,53 +6440,48 @@ function buildTokenRequest(code, state) {
 }
 exports.buildTokenRequest = buildTokenRequest;
 /**
- * @param {Object} env
- * @param {() => Promise<fhirclient.Client>} [onSuccess]
- * @param {() => never} [onError]
- * @returns { Promise<fhirclient.Client> }
+ * @param env
+ * @param [onSuccess]
+ * @param [onError]
  */
-function ready(env, onSuccess, onError) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let task = completeAuth(env);
-        if (onSuccess) {
-            task = task.then(onSuccess);
-        }
-        if (onError) {
-            task = task.catch(onError);
-        }
-        return task;
-    });
+async function ready(env, onSuccess, onError) {
+    let task = completeAuth(env);
+    if (onSuccess) {
+        task = task.then(onSuccess);
+    }
+    if (onError) {
+        task = task.catch(onError);
+    }
+    return task;
 }
 exports.ready = ready;
-function init(env, options) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const url = env.getUrl();
-        const code = url.searchParams.get("code");
-        const state = url.searchParams.get("state");
-        // if `code` and `state` params are present we need to complete the auth flow
-        if (code && state) {
-            return completeAuth(env);
-        }
-        // Check for existing client state. If state is found, it means a client
-        // instance have already been created in this session and we should try to
-        // "revive" it.
-        const storage = env.getStorage();
-        const key = state || (yield storage.get(settings_1.SMART_KEY));
-        const cached = yield storage.get(key);
-        if (cached) {
-            return new Client_1.default(env, cached);
-        }
-        // Otherwise try to launch
-        return authorize(env, options).then(() => {
-            // `init` promises a Client but that cannot happen in this case. The
-            // browser will be redirected (unload the page and be redirected back
-            // to it later and the same init function will be called again). On
-            // success, authorize will resolve with the redirect url but we don't
-            // want to return that from this promise chain because it is not a
-            // Client instance. At the same time, if authorize fails, we do want to
-            // pass the error to those waiting for a client instance.
-            return new Promise(() => { });
-        });
+async function init(env, options) {
+    const url = env.getUrl();
+    const code = url.searchParams.get("code");
+    const state = url.searchParams.get("state");
+    // if `code` and `state` params are present we need to complete the auth flow
+    if (code && state) {
+        return completeAuth(env);
+    }
+    // Check for existing client state. If state is found, it means a client
+    // instance have already been created in this session and we should try to
+    // "revive" it.
+    const storage = env.getStorage();
+    const key = state || await storage.get(settings_1.SMART_KEY);
+    const cached = await storage.get(key);
+    if (cached) {
+        return new Client_1.default(env, cached);
+    }
+    // Otherwise try to launch
+    return authorize(env, options).then(() => {
+        // `init` promises a Client but that cannot happen in this case. The
+        // browser will be redirected (unload the page and be redirected back
+        // to it later and the same init function will be called again). On
+        // success, authorize will resolve with the redirect url but we don't
+        // want to return that from this promise chain because it is not a
+        // Client instance. At the same time, if authorize fails, we do want to
+        // pass the error to those waiting for a client instance.
+        return new Promise(() => { });
     });
 }
 exports.init = init;
@@ -9915,15 +6498,6 @@ exports.init = init;
 
 "use strict";
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-env browser */
 class Storage {
@@ -9931,38 +6505,32 @@ class Storage {
      * Gets the value at `key`. Returns a promise that will be resolved
      * with that value (or undefined for missing keys).
      */
-    get(key) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const value = sessionStorage[key];
-            if (value) {
-                return JSON.parse(value);
-            }
-            return null;
-        });
+    async get(key) {
+        const value = sessionStorage[key];
+        if (value) {
+            return JSON.parse(value);
+        }
+        return null;
     }
     /**
      * Sets the `value` on `key` and returns a promise that will be resolved
      * with the value that was set.
      */
-    set(key, value) {
-        return __awaiter(this, void 0, void 0, function* () {
-            sessionStorage[key] = JSON.stringify(value);
-            return value;
-        });
+    async set(key, value) {
+        sessionStorage[key] = JSON.stringify(value);
+        return value;
     }
     /**
      * Deletes the value at `key`. Returns a promise that will be resolved
      * with true if the key was deleted or with false if it was not (eg. if
      * did not exist).
      */
-    unset(key) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (key in sessionStorage) {
-                delete sessionStorage[key];
-                return true;
-            }
-            return false;
-        });
+    async unset(key) {
+        if (key in sessionStorage) {
+            delete sessionStorage[key];
+            return true;
+        }
+        return false;
     }
 }
 exports.default = Storage;

@@ -5,11 +5,14 @@
 
 import HttpError from "./HttpError";
 import { patientParams } from "./settings";
-import debug from "debug";
+import { fhirclient } from "./types";
+const debug = require("debug");
 
+// $lab:coverage:off$
 // @ts-ignore
 // eslint-disable-next-line no-undef
 const { fetch } = global.FHIRCLIENT_PURE ? window : require("cross-fetch");
+// $lab:coverage:on$
 
 const _debug     = debug("FHIR");
 export { _debug as debug };
@@ -47,10 +50,10 @@ export function responseToJSON(resp: Response): Promise<object|string> {
  * - If the response is text return the result text
  * - Otherwise return the response object on which we call stuff like `.blob()`
  */
-export function request(
+export function request<T = Response | fhirclient.JsonObject | string>(
     url: string | Request,
-    options: fhirclient.JsonObject = {}
-): Promise<Response | fhirclient.JsonObject | string>
+    options: RequestInit = {}
+): Promise<T>
 {
     return fetch(url, {
         mode: "cors",
@@ -74,15 +77,16 @@ export function request(
 }
 
 export const getAndCache = (() => {
-    let cache: fhirclient.JsonObject = {};
+    const cache: fhirclient.JsonObject = {};
 
     return (url: string, force = process.env.NODE_ENV === "test") => {
         if (force || !cache[url]) {
             cache[url] = request(url);
+            return cache[url];
         }
-        return cache[url];
+        return Promise.resolve(cache[url]);
     };
-})();
+})() as (url: string, force?: boolean) => Promise<any>;
 
 export async function humanizeError(resp: fhirclient.JsonObject) {
     let msg = `${resp.status} ${resp.statusText}\nURL: ${resp.url}`;
@@ -159,14 +163,15 @@ export function setPath(obj: fhirclient.JsonObject, path: string, value: any): f
     return obj;
 }
 
-export function makeArray(arg: any) {
+export function makeArray<T = any>(arg: any): T[] {
     if (Array.isArray(arg)) {
         return arg;
     }
     return [arg];
 }
 
-export function absolute(path: string, baseUrl?: string) {
+export function absolute(path: string, baseUrl?: string): string
+{
     if (path.match(/^http/)) return path;
     if (path.match(/^urn/)) return path;
     return String(baseUrl || "").replace(/\/+$/, "") + "/" + path.replace(/^\/+/, "");
@@ -179,7 +184,8 @@ export function absolute(path: string, baseUrl?: string) {
  * @param charSet A string containing all the possible characters.
  *     Defaults to all the upper and lower-case letters plus digits.
  */
-export function randomString(strLength = 8, charSet?: string) {
+export function randomString(strLength = 8, charSet?: string): string
+{
     const result = [];
 
     charSet = charSet || "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
@@ -193,7 +199,7 @@ export function randomString(strLength = 8, charSet?: string) {
     return result.join("");
 }
 
-export function atob(str: string)
+export function atob(str: string): string
 {
     if (isBrowser()) {
         // eslint-disable-next-line no-undef
@@ -205,7 +211,7 @@ export function atob(str: string)
     return global.Buffer.from(str, "base64").toString("ascii");
 }
 
-export function btoa(str: string)
+export function btoa(str: string): string
 {
     if (isBrowser()) {
         // eslint-disable-next-line no-undef
@@ -217,43 +223,46 @@ export function btoa(str: string)
     return global.Buffer.from(str).toString("base64");
 }
 
-export function jwtDecode(token: string)
+export function jwtDecode(token: string): fhirclient.IDToken
 {
     const payload = token.split(".")[1];
     return JSON.parse(atob(payload));
 }
 // -----------------------------------------------------------------------------
 interface CodeValue {
-    code: string
-    value: number
+    code: string;
+    value: number;
 }
-interface Observation {
-
-}
-interface CodeableConcept {
-    coding?: {
-        code: any
-    }
+interface ObservationMap {
+    [code: string]: any;
 }
 // -----------------------------------------------------------------------------
 /**
  * Groups the observations by code. Returns a map that will look like:
- * {
- *   "55284-4": [ observation1, observation2 ],
- *   "6082-2" : [ observation3 ]
- * }
+ * ```js
+ * const map = client.byCodes(observations, "code");
+ * // map = {
+ * //     "55284-4": [ observation1, observation2 ],
+ * //     "6082-2": [ observation3 ]
+ * // }
+ * ```
  * @param observations Array of observations
  * @param property The name of a CodeableConcept property to group by
  */
-export function byCode(observations: Observation | Observation[], property: string): fhirclient.JsonObject
+export function byCode(
+    observations: fhirclient.FHIR.Observation | fhirclient.FHIR.Observation[],
+    property: string
+): ObservationMap
 {
-    const ret: fhirclient.JsonObject = {};
+    const ret: ObservationMap = {};
 
-    function handleCodeableConcept(concept: CodeableConcept, observation: Observation) {
+    function handleCodeableConcept(concept: fhirclient.FHIR.CodeableConcept, observation: fhirclient.FHIR.Observation) {
         if (concept && Array.isArray(concept.coding)) {
             concept.coding.forEach(({ code }) => {
-                ret[code] = ret[code] || [];
-                ret[code].push(observation);
+                if (code) {
+                    ret[code] = ret[code] || [];
+                    ret[code].push(observation);
+                }
             });
         }
     }
@@ -261,7 +270,7 @@ export function byCode(observations: Observation | Observation[], property: stri
     makeArray(observations).forEach(o => {
         if (o.resourceType === "Observation" && o[property]) {
             if (Array.isArray(o[property])) {
-                o[property].forEach((concept: CodeableConcept) => handleCodeableConcept(concept, o));
+                o[property].forEach((concept: fhirclient.FHIR.CodeableConcept) => handleCodeableConcept(concept, o));
             } else {
                 handleCodeableConcept(o[property], o);
             }
@@ -274,16 +283,28 @@ export function byCode(observations: Observation | Observation[], property: stri
 /**
  * First groups the observations by code using `byCode`. Then returns a function
  * that accepts codes as arguments and will return a flat array of observations
- * having that codes
+ * having that codes. Example:
+ * ```js
+ * const filter = client.byCodes(observations, "category");
+ * filter("laboratory") // => [ observation1, observation2 ]
+ * filter("vital-signs") // => [ observation3 ]
+ * filter("laboratory", "vital-signs") // => [ observation1, observation2, observation3 ]
+ * ```
  * @param observations Array of observations
  * @param property The name of a CodeableConcept property to group by
  */
-export function byCodes(observations: Observation | Observation[], property: string): (codes: string[]) => any[]
+export function byCodes(
+    observations: fhirclient.FHIR.Observation | fhirclient.FHIR.Observation[],
+    property: string
+): (...codes: string[]) => any[]
 {
     const bank = byCode(observations, property);
     return (...codes) => codes
         .filter(code => (code + "") in bank)
-        .reduce((prev, code) => [...prev, ...bank[code + ""]], []);
+        .reduce(
+            (prev, code) => prev.concat(bank[code + ""]),
+            [] as fhirclient.FHIR.Observation[]
+        );
 }
 
 export function ensureNumerical({ value, code }: CodeValue) {
@@ -306,10 +327,10 @@ export const units = {
     },
     kg({ code, value }: CodeValue){
         ensureNumerical({ code, value });
-        if(code == "kg"    ) return value;
-        if(code == "g"     ) return value / 1000;
-        if(code.match(/lb/)) return value / 2.20462;
-        if(code.match(/oz/)) return value / 35.274;
+        if (code == "kg"    ) return value;
+        if (code == "g"     ) return value / 1000;
+        if (code.match(/lb/)) return value / 2.20462;
+        if (code.match(/oz/)) return value / 35.274;
         throw new Error("Unrecognized weight unit: " + code);
     },
     any(pq: CodeValue){
@@ -322,30 +343,34 @@ export const units = {
  * Given a conformance statement and a resource type, returns the name of the
  * URL parameter that can be used to scope the resource type by patient ID.
  */
-export function getPatientParam(conformance: fhirclient.JsonObject, resourceType: string)
+export function getPatientParam(conformance: fhirclient.FHIR.CapabilityStatement, resourceType: string): string
 {
     // Find what resources are supported by this server
     const resources = getPath(conformance, "rest.0.resource") || [];
 
     // Check if this resource is supported
     const meta = resources.find((r: any) => r.type === resourceType);
-    if (!meta)
-        throw new Error("Resource not supported");
+    if (!meta) {
+        throw new Error(`Resource "${resourceType}" is not supported by this FHIR server`);
+    }
 
     // Check if any search parameters are available for this resource
-    if (!Array.isArray(meta.searchParam))
+    if (!Array.isArray(meta.searchParam)) {
         throw new Error(`No search parameters supported for "${resourceType}" on this FHIR server`);
+    }
 
-    // This is a rare case vut could happen in generic workflows
-    if (resourceType == "Patient" && meta.searchParam.find((x: any) => x.name == "_id"))
+    // This is a rare case but could happen in generic workflows
+    if (resourceType == "Patient" && meta.searchParam.find((x: any) => x.name == "_id")) {
         return "_id";
+    }
 
     // Now find the first possible parameter name
-    let out = patientParams.find(p => meta.searchParam.find((x: any) => x.name == p));
+    const out = patientParams.find(p => meta.searchParam.find((x: any) => x.name == p));
 
     // If there is no match
-    if (!out)
+    if (!out) {
         throw new Error("I don't know what param to use for " + resourceType);
+    }
 
     return out;
 }

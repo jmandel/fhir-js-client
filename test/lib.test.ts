@@ -3,9 +3,10 @@ import * as Lab     from "@hapi/lab";
 import { Response } from "cross-fetch";
 import * as lib     from "../src/lib";
 import HttpError    from "../src/HttpError";
+import mockServer   from "./mocks/mockServer";
 
 export const lab = Lab.script();
-const { it, describe } = lab;
+const { it, describe, beforeEach, afterEach } = lab;
 
 describe("Lib", () => {
 
@@ -67,6 +68,12 @@ describe("Lib", () => {
             expect(lib.absolute("/", "http://google.com")).to.equal("http://google.com/");
             expect(lib.absolute("/a/b/c", "http://google.com")).to.equal("http://google.com/a/b/c");
             expect(lib.absolute("a/b/c", "http://google.com")).to.equal("http://google.com/a/b/c");
+        });
+
+        it ("returns site rooted paths if no baseUrl is provided", () => {
+            expect(lib.absolute("/")).to.equal("/");
+            expect(lib.absolute("a/b/c")).to.equal("/a/b/c");
+            expect(lib.absolute("./a/b/c")).to.equal("/./a/b/c");
         });
     });
 
@@ -133,4 +140,109 @@ describe("Lib", () => {
         });
     });
 
+    describe("randomString", () => {
+        it ("respects strLength", () => {
+            expect(lib.randomString( ).length).to.equal(8);
+            expect(lib.randomString(2).length).to.equal(2);
+            expect(lib.randomString(9).length).to.equal(9);
+        });
+
+        it ("respects charSet", () => {
+            expect(lib.randomString(8, "abc")).to.match(/^[abc]{8}$/);
+            expect(lib.randomString(8, "xyz")).to.match(/^[xyz]{8}$/);
+            expect(lib.randomString(8, "123")).to.match(/^[123]{8}$/);
+        });
+    });
+
+    describe("btoa", () => {
+        it ("works in node", () => {
+            expect(lib.btoa("abc")).to.equal("YWJj");
+        });
+
+        it ("works in browser", () => {
+            // @ts-ignore
+            global.window = 1;
+            try {
+                expect(lib.btoa("abc")).to.equal("YWJj");
+            } catch (ex) {
+                throw ex;
+            } finally {
+                // @ts-ignore
+                delete global.window;
+            }
+        });
+    });
+
+    describe("getAndCache", () => {
+
+        let mockDataServer, mockUrl;
+
+
+        beforeEach(() => {
+            return new Promise((resolve, reject) => {
+                mockDataServer = mockServer.listen(null, "0.0.0.0", error => {
+                    if (error) {
+                        return reject(error);
+                    }
+                    let addr = mockDataServer.address();
+                    mockUrl = `http://127.0.0.1:${addr.port}`;
+                    // console.log(`Mock Data Server listening at ${mockUrl}`);
+                    resolve();
+                });
+            });
+        });
+
+        afterEach(() => {
+            if (mockDataServer && mockDataServer.listening) {
+                return new Promise(resolve => {
+                    mockUrl = "";
+                    mockDataServer.close(error => {
+                        if (error) {
+                            console.log("Error shutting down the mock-data server: ", error);
+                        }
+                        // console.log("Mock Data Server CLOSED!");
+                        resolve();
+                    });
+                });
+            }
+        });
+
+
+        it ("returns second hit from cache", async () => {
+            mockServer.mock({
+                headers: { "content-type": "text/plain" },
+                status: 200,
+                body: "abc"
+            });
+
+            const result = await lib.getAndCache(mockUrl, false);
+            expect(result).to.equal("abc");
+
+            const result2 = await lib.getAndCache(mockUrl, false);
+            expect(result2).to.equal("abc");
+        });
+
+        it ("can force-load and update the cache", async () => {
+            mockServer.mock({
+                headers: { "content-type": "text/plain" },
+                status: 200,
+                body: "abc"
+            });
+
+            const result = await lib.getAndCache(mockUrl, false);
+            expect(result).to.equal("abc");
+
+            mockServer.mock({
+                headers: { "content-type": "text/plain" },
+                status: 200,
+                body: "123"
+            });
+
+            const result2 = await lib.getAndCache(mockUrl, false);
+            expect(result2).to.equal("abc");
+
+            const result3 = await lib.getAndCache(mockUrl, true);
+            expect(result3).to.equal("123");
+        });
+    });
 });

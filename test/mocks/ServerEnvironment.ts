@@ -2,7 +2,13 @@ import ServerStorage from "../../src/storage/ServerStorage";
 
 export default class ServerEnvironment
 {
-    constructor(request, response, storage)
+    public request: any;
+
+    public response: any;
+
+    public storage: any;
+
+    constructor(request?: any, response?: any, storage?: any)
     {
         this.request  = request;
         this.response = response;
@@ -18,7 +24,7 @@ export default class ServerEnvironment
         }
     }
 
-    getUrl()
+    public getUrl()
     {
         const req = this.request;
         const host = req.headers["x-forwarded-host"] || req.headers.host;
@@ -35,18 +41,18 @@ export default class ServerEnvironment
         return new URL(req.originalUrl || req.path || req.url, protocol + "://" + host);
     }
 
-    redirect(location)
+    public redirect(location)
     {
         this.response.writeHead(302, { location });
         this.response.end();
     }
 
-    getStorage()
+    public getStorage()
     {
         return this.storage;
     }
 
-    relative(url)
+    public relative(url: string)
     {
         return new URL(url, this.getUrl()).href;
     }

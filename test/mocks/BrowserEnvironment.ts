@@ -1,11 +1,11 @@
 /* global fhir */
-import EventEmitter from "events";
+const EventEmitter = require("events");
 import MemoryStorage from "./MemoryStorage";
 import Location      from "./Location";
 
 export default class BrowserEnvironment extends EventEmitter
 {
-    constructor(options)
+    constructor(options = {})
     {
         super();
         this.options = {
@@ -18,21 +18,21 @@ export default class BrowserEnvironment extends EventEmitter
 
     get fhir()
     {
-        return typeof fhir === "function" ? fhir : null;
+        return null;
     }
 
-    getUrl()
+    public getUrl()
     {
         return new URL(this._location.href);
     }
 
-    redirect(to)
+    public redirect(to: string)
     {
         this._location.href = to;
         this.emit("redirect");
     }
 
-    getStorage()
+    public getStorage()
     {
         if (!this._storage) {
             this._storage = new MemoryStorage();
@@ -40,7 +40,7 @@ export default class BrowserEnvironment extends EventEmitter
         return this._storage;
     }
 
-    relative(url)
+    public relative(url: string)
     {
         return new URL(url, this._location.href).href;
     }
