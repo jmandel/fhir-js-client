@@ -30,7 +30,7 @@
     "pack": "npm run pack:dev && npm run pack:prod && npm run pack:dev:pure && npm run pack:prod:pure",
     "build": "npm run build:module && npm run pack",
     "build:dev": "npm run pack:dev -- --watch",
-    "cover": "lab -S -T ./test/transform -P test -I __core-js_shared__ --threshold 0 --coverage-exclude lib -r lcov | coveralls",
+    "cover": "lab -S -T node_modules/lab-transform-typescript -I __core-js_shared__ --threshold 0 --coverage-exclude lib -r lcov | coveralls",
     "build:module": "babel --env-name module -d dist/lib src"
   },
   "devDependencies": {
