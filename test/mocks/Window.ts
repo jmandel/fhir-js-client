@@ -1,19 +1,25 @@
 class History
 {
+    public _location: string;
+
     constructor()
     {
         this._location = "";
     }
 
-    replaceState(a, b, loc)
+    public replaceState(a: any, b: any, loc: string)
     {
         this._location = loc;
     }
 }
 
+// tslint:disable-next-line:max-classes-per-file
 export default class Window
 {
-    constructor()
+    public FHIR: any;
+    public history: History;
+
+    public constructor()
     {
         this.history = new History();
 
@@ -31,7 +37,7 @@ export default class Window
         };
     }
 
-    atob(str) {
+    public atob(str: string) {
         return Buffer.from(str, "base64").toString("ascii");
     }
 }

@@ -2,13 +2,14 @@
 /* eslint-env browser */
 import { URL }    from "url";
 import { expect } from "@hapi/code";
-import * as Lab        from "@hapi/lab";
+import * as Lab   from "@hapi/lab";
 import * as smart from "../src/smart";
 
 // mocks
 import BrowserEnv from "./mocks/BrowserEnvironment";
 import Window     from "./mocks/Window";
 import mockServer from "./mocks/mockServer";
+import { Client } from "../src";
 
 export const lab = Lab.script();
 const {
@@ -20,16 +21,19 @@ const {
     afterEach
 } = lab;
 
-let mockDataServer, mockUrl;
+declare var window: Window;
+
+let mockDataServer: any, mockUrl: string;
 
 
 before(() => {
     return new Promise((resolve, reject) => {
-        mockDataServer = mockServer.listen(null, "0.0.0.0", error => {
+        // @ts-ignore
+        mockDataServer = mockServer.listen(null, "0.0.0.0", (error: Error) => {
             if (error) {
                 return reject(error);
             }
-            let addr = mockDataServer.address();
+            const addr: any = mockDataServer.address();
             mockUrl = `http://127.0.0.1:${addr.port}`;
             // console.log(`Mock Data Server listening at ${mockUrl}`);
             resolve();
@@ -41,7 +45,7 @@ after(() => {
     if (mockDataServer && mockDataServer.listening) {
         return new Promise(resolve => {
             mockUrl = "";
-            mockDataServer.close(error => {
+            mockDataServer.close((error: Error) => {
                 if (error) {
                     console.log("Error shutting down the mock-data server: ", error);
                 }
@@ -53,13 +57,13 @@ after(() => {
 });
 
 beforeEach(() => {
-    global.window = new Window();
+    (global as any).window = new Window();
 });
 
 afterEach(() => {
     mockServer.clear();
-    delete global.window;
-    delete global.fetch;
+    delete (global as any).window;
+    delete (global as any).fetch;
     // window.FHIR.oauth2.settings.fullSessionStorageSupport = true;
     // window.FHIR.oauth2.settings.replaceBrowserHistory = true;
 });
@@ -302,7 +306,7 @@ describe ("Complete authorization", () => {
             scope: "x",
             launch: "123"
         }, true);
-        const state = (new URL(redirect)).searchParams.get("state");
+        const state = (new URL(redirect as string)).searchParams.get("state");
         expect((await Storage.get(state)).scope).to.equal("x launch");
     });
 
@@ -376,6 +380,7 @@ describe("smart", () => {
 
         it ("rejects bad baseUrl values", async () => {
             await expect(smart.fetchConformanceStatement("")).to.reject();
+            // @ts-ignore
             await expect(smart.fetchConformanceStatement(null)).to.reject();
             await expect(smart.fetchConformanceStatement("whatever")).to.reject();
         });
@@ -389,6 +394,7 @@ describe("smart", () => {
                 }
             });
             const conformance = await smart.fetchConformanceStatement(mockUrl);
+            // @ts-ignore
             expect(conformance).to.equal({resourceType: "Conformance"});
         });
 
@@ -411,6 +417,7 @@ describe("smart", () => {
                 }
             });
             const conformance = await smart.fetchWellKnownJson(mockUrl);
+            // @ts-ignore
             expect(conformance).to.equal({resourceType: "fetchWellKnownJson"});
         });
 
@@ -603,7 +610,7 @@ describe("smart", () => {
                 fhirServiceUrl: "http://localhost",
                 encounterId: "whatever"
             }, true);
-            const state = (new URL(url)).searchParams.get("state");
+            const state = (new URL(url as string)).searchParams.get("state");
             expect(await env.getStorage().get(state)).to.include({
                 tokenResponse: { encounter: "whatever" }
             });
@@ -615,7 +622,7 @@ describe("smart", () => {
                 fhirServiceUrl: "http://localhost",
                 patientId: "whatever"
             }, true);
-            const state = (new URL(url)).searchParams.get("state");
+            const state = (new URL(url as string)).searchParams.get("state");
             expect(await env.getStorage().get(state)).to.include({
                 tokenResponse: { patient: "whatever" }
             });
@@ -627,7 +634,7 @@ describe("smart", () => {
                 fhirServiceUrl: "http://localhost",
                 fakeTokenResponse: { a: 1, b: 2 }
             }, true);
-            const state = (new URL(url)).searchParams.get("state");
+            const state = (new URL(url as string)).searchParams.get("state");
             expect(await env.getStorage().get(state)).to.include({
                 tokenResponse: { a: 1, b: 2 }
             });
@@ -668,16 +675,18 @@ describe("smart", () => {
     describe("buildTokenRequest", () => {
 
         it ("rejects with missing state.redirectUri", () => {
-            expect(() => smart.buildTokenRequest("whatever", {
-
-            })).to.throw(Error, "Missing state.redirectUri");
+            // @ts-ignore
+            expect(() => smart.buildTokenRequest("whatever", {}))
+                .to.throw(Error, "Missing state.redirectUri");
         });
         it ("rejects with missing state.tokenUri", () => {
+            // @ts-ignore
             expect(() => smart.buildTokenRequest("whatever", {
                 redirectUri: "whatever"
             })).to.throw(Error, "Missing state.tokenUri");
         });
         it ("rejects with missing state.clientId", () => {
+            // @ts-ignore
             expect(() => smart.buildTokenRequest("whatever", {
                 redirectUri: "whatever",
                 tokenUri: "whatever"
@@ -718,7 +727,7 @@ describe("smart", () => {
 
             const env = new BrowserEnv();
 
-            let client = await new Promise((resolve, reject) => {
+            let client = await new Promise<Client>((resolve, reject) => {
 
                 env.once("redirect", async () => {
                     env.redirect("http://localhost/?code=123&state=" + env.getUrl().searchParams.get("state"));
@@ -790,7 +799,7 @@ describe("smart", () => {
 
             const env = new BrowserEnv();
 
-            let client = await new Promise((resolve, reject) => {
+            let client = await new Promise<Client>((resolve, reject) => {
                 env.redirect("http://localhost/?launch=123&state=" + key);
 
                 env.once("redirect", async () => {

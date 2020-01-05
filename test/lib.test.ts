@@ -18,6 +18,7 @@ describe("Lib", () => {
         });
 
         it ("does nothing if the first argument is null", () => {
+            // @ts-ignore
             expect(lib.setPath(null, "b.1.a", 3)).to.equal(null);
         });
     });
@@ -36,9 +37,11 @@ describe("Lib", () => {
         });
 
         it ("works with non-string argument", () => {
+            // @ts-ignore
             expect(lib.stripTrailingSlash(null)).to.equal("");
             // @ts-ignore
             expect(lib.stripTrailingSlash(false)).to.equal("");
+            // @ts-ignore
             expect(lib.stripTrailingSlash(undefined)).to.equal("");
             // @ts-ignore
             expect(lib.stripTrailingSlash()).to.equal("");
@@ -175,16 +178,17 @@ describe("Lib", () => {
 
     describe("getAndCache", () => {
 
-        let mockDataServer, mockUrl;
+        let mockDataServer: any, mockUrl: string;
 
 
         beforeEach(() => {
             return new Promise((resolve, reject) => {
-                mockDataServer = mockServer.listen(null, "0.0.0.0", error => {
+                // @ts-ignore
+                mockDataServer = mockServer.listen(null, "0.0.0.0", (error: Error) => {
                     if (error) {
                         return reject(error);
                     }
-                    let addr = mockDataServer.address();
+                    const addr: any = mockDataServer.address();
                     mockUrl = `http://127.0.0.1:${addr.port}`;
                     // console.log(`Mock Data Server listening at ${mockUrl}`);
                     resolve();
@@ -196,7 +200,7 @@ describe("Lib", () => {
             if (mockDataServer && mockDataServer.listening) {
                 return new Promise(resolve => {
                     mockUrl = "";
-                    mockDataServer.close(error => {
+                    mockDataServer.close((error: Error) => {
                         if (error) {
                             console.log("Error shutting down the mock-data server: ", error);
                         }

@@ -16,13 +16,12 @@
   "main": "src/index.js",
   "browser": "src/browser.js",
   "dependencies": {
-    "@types/node": "^13.1.1",
     "core-js": "^3.5.0",
     "cross-fetch": "^3.0.4",
     "debug": "^4.1.1"
   },
   "scripts": {
-    "test": "lab -S -T node_modules/lab-transform-typescript -I __core-js_shared__ --threshold 90 --verbose --coverage-exclude lib -r console -r html -o stdout -o test/coverage.html test/**.ts",
+    "test": "lab test/**.ts",
     "pack:prod": "webpack --config webpack.config.js --mode production",
     "pack:dev": "webpack --config webpack.config.js --mode development",
     "pack:prod:pure": "npm run pack:prod -- --pure",
@@ -30,8 +29,8 @@
     "pack": "npm run pack:dev && npm run pack:prod && npm run pack:dev:pure && npm run pack:prod:pure",
     "build": "npm run build:module && npm run pack",
     "build:dev": "npm run pack:dev -- --watch",
-    "cover": "lab -S -T node_modules/lab-transform-typescript -I __core-js_shared__ --threshold 0 --coverage-exclude lib -r lcov | coveralls",
-    "build:module": "babel --env-name module -d dist/lib src"
+    "cover": "lab --threshold 0 -r lcov | coveralls",
+    "build:module": "tsc -p tsconfig.module.json"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.5",
@@ -42,6 +41,8 @@
     "@hapi/code": "^7.0.0",
     "@hapi/lab": "^21.0.0",
     "@types/debug": "^4.1.5",
+    "@types/express": "^4.17.2",
+    "@types/node": "^13.1.1",
     "babel-loader": "^8.0.6",
     "babel-polyfill": "^6.26.0",
     "cors": "^2.8.5",
@@ -51,7 +52,6 @@
     "fhir.js": "0.0.22",
     "jsdom": "^15.2.1",
     "lab-transform-typescript": "^3.0.1",
-    "source-map-loader": "^0.2.4",
     "ts-loader": "^6.2.1",
     "tslint": "^5.20.1",
     "typescript": "^3.7.4",
@@ -67,5 +67,6 @@
   "bugs": {
     "url": "https://github.com/smart-on-fhir/client-js/issues"
   },
-  "homepage": "http://docs.smarthealthit.org/client-js/"
+  "homepage": "http://docs.smarthealthit.org/client-js/",
+  "types": "src/types.d.ts"
 }

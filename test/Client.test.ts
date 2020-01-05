@@ -10,18 +10,21 @@ import * as FS        from "fs";
 import str            from "../src/strings";
 import Client         from "../src/Client";
 import { KEY }        from "../src/smart";
+import { Adapter } from "../src/adapters/BrowserAdapter";
+import { fhirclient } from "../src/types";
 
 export const lab = Lab.script();
 const { it, describe, before, after, afterEach } = lab;
 
 const clientDebug = mockDebug.instances.find(instance => instance.namespace === "FHIR:client");
 
-let mockDataServer, mockUrl;
+let mockDataServer: any, mockUrl: string;
 
 before(() => {
     return new Promise((resolve, reject) => {
 
-        mockDataServer = mockServer.listen(null, "0.0.0.0", error => {
+        // @ts-ignore
+        mockDataServer = mockServer.listen(null, "0.0.0.0", (error: Error) => {
             if (error) {
                 return reject(error);
             }
@@ -37,7 +40,7 @@ after(() => {
     if (mockDataServer && mockDataServer.listening) {
         return new Promise((resolve, reject) => {
             mockUrl = "";
-            mockDataServer.close(error => {
+            mockDataServer.close((error: Error) => {
                 if (error) {
                     reject(new Error("Error shutting down the mock-data server: " + error));
                 }
@@ -56,8 +59,8 @@ afterEach(() => {
 
 
 
-function crossPlatformTest(callback) {
-    const tests = {
+function crossPlatformTest(callback: (env: Adapter) => void) {
+    const tests: fhirclient.JsonObject = {
         "works in the browser": new BrowserEnv(),
         "works on the server" : new ServerEnv({ session: {} })
     };
@@ -114,7 +117,7 @@ describe("FHIR.client", () => {
                 id: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
             }
         };
-        const tests = {
+        const tests: fhirclient.JsonObject = {
             "works in the browser": new BrowserEnv(),
             "works on the server" : new ServerEnv()
         };
@@ -475,7 +478,7 @@ describe("FHIR.client", () => {
                     status: 200,
                     body: { id: "encounter-id" }
                 });
-                client.state.tokenResponse.encounter = "whatever";
+                (client.state.tokenResponse as any).encounter = "whatever";
                 const encounter = await client.encounter.read();
                 expect(encounter).to.equal({ id: "encounter-id" });
             });
@@ -497,7 +500,7 @@ describe("FHIR.client", () => {
                     status: 200,
                     body: { id: "user-id" }
                 });
-                client.state.tokenResponse.id_token =
+                (client.state.tokenResponse as any).id_token =
                 "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9." +
                 "eyJwcm9maWxlIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb2" +
                 "5lci03MjA4MDQxNiIsImZoaXJVc2VyIjoiUHJhY3RpdGlvbmVyL3Nt" +
@@ -541,9 +544,9 @@ describe("FHIR.client", () => {
                     patient: "bd7cb541-732b-4e39-ab49-ae507aa49326"
                 }
             });
-            await client.api.read({ type: "Patient", id: "bd7cb541-732b-4e39-ab49-ae507aa49326" });
-            await client.api.search({ type: "Patient" });
-            await client.patient.api.read({ type: "Patient", id: "bd7cb541-732b-4e39-ab49-ae507aa49326" });
+            await (client.api as any).read({ type: "Patient", id: "bd7cb541-732b-4e39-ab49-ae507aa49326" });
+            await (client.api as any).search({ type: "Patient" });
+            await (client.patient.api as any).read({ type: "Patient", id: "bd7cb541-732b-4e39-ab49-ae507aa49326" });
         });
     });
 
@@ -558,9 +561,9 @@ describe("FHIR.client", () => {
                 }
             });
 
-            let _passedOptions = null;
+            let _passedOptions: any = {};
 
-            const fhirJs = (options) => {
+            const fhirJs = (options: any) => {
                 _passedOptions = options;
                 return options;
             };
@@ -570,7 +573,7 @@ describe("FHIR.client", () => {
             expect(_passedOptions.baseUrl).to.equal("https://r2.smarthealthit.org");
             expect(_passedOptions.auth).to.equal({ token: "my access token" });
 
-            client.state.tokenResponse.access_token = null;
+            (client.state.tokenResponse as any).access_token = null;
             client.connect(fhirJs);
             expect(_passedOptions.auth).to.be.undefined();
             expect(client.patient.api).to.be.undefined();
@@ -593,7 +596,7 @@ describe("FHIR.client", () => {
                 pass: "my password"
             });
 
-            client.state.tokenResponse.patient = "bd7cb541-732b-4e39-ab49-ae507aa49326";
+            (client.state.tokenResponse as any).patient = "bd7cb541-732b-4e39-ab49-ae507aa49326";
             client.connect(fhirJs);
             expect(client.patient.api).to.not.be.undefined();
         });
@@ -639,7 +642,7 @@ describe("FHIR.client", () => {
                 status: 200,
                 body: { id: "patient-id" }
             };
-            const tests = {
+            const tests: fhirclient.JsonObject = {
                 "works in the browser": new BrowserEnv(),
                 "works on the server" : new ServerEnv()
             };
@@ -661,7 +664,7 @@ describe("FHIR.client", () => {
                 status: 200,
                 body: { resourceType: "Patient" }
             };
-            const tests = {
+            const tests: fhirclient.JsonObject = {
                 "works in the browser": new BrowserEnv(),
                 "works on the server" : new ServerEnv()
             };
@@ -682,7 +685,7 @@ describe("FHIR.client", () => {
                 status: 200,
                 body: { resourceType: "Bundle", entry: [] }
             };
-            const tests = {
+            const tests: fhirclient.JsonObject = {
                 "works in the browser": new BrowserEnv(),
                 "works on the server" : new ServerEnv()
             };
@@ -802,8 +805,8 @@ describe("FHIR.client", () => {
         describe ("onPage callback", () => {
             crossPlatformTest(async (env) => {
                 const client = new Client(env, { serverUrl: mockUrl });
-                const pages = [];
-                const onPage = page => pages.push(page);
+                const pages: any[] = [];
+                const onPage = (page: any) => pages.push(page);
 
                 // Page 1
                 mockServer.mock({
@@ -842,8 +845,8 @@ describe("FHIR.client", () => {
         describe ("stops fetching pages if onPage throws", () => {
             crossPlatformTest(async (env) => {
                 const client = new Client(env, { serverUrl: mockUrl });
-                const pages = [];
-                const onPage = page => {
+                const pages: any[] = [];
+                const onPage = (page: any) => {
                     pages.push(page);
                     throw new Error("test error");
                 };
@@ -874,8 +877,8 @@ describe("FHIR.client", () => {
         describe ("stops fetching pages if onPage rejects", () => {
             crossPlatformTest(async (env) => {
                 const client = new Client(env, { serverUrl: mockUrl });
-                const pages = [];
-                const onPage = page => {
+                const pages: any[] = [];
+                const onPage = (page: any) => {
                     pages.push(page);
                     return Promise.reject(new Error("test error"));
                 };
@@ -906,8 +909,8 @@ describe("FHIR.client", () => {
         describe ("awaits for the onPage callback", () => {
             crossPlatformTest(async (env) => {
                 const client = new Client(env, { serverUrl: mockUrl });
-                const pages = [];
-                const onPage = page => {
+                const pages: any[] = [];
+                const onPage = (page: any) => {
                     return new Promise(resolve => {
                         setTimeout(() => {
                             pages.push(page);
@@ -1105,7 +1108,7 @@ describe("FHIR.client", () => {
                     patient: { resourceType: "Patient" }
                 });
 
-                expect(clientDebug._calls.find(o => o[0] === "Duplicated reference path \"%s\"")).to.exist();
+                expect(clientDebug._calls.find((o: any) => o[0] === "Duplicated reference path \"%s\"")).to.exist();
             });
         });
 
@@ -1520,7 +1523,7 @@ describe("FHIR.client", () => {
                     }
                 });
 
-                const pages = [];
+                const pages: any[] = [];
                 const result = await client.request(
                     "/Patient",
                     {
@@ -1629,8 +1632,8 @@ describe("FHIR.client", () => {
                     }
                 });
 
-                const pages = [];
-                const refs = [];
+                const pages: any[] = [];
+                const refs: any[] = [];
                 const result = await client.request(
                     "/Patient",
                     {
@@ -1875,7 +1878,7 @@ describe("FHIR.client", () => {
             crossPlatformTest(async (env) => {
                 const client = new Client(env, mockUrl);
 
-                const results = [];
+                const results: any[] = [];
 
                 // Page 1
                 mockServer.mock({
@@ -1962,7 +1965,7 @@ describe("FHIR.client", () => {
             crossPlatformTest(async (env) => {
                 const client = new Client(env, mockUrl);
 
-                const results = [];
+                const results: any[] = [];
                 const references = {};
 
                 // Page 1
@@ -2312,7 +2315,7 @@ describe("FHIR.client", () => {
                 "Basic " + Buffer.from("my-username:my-password", "ascii").toString("base64")
             );
 
-            client.state.tokenResponse.access_token = "my-token";
+            (client.state.tokenResponse as any).access_token = "my-token";
             expect(client.getAuthorizationHeader()).to.equal("Bearer my-token");
         });
     });
@@ -2455,10 +2458,10 @@ describe("FHIR.client", () => {
 
         // 1. Manual refresh
         await client.refresh();
-        expect(client.state.tokenResponse.expires_in).to.equal(3600);
+        expect((client.state.tokenResponse as any).expires_in).to.equal(3600);
 
         // 2. Automatic refresh
-        client.state.tokenResponse.expires_in = 0;
+        (client.state.tokenResponse as any).expires_in = 0;
         mockServer.mock({ status: 401, body: "Unauthorized" });
         mockServer.mock(fakeTokenResponse);
         mockServer.mock({

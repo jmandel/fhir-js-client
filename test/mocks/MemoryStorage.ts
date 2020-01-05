@@ -1,25 +1,25 @@
 
 export default class MemoryStorage
 {
-    private __data: { [key: string]: any };
+    private _data: { [key: string]: any };
 
     constructor()
     {
-        this.__data = {};
+        this._data = {};
     }
 
-    async set(key: string, value: any) {
-        this.__data[key] = value;
+    public async set(key: string, value: any) {
+        this._data[key] = value;
         return value;
     }
 
-    async get(key: string) {
-        return Object.prototype.hasOwnProperty.call(this.__data, key) ? this.__data[key] : null;
+    public async get(key: string) {
+        return Object.prototype.hasOwnProperty.call(this._data, key) ? this._data[key] : null;
     }
 
-    async unset(key: string) {
-        if (key in this.__data) {
-            delete this.__data[key];
+    public async unset(key: string) {
+        if (key in this._data) {
+            delete this._data[key];
             return true;
         }
         return false;

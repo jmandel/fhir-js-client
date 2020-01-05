@@ -8,11 +8,12 @@ export default class HttpResponse
         this.headers = {};
     }
 
-    writeHead(status: number, headers: {[key: string]: any})
+    public writeHead(status: number, headers: {[key: string]: any})
     {
         this.status = status;
         Object.assign(this.headers, headers);
     }
 
-    end() {}
+    // tslint:disable-next-line:no-empty
+    public end(): void {}
 }

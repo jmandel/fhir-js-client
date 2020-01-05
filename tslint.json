@@ -4,7 +4,11 @@
         "tslint:recommended"
     ],
     "jsRules": {
-        "no-consecutive-blank-lines": false
+        "object-literal-sort-keys": false,
+        "trailing-comma": false,
+        "no-consecutive-blank-lines": false,
+        "max-line-length": false,
+        "no-empty": false
     },
     "rules": {
         "import-spacing": false,

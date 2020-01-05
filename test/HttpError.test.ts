@@ -56,6 +56,7 @@ describe("HttpError", () => {
     });
 
     it ("create from incompatible object", () => {
+        // @ts-ignore
         const error = HttpError.create({ error: "test" });
         expect(error.name).to.equal("HttpError");
         expect(error.message).to.equal("Unknown error");
@@ -74,6 +75,7 @@ describe("HttpError", () => {
     });
 
     it ("create from incompatible argument", () => {
+        // @ts-ignore
         const error = HttpError.create(true);
         expect(error.name).to.equal("HttpError");
         expect(error.message).to.equal("Unknown error");

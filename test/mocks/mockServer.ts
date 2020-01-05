@@ -1,12 +1,19 @@
+import { Application, Request, Response } from "express";
+import { AddressInfo } from "net";
+
 const express = require("express");
 const cors = require("cors");
 
+interface App extends Application {
+    mock: (mock: any) => number;
+    clear: () => any;
+}
 
-const app: any = express();
+const app: App = express();
 export default app;
 app.use(cors());
 
-const mocks = [];
+const mocks: any[] = [];
 
 app.mock = mock => mocks.push(mock);
 app.clear = () => mocks.splice(0, mocks.length);
@@ -41,8 +48,7 @@ app.all("*", (req, res, next) => {
     }
 });
 
-
-app.use((err, _req, res, _next) => { // eslint-disable-line
+app.use((err: Error, _req: Request, res: Response, _next: () => any) => {
     res.status(500).send(err.message);
 });
 
@@ -52,7 +58,7 @@ if (!module.parent) {
         /**
          * @type any
          */
-        const addr = server.address();
+        const addr: AddressInfo = server.address() as AddressInfo;
         console.log(`Server listening at 0.0.0.0:${addr.port}`);
     });
 }

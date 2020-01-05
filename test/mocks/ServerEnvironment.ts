@@ -41,7 +41,7 @@ export default class ServerEnvironment
         return new URL(req.originalUrl || req.path || req.url, protocol + "://" + host);
     }
 
-    public redirect(location)
+    public redirect(location: string)
     {
         this.response.writeHead(302, { location });
         this.response.end();

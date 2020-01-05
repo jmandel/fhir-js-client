@@ -2,9 +2,12 @@
 const EventEmitter = require("events");
 import MemoryStorage from "./MemoryStorage";
 import Location      from "./Location";
+import BaseAdapter from "../../src/adapters/BaseAdapter";
 
-export default class BrowserEnvironment extends EventEmitter
+export default class BrowserEnvironment extends EventEmitter implements BaseAdapter
 {
+    public options: any;
+
     constructor(options = {})
     {
         super();
@@ -43,5 +46,10 @@ export default class BrowserEnvironment extends EventEmitter
     public relative(url: string)
     {
         return new URL(url, this._location.href).href;
+    }
+
+    public getSmartApi(): any
+    {
+        return false;
     }
 }

@@ -1,20 +1,20 @@
 {
     "compilerOptions": {
-        "outDir": "./dist/tsc/",
+
+        // Generate source maps for the original TS files.
         "sourceMap": true,
+
+        // We want strict validation
+        "strict"       : true,
         "noImplicitAny": true,
-        "module": "commonjs",
-        "target": "ES2017",
-        "strict": true,
-        // "esModuleInterop": true,
-        "declaration": true,
-        "declarationDir": "./dist/tsc/types",
+        "alwaysStrict" : true,
+
+        // Just transpile TS to modern JS. Babel will take over from there and
+        // compile depending on the target environments.
+        "module"       : "commonjs",
+        "target"       : "ES2019",
         "importHelpers": false,
-        "lib": ["ES6"],
-        // "noEmitHelpers": true,
-        "resolveJsonModule": true,
-        // "inlineSourceMap": true
-        "alwaysStrict": true
+        "noEmitHelpers": true
     },
     "include": [
         "src"
