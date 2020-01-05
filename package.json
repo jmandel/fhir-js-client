@@ -22,14 +22,10 @@
   },
   "scripts": {
     "test": "lab test/**.ts",
-    "pack:prod": "webpack --config webpack.config.js --mode production",
-    "pack:dev": "webpack --config webpack.config.js --mode development",
-    "pack:prod:pure": "npm run pack:prod -- --pure",
-    "pack:dev:pure": "npm run pack:dev -- --pure",
-    "pack": "npm run pack:dev && npm run pack:prod && npm run pack:dev:pure && npm run pack:prod:pure",
+    "pack": "webpack",
     "build": "npm run build:module && npm run pack",
-    "build:dev": "npm run pack:dev -- --watch",
-    "cover": "lab --threshold 0 -r lcov | coveralls",
+    "build:dev": "webpack --watch",
+    "cover": "lab -r lcov -o lcov.info test/**.ts && cat lcov.info | coveralls && rm -rf lcov.info",
     "build:module": "tsc -p tsconfig.module.json"
   },
   "devDependencies": {
