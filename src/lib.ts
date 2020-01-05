@@ -184,14 +184,12 @@ export function absolute(path: string, baseUrl?: string): string
  * @param charSet A string containing all the possible characters.
  *     Defaults to all the upper and lower-case letters plus digits.
  */
-export function randomString(strLength = 8, charSet?: string): string
+export function randomString(
+    strLength = 8,
+    charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+): string
 {
     const result = [];
-
-    charSet = charSet || "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-                         "abcdefghijklmnopqrstuvwxyz" +
-                         "0123456789";
-
     const len = charSet.length;
     while (strLength--) {
         result.push(charSet.charAt(Math.floor(Math.random() * len)));
