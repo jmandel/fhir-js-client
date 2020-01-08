@@ -226,15 +226,7 @@ export function jwtDecode(token: string): fhirclient.IDToken
     const payload = token.split(".")[1];
     return JSON.parse(atob(payload));
 }
-// -----------------------------------------------------------------------------
-export interface CodeValue {
-    code: string;
-    value: number;
-}
-export interface ObservationMap {
-    [code: string]: any;
-}
-// -----------------------------------------------------------------------------
+
 /**
  * Groups the observations by code. Returns a map that will look like:
  * ```js
@@ -250,9 +242,9 @@ export interface ObservationMap {
 export function byCode(
     observations: fhirclient.FHIR.Observation | fhirclient.FHIR.Observation[],
     property: string
-): ObservationMap
+): fhirclient.ObservationMap
 {
-    const ret: ObservationMap = {};
+    const ret: fhirclient.ObservationMap = {};
 
     function handleCodeableConcept(concept: fhirclient.FHIR.CodeableConcept, observation: fhirclient.FHIR.Observation) {
         if (concept && Array.isArray(concept.coding)) {
@@ -305,14 +297,14 @@ export function byCodes(
         );
 }
 
-export function ensureNumerical({ value, code }: CodeValue) {
+export function ensureNumerical({ value, code }: fhirclient.CodeValue) {
     if (typeof value !== "number") {
         throw new Error("Found a non-numerical unit: " + value + " " + code);
     }
 }
 
 export const units = {
-    cm({ code, value }: CodeValue) {
+    cm({ code, value }: fhirclient.CodeValue) {
         ensureNumerical({ code, value });
         if (code == "cm"     ) return value;
         if (code == "m"      ) return value *   100;
@@ -323,7 +315,7 @@ export const units = {
         if (code == "[ft_us]") return value * 30.48;
         throw new Error("Unrecognized length unit: " + code);
     },
-    kg({ code, value }: CodeValue){
+    kg({ code, value }: fhirclient.CodeValue){
         ensureNumerical({ code, value });
         if (code == "kg"    ) return value;
         if (code == "g"     ) return value / 1000;
@@ -331,7 +323,7 @@ export const units = {
         if (code.match(/oz/)) return value / 35.274;
         throw new Error("Unrecognized weight unit: " + code);
     },
-    any(pq: CodeValue){
+    any(pq: fhirclient.CodeValue){
         ensureNumerical(pq);
         return pq.value;
     }

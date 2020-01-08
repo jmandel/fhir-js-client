@@ -1,12 +1,12 @@
 /// <reference types="node" />
-
 import { IncomingMessage, ServerResponse } from "http";
-import { fhirclient } from "./lib/types";
-import Client from "./lib/Client";
+import { fhirclient } from "../types";
+import Client from "../Client";
 
 export = smart;
 
 type storageFactory = (options?: fhirclient.JsonObject) => fhirclient.Storage;
+
 
 // tslint:disable-next-line: no-namespace
 declare namespace smart {

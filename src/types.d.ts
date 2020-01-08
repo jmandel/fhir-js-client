@@ -2,7 +2,7 @@
 
 import { default as ClientClass } from "./Client";
 import BaseAdapter from "./adapters/BaseAdapter";
-import { getPath, byCodes, byCode, CodeValue } from "./lib";
+import { getPath, byCodes, byCode } from "./lib";
 
 // tslint:disable-next-line: no-namespace
 declare namespace fhirclient {
@@ -88,6 +88,15 @@ declare namespace fhirclient {
         fullSessionStorageSupport?: boolean;
 
         storage?: Storage | ((options?: JsonObject) => Storage);
+    }
+
+    interface CodeValue {
+        code: string;
+        value: number;
+    }
+
+    interface ObservationMap {
+        [code: string]: FHIR.Observation;
     }
 
     class Adapter {
@@ -883,7 +892,7 @@ declare namespace fhirclient {
              */
             id ?: id;
 
-            resourceType: string;
+            resourceType?: string;
 
             /**
              * Metadata about the resource

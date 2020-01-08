@@ -1,6 +1,6 @@
 {
   "name": "fhirclient",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "JavaScript client for Fast Healthcare Interoperability Resources",
   "author": "SMART Health IT <support@smarthealthit.org> (https://smarthealthit.org/)",
   "contributors": [
@@ -13,10 +13,13 @@
     "Client"
   ],
   "license": "Apache-2.0",
-  "main": "lib/index.js",
-  "browser": "lib/browser.js",
+  "main": "lib/entry/node.js",
+  "browser": "lib/entry/browser.js",
+  "modules.root": "lib",
   "types": "index.d.ts",
   "dependencies": {
+    "@types/hapi": "^18.0.3",
+    "@types/node": "^13.1.4",
     "core-js": "^3.5.0",
     "cross-fetch": "^3.0.4",
     "debug": "^4.1.1"
