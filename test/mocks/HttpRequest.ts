@@ -2,11 +2,11 @@ import MemoryStorage from "./MemoryStorage";
 
 export default class HttpRequest
 {
-    public url: URL;
-    public headers: { [key: string]: any };
-    public session: MemoryStorage;
+    url: URL | string;
+    headers: { [key: string]: any };
+    session: MemoryStorage;
 
-    constructor(url: URL)
+    constructor(url: URL | string)
     {
         this.url = url;
         this.headers = {};

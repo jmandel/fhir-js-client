@@ -10,21 +10,21 @@ export default class HttpError extends Error
     /**
      * The HTTP status code for this error
      */
-    public statusCode: number;
+    statusCode: number;
 
     /**
      * The HTTP status code for this error.
      * Note that this is the same as `status`, i.e. the code is available
      * through any of these.
      */
-    public status: number;
+    status: number;
 
     /**
      * The HTTP status text corresponding to this error
      */
-    public statusText: string;
+    statusText: string;
 
-    public constructor(message: string, statusCode: number, statusText: string) {
+    constructor(message: string, statusCode: number, statusText: string) {
         super(message);
         this.message    = message;
         this.name       = "HttpError";
@@ -33,7 +33,7 @@ export default class HttpError extends Error
         this.statusText = statusText;
     }
 
-    public toJSON() {
+    toJSON() {
         return {
             name      : this.name,
             statusCode: this.statusCode,
@@ -43,7 +43,7 @@ export default class HttpError extends Error
         };
     }
 
-    public static create(failure?: string | Error | ErrorResponse) {
+    static create(failure?: string | Error | ErrorResponse) {
         // start with generic values
         let status: string | number = 0;
         let statusText = "Error";

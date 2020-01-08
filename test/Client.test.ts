@@ -1,16 +1,16 @@
 // Mocks
+import { expect }     from "@hapi/code";
+import * as Lab       from "@hapi/lab";
+import * as FS        from "fs";
 import mockDebug      from "./mocks/mockDebug";
 import mockServer     from "./mocks/mockServer";
 import ServerEnv      from "./mocks/ServerEnvironment";
 import BrowserEnv     from "./mocks/BrowserEnvironment";
 import BrowserEnvFhir from "./mocks/BrowserEnvironmentWithFhirJs";
-import { expect }     from "@hapi/code";
-import * as Lab       from "@hapi/lab";
-import * as FS        from "fs";
 import str            from "../src/strings";
 import Client         from "../src/Client";
 import { KEY }        from "../src/smart";
-import { Adapter } from "../src/adapters/BrowserAdapter";
+import Adapter        from "../src/adapters/BrowserAdapter";
 import { fhirclient } from "../src/types";
 
 export const lab = Lab.script();

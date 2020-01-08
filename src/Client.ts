@@ -18,13 +18,13 @@ import { fetchConformanceStatement, fetchFhirVersion } from "./smart";
 import { SMART_KEY, patientCompartment, fhirVersions } from "./settings";
 import HttpError from "./HttpError";
 import BaseAdapter from "./adapters/BaseAdapter";
-import { Adapter as BrowserAdapter } from "./adapters/BrowserAdapter";
+import BrowserAdapter from "./adapters/BrowserAdapter";
 import { fhirclient } from "./types";
 
 // $lab:coverage:off$
 // @ts-ignore
 // eslint-disable-next-line no-undef
-const { Response } = global.FHIRCLIENT_PURE ? window : require("cross-fetch");
+const { Response } = typeof FHIRCLIENT_PURE !== "undefined" ? window : require("cross-fetch");
 // $lab:coverage:on$
 
 const debug = _debug.extend("client");
@@ -190,47 +190,37 @@ function resolveRefs(
     return task;
 }
 
-/**
- * @implements { fhirclient.Client }
- */
 export default class Client
 {
-    public state: fhirclient.ClientState;
+    state: fhirclient.ClientState;
 
-    public environment: BaseAdapter;
+    environment: BaseAdapter;
 
-    public patient: {
+    patient: {
         id: string | null
         read: () => Promise<fhirclient.JsonObject>
         request: (requestOptions: string|URL|fhirclient.RequestOptions, fhirOptions?: fhirclient.FhirOptions) => Promise<fhirclient.JsonObject>
         api?: fhirclient.JsonObject
     };
 
-    public encounter: {
+    encounter: {
         id: string | null
         read: () => Promise<fhirclient.JsonObject>
     };
 
-    public user: {
+    user: {
         id: string | null
         read: () => Promise<fhirclient.JsonObject>
         fhirUser: string | null
         resourceType: string | null
     };
 
-    public api: fhirclient.JsonObject | undefined;
+    api: fhirclient.JsonObject | undefined;
 
-    private _refreshTask: Promise<any> | null = null;
+    private _refreshTask: Promise<any> | null;
 
-    /**
-     * @param {object} environment
-     * @param {fhirclient.ClientState|string} state
-     */
     constructor(environment: BaseAdapter, state: fhirclient.ClientState | string)
     {
-        /**
-         * @type fhirclient.ClientState
-         */
         const _state = typeof state == "string" ? { serverUrl: state } : state;
 
         // Valid serverUrl is required!
@@ -240,6 +230,7 @@ export default class Client
 
         this.state = _state;
         this.environment = environment;
+        this._refreshTask = null;
 
         const client = this;
 
@@ -293,7 +284,7 @@ export default class Client
         this.connect((environment as BrowserAdapter).fhir);
     }
 
-    public connect(fhirJs?: (options: fhirclient.JsonObject) => fhirclient.JsonObject): Client
+    connect(fhirJs?: (options: fhirclient.JsonObject) => fhirclient.JsonObject): Client
     {
         if (typeof fhirJs == "function") {
             const options: fhirclient.JsonObject = {
@@ -330,7 +321,7 @@ export default class Client
      * Returns the ID of the selected patient or null. You should have requested
      * "launch/patient" scope. Otherwise this will return null.
      */
-    public getPatientId(): string | null
+    getPatientId(): string | null
     {
         const tokenResponse = this.state.tokenResponse;
         if (tokenResponse) {
@@ -364,7 +355,7 @@ export default class Client
      * Note that not all servers support the "launch/encounter" scope so this
      * will be null if they don't.
      */
-    public getEncounterId(): string | null
+    getEncounterId(): string | null
     {
         const tokenResponse = this.state.tokenResponse;
         if (tokenResponse) {
@@ -397,7 +388,7 @@ export default class Client
      * "profile" scopes if you need to receive an id_token (if you need to know
      * who the logged-in user is).
      */
-    public getIdToken(): fhirclient.IDToken | null
+    getIdToken(): fhirclient.IDToken | null
     {
         const tokenResponse = this.state.tokenResponse;
         if (tokenResponse) {
@@ -440,7 +431,7 @@ export default class Client
      * having the following shape "{user type}/{user id}". For example:
      * "Practitioner/abc" or "Patient/xyz".
      */
-    public getFhirUser(): string | null
+    getFhirUser(): string | null
     {
         const idToken = this.getIdToken();
         if (idToken) {
@@ -452,7 +443,7 @@ export default class Client
     /**
      * Returns the user ID or null.
      */
-    public getUserId(): string | null
+    getUserId(): string | null
     {
         const profile = this.getFhirUser();
         if (profile) {
@@ -465,7 +456,7 @@ export default class Client
      * Returns the type of the logged-in user or null. The result can be
      * "Practitioner", "Patient" or "RelatedPerson".
      */
-    public getUserType(): string | null
+    getUserType(): string | null
     {
         const profile = this.getFhirUser();
         if (profile) {
@@ -478,7 +469,7 @@ export default class Client
      * Builds and returns the value of the `Authorization` header that can be
      * sent to the FHIR server
      */
-    public getAuthorizationHeader(): string | null
+    getAuthorizationHeader(): string | null
     {
         const accessToken = getPath(this, "state.tokenResponse.access_token");
         if (accessToken) {
@@ -504,7 +495,7 @@ export default class Client
     /**
      * @param resource A FHIR resource to be created
      */
-    public create(resource: fhirclient.FHIR.Resource): Promise<fhirclient.FHIR.Resource>
+    create(resource: fhirclient.FHIR.Resource): Promise<fhirclient.FHIR.Resource>
     {
         return this.request<fhirclient.FHIR.Resource>({
             url: `${resource.resourceType}`,
@@ -519,7 +510,7 @@ export default class Client
     /**
      * @param resource A FHIR resource to be updated
      */
-    public update(resource: fhirclient.FHIR.Resource): Promise<fhirclient.FHIR.Resource>
+    update(resource: fhirclient.FHIR.Resource): Promise<fhirclient.FHIR.Resource>
     {
         return this.request<fhirclient.FHIR.Resource>({
             url: `${resource.resourceType}/${resource.id}`,
@@ -535,7 +526,7 @@ export default class Client
      * @param url Relative URI of the FHIR resource to be deleted
      * (format: `resourceType/id`)
      */
-    public delete(url: string): Promise<fhirclient.FHIR.Resource>
+    delete(url: string): Promise<fhirclient.FHIR.Resource>
     {
         return this.request<fhirclient.FHIR.Resource>({
             url,
@@ -549,7 +540,7 @@ export default class Client
      * @param fhirOptions Additional options to control the behavior
      * @param _resolvedRefs DO NOT USE! Used internally.
      */
-    public async request<T = any>(
+    async request<T = any>(
         requestOptions: string|URL|fhirclient.RequestOptions,
         fhirOptions: fhirclient.FhirOptions = {},
         _resolvedRefs: fhirclient.JsonObject = {}
@@ -748,7 +739,7 @@ export default class Client
      * expired (or this fails for any other reason) it will be deleted from the
      * state, so that we don't enter into loops trying to re-authorize.
      */
-    public refresh(): Promise<fhirclient.ClientState>
+    refresh(): Promise<fhirclient.ClientState>
     {
         const debugRefresh = _debug.extend("client:refresh");
         debugRefresh("Attempting to refresh with refresh_token...");
@@ -811,16 +802,16 @@ export default class Client
     }
 
     // utils -------------------------------------------------------------------
-    public byCode  = byCode;
-    public byCodes = byCodes;
-    public units   = units;
-    public getPath = getPath;
+    byCode  = byCode;
+    byCodes = byCodes;
+    units   = units;
+    getPath = getPath;
 
     /**
      * Returns a promise that will be resolved with the fhir version as defined
      * in the conformance statement.
      */
-    public getFhirVersion(): Promise<string> {
+    getFhirVersion(): Promise<string> {
         return fetchFhirVersion(this.state.serverUrl);
     }
 
@@ -831,7 +822,7 @@ export default class Client
      * - 4 for R4
      * - 0 if the version is not known
      */
-    public getFhirRelease(): Promise<number> {
+    getFhirRelease(): Promise<number> {
         return this.getFhirVersion().then(v => (fhirVersions as fhirclient.JsonObject)[v] ?? 0);
     }
 }

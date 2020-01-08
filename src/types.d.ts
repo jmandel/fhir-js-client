@@ -1,8 +1,16 @@
 /// <reference lib="dom" />
 
-import Client from "./Client"
+import { default as ClientClass } from "./Client";
+import BaseAdapter from "./adapters/BaseAdapter";
+import { getPath, byCodes, byCode, CodeValue } from "./lib";
 
+// tslint:disable-next-line: no-namespace
 declare namespace fhirclient {
+
+    function readyFunction(): Promise<Client>;
+    function readyFunction(onSuccess: (client: Client) => any, onError?: (error: Error) => any): Promise<any>;
+
+    type readyFunction = typeof readyFunction;
 
     interface SMART {
         options: fhirSettings;
@@ -17,7 +25,11 @@ declare namespace fhirclient {
         /**
          * Starts the [SMART Launch Sequence](http://hl7.org/fhir/smart-app-launch/#smart-launch-sequence).
          *
-         * > **IMPORTANT:** `authorize()` will end up redirecting you to the authorization server. This means that you should **not** add anything to the returned promise chain. Any code written directly after the `authorize()` call might not be executed due to that redirect!
+         * > **IMPORTANT:** `authorize()` will end up redirecting you to the
+         *   authorization server. This means that you should **not** add
+         *   anything to the returned promise chain. Any code written directly
+         *   after the `authorize()` call might not be executed due to that
+         *   redirect!
          *
          * The options that you would typically pass for an EHR launch are just
          * `clientId` and `scope`. For standalone launch you should also provide
@@ -51,7 +63,7 @@ declare namespace fhirclient {
          * Creates and returns a Client instance that can be used to query the
          * FHIR server.
          */
-        client(state: fhirclient.ClientState): Client;
+        client(state: string | fhirclient.ClientState): ClientClass;
     }
 
     interface fhirSettings extends JsonObject {
@@ -123,6 +135,7 @@ declare namespace fhirclient {
     /**
      * Simple key/value storage interface
      */
+    // tslint:disable-next-line: max-classes-per-file
     class Storage {
 
         /**
@@ -145,6 +158,118 @@ declare namespace fhirclient {
         unset: (key: string) => Promise<boolean>;
     }
 
+    // tslint:disable-next-line: max-classes-per-file
+    class Client {
+        state: fhirclient.ClientState;
+        environment: BaseAdapter;
+        patient: {
+            id: string | null;
+            read: () => Promise<fhirclient.JsonObject>;
+            request: (requestOptions: string | URL | fhirclient.RequestOptions, fhirOptions?: fhirclient.FhirOptions) => Promise<fhirclient.JsonObject>;
+            api?: fhirclient.JsonObject;
+        };
+        encounter: {
+            id: string | null;
+            read: () => Promise<fhirclient.JsonObject>;
+        };
+        user: {
+            id: string | null;
+            read: () => Promise<fhirclient.JsonObject>;
+            fhirUser: string | null;
+            resourceType: string | null;
+        };
+        api: fhirclient.JsonObject | undefined;
+        private _refreshTask: Promise<any> | null;
+        constructor(environment: BaseAdapter, state: fhirclient.ClientState | string);
+        connect(fhirJs?: (options: fhirclient.JsonObject) => fhirclient.JsonObject): Client;
+        /**
+         * Returns the ID of the selected patient or null. You should have requested
+         * "launch/patient" scope. Otherwise this will return null.
+         */
+        getPatientId(): string | null;
+        /**
+         * Returns the ID of the selected encounter or null. You should have
+         * requested "launch/encounter" scope. Otherwise this will return null.
+         * Note that not all servers support the "launch/encounter" scope so this
+         * will be null if they don't.
+         */
+        getEncounterId(): string | null;
+        /**
+         * Returns the (decoded) id_token if any. You need to request "openid" and
+         * "profile" scopes if you need to receive an id_token (if you need to know
+         * who the logged-in user is).
+         */
+        getIdToken(): fhirclient.IDToken | null;
+        /**
+         * Returns the profile of the logged_in user (if any). This is a string
+         * having the following shape "{user type}/{user id}". For example:
+         * "Practitioner/abc" or "Patient/xyz".
+         */
+        getFhirUser(): string | null;
+        /**
+         * Returns the user ID or null.
+         */
+        getUserId(): string | null;
+        /**
+         * Returns the type of the logged-in user or null. The result can be
+         * "Practitioner", "Patient" or "RelatedPerson".
+         */
+        getUserType(): string | null;
+        /**
+         * Builds and returns the value of the `Authorization` header that can be
+         * sent to the FHIR server
+         */
+        getAuthorizationHeader(): string | null;
+        private _clearState;
+        /**
+         * @param resource A FHIR resource to be created
+         */
+        create(resource: fhirclient.FHIR.Resource): Promise<fhirclient.FHIR.Resource>;
+        /**
+         * @param resource A FHIR resource to be updated
+         */
+        update(resource: fhirclient.FHIR.Resource): Promise<fhirclient.FHIR.Resource>;
+        /**
+         * @param url Relative URI of the FHIR resource to be deleted
+         * (format: `resourceType/id`)
+         */
+        delete(url: string): Promise<fhirclient.FHIR.Resource>;
+        /**
+         * @param requestOptions Can be a string URL (relative to the serviceUrl),
+         * or an object which will be passed to fetch()
+         * @param fhirOptions Additional options to control the behavior
+         * @param _resolvedRefs DO NOT USE! Used internally.
+         */
+        request<T = any>(requestOptions: string | URL | fhirclient.RequestOptions, fhirOptions?: fhirclient.FhirOptions, _resolvedRefs?: fhirclient.JsonObject): Promise<T>;
+        /**
+         * Use the refresh token to obtain new access token. If the refresh token is
+         * expired (or this fails for any other reason) it will be deleted from the
+         * state, so that we don't enter into loops trying to re-authorize.
+         */
+        refresh(): Promise<fhirclient.ClientState>;
+        byCode: typeof byCode;
+        byCodes: typeof byCodes;
+        units: {
+            cm({ code, value }: CodeValue): number;
+            kg({ code, value }: CodeValue): number;
+            any(pq: CodeValue): number;
+        };
+        getPath: typeof getPath;
+        /**
+         * Returns a promise that will be resolved with the fhir version as defined
+         * in the conformance statement.
+         */
+        getFhirVersion(): Promise<string>;
+        /**
+         * Returns a promise that will be resolved with the numeric fhir version
+         * - 2 for DSTU2
+         * - 3 for STU3
+         * - 4 for R4
+         * - 0 if the version is not known
+         */
+        getFhirRelease(): Promise<number>;
+    }
+
     /**
      * Options that must contain an `url` property (String|URL). Any other
      * properties will be passed to the underlying `fetch()` call.
@@ -152,129 +277,6 @@ declare namespace fhirclient {
     interface RequestOptions extends RequestInit {
         url: string | URL;
     }
-
-    /**
-     * A Client instance that can be used to query the FHIR server.
-     */
-    // class Client {
-
-    //     /**
-    //      * The current state including options and tokenResponse
-    //      */
-    //     state: ClientState;
-    //     environment: Adapter;
-    //     api?: JsonObject;
-    //     patient: {
-    //         id: string | null;
-    //         api?: JsonObject;
-    //         read(): Promise<JsonObject>;
-    //     };
-    //     encounter: {
-    //         id: string | null;
-    //         read(): Promise<JsonObject>;
-    //     };
-    //     user: {
-    //         id: string | null;
-    //         fhirUser: string | null;
-    //         resourceType: string | null;
-    //         read(): Promise<JsonObject>;
-    //     }
-
-    //     constructor(environment: Adapter, state: ClientState);
-
-    //     /**
-    //      * Returns the ID of the current patient (if any) or null
-    //      *
-    //      * NOTE: use `patient.id` instead
-    //      */
-    //     getPatientId(): string|null;
-
-    //     /**
-    //      * Returns the ID of the current encounter (if any) or null
-    //      *
-    //      * NOTE: use `encounter.id` instead
-    //      */
-    //     getEncounterId(): string|null;
-    //     getIdToken(): object|null;
-    //     getFhirUser(): string|null;
-
-    //     /**
-    //      * Returns the ID of the current user (if any) or null
-    //      *
-    //      * NOTE: use `user.id` instead
-    //      */
-    //     getUserId(): string|null;
-
-    //     /**
-    //      * Returns the resourceType of the current user (if any) or null
-    //      *
-    //      * NOTE: use `user.resourceType` instead
-    //      */
-    //     getUserType(): string|null;
-
-    //     getAuthorizationHeader(): string|null;
-    //     _clearState(): Promise<void>;
-
-    //     /**
-    //      * Wrapper for `client.request` implementing the FHIR resource create operation
-    //      * @param {Object} resource A FHIR resource to be created
-    //      */
-    //     create(resource: object): Promise<Response>
-
-    //     /**
-    //      * Wrapper for `client.request` implementing the FHIR resource update operation
-    //      * @param {Object} resource A FHIR resource to be updated
-    //      */
-    //     update(resource: object): Promise<Response>
-
-    //     /**
-    //      * Wrapper for `client.request` implementing the FHIR resource delete operation
-    //      * @param {String} uri Relative URI of the FHIR resource to be deleted (format: `resourceType/id`)
-    //      */
-    //     delete(uri: string): Promise<Response>
-
-    //     /**
-    //      * Use this method to query the FHIR server
-    //      * @param uri Either the full url, or a path that will be rooted at the FHIR baseUrl.
-    //      * @param fhirOptions Additional options to control the behavior
-    //      * @param _resolvedRefs DO NOT USE! Used internally.
-    //      */
-    //     request(uri: string, fhirOptions?: FhirOptions, _resolvedRefs?: object): Promise<Response>
-    //     request(url: URL, fhirOptions?: FhirOptions, _resolvedRefs?: object): Promise<Response>;
-    //     request(requestOptions: RequestOptions, fhirOptions?: FhirOptions, _resolvedRefs?: object): Promise<Response>;
-
-    //     /**
-    //      * Use the refresh token to obtain new access token. If the refresh token is
-    //      * expired (or this fails for any other reason) it will be deleted from the
-    //      * state, so that we don't enter into loops trying to re-authorize.
-    //      *
-    //      * **Note** that that `client.request()` will automatically refresh the access
-    //      * token for you!
-    //      *
-    //      * Resolves with the updated state or rejects with an error.
-    //      */
-    //     refresh(): Promise<object>;
-
-    //     /**
-    //      * Returns a promise that will be resolved with the fhir version as defined
-    //      * in the conformance statement.
-    //      */
-    //     getFhirVersion(): Promise<string>;
-
-    //     /**
-    //      * Returns a promise that will be resolved with the numeric fhir version
-    //      * - 2 for DSTU2
-    //      * - 3 for STU3
-    //      * - 4 for R4
-    //      * - 0 if the version is not known
-    //      */
-    //     getFhirRelease(): Promise<number>;
-
-    //     byCode(observations: object|object[], property: string): object[];
-    //     byCodes(observations: object|object[], property: string): (codes: string[]) => object[];
-    //     units: any;
-    //     getPath(object: object|any[], path: string): any;
-    // }
 
     /**
      * The three security endpoints that SMART servers might declare in the
@@ -562,7 +564,7 @@ declare namespace fhirclient {
          * - This option does not work with contained references (they are "already
          *   resolved" anyway).
          */
-        resolveReferences?: string|String[]
+        resolveReferences?: string|string[];
 
         /**
          * If the client is authorized, it will possess an access token and pass it
@@ -636,7 +638,7 @@ declare namespace fhirclient {
          * Scope of access authorized. Note that this can be different from the
          * scopes requested by the app.
          */
-        scope?: string,
+        scope?: string;
 
         /**
          * Lifetime in seconds of the access token, after which the token SHALL NOT
@@ -677,7 +679,7 @@ declare namespace fhirclient {
     }
 
     interface JsonObject {
-        [key: string]: any
+        [key: string]: any;
     }
 
     // Capabilities ------------------------------------------------------------
@@ -703,18 +705,18 @@ declare namespace fhirclient {
          * URL to the OAuth2 authorization endpoint.
          */
         authorization_endpoint: string;
-        
+
         /**
          * URL to the OAuth2 token endpoint.
          */
         token_endpoint: string;
-        
+
         /**
          * If available, URL to the OAuth2 dynamic registration endpoint for the
          * FHIR server.
          */
         registration_endpoint?: string;
-        
+
         /**
          * RECOMMENDED! URL where an end-user can view which applications currently
          * have access to data and can make adjustments to these access rights.
@@ -732,18 +734,18 @@ declare namespace fhirclient {
          * revoke a token.
          */
         revocation_endpoint?: string;
-        
+
         /**
          * Array of client authentication methods supported by the token endpoint.
          * The options are “client_secret_post” and “client_secret_basic”.
          */
         token_endpoint_auth_methods?: SMARTAuthenticationMethod[];
-        
+
         /**
          * Array of scopes a client may request.
          */
         scopes_supported?: string[];
-        
+
         /**
          * Array of OAuth2 response_type values that are supported
          */
@@ -753,7 +755,7 @@ declare namespace fhirclient {
          * Array of strings representing SMART capabilities (e.g., single-sign-on
          * or launch-standalone) that the server supports.
          */
-        capabilities: (
+        capabilities: Array<
             SMARTAuthenticationMethod |
             launchMode |
             clientType |
@@ -762,7 +764,7 @@ declare namespace fhirclient {
             launchContextEHR |
             launchContextStandalone |
             permissions
-        )[]; 
+        >;
     }
 
     namespace FHIR {
@@ -780,7 +782,7 @@ declare namespace fhirclient {
          * A Uniform Resource Identifier Reference (RFC 3986 ). Note: URIs are case
          * sensitive. For UUID (urn:uuid:53fefa32-fcbb-4ff8-8a92-55ee120877b7) use
          * all lowercase. URIs can be absolute or relative, and may have an optional
-         * fragment identifier.	
+         * fragment identifier.
          */
         type uri = string;
 
@@ -798,7 +800,7 @@ declare namespace fhirclient {
          * time zone. Note: This is intended for precisely observed times (typically
          * system logs etc.), and not human-reported times - for them, use date and
          * dateTime. instant is a more constrained dateTime.
-         * 
+         *
          * Patterns:
          * - `YYYY-MM-DDTHH:mm:ss.SSSSZ`
          * - `YYYY-MM-DDTHH:mm:ss.SSSZ`
@@ -820,8 +822,8 @@ declare namespace fhirclient {
          * - `YYYY-MM-DD`
          * - `YYYY-MM`
          * - `YYYY`
-         *  
-         * Regex: 
+         *
+         * Regex:
          * -?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1])(T([01]
          * [0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]+)?(Z|(\+|-)((0[0-9]|1[0-3]):
          * [0-5][0-9]|14:00)))?)?)?
@@ -846,33 +848,33 @@ declare namespace fhirclient {
 
         interface Element {
             id?: id;
-            extension?: Extension<valueX>[];
+            extension?: Array<Extension<valueX>>;
         }
-    
-        interface Extension<T="valueX"> extends Element {
+
+        interface Extension<T = "valueX"> extends Element {
             /**
              * identifies the meaning of the extension
              */
             url: uri;
-    
+
             [T: string]: any;
         }
 
         interface CapabilityStatement {
             resourceType: string;
             fhirVersion: string;
-            rest: {
+            rest: Array<{
                 security?: {
                     cors?: boolean;
-                    extension?: {
+                    extension?: Array<{
                         url: string;
-                        extension: Extension<"valueUri">[]
-                    }[]
+                        extension: Array<Extension<"valueUri">>
+                    }>
                 };
-                resource: {
+                resource: Array<{
                     type: string
-                }[]
-            }[];
+                }>
+            }>;
         }
 
         interface Resource extends JsonObject {
@@ -882,17 +884,17 @@ declare namespace fhirclient {
             id ?: id;
 
             resourceType: string;
-    
+
             /**
              * Metadata about the resource
              */
             meta ?: Meta;
-    
+
             /**
              * A set of rules under which this content was created
              */
             implicitRules ?: uri;
-    
+
             /**
              * Language of the resource content
              */
@@ -900,7 +902,7 @@ declare namespace fhirclient {
         }
 
         interface Meta extends Element {
-        
+
             /**
              * When the resource version last changed
              */
@@ -916,7 +918,7 @@ declare namespace fhirclient {
              * Starting time with inclusive boundary
              */
             start ?: dateTime;
-    
+
             /**
              * End time with inclusive boundary, if not ongoing
              */
@@ -932,7 +934,7 @@ declare namespace fhirclient {
              * Code defined by a terminology system
              */
             coding?: Coding[];
-    
+
             /**
              * Plain text representation of the concept
              */
@@ -944,22 +946,22 @@ declare namespace fhirclient {
              * Identity of the terminology system
              */
             system ?: uri;
-    
+
             /**
              * Version of the system - if relevant
              */
             version ?: string;
-    
+
             /**
              * Symbol in syntax defined by the system
              */
             code ?: code;
-    
+
             /**
              * Representation defined by the system
              */
             display ?: string;
-    
+
             /**
              * If this coding was chosen directly by the user
              */
@@ -972,22 +974,22 @@ declare namespace fhirclient {
              * Description of identifier
              */
             type ?: CodeableConcept;
-            
+
             /**
              * The namespace for the identifier value
              */
             system ?: uri;
-    
+
             /**
              * The value that is unique
              */
             value ?: string;
-    
+
             /**
              * Time period when id is/was valid for use
              */
             period ?: Period;
-    
+
             /**
              * Organization that issued id (may be just text)
              */
@@ -1000,12 +1002,12 @@ declare namespace fhirclient {
              * Literal reference, Relative, internal or absolute URL
              */
             reference ?: string;
-            
+
             /**
              * Logical reference, when literal reference is not known
              */
             identifier ?: Identifier;
-    
+
             /**
              * Text alternative for the resource
              */
@@ -1016,26 +1018,25 @@ declare namespace fhirclient {
             relation: string;
             url: uri;
         }
-    
+
         interface BundleEntry extends BackboneElement {
             fullUrl: string; // This is optional on POSTs
             resource: Resource;
         }
-    
+
         interface Bundle extends Resource {
             /**
              * Persistent identifier for the bundle
              */
             identifier ?: Identifier;
-    
+
             type: "document" | "message" | "transaction" | "transaction-response"
                 | "batch" | "batch-response" | "history" | "searchset" | "collection";
-    
-            total ?: unsignedInt; 
-    
+
+            total ?: unsignedInt;
+
             link: BundleLink[];
             entry?: BundleEntry[];
         }
-    
     }
 }

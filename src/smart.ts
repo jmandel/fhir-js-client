@@ -9,7 +9,7 @@ import {
     getAndCache
 } from "./lib";
 
-import Client from "./Client";
+
 import BaseAdapter from "./adapters/BaseAdapter";
 import { SMART_KEY } from "./settings";
 import { fhirclient } from "./types";
@@ -18,6 +18,18 @@ import { fhirclient } from "./types";
 const debug = _debug.extend("oauth2");
 
 export { SMART_KEY as KEY };
+
+/**
+ * Creates and returns a Client instance.
+ * Note that this is done within a function to postpone the "./Client" import
+ * and avoid cyclic dependency.
+ * @param env The adapter
+ * @param state The client state or baseUrl
+ */
+function createClient(env: BaseAdapter, state: string | fhirclient.ClientState): any {
+    const Client  = require("./Client").default;
+    return new Client(env, state);
+}
 
 /**
  * Fetches the conformance statement from the given base URL.
@@ -257,7 +269,7 @@ export async function authorize(env: BaseAdapter, params: fhirclient.AuthorizePa
  * the redirectUri. We typically land there after a redirect from the
  * authorization server..
  */
-export async function completeAuth(env: BaseAdapter): Promise<Client>
+export async function completeAuth(env: BaseAdapter): Promise<fhirclient.Client>
 {
     const url = env.getUrl();
     const Storage = env.getStorage();
@@ -381,7 +393,7 @@ export async function completeAuth(env: BaseAdapter): Promise<Client>
         await Storage.set(SMART_KEY, key);
     }
 
-    const client = new Client(env, state);
+    const client = createClient(env, state);
     debug("Created client instance: %O", client);
     return client;
 }
@@ -438,7 +450,7 @@ export function buildTokenRequest(code: string, state: fhirclient.ClientState): 
  * @param [onSuccess]
  * @param [onError]
  */
-export async function ready(env: BaseAdapter, onSuccess?: () => any, onError?: () => any): Promise<Client>
+export async function ready(env: BaseAdapter, onSuccess?: () => any, onError?: () => any): Promise<fhirclient.Client>
 {
     let task = completeAuth(env);
     if (onSuccess) {
@@ -450,7 +462,7 @@ export async function ready(env: BaseAdapter, onSuccess?: () => any, onError?: (
     return task;
 }
 
-export async function init(env: BaseAdapter, options: fhirclient.AuthorizeParams): Promise<Client|never>
+export async function init(env: BaseAdapter, options: fhirclient.AuthorizeParams): Promise<fhirclient.Client|never>
 {
     const url   = env.getUrl();
     const code  = url.searchParams.get("code");
@@ -468,7 +480,7 @@ export async function init(env: BaseAdapter, options: fhirclient.AuthorizeParams
     const key     = state || await storage.get(SMART_KEY);
     const cached  = await storage.get(key);
     if (cached) {
-        return new Client(env, cached);
+        return createClient(env, cached);
     }
 
     // Otherwise try to launch

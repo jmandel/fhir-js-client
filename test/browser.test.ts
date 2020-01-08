@@ -9,7 +9,7 @@ import * as smart from "../src/smart";
 import BrowserEnv from "./mocks/BrowserEnvironment";
 import Window     from "./mocks/Window";
 import mockServer from "./mocks/mockServer";
-import { Client } from "../src";
+import { fhirclient } from "../src/types";
 
 export const lab = Lab.script();
 const {
@@ -727,7 +727,7 @@ describe("smart", () => {
 
             const env = new BrowserEnv();
 
-            let client = await new Promise<Client>((resolve, reject) => {
+            let client = await new Promise<fhirclient.Client>((resolve, reject) => {
 
                 env.once("redirect", async () => {
                     env.redirect("http://localhost/?code=123&state=" + env.getUrl().searchParams.get("state"));
@@ -799,7 +799,7 @@ describe("smart", () => {
 
             const env = new BrowserEnv();
 
-            let client = await new Promise<Client>((resolve, reject) => {
+            let client = await new Promise<fhirclient.Client>((resolve, reject) => {
                 env.redirect("http://localhost/?launch=123&state=" + key);
 
                 env.once("redirect", async () => {

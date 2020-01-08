@@ -1,9 +1,10 @@
 
 import { expect }        from "@hapi/code";
 import * as Lab          from "@hapi/lab";
-import FHIR, { Adapter } from "../src/adapters/NodeAdapter";
+import Adapter           from "../src/adapters/NodeAdapter";
 import { KEY }           from "../src/smart";
 import ServerStorage     from "../src/storage/ServerStorage";
+import FHIR              from "../src/entry/node";
 
 // Mocks
 import mockServer        from "./mocks/mockServer";
@@ -24,7 +25,7 @@ before(() => {
             if (error) {
                 return reject(error);
             }
-            let addr = mockDataServer.address();
+            const addr = mockDataServer.address();
             mockUrl = `http://127.0.0.1:${addr.port}`;
             // console.log(`Mock Data Server listening at ${mockUrl}`);
             resolve();
@@ -60,7 +61,7 @@ describe("Complete authorization [SERVER]", () => {
 
         const req1   = new HttpRequest("http://localhost/launch?launch=123&state=" + key);
         const res1   = new HttpResponse();
-        const smart1 = FHIR(req1, res1);
+        const smart1 = FHIR(req1 as any, res1 as any);
 
         // mock our oauth endpoints
         mockServer.mock({
@@ -97,7 +98,7 @@ describe("Complete authorization [SERVER]", () => {
         const req2   = new HttpRequest("http://localhost/index?code=123&state=" + code);
         req2.session = req1.session; // inherit the session
         const res2   = new HttpResponse();
-        const smart2 = FHIR(req2, res2);
+        const smart2 = FHIR(req2 as any, res2 as any);
 
         // mock our access token response
         mockServer.mock({
@@ -134,7 +135,7 @@ describe("Complete authorization [SERVER]", () => {
         const req     = new HttpRequest("http://localhost/index");
         const res     = new HttpResponse();
         const storage = new MemoryStorage();
-        const smart   = FHIR(req, res, storage);
+        const smart   = FHIR(req as any, res as any, storage);
 
         await storage.set(KEY, key);
         await storage.set(key, {
@@ -169,7 +170,7 @@ describe("Complete authorization [SERVER]", () => {
     it ("can bypass oauth by passing `fhirServiceUrl` to `authorize`", async () => {
         const req   = new HttpRequest("http://localhost/launch");
         const res   = new HttpResponse();
-        const smart = FHIR(req, res);
+        const smart = FHIR(req as any, res as any);
         await smart.authorize({ fhirServiceUrl: "http://localhost" });
         expect(res.status).to.equal(302);
         expect(res.headers.location).to.exist();
@@ -181,7 +182,7 @@ describe("Complete authorization [SERVER]", () => {
         const req     = new HttpRequest("http://localhost/launch");
         const res     = new HttpResponse();
         const storage = new MemoryStorage();
-        const smart   = FHIR(req, res, storage);
+        const smart   = FHIR(req as any, res as any, storage);
         await smart.authorize({
             fhirServiceUrl: "http://localhost",
             scope: "x",
@@ -266,7 +267,7 @@ describe("NodeAdapter", () => {
 
         const callLog = [];
 
-        const fakeStorage = { fakeStorage: "whatever" };
+        const fakeStorage: any = { fakeStorage: "whatever" };
 
         function getStorage(...args) {
             callLog.push(args);

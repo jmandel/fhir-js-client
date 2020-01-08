@@ -11,7 +11,7 @@ const debug = require("debug");
 // $lab:coverage:off$
 // @ts-ignore
 // eslint-disable-next-line no-undef
-const { fetch } = global.FHIRCLIENT_PURE ? window : require("cross-fetch");
+const { fetch } = typeof FHIRCLIENT_PURE !== "undefined" ? window : require("cross-fetch");
 // $lab:coverage:on$
 
 const _debug     = debug("FHIR");
@@ -227,11 +227,11 @@ export function jwtDecode(token: string): fhirclient.IDToken
     return JSON.parse(atob(payload));
 }
 // -----------------------------------------------------------------------------
-interface CodeValue {
+export interface CodeValue {
     code: string;
     value: number;
 }
-interface ObservationMap {
+export interface ObservationMap {
     [code: string]: any;
 }
 // -----------------------------------------------------------------------------

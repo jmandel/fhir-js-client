@@ -7,7 +7,7 @@ import { fhirclient } from "../types";
 /**
  * Browser Adapter
  */
-class BrowserAdapter extends BaseAdapter
+export default class BrowserAdapter extends BaseAdapter
 {
     /**
      * Stores the URL instance associated with this adapter
@@ -24,7 +24,7 @@ class BrowserAdapter extends BaseAdapter
      * included in the page. If it is, it should have created a "fhir" variable
      * in the global scope.
      */
-    public get fhir()
+    get fhir()
     {
         // @ts-ignore
         return typeof fhir === "function" ? fhir : null;
@@ -34,7 +34,7 @@ class BrowserAdapter extends BaseAdapter
      * Given the current environment, this method must return the current url
      * as URL instance
      */
-    public getUrl(): URL
+    getUrl(): URL
     {
         if (!this._url) {
             this._url = new URL(location + "");
@@ -46,7 +46,7 @@ class BrowserAdapter extends BaseAdapter
      * Given the current environment, this method must redirect to the given
      * path
      */
-    public redirect(to: string): void
+    redirect(to: string): void
     {
         location.href = to;
     }
@@ -55,7 +55,7 @@ class BrowserAdapter extends BaseAdapter
      * Returns a BrowserStorage object which is just a wrapper around
      * sessionStorage
      */
-    public getStorage(): BrowserStorage
+    getStorage(): BrowserStorage
     {
         if (!this._storage) {
             this._storage = new BrowserStorage();
@@ -63,11 +63,8 @@ class BrowserAdapter extends BaseAdapter
         return this._storage;
     }
 
-    public static smart(options?: fhirclient.fhirSettings): fhirclient.SMART
+    static smart(options?: fhirclient.fhirSettings): fhirclient.SMART
     {
         return new BrowserAdapter(options).getSmartApi();
     }
 }
-
-export default BrowserAdapter.smart;
-export { BrowserAdapter as Adapter };

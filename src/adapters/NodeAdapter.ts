@@ -6,7 +6,7 @@ import { fhirclient } from "../types";
 /**
  * Node Adapter - works with native NodeJS and with Express
  */
-class NodeAdapter extends BaseAdapter
+export default class NodeAdapter extends BaseAdapter
 {
     /**
      * Holds the Storage instance associated with this instance
@@ -17,7 +17,7 @@ class NodeAdapter extends BaseAdapter
      * Given the current environment, this method must return the current url
      * as URL instance. In Node we might be behind a proxy!
      */
-    public getUrl(): URL
+    getUrl(): URL
     {
         const req = this.options.request;
 
@@ -39,7 +39,7 @@ class NodeAdapter extends BaseAdapter
      * path
      * @param location The path to redirect to
      */
-    public redirect(location: string): void
+    redirect(location: string): void
     {
         this.options.response.writeHead(302, { location });
         this.options.response.end();
@@ -47,9 +47,8 @@ class NodeAdapter extends BaseAdapter
 
     /**
      * Returns a ServerStorage instance
-     * @returns {ServerStorage}
      */
-    public getStorage(): fhirclient.Storage
+    getStorage(): fhirclient.Storage
     {
         if (!this._storage) {
             if (this.options.storage) {
@@ -72,10 +71,10 @@ class NodeAdapter extends BaseAdapter
      * @param storage Custom storage instance or a storage
      *  factory function
      */
-    public static smart(
+    static smart(
         req: ClientRequest,
         res: ServerResponse,
-        storage: fhirclient.Storage | ((options?: fhirclient.JsonObject) => fhirclient.Storage)
+        storage?: fhirclient.Storage | ((options?: fhirclient.JsonObject) => fhirclient.Storage)
     )
     {
         return new NodeAdapter({
@@ -85,6 +84,3 @@ class NodeAdapter extends BaseAdapter
         }).getSmartApi();
     }
 }
-
-export default NodeAdapter.smart;
-export { NodeAdapter as Adapter };
