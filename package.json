@@ -16,6 +16,7 @@
   "main": "src/index.js",
   "browser": "src/browser.js",
   "dependencies": {
+    "@types/hapi": "^18.0.3",
     "core-js": "^3.5.0",
     "cross-fetch": "^3.0.4",
     "debug": "^4.1.1"
@@ -26,7 +27,7 @@
     "build": "npm run build:module && npm run pack",
     "build:dev": "webpack --watch",
     "cover": "lab -r lcov -o lcov.info test/**.ts && cat lcov.info | coveralls && rm -rf lcov.info",
-    "build:module": "tsc -p tsconfig.module.json"
+    "build:module": "cp src/types.d.ts dist/lib && tsc -p tsconfig.module.json && babel --env-name module -d dist/lib dist/lib"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.5",
@@ -53,7 +54,8 @@
     "typescript": "^3.7.4",
     "webpack": "^4.41.2",
     "webpack-bundle-analyzer": "^3.6.0",
-    "webpack-cli": "^3.3.10"
+    "webpack-cli": "^3.3.10",
+    "webpack-merge": "^4.2.2"
   },
   "engine": "node >= 10",
   "repository": {

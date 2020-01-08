@@ -30,7 +30,9 @@ module.exports = {
                     corejs: {
                         version: 3
                     },
-                    targets: "node 10"
+                    targets: [
+                        "node 10"
+                    ]
                 }]
             ]
         }

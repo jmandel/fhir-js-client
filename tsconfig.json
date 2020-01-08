@@ -11,7 +11,7 @@
 
         // Just transpile TS to modern JS. Babel will take over from there and
         // compile depending on the target environments.
-        "module"       : "commonjs",
+        "module"       : "CommonJS",
         "target"       : "ES2019",
         "importHelpers": false,
         "noEmitHelpers": true

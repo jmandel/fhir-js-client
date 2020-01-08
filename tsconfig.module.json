@@ -6,12 +6,14 @@
         "target": "ES2017",
         "importHelpers": false,
         "outDir": "dist/lib",
-        "listEmittedFiles": true
+        "listEmittedFiles": false,
+        "declaration": true
     },
     "include": [
         "src"
     ],
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "src/entry"
     ],
 }

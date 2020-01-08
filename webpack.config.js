@@ -1,4 +1,5 @@
 const path = require("path");
+const merge = require("webpack-merge");
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 const { DefinePlugin } = require("webpack");
 
@@ -7,23 +8,26 @@ const BASE_CONFIG = {
     entry  : "./src/browser.ts",
     target : "web",
     devtool: "source-map",
-    // optimization: {
-    //     providedExports: false,
-    //     usedExports: true,
-    //     sideEffects: true
-    // },
+    output : {
+        path         : path.resolve(__dirname, "dist/build"),
+        library      : "FHIR",
+        libraryTarget: "window",
+        libraryExport: "default"
+    },
+    optimization: {
+        providedExports: false,
+        usedExports: true,
+        sideEffects: true
+    },
     resolve: {
         extensions: [".ts", ".js"]
     }
 };
 
-const PURE_DEV_BUILD = Object.assign({}, BASE_CONFIG, {
-    mode   : "development",
-    output : {
-        path         : path.resolve(__dirname, "dist/build"),
-        filename     : "fhir-client.pure.js",
-        library      : "FHIR",
-        libraryTarget: "window"
+const PURE_DEV_BUILD = merge(BASE_CONFIG, {
+    mode: "development",
+    output: {
+        filename: "fhir-client.pure.js"
     },
     module: {
         rules: [
@@ -31,14 +35,14 @@ const PURE_DEV_BUILD = Object.assign({}, BASE_CONFIG, {
                 test: /\.ts$/,
                 exclude: /node_modules/,
                 use: [
-                    "babel-loader?configFile=./.babelrc.js&envName=pure",
+                    "babel-loader?envName=pure",
                     "ts-loader"
                 ]
             }
         ]
     },
     plugins: [
-        new DefinePlugin({ "global.FHIRCLIENT_PURE": true }),
+        new DefinePlugin({ "FHIRCLIENT_PURE": true }),
         new BundleAnalyzerPlugin({
             analyzerMode  : "static",
             openAnalyzer  : false,
@@ -47,13 +51,10 @@ const PURE_DEV_BUILD = Object.assign({}, BASE_CONFIG, {
     ]
 });
 
-const PURE_PROD_BUILD = Object.assign({}, BASE_CONFIG, {
-    mode   : "production",
-    output : {
-        path         : path.resolve(__dirname, "dist/build"),
-        filename     : "fhir-client.pure.min.js",
-        library      : "FHIR",
-        libraryTarget: "window"
+const PURE_PROD_BUILD = merge(BASE_CONFIG, {
+    mode: "production",
+    output: {
+        filename: "fhir-client.pure.min.js"
     },
     module: {
         rules: [
@@ -61,14 +62,14 @@ const PURE_PROD_BUILD = Object.assign({}, BASE_CONFIG, {
                 test: /\.ts$/,
                 exclude: /node_modules/,
                 use: [
-                    "babel-loader?configFile=./.babelrc.js&envName=pure",
+                    "babel-loader?envName=pure",
                     "ts-loader"
                 ]
             }
         ]
     },
     plugins: [
-        new DefinePlugin({ "global.FHIRCLIENT_PURE": true }),
+        new DefinePlugin({ "FHIRCLIENT_PURE": true }),
         new BundleAnalyzerPlugin({
             analyzerMode  : "static",
             openAnalyzer  : false,
@@ -77,21 +78,28 @@ const PURE_PROD_BUILD = Object.assign({}, BASE_CONFIG, {
     ]
 });
 
-const BROWSER_DEV_BUILD = Object.assign({}, BASE_CONFIG, {
-    mode   : "development",
-    output : {
-        path         : path.resolve(__dirname, "dist/build"),
-        filename     : "fhir-client.js",
-        library      : "FHIR",
-        libraryTarget: "window"
+const BROWSER_DEV_BUILD = merge(BASE_CONFIG, {
+    mode: "development",
+    output: {
+        filename: "fhir-client.js"
     },
     module: {
         rules: [
             {
+                test: /\.js$/,
+                include: [
+                    path.join(__dirname, "src"),
+                    path.join(__dirname, "node_modules/debug")
+                ],
+                use: "babel-loader?envName=browser"
+            },
+            {
                 test: /\.ts$/,
-                exclude: /node_modules/,
+                include: [
+                    path.join(__dirname, "src")
+                ],
                 use: [
-                    "babel-loader?configFile=./.babelrc.js&envName=browser",
+                    "babel-loader?envName=browser",
                     "ts-loader"
                 ]
             }
@@ -106,21 +114,26 @@ const BROWSER_DEV_BUILD = Object.assign({}, BASE_CONFIG, {
     ]
 });
 
-const BROWSER_PROD_BUILD = Object.assign({}, BASE_CONFIG, {
-    mode   : "production",
-    output : {
-        path         : path.resolve(__dirname, "dist/build"),
-        filename     : "fhir-client.min.js",
-        library      : "FHIR",
-        libraryTarget: "window"
+const BROWSER_PROD_BUILD = merge(BASE_CONFIG, {
+    mode: "production",
+    output: {
+        filename: "fhir-client.min.js"
     },
     module: {
         rules: [
             {
+                test: /\.js$/,
+                include: [
+                    path.join(__dirname, "src"),
+                    path.join(__dirname, "node_modules/debug")
+                ],
+                use: "babel-loader?envName=browser"
+            },
+            {
                 test: /\.ts$/,
                 exclude: /node_modules/,
                 use: [
-                    "babel-loader?configFile=./.babelrc.js&envName=browser",
+                    "babel-loader?envName=browser",
                     "ts-loader"
                 ]
             }

@@ -30,7 +30,8 @@
         "no-bitwise": false,
         "curly": false,
         "no-var-requires": false,
-        "forin": false
+        "forin": false,
+        "member-access": [true, "no-public"]
     },
     "rulesDirectory": []
 }
