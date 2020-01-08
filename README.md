@@ -13,7 +13,7 @@ npm i fhirclient
 
 <br/>
 
-## Documentation (new)
+## Documentation
 The documentation for the upcoming release is available at [http://docs.smarthealthit.org/client-js/](http://docs.smarthealthit.org/client-js/).
 
 Check out [what's new in v2](http://docs.smarthealthit.org/client-js/v2.html)!
