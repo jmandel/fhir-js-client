@@ -115,6 +115,7 @@ FHIR.oauth2.ready()
 ```
 
 > NOTE: When the library is used as module it will not polyfill the global namespace and will not create a global `FHIR` object as it does when included as script. If you want to be able to use it globally, you can expert it yourself like so:
+
 ```ts
 import FHIR from "fhirclient";
 
