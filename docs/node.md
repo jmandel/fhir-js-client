@@ -111,9 +111,15 @@ An adapter is a class that has a few methods for doing environment-specific thin
 
 The adapters are located [here](https://github.com/smart-on-fhir/client-js/tree/master/src/adapters). They all extend one abstract base class (`BaseAdapter`).
 
-In Node `require("fhirclient")` is the same as `require("fhirclient/lib/adapters/NodeAdapter")` which loads the default adapter for Node and/or Express. To use another adapter load it like so:
+In Node `require("fhirclient")` loads the default adapter for Node and/or Express.
+To use another adapter load it like so:
 ```js
-const smart = require("fhirclient/lib/adapters/HapiAdapter");
+
+// NOTE
+// require("fhirclient/lib/entry/hapi") is the same as require("fhirclient/lib/adapters/HapiAdapter").default.smart;
+// but it is cleaner and comes with proper type definitions
+const smart = require("fhirclient/lib/entry/hapi");
+
 
 // inside your redirect_uri route handler
 smart(request, h).ready(client => client.request("Patient"));

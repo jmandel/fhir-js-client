@@ -18,10 +18,6 @@ The documentation for the upcoming release is available at [http://docs.smarthea
 
 Check out [what's new in v2](http://docs.smarthealthit.org/client-js/v2.html)!
 
-<br/>
-
-## Documentation (old) 
-The documentation for the older (current) version is at [http://docs.smarthealthit.org/clients/javascript/](http://docs.smarthealthit.org/clients/javascript/).
 
 <br/>
 
@@ -38,23 +34,8 @@ npm test
 # Build everything
 npm run build
 
-# Build all bundles
+# Build all bundles (browser packages in dist/build)
 npm run pack
-
-# Only build the minified bundle for production
-npm run pack:prod
-
-# Only build the pure (no polyfills included) minified bundle for production
-npm run pack:prod:pure
-
-# Only build non-minified bundle for development
-npm run pack:dev
-
-# Only build the pure (no polyfills included) bundle for development
-npm run pack:dev:pure
-
-# Only build non-minified bundle for development and rebuild on change
-npm run build:dev
 
 # Build the CommonJS modules (for Node and bundlers)
 npm run build:module

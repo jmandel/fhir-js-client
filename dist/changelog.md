@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.2.0
+- Rewritten in TypeScript to improve readability and maintainability
+- Fixed some build errors (#68)
+- HapiJs users have new entry point `const smart = require("fhirclient/lib/entry/hapi")`
+- Better code coverage
+- Improved performance (#67) - work in progress
+
 ## v2.1.1
 - Switched to ES modules (thanks to @kherock)
 - Updated type definitions to fix some issues with Angular projects

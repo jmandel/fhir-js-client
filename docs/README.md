@@ -114,6 +114,17 @@ FHIR.oauth2.ready()
     .catch(console.error);
 ```
 
+> NOTE: When the library is used as module it will not polyfill the global namespace and will not create a global `FHIR` object as it does when included as script. If you want to be able to use it globally, you can expert it yourself like so:
+```ts
+import FHIR from "fhirclient";
+
+// in JavaScript:
+window.FHIR = FHIR;
+
+// In TypeScript:
+(window as any).FHIR = FHIR;
+```
+
 ## Server Usage
 The server is fundamentally different environment than the browser but the
 API is very similar. Here is a simple Express example:
