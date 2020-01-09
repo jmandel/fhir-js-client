@@ -1,4 +1,3 @@
-/* eslint-env browser */
 
 // Note: the following 2 imports appear as unused but they affect how tsc is
 // generating type definitions!
@@ -18,7 +17,6 @@ const { ready, authorize, init, client, options } = adapter.getSmartApi();
 // automatically polyfill everything except "fetch", which we have to handle
 // manually.
 // @ts-ignore
-// eslint-disable-next-line no-undef
 if (typeof FHIRCLIENT_PURE == "undefined") {
     const fetch = require("cross-fetch");
     require("abortcontroller-polyfill/dist/abortcontroller-polyfill-only");

@@ -10355,7 +10355,6 @@ var strings_1 = __webpack_require__(/*! ./strings */ "./src/strings.ts");
 
 var settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts"); // $lab:coverage:off$
 // @ts-ignore
-// eslint-disable-next-line no-undef
 
 
 var _ref = typeof FHIRCLIENT_PURE !== "undefined" ? window : __webpack_require__(/*! cross-fetch */ "./node_modules/cross-fetch/dist/browser-ponyfill.js"),
@@ -11544,9 +11543,6 @@ var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtim
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-/* eslint-env browser */
-
-/* global fhir */
 
 var smart_1 = __webpack_require__(/*! ../smart */ "./src/smart.ts");
 
@@ -11728,9 +11724,7 @@ exports.default = BrowserAdapter;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
-/* eslint-env browser */
-// In Browsers we create an adapter, get the SMART api from it and build the
+ // In Browsers we create an adapter, get the SMART api from it and build the
 // global FHIR object
 
 __webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
@@ -11752,7 +11746,6 @@ var _adapter$getSmartApi = adapter.getSmartApi(),
 // automatically polyfill everything except "fetch", which we have to handle
 // manually.
 // @ts-ignore
-// eslint-disable-next-line no-undef
 
 
 if (typeof FHIRCLIENT_PURE == "undefined") {
@@ -11843,7 +11836,6 @@ var settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts");
 
 var debug = __webpack_require__(/*! debug */ "./node_modules/debug/src/browser.js"); // $lab:coverage:off$
 // @ts-ignore
-// eslint-disable-next-line no-undef
 
 
 var _ref = typeof FHIRCLIENT_PURE !== "undefined" ? window : __webpack_require__(/*! cross-fetch */ "./node_modules/cross-fetch/dist/browser-ponyfill.js"),
@@ -13173,7 +13165,6 @@ var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/r
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-/* eslint-env browser */
 
 var Storage =
 /*#__PURE__*/

@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-/* eslint-env browser */
 import { URL }    from "url";
 import { expect } from "@hapi/code";
 import * as Lab   from "@hapi/lab";
@@ -9,7 +7,6 @@ import * as smart from "../src/smart";
 import BrowserEnv from "./mocks/BrowserEnvironment";
 import Window     from "./mocks/Window";
 import mockServer from "./mocks/mockServer";
-import { fhirclient } from "../src/types";
 
 export const lab = Lab.script();
 const {
@@ -710,7 +707,7 @@ describe("smart", () => {
 
             const env = new BrowserEnv();
 
-            let client = await new Promise<fhirclient.Client>((resolve, reject) => {
+            let client = await new Promise<any>((resolve, reject) => {
 
                 env.once("redirect", async () => {
                     env.redirect("http://localhost/?code=123&state=" + env.getUrl().searchParams.get("state"));
@@ -786,7 +783,7 @@ describe("smart", () => {
 
             const env = new BrowserEnv();
 
-            let client = await new Promise<fhirclient.Client>((resolve, reject) => {
+            let client = await new Promise<any>((resolve, reject) => {
                 env.redirect("http://localhost/?launch=123&state=" + key);
 
                 env.once("redirect", async () => {

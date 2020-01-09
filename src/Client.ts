@@ -21,7 +21,6 @@ import { fhirclient } from "./types";
 
 // $lab:coverage:off$
 // @ts-ignore
-// eslint-disable-next-line no-undef
 const { Response } = typeof FHIRCLIENT_PURE !== "undefined" ? window : require("cross-fetch");
 // $lab:coverage:on$
 

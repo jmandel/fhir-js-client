@@ -1,6 +1,4 @@
-"use strict";
-/* eslint-env browser */
-// In Browsers we create an adapter, get the SMART api from it and build the
+"use strict"; // In Browsers we create an adapter, get the SMART api from it and build the
 // global FHIR object
 
 const BrowserAdapter_1 = require("../adapters/BrowserAdapter");
@@ -18,7 +16,6 @@ const {
 // automatically polyfill everything except "fetch", which we have to handle
 // manually.
 // @ts-ignore
-// eslint-disable-next-line no-undef
 
 if (typeof FHIRCLIENT_PURE == "undefined") {
   const fetch = require("cross-fetch");

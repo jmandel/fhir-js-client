@@ -1,4 +1,3 @@
-/* eslint-env browser */
 import BrowserEnvironment from "./BrowserEnvironment";
 import fetch from "cross-fetch";
 import { JSDOM } from "jsdom";

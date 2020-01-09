@@ -3,9 +3,6 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-/* eslint-env browser */
-
-/* global fhir */
 
 const smart_1 = require("../smart");
 

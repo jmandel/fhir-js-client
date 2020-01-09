@@ -1028,7 +1028,6 @@ const strings_1 = __webpack_require__(/*! ./strings */ "./src/strings.ts");
 
 const settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts"); // $lab:coverage:off$
 // @ts-ignore
-// eslint-disable-next-line no-undef
 
 
 const {
@@ -1881,9 +1880,6 @@ exports.default = HttpError;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-/* eslint-env browser */
-
-/* global fhir */
 
 const smart_1 = __webpack_require__(/*! ../smart */ "./src/smart.ts");
 
@@ -2038,9 +2034,7 @@ exports.default = BrowserAdapter;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
-/* eslint-env browser */
-// In Browsers we create an adapter, get the SMART api from it and build the
+ // In Browsers we create an adapter, get the SMART api from it and build the
 // global FHIR object
 
 const BrowserAdapter_1 = __webpack_require__(/*! ../adapters/BrowserAdapter */ "./src/adapters/BrowserAdapter.ts");
@@ -2058,7 +2052,6 @@ const {
 // automatically polyfill everything except "fetch", which we have to handle
 // manually.
 // @ts-ignore
-// eslint-disable-next-line no-undef
 
 if (false) {} // $lab:coverage:off
 
@@ -2101,7 +2094,6 @@ const settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts");
 
 const debug = __webpack_require__(/*! debug */ "./node_modules/debug/src/browser.js"); // $lab:coverage:off$
 // @ts-ignore
-// eslint-disable-next-line no-undef
 
 
 const {
@@ -3071,7 +3063,6 @@ exports.init = init;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-/* eslint-env browser */
 
 class Storage {
   /**

@@ -14,7 +14,6 @@ const strings_1 = require("./strings");
 
 const settings_1 = require("./settings"); // $lab:coverage:off$
 // @ts-ignore
-// eslint-disable-next-line no-undef
 
 
 const {

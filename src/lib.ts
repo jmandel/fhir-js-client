@@ -10,7 +10,6 @@ const debug = require("debug");
 
 // $lab:coverage:off$
 // @ts-ignore
-// eslint-disable-next-line no-undef
 const { fetch } = typeof FHIRCLIENT_PURE !== "undefined" ? window : require("cross-fetch");
 // $lab:coverage:on$
 

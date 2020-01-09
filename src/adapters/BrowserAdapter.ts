@@ -1,5 +1,3 @@
-/* eslint-env browser */
-/* global fhir */
 import { ready, authorize, init } from "../smart";
 import Client from "../Client";
 import BrowserStorage from "../storage/BrowserStorage";

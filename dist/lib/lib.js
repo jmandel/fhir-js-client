@@ -14,7 +14,6 @@ const settings_1 = require("./settings");
 
 const debug = require("debug"); // $lab:coverage:off$
 // @ts-ignore
-// eslint-disable-next-line no-undef
 
 
 const {

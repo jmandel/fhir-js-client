@@ -3,7 +3,6 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-/* eslint-env browser */
 
 class Storage {
   /**

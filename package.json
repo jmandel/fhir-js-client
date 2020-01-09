@@ -45,7 +45,6 @@
     "babel-polyfill": "^6.26.0",
     "cors": "^2.8.5",
     "coveralls": "^3.0.9",
-    "eslint": "^6.7.2",
     "express": "^4.17.1",
     "fhir.js": "0.0.22",
     "jsdom": "^15.2.1",
