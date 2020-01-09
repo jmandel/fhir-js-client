@@ -1,2 +1,23 @@
 import NodeAdapter from "../adapters/NodeAdapter";
-export default NodeAdapter.smart;
+import { IncomingMessage, ServerResponse } from "http";
+import { fhirclient } from "../types";
+import { AbortController as Controller } from "abortcontroller-polyfill/dist/cjs-ponyfill";
+
+type storageFactory = (options?: fhirclient.JsonObject) => fhirclient.Storage;
+
+function smart(
+    request: IncomingMessage,
+    response: ServerResponse,
+    storage?: fhirclient.Storage | storageFactory
+)
+{
+    return new NodeAdapter({
+        request,
+        response,
+        storage
+    }).getSmartApi();
+}
+
+smart.AbortController = Controller as typeof AbortController;
+
+export = smart;

@@ -17,6 +17,7 @@
   "browser": "src/browser.js",
   "dependencies": {
     "@types/hapi": "^18.0.3",
+    "abortcontroller-polyfill": "^1.4.0",
     "core-js": "^3.5.0",
     "cross-fetch": "^3.0.4",
     "debug": "^4.1.1"
@@ -27,7 +28,7 @@
     "build": "npm run build:module && npm run pack",
     "build:dev": "webpack --watch",
     "cover": "lab -r lcov -o lcov.info test/**.ts && cat lcov.info | coveralls && rm -rf lcov.info",
-    "build:module": "cp src/types.d.ts dist/lib && tsc -p tsconfig.module.json && babel --env-name module --ignore dist/lib/entry -d dist/lib dist/lib"
+    "build:module": "cp src/types.d.ts dist/lib && tsc -p tsconfig.module.json && babel --env-name module -d dist/lib dist/lib"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.5",

@@ -1,12 +1,14 @@
 import ServerStorage from "../../src/storage/ServerStorage";
+import { AbortController } from "abortcontroller-polyfill/dist/cjs-ponyfill";
+import { fhirclient } from "../../src/types";
 
-export default class ServerEnvironment
+export default class ServerEnvironment implements fhirclient.Adapter
 {
-    public request: any;
+    request: any;
 
-    public response: any;
+    response: any;
 
-    public storage: any;
+    storage: any;
 
     constructor(request?: any, response?: any, storage?: any)
     {
@@ -24,7 +26,7 @@ export default class ServerEnvironment
         }
     }
 
-    public getUrl()
+    getUrl()
     {
         const req = this.request;
         const host = req.headers["x-forwarded-host"] || req.headers.host;
@@ -41,19 +43,39 @@ export default class ServerEnvironment
         return new URL(req.originalUrl || req.path || req.url, protocol + "://" + host);
     }
 
-    public redirect(location: string)
+    redirect(location: string)
     {
         this.response.writeHead(302, { location });
         this.response.end();
     }
 
-    public getStorage()
+    getStorage()
     {
         return this.storage;
     }
 
-    public relative(url: string)
+    relative(url: string)
     {
         return new URL(url, this.getUrl()).href;
+    }
+
+    btoa(str: string): string
+    {
+        return Buffer.from(str).toString("base64");
+    }
+
+    atob(str: string): string
+    {
+        return Buffer.from(str, "base64").toString("ascii");
+    }
+
+    getAbortController()
+    {
+        return AbortController;
+    }
+
+    getSmartApi(): any
+    {
+        return false;
     }
 }

@@ -13,7 +13,6 @@
         "src"
     ],
     "exclude": [
-        "node_modules",
-        "src/entry"
+        "node_modules"
     ],
 }

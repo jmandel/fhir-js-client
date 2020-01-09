@@ -1,9 +1,16 @@
 /* eslint-env browser */
 
+// Note: the following 2 imports appear as unused but they affect how tsc is
+// generating type definitions!
+import { fhirclient } from "../types";
+import Client from "../Client";
+
 // In Browsers we create an adapter, get the SMART api from it and build the
 // global FHIR object
 import BrowserAdapter from "../adapters/BrowserAdapter";
-const { ready, authorize, init, client, options } = BrowserAdapter.smart();
+
+const adapter = new BrowserAdapter();
+const { ready, authorize, init, client, options } = adapter.getSmartApi();
 
 // We have two kinds of browser builds - "pure" for new browsers and "legacy"
 // for old ones. In pure builds we assume that the browser supports everything
@@ -14,6 +21,7 @@ const { ready, authorize, init, client, options } = BrowserAdapter.smart();
 // eslint-disable-next-line no-undef
 if (typeof FHIRCLIENT_PURE == "undefined") {
     const fetch = require("cross-fetch");
+    require("abortcontroller-polyfill/dist/abortcontroller-polyfill-only");
     if (!window.fetch) {
         window.fetch    = fetch.default;
         window.Headers  = fetch.Headers;
@@ -22,8 +30,9 @@ if (typeof FHIRCLIENT_PURE == "undefined") {
     }
 }
 
-// $lab:coverage:off$
-export default {
+// $lab:coverage:off
+const FHIR = {
+    AbortController: window.AbortController,
     client,
     oauth2: {
         settings: options,
@@ -32,4 +41,6 @@ export default {
         init
     }
 };
+
+export = FHIR;
 // $lab:coverage:on$

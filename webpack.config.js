@@ -12,7 +12,7 @@ const BASE_CONFIG = {
         path         : path.resolve(__dirname, "dist/build"),
         library      : "FHIR",
         libraryTarget: "window",
-        libraryExport: "default"
+        // libraryExport: "default"
     },
     optimization: {
         providedExports: false,

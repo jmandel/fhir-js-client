@@ -1,21 +1,19 @@
-
 import { fhirclient } from "../types";
 import Client from "../Client";
-
-export = smart;
-
-type storageFactory = (options?: fhirclient.JsonObject) => fhirclient.Storage;
-
-
-// tslint:disable-next-line: no-namespace
-declare namespace smart {
-    export const oauth2: OAuth2;
-    export function client(stateOrURI: fhirclient.ClientState | string): Client;
-}
-
-interface OAuth2 {
-    settings: fhirclient.fhirSettings;
-    ready: fhirclient.readyFunction;
-    authorize: (p: fhirclient.AuthorizeParams) => Promise<never>;
-    init: (p: fhirclient.AuthorizeParams) => Promise<never|Client>;
-}
+declare const FHIR: {
+    AbortController: {
+        new (): AbortController;
+        prototype: AbortController;
+    };
+    client: (state: string | fhirclient.ClientState) => Client;
+    oauth2: {
+        settings: fhirclient.fhirSettings;
+        ready: {
+            (onSuccess: (client: Client) => any, onError?: (error: Error) => any): Promise<any>;
+            (): Promise<Client>;
+        };
+        authorize: (options: fhirclient.AuthorizeParams) => Promise<string | void>;
+        init: (options: fhirclient.AuthorizeParams) => Promise<Client>;
+    };
+};
+export = FHIR;
