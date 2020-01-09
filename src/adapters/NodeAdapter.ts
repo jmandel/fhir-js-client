@@ -1,17 +1,56 @@
-import ServerStorage from "../storage/ServerStorage";
-import BaseAdapter   from "./BaseAdapter";
-import { ClientRequest, ServerResponse } from "http";
 import { fhirclient } from "../types";
+import { ready, authorize, init } from "../smart";
+import Client from "../Client";
+import ServerStorage from "../storage/ServerStorage";
+import { AbortController } from "abortcontroller-polyfill/dist/cjs-ponyfill";
 
 /**
  * Node Adapter - works with native NodeJS and with Express
  */
-export default class NodeAdapter extends BaseAdapter
+export default class NodeAdapter implements fhirclient.Adapter
 {
     /**
      * Holds the Storage instance associated with this instance
      */
     private _storage: fhirclient.Storage | null = null;
+
+    /**
+     * Environment-specific options
+     */
+    options: fhirclient.fhirSettings;
+
+    /**
+     * @param options Environment-specific options
+     */
+    constructor(options: fhirclient.fhirSettings = {})
+    {
+        this.options = {
+            // Replaces the browser's current URL
+            // using window.history.replaceState API or by reloading.
+            replaceBrowserHistory: true,
+
+            // When set to true, this variable will fully utilize
+            // HTML5 sessionStorage API.
+            // This variable can be overridden to false by setting
+            // FHIR.oauth2.settings.fullSessionStorageSupport = false.
+            // When set to false, the sessionStorage will be keyed
+            // by a state variable. This is to allow the embedded IE browser
+            // instances instantiated on a single thread to continue to
+            // function without having sessionStorage data shared
+            // across the embedded IE instances.
+            fullSessionStorageSupport: true,
+
+            ...options
+        };
+    }
+
+    /**
+     * Given a relative path, returns an absolute url using the instance base URL
+     */
+    relative(path: string): string
+    {
+        return new URL(path, this.getUrl().href).href;
+    }
 
     /**
      * Given the current environment, this method must return the current url
@@ -65,22 +104,49 @@ export default class NodeAdapter extends BaseAdapter
     }
 
     /**
-     * This is the static entry point and MUST be provided
-     * @param req The http request
-     * @param res The http response
-     * @param storage Custom storage instance or a storage
-     *  factory function
+     * Base64 to ASCII string
      */
-    static smart(
-        req: ClientRequest,
-        res: ServerResponse,
-        storage?: fhirclient.Storage | ((options?: fhirclient.JsonObject) => fhirclient.Storage)
-    )
+    btoa(str: string): string
     {
-        return new NodeAdapter({
-            request: req,
-            response: res,
-            storage
-        }).getSmartApi();
+        // The "global." makes Webpack understand that it doesn't have to
+        // include the Buffer code in the bundle
+        return global.Buffer.from(str).toString("base64");
+    }
+
+    /**
+     * ASCII string to Base64
+     */
+    atob(str: string): string
+    {
+        // The "global." makes Webpack understand that it doesn't have to
+        // include the Buffer code in the bundle
+        return global.Buffer.from(str, "base64").toString("ascii");
+    }
+
+    /**
+     * Returns a reference to the AbortController constructor. In browsers,
+     * AbortController will always be available as global (native or polyfilled)
+     */
+    getAbortController()
+    {
+        return AbortController;
+    }
+
+    /**
+     * Creates and returns adapter-aware SMART api. Not that while the shape of
+     * the returned object is well known, the arguments to this function are not.
+     * Those who override this method are free to require any environment-specific
+     * arguments. For example in node we will need a request, a response and
+     * optionally a storage or storage factory function.
+     */
+    getSmartApi(): fhirclient.SMART
+    {
+        return {
+            ready    : (...args: any[]) => ready(this, ...args),
+            authorize: options   => authorize(this, options),
+            init     : (...args) => init(this, ...args),
+            client   : (state: string | fhirclient.ClientState) => new Client(this, state),
+            options  : this.options
+        };
     }
 }

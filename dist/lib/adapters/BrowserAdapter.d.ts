@@ -1,10 +1,9 @@
 import BrowserStorage from "../storage/BrowserStorage";
-import BaseAdapter from "./BaseAdapter";
 import { fhirclient } from "../types";
 /**
  * Browser Adapter
  */
-export default class BrowserAdapter extends BaseAdapter {
+export default class BrowserAdapter implements fhirclient.Adapter {
     /**
      * Stores the URL instance associated with this adapter
      */
@@ -13,6 +12,18 @@ export default class BrowserAdapter extends BaseAdapter {
      * Holds the Storage instance associated with this instance
      */
     private _storage;
+    /**
+     * Environment-specific options
+     */
+    options: fhirclient.fhirSettings;
+    /**
+     * @param options Environment-specific options
+     */
+    constructor(options?: fhirclient.fhirSettings);
+    /**
+     * Given a relative path, returns an absolute url using the instance base URL
+     */
+    relative(path: string): string;
     /**
      * In browsers we need to be able to (dynamically) check if fhir.js is
      * included in the page. If it is, it should have created a "fhir" variable
@@ -34,5 +45,28 @@ export default class BrowserAdapter extends BaseAdapter {
      * sessionStorage
      */
     getStorage(): BrowserStorage;
-    static smart(options?: fhirclient.fhirSettings): fhirclient.SMART;
+    /**
+     * Returns a reference to the AbortController constructor. In browsers,
+     * AbortController will always be available as global (native or polyfilled)
+     */
+    getAbortController(): {
+        new (): AbortController;
+        prototype: AbortController;
+    };
+    /**
+     * ASCII string to Base64
+     */
+    atob(str: string): string;
+    /**
+     * Base64 to ASCII string
+     */
+    btoa(str: string): string;
+    /**
+     * Creates and returns adapter-aware SMART api. Not that while the shape of
+     * the returned object is well known, the arguments to this function are not.
+     * Those who override this method are free to require any environment-specific
+     * arguments. For example in node we will need a request, a response and
+     * optionally a storage or storage factory function.
+     */
+    getSmartApi(): fhirclient.SMART;
 }

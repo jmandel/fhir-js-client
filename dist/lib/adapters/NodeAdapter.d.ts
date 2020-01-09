@@ -1,15 +1,24 @@
-/// <reference types="node" />
-import BaseAdapter from "./BaseAdapter";
-import { ClientRequest, ServerResponse } from "http";
 import { fhirclient } from "../types";
 /**
  * Node Adapter - works with native NodeJS and with Express
  */
-export default class NodeAdapter extends BaseAdapter {
+export default class NodeAdapter implements fhirclient.Adapter {
     /**
      * Holds the Storage instance associated with this instance
      */
     private _storage;
+    /**
+     * Environment-specific options
+     */
+    options: fhirclient.fhirSettings;
+    /**
+     * @param options Environment-specific options
+     */
+    constructor(options?: fhirclient.fhirSettings);
+    /**
+     * Given a relative path, returns an absolute url using the instance base URL
+     */
+    relative(path: string): string;
     /**
      * Given the current environment, this method must return the current url
      * as URL instance. In Node we might be behind a proxy!
@@ -26,11 +35,24 @@ export default class NodeAdapter extends BaseAdapter {
      */
     getStorage(): fhirclient.Storage;
     /**
-     * This is the static entry point and MUST be provided
-     * @param req The http request
-     * @param res The http response
-     * @param storage Custom storage instance or a storage
-     *  factory function
+     * Base64 to ASCII string
      */
-    static smart(req: ClientRequest, res: ServerResponse, storage?: fhirclient.Storage | ((options?: fhirclient.JsonObject) => fhirclient.Storage)): fhirclient.SMART;
+    btoa(str: string): string;
+    /**
+     * ASCII string to Base64
+     */
+    atob(str: string): string;
+    /**
+     * Returns a reference to the AbortController constructor. In browsers,
+     * AbortController will always be available as global (native or polyfilled)
+     */
+    getAbortController(): any;
+    /**
+     * Creates and returns adapter-aware SMART api. Not that while the shape of
+     * the returned object is well known, the arguments to this function are not.
+     * Those who override this method are free to require any environment-specific
+     * arguments. For example in node we will need a request, a response and
+     * optionally a storage or storage factory function.
+     */
+    getSmartApi(): fhirclient.SMART;
 }

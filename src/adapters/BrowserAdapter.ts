@@ -1,13 +1,14 @@
 /* eslint-env browser */
 /* global fhir */
+import { ready, authorize, init } from "../smart";
+import Client from "../Client";
 import BrowserStorage from "../storage/BrowserStorage";
-import BaseAdapter    from "./BaseAdapter";
 import { fhirclient } from "../types";
 
 /**
  * Browser Adapter
  */
-export default class BrowserAdapter extends BaseAdapter
+export default class BrowserAdapter implements fhirclient.Adapter
 {
     /**
      * Stores the URL instance associated with this adapter
@@ -18,6 +19,44 @@ export default class BrowserAdapter extends BaseAdapter
      * Holds the Storage instance associated with this instance
      */
     private _storage: fhirclient.Storage | null = null;
+
+    /**
+     * Environment-specific options
+     */
+    options: fhirclient.fhirSettings;
+
+    /**
+     * @param options Environment-specific options
+     */
+    constructor(options: fhirclient.fhirSettings = {})
+    {
+        this.options = {
+            // Replaces the browser's current URL
+            // using window.history.replaceState API or by reloading.
+            replaceBrowserHistory: true,
+
+            // When set to true, this variable will fully utilize
+            // HTML5 sessionStorage API.
+            // This variable can be overridden to false by setting
+            // FHIR.oauth2.settings.fullSessionStorageSupport = false.
+            // When set to false, the sessionStorage will be keyed
+            // by a state variable. This is to allow the embedded IE browser
+            // instances instantiated on a single thread to continue to
+            // function without having sessionStorage data shared
+            // across the embedded IE instances.
+            fullSessionStorageSupport: true,
+
+            ...options
+        };
+    }
+
+    /**
+     * Given a relative path, returns an absolute url using the instance base URL
+     */
+    relative(path: string): string
+    {
+        return new URL(path, this.getUrl().href).href;
+    }
 
     /**
      * In browsers we need to be able to (dynamically) check if fhir.js is
@@ -63,8 +102,46 @@ export default class BrowserAdapter extends BaseAdapter
         return this._storage;
     }
 
-    static smart(options?: fhirclient.fhirSettings): fhirclient.SMART
+    /**
+     * Returns a reference to the AbortController constructor. In browsers,
+     * AbortController will always be available as global (native or polyfilled)
+     */
+    getAbortController()
     {
-        return new BrowserAdapter(options).getSmartApi();
+        return AbortController;
+    }
+
+    /**
+     * ASCII string to Base64
+     */
+    atob(str: string): string
+    {
+        return window.atob(str);
+    }
+
+    /**
+     * Base64 to ASCII string
+     */
+    btoa(str: string): string
+    {
+        return window.btoa(str);
+    }
+
+    /**
+     * Creates and returns adapter-aware SMART api. Not that while the shape of
+     * the returned object is well known, the arguments to this function are not.
+     * Those who override this method are free to require any environment-specific
+     * arguments. For example in node we will need a request, a response and
+     * optionally a storage or storage factory function.
+     */
+    getSmartApi(): fhirclient.SMART
+    {
+        return {
+            ready    : (...args: any[]) => ready(this, ...args),
+            authorize: options   => authorize(this, options),
+            init     : (...args) => init(this, ...args),
+            client   : (state: string | fhirclient.ClientState) => new Client(this, state),
+            options  : this.options
+        };
     }
 }
