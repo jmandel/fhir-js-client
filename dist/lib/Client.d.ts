@@ -1,9 +1,8 @@
 import { getPath, byCode, byCodes } from "./lib";
-import BaseAdapter from "./adapters/BaseAdapter";
 import { fhirclient } from "./types";
 export default class Client {
     state: fhirclient.ClientState;
-    environment: BaseAdapter;
+    environment: fhirclient.Adapter;
     patient: {
         id: string | null;
         read: () => Promise<fhirclient.JsonObject>;
@@ -22,7 +21,7 @@ export default class Client {
     };
     api: fhirclient.JsonObject | undefined;
     private _refreshTask;
-    constructor(environment: BaseAdapter, state: fhirclient.ClientState | string);
+    constructor(environment: fhirclient.Adapter, state: fhirclient.ClientState | string);
     connect(fhirJs?: (options: fhirclient.JsonObject) => fhirclient.JsonObject): Client;
     /**
      * Returns the ID of the selected patient or null. You should have requested
@@ -99,7 +98,7 @@ export default class Client {
     getPath: typeof getPath;
     /**
      * Returns a promise that will be resolved with the fhir version as defined
-     * in the conformance statement.
+     * in the CapabilityStatement.
      */
     getFhirVersion(): Promise<string>;
     /**

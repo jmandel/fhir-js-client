@@ -6,18 +6,16 @@ import {
     jwtDecode,
     makeArray,
     request,
-    btoa,
     byCode,
     byCodes,
     units,
-    getPatientParam
+    getPatientParam,
+    fetchConformanceStatement
 } from "./lib";
 
 import str from "./strings";
-import { fetchConformanceStatement, fetchFhirVersion } from "./smart";
 import { SMART_KEY, patientCompartment, fhirVersions } from "./settings";
 import HttpError from "./HttpError";
-import BaseAdapter from "./adapters/BaseAdapter";
 import BrowserAdapter from "./adapters/BrowserAdapter";
 import { fhirclient } from "./types";
 
@@ -30,8 +28,7 @@ const { Response } = typeof FHIRCLIENT_PURE !== "undefined" ? window : require("
 const debug = _debug.extend("client");
 
 /**
- * Adds patient context to requestOptions object to be used with
- * fhirclient.Client.request
+ * Adds patient context to requestOptions object to be used with `Client.request`
  * @param requestOptions Can be a string URL (relative to the serviceUrl), or an
  * object which will be passed to fetch()
  * @param client Current FHIR client object containing patient context
@@ -194,7 +191,7 @@ export default class Client
 {
     state: fhirclient.ClientState;
 
-    environment: BaseAdapter;
+    environment: fhirclient.Adapter;
 
     patient: {
         id: string | null
@@ -219,7 +216,7 @@ export default class Client
 
     private _refreshTask: Promise<any> | null;
 
-    constructor(environment: BaseAdapter, state: fhirclient.ClientState | string)
+    constructor(environment: fhirclient.Adapter, state: fhirclient.ClientState | string)
     {
         const _state = typeof state == "string" ? { serverUrl: state } : state;
 
@@ -415,7 +412,7 @@ export default class Client
                 }
                 return null;
             }
-            return jwtDecode(idToken);
+            return jwtDecode(idToken, this.environment);
         }
         if (this.state.authorizeUri) {
             debug(str.noIfNoAuth, "the id_token");
@@ -477,7 +474,7 @@ export default class Client
         }
         const { username, password } = this.state;
         if (username && password) {
-            return "Basic " + btoa(username + ":" + password);
+            return "Basic " + this.environment.btoa(username + ":" + password);
         }
         return null;
     }
@@ -809,10 +806,11 @@ export default class Client
 
     /**
      * Returns a promise that will be resolved with the fhir version as defined
-     * in the conformance statement.
+     * in the CapabilityStatement.
      */
     getFhirVersion(): Promise<string> {
-        return fetchFhirVersion(this.state.serverUrl);
+        return fetchConformanceStatement(this.state.serverUrl)
+            .then((metadata) => metadata.fhirVersion);
     }
 
     /**

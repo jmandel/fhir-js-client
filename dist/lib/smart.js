@@ -7,39 +7,12 @@ Object.defineProperty(exports, "__esModule", {
 
 const lib_1 = require("./lib");
 
+const Client_1 = require("./Client");
+
 const settings_1 = require("./settings");
 
 exports.KEY = settings_1.SMART_KEY;
 const debug = lib_1.debug.extend("oauth2");
-/**
- * Creates and returns a Client instance.
- * Note that this is done within a function to postpone the "./Client" import
- * and avoid cyclic dependency.
- * @param env The adapter
- * @param state The client state or baseUrl
- */
-
-function createClient(env, state) {
-  const Client = require("./Client").default;
-
-  return new Client(env, state);
-}
-/**
- * Fetches the conformance statement from the given base URL.
- * Note that the result is cached in memory (until the page is reloaded in the
- * browser) because it might have to be re-used by the client
- * @param baseUrl The base URL of the FHIR server
- */
-
-
-function fetchConformanceStatement(baseUrl = "/") {
-  const url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
-  return lib_1.getAndCache(url).catch(ex => {
-    throw new Error(`Failed to fetch the conformance statement from "${url}". ${ex}`);
-  });
-}
-
-exports.fetchConformanceStatement = fetchConformanceStatement;
 /**
  * Fetches the well-known json file from the given base URL.
  * Note that the result is cached in memory (until the page is reloaded in the
@@ -47,33 +20,17 @@ exports.fetchConformanceStatement = fetchConformanceStatement;
  * @param baseUrl The base URL of the FHIR server
  */
 
-function fetchWellKnownJson(baseUrl = "/") {
+function fetchWellKnownJson(baseUrl = "/", requestOptions) {
   const url = String(baseUrl).replace(/\/*$/, "/") + ".well-known/smart-configuration";
-  return lib_1.getAndCache(url).catch(ex => {
+  return lib_1.getAndCache(url, requestOptions).catch(ex => {
     throw new Error(`Failed to fetch the well-known json "${url}". ${ex.message}`);
   });
 }
 
 exports.fetchWellKnownJson = fetchWellKnownJson;
-/**
- * Fetch and return the FHIR version. This is done by fetching (and caching) the
- * CapabilityStatement of the FHIR server
- * @param [baseUrl] The base URL of the FHIR server
- */
 
-function fetchFhirVersion(baseUrl = "/") {
-  return fetchConformanceStatement(baseUrl).then(metadata => metadata.fhirVersion);
-}
-
-exports.fetchFhirVersion = fetchFhirVersion;
-/**
- * Given a fhir server returns an object with it's Oauth security endpoints that
- * we are interested in
- * @param [baseUrl] Fhir server base URL
- */
-
-function getSecurityExtensions(baseUrl = "/") {
-  return fetchWellKnownJson(baseUrl).then(meta => {
+function getSecurityExtensionsFromWellKnownJson(baseUrl = "/", requestOptions) {
+  return fetchWellKnownJson(baseUrl, requestOptions).then(meta => {
     if (!meta.authorization_endpoint || !meta.token_endpoint) {
       throw new Error("Invalid wellKnownJson");
     }
@@ -83,9 +40,13 @@ function getSecurityExtensions(baseUrl = "/") {
       authorizeUri: meta.authorization_endpoint,
       tokenUri: meta.token_endpoint
     };
-  }).catch(() => fetchConformanceStatement(baseUrl).then(metadata => {
+  });
+}
+
+function getSecurityExtensionsFromConformanceStatement(baseUrl = "/", requestOptions) {
+  return lib_1.fetchConformanceStatement(baseUrl, requestOptions).then(meta => {
     const nsUri = "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris";
-    const extensions = (lib_1.getPath(metadata || {}, "rest.0.security.extension") || []).filter(e => e.url === nsUri).map(o => o.extension)[0];
+    const extensions = (lib_1.getPath(meta || {}, "rest.0.security.extension") || []).filter(e => e.url === nsUri).map(o => o.extension)[0];
     const out = {
       registrationUri: "",
       authorizeUri: "",
@@ -109,7 +70,72 @@ function getSecurityExtensions(baseUrl = "/") {
     }
 
     return out;
-  }));
+  });
+}
+/**
+ * This works similarly to `Promise.any()`. The tasks are objects containing a
+ * request promise and it's AbortController. Returns a promise that will be
+ * resolved with the return value of the first successful request, or rejected
+ * with an aggregate error if all tasks fail. Any requests, other than the first
+ * one that succeeds will be aborted.
+ */
+
+
+function any(tasks) {
+  const len = tasks.length;
+  const errors = [];
+  let resolved = false;
+  return new Promise((resolve, reject) => {
+    function onSuccess(task, result) {
+      task.complete = true;
+
+      if (!resolved) {
+        resolved = true;
+        tasks.forEach(t => {
+          if (!t.complete) {
+            t.controller.abort();
+          }
+        });
+        resolve(result);
+      }
+    }
+
+    function onError(error) {
+      if (errors.push(error) === len) {
+        reject(new Error(errors.map(e => e.message).join("; ")));
+      }
+    }
+
+    tasks.forEach(t => {
+      t.promise.then(result => onSuccess(t, result), onError);
+    });
+  });
+}
+/**
+ * Given a FHIR server, returns an object with it's Oauth security endpoints
+ * that we are interested in. This will try to find the info in both the
+ * `CapabilityStatement` and the `.well-known/smart-configuration`. Whatever
+ * Arrives first will be used and the other request will be aborted.
+ * @param [baseUrl] Fhir server base URL
+ * @param [env] The Adapter
+ */
+
+
+function getSecurityExtensions(env, baseUrl = "/") {
+  const AbortController = env.getAbortController();
+  const abortController1 = new AbortController();
+  const abortController2 = new AbortController();
+  return any([{
+    controller: abortController1,
+    promise: getSecurityExtensionsFromWellKnownJson(baseUrl, {
+      signal: abortController1.signal
+    })
+  }, {
+    controller: abortController2,
+    promise: getSecurityExtensionsFromConformanceStatement(baseUrl, {
+      signal: abortController2.signal
+    })
+  }]);
 }
 
 exports.getSecurityExtensions = getSecurityExtensions;
@@ -220,7 +246,7 @@ async function authorize(env, params = {}, _noRedirect = false) {
   } // Get oauth endpoints and add them to the state
 
 
-  const extensions = await getSecurityExtensions(serverUrl);
+  const extensions = await getSecurityExtensions(env, serverUrl);
   Object.assign(state, extensions);
   await storage.set(stateKey, state); // If this happens to be an open server and there is no authorizeUri
 
@@ -342,7 +368,7 @@ async function completeAuth(env) {
     }
 
     debug("Preparing to exchange the code for access token...");
-    const requestOptions = buildTokenRequest(code, state);
+    const requestOptions = buildTokenRequest(env, code, state);
     debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
     // includes an access token or a message indicating that the
     // authorization request has been denied.
@@ -369,7 +395,7 @@ async function completeAuth(env) {
     await Storage.set(settings_1.SMART_KEY, key);
   }
 
-  const client = createClient(env, state);
+  const client = new Client_1.default(env, state);
   debug("Created client instance: %O", client);
   return client;
 }
@@ -380,7 +406,7 @@ exports.completeAuth = completeAuth;
  * creates it's configuration and returns it in a Promise.
  */
 
-function buildTokenRequest(code, state) {
+function buildTokenRequest(env, code, state) {
   const {
     redirectUri,
     clientSecret,
@@ -415,7 +441,7 @@ function buildTokenRequest(code, state) {
   // client_id and the password is the app’s client_secret (see example).
 
   if (clientSecret) {
-    requestOptions.headers.Authorization = "Basic " + lib_1.btoa(clientId + ":" + clientSecret);
+    requestOptions.headers.Authorization = "Basic " + env.btoa(clientId + ":" + clientSecret);
     debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
   } else {
     debug("No clientSecret found in state. Adding the clientId to the POST body");
@@ -465,7 +491,7 @@ async function init(env, options) {
   const cached = await storage.get(key);
 
   if (cached) {
-    return createClient(env, cached);
+    return new Client_1.default(env, cached);
   } // Otherwise try to launch
 
 

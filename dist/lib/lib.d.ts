@@ -23,7 +23,15 @@ export declare function responseToJSON(resp: Response): Promise<object | string>
  * - Otherwise return the response object on which we call stuff like `.blob()`
  */
 export declare function request<T = Response | fhirclient.JsonObject | string>(url: string | Request, options?: RequestInit): Promise<T>;
-export declare const getAndCache: (url: string, force?: boolean) => Promise<any>;
+export declare const getAndCache: (url: string, requestOptions?: RequestInit, force?: boolean) => Promise<any>;
+/**
+ * Fetches the conformance statement from the given base URL.
+ * Note that the result is cached in memory (until the page is reloaded in the
+ * browser) because it might have to be re-used by the client
+ * @param baseUrl The base URL of the FHIR server
+ * @param [requestOptions] Any options passed to the fetch call
+ */
+export declare function fetchConformanceStatement(baseUrl?: string, requestOptions?: RequestInit): Promise<fhirclient.FHIR.CapabilityStatement>;
 export declare function humanizeError(resp: fhirclient.JsonObject): Promise<void>;
 export declare function stripTrailingSlash(str: string): string;
 /**
@@ -54,9 +62,7 @@ export declare function absolute(path: string, baseUrl?: string): string;
  *     Defaults to all the upper and lower-case letters plus digits.
  */
 export declare function randomString(strLength?: number, charSet?: string): string;
-export declare function atob(str: string): string;
-export declare function btoa(str: string): string;
-export declare function jwtDecode(token: string): fhirclient.IDToken;
+export declare function jwtDecode(token: string, env: fhirclient.Adapter): fhirclient.IDToken;
 /**
  * Groups the observations by code. Returns a map that will look like:
  * ```js

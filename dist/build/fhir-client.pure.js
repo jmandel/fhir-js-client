@@ -1008,37 +1008,6 @@ process.umask = function() { return 0; };
 
 /***/ }),
 
-/***/ "./node_modules/webpack/buildin/global.js":
-/*!***********************************!*\
-  !*** (webpack)/buildin/global.js ***!
-  \***********************************/
-/*! all exports used */
-/***/ (function(module, exports) {
-
-var g;
-
-// This works in non-strict mode
-g = (function() {
-	return this;
-})();
-
-try {
-	// This works if eval is allowed (see CSP)
-	g = g || new Function("return this")();
-} catch (e) {
-	// This works if the window reference is available
-	if (typeof window === "object") g = window;
-}
-
-// g can still be undefined, but nothing to do about it...
-// We return undefined, instead of nothing here, so it's
-// easier to handle this case. if(!global) { ...}
-
-module.exports = g;
-
-
-/***/ }),
-
 /***/ "./src/Client.ts":
 /*!***********************!*\
   !*** ./src/Client.ts ***!
@@ -1057,8 +1026,6 @@ const lib_1 = __webpack_require__(/*! ./lib */ "./src/lib.ts");
 
 const strings_1 = __webpack_require__(/*! ./strings */ "./src/strings.ts");
 
-const smart_1 = __webpack_require__(/*! ./smart */ "./src/smart.ts");
-
 const settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts"); // $lab:coverage:off$
 // @ts-ignore
 // eslint-disable-next-line no-undef
@@ -1070,8 +1037,7 @@ const {
 
 const debug = lib_1.debug.extend("client");
 /**
- * Adds patient context to requestOptions object to be used with
- * fhirclient.Client.request
+ * Adds patient context to requestOptions object to be used with `Client.request`
  * @param requestOptions Can be a string URL (relative to the serviceUrl), or an
  * object which will be passed to fetch()
  * @param client Current FHIR client object containing patient context
@@ -1092,7 +1058,7 @@ async function contextualize(requestOptions, client) {
       throw new Error(`Cannot filter "${resourceType}" resources by patient`);
     }
 
-    const conformance = await smart_1.fetchConformanceStatement(client.state.serverUrl);
+    const conformance = await lib_1.fetchConformanceStatement(client.state.serverUrl);
     const searchParam = lib_1.getPatientParam(conformance, resourceType);
 
     _url.searchParams.set(searchParam, client.patient.id);
@@ -1435,7 +1401,7 @@ class Client {
         return null;
       }
 
-      return lib_1.jwtDecode(idToken);
+      return lib_1.jwtDecode(idToken, this.environment);
     }
 
     if (this.state.authorizeUri) {
@@ -1510,7 +1476,7 @@ class Client {
     } = this.state;
 
     if (username && password) {
-      return "Basic " + lib_1.btoa(username + ":" + password);
+      return "Basic " + this.environment.btoa(username + ":" + password);
     }
 
     return null;
@@ -1806,12 +1772,12 @@ class Client {
   }
   /**
    * Returns a promise that will be resolved with the fhir version as defined
-   * in the conformance statement.
+   * in the CapabilityStatement.
    */
 
 
   getFhirVersion() {
-    return smart_1.fetchFhirVersion(this.state.serverUrl);
+    return lib_1.fetchConformanceStatement(this.state.serverUrl).then(metadata => metadata.fhirVersion);
   }
   /**
    * Returns a promise that will be resolved with the numeric fhir version
@@ -1902,80 +1868,6 @@ exports.default = HttpError;
 
 /***/ }),
 
-/***/ "./src/adapters/BaseAdapter.ts":
-/*!*************************************!*\
-  !*** ./src/adapters/BaseAdapter.ts ***!
-  \*************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-const smart_1 = __webpack_require__(/*! ../smart */ "./src/smart.ts");
-
-const Client_1 = __webpack_require__(/*! ../Client */ "./src/Client.ts");
-/**
- * This is the abstract base class that adapters must inherit. It just a
- * collection of environment-specific methods that subclasses have to implement.
- */
-
-
-class BaseAdapter {
-  /**
-   * @param options Environment-specific options
-   */
-  constructor(options = {}) {
-    this.options = {
-      // Replaces the browser's current URL
-      // using window.history.replaceState API or by reloading.
-      replaceBrowserHistory: true,
-      // When set to true, this variable will fully utilize
-      // HTML5 sessionStorage API.
-      // This variable can be overridden to false by setting
-      // FHIR.oauth2.settings.fullSessionStorageSupport = false.
-      // When set to false, the sessionStorage will be keyed
-      // by a state variable. This is to allow the embedded IE browser
-      // instances instantiated on a single thread to continue to
-      // function without having sessionStorage data shared
-      // across the embedded IE instances.
-      fullSessionStorageSupport: true,
-      ...options
-    };
-  }
-
-  relative(path) {
-    return new URL(path, this.getUrl().href).href;
-  }
-  /**
-   * Creates and returns adapter-aware SMART api. Not that while the shape of
-   * the returned object is well known, the arguments to this function are not.
-   * Those who override this method are free to require any environment-specific
-   * arguments. For example in node we will need a request, a response and
-   * optionally a storage or storage factory function.
-   */
-
-
-  getSmartApi() {
-    return {
-      ready: (...args) => smart_1.ready(this, ...args),
-      authorize: options => smart_1.authorize(this, options),
-      init: (...args) => smart_1.init(this, ...args),
-      client: state => new Client_1.default(this, state),
-      options: this.options
-    };
-  }
-
-}
-
-exports.default = BaseAdapter;
-
-/***/ }),
-
 /***/ "./src/adapters/BrowserAdapter.ts":
 /*!****************************************!*\
   !*** ./src/adapters/BrowserAdapter.ts ***!
@@ -1993,27 +1885,54 @@ Object.defineProperty(exports, "__esModule", {
 
 /* global fhir */
 
-const BrowserStorage_1 = __webpack_require__(/*! ../storage/BrowserStorage */ "./src/storage/BrowserStorage.ts");
+const smart_1 = __webpack_require__(/*! ../smart */ "./src/smart.ts");
 
-const BaseAdapter_1 = __webpack_require__(/*! ./BaseAdapter */ "./src/adapters/BaseAdapter.ts");
+const Client_1 = __webpack_require__(/*! ../Client */ "./src/Client.ts");
+
+const BrowserStorage_1 = __webpack_require__(/*! ../storage/BrowserStorage */ "./src/storage/BrowserStorage.ts");
 /**
  * Browser Adapter
  */
 
 
-class BrowserAdapter extends BaseAdapter_1.default {
-  constructor() {
-    super(...arguments);
+class BrowserAdapter {
+  /**
+   * @param options Environment-specific options
+   */
+  constructor(options = {}) {
     /**
      * Stores the URL instance associated with this adapter
      */
-
     this._url = null;
     /**
      * Holds the Storage instance associated with this instance
      */
 
     this._storage = null;
+    this.options = {
+      // Replaces the browser's current URL
+      // using window.history.replaceState API or by reloading.
+      replaceBrowserHistory: true,
+      // When set to true, this variable will fully utilize
+      // HTML5 sessionStorage API.
+      // This variable can be overridden to false by setting
+      // FHIR.oauth2.settings.fullSessionStorageSupport = false.
+      // When set to false, the sessionStorage will be keyed
+      // by a state variable. This is to allow the embedded IE browser
+      // instances instantiated on a single thread to continue to
+      // function without having sessionStorage data shared
+      // across the embedded IE instances.
+      fullSessionStorageSupport: true,
+      ...options
+    };
+  }
+  /**
+   * Given a relative path, returns an absolute url using the instance base URL
+   */
+
+
+  relative(path) {
+    return new URL(path, this.getUrl().href).href;
   }
   /**
    * In browsers we need to be able to (dynamically) check if fhir.js is
@@ -2061,9 +1980,48 @@ class BrowserAdapter extends BaseAdapter_1.default {
 
     return this._storage;
   }
+  /**
+   * Returns a reference to the AbortController constructor. In browsers,
+   * AbortController will always be available as global (native or polyfilled)
+   */
 
-  static smart(options) {
-    return new BrowserAdapter(options).getSmartApi();
+
+  getAbortController() {
+    return AbortController;
+  }
+  /**
+   * ASCII string to Base64
+   */
+
+
+  atob(str) {
+    return window.atob(str);
+  }
+  /**
+   * Base64 to ASCII string
+   */
+
+
+  btoa(str) {
+    return window.btoa(str);
+  }
+  /**
+   * Creates and returns adapter-aware SMART api. Not that while the shape of
+   * the returned object is well known, the arguments to this function are not.
+   * Those who override this method are free to require any environment-specific
+   * arguments. For example in node we will need a request, a response and
+   * optionally a storage or storage factory function.
+   */
+
+
+  getSmartApi() {
+    return {
+      ready: (...args) => smart_1.ready(this, ...args),
+      authorize: options => smart_1.authorize(this, options),
+      init: (...args) => smart_1.init(this, ...args),
+      client: state => new Client_1.default(this, state),
+      options: this.options
+    };
   }
 
 }
@@ -2082,21 +2040,19 @@ exports.default = BrowserAdapter;
 "use strict";
 
 /* eslint-env browser */
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-}); // In Browsers we create an adapter, get the SMART api from it and build the
+// In Browsers we create an adapter, get the SMART api from it and build the
 // global FHIR object
 
 const BrowserAdapter_1 = __webpack_require__(/*! ../adapters/BrowserAdapter */ "./src/adapters/BrowserAdapter.ts");
 
+const adapter = new BrowserAdapter_1.default();
 const {
   ready,
   authorize,
   init,
   client,
   options
-} = BrowserAdapter_1.default.smart(); // We have two kinds of browser builds - "pure" for new browsers and "legacy"
+} = adapter.getSmartApi(); // We have two kinds of browser builds - "pure" for new browsers and "legacy"
 // for old ones. In pure builds we assume that the browser supports everything
 // we need. In legacy mode, the library also acts as a polyfill. Babel will
 // automatically polyfill everything except "fetch", which we have to handle
@@ -2104,10 +2060,11 @@ const {
 // @ts-ignore
 // eslint-disable-next-line no-undef
 
-if (false) {} // $lab:coverage:off$
+if (false) {} // $lab:coverage:off
 
 
-exports.default = {
+const FHIR = {
+  AbortController: window.AbortController,
   client,
   oauth2: {
     settings: options,
@@ -2115,7 +2072,8 @@ exports.default = {
     authorize,
     init
   }
-}; // $lab:coverage:on$
+};
+module.exports = FHIR; // $lab:coverage:on$
 
 /***/ }),
 
@@ -2127,7 +2085,7 @@ exports.default = {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(global) {
+
 /*
  * This file contains some shared functions. The are used by other modules, but
  * are defined here so that tests can import this library and test them.
@@ -2221,15 +2179,32 @@ exports.request = request;
 
 exports.getAndCache = (() => {
   const cache = {};
-  return (url, force = "development" === "test") => {
+  return (url, requestOptions, force = "development" === "test") => {
     if (force || !cache[url]) {
-      cache[url] = request(url);
+      cache[url] = request(url, requestOptions);
       return cache[url];
     }
 
     return Promise.resolve(cache[url]);
   };
 })();
+/**
+ * Fetches the conformance statement from the given base URL.
+ * Note that the result is cached in memory (until the page is reloaded in the
+ * browser) because it might have to be re-used by the client
+ * @param baseUrl The base URL of the FHIR server
+ * @param [requestOptions] Any options passed to the fetch call
+ */
+
+
+function fetchConformanceStatement(baseUrl = "/", requestOptions) {
+  const url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
+  return exports.getAndCache(url, requestOptions).catch(ex => {
+    throw new Error(`Failed to fetch the conformance statement from "${url}". ${ex}`);
+  });
+}
+
+exports.fetchConformanceStatement = fetchConformanceStatement;
 
 async function humanizeError(resp) {
   let msg = `${resp.status} ${resp.statusText}\nURL: ${resp.url}`;
@@ -2351,35 +2326,9 @@ function randomString(strLength = 8, charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef
 
 exports.randomString = randomString;
 
-function atob(str) {
-  if (isBrowser()) {
-    // eslint-disable-next-line no-undef
-    return window.atob(str);
-  } // The "global." makes Webpack understand that it doesn't have to include
-  // the Buffer code in the bundle
-
-
-  return global.Buffer.from(str, "base64").toString("ascii");
-}
-
-exports.atob = atob;
-
-function btoa(str) {
-  if (isBrowser()) {
-    // eslint-disable-next-line no-undef
-    return window.btoa(str);
-  } // The "global." makes Webpack understand that it doesn't have to include
-  // the Buffer code in the bundle
-
-
-  return global.Buffer.from(str).toString("base64");
-}
-
-exports.btoa = btoa;
-
-function jwtDecode(token) {
+function jwtDecode(token, env) {
   const payload = token.split(".")[1];
-  return JSON.parse(atob(payload));
+  return JSON.parse(env.atob(payload));
 }
 
 exports.jwtDecode = jwtDecode;
@@ -2532,7 +2481,6 @@ function getPatientParam(conformance, resourceType) {
 }
 
 exports.getPatientParam = getPatientParam;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
 
@@ -2606,39 +2554,12 @@ Object.defineProperty(exports, "__esModule", {
 
 const lib_1 = __webpack_require__(/*! ./lib */ "./src/lib.ts");
 
+const Client_1 = __webpack_require__(/*! ./Client */ "./src/Client.ts");
+
 const settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts");
 
 exports.KEY = settings_1.SMART_KEY;
 const debug = lib_1.debug.extend("oauth2");
-/**
- * Creates and returns a Client instance.
- * Note that this is done within a function to postpone the "./Client" import
- * and avoid cyclic dependency.
- * @param env The adapter
- * @param state The client state or baseUrl
- */
-
-function createClient(env, state) {
-  const Client = __webpack_require__(/*! ./Client */ "./src/Client.ts").default;
-
-  return new Client(env, state);
-}
-/**
- * Fetches the conformance statement from the given base URL.
- * Note that the result is cached in memory (until the page is reloaded in the
- * browser) because it might have to be re-used by the client
- * @param baseUrl The base URL of the FHIR server
- */
-
-
-function fetchConformanceStatement(baseUrl = "/") {
-  const url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
-  return lib_1.getAndCache(url).catch(ex => {
-    throw new Error(`Failed to fetch the conformance statement from "${url}". ${ex}`);
-  });
-}
-
-exports.fetchConformanceStatement = fetchConformanceStatement;
 /**
  * Fetches the well-known json file from the given base URL.
  * Note that the result is cached in memory (until the page is reloaded in the
@@ -2646,33 +2567,17 @@ exports.fetchConformanceStatement = fetchConformanceStatement;
  * @param baseUrl The base URL of the FHIR server
  */
 
-function fetchWellKnownJson(baseUrl = "/") {
+function fetchWellKnownJson(baseUrl = "/", requestOptions) {
   const url = String(baseUrl).replace(/\/*$/, "/") + ".well-known/smart-configuration";
-  return lib_1.getAndCache(url).catch(ex => {
+  return lib_1.getAndCache(url, requestOptions).catch(ex => {
     throw new Error(`Failed to fetch the well-known json "${url}". ${ex.message}`);
   });
 }
 
 exports.fetchWellKnownJson = fetchWellKnownJson;
-/**
- * Fetch and return the FHIR version. This is done by fetching (and caching) the
- * CapabilityStatement of the FHIR server
- * @param [baseUrl] The base URL of the FHIR server
- */
 
-function fetchFhirVersion(baseUrl = "/") {
-  return fetchConformanceStatement(baseUrl).then(metadata => metadata.fhirVersion);
-}
-
-exports.fetchFhirVersion = fetchFhirVersion;
-/**
- * Given a fhir server returns an object with it's Oauth security endpoints that
- * we are interested in
- * @param [baseUrl] Fhir server base URL
- */
-
-function getSecurityExtensions(baseUrl = "/") {
-  return fetchWellKnownJson(baseUrl).then(meta => {
+function getSecurityExtensionsFromWellKnownJson(baseUrl = "/", requestOptions) {
+  return fetchWellKnownJson(baseUrl, requestOptions).then(meta => {
     if (!meta.authorization_endpoint || !meta.token_endpoint) {
       throw new Error("Invalid wellKnownJson");
     }
@@ -2682,9 +2587,13 @@ function getSecurityExtensions(baseUrl = "/") {
       authorizeUri: meta.authorization_endpoint,
       tokenUri: meta.token_endpoint
     };
-  }).catch(() => fetchConformanceStatement(baseUrl).then(metadata => {
+  });
+}
+
+function getSecurityExtensionsFromConformanceStatement(baseUrl = "/", requestOptions) {
+  return lib_1.fetchConformanceStatement(baseUrl, requestOptions).then(meta => {
     const nsUri = "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris";
-    const extensions = (lib_1.getPath(metadata || {}, "rest.0.security.extension") || []).filter(e => e.url === nsUri).map(o => o.extension)[0];
+    const extensions = (lib_1.getPath(meta || {}, "rest.0.security.extension") || []).filter(e => e.url === nsUri).map(o => o.extension)[0];
     const out = {
       registrationUri: "",
       authorizeUri: "",
@@ -2708,7 +2617,72 @@ function getSecurityExtensions(baseUrl = "/") {
     }
 
     return out;
-  }));
+  });
+}
+/**
+ * This works similarly to `Promise.any()`. The tasks are objects containing a
+ * request promise and it's AbortController. Returns a promise that will be
+ * resolved with the return value of the first successful request, or rejected
+ * with an aggregate error if all tasks fail. Any requests, other than the first
+ * one that succeeds will be aborted.
+ */
+
+
+function any(tasks) {
+  const len = tasks.length;
+  const errors = [];
+  let resolved = false;
+  return new Promise((resolve, reject) => {
+    function onSuccess(task, result) {
+      task.complete = true;
+
+      if (!resolved) {
+        resolved = true;
+        tasks.forEach(t => {
+          if (!t.complete) {
+            t.controller.abort();
+          }
+        });
+        resolve(result);
+      }
+    }
+
+    function onError(error) {
+      if (errors.push(error) === len) {
+        reject(new Error(errors.map(e => e.message).join("; ")));
+      }
+    }
+
+    tasks.forEach(t => {
+      t.promise.then(result => onSuccess(t, result), onError);
+    });
+  });
+}
+/**
+ * Given a FHIR server, returns an object with it's Oauth security endpoints
+ * that we are interested in. This will try to find the info in both the
+ * `CapabilityStatement` and the `.well-known/smart-configuration`. Whatever
+ * Arrives first will be used and the other request will be aborted.
+ * @param [baseUrl] Fhir server base URL
+ * @param [env] The Adapter
+ */
+
+
+function getSecurityExtensions(env, baseUrl = "/") {
+  const AbortController = env.getAbortController();
+  const abortController1 = new AbortController();
+  const abortController2 = new AbortController();
+  return any([{
+    controller: abortController1,
+    promise: getSecurityExtensionsFromWellKnownJson(baseUrl, {
+      signal: abortController1.signal
+    })
+  }, {
+    controller: abortController2,
+    promise: getSecurityExtensionsFromConformanceStatement(baseUrl, {
+      signal: abortController2.signal
+    })
+  }]);
 }
 
 exports.getSecurityExtensions = getSecurityExtensions;
@@ -2819,7 +2793,7 @@ async function authorize(env, params = {}, _noRedirect = false) {
   } // Get oauth endpoints and add them to the state
 
 
-  const extensions = await getSecurityExtensions(serverUrl);
+  const extensions = await getSecurityExtensions(env, serverUrl);
   Object.assign(state, extensions);
   await storage.set(stateKey, state); // If this happens to be an open server and there is no authorizeUri
 
@@ -2941,7 +2915,7 @@ async function completeAuth(env) {
     }
 
     debug("Preparing to exchange the code for access token...");
-    const requestOptions = buildTokenRequest(code, state);
+    const requestOptions = buildTokenRequest(env, code, state);
     debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
     // includes an access token or a message indicating that the
     // authorization request has been denied.
@@ -2968,7 +2942,7 @@ async function completeAuth(env) {
     await Storage.set(settings_1.SMART_KEY, key);
   }
 
-  const client = createClient(env, state);
+  const client = new Client_1.default(env, state);
   debug("Created client instance: %O", client);
   return client;
 }
@@ -2979,7 +2953,7 @@ exports.completeAuth = completeAuth;
  * creates it's configuration and returns it in a Promise.
  */
 
-function buildTokenRequest(code, state) {
+function buildTokenRequest(env, code, state) {
   const {
     redirectUri,
     clientSecret,
@@ -3014,7 +2988,7 @@ function buildTokenRequest(code, state) {
   // client_id and the password is the app’s client_secret (see example).
 
   if (clientSecret) {
-    requestOptions.headers.Authorization = "Basic " + lib_1.btoa(clientId + ":" + clientSecret);
+    requestOptions.headers.Authorization = "Basic " + env.btoa(clientId + ":" + clientSecret);
     debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
   } else {
     debug("No clientSecret found in state. Adding the clientId to the POST body");
@@ -3064,7 +3038,7 @@ async function init(env, options) {
   const cached = await storage.get(key);
 
   if (cached) {
-    return createClient(env, cached);
+    return new Client_1.default(env, cached);
   } // Otherwise try to launch
 
 
@@ -3168,5 +3142,5 @@ exports.default = {
 
 /***/ })
 
-/******/ })["default"];
+/******/ });
 //# sourceMappingURL=fhir-client.pure.js.map

@@ -1093,6 +1093,339 @@ module.exports = __webpack_require__(/*! regenerator-runtime */ "./node_modules/
 
 /***/ }),
 
+/***/ "./node_modules/abortcontroller-polyfill/dist/abortcontroller-polyfill-only.js":
+/*!*************************************************************************************!*\
+  !*** ./node_modules/abortcontroller-polyfill/dist/abortcontroller-polyfill-only.js ***!
+  \*************************************************************************************/
+/*! all exports used */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(global) {var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (factory) {
+   true ? !(__WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) :
+				__WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)) :
+  undefined;
+}((function () { 'use strict';
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  function _defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  function _createClass(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) _defineProperties(Constructor, staticProps);
+    return Constructor;
+  }
+
+  function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+      constructor: {
+        value: subClass,
+        writable: true,
+        configurable: true
+      }
+    });
+    if (superClass) _setPrototypeOf(subClass, superClass);
+  }
+
+  function _getPrototypeOf(o) {
+    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+      return o.__proto__ || Object.getPrototypeOf(o);
+    };
+    return _getPrototypeOf(o);
+  }
+
+  function _setPrototypeOf(o, p) {
+    _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+      o.__proto__ = p;
+      return o;
+    };
+
+    return _setPrototypeOf(o, p);
+  }
+
+  function _assertThisInitialized(self) {
+    if (self === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+
+    return self;
+  }
+
+  function _possibleConstructorReturn(self, call) {
+    if (call && (typeof call === "object" || typeof call === "function")) {
+      return call;
+    }
+
+    return _assertThisInitialized(self);
+  }
+
+  function _superPropBase(object, property) {
+    while (!Object.prototype.hasOwnProperty.call(object, property)) {
+      object = _getPrototypeOf(object);
+      if (object === null) break;
+    }
+
+    return object;
+  }
+
+  function _get(target, property, receiver) {
+    if (typeof Reflect !== "undefined" && Reflect.get) {
+      _get = Reflect.get;
+    } else {
+      _get = function _get(target, property, receiver) {
+        var base = _superPropBase(target, property);
+
+        if (!base) return;
+        var desc = Object.getOwnPropertyDescriptor(base, property);
+
+        if (desc.get) {
+          return desc.get.call(receiver);
+        }
+
+        return desc.value;
+      };
+    }
+
+    return _get(target, property, receiver || target);
+  }
+
+  var Emitter =
+  /*#__PURE__*/
+  function () {
+    function Emitter() {
+      _classCallCheck(this, Emitter);
+
+      Object.defineProperty(this, 'listeners', {
+        value: {},
+        writable: true,
+        configurable: true
+      });
+    }
+
+    _createClass(Emitter, [{
+      key: "addEventListener",
+      value: function addEventListener(type, callback) {
+        if (!(type in this.listeners)) {
+          this.listeners[type] = [];
+        }
+
+        this.listeners[type].push(callback);
+      }
+    }, {
+      key: "removeEventListener",
+      value: function removeEventListener(type, callback) {
+        if (!(type in this.listeners)) {
+          return;
+        }
+
+        var stack = this.listeners[type];
+
+        for (var i = 0, l = stack.length; i < l; i++) {
+          if (stack[i] === callback) {
+            stack.splice(i, 1);
+            return;
+          }
+        }
+      }
+    }, {
+      key: "dispatchEvent",
+      value: function dispatchEvent(event) {
+        var _this = this;
+
+        if (!(event.type in this.listeners)) {
+          return;
+        }
+
+        var debounce = function debounce(callback) {
+          setTimeout(function () {
+            return callback.call(_this, event);
+          });
+        };
+
+        var stack = this.listeners[event.type];
+
+        for (var i = 0, l = stack.length; i < l; i++) {
+          debounce(stack[i]);
+        }
+
+        return !event.defaultPrevented;
+      }
+    }]);
+
+    return Emitter;
+  }();
+
+  var AbortSignal =
+  /*#__PURE__*/
+  function (_Emitter) {
+    _inherits(AbortSignal, _Emitter);
+
+    function AbortSignal() {
+      var _this2;
+
+      _classCallCheck(this, AbortSignal);
+
+      _this2 = _possibleConstructorReturn(this, _getPrototypeOf(AbortSignal).call(this)); // Some versions of babel does not transpile super() correctly for IE <= 10, if the parent
+      // constructor has failed to run, then "this.listeners" will still be undefined and then we call
+      // the parent constructor directly instead as a workaround. For general details, see babel bug:
+      // https://github.com/babel/babel/issues/3041
+      // This hack was added as a fix for the issue described here:
+      // https://github.com/Financial-Times/polyfill-library/pull/59#issuecomment-477558042
+
+      if (!_this2.listeners) {
+        Emitter.call(_assertThisInitialized(_this2));
+      } // Compared to assignment, Object.defineProperty makes properties non-enumerable by default and
+      // we want Object.keys(new AbortController().signal) to be [] for compat with the native impl
+
+
+      Object.defineProperty(_assertThisInitialized(_this2), 'aborted', {
+        value: false,
+        writable: true,
+        configurable: true
+      });
+      Object.defineProperty(_assertThisInitialized(_this2), 'onabort', {
+        value: null,
+        writable: true,
+        configurable: true
+      });
+      return _this2;
+    }
+
+    _createClass(AbortSignal, [{
+      key: "toString",
+      value: function toString() {
+        return '[object AbortSignal]';
+      }
+    }, {
+      key: "dispatchEvent",
+      value: function dispatchEvent(event) {
+        if (event.type === 'abort') {
+          this.aborted = true;
+
+          if (typeof this.onabort === 'function') {
+            this.onabort.call(this, event);
+          }
+        }
+
+        _get(_getPrototypeOf(AbortSignal.prototype), "dispatchEvent", this).call(this, event);
+      }
+    }]);
+
+    return AbortSignal;
+  }(Emitter);
+  var AbortController =
+  /*#__PURE__*/
+  function () {
+    function AbortController() {
+      _classCallCheck(this, AbortController);
+
+      // Compared to assignment, Object.defineProperty makes properties non-enumerable by default and
+      // we want Object.keys(new AbortController()) to be [] for compat with the native impl
+      Object.defineProperty(this, 'signal', {
+        value: new AbortSignal(),
+        writable: true,
+        configurable: true
+      });
+    }
+
+    _createClass(AbortController, [{
+      key: "abort",
+      value: function abort() {
+        var event;
+
+        try {
+          event = new Event('abort');
+        } catch (e) {
+          if (typeof document !== 'undefined') {
+            if (!document.createEvent) {
+              // For Internet Explorer 8:
+              event = document.createEventObject();
+              event.type = 'abort';
+            } else {
+              // For Internet Explorer 11:
+              event = document.createEvent('Event');
+              event.initEvent('abort', false, false);
+            }
+          } else {
+            // Fallback where document isn't available:
+            event = {
+              type: 'abort',
+              bubbles: false,
+              cancelable: false
+            };
+          }
+        }
+
+        this.signal.dispatchEvent(event);
+      }
+    }, {
+      key: "toString",
+      value: function toString() {
+        return '[object AbortController]';
+      }
+    }]);
+
+    return AbortController;
+  }();
+
+  if (typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+    // These are necessary to make sure that we get correct output for:
+    // Object.prototype.toString.call(new AbortController())
+    AbortController.prototype[Symbol.toStringTag] = 'AbortController';
+    AbortSignal.prototype[Symbol.toStringTag] = 'AbortSignal';
+  }
+
+  function polyfillNeeded(self) {
+    if (self.__FORCE_INSTALL_ABORTCONTROLLER_POLYFILL) {
+      console.log('__FORCE_INSTALL_ABORTCONTROLLER_POLYFILL=true is set, will force install polyfill');
+      return true;
+    } // Note that the "unfetch" minimal fetch polyfill defines fetch() without
+    // defining window.Request, and this polyfill need to work on top of unfetch
+    // so the below feature detection needs the !self.AbortController part.
+    // The Request.prototype check is also needed because Safari versions 11.1.2
+    // up to and including 12.1.x has a window.AbortController present but still
+    // does NOT correctly implement abortable fetch:
+    // https://bugs.webkit.org/show_bug.cgi?id=174980#c2
+
+
+    return typeof self.Request === 'function' && !self.Request.prototype.hasOwnProperty('signal') || !self.AbortController;
+  }
+
+  (function (self) {
+
+    if (!polyfillNeeded(self)) {
+      return;
+    }
+
+    self.AbortController = AbortController;
+    self.AbortSignal = AbortSignal;
+  })(typeof self !== 'undefined' ? self : global);
+
+})));
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/a-function.js":
 /*!******************************************************!*\
   !*** ./node_modules/core-js/internals/a-function.js ***!
@@ -10020,8 +10353,6 @@ var lib_1 = __webpack_require__(/*! ./lib */ "./src/lib.ts");
 
 var strings_1 = __webpack_require__(/*! ./strings */ "./src/strings.ts");
 
-var smart_1 = __webpack_require__(/*! ./smart */ "./src/smart.ts");
-
 var settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts"); // $lab:coverage:off$
 // @ts-ignore
 // eslint-disable-next-line no-undef
@@ -10033,8 +10364,7 @@ var _ref = typeof FHIRCLIENT_PURE !== "undefined" ? window : __webpack_require__
 
 var debug = lib_1.debug.extend("client");
 /**
- * Adds patient context to requestOptions object to be used with
- * fhirclient.Client.request
+ * Adds patient context to requestOptions object to be used with `Client.request`
  * @param requestOptions Can be a string URL (relative to the serviceUrl), or an
  * object which will be passed to fetch()
  * @param client Current FHIR client object containing patient context
@@ -10092,7 +10422,7 @@ function _contextualize() {
 
                       case 5:
                         _context7.next = 7;
-                        return smart_1.fetchConformanceStatement(client.state.serverUrl);
+                        return lib_1.fetchConformanceStatement(client.state.serverUrl);
 
                       case 7:
                         conformance = _context7.sent;
@@ -10497,7 +10827,7 @@ function () {
         return null;
       }
 
-      return lib_1.jwtDecode(idToken);
+      return lib_1.jwtDecode(idToken, this.environment);
     }
 
     if (this.state.authorizeUri) {
@@ -10571,7 +10901,7 @@ function () {
         password = _this$state2.password;
 
     if (username && password) {
-      return "Basic " + lib_1.btoa(username + ":" + password);
+      return "Basic " + this.environment.btoa(username + ":" + password);
     }
 
     return null;
@@ -11064,12 +11394,14 @@ function () {
   }
   /**
    * Returns a promise that will be resolved with the fhir version as defined
-   * in the conformance statement.
+   * in the CapabilityStatement.
    */
   ;
 
   _proto.getFhirVersion = function getFhirVersion() {
-    return smart_1.fetchFhirVersion(this.state.serverUrl);
+    return lib_1.fetchConformanceStatement(this.state.serverUrl).then(function (metadata) {
+      return metadata.fhirVersion;
+    });
   }
   /**
    * Returns a promise that will be resolved with the numeric fhir version
@@ -11181,15 +11513,17 @@ exports.default = HttpError;
 
 /***/ }),
 
-/***/ "./src/adapters/BaseAdapter.ts":
-/*!*************************************!*\
-  !*** ./src/adapters/BaseAdapter.ts ***!
-  \*************************************/
+/***/ "./src/adapters/BrowserAdapter.ts":
+/*!****************************************!*\
+  !*** ./src/adapters/BrowserAdapter.ts ***!
+  \****************************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/interopRequireDefault.js");
 
 __webpack_require__(/*! core-js/modules/es.array.concat */ "./node_modules/core-js/modules/es.array.concat.js");
 
@@ -11205,30 +11539,45 @@ __webpack_require__(/*! core-js/modules/web.dom-collections.iterator */ "./node_
 
 __webpack_require__(/*! core-js/modules/web.url */ "./node_modules/core-js/modules/web.url.js");
 
+var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ "./node_modules/@babel/runtime/helpers/createClass.js"));
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+/* eslint-env browser */
+
+/* global fhir */
 
 var smart_1 = __webpack_require__(/*! ../smart */ "./src/smart.ts");
 
 var Client_1 = __webpack_require__(/*! ../Client */ "./src/Client.ts");
+
+var BrowserStorage_1 = __webpack_require__(/*! ../storage/BrowserStorage */ "./src/storage/BrowserStorage.ts");
 /**
- * This is the abstract base class that adapters must inherit. It just a
- * collection of environment-specific methods that subclasses have to implement.
+ * Browser Adapter
  */
 
 
-var BaseAdapter =
+var BrowserAdapter =
 /*#__PURE__*/
 function () {
   /**
    * @param options Environment-specific options
    */
-  function BaseAdapter(options) {
+  function BrowserAdapter(options) {
     if (options === void 0) {
       options = {};
     }
 
+    /**
+     * Stores the URL instance associated with this adapter
+     */
+    this._url = null;
+    /**
+     * Holds the Storage instance associated with this instance
+     */
+
+    this._storage = null;
     this.options = Object.assign({
       // Replaces the browser's current URL
       // using window.history.replaceState API or by reloading.
@@ -11245,11 +11594,80 @@ function () {
       fullSessionStorageSupport: true
     }, options);
   }
+  /**
+   * Given a relative path, returns an absolute url using the instance base URL
+   */
 
-  var _proto = BaseAdapter.prototype;
+
+  var _proto = BrowserAdapter.prototype;
 
   _proto.relative = function relative(path) {
     return new URL(path, this.getUrl().href).href;
+  }
+  /**
+   * In browsers we need to be able to (dynamically) check if fhir.js is
+   * included in the page. If it is, it should have created a "fhir" variable
+   * in the global scope.
+   */
+  ;
+
+  /**
+   * Given the current environment, this method must return the current url
+   * as URL instance
+   */
+  _proto.getUrl = function getUrl() {
+    if (!this._url) {
+      this._url = new URL(location + "");
+    }
+
+    return this._url;
+  }
+  /**
+   * Given the current environment, this method must redirect to the given
+   * path
+   */
+  ;
+
+  _proto.redirect = function redirect(to) {
+    location.href = to;
+  }
+  /**
+   * Returns a BrowserStorage object which is just a wrapper around
+   * sessionStorage
+   */
+  ;
+
+  _proto.getStorage = function getStorage() {
+    if (!this._storage) {
+      this._storage = new BrowserStorage_1.default();
+    }
+
+    return this._storage;
+  }
+  /**
+   * Returns a reference to the AbortController constructor. In browsers,
+   * AbortController will always be available as global (native or polyfilled)
+   */
+  ;
+
+  _proto.getAbortController = function getAbortController() {
+    return AbortController;
+  }
+  /**
+   * ASCII string to Base64
+   */
+  ;
+
+  _proto.atob = function atob(str) {
+    return window.atob(str);
+  }
+  /**
+   * Base64 to ASCII string
+   */
+  ;
+
+  _proto.btoa = function btoa(str) {
+    return window.btoa(str);
   }
   /**
    * Creates and returns adapter-aware SMART api. Not that while the shape of
@@ -11288,122 +11706,6 @@ function () {
     };
   };
 
-  return BaseAdapter;
-}();
-
-exports.default = BaseAdapter;
-
-/***/ }),
-
-/***/ "./src/adapters/BrowserAdapter.ts":
-/*!****************************************!*\
-  !*** ./src/adapters/BrowserAdapter.ts ***!
-  \****************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-
-__webpack_require__(/*! core-js/modules/es.array.iterator */ "./node_modules/core-js/modules/es.array.iterator.js");
-
-__webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
-
-__webpack_require__(/*! core-js/modules/es.string.iterator */ "./node_modules/core-js/modules/es.string.iterator.js");
-
-__webpack_require__(/*! core-js/modules/web.dom-collections.iterator */ "./node_modules/core-js/modules/web.dom-collections.iterator.js");
-
-__webpack_require__(/*! core-js/modules/web.url */ "./node_modules/core-js/modules/web.url.js");
-
-var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ "./node_modules/@babel/runtime/helpers/createClass.js"));
-
-var _inheritsLoose2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/inheritsLoose */ "./node_modules/@babel/runtime/helpers/inheritsLoose.js"));
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-/* eslint-env browser */
-
-/* global fhir */
-
-var BrowserStorage_1 = __webpack_require__(/*! ../storage/BrowserStorage */ "./src/storage/BrowserStorage.ts");
-
-var BaseAdapter_1 = __webpack_require__(/*! ./BaseAdapter */ "./src/adapters/BaseAdapter.ts");
-/**
- * Browser Adapter
- */
-
-
-var BrowserAdapter =
-/*#__PURE__*/
-function (_BaseAdapter_1$defaul) {
-  (0, _inheritsLoose2.default)(BrowserAdapter, _BaseAdapter_1$defaul);
-
-  function BrowserAdapter() {
-    var _this;
-
-    _this = _BaseAdapter_1$defaul.apply(this, arguments) || this;
-    /**
-     * Stores the URL instance associated with this adapter
-     */
-
-    _this._url = null;
-    /**
-     * Holds the Storage instance associated with this instance
-     */
-
-    _this._storage = null;
-    return _this;
-  }
-  /**
-   * In browsers we need to be able to (dynamically) check if fhir.js is
-   * included in the page. If it is, it should have created a "fhir" variable
-   * in the global scope.
-   */
-
-
-  var _proto = BrowserAdapter.prototype;
-
-  /**
-   * Given the current environment, this method must return the current url
-   * as URL instance
-   */
-  _proto.getUrl = function getUrl() {
-    if (!this._url) {
-      this._url = new URL(location + "");
-    }
-
-    return this._url;
-  }
-  /**
-   * Given the current environment, this method must redirect to the given
-   * path
-   */
-  ;
-
-  _proto.redirect = function redirect(to) {
-    location.href = to;
-  }
-  /**
-   * Returns a BrowserStorage object which is just a wrapper around
-   * sessionStorage
-   */
-  ;
-
-  _proto.getStorage = function getStorage() {
-    if (!this._storage) {
-      this._storage = new BrowserStorage_1.default();
-    }
-
-    return this._storage;
-  };
-
-  BrowserAdapter.smart = function smart(options) {
-    return new BrowserAdapter(options).getSmartApi();
-  };
-
   (0, _createClass2.default)(BrowserAdapter, [{
     key: "fhir",
     get: function get() {
@@ -11412,7 +11714,7 @@ function (_BaseAdapter_1$defaul) {
     }
   }]);
   return BrowserAdapter;
-}(BaseAdapter_1.default);
+}();
 
 exports.default = BrowserAdapter;
 
@@ -11428,24 +11730,23 @@ exports.default = BrowserAdapter;
 "use strict";
 
 /* eslint-env browser */
+// In Browsers we create an adapter, get the SMART api from it and build the
+// global FHIR object
 
 __webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
 
 __webpack_require__(/*! core-js/modules/es.promise */ "./node_modules/core-js/modules/es.promise.js");
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-}); // In Browsers we create an adapter, get the SMART api from it and build the
-// global FHIR object
-
 var BrowserAdapter_1 = __webpack_require__(/*! ../adapters/BrowserAdapter */ "./src/adapters/BrowserAdapter.ts");
 
-var _BrowserAdapter_1$def = BrowserAdapter_1.default.smart(),
-    ready = _BrowserAdapter_1$def.ready,
-    authorize = _BrowserAdapter_1$def.authorize,
-    init = _BrowserAdapter_1$def.init,
-    client = _BrowserAdapter_1$def.client,
-    options = _BrowserAdapter_1$def.options; // We have two kinds of browser builds - "pure" for new browsers and "legacy"
+var adapter = new BrowserAdapter_1.default();
+
+var _adapter$getSmartApi = adapter.getSmartApi(),
+    ready = _adapter$getSmartApi.ready,
+    authorize = _adapter$getSmartApi.authorize,
+    init = _adapter$getSmartApi.init,
+    client = _adapter$getSmartApi.client,
+    options = _adapter$getSmartApi.options; // We have two kinds of browser builds - "pure" for new browsers and "legacy"
 // for old ones. In pure builds we assume that the browser supports everything
 // we need. In legacy mode, the library also acts as a polyfill. Babel will
 // automatically polyfill everything except "fetch", which we have to handle
@@ -11457,16 +11758,19 @@ var _BrowserAdapter_1$def = BrowserAdapter_1.default.smart(),
 if (typeof FHIRCLIENT_PURE == "undefined") {
   var fetch = __webpack_require__(/*! cross-fetch */ "./node_modules/cross-fetch/dist/browser-ponyfill.js");
 
+  __webpack_require__(/*! abortcontroller-polyfill/dist/abortcontroller-polyfill-only */ "./node_modules/abortcontroller-polyfill/dist/abortcontroller-polyfill-only.js");
+
   if (!window.fetch) {
     window.fetch = fetch.default;
     window.Headers = fetch.Headers;
     window.Request = fetch.Request;
     window.Response = fetch.Response;
   }
-} // $lab:coverage:off$
+} // $lab:coverage:off
 
 
-exports.default = {
+var FHIR = {
+  AbortController: window.AbortController,
   client: client,
   oauth2: {
     settings: options,
@@ -11474,7 +11778,8 @@ exports.default = {
     authorize: authorize,
     init: init
   }
-}; // $lab:coverage:on$
+};
+module.exports = FHIR; // $lab:coverage:on$
 
 /***/ }),
 
@@ -11486,7 +11791,7 @@ exports.default = {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(global) {
+
 /*
  * This file contains some shared functions. The are used by other modules, but
  * are defined here so that tests can import this library and test them.
@@ -11511,8 +11816,6 @@ __webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/c
 __webpack_require__(/*! core-js/modules/es.promise */ "./node_modules/core-js/modules/es.promise.js");
 
 __webpack_require__(/*! core-js/modules/es.regexp.exec */ "./node_modules/core-js/modules/es.regexp.exec.js");
-
-__webpack_require__(/*! core-js/modules/es.regexp.to-string */ "./node_modules/core-js/modules/es.regexp.to-string.js");
 
 __webpack_require__(/*! core-js/modules/es.string.match */ "./node_modules/core-js/modules/es.string.match.js");
 
@@ -11651,19 +11954,40 @@ exports.request = request;
 
 exports.getAndCache = function () {
   var cache = {};
-  return function (url, force) {
+  return function (url, requestOptions, force) {
     if (force === void 0) {
       force = "development" === "test";
     }
 
     if (force || !cache[url]) {
-      cache[url] = request(url);
+      cache[url] = request(url, requestOptions);
       return cache[url];
     }
 
     return Promise.resolve(cache[url]);
   };
 }();
+/**
+ * Fetches the conformance statement from the given base URL.
+ * Note that the result is cached in memory (until the page is reloaded in the
+ * browser) because it might have to be re-used by the client
+ * @param baseUrl The base URL of the FHIR server
+ * @param [requestOptions] Any options passed to the fetch call
+ */
+
+
+function fetchConformanceStatement(baseUrl, requestOptions) {
+  if (baseUrl === void 0) {
+    baseUrl = "/";
+  }
+
+  var url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
+  return exports.getAndCache(url, requestOptions).catch(function (ex) {
+    throw new Error("Failed to fetch the conformance statement from \"" + url + "\". " + ex);
+  });
+}
+
+exports.fetchConformanceStatement = fetchConformanceStatement;
 
 function humanizeError(_x2) {
   return _humanizeError.apply(this, arguments);
@@ -11841,35 +12165,9 @@ function randomString(strLength, charSet) {
 
 exports.randomString = randomString;
 
-function atob(str) {
-  if (isBrowser()) {
-    // eslint-disable-next-line no-undef
-    return window.atob(str);
-  } // The "global." makes Webpack understand that it doesn't have to include
-  // the Buffer code in the bundle
-
-
-  return global.Buffer.from(str, "base64").toString("ascii");
-}
-
-exports.atob = atob;
-
-function btoa(str) {
-  if (isBrowser()) {
-    // eslint-disable-next-line no-undef
-    return window.btoa(str);
-  } // The "global." makes Webpack understand that it doesn't have to include
-  // the Buffer code in the bundle
-
-
-  return global.Buffer.from(str).toString("base64");
-}
-
-exports.btoa = btoa;
-
-function jwtDecode(token) {
+function jwtDecode(token, env) {
   var payload = token.split(".")[1];
-  return JSON.parse(atob(payload));
+  return JSON.parse(env.atob(payload));
 }
 
 exports.jwtDecode = jwtDecode;
@@ -12037,7 +12335,6 @@ function getPatientParam(conformance, resourceType) {
 }
 
 exports.getPatientParam = getPatientParam;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
 
@@ -12139,43 +12436,12 @@ Object.defineProperty(exports, "__esModule", {
 
 var lib_1 = __webpack_require__(/*! ./lib */ "./src/lib.ts");
 
+var Client_1 = __webpack_require__(/*! ./Client */ "./src/Client.ts");
+
 var settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts");
 
 exports.KEY = settings_1.SMART_KEY;
 var debug = lib_1.debug.extend("oauth2");
-/**
- * Creates and returns a Client instance.
- * Note that this is done within a function to postpone the "./Client" import
- * and avoid cyclic dependency.
- * @param env The adapter
- * @param state The client state or baseUrl
- */
-
-function createClient(env, state) {
-  var Client = __webpack_require__(/*! ./Client */ "./src/Client.ts").default;
-
-  return new Client(env, state);
-}
-/**
- * Fetches the conformance statement from the given base URL.
- * Note that the result is cached in memory (until the page is reloaded in the
- * browser) because it might have to be re-used by the client
- * @param baseUrl The base URL of the FHIR server
- */
-
-
-function fetchConformanceStatement(baseUrl) {
-  if (baseUrl === void 0) {
-    baseUrl = "/";
-  }
-
-  var url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
-  return lib_1.getAndCache(url).catch(function (ex) {
-    throw new Error("Failed to fetch the conformance statement from \"" + url + "\". " + ex);
-  });
-}
-
-exports.fetchConformanceStatement = fetchConformanceStatement;
 /**
  * Fetches the well-known json file from the given base URL.
  * Note that the result is cached in memory (until the page is reloaded in the
@@ -12183,47 +12449,25 @@ exports.fetchConformanceStatement = fetchConformanceStatement;
  * @param baseUrl The base URL of the FHIR server
  */
 
-function fetchWellKnownJson(baseUrl) {
+function fetchWellKnownJson(baseUrl, requestOptions) {
   if (baseUrl === void 0) {
     baseUrl = "/";
   }
 
   var url = String(baseUrl).replace(/\/*$/, "/") + ".well-known/smart-configuration";
-  return lib_1.getAndCache(url).catch(function (ex) {
+  return lib_1.getAndCache(url, requestOptions).catch(function (ex) {
     throw new Error("Failed to fetch the well-known json \"" + url + "\". " + ex.message);
   });
 }
 
 exports.fetchWellKnownJson = fetchWellKnownJson;
-/**
- * Fetch and return the FHIR version. This is done by fetching (and caching) the
- * CapabilityStatement of the FHIR server
- * @param [baseUrl] The base URL of the FHIR server
- */
 
-function fetchFhirVersion(baseUrl) {
+function getSecurityExtensionsFromWellKnownJson(baseUrl, requestOptions) {
   if (baseUrl === void 0) {
     baseUrl = "/";
   }
 
-  return fetchConformanceStatement(baseUrl).then(function (metadata) {
-    return metadata.fhirVersion;
-  });
-}
-
-exports.fetchFhirVersion = fetchFhirVersion;
-/**
- * Given a fhir server returns an object with it's Oauth security endpoints that
- * we are interested in
- * @param [baseUrl] Fhir server base URL
- */
-
-function getSecurityExtensions(baseUrl) {
-  if (baseUrl === void 0) {
-    baseUrl = "/";
-  }
-
-  return fetchWellKnownJson(baseUrl).then(function (meta) {
+  return fetchWellKnownJson(baseUrl, requestOptions).then(function (meta) {
     if (!meta.authorization_endpoint || !meta.token_endpoint) {
       throw new Error("Invalid wellKnownJson");
     }
@@ -12233,39 +12477,118 @@ function getSecurityExtensions(baseUrl) {
       authorizeUri: meta.authorization_endpoint,
       tokenUri: meta.token_endpoint
     };
-  }).catch(function () {
-    return fetchConformanceStatement(baseUrl).then(function (metadata) {
-      var nsUri = "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris";
-      var extensions = (lib_1.getPath(metadata || {}, "rest.0.security.extension") || []).filter(function (e) {
-        return e.url === nsUri;
-      }).map(function (o) {
-        return o.extension;
-      })[0];
-      var out = {
-        registrationUri: "",
-        authorizeUri: "",
-        tokenUri: ""
-      };
+  });
+}
 
-      if (extensions) {
-        extensions.forEach(function (ext) {
-          if (ext.url === "register") {
-            out.registrationUri = ext.valueUri;
-          }
+function getSecurityExtensionsFromConformanceStatement(baseUrl, requestOptions) {
+  if (baseUrl === void 0) {
+    baseUrl = "/";
+  }
 
-          if (ext.url === "authorize") {
-            out.authorizeUri = ext.valueUri;
-          }
+  return lib_1.fetchConformanceStatement(baseUrl, requestOptions).then(function (meta) {
+    var nsUri = "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris";
+    var extensions = (lib_1.getPath(meta || {}, "rest.0.security.extension") || []).filter(function (e) {
+      return e.url === nsUri;
+    }).map(function (o) {
+      return o.extension;
+    })[0];
+    var out = {
+      registrationUri: "",
+      authorizeUri: "",
+      tokenUri: ""
+    };
 
-          if (ext.url === "token") {
-            out.tokenUri = ext.valueUri;
+    if (extensions) {
+      extensions.forEach(function (ext) {
+        if (ext.url === "register") {
+          out.registrationUri = ext.valueUri;
+        }
+
+        if (ext.url === "authorize") {
+          out.authorizeUri = ext.valueUri;
+        }
+
+        if (ext.url === "token") {
+          out.tokenUri = ext.valueUri;
+        }
+      });
+    }
+
+    return out;
+  });
+}
+/**
+ * This works similarly to `Promise.any()`. The tasks are objects containing a
+ * request promise and it's AbortController. Returns a promise that will be
+ * resolved with the return value of the first successful request, or rejected
+ * with an aggregate error if all tasks fail. Any requests, other than the first
+ * one that succeeds will be aborted.
+ */
+
+
+function any(tasks) {
+  var len = tasks.length;
+  var errors = [];
+  var resolved = false;
+  return new Promise(function (resolve, reject) {
+    function onSuccess(task, result) {
+      task.complete = true;
+
+      if (!resolved) {
+        resolved = true;
+        tasks.forEach(function (t) {
+          if (!t.complete) {
+            t.controller.abort();
           }
         });
+        resolve(result);
       }
+    }
 
-      return out;
+    function onError(error) {
+      if (errors.push(error) === len) {
+        reject(new Error(errors.map(function (e) {
+          return e.message;
+        }).join("; ")));
+      }
+    }
+
+    tasks.forEach(function (t) {
+      t.promise.then(function (result) {
+        return onSuccess(t, result);
+      }, onError);
     });
   });
+}
+/**
+ * Given a FHIR server, returns an object with it's Oauth security endpoints
+ * that we are interested in. This will try to find the info in both the
+ * `CapabilityStatement` and the `.well-known/smart-configuration`. Whatever
+ * Arrives first will be used and the other request will be aborted.
+ * @param [baseUrl] Fhir server base URL
+ * @param [env] The Adapter
+ */
+
+
+function getSecurityExtensions(env, baseUrl) {
+  if (baseUrl === void 0) {
+    baseUrl = "/";
+  }
+
+  var AbortController = env.getAbortController();
+  var abortController1 = new AbortController();
+  var abortController2 = new AbortController();
+  return any([{
+    controller: abortController1,
+    promise: getSecurityExtensionsFromWellKnownJson(baseUrl, {
+      signal: abortController1.signal
+    })
+  }, {
+    controller: abortController2,
+    promise: getSecurityExtensionsFromConformanceStatement(baseUrl, {
+      signal: abortController2.signal
+    })
+  }]);
 }
 
 exports.getSecurityExtensions = getSecurityExtensions;
@@ -12404,7 +12727,7 @@ function _authorize() {
 
           case 34:
             _context.next = 36;
-            return getSecurityExtensions(serverUrl);
+            return getSecurityExtensions(env, serverUrl);
 
           case 36:
             extensions = _context.sent;
@@ -12593,7 +12916,7 @@ function _completeAuth() {
 
           case 28:
             debug("Preparing to exchange the code for access token...");
-            requestOptions = buildTokenRequest(code, state);
+            requestOptions = buildTokenRequest(env, code, state);
             debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
             // includes an access token or a message indicating that the
             // authorization request has been denied.
@@ -12639,7 +12962,7 @@ function _completeAuth() {
             return Storage.set(settings_1.SMART_KEY, key);
 
           case 47:
-            client = createClient(env, state);
+            client = new Client_1.default(env, state);
             debug("Created client instance: %O", client);
             return _context2.abrupt("return", client);
 
@@ -12659,7 +12982,7 @@ exports.completeAuth = completeAuth;
  * creates it's configuration and returns it in a Promise.
  */
 
-function buildTokenRequest(code, state) {
+function buildTokenRequest(env, code, state) {
   var redirectUri = state.redirectUri,
       clientSecret = state.clientSecret,
       tokenUri = state.tokenUri,
@@ -12692,7 +13015,7 @@ function buildTokenRequest(code, state) {
   // client_id and the password is the app’s client_secret (see example).
 
   if (clientSecret) {
-    requestOptions.headers.Authorization = "Basic " + lib_1.btoa(clientId + ":" + clientSecret);
+    requestOptions.headers.Authorization = "Basic " + env.btoa(clientId + ":" + clientSecret);
     debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
   } else {
     debug("No clientSecret found in state. Adding the clientId to the POST body");
@@ -12801,7 +13124,7 @@ function _init() {
               break;
             }
 
-            return _context4.abrupt("return", createClient(env, cached));
+            return _context4.abrupt("return", new Client_1.default(env, cached));
 
           case 17:
             return _context4.abrupt("return", authorize(env, options).then(function () {
@@ -13006,5 +13329,5 @@ exports.default = {
 
 /***/ })
 
-/******/ })["default"];
+/******/ });
 //# sourceMappingURL=fhir-client.js.map

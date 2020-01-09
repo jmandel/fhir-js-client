@@ -157,26 +157,26 @@ describe("Lib", () => {
         });
     });
 
-    describe("btoa", () => {
-        it ("works in node", () => {
-            expect(lib.btoa("abc")).to.equal("YWJj");
-        });
+    // describe("btoa", () => {
+    //     it ("works in node", () => {
+    //         expect(lib.btoa("abc")).to.equal("YWJj");
+    //     });
 
-        it ("works in browser", () => {
-            // @ts-ignore
-            global.window = 1;
-            try {
-                expect(lib.btoa("abc")).to.equal("YWJj");
-            } catch (ex) {
-                throw ex;
-            } finally {
-                // @ts-ignore
-                delete global.window;
-            }
-        });
-    });
+    //     it ("works in browser", () => {
+    //         // @ts-ignore
+    //         global.window = 1;
+    //         try {
+    //             expect(lib.btoa("abc")).to.equal("YWJj");
+    //         } catch (ex) {
+    //             throw ex;
+    //         } finally {
+    //             // @ts-ignore
+    //             delete global.window;
+    //         }
+    //     });
+    // });
 
-    describe("getAndCache", () => {
+    describe("Request Functions", () => {
 
         let mockDataServer: any, mockUrl: string;
 
@@ -211,42 +211,74 @@ describe("Lib", () => {
             }
         });
 
+        describe("getAndCache", () => {
+            it ("returns second hit from cache", async () => {
+                mockServer.mock({
+                    headers: { "content-type": "text/plain" },
+                    status: 200,
+                    body: "abc"
+                });
 
-        it ("returns second hit from cache", async () => {
-            mockServer.mock({
-                headers: { "content-type": "text/plain" },
-                status: 200,
-                body: "abc"
+                const result = await lib.getAndCache(mockUrl, {}, false);
+                expect(result).to.equal("abc");
+
+                const result2 = await lib.getAndCache(mockUrl, {}, false);
+                expect(result2).to.equal("abc");
             });
 
-            const result = await lib.getAndCache(mockUrl, false);
-            expect(result).to.equal("abc");
+            it ("can force-load and update the cache", async () => {
+                mockServer.mock({
+                    headers: { "content-type": "text/plain" },
+                    status: 200,
+                    body: "abc"
+                });
 
-            const result2 = await lib.getAndCache(mockUrl, false);
-            expect(result2).to.equal("abc");
+                const result = await lib.getAndCache(mockUrl, {}, false);
+                expect(result).to.equal("abc");
+
+                mockServer.mock({
+                    headers: { "content-type": "text/plain" },
+                    status: 200,
+                    body: "123"
+                });
+
+                const result2 = await lib.getAndCache(mockUrl, {}, false);
+                expect(result2).to.equal("abc");
+
+                const result3 = await lib.getAndCache(mockUrl, {}, true);
+                expect(result3).to.equal("123");
+            });
         });
 
-        it ("can force-load and update the cache", async () => {
-            mockServer.mock({
-                headers: { "content-type": "text/plain" },
-                status: 200,
-                body: "abc"
+        describe("fetchConformanceStatement", () => {
+
+            it ("rejects bad baseUrl values", async () => {
+                await expect(lib.fetchConformanceStatement("")).to.reject();
+                // @ts-ignore
+                await expect(lib.fetchConformanceStatement(null)).to.reject();
+                await expect(lib.fetchConformanceStatement("whatever")).to.reject();
             });
 
-            const result = await lib.getAndCache(mockUrl, false);
-            expect(result).to.equal("abc");
-
-            mockServer.mock({
-                headers: { "content-type": "text/plain" },
-                status: 200,
-                body: "123"
+            it("works", async () => {
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Conformance"
+                    }
+                });
+                const conformance = await lib.fetchConformanceStatement(mockUrl);
+                // @ts-ignore
+                expect(conformance).to.equal({resourceType: "Conformance"});
             });
 
-            const result2 = await lib.getAndCache(mockUrl, false);
-            expect(result2).to.equal("abc");
-
-            const result3 = await lib.getAndCache(mockUrl, true);
-            expect(result3).to.equal("123");
+            it("rejects on error", async () => {
+                mockServer.mock({
+                    status: 404,
+                    body: "Not Found"
+                });
+                await expect(lib.fetchConformanceStatement(mockUrl)).to.reject(Error, /Not Found/);
+            });
         });
     });
 });

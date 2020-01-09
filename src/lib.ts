@@ -79,14 +79,31 @@ export function request<T = Response | fhirclient.JsonObject | string>(
 export const getAndCache = (() => {
     const cache: fhirclient.JsonObject = {};
 
-    return (url: string, force = process.env.NODE_ENV === "test") => {
+    return (url: string, requestOptions?: RequestInit, force = process.env.NODE_ENV === "test") => {
         if (force || !cache[url]) {
-            cache[url] = request(url);
+            cache[url] = request(url, requestOptions);
             return cache[url];
         }
         return Promise.resolve(cache[url]);
     };
-})() as (url: string, force?: boolean) => Promise<any>;
+})() as (url: string, requestOptions?: RequestInit, force?: boolean) => Promise<any>;
+
+/**
+ * Fetches the conformance statement from the given base URL.
+ * Note that the result is cached in memory (until the page is reloaded in the
+ * browser) because it might have to be re-used by the client
+ * @param baseUrl The base URL of the FHIR server
+ * @param [requestOptions] Any options passed to the fetch call
+ */
+export function fetchConformanceStatement(baseUrl = "/", requestOptions?: RequestInit): Promise<fhirclient.FHIR.CapabilityStatement>
+{
+    const url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
+    return getAndCache(url, requestOptions).catch((ex: Error) => {
+        throw new Error(
+            `Failed to fetch the conformance statement from "${url}". ${ex}`
+        );
+    });
+}
 
 export async function humanizeError(resp: fhirclient.JsonObject) {
     let msg = `${resp.status} ${resp.statusText}\nURL: ${resp.url}`;
@@ -197,34 +214,10 @@ export function randomString(
     return result.join("");
 }
 
-export function atob(str: string): string
-{
-    if (isBrowser()) {
-        // eslint-disable-next-line no-undef
-        return window.atob(str);
-    }
-
-    // The "global." makes Webpack understand that it doesn't have to include
-    // the Buffer code in the bundle
-    return global.Buffer.from(str, "base64").toString("ascii");
-}
-
-export function btoa(str: string): string
-{
-    if (isBrowser()) {
-        // eslint-disable-next-line no-undef
-        return window.btoa(str);
-    }
-
-    // The "global." makes Webpack understand that it doesn't have to include
-    // the Buffer code in the bundle
-    return global.Buffer.from(str).toString("base64");
-}
-
-export function jwtDecode(token: string): fhirclient.IDToken
+export function jwtDecode(token: string, env: fhirclient.Adapter): fhirclient.IDToken
 {
     const payload = token.split(".")[1];
-    return JSON.parse(atob(payload));
+    return JSON.parse(env.atob(payload));
 }
 
 /**

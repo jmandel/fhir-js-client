@@ -12,8 +12,6 @@ const lib_1 = require("./lib");
 
 const strings_1 = require("./strings");
 
-const smart_1 = require("./smart");
-
 const settings_1 = require("./settings"); // $lab:coverage:off$
 // @ts-ignore
 // eslint-disable-next-line no-undef
@@ -25,8 +23,7 @@ const {
 
 const debug = lib_1.debug.extend("client");
 /**
- * Adds patient context to requestOptions object to be used with
- * fhirclient.Client.request
+ * Adds patient context to requestOptions object to be used with `Client.request`
  * @param requestOptions Can be a string URL (relative to the serviceUrl), or an
  * object which will be passed to fetch()
  * @param client Current FHIR client object containing patient context
@@ -47,7 +44,7 @@ async function contextualize(requestOptions, client) {
       throw new Error(`Cannot filter "${resourceType}" resources by patient`);
     }
 
-    const conformance = await smart_1.fetchConformanceStatement(client.state.serverUrl);
+    const conformance = await lib_1.fetchConformanceStatement(client.state.serverUrl);
     const searchParam = lib_1.getPatientParam(conformance, resourceType);
 
     _url.searchParams.set(searchParam, client.patient.id);
@@ -390,7 +387,7 @@ class Client {
         return null;
       }
 
-      return lib_1.jwtDecode(idToken);
+      return lib_1.jwtDecode(idToken, this.environment);
     }
 
     if (this.state.authorizeUri) {
@@ -465,7 +462,7 @@ class Client {
     } = this.state;
 
     if (username && password) {
-      return "Basic " + lib_1.btoa(username + ":" + password);
+      return "Basic " + this.environment.btoa(username + ":" + password);
     }
 
     return null;
@@ -760,12 +757,12 @@ class Client {
   }
   /**
    * Returns a promise that will be resolved with the fhir version as defined
-   * in the conformance statement.
+   * in the CapabilityStatement.
    */
 
 
   getFhirVersion() {
-    return smart_1.fetchFhirVersion(this.state.serverUrl);
+    return lib_1.fetchConformanceStatement(this.state.serverUrl).then(metadata => metadata.fhirVersion);
   }
   /**
    * Returns a promise that will be resolved with the numeric fhir version

@@ -376,37 +376,6 @@ describe ("Complete authorization", () => {
 
 describe("smart", () => {
 
-    describe("fetchConformanceStatement", () => {
-
-        it ("rejects bad baseUrl values", async () => {
-            await expect(smart.fetchConformanceStatement("")).to.reject();
-            // @ts-ignore
-            await expect(smart.fetchConformanceStatement(null)).to.reject();
-            await expect(smart.fetchConformanceStatement("whatever")).to.reject();
-        });
-
-        it("works", async () => {
-            mockServer.mock({
-                headers: { "content-type": "application/json" },
-                status: 200,
-                body: {
-                    resourceType: "Conformance"
-                }
-            });
-            const conformance = await smart.fetchConformanceStatement(mockUrl);
-            // @ts-ignore
-            expect(conformance).to.equal({resourceType: "Conformance"});
-        });
-
-        it("rejects on error", async () => {
-            mockServer.mock({
-                status: 404,
-                body: "Not Found"
-            });
-            await expect(smart.fetchConformanceStatement(mockUrl)).to.reject(Error, /Not Found/);
-        });
-    });
-
     describe("fetchWellKnownJson", () => {
         it("works", async () => {
             mockServer.mock({
@@ -442,7 +411,17 @@ describe("smart", () => {
                 }
             });
 
-            const result = await smart.getSecurityExtensions(mockUrl);
+            // mockServer.mock({
+            //     headers: { "content-type": "application/json" },
+            //     status: 200,
+            //     body: {
+            //         registration_endpoint : "https://my-register-uri",
+            //         authorization_endpoint: "https://my-authorize-uri",
+            //         token_endpoint        : "https://my-token-uri"
+            //     }
+            // });
+
+            const result = await smart.getSecurityExtensions(new BrowserEnv(), mockUrl);
             expect(result).to.equal({
                 registrationUri : "https://my-register-uri",
                 authorizeUri    : "https://my-authorize-uri",
@@ -490,7 +469,7 @@ describe("smart", () => {
                 }
             });
 
-            const result = await smart.getSecurityExtensions(mockUrl);
+            const result = await smart.getSecurityExtensions(new BrowserEnv(), mockUrl);
             expect(result).to.equal({
                 registrationUri : "https://my-registration-uri",
                 authorizeUri    : "https://my-authorize-uri",
@@ -534,7 +513,7 @@ describe("smart", () => {
                 }
             });
 
-            const result = await smart.getSecurityExtensions(mockUrl);
+            const result = await smart.getSecurityExtensions(new BrowserEnv(), mockUrl);
             expect(result).to.equal({
                 registrationUri : "",
                 authorizeUri    : "https://my-authorize-uri",
@@ -553,7 +532,7 @@ describe("smart", () => {
                 body: {rest: [{}]}
             });
 
-            const result = await smart.getSecurityExtensions(mockUrl);
+            const result = await smart.getSecurityExtensions(new BrowserEnv(), mockUrl);
             expect(result).to.equal({
                 registrationUri : "",
                 authorizeUri    : "",
@@ -572,7 +551,7 @@ describe("smart", () => {
                 // body: {}
             });
 
-            const result = await smart.getSecurityExtensions(mockUrl);
+            const result = await smart.getSecurityExtensions(new BrowserEnv(), mockUrl);
             expect(result).to.equal({
                 registrationUri : "",
                 authorizeUri    : "",
@@ -593,7 +572,7 @@ describe("smart", () => {
                 status: 400,
                 body: {}
             });
-            await expect(smart.getSecurityExtensions(mockUrl)).to.reject();
+            await expect(smart.getSecurityExtensions(new BrowserEnv(), mockUrl)).to.reject();
         });
     });
 
@@ -676,18 +655,18 @@ describe("smart", () => {
 
         it ("rejects with missing state.redirectUri", () => {
             // @ts-ignore
-            expect(() => smart.buildTokenRequest("whatever", {}))
+            expect(() => smart.buildTokenRequest(new BrowserEnv(), "whatever", {}))
                 .to.throw(Error, "Missing state.redirectUri");
         });
         it ("rejects with missing state.tokenUri", () => {
             // @ts-ignore
-            expect(() => smart.buildTokenRequest("whatever", {
+            expect(() => smart.buildTokenRequest(new BrowserEnv(), "whatever", {
                 redirectUri: "whatever"
             })).to.throw(Error, "Missing state.tokenUri");
         });
         it ("rejects with missing state.clientId", () => {
             // @ts-ignore
-            expect(() => smart.buildTokenRequest("whatever", {
+            expect(() => smart.buildTokenRequest(new BrowserEnv(), "whatever", {
                 redirectUri: "whatever",
                 tokenUri: "whatever"
             })).to.throw(Error, "Missing state.clientId");
@@ -704,6 +683,10 @@ describe("smart", () => {
                     authorization_endpoint: mockUrl,
                     token_endpoint: mockUrl
                 }
+            });
+
+            mockServer.mock({
+                status: 404
             });
 
             mockServer.mock({
@@ -776,6 +759,10 @@ describe("smart", () => {
                     authorization_endpoint: mockUrl,
                     token_endpoint: mockUrl
                 }
+            });
+
+            mockServer.mock({
+                status: 404
             });
 
             mockServer.mock({
