@@ -480,45 +480,53 @@ class Client {
   }
   /**
    * @param resource A FHIR resource to be created
+   * @param [requestOptions] Any options to be passed to the fetch call.
+   * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
+   * but other headers can be added.
    */
 
 
-  create(resource) {
-    return this.request({
+  create(resource, requestOptions = {}) {
+    return this.request(Object.assign(Object.assign({}, requestOptions), {
       url: `${resource.resourceType}`,
       method: "POST",
       body: JSON.stringify(resource),
-      headers: {
+      headers: Object.assign(Object.assign({}, requestOptions.headers || {}), {
         "Content-Type": "application/fhir+json"
-      }
-    });
+      })
+    }));
   }
   /**
    * @param resource A FHIR resource to be updated
+   * @param [requestOptions] Any options to be passed to the fetch call.
+   * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
+   * but other headers can be added.
    */
 
 
-  update(resource) {
-    return this.request({
+  update(resource, requestOptions = {}) {
+    return this.request(Object.assign(Object.assign({}, requestOptions), {
       url: `${resource.resourceType}/${resource.id}`,
       method: "PUT",
       body: JSON.stringify(resource),
-      headers: {
+      headers: Object.assign(Object.assign({}, requestOptions.headers || {}), {
         "Content-Type": "application/fhir+json"
-      }
-    });
+      })
+    }));
   }
   /**
    * @param url Relative URI of the FHIR resource to be deleted
    * (format: `resourceType/id`)
+   * @param [requestOptions] Any options (except `method` which will be fixed
+   * to `DELETE`) to be passed to the fetch call.
    */
 
 
-  delete(url) {
-    return this.request({
+  delete(url, requestOptions = {}) {
+    return this.request(Object.assign(Object.assign({}, requestOptions), {
       url,
       method: "DELETE"
-    });
+    }));
   }
   /**
    * @param requestOptions Can be a string URL (relative to the serviceUrl),

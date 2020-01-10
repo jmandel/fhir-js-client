@@ -10955,45 +10955,65 @@ function () {
   }()
   /**
    * @param resource A FHIR resource to be created
+   * @param [requestOptions] Any options to be passed to the fetch call.
+   * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
+   * but other headers can be added.
    */
   ;
 
-  _proto.create = function create(resource) {
-    return this.request({
+  _proto.create = function create(resource, requestOptions) {
+    if (requestOptions === void 0) {
+      requestOptions = {};
+    }
+
+    return this.request(Object.assign({}, requestOptions, {
       url: "" + resource.resourceType,
       method: "POST",
       body: JSON.stringify(resource),
-      headers: {
+      headers: Object.assign({}, requestOptions.headers || {}, {
         "Content-Type": "application/fhir+json"
-      }
-    });
+      })
+    }));
   }
   /**
    * @param resource A FHIR resource to be updated
+   * @param [requestOptions] Any options to be passed to the fetch call.
+   * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
+   * but other headers can be added.
    */
   ;
 
-  _proto.update = function update(resource) {
-    return this.request({
+  _proto.update = function update(resource, requestOptions) {
+    if (requestOptions === void 0) {
+      requestOptions = {};
+    }
+
+    return this.request(Object.assign({}, requestOptions, {
       url: resource.resourceType + "/" + resource.id,
       method: "PUT",
       body: JSON.stringify(resource),
-      headers: {
+      headers: Object.assign({}, requestOptions.headers || {}, {
         "Content-Type": "application/fhir+json"
-      }
-    });
+      })
+    }));
   }
   /**
    * @param url Relative URI of the FHIR resource to be deleted
    * (format: `resourceType/id`)
+   * @param [requestOptions] Any options (except `method` which will be fixed
+   * to `DELETE`) to be passed to the fetch call.
    */
   ;
 
-  _proto.delete = function _delete(url) {
-    return this.request({
+  _proto.delete = function _delete(url, requestOptions) {
+    if (requestOptions === void 0) {
+      requestOptions = {};
+    }
+
+    return this.request(Object.assign({}, requestOptions, {
       url: url,
       method: "DELETE"
-    });
+    }));
   }
   /**
    * @param requestOptions Can be a string URL (relative to the serviceUrl),

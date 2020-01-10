@@ -128,13 +128,13 @@ client.request(
 );
 ```
 
-### client.create(resource: Object) `Promise<Object>`
+### client.create(resource: Object, requestOptions = {}) `Promise<Object>`
 Wrapper for `client.request` implementing the FHIR resource create operation.
 
-### client.update(resource: Object) `Promise<Object>`
+### client.update(resource: Object, requestOptions = {}) `Promise<Object>`
 Wrapper for `client.request` implementing the FHIR resource update operation.
 
-### client.delete(uri: String) `Promise<Object>`
+### client.delete(uri: String, requestOptions = {}) `Promise<Object>`
 Wrapper for `client.request` implementing the FHIR resource delete operation.
 
 ***Example:***
@@ -251,3 +251,48 @@ client.getPath(data, "c.1.x") // => 5
 client.getPath(data, "c.2.1") // => 2
 client.getPath(data, "a.b.c.d.e") // => undefined
 ```
+
+## Aborting Requests
+It is possible to abort HTTP requests since version `2.2.0`. The implementation
+is based on the standard `AbortController` approach. You need to create an
+instance of `AbortController` and pass it's `AbortSignal` as request option as
+shown below.
+
+### When used as library
+When the bundle is included via `script` tag in a web page, the `AbortController`
+class will be globally available (we include a polyfill). Then an abort-able
+request could look like this:
+```js
+const client = new FHIR.client("https://r3.smarthealthit.org");
+const abortController = new AbortController();
+const signal = abortController.signal;
+
+// Any of these should work
+client.request({ url: "Patient", signal });
+client.create(resource, { signal });
+client.update(resource, { signal });
+client.delete("Patient/123", { signal });
+
+// Later...
+abortController.abort();
+```
+
+### When used as module
+If the library is used as module (with a bundler or in NodeJS), the usage is the
+same, except that the global scope is not polyfilled. You can include your own polyfill for `AbortController`. However, we are already using `AbortController` internally and made it accessible via the entry point:
+```js
+import FHIR, { AbortController } from "fhirclient"
+
+const client = new FHIR.client("https://r3.smarthealthit.org");
+const abortController = new AbortController();
+
+client.request({
+    url: "Patient",
+    signal: abortController.signal
+}).then(console.log, console.error);
+
+// Later...
+abortController.abort();
+```
+
+

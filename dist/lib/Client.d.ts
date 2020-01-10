@@ -64,17 +64,25 @@ export default class Client {
     private _clearState;
     /**
      * @param resource A FHIR resource to be created
+     * @param [requestOptions] Any options to be passed to the fetch call.
+     * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
+     * but other headers can be added.
      */
-    create(resource: fhirclient.FHIR.Resource): Promise<fhirclient.FHIR.Resource>;
+    create(resource: fhirclient.FHIR.Resource, requestOptions?: RequestInit): Promise<fhirclient.FHIR.Resource>;
     /**
      * @param resource A FHIR resource to be updated
+     * @param [requestOptions] Any options to be passed to the fetch call.
+     * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
+     * but other headers can be added.
      */
-    update(resource: fhirclient.FHIR.Resource): Promise<fhirclient.FHIR.Resource>;
+    update(resource: fhirclient.FHIR.Resource, requestOptions?: RequestInit): Promise<fhirclient.FHIR.Resource>;
     /**
      * @param url Relative URI of the FHIR resource to be deleted
      * (format: `resourceType/id`)
+     * @param [requestOptions] Any options (except `method` which will be fixed
+     * to `DELETE`) to be passed to the fetch call.
      */
-    delete(url: string): Promise<fhirclient.FHIR.Resource>;
+    delete(url: string, requestOptions?: RequestInit): Promise<fhirclient.FHIR.Resource>;
     /**
      * @param requestOptions Can be a string URL (relative to the serviceUrl),
      * or an object which will be passed to fetch()

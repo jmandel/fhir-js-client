@@ -490,14 +490,19 @@ export default class Client
 
     /**
      * @param resource A FHIR resource to be created
+     * @param [requestOptions] Any options to be passed to the fetch call.
+     * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
+     * but other headers can be added.
      */
-    create(resource: fhirclient.FHIR.Resource): Promise<fhirclient.FHIR.Resource>
+    create(resource: fhirclient.FHIR.Resource, requestOptions: RequestInit = {}): Promise<fhirclient.FHIR.Resource>
     {
         return this.request<fhirclient.FHIR.Resource>({
+            ...requestOptions,
             url: `${resource.resourceType}`,
             method: "POST",
             body: JSON.stringify(resource),
             headers: {
+                ...requestOptions.headers || {},
                 "Content-Type": "application/fhir+json"
             }
         });
@@ -505,14 +510,19 @@ export default class Client
 
     /**
      * @param resource A FHIR resource to be updated
+     * @param [requestOptions] Any options to be passed to the fetch call.
+     * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
+     * but other headers can be added.
      */
-    update(resource: fhirclient.FHIR.Resource): Promise<fhirclient.FHIR.Resource>
+    update(resource: fhirclient.FHIR.Resource, requestOptions: RequestInit = {}): Promise<fhirclient.FHIR.Resource>
     {
         return this.request<fhirclient.FHIR.Resource>({
+            ...requestOptions,
             url: `${resource.resourceType}/${resource.id}`,
             method: "PUT",
             body: JSON.stringify(resource),
             headers: {
+                ...requestOptions.headers || {},
                 "Content-Type": "application/fhir+json"
             }
         });
@@ -521,10 +531,13 @@ export default class Client
     /**
      * @param url Relative URI of the FHIR resource to be deleted
      * (format: `resourceType/id`)
+     * @param [requestOptions] Any options (except `method` which will be fixed
+     * to `DELETE`) to be passed to the fetch call.
      */
-    delete(url: string): Promise<fhirclient.FHIR.Resource>
+    delete(url: string, requestOptions: RequestInit = {}): Promise<fhirclient.FHIR.Resource>
     {
         return this.request<fhirclient.FHIR.Resource>({
+            ...requestOptions,
             url,
             method: "DELETE"
         });
