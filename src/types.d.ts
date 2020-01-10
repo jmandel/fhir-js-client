@@ -19,8 +19,8 @@ declare namespace fhirclient {
          * will eventually be resolved with a Client instance that you can use
          * to query the fhir server.
          */
-        ready(onSuccess: (client: Client) => any, onError?: (error: Error) => any): Promise<any>;
         ready(): Promise<Client>;
+        ready(onSuccess: (client: Client) => any, onError?: (error: Error) => any): Promise<any>;
 
         /**
          * Starts the [SMART Launch Sequence](http://hl7.org/fhir/smart-app-launch/#smart-launch-sequence).

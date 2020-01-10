@@ -9,8 +9,8 @@ declare const FHIR: {
     oauth2: {
         settings: fhirclient.BrowserFHIRSettings;
         ready: {
-            (onSuccess: (client: Client) => any, onError?: (error: Error) => any): Promise<any>;
             (): Promise<Client>;
+            (onSuccess: (client: Client) => any, onError?: (error: Error) => any): Promise<any>;
         };
         authorize: (options: fhirclient.AuthorizeParams) => Promise<string | void>;
         init: (options: fhirclient.AuthorizeParams) => Promise<Client>;

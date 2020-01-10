@@ -5,7 +5,8 @@
 - Fixed some build errors (#68)
 - HapiJs users have new entry point `const smart = require("fhirclient/lib/entry/hapi")`
 - Better code coverage
-- Improved performance (#67) - work in progress
+- Improved performance (#67)
+- Added ability to [abort requests](http://docs.smarthealthit.org/client-js/client.html#aborting-requests)
 
 ## v2.1.1
 - Switched to ES modules (thanks to @kherock)
