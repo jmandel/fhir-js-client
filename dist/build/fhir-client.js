@@ -10616,9 +10616,15 @@ function () {
         return client.getPatientId();
       },
 
-      read: function read() {
+      read: function read(requestOptions) {
+        if (requestOptions === void 0) {
+          requestOptions = {};
+        }
+
         var id = _this.patient.id;
-        return id ? _this.request("Patient/" + id) : Promise.reject(new Error("Patient is not available"));
+        return id ? _this.request(Object.assign({}, requestOptions, {
+          url: "Patient/" + id
+        })) : Promise.reject(new Error("Patient is not available"));
       },
       request: function request(requestOptions, fhirOptions) {
         if (fhirOptions === void 0) {
@@ -10659,9 +10665,15 @@ function () {
         return client.getEncounterId();
       },
 
-      read: function read() {
+      read: function read(requestOptions) {
+        if (requestOptions === void 0) {
+          requestOptions = {};
+        }
+
         var id = _this.encounter.id;
-        return id ? _this.request("Encounter/" + id) : Promise.reject(new Error("Encounter is not available"));
+        return id ? _this.request(Object.assign({}, requestOptions, {
+          url: "Encounter/" + id
+        })) : Promise.reject(new Error("Encounter is not available"));
       }
     }; // user api ------------------------------------------------------------
 
@@ -10678,9 +10690,15 @@ function () {
         return client.getUserType();
       },
 
-      read: function read() {
+      read: function read(requestOptions) {
+        if (requestOptions === void 0) {
+          requestOptions = {};
+        }
+
         var fhirUser = _this.user.fhirUser;
-        return fhirUser ? _this.request(fhirUser) : Promise.reject(new Error("User is not available"));
+        return fhirUser ? _this.request(Object.assign({}, requestOptions, {
+          url: fhirUser
+        })) : Promise.reject(new Error("User is not available"));
       }
     }; // fhir.js api (attached automatically in browser)
     // ---------------------------------------------------------------------
@@ -11169,7 +11187,7 @@ function () {
               .then(function (data) {
                 if (!data) return data;
                 if (typeof data == "string") return data;
-                if (typeof data == "object" && data instanceof Response) return data; // Resolve References ------------------------------------------
+                if (data instanceof Response) return data; // Resolve References ------------------------------------------
 
                 return function () {
                   var _ref4 = (0, _asyncToGenerator2.default)(
@@ -11179,33 +11197,28 @@ function () {
                       while (1) {
                         switch (_context4.prev = _context4.next) {
                           case 0:
-                            if (!_data) {
-                              _context4.next = 8;
-                              break;
-                            }
-
                             if (!(_data.resourceType == "Bundle")) {
-                              _context4.next = 6;
+                              _context4.next = 5;
                               break;
                             }
 
-                            _context4.next = 4;
+                            _context4.next = 3;
                             return Promise.all((_data.entry || []).map(function (item) {
                               return resolveRefs(item.resource, options, _resolvedRefs, _this2);
                             }));
 
-                          case 4:
-                            _context4.next = 8;
+                          case 3:
+                            _context4.next = 7;
                             break;
 
-                          case 6:
-                            _context4.next = 8;
+                          case 5:
+                            _context4.next = 7;
                             return resolveRefs(_data, options, _resolvedRefs, _this2);
 
-                          case 8:
+                          case 7:
                             return _context4.abrupt("return", _data);
 
-                          case 9:
+                          case 8:
                           case "end":
                             return _context4.stop();
                         }

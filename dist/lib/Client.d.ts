@@ -5,17 +5,17 @@ export default class Client {
     environment: fhirclient.Adapter;
     patient: {
         id: string | null;
-        read: () => Promise<fhirclient.JsonObject>;
+        read: (requestOptions?: RequestInit) => Promise<fhirclient.JsonObject>;
         request: (requestOptions: string | URL | fhirclient.RequestOptions, fhirOptions?: fhirclient.FhirOptions) => Promise<fhirclient.JsonObject>;
         api?: fhirclient.JsonObject;
     };
     encounter: {
         id: string | null;
-        read: () => Promise<fhirclient.JsonObject>;
+        read: (requestOptions?: RequestInit) => Promise<fhirclient.JsonObject>;
     };
     user: {
         id: string | null;
-        read: () => Promise<fhirclient.JsonObject>;
+        read: (requestOptions?: RequestInit) => Promise<fhirclient.JsonObject>;
         fhirUser: string | null;
         resourceType: string | null;
     };

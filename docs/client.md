@@ -272,6 +272,10 @@ client.request({ url: "Patient", signal });
 client.create(resource, { signal });
 client.update(resource, { signal });
 client.delete("Patient/123", { signal });
+client.patient.read({ signal });
+client.patient.request({ signal, url: "Immunization" });
+client.encounter.read({ signal });
+client.user.read({ signal });
 
 // Later...
 abortController.abort();

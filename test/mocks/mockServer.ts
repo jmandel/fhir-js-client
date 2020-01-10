@@ -25,27 +25,29 @@ app.all("*", (req, res, next) => {
     }
     const settings = mocks.shift();
 
-    if (settings.headers) {
-        res.set(settings.headers);
-    }
+    setTimeout(() => {
+        if (settings.headers) {
+            res.set(settings.headers);
+        }
 
-    if (settings.status) {
-        res.status(settings.status);
-    }
+        if (settings.status) {
+            res.status(settings.status);
+        }
 
-    if (settings.body) {
-        res.send(
-            typeof settings.body == "object" ?
-                JSON.stringify(settings.body) :
-                settings.body
-        );
-    }
+        if (settings.body) {
+            res.send(
+                settings.body && typeof settings.body == "object" ?
+                    JSON.stringify(settings.body) :
+                    settings.body
+            );
+        }
 
-    if (settings.file) {
-        res.sendFile(settings.file, { root: __dirname });
-    } else {
-        res.end();
-    }
+        if (settings.file) {
+            res.sendFile(settings.file, { root: __dirname });
+        } else {
+            res.end();
+        }
+    }, settings._delay || 0);
 });
 
 app.use((err: Error, _req: Request, res: Response, _next: () => any) => {

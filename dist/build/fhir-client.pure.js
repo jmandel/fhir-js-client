@@ -1213,9 +1213,11 @@ class Client {
         return client.getPatientId();
       },
 
-      read: () => {
+      read: (requestOptions = {}) => {
         const id = this.patient.id;
-        return id ? this.request(`Patient/${id}`) : Promise.reject(new Error("Patient is not available"));
+        return id ? this.request({ ...requestOptions,
+          url: `Patient/${id}`
+        }) : Promise.reject(new Error("Patient is not available"));
       },
       request: (requestOptions, fhirOptions = {}) => {
         if (this.patient.id) {
@@ -1234,9 +1236,11 @@ class Client {
         return client.getEncounterId();
       },
 
-      read: () => {
+      read: (requestOptions = {}) => {
         const id = this.encounter.id;
-        return id ? this.request(`Encounter/${id}`) : Promise.reject(new Error("Encounter is not available"));
+        return id ? this.request({ ...requestOptions,
+          url: `Encounter/${id}`
+        }) : Promise.reject(new Error("Encounter is not available"));
       }
     }; // user api ------------------------------------------------------------
 
@@ -1253,9 +1257,11 @@ class Client {
         return client.getUserType();
       },
 
-      read: () => {
+      read: (requestOptions = {}) => {
         const fhirUser = this.user.fhirUser;
-        return fhirUser ? this.request(fhirUser) : Promise.reject(new Error("User is not available"));
+        return fhirUser ? this.request({ ...requestOptions,
+          url: fhirUser
+        }) : Promise.reject(new Error("User is not available"));
       }
     }; // fhir.js api (attached automatically in browser)
     // ---------------------------------------------------------------------
@@ -1638,15 +1644,13 @@ class Client {
     .then(data => {
       if (!data) return data;
       if (typeof data == "string") return data;
-      if (typeof data == "object" && data instanceof Response) return data; // Resolve References ------------------------------------------
+      if (data instanceof Response) return data; // Resolve References ------------------------------------------
 
       return (async _data => {
-        if (_data) {
-          if (_data.resourceType == "Bundle") {
-            await Promise.all((_data.entry || []).map(item => resolveRefs(item.resource, options, _resolvedRefs, this)));
-          } else {
-            await resolveRefs(_data, options, _resolvedRefs, this);
-          }
+        if (_data.resourceType == "Bundle") {
+          await Promise.all((_data.entry || []).map(item => resolveRefs(item.resource, options, _resolvedRefs, this)));
+        } else {
+          await resolveRefs(_data, options, _resolvedRefs, this);
         }
 
         return _data;

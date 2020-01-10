@@ -109,6 +109,35 @@ describe("FHIR.client", () => {
             });
         });
 
+        describe("can be aborted", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        patient: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
+                    }
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Patient",
+                        id: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
+                    },
+                    _delay: 10
+                });
+
+                const AbortController = env.getAbortController();
+                const abortController = new AbortController();
+                const task = client.patient.read({ signal: abortController.signal });
+                abortController.abort();
+                await expect(task).to.reject(
+                    Error, "The user aborted a request."
+                );
+            });
+        });
+
         const mock = {
             headers: { "content-type": "application/json" },
             status: 200,
@@ -387,6 +416,52 @@ describe("FHIR.client", () => {
             });
         });
 
+        describe("can be aborted", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        patient: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
+                    }
+                });
+
+                // Mock the conformance statement
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        rest: [{
+                            resource: [{
+                                type: "Observation",
+                                searchParam: [
+                                    { name: "patient" }
+                                ]
+                            }]
+                        }]
+                    },
+                    _delay: 10
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Observation",
+                        id: "whatever"
+                    },
+                    _delay: 10
+                });
+
+                const AbortController = env.getAbortController();
+                const abortController = new AbortController();
+                const task = client.patient.request({ url: "Observation", signal: abortController.signal });
+                abortController.abort();
+                await expect(task).to.reject(
+                    Error, "The user aborted a request."
+                );
+            });
+        });
+
         describe("works if the resource is Patient and _id param is supported", () => {
             crossPlatformTest(async (env) => {
                 const client = new Client(env, {
@@ -483,6 +558,32 @@ describe("FHIR.client", () => {
                 expect(encounter).to.equal({ id: "encounter-id" });
             });
         });
+
+        describe("can be aborted", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        encounter: "x"
+                    }
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: { id: "encounter-id" },
+                    _delay: 10
+                });
+
+                const AbortController = env.getAbortController();
+                const abortController = new AbortController();
+                const task = client.encounter.read({ signal: abortController.signal });
+                abortController.abort();
+                await expect(task).to.reject(
+                    Error, "The user aborted a request."
+                );
+            });
+        });
     });
 
     describe("user.read", () => {
@@ -517,6 +618,44 @@ describe("FHIR.client", () => {
                 "UgIJ6H18wiSJJHp6Plf_bapccAwxbx-zZCw";
                 const user = await client.user.read();
                 expect(user).to.equal({ id: "user-id" });
+            });
+        });
+
+        describe("can be aborted", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        id_token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9." +
+                        "eyJwcm9maWxlIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb2" +
+                        "5lci03MjA4MDQxNiIsImZoaXJVc2VyIjoiUHJhY3RpdGlvbmVyL3Nt" +
+                        "YXJ0LVByYWN0aXRpb25lci03MjA4MDQxNiIsInN1YiI6IjM2YTEwYm" +
+                        "M0ZDJhNzM1OGI0YWZkYWFhZjlhZjMyYmFjY2FjYmFhYmQxMDkxYmQ0" +
+                        "YTgwMjg0MmFkNWNhZGQxNzgiLCJpc3MiOiJodHRwOi8vbGF1bmNoLn" +
+                        "NtYXJ0aGVhbHRoaXQub3JnIiwiaWF0IjoxNTU5MzkyMjk1LCJleHAi" +
+                        "OjE1NTkzOTU4OTV9.niEs55G4AFJZtU_b9Y1Y6DQmXurUZZkh3WCud" +
+                        "ZgwvYasxVU8x3gJiX3jqONttqPhkh7418EFssCKnnaBlUDwsbhp7xd" +
+                        "WN4o1L1NvH4bp_R_zJ25F1s6jLmNm2Qp9LqU133PEdcRIqQPgBMyZB" +
+                        "WUTyxQ9ihKY1RAjlztAULQ3wKea-rfe0BXJZeUJBsQPzYCnbKY1dON" +
+                        "_NRd8N9pTImqf41MpIbEe7YEOHuirIb6HBpurhAHjTLDv1IuHpEAOx" +
+                        "pmtxVVHiVf-FYXzTFmn4cGe2PsNJfBl8R_zow2n6qaSANdvSxJDE4D" +
+                        "UgIJ6H18wiSJJHp6Plf_bapccAwxbx-zZCw"
+                    }
+                });
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: { id: "user-id" },
+                    _delay: 10
+                });
+
+                const AbortController = env.getAbortController();
+                const abortController = new AbortController();
+                const task = client.user.read({ signal: abortController.signal });
+                abortController.abort();
+                await expect(task).to.reject(
+                    Error, "The user aborted a request."
+                );
             });
         });
     });
@@ -654,6 +793,78 @@ describe("FHIR.client", () => {
                     mockServer.mock(mock);
                     const result = await client.request("/Patient/patient-id");
                     expect(result).to.include({ id: "patient-id" });
+                });
+            }
+        });
+
+        describe ("works with URL", () => {
+            const mock = {
+                headers: { "content-type": "application/json" },
+                status: 200,
+                body: { id: "patient-id" }
+            };
+            const tests: fhirclient.JsonObject = {
+                "works in the browser": new BrowserEnv(),
+                "works on the server" : new ServerEnv()
+            };
+
+            // tslint:disable-next-line:forin
+            for (const name in tests) {
+                it (name, async () => {
+                    const client = new Client(tests[name], { serverUrl: mockUrl });
+                    mockServer.mock(mock);
+                    const result = await client.request(new URL("/Patient/patient-id", mockUrl));
+                    expect(result).to.include({ id: "patient-id" });
+                });
+            }
+        });
+
+        describe ("can be aborted", () => {
+            const mock = {
+                headers: { "content-type": "application/json" },
+                status: 200,
+                body: { id: "patient-id" },
+                _delay: 10
+            };
+            const tests: fhirclient.JsonObject = {
+                "works in the browser": new BrowserEnv(),
+                "works on the server" : new ServerEnv()
+            };
+
+            // tslint:disable-next-line:forin
+            for (const name in tests) {
+                it (name, async () => {
+                    const client = new Client(tests[name], { serverUrl: mockUrl });
+                    mockServer.mock(mock);
+                    const AbortController = tests[name].getAbortController();
+                    const abortController = new AbortController();
+                    const task = client.request({ url: "/Patient/patient-id", signal: abortController.signal });
+                    abortController.abort();
+                    await expect(task).to.reject(
+                        Error, "The user aborted a request."
+                    );
+                });
+            }
+        });
+
+        describe ("resolve with falsy value if one is received", () => {
+            const mock = {
+                headers: { "content-type": "application/json" },
+                status: 200,
+                body: ""
+            };
+            const tests: fhirclient.JsonObject = {
+                "works in the browser": new BrowserEnv(),
+                "works on the server" : new ServerEnv()
+            };
+
+            // tslint:disable-next-line:forin
+            for (const name in tests) {
+                it (name, async () => {
+                    const client = new Client(tests[name], { serverUrl: mockUrl });
+                    mockServer.mock(mock);
+                    const result = await client.request("Patient");
+                    expect(result).to.equal("");
                 });
             }
         });
@@ -2771,12 +2982,47 @@ describe("FHIR.client", () => {
             const client = new Client(env, mockUrl);
             const resource = { resourceType: "Patient" };
             client.request = async (options: any) => options;
-            const result: any = await client.create(resource);
+            let result: any;
+
+            result = await client.create(resource);
             expect(result).to.equal({
                 url    : "Patient",
                 method : "POST",
                 body   : JSON.stringify(resource),
                 headers: {
+                    "Content-Type": "application/fhir+json"
+                }
+            });
+
+            // Standard usage
+            result = await client.create(resource);
+            expect(result).to.equal({
+                url    : "Patient",
+                method : "POST",
+                body   : JSON.stringify(resource),
+                headers: {
+                    "Content-Type": "application/fhir+json"
+                }
+            });
+
+            // Passing options
+            result = await client.create(resource, {
+                url   : "a",
+                method: "b",
+                body  : "c",
+                // @ts-ignore
+                signal: "whatever",
+                headers: {
+                    "x-custom": "value"
+                }
+            });
+            expect(result).to.equal({
+                url    : "Patient",
+                method : "POST",
+                body   : JSON.stringify(resource),
+                signal : "whatever",
+                headers: {
+                    "x-custom": "value",
                     "Content-Type": "application/fhir+json"
                 }
             });
@@ -2788,12 +3034,37 @@ describe("FHIR.client", () => {
             const client = new Client(env, mockUrl);
             const resource = { resourceType: "Patient", id: "2" };
             client.request = async (options: any) => options;
-            const result: any = await client.update(resource);
+            let result: any;
+
+            // Standard usage
+            result = await client.update(resource);
             expect(result).to.equal({
                 url    : "Patient/2",
                 method : "PUT",
                 body   : JSON.stringify(resource),
                 headers: {
+                    "Content-Type": "application/fhir+json"
+                }
+            });
+
+            // Passing options
+            result = await client.update(resource, {
+                url   : "a",
+                method: "b",
+                body  : "c",
+                // @ts-ignore
+                signal: "whatever",
+                headers: {
+                    "x-custom": "value"
+                }
+            });
+            expect(result).to.equal({
+                url    : "Patient/2",
+                method : "PUT",
+                body   : JSON.stringify(resource),
+                signal: "whatever",
+                headers: {
+                    "x-custom": "value",
                     "Content-Type": "application/fhir+json"
                 }
             });
@@ -2804,10 +3075,37 @@ describe("FHIR.client", () => {
         crossPlatformTest(async (env) => {
             const client = new Client(env, mockUrl);
             client.request = async (options: any) => options;
-            const result: any = await client.delete("Patient/2");
+            let result: any;
+
+            // Standard usage
+            result = await client.delete("Patient/2");
             expect(result).to.equal({
                 url   : "Patient/2",
                 method: "DELETE"
+            });
+
+            // Verify that method and url cannot be overridden
+            result = await client.delete("Patient/2", {
+                // @ts-ignore
+                url   : "x",
+                method: "y",
+                other : 3
+            });
+            expect(result).to.equal({
+                url   : "Patient/2",
+                method: "DELETE",
+                other : 3
+            });
+
+            // Verify that abort signal is passed through
+            result = await client.delete("Patient/2", {
+                // @ts-ignore
+                signal: "whatever"
+            });
+            expect(result).to.equal({
+                url   : "Patient/2",
+                method: "DELETE",
+                signal: "whatever"
             });
         });
     });

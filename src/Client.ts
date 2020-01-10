@@ -194,19 +194,19 @@ export default class Client
 
     patient: {
         id: string | null
-        read: () => Promise<fhirclient.JsonObject>
+        read: (requestOptions?: RequestInit) => Promise<fhirclient.JsonObject>
         request: (requestOptions: string|URL|fhirclient.RequestOptions, fhirOptions?: fhirclient.FhirOptions) => Promise<fhirclient.JsonObject>
         api?: fhirclient.JsonObject
     };
 
     encounter: {
         id: string | null
-        read: () => Promise<fhirclient.JsonObject>
+        read: (requestOptions?: RequestInit) => Promise<fhirclient.JsonObject>
     };
 
     user: {
         id: string | null
-        read: () => Promise<fhirclient.JsonObject>
+        read: (requestOptions?: RequestInit) => Promise<fhirclient.JsonObject>
         fhirUser: string | null
         resourceType: string | null
     };
@@ -233,10 +233,10 @@ export default class Client
         // patient api ---------------------------------------------------------
         this.patient = {
             get id() { return client.getPatientId(); },
-            read: () => {
+            read: (requestOptions: RequestInit = {}) => {
                 const id = this.patient.id;
                 return id ?
-                    this.request(`Patient/${id}`) :
+                    this.request({ ...requestOptions, url: `Patient/${id}` }) :
                     Promise.reject(new Error("Patient is not available"));
             },
             request: (requestOptions, fhirOptions = {}) => {
@@ -254,10 +254,10 @@ export default class Client
         // encounter api -------------------------------------------------------
         this.encounter = {
             get id() { return client.getEncounterId(); },
-            read: () => {
+            read: (requestOptions: RequestInit = {}) => {
                 const id = this.encounter.id;
                 return id ?
-                    this.request(`Encounter/${id}`) :
+                    this.request({ ...requestOptions, url: `Encounter/${id}` }) :
                     Promise.reject(new Error("Encounter is not available"));
             }
         };
@@ -267,10 +267,10 @@ export default class Client
             get fhirUser() { return client.getFhirUser(); },
             get id() { return client.getUserId(); },
             get resourceType() { return client.getUserType(); },
-            read: () => {
+            read: (requestOptions: RequestInit = {}) => {
                 const fhirUser = this.user.fhirUser;
                 return fhirUser ?
-                    this.request(fhirUser) :
+                    this.request({ ...requestOptions, url: fhirUser }) :
                     Promise.reject(new Error("User is not available"));
             }
         };
@@ -659,29 +659,27 @@ export default class Client
                     return data;
                 if (typeof data == "string")
                     return data;
-                if (typeof data == "object" && data instanceof Response)
+                if (data instanceof Response)
                     return data;
 
                 // Resolve References ------------------------------------------
                 return (async (_data) => {
 
-                    if (_data) {
-                        if (_data.resourceType == "Bundle") {
-                            await Promise.all((_data.entry as fhirclient.FHIR.BundleEntry[] || []).map(item => resolveRefs(
-                                item.resource,
-                                options,
-                                _resolvedRefs,
-                                this
-                            )));
-                        }
-                        else {
-                            await resolveRefs(
-                                _data,
-                                options,
-                                _resolvedRefs,
-                                this
-                            );
-                        }
+                    if (_data.resourceType == "Bundle") {
+                        await Promise.all((_data.entry as fhirclient.FHIR.BundleEntry[] || []).map(item => resolveRefs(
+                            item.resource,
+                            options,
+                            _resolvedRefs,
+                            this
+                        )));
+                    }
+                    else {
+                        await resolveRefs(
+                            _data,
+                            options,
+                            _resolvedRefs,
+                            this
+                        );
                     }
 
                     return _data;

@@ -10,6 +10,8 @@ export default class ServerEnvironment implements fhirclient.Adapter
 
     storage: any;
 
+    options: any;
+
     constructor(request?: any, response?: any, storage?: any)
     {
         this.request  = request;
