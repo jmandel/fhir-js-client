@@ -4,7 +4,6 @@ declare module "abortcontroller-polyfill/dist/cjs-ponyfill" {
         prototype: AbortController;
     };
 }
-
 declare module "abortcontroller-polyfill/dist/abortcontroller-polyfill-only" {
     const AbortController: {
         new (): AbortController;

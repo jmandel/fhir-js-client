@@ -2014,7 +2014,7 @@ class BrowserAdapter {
     return {
       ready: (...args) => smart_1.ready(this, ...args),
       authorize: options => smart_1.authorize(this, options),
-      init: (...args) => smart_1.init(this, ...args),
+      init: options => smart_1.init(this, options),
       client: state => new Client_1.default(this, state),
       options: this.options
     };

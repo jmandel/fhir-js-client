@@ -7,7 +7,7 @@ declare const FHIR: {
     };
     client: (state: string | fhirclient.ClientState) => Client;
     oauth2: {
-        settings: fhirclient.fhirSettings;
+        settings: fhirclient.BrowserFHIRSettings;
         ready: {
             (onSuccess: (client: Client) => any, onError?: (error: Error) => any): Promise<any>;
             (): Promise<Client>;

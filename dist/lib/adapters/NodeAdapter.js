@@ -20,26 +20,12 @@ class NodeAdapter {
   /**
    * @param options Environment-specific options
    */
-  constructor(options = {}) {
+  constructor(options) {
     /**
      * Holds the Storage instance associated with this instance
      */
     this._storage = null;
-    this.options = Object.assign({
-      // Replaces the browser's current URL
-      // using window.history.replaceState API or by reloading.
-      replaceBrowserHistory: true,
-      // When set to true, this variable will fully utilize
-      // HTML5 sessionStorage API.
-      // This variable can be overridden to false by setting
-      // FHIR.oauth2.settings.fullSessionStorageSupport = false.
-      // When set to false, the sessionStorage will be keyed
-      // by a state variable. This is to allow the embedded IE browser
-      // instances instantiated on a single thread to continue to
-      // function without having sessionStorage data shared
-      // across the embedded IE instances.
-      fullSessionStorageSupport: true
-    }, options);
+    this.options = Object.assign({}, options);
   }
   /**
    * Given a relative path, returns an absolute url using the instance base URL
@@ -68,9 +54,9 @@ class NodeAdapter {
     }
 
     const protocol = req.headers["x-forwarded-proto"] || req.protocol || "http";
-    const orig =
+    const orig = String(
     /*req.originalUrl || */
-    req.headers["x-original-uri"] || req.url;
+    req.headers["x-original-uri"] || req.url);
     return new URL(orig, protocol + "://" + host);
   }
   /**
@@ -148,7 +134,7 @@ class NodeAdapter {
     return {
       ready: (...args) => smart_1.ready(this, ...args),
       authorize: options => smart_1.authorize(this, options),
-      init: (...args) => smart_1.init(this, ...args),
+      init: options => smart_1.init(this, options),
       client: state => new Client_1.default(this, state),
       options: this.options
     };

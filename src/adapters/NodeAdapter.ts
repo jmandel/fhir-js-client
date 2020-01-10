@@ -3,6 +3,14 @@ import { ready, authorize, init } from "../smart";
 import Client from "../Client";
 import ServerStorage from "../storage/ServerStorage";
 import { AbortController } from "abortcontroller-polyfill/dist/cjs-ponyfill";
+import { IncomingMessage, ServerResponse } from "http";
+
+
+interface NodeAdapterOptions {
+    request: IncomingMessage;
+    response: ServerResponse;
+    storage?: fhirclient.Storage | fhirclient.storageFactory;
+}
 
 /**
  * Node Adapter - works with native NodeJS and with Express
@@ -12,36 +20,19 @@ export default class NodeAdapter implements fhirclient.Adapter
     /**
      * Holds the Storage instance associated with this instance
      */
-    private _storage: fhirclient.Storage | null = null;
+    protected _storage: fhirclient.Storage | null = null;
 
     /**
      * Environment-specific options
      */
-    options: fhirclient.fhirSettings;
+    options: NodeAdapterOptions;
 
     /**
      * @param options Environment-specific options
      */
-    constructor(options: fhirclient.fhirSettings = {})
+    constructor(options: NodeAdapterOptions)
     {
-        this.options = {
-            // Replaces the browser's current URL
-            // using window.history.replaceState API or by reloading.
-            replaceBrowserHistory: true,
-
-            // When set to true, this variable will fully utilize
-            // HTML5 sessionStorage API.
-            // This variable can be overridden to false by setting
-            // FHIR.oauth2.settings.fullSessionStorageSupport = false.
-            // When set to false, the sessionStorage will be keyed
-            // by a state variable. This is to allow the embedded IE browser
-            // instances instantiated on a single thread to continue to
-            // function without having sessionStorage data shared
-            // across the embedded IE instances.
-            fullSessionStorageSupport: true,
-
-            ...options
-        };
+        this.options = { ...options };
     }
 
     /**
@@ -62,14 +53,14 @@ export default class NodeAdapter implements fhirclient.Adapter
 
         let host = req.headers.host;
         if (req.headers["x-forwarded-host"]) {
-            host = req.headers["x-forwarded-host"];
+            host = req.headers["x-forwarded-host"] as string;
             if (req.headers["x-forwarded-port"]) {
                 host += ":" + req.headers["x-forwarded-port"];
             }
         }
 
-        const protocol = req.headers["x-forwarded-proto"] || req.protocol || "http";
-        const orig = /*req.originalUrl || */req.headers["x-original-uri"] || req.url;
+        const protocol = req.headers["x-forwarded-proto"] || (req as any).protocol || "http";
+        const orig = String(/*req.originalUrl || */req.headers["x-original-uri"] || req.url);
         return new URL(orig, protocol + "://" + host);
     }
 
@@ -97,7 +88,7 @@ export default class NodeAdapter implements fhirclient.Adapter
                     this._storage = this.options.storage;
                 }
             } else {
-                this._storage = new ServerStorage(this.options.request);
+                this._storage = new ServerStorage(this.options.request as fhirclient.RequestWithSession);
             }
         }
         return this._storage;
@@ -143,8 +134,8 @@ export default class NodeAdapter implements fhirclient.Adapter
     {
         return {
             ready    : (...args: any[]) => ready(this, ...args),
-            authorize: options   => authorize(this, options),
-            init     : (...args) => init(this, ...args),
+            authorize: options => authorize(this, options),
+            init     : options => init(this, options),
             client   : (state: string | fhirclient.ClientState) => new Client(this, state),
             options  : this.options
         };

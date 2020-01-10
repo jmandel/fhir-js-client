@@ -2,12 +2,17 @@
 
 import Client from "./Client";
 import { getPath, byCodes, byCode } from "./lib";
+import { IncomingMessage } from "http";
 
 // tslint:disable-next-line: no-namespace
 declare namespace fhirclient {
 
+    interface RequestWithSession extends IncomingMessage {
+        session: fhirclient.JsonObject;
+    }
+
     interface SMART {
-        options: fhirSettings;
+        options: BrowserFHIRSettings;
 
         /**
          * This should be called on your `redirect_uri`. Returns a Promise that
@@ -61,7 +66,7 @@ declare namespace fhirclient {
         client(state: string | fhirclient.ClientState): Client;
     }
 
-    interface fhirSettings extends JsonObject {
+    interface BrowserFHIRSettings extends JsonObject {
 
         /**
          * Replaces the browser's current URL using
@@ -82,7 +87,7 @@ declare namespace fhirclient {
          */
         fullSessionStorageSupport?: boolean;
 
-        storage?: Storage | ((options?: JsonObject) => Storage);
+        // storage?: Storage | ((options?: JsonObject) => Storage);
     }
 
     interface CodeValue {
@@ -99,7 +104,7 @@ declare namespace fhirclient {
         /**
          * Environment-specific options
          */
-        options: fhirSettings;
+        options: BrowserFHIRSettings;
 
         /**
          * Given the current environment, this method returns the current url
@@ -155,8 +160,7 @@ declare namespace fhirclient {
     /**
      * Simple key/value storage interface
      */
-    // tslint:disable-next-line: max-classes-per-file
-    class Storage {
+    interface Storage {
 
         /**
          * Sets the `value` on `key` and returns a promise that will be resolved
@@ -178,6 +182,9 @@ declare namespace fhirclient {
         unset: (key: string) => Promise<boolean>;
     }
 
+    // =========================================================================
+
+    type storageFactory = (options?: JsonObject) => Storage;
 
     /**
      * Options that must contain an `url` property (String|URL). Any other

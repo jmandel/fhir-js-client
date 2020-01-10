@@ -11688,12 +11688,8 @@ function () {
       authorize: function authorize(options) {
         return smart_1.authorize(_this, options);
       },
-      init: function init() {
-        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-          args[_key2] = arguments[_key2];
-        }
-
-        return smart_1.init.apply(smart_1, [_this].concat(args));
+      init: function init(options) {
+        return smart_1.init(_this, options);
       },
       client: function client(state) {
         return new Client_1.default(_this, state);

@@ -15,11 +15,11 @@ export default class BrowserAdapter implements fhirclient.Adapter {
     /**
      * Environment-specific options
      */
-    options: fhirclient.fhirSettings;
+    options: fhirclient.BrowserFHIRSettings;
     /**
      * @param options Environment-specific options
      */
-    constructor(options?: fhirclient.fhirSettings);
+    constructor(options?: fhirclient.BrowserFHIRSettings);
     /**
      * Given a relative path, returns an absolute url using the instance base URL
      */

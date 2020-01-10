@@ -1,4 +1,11 @@
+/// <reference types="node" />
 import { fhirclient } from "../types";
+import { IncomingMessage, ServerResponse } from "http";
+interface NodeAdapterOptions {
+    request: IncomingMessage;
+    response: ServerResponse;
+    storage?: fhirclient.Storage | fhirclient.storageFactory;
+}
 /**
  * Node Adapter - works with native NodeJS and with Express
  */
@@ -6,15 +13,15 @@ export default class NodeAdapter implements fhirclient.Adapter {
     /**
      * Holds the Storage instance associated with this instance
      */
-    private _storage;
+    protected _storage: fhirclient.Storage | null;
     /**
      * Environment-specific options
      */
-    options: fhirclient.fhirSettings;
+    options: NodeAdapterOptions;
     /**
      * @param options Environment-specific options
      */
-    constructor(options?: fhirclient.fhirSettings);
+    constructor(options: NodeAdapterOptions);
     /**
      * Given a relative path, returns an absolute url using the instance base URL
      */
@@ -46,7 +53,10 @@ export default class NodeAdapter implements fhirclient.Adapter {
      * Returns a reference to the AbortController constructor. In browsers,
      * AbortController will always be available as global (native or polyfilled)
      */
-    getAbortController(): any;
+    getAbortController(): {
+        new (): AbortController;
+        prototype: AbortController;
+    };
     /**
      * Creates and returns adapter-aware SMART api. Not that while the shape of
      * the returned object is well known, the arguments to this function are not.
@@ -56,3 +66,4 @@ export default class NodeAdapter implements fhirclient.Adapter {
      */
     getSmartApi(): fhirclient.SMART;
 }
+export {};

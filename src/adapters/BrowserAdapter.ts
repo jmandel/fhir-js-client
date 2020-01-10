@@ -21,12 +21,12 @@ export default class BrowserAdapter implements fhirclient.Adapter
     /**
      * Environment-specific options
      */
-    options: fhirclient.fhirSettings;
+    options: fhirclient.BrowserFHIRSettings;
 
     /**
      * @param options Environment-specific options
      */
-    constructor(options: fhirclient.fhirSettings = {})
+    constructor(options: fhirclient.BrowserFHIRSettings = {})
     {
         this.options = {
             // Replaces the browser's current URL
@@ -136,8 +136,8 @@ export default class BrowserAdapter implements fhirclient.Adapter
     {
         return {
             ready    : (...args: any[]) => ready(this, ...args),
-            authorize: options   => authorize(this, options),
-            init     : (...args) => init(this, ...args),
+            authorize: options => authorize(this, options),
+            init     : options => init(this, options),
             client   : (state: string | fhirclient.ClientState) => new Client(this, state),
             options  : this.options
         };

@@ -11,6 +11,7 @@ import mockServer        from "./mocks/mockServer";
 import HttpRequest       from "./mocks/HttpRequest";
 import HttpResponse      from "./mocks/HttpResponse";
 import MemoryStorage     from "./mocks/MemoryStorage";
+import { IncomingMessage } from "http";
 
 export const lab = Lab.script();
 const { it, describe, before, after, afterEach } = lab;
@@ -202,19 +203,19 @@ describe("Complete authorization [SERVER]", () => {
 describe("ServerStorage", () => {
     it ("can 'get'", async () => {
         const session = { a: "b" };
-        const storage = new ServerStorage({ session });
+        const storage = new ServerStorage({ session } as any);
         expect(await storage.get("a")).to.equal("b");
         expect(await storage.get("b")).to.equal(undefined);
     });
     it ("can 'set'", async () => {
         const session = {};
-        const storage = new ServerStorage({ session });
+        const storage = new ServerStorage({ session } as any);
         await storage.set("a", "b");
         expect(await storage.get("a")).to.equal("b");
     });
     it ("can 'unset'", async () => {
         const session = { a: "b" };
-        const storage = new ServerStorage({ session });
+        const storage = new ServerStorage({ session } as any);
         const result = await storage.unset("a");
         expect(result).to.equal(true);
         expect(session.a).to.equal(undefined);
@@ -226,41 +227,46 @@ describe("ServerStorage", () => {
 describe("NodeAdapter", () => {
 
     it ("getUrl", () => {
-        const adapter1 = new Adapter({
-            request: {
-                protocol: "http",
-                url: "/",
-                headers: {
-                    host: "localhost"
-                }
+        const map = [
+            {
+                request: {
+                    url: "/",
+                    headers: {
+                        host: "localhost"
+                    }
+                },
+                result: "http://localhost/"
+            },
+            {
+                request: {
+                    url: "/a/b/c",
+                    headers: {
+                        "x-forwarded-host" : "external-domain",
+                        "x-forwarded-proto": "https"
+                    }
+                },
+                result: "https://external-domain/a/b/c"
+            },
+            {
+                request: {
+                    headers: {
+                        "x-forwarded-host" : "external-domain",
+                        "x-forwarded-proto": "https",
+                        "x-forwarded-port" : "8080",
+                        "x-original-uri"   : "/b/c/d"
+                    }
+                },
+                result: "https://external-domain:8080/b/c/d"
             }
-        });
-        expect(adapter1.getUrl().href).to.equal("http://localhost/");
+        ];
 
-        const adapter2 = new Adapter({
-            request: {
-                protocol: "http",
-                url: "/a/b/c",
-                headers: {
-                    "x-forwarded-host": "external-domain",
-                    "x-forwarded-proto": "https"
-                }
-            }
+        map.forEach(meta => {
+            const adapter = new Adapter({
+                request : meta.request as IncomingMessage,
+                response: {} as any
+            });
+            expect(adapter.getUrl().href).to.equal(meta.result);
         });
-        expect(adapter2.getUrl().href).to.equal("https://external-domain/a/b/c");
-
-        const adapter3 = new Adapter({
-            request: {
-                protocol: "http",
-                headers: {
-                    "x-forwarded-host": "external-domain",
-                    "x-forwarded-proto": "https",
-                    "x-forwarded-port": 8080,
-                    "x-original-uri": "/b/c/d"
-                }
-            }
-        });
-        expect(adapter3.getUrl().href).to.equal("https://external-domain:8080/b/c/d");
     });
 
     it ("getStorage() works with factory function", () => {
@@ -276,16 +282,14 @@ describe("NodeAdapter", () => {
 
         const adapter = new Adapter({
             storage : getStorage,
-            request : "my-request",
-            response: "my-response"
+            request : "my-request" as any,
+            response: "my-response" as any
         });
 
         // Call it twice and make sure that only one instance is created
         expect(adapter.getStorage()).to.equal(fakeStorage);
         expect(adapter.getStorage()).to.equal(fakeStorage);
         expect(callLog).to.equal([[{
-            fullSessionStorageSupport: true,
-            replaceBrowserHistory: true,
             storage : getStorage,
             request : "my-request",
             response: "my-response"
