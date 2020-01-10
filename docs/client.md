@@ -9,14 +9,6 @@ const client = smart(req, res).client("https://r4.smarthealthit.org");
 ```
 It exposes the following API:
 
-<!--
-### `client.getPatientId()`
-### `client.getEncounterId()`
-### `client.getIdToken()`
-### `client.getFhirUser()`
-### `client.getUserId()`
-### `client.getUserType()`
--->
 ### client.request(uri: String [, fhirOptions: Object]) `Promise<Object>`<br/>client.request(url: URL [, fhirOptions: Object]) `Promise<Object>`<br/>client.request(options: Object [, fhirOptions: Object]) `Promise<Object>`
 
 > This is the single most important method. Please see the **[live examples](http://docs.smarthealthit.org/client-js/request.html)**.
@@ -142,7 +134,7 @@ Wrapper for `client.request` implementing the FHIR resource delete operation.
 client.delete("Patient/id");
 ```
 
-### client.refresh() `Promise<Object>`
+### client.refresh(requestOptions = {}) `Promise<Object>`
 Use the refresh token to obtain new access token. If the refresh token is
 expired (or this fails for any other reason) it will be deleted from the
 state, so that we don't enter into loops trying to re-authorize.
@@ -174,31 +166,31 @@ client.patient.request("Group");       // -> /Group?member=patient-id
 
 Only accessible if fhir.js is available. Read more about the fhir.js integration [here](README.md#fhirjs-integration).
 
-### client.encounter.id `String|null`
+### client.encounter.id `string|null`
 
 The selected encounter ID or `null` if encounter is not available. If no encounter is selected, it will generate useful debug messages about the possible reasons. See [debugging](README.md#debugging).
 
-### client.encounter.read() `Promise<Object>`
+### client.encounter.read() `Promise<object>`
 
 Fetches the selected encounter resource (if available). Resolves with the encounter or rejects with an error.
 
-### client.user.id `String`
+### client.user.id `string`
 The selected user ID or `null` if user is not available. If no user is selected, it will generate useful debug messages about the possible reasons. See [debugging](README.md#debugging).
 
-### client.user.fhirUser `String`
+### client.user.fhirUser `string`
 The selected user identifier that looks like `Practitioner/id` or `null` if user is not available. If no user is selected, it will generate useful debug messages about the possible reasons. See [debugging](README.md#debugging).
 
-### client.user.resourceType `String`
+### client.user.resourceType `string`
 
 The selected user resourceType (E.g. `Practitioner`, `Patient`, `RelatedPerson`...) or `null` if user is not available. If no user is selected, it will generate useful debug messages about the possible reasons. See [debugging](README.md#debugging).
 
-### client.user.read() `Promise<Object>`
+### client.user.read() `Promise<object>`
 Fetches the selected user resource (if available). Resolves with the user or rejects with an error.
 
-### client.getFhirVersion() `Promise<String>`
+### client.getFhirVersion() `Promise<string>`
 Returns a promise that will be resolved with the FHIR version as defined in the conformance statement of the server.
 
-### client.getFhirRelease() `Promise<Number>`
+### client.getFhirRelease() `Promise<number>`
 Returns a promise that will be resolved with the numeric FHIR version:
 - `2` for **DSTU2**
 - `3` for **STU3**
@@ -282,6 +274,7 @@ client.patient.read({ signal });
 client.patient.request({ signal, url: "Immunization" });
 client.encounter.read({ signal });
 client.user.read({ signal });
+client.refresh({ signal });
 
 // Later...
 abortController.abort();
