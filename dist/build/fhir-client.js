@@ -10378,6 +10378,7 @@ function contextualize(_x, _x2) {
  * @param refId
  * @param cache A map to store the resolved refs
  * @param client The client instance
+ * @param [signal] The `AbortSignal` if any
  * @returns The resolved reference
  * @private
  */
@@ -10479,14 +10480,17 @@ function _contextualize() {
   return _contextualize.apply(this, arguments);
 }
 
-function getRef(refId, cache, client) {
+function getRef(refId, cache, client, signal) {
   var sub = cache[refId];
 
   if (!sub) {
     // Note that we set cache[refId] immediately! When the promise is
     // settled it will be updated. This is to avoid a ref being fetched
     // twice because some of these requests are executed in parallel.
-    cache[refId] = client.request(refId).then(function (res) {
+    cache[refId] = client.request({
+      url: refId,
+      signal: signal
+    }).then(function (res) {
       cache[refId] = res;
       return res;
     }, function (error) {
@@ -10500,11 +10504,11 @@ function getRef(refId, cache, client) {
 }
 /**
  * Resolves a reference in the given resource.
- * @param {Object} obj FHIR Resource
+ * @param obj FHIR Resource
  */
 
 
-function resolveRef(obj, path, graph, cache, client) {
+function resolveRef(obj, path, graph, cache, client, signal) {
   var node = lib_1.getPath(obj, path);
 
   if (node) {
@@ -10513,7 +10517,7 @@ function resolveRef(obj, path, graph, cache, client) {
       var ref = item.reference;
 
       if (ref) {
-        return getRef(ref, cache, client).then(function (sub) {
+        return getRef(ref, cache, client, signal).then(function (sub) {
           if (graph) {
             if (isArray) {
               lib_1.setPath(obj, path + "." + i, sub);
@@ -10521,7 +10525,12 @@ function resolveRef(obj, path, graph, cache, client) {
               lib_1.setPath(obj, path, sub);
             }
           }
-        }).catch(function () {});
+        }).catch(function (ex) {
+          /* ignore missing references */
+          if (ex.status !== 404) {
+            throw ex;
+          }
+        });
       }
     }));
   }
@@ -10529,14 +10538,14 @@ function resolveRef(obj, path, graph, cache, client) {
 /**
  * Given a resource and a list of ref paths - resolves them all
  * @param obj FHIR Resource
- * @param {Object} fhirOptions The fhir options of the initiating request call
+ * @param fhirOptions The fhir options of the initiating request call
  * @param cache A map to store fetched refs
  * @param client The client instance
  * @private
  */
 
 
-function resolveRefs(obj, fhirOptions, cache, client) {
+function resolveRefs(obj, fhirOptions, cache, client, signal) {
   // 1. Sanitize paths, remove any invalid ones
   var paths = lib_1.makeArray(fhirOptions.resolveReferences).filter(Boolean) // No false, 0, null, undefined or ""
   .map(function (path) {
@@ -10578,7 +10587,7 @@ function resolveRefs(obj, fhirOptions, cache, client) {
     var group = groups[len];
     task = task.then(function () {
       return Promise.all(group.map(function (path) {
-        return resolveRef(obj, path, !!fhirOptions.graph, cache, client);
+        return resolveRef(obj, path, !!fhirOptions.graph, cache, client, signal);
       }));
     });
   });
@@ -11049,7 +11058,7 @@ function () {
     _regenerator.default.mark(function _callee6(requestOptions, fhirOptions, _resolvedRefs) {
       var _this2 = this;
 
-      var _a, debugRequest, url, authHeader, options;
+      var _a, debugRequest, url, authHeader, options, signal;
 
       return _regenerator.default.wrap(function _callee6$(_context6) {
         while (1) {
@@ -11099,6 +11108,7 @@ function () {
                 onPage: typeof fhirOptions.onPage == "function" ? fhirOptions.onPage : undefined
               };
               debugRequest("%s, options: %O, fhirOptions: %O", url, requestOptions, options);
+              signal = requestOptions.signal || undefined;
               return _context6.abrupt("return", lib_1.request(url, requestOptions) // Automatic re-auth via refresh token -----------------------------
               .catch(function (error) {
                 debugRequest("%o", error);
@@ -11107,7 +11117,9 @@ function () {
                   var hasRefreshToken = lib_1.getPath(_this2, "state.tokenResponse.refresh_token");
 
                   if (hasRefreshToken) {
-                    return _this2.refresh().then(function () {
+                    return _this2.refresh({
+                      signal: signal
+                    }).then(function () {
                       return _this2.request(Object.assign({}, requestOptions, {
                         url: url
                       }), options, _resolvedRefs);
@@ -11183,8 +11195,8 @@ function () {
                 }
 
                 throw error;
-              }) // Handle raw requests (anything other than json) ------------------
-              .then(function (data) {
+              }).then(function (data) {
+                // Handle raw responses (anything other than json) -------------
                 if (!data) return data;
                 if (typeof data == "string") return data;
                 if (data instanceof Response) return data; // Resolve References ------------------------------------------
@@ -11204,7 +11216,7 @@ function () {
 
                             _context4.next = 3;
                             return Promise.all((_data.entry || []).map(function (item) {
-                              return resolveRefs(item.resource, options, _resolvedRefs, _this2);
+                              return resolveRefs(item.resource, options, _resolvedRefs, _this2, signal);
                             }));
 
                           case 3:
@@ -11213,7 +11225,7 @@ function () {
 
                           case 5:
                             _context4.next = 7;
-                            return resolveRefs(_data, options, _resolvedRefs, _this2);
+                            return resolveRefs(_data, options, _resolvedRefs, _this2, signal);
 
                           case 7:
                             return _context4.abrupt("return", _data);
@@ -11279,7 +11291,14 @@ function () {
                             }
 
                             _context5.next = 12;
-                            return _this2.request(next.url, options, _resolvedRefs);
+                            return _this2.request({
+                              url: next.url,
+                              // Aborting the main request (even after it is complete)
+                              // must propagate to any child requests and abort them!
+                              // To do so, just pass the same AbortSignal if one is
+                              // provided.
+                              signal: signal
+                            }, options, _resolvedRefs);
 
                           case 12:
                             nextPage = _context5.sent;
@@ -11332,7 +11351,7 @@ function () {
                 });
               }));
 
-            case 12:
+            case 13:
             case "end":
               return _context6.stop();
           }
@@ -11353,8 +11372,12 @@ function () {
    */
   ;
 
-  _proto.refresh = function refresh() {
+  _proto.refresh = function refresh(requestOptions) {
     var _this3 = this;
+
+    if (requestOptions === void 0) {
+      requestOptions = {};
+    }
 
     var _a, _b;
 
@@ -11383,15 +11406,15 @@ function () {
 
 
     if (!this._refreshTask) {
-      this._refreshTask = lib_1.request(tokenUri, {
+      this._refreshTask = lib_1.request(tokenUri, Object.assign({}, requestOptions, {
         mode: "cors",
         method: "POST",
-        headers: {
+        headers: Object.assign({}, requestOptions.headers || {}, {
           "content-type": "application/x-www-form-urlencoded"
-        },
+        }),
         body: "grant_type=refresh_token&refresh_token=" + encodeURIComponent(refreshToken),
         credentials: "include"
-      }).then(function (data) {
+      })).then(function (data) {
         if (!data.access_token) {
           throw new Error("No access token received");
         }

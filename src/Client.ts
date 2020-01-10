@@ -70,13 +70,15 @@ async function contextualize(
  * @param refId
  * @param cache A map to store the resolved refs
  * @param client The client instance
+ * @param [signal] The `AbortSignal` if any
  * @returns The resolved reference
  * @private
  */
 function getRef(
     refId: string,
     cache: fhirclient.JsonObject,
-    client: Client
+    client: Client,
+    signal?: AbortSignal
 ): Promise<fhirclient.JsonObject> {
     const sub = cache[refId];
     if (!sub) {
@@ -84,7 +86,10 @@ function getRef(
         // Note that we set cache[refId] immediately! When the promise is
         // settled it will be updated. This is to avoid a ref being fetched
         // twice because some of these requests are executed in parallel.
-        cache[refId] = client.request(refId).then(res => {
+        cache[refId] = client.request({
+            url: refId,
+            signal
+        }).then(res => {
             cache[refId] = res;
             return res;
         }, (error: Error) => {
@@ -98,14 +103,15 @@ function getRef(
 
 /**
  * Resolves a reference in the given resource.
- * @param {Object} obj FHIR Resource
+ * @param obj FHIR Resource
  */
 function resolveRef(
     obj: fhirclient.FHIR.Resource,
     path: string,
     graph: boolean,
     cache: fhirclient.JsonObject,
-    client: Client
+    client: Client,
+    signal?: AbortSignal
 ) {
     const node = getPath(obj, path);
     if (node) {
@@ -113,7 +119,7 @@ function resolveRef(
         return Promise.all(makeArray(node).map((item, i) => {
             const ref = item.reference;
             if (ref) {
-                return getRef(ref, cache, client).then(sub => {
+                return getRef(ref, cache, client, signal).then(sub => {
                     if (graph) {
                         if (isArray) {
                             setPath(obj, `${path}.${i}`, sub);
@@ -121,7 +127,12 @@ function resolveRef(
                             setPath(obj, path, sub);
                         }
                     }
-                }).catch(() => { /* ignore */ });
+                }).catch((ex) => {
+                    /* ignore missing references */
+                    if (ex.status !== 404) {
+                        throw ex;
+                    }
+                });
             }
         }));
     }
@@ -130,7 +141,7 @@ function resolveRef(
 /**
  * Given a resource and a list of ref paths - resolves them all
  * @param obj FHIR Resource
- * @param {Object} fhirOptions The fhir options of the initiating request call
+ * @param fhirOptions The fhir options of the initiating request call
  * @param cache A map to store fetched refs
  * @param client The client instance
  * @private
@@ -139,7 +150,8 @@ function resolveRefs(
     obj: fhirclient.FHIR.Resource,
     fhirOptions: fhirclient.FhirOptions,
     cache: fhirclient.JsonObject,
-    client: Client
+    client: Client,
+    signal?: AbortSignal
 ) {
 
     // 1. Sanitize paths, remove any invalid ones
@@ -180,7 +192,7 @@ function resolveRefs(
     Object.keys(groups).sort().forEach(len => {
         const group = groups[len];
         task = task.then(() => Promise.all(group.map((path: string) => {
-            return resolveRef(obj, path, !!fhirOptions.graph, cache, client);
+            return resolveRef(obj, path, !!fhirOptions.graph, cache, client, signal);
         })));
     });
     return task;
@@ -601,6 +613,9 @@ export default class Client
             options
         );
 
+        const signal = (requestOptions as RequestInit).signal || undefined;
+
+
         return request(url, requestOptions)
 
             // Automatic re-auth via refresh token -----------------------------
@@ -609,7 +624,7 @@ export default class Client
                 if (error.status == 401 && options.useRefreshToken) {
                     const hasRefreshToken = getPath(this, "state.tokenResponse.refresh_token");
                     if (hasRefreshToken) {
-                        return this.refresh().then(() => this.request(
+                        return this.refresh({ signal }).then(() => this.request(
                             { ...(requestOptions as fhirclient.RequestOptions), url },
                             options,
                             _resolvedRefs
@@ -653,8 +668,9 @@ export default class Client
                 throw error;
             })
 
-            // Handle raw requests (anything other than json) ------------------
             .then(data => {
+
+                // Handle raw responses (anything other than json) -------------
                 if (!data)
                     return data;
                 if (typeof data == "string")
@@ -670,7 +686,8 @@ export default class Client
                             item.resource,
                             options,
                             _resolvedRefs,
-                            this
+                            this,
+                            signal
                         )));
                     }
                     else {
@@ -678,7 +695,8 @@ export default class Client
                             _data,
                             options,
                             _resolvedRefs,
-                            this
+                            this,
+                            signal
                         );
                     }
 
@@ -705,7 +723,15 @@ export default class Client
                                 _data = makeArray(_data);
                                 if (next && next.url) {
                                     const nextPage = await this.request(
-                                        next.url,
+                                        {
+                                            url: next.url,
+
+                                            // Aborting the main request (even after it is complete)
+                                            // must propagate to any child requests and abort them!
+                                            // To do so, just pass the same AbortSignal if one is
+                                            // provided.
+                                            signal
+                                        },
                                         options,
                                         _resolvedRefs
                                     );
@@ -746,7 +772,7 @@ export default class Client
      * expired (or this fails for any other reason) it will be deleted from the
      * state, so that we don't enter into loops trying to re-authorize.
      */
-    refresh(): Promise<fhirclient.ClientState>
+    refresh(requestOptions: RequestInit = {}): Promise<fhirclient.ClientState>
     {
         const debugRefresh = _debug.extend("client:refresh");
         debugRefresh("Attempting to refresh with refresh_token...");
@@ -772,9 +798,11 @@ export default class Client
         // To avoid that, we keep a to the current refresh task (if any).
         if (!this._refreshTask) {
             this._refreshTask = request<fhirclient.TokenResponse>(tokenUri, {
+                ...requestOptions,
                 mode   : "cors",
                 method : "POST",
                 headers: {
+                    ...(requestOptions.headers || {}),
                     "content-type": "application/x-www-form-urlencoded"
                 },
                 body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}`,

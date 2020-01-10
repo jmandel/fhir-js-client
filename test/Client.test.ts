@@ -819,34 +819,6 @@ describe("FHIR.client", () => {
             }
         });
 
-        describe ("can be aborted", () => {
-            const mock = {
-                headers: { "content-type": "application/json" },
-                status: 200,
-                body: { id: "patient-id" },
-                _delay: 10
-            };
-            const tests: fhirclient.JsonObject = {
-                "works in the browser": new BrowserEnv(),
-                "works on the server" : new ServerEnv()
-            };
-
-            // tslint:disable-next-line:forin
-            for (const name in tests) {
-                it (name, async () => {
-                    const client = new Client(tests[name], { serverUrl: mockUrl });
-                    mockServer.mock(mock);
-                    const AbortController = tests[name].getAbortController();
-                    const abortController = new AbortController();
-                    const task = client.request({ url: "/Patient/patient-id", signal: abortController.signal });
-                    abortController.abort();
-                    await expect(task).to.reject(
-                        Error, "The user aborted a request."
-                    );
-                });
-            }
-        });
-
         describe ("resolve with falsy value if one is received", () => {
             const mock = {
                 headers: { "content-type": "application/json" },
@@ -2480,6 +2452,161 @@ describe("FHIR.client", () => {
                 // var base64Image = Buffer.from(buffer).toString('base64');
                 // console.log(base64Image);
                 // expect(result).to.equal("This is a text");
+            });
+        });
+
+        // Aborting ------------------------------------------------------------
+        describe ("can be aborted", () => {
+            const mock = {
+                headers: { "content-type": "application/json" },
+                status: 200,
+                body: { id: "patient-id" },
+                _delay: 10
+            };
+            const tests: fhirclient.JsonObject = {
+                "works in the browser": new BrowserEnv(),
+                "works on the server" : new ServerEnv()
+            };
+
+            // tslint:disable-next-line:forin
+            for (const name in tests) {
+                it (name, async () => {
+                    const client = new Client(tests[name], { serverUrl: mockUrl });
+                    mockServer.mock(mock);
+                    const AbortController = tests[name].getAbortController();
+                    const abortController = new AbortController();
+                    const task = client.request({ url: "/Patient/patient-id", signal: abortController.signal });
+                    abortController.abort();
+                    await expect(task).to.reject(
+                        Error, "The user aborted a request."
+                    );
+                });
+            }
+        });
+
+        describe ("aborts nested page requests", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, { serverUrl: mockUrl });
+                const pages: any[] = [];
+                const AbortController = env.getAbortController();
+                const abortController = new AbortController();
+                const onPage = (page: any) => {
+                    if (pages.push(page) == 2) {
+
+                        // On the second call to onPage the main request is complete
+                        // (the one that got page 1) and the first child request
+                        // (the one that got page 2) is complete. At this point,
+                        // even though the main request itself is complete, aborting
+                        // it should propagate to any nested requests and cancel them.
+                        // We should not get to page 3!
+                        abortController.abort();
+                    }
+                };
+
+                // Page 1
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Bundle",
+                        pageId: 1,
+                        entry: [],
+                        link: [{ relation: "next", url: "whatever" }]
+                    },
+                    _delay: 10
+                });
+
+                // Page 2
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Bundle",
+                        pageId: 2,
+                        entry: [],
+                        link: [{ relation: "next", url: "whatever" }]
+                    },
+                    _delay: 10
+                });
+
+                // Page 3
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Bundle",
+                        pageId: 3,
+                        entry: []
+                    },
+                    _delay: 10
+                });
+
+                const task = client.request({
+                    url: "/Patient",
+                    signal: abortController.signal
+                 }, {
+                    pageLimit: 0,
+                    onPage
+                });
+
+                await expect(task).to.reject(Error, "The user aborted a request.");
+                expect(pages.length, "onPage should be called twice").to.equal(2);
+                expect(pages[0]).to.include({ pageId: 1 });
+                expect(pages[1]).to.include({ pageId: 2 });
+            });
+        });
+
+        describe ("aborts nested reference requests", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, { serverUrl: mockUrl });
+                const AbortController = env.getAbortController();
+                const abortController = new AbortController();
+
+                // Page 1
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        patient: { reference: "ref/1" },
+                        subject: { reference: "ref/2" }
+                    },
+                    _delay: 10
+                });
+
+                // Page 2
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: { resourceType: "Patient" },
+                    _delay: 10
+                });
+
+                // Page 3
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: { resourceType: "Patient" },
+                    _delay: 1000
+                });
+
+                const task = client.request({
+                    url: "/Patient",
+                    signal: abortController.signal
+                 }, {
+                    resolveReferences: [
+                        "patient",
+                        "subject"
+                    ]
+                });
+
+                // After 30ms the main resource should be fetched and the patient
+                // reference should be resolved. The subject reference should
+                // still be pending because it takes 1000ms to reply. If we abort
+                // at that point, we should get our client.request promise
+                // rejected with abort error.
+                setTimeout(() => abortController.abort(), 30);
+
+                await expect(task).to.reject(Error, "The user aborted a request.");
             });
         });
     });

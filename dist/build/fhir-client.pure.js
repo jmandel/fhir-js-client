@@ -1079,19 +1079,23 @@ async function contextualize(requestOptions, client) {
  * @param refId
  * @param cache A map to store the resolved refs
  * @param client The client instance
+ * @param [signal] The `AbortSignal` if any
  * @returns The resolved reference
  * @private
  */
 
 
-function getRef(refId, cache, client) {
+function getRef(refId, cache, client, signal) {
   const sub = cache[refId];
 
   if (!sub) {
     // Note that we set cache[refId] immediately! When the promise is
     // settled it will be updated. This is to avoid a ref being fetched
     // twice because some of these requests are executed in parallel.
-    cache[refId] = client.request(refId).then(res => {
+    cache[refId] = client.request({
+      url: refId,
+      signal
+    }).then(res => {
       cache[refId] = res;
       return res;
     }, error => {
@@ -1105,11 +1109,11 @@ function getRef(refId, cache, client) {
 }
 /**
  * Resolves a reference in the given resource.
- * @param {Object} obj FHIR Resource
+ * @param obj FHIR Resource
  */
 
 
-function resolveRef(obj, path, graph, cache, client) {
+function resolveRef(obj, path, graph, cache, client, signal) {
   const node = lib_1.getPath(obj, path);
 
   if (node) {
@@ -1118,7 +1122,7 @@ function resolveRef(obj, path, graph, cache, client) {
       const ref = item.reference;
 
       if (ref) {
-        return getRef(ref, cache, client).then(sub => {
+        return getRef(ref, cache, client, signal).then(sub => {
           if (graph) {
             if (isArray) {
               lib_1.setPath(obj, `${path}.${i}`, sub);
@@ -1126,7 +1130,12 @@ function resolveRef(obj, path, graph, cache, client) {
               lib_1.setPath(obj, path, sub);
             }
           }
-        }).catch(() => {});
+        }).catch(ex => {
+          /* ignore missing references */
+          if (ex.status !== 404) {
+            throw ex;
+          }
+        });
       }
     }));
   }
@@ -1134,14 +1143,14 @@ function resolveRef(obj, path, graph, cache, client) {
 /**
  * Given a resource and a list of ref paths - resolves them all
  * @param obj FHIR Resource
- * @param {Object} fhirOptions The fhir options of the initiating request call
+ * @param fhirOptions The fhir options of the initiating request call
  * @param cache A map to store fetched refs
  * @param client The client instance
  * @private
  */
 
 
-function resolveRefs(obj, fhirOptions, cache, client) {
+function resolveRefs(obj, fhirOptions, cache, client, signal) {
   // 1. Sanitize paths, remove any invalid ones
   let paths = lib_1.makeArray(fhirOptions.resolveReferences).filter(Boolean) // No false, 0, null, undefined or ""
   .map(path => String(path).trim()).filter(Boolean); // No space-only strings
@@ -1180,7 +1189,7 @@ function resolveRefs(obj, fhirOptions, cache, client) {
   Object.keys(groups).sort().forEach(len => {
     const group = groups[len];
     task = task.then(() => Promise.all(group.map(path => {
-      return resolveRef(obj, path, !!fhirOptions.graph, cache, client);
+      return resolveRef(obj, path, !!fhirOptions.graph, cache, client, signal);
     })));
   });
   return task;
@@ -1594,6 +1603,7 @@ class Client {
       onPage: typeof fhirOptions.onPage == "function" ? fhirOptions.onPage : undefined
     };
     debugRequest("%s, options: %O, fhirOptions: %O", url, requestOptions, options);
+    const signal = requestOptions.signal || undefined;
     return lib_1.request(url, requestOptions) // Automatic re-auth via refresh token -----------------------------
     .catch(error => {
       debugRequest("%o", error);
@@ -1602,7 +1612,9 @@ class Client {
         const hasRefreshToken = lib_1.getPath(this, "state.tokenResponse.refresh_token");
 
         if (hasRefreshToken) {
-          return this.refresh().then(() => this.request({ ...requestOptions,
+          return this.refresh({
+            signal
+          }).then(() => this.request({ ...requestOptions,
             url
           }, options, _resolvedRefs));
         }
@@ -1640,17 +1652,17 @@ class Client {
       }
 
       throw error;
-    }) // Handle raw requests (anything other than json) ------------------
-    .then(data => {
+    }).then(data => {
+      // Handle raw responses (anything other than json) -------------
       if (!data) return data;
       if (typeof data == "string") return data;
       if (data instanceof Response) return data; // Resolve References ------------------------------------------
 
       return (async _data => {
         if (_data.resourceType == "Bundle") {
-          await Promise.all((_data.entry || []).map(item => resolveRefs(item.resource, options, _resolvedRefs, this)));
+          await Promise.all((_data.entry || []).map(item => resolveRefs(item.resource, options, _resolvedRefs, this, signal)));
         } else {
-          await resolveRefs(_data, options, _resolvedRefs, this);
+          await resolveRefs(_data, options, _resolvedRefs, this, signal);
         }
 
         return _data;
@@ -1673,7 +1685,14 @@ class Client {
             _data = lib_1.makeArray(_data);
 
             if (next && next.url) {
-              const nextPage = await this.request(next.url, options, _resolvedRefs);
+              const nextPage = await this.request({
+                url: next.url,
+                // Aborting the main request (even after it is complete)
+                // must propagate to any child requests and abort them!
+                // To do so, just pass the same AbortSignal if one is
+                // provided.
+                signal
+              }, options, _resolvedRefs);
 
               if (options.onPage) {
                 return null;
@@ -1712,7 +1731,7 @@ class Client {
    */
 
 
-  refresh() {
+  refresh(requestOptions = {}) {
     var _a, _b;
 
     const debugRefresh = lib_1.debug.extend("client:refresh");
@@ -1740,10 +1759,10 @@ class Client {
 
 
     if (!this._refreshTask) {
-      this._refreshTask = lib_1.request(tokenUri, {
+      this._refreshTask = lib_1.request(tokenUri, { ...requestOptions,
         mode: "cors",
         method: "POST",
-        headers: {
+        headers: { ...(requestOptions.headers || {}),
           "content-type": "application/x-www-form-urlencoded"
         },
         body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}`,

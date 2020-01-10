@@ -258,6 +258,12 @@ is based on the standard `AbortController` approach. You need to create an
 instance of `AbortController` and pass it's `AbortSignal` as request option as
 shown below.
 
+Note that `client.request` is a powerful method that might start other requests
+depending on the passed options (to fetch references or additional pages). If
+a `client.request` task is aborted, that will propagate and cancel any sub-requests
+that are being executed at that point.
+
+
 ### When used as library
 When the bundle is included via `script` tag in a web page, the `AbortController`
 class will be globally available (we include a polyfill). Then an abort-able

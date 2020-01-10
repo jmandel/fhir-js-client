@@ -95,7 +95,7 @@ export default class Client {
      * expired (or this fails for any other reason) it will be deleted from the
      * state, so that we don't enter into loops trying to re-authorize.
      */
-    refresh(): Promise<fhirclient.ClientState>;
+    refresh(requestOptions?: RequestInit): Promise<fhirclient.ClientState>;
     byCode: typeof byCode;
     byCodes: typeof byCodes;
     units: {
