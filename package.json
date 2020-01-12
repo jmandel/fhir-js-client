@@ -29,7 +29,7 @@
     "build:dev": "webpack --watch",
     "cover": "lab -r lcov -o lcov.info test/**.ts && cat lcov.info | coveralls && rm -rf lcov.info",
     "build:module": "cp src/types.d.ts dist/lib && tsc -p tsconfig.module.json && babel --env-name module -d dist/lib dist/lib",
-    "doc": "typedoc src"
+    "doc": "typedoc src && touch docs/typedoc/.nojekyll"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.5",
