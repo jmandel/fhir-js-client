@@ -13,12 +13,17 @@ const settings_1 = require("./settings");
 
 exports.KEY = settings_1.SMART_KEY;
 const debug = lib_1.debug.extend("oauth2");
+
+function isBrowser() {
+  return typeof window === "object";
+}
 /**
  * Fetches the well-known json file from the given base URL.
  * Note that the result is cached in memory (until the page is reloaded in the
  * browser) because it might have to be re-used by the client
  * @param baseUrl The base URL of the FHIR server
  */
+
 
 function fetchWellKnownJson(baseUrl = "/", requestOptions) {
   const url = String(baseUrl).replace(/\/*$/, "/") + ".well-known/smart-configuration";
@@ -28,6 +33,9 @@ function fetchWellKnownJson(baseUrl = "/", requestOptions) {
 }
 
 exports.fetchWellKnownJson = fetchWellKnownJson;
+/**
+ * Fetch a "WellKnownJson" and extract the SMART endpoints from it
+ */
 
 function getSecurityExtensionsFromWellKnownJson(baseUrl = "/", requestOptions) {
   return fetchWellKnownJson(baseUrl, requestOptions).then(meta => {
@@ -42,6 +50,10 @@ function getSecurityExtensionsFromWellKnownJson(baseUrl = "/", requestOptions) {
     };
   });
 }
+/**
+ * Fetch a `CapabilityStatement` and extract the SMART endpoints from it
+ */
+
 
 function getSecurityExtensionsFromConformanceStatement(baseUrl = "/", requestOptions) {
   return lib_1.fetchConformanceStatement(baseUrl, requestOptions).then(meta => {
@@ -140,6 +152,12 @@ function getSecurityExtensions(env, baseUrl = "/") {
 
 exports.getSecurityExtensions = getSecurityExtensions;
 /**
+ * Starts the SMART Launch Sequence.
+ * > **IMPORTANT**:
+ *   `authorize()` will end up redirecting you to the authorization server.
+ *    This means that you should not add anything to the returned promise chain.
+ *    Any code written directly after the authorize() call might not be executed
+ *    due to that redirect!
  * @param env
  * @param [params]
  * @param [_noRedirect] If true, resolve with the redirect url without trying to redirect to it
@@ -317,11 +335,11 @@ async function completeAuth(env) {
 
 
   let state = await Storage.get(key);
-  const fullSessionStorageSupport = lib_1.isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // Do we have to remove the `code` and `state` params from the URL?
+  const fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // Do we have to remove the `code` and `state` params from the URL?
 
   const hasState = params.has("state");
 
-  if (lib_1.isBrowser() && lib_1.getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
+  if (isBrowser() && lib_1.getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
     // `code` is the flag that tell us to request an access token.
     // We have to remove it, otherwise the page will authorize on
     // every load!
@@ -473,6 +491,36 @@ async function ready(env, onSuccess, onError) {
 }
 
 exports.ready = ready;
+/**
+ * This function can be used when you want to handle everything in one page
+ * (no launch endpoint needed). You can think of it as if it does:
+ * ```js
+ * authorize(options).then(ready)
+ * ```
+ *
+ * **Be careful with init()!** There are some details you need to be aware of:
+ *
+ * 1. It will only work if your launch_uri is the same as your redirect_uri.
+ *    While this should be valid, we can’t promise that every EHR will allow you
+ *    to register client with such settings.
+ * 2. Internally, `init()` will be called twice. First it will redirect to the
+ *    EHR, then the EHR will redirect back to the page where init() will be
+ *    called again to complete the authorization. This is generally fine,
+ *    because the returned promise will only be resolved once, after the second
+ *    execution, but please also consider the following:
+ *    - You should wrap all your app’s code in a function that is only executed
+ *      after `init()` resolves!
+ *    - Since the page will be loaded twice, you must be careful if your code
+ *      has global side effects that can persist between page reloads
+ *      (for example writing to localStorage).
+ * 3. For standalone launch, only use init in combination with offline_access
+ *    scope. Once the access_token expires, if you don’t have a refresh_token
+ *    there is no way to re-authorize properly. We detect that and delete the
+ *    expired access token, but it still means that the user will have to
+ *    refresh the page twice to re-authorize.
+ * @param env The adapter
+ * @param options The authorize options
+ */
 
 async function init(env, options) {
   const url = env.getUrl();

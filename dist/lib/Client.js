@@ -180,14 +180,27 @@ function resolveRefs(obj, fhirOptions, cache, client, signal) {
   });
   return task;
 }
+/**
+ * This is a FHIR client that is returned to you from the `ready()` call of the
+ * **SMART API**. You can also create it yourself if needed:
+ *
+ * ```js
+ * // BROWSER
+ * const client = FHIR.client("https://r4.smarthealthit.org");
+ *
+ * // SERVER
+ * const client = smart(req, res).client("https://r4.smarthealthit.org");
+ * ```
+ */
+
 
 class Client {
+  /**
+   * Validates the parameters, creates an instance and tries to connect it to
+   * FhirJS, if one is available globally.
+   */
   constructor(environment, state) {
-    // utils -------------------------------------------------------------------
-    this.byCode = lib_1.byCode;
-    this.byCodes = lib_1.byCodes;
     this.units = lib_1.units;
-    this.getPath = lib_1.getPath;
 
     const _state = typeof state == "string" ? {
       serverUrl: state
@@ -263,6 +276,15 @@ class Client {
 
     this.connect(environment.fhir);
   }
+  /**
+   * This method is used to make the "link" between the `fhirclient` and the
+   * `fhir.js`, if one is available.
+   * **Note:** This is called by the constructor. If fhir.js is available in
+   * the global scope as `fhir`, it will automatically be linked to any `Client`
+   * instance. You should only use this method to connect to `fhir.js` which
+   * is not global.
+   */
+
 
   connect(fhirJs) {
     if (typeof fhirJs == "function") {
@@ -481,6 +503,11 @@ class Client {
 
     return null;
   }
+  /**
+   * Used internally to clear the state of the instance and the state in the
+   * associated storage.
+   */
+
 
   async _clearState() {
     const storage = this.environment.getStorage();
@@ -513,7 +540,7 @@ class Client {
   }
   /**
    * @param resource A FHIR resource to be updated
-   * @param [requestOptions] Any options to be passed to the fetch call.
+   * @param requestOptions Any options to be passed to the fetch call.
    * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
    * but other headers can be added.
    */
@@ -532,7 +559,7 @@ class Client {
   /**
    * @param url Relative URI of the FHIR resource to be deleted
    * (format: `resourceType/id`)
-   * @param [requestOptions] Any options (except `method` which will be fixed
+   * @param requestOptions Any options (except `method` which will be fixed
    * to `DELETE`) to be passed to the fetch call.
    */
 
@@ -713,6 +740,13 @@ class Client {
    * Use the refresh token to obtain new access token. If the refresh token is
    * expired (or this fails for any other reason) it will be deleted from the
    * state, so that we don't enter into loops trying to re-authorize.
+   *
+   * This method is typically called internally from `Client.request` if
+   * certain request fails with 401.
+   *
+   * @param requestOptions Any options to pass to the fetch call. Most of them
+   * will be overridden, bit it might still be useful for passing additional
+   * request calls or an abort signal.
    */
 
 
@@ -784,6 +818,65 @@ class Client {
     }
 
     return this._refreshTask;
+  } // utils -------------------------------------------------------------------
+
+  /**
+   * Groups the observations by code. Returns a map that will look like:
+   * ```js
+   * const map = client.byCodes(observations, "code");
+   * // map = {
+   * //     "55284-4": [ observation1, observation2 ],
+   * //     "6082-2": [ observation3 ]
+   * // }
+   * ```
+   * @param observations Array of observations
+   * @param property The name of a CodeableConcept property to group by
+   * @todo This should be deprecated and moved elsewhere. One should not have
+   * to obtain an instance of `Client` just to use utility functions like this.
+   * @deprecated
+   */
+
+
+  byCode(observations, property) {
+    return lib_1.byCode(observations, property);
+  }
+  /**
+   * First groups the observations by code using `byCode`. Then returns a function
+   * that accepts codes as arguments and will return a flat array of observations
+   * having that codes. Example:
+   * ```js
+   * const filter = client.byCodes(observations, "category");
+   * filter("laboratory") // => [ observation1, observation2 ]
+   * filter("vital-signs") // => [ observation3 ]
+   * filter("laboratory", "vital-signs") // => [ observation1, observation2, observation3 ]
+   * ```
+   * @param observations Array of observations
+   * @param property The name of a CodeableConcept property to group by
+   * @todo This should be deprecated and moved elsewhere. One should not have
+   * to obtain an instance of `Client` just to use utility functions like this.
+   * @deprecated
+   */
+
+
+  byCodes(observations, property) {
+    return lib_1.byCodes(observations, property);
+  }
+  /**
+   * Walks through an object (or array) and returns the value found at the
+   * provided path. This function is very simple so it intentionally does not
+   * support any argument polymorphism, meaning that the path can only be a
+   * dot-separated string. If the path is invalid returns undefined.
+   * @param obj The object (or Array) to walk through
+   * @param path The path (eg. "a.b.4.c")
+   * @returns {*} Whatever is found in the path or undefined
+   * @todo This should be deprecated and moved elsewhere. One should not have
+   * to obtain an instance of `Client` just to use utility functions like this.
+   * @deprecated
+   */
+
+
+  getPath(obj, path = "") {
+    return lib_1.getPath(obj, path);
   }
   /**
    * Returns a promise that will be resolved with the fhir version as defined

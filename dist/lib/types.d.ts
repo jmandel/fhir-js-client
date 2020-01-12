@@ -330,11 +330,14 @@ declare namespace fhirclient {
 
         /**
          * Defaults to the current directory (it's index file)
+         * @alias redirect_uri
          */
         redirectUri?: string;
 
         /**
          * Same as redirectUri
+         * @alias redirectUri
+         * @deprecated
          */
         redirect_uri?: string;
 
@@ -343,6 +346,7 @@ declare namespace fhirclient {
          * EHR. This is not required if you only intend to communicate with open
          * FHIR servers. Note: For backwards compatibility reasons we also accept
          * `client_id` instead of `clientId`!
+         * @alias client_id
          */
         clientId?: string;
 
@@ -351,6 +355,8 @@ declare namespace fhirclient {
          * EHR. This is not required if you only intend to communicate with open
          * FHIR servers. Note: For backwards compatibility reasons we accept
          * `client_id` as an alias of `clientId`!
+         * @alias clientId
+         * @deprecated
          */
         client_id?: string;
 
@@ -826,7 +832,23 @@ declare namespace fhirclient {
         }
 
         interface Observation extends Resource {
+            resourceType: "Observation";
+        }
 
+        interface Patient extends Resource {
+            resourceType: "Patient";
+        }
+
+        interface Practitioner extends Resource {
+            resourceType: "Practitioner";
+        }
+
+        interface RelatedPerson extends Resource {
+            resourceType: "RelatedPerson";
+        }
+
+        interface Encounter extends Resource {
+            resourceType: "Encounter";
         }
 
         interface Period extends Element {

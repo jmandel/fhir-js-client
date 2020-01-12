@@ -1,7 +1,14 @@
 import { fhirclient } from "./types";
 declare const _debug: any;
 export { _debug as debug };
-export declare function isBrowser(): boolean;
+/**
+ * A namespace with functions for converting between different measurement units
+ */
+export declare const units: {
+    cm({ code, value }: fhirclient.CodeValue): number;
+    kg({ code, value }: fhirclient.CodeValue): number;
+    any(pq: fhirclient.CodeValue): number;
+};
 /**
  * Used in fetch Promise chains to reject if the "ok" property is not true
  */
@@ -23,7 +30,15 @@ export declare function responseToJSON(resp: Response): Promise<object | string>
  * - Otherwise return the response object on which we call stuff like `.blob()`
  */
 export declare function request<T = Response | fhirclient.JsonObject | string>(url: string | Request, options?: RequestInit): Promise<T>;
-export declare const getAndCache: (url: string, requestOptions?: RequestInit, force?: boolean) => Promise<any>;
+/**
+ * Makes a request using `fetch` and stores the result in internal memory cache.
+ * The cache is cleared when the page is unloaded.
+ * @param url The URL to request
+ * @param requestOptions Request options
+ * @param force If true, reload from source and update the cache, even if it has
+ * already been cached.
+ */
+export declare function getAndCache(url: string, requestOptions?: RequestInit, force?: boolean): Promise<any>;
 /**
  * Fetches the conformance statement from the given base URL.
  * Note that the result is cached in memory (until the page is reloaded in the
@@ -32,8 +47,11 @@ export declare const getAndCache: (url: string, requestOptions?: RequestInit, fo
  * @param [requestOptions] Any options passed to the fetch call
  */
 export declare function fetchConformanceStatement(baseUrl?: string, requestOptions?: RequestInit): Promise<fhirclient.FHIR.CapabilityStatement>;
-export declare function humanizeError(resp: fhirclient.JsonObject): Promise<void>;
-export declare function stripTrailingSlash(str: string): string;
+/**
+ * Given a response object, generates and throws detailed HttpError.
+ * @param resp The `Response` object of a failed `fetch` request
+ */
+export declare function humanizeError(resp: Response): Promise<void>;
 /**
  * Walks through an object (or array) and returns the value found at the
  * provided path. This function is very simple so it intentionally does not
@@ -52,7 +70,18 @@ export declare function getPath(obj: fhirclient.JsonObject, path?: string): any;
  * @returns The modified object
  */
 export declare function setPath(obj: fhirclient.JsonObject, path: string, value: any): fhirclient.JsonObject;
+/**
+ * If the argument is an array returns it as is. Otherwise puts it in an array
+ * (`[arg]`) and returns the result
+ * @param arg The element to test and possibly convert to array
+ */
 export declare function makeArray<T = any>(arg: any): T[];
+/**
+ * Given a path, converts it to absolute url based on the `baseUrl`. If baseUrl
+ * is not provided, the result would be a rooted path (one that starts with `/`).
+ * @param path The path to convert
+ * @param baseUrl The base URL
+ */
 export declare function absolute(path: string, baseUrl?: string): string;
 /**
  * Generates random strings. By default this returns random 8 characters long
@@ -62,6 +91,11 @@ export declare function absolute(path: string, baseUrl?: string): string;
  *     Defaults to all the upper and lower-case letters plus digits.
  */
 export declare function randomString(strLength?: number, charSet?: string): string;
+/**
+ * Decodes a JWT token and returns it's body.
+ * @param token The token to read
+ * @param env An `Adapter` or any other object that has an `atob` method
+ */
 export declare function jwtDecode(token: string, env: fhirclient.Adapter): fhirclient.IDToken;
 /**
  * Groups the observations by code. Returns a map that will look like:
@@ -90,12 +124,6 @@ export declare function byCode(observations: fhirclient.FHIR.Observation | fhirc
  * @param property The name of a CodeableConcept property to group by
  */
 export declare function byCodes(observations: fhirclient.FHIR.Observation | fhirclient.FHIR.Observation[], property: string): (...codes: string[]) => any[];
-export declare function ensureNumerical({ value, code }: fhirclient.CodeValue): void;
-export declare const units: {
-    cm({ code, value }: fhirclient.CodeValue): number;
-    kg({ code, value }: fhirclient.CodeValue): number;
-    any(pq: fhirclient.CodeValue): number;
-};
 /**
  * Given a conformance statement and a resource type, returns the name of the
  * URL parameter that can be used to scope the resource type by patient ID.

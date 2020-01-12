@@ -23,35 +23,6 @@ describe("Lib", () => {
         });
     });
 
-    describe("stripTrailingSlash", () => {
-        it ("returns the same string if it does not end with slash", () => {
-            expect(lib.stripTrailingSlash("abc")).to.equal("abc");
-        });
-
-        it ("removes the trailing slash", () => {
-            expect(lib.stripTrailingSlash("abc/")).to.equal("abc");
-        });
-
-        it ("removes repeated trailing slashes", () => {
-            expect(lib.stripTrailingSlash("abc///")).to.equal("abc");
-        });
-
-        it ("works with non-string argument", () => {
-            // @ts-ignore
-            expect(lib.stripTrailingSlash(null)).to.equal("");
-            // @ts-ignore
-            expect(lib.stripTrailingSlash(false)).to.equal("");
-            // @ts-ignore
-            expect(lib.stripTrailingSlash(undefined)).to.equal("");
-            // @ts-ignore
-            expect(lib.stripTrailingSlash()).to.equal("");
-            // @ts-ignore
-            expect(lib.stripTrailingSlash(53)).to.equal("53");
-            // @ts-ignore
-            expect(lib.stripTrailingSlash(/abc/)).to.equal("/abc");
-        });
-    });
-
     describe("absolute", () => {
         it ("returns http, https or urn URI as is", () => {
             [

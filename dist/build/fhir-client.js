@@ -10593,18 +10593,31 @@ function resolveRefs(obj, fhirOptions, cache, client, signal) {
   });
   return task;
 }
+/**
+ * This is a FHIR client that is returned to you from the `ready()` call of the
+ * **SMART API**. You can also create it yourself if needed:
+ *
+ * ```js
+ * // BROWSER
+ * const client = FHIR.client("https://r4.smarthealthit.org");
+ *
+ * // SERVER
+ * const client = smart(req, res).client("https://r4.smarthealthit.org");
+ * ```
+ */
+
 
 var Client =
 /*#__PURE__*/
 function () {
+  /**
+   * Validates the parameters, creates an instance and tries to connect it to
+   * FhirJS, if one is available globally.
+   */
   function Client(environment, state) {
     var _this = this;
 
-    // utils -------------------------------------------------------------------
-    this.byCode = lib_1.byCode;
-    this.byCodes = lib_1.byCodes;
     this.units = lib_1.units;
-    this.getPath = lib_1.getPath;
 
     var _state = typeof state == "string" ? {
       serverUrl: state
@@ -10714,6 +10727,15 @@ function () {
 
     this.connect(environment.fhir);
   }
+  /**
+   * This method is used to make the "link" between the `fhirclient` and the
+   * `fhir.js`, if one is available.
+   * **Note:** This is called by the constructor. If fhir.js is available in
+   * the global scope as `fhir`, it will automatically be linked to any `Client`
+   * instance. You should only use this method to connect to `fhir.js` which
+   * is not global.
+   */
+
 
   var _proto = Client.prototype;
 
@@ -10931,7 +10953,12 @@ function () {
     }
 
     return null;
-  };
+  }
+  /**
+   * Used internally to clear the state of the instance and the state in the
+   * associated storage.
+   */
+  ;
 
   _proto._clearState =
   /*#__PURE__*/
@@ -11004,7 +11031,7 @@ function () {
   }
   /**
    * @param resource A FHIR resource to be updated
-   * @param [requestOptions] Any options to be passed to the fetch call.
+   * @param requestOptions Any options to be passed to the fetch call.
    * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
    * but other headers can be added.
    */
@@ -11027,7 +11054,7 @@ function () {
   /**
    * @param url Relative URI of the FHIR resource to be deleted
    * (format: `resourceType/id`)
-   * @param [requestOptions] Any options (except `method` which will be fixed
+   * @param requestOptions Any options (except `method` which will be fixed
    * to `DELETE`) to be passed to the fetch call.
    */
   ;
@@ -11369,6 +11396,13 @@ function () {
    * Use the refresh token to obtain new access token. If the refresh token is
    * expired (or this fails for any other reason) it will be deleted from the
    * state, so that we don't enter into loops trying to re-authorize.
+   *
+   * This method is typically called internally from `Client.request` if
+   * certain request fails with 401.
+   *
+   * @param requestOptions Any options to pass to the fetch call. Most of them
+   * will be overridden, bit it might still be useful for passing additional
+   * request calls or an abort signal.
    */
   ;
 
@@ -11446,6 +11480,69 @@ function () {
     }
 
     return this._refreshTask;
+  } // utils -------------------------------------------------------------------
+
+  /**
+   * Groups the observations by code. Returns a map that will look like:
+   * ```js
+   * const map = client.byCodes(observations, "code");
+   * // map = {
+   * //     "55284-4": [ observation1, observation2 ],
+   * //     "6082-2": [ observation3 ]
+   * // }
+   * ```
+   * @param observations Array of observations
+   * @param property The name of a CodeableConcept property to group by
+   * @todo This should be deprecated and moved elsewhere. One should not have
+   * to obtain an instance of `Client` just to use utility functions like this.
+   * @deprecated
+   */
+  ;
+
+  _proto.byCode = function byCode(observations, property) {
+    return lib_1.byCode(observations, property);
+  }
+  /**
+   * First groups the observations by code using `byCode`. Then returns a function
+   * that accepts codes as arguments and will return a flat array of observations
+   * having that codes. Example:
+   * ```js
+   * const filter = client.byCodes(observations, "category");
+   * filter("laboratory") // => [ observation1, observation2 ]
+   * filter("vital-signs") // => [ observation3 ]
+   * filter("laboratory", "vital-signs") // => [ observation1, observation2, observation3 ]
+   * ```
+   * @param observations Array of observations
+   * @param property The name of a CodeableConcept property to group by
+   * @todo This should be deprecated and moved elsewhere. One should not have
+   * to obtain an instance of `Client` just to use utility functions like this.
+   * @deprecated
+   */
+  ;
+
+  _proto.byCodes = function byCodes(observations, property) {
+    return lib_1.byCodes(observations, property);
+  }
+  /**
+   * Walks through an object (or array) and returns the value found at the
+   * provided path. This function is very simple so it intentionally does not
+   * support any argument polymorphism, meaning that the path can only be a
+   * dot-separated string. If the path is invalid returns undefined.
+   * @param obj The object (or Array) to walk through
+   * @param path The path (eg. "a.b.4.c")
+   * @returns {*} Whatever is found in the path or undefined
+   * @todo This should be deprecated and moved elsewhere. One should not have
+   * to obtain an instance of `Client` just to use utility functions like this.
+   * @deprecated
+   */
+  ;
+
+  _proto.getPath = function getPath(obj, path) {
+    if (path === void 0) {
+      path = "";
+    }
+
+    return lib_1.getPath(obj, path);
   }
   /**
    * Returns a promise that will be resolved with the fhir version as defined
@@ -11838,7 +11935,7 @@ module.exports = FHIR; // $lab:coverage:on$
 "use strict";
 
 /*
- * This file contains some shared functions. The are used by other modules, but
+ * This file contains some shared functions. They are used by other modules, but
  * are defined here so that tests can import this library and test them.
  */
 
@@ -11897,15 +11994,66 @@ var _ref = typeof FHIRCLIENT_PURE !== "undefined" ? window : __webpack_require__
 var _debug = debug("FHIR");
 
 exports.debug = _debug;
+/**
+ * The cache for the `getAndCache` function
+ */
 
-function isBrowser() {
-  return typeof window === "object";
+var cache = {};
+/**
+ * A namespace with functions for converting between different measurement units
+ */
+
+exports.units = {
+  cm: function cm(_ref2) {
+    var code = _ref2.code,
+        value = _ref2.value;
+    ensureNumerical({
+      code: code,
+      value: value
+    });
+    if (code == "cm") return value;
+    if (code == "m") return value * 100;
+    if (code == "in") return value * 2.54;
+    if (code == "[in_us]") return value * 2.54;
+    if (code == "[in_i]") return value * 2.54;
+    if (code == "ft") return value * 30.48;
+    if (code == "[ft_us]") return value * 30.48;
+    throw new Error("Unrecognized length unit: " + code);
+  },
+  kg: function kg(_ref3) {
+    var code = _ref3.code,
+        value = _ref3.value;
+    ensureNumerical({
+      code: code,
+      value: value
+    });
+    if (code == "kg") return value;
+    if (code == "g") return value / 1000;
+    if (code.match(/lb/)) return value / 2.20462;
+    if (code.match(/oz/)) return value / 35.274;
+    throw new Error("Unrecognized weight unit: " + code);
+  },
+  any: function any(pq) {
+    ensureNumerical(pq);
+    return pq.value;
+  }
+};
+/**
+ * Assertion function to guard arguments for `units` functions
+ */
+
+function ensureNumerical(_ref4) {
+  var value = _ref4.value,
+      code = _ref4.code;
+
+  if (typeof value !== "number") {
+    throw new Error("Found a non-numerical unit: " + value + " " + code);
+  }
 }
-
-exports.isBrowser = isBrowser;
 /**
  * Used in fetch Promise chains to reject if the "ok" property is not true
  */
+
 
 function checkResponse(_x) {
   return _checkResponse.apply(this, arguments);
@@ -11995,22 +12143,29 @@ function request(url, options) {
 }
 
 exports.request = request;
+/**
+ * Makes a request using `fetch` and stores the result in internal memory cache.
+ * The cache is cleared when the page is unloaded.
+ * @param url The URL to request
+ * @param requestOptions Request options
+ * @param force If true, reload from source and update the cache, even if it has
+ * already been cached.
+ */
 
-exports.getAndCache = function () {
-  var cache = {};
-  return function (url, requestOptions, force) {
-    if (force === void 0) {
-      force = "development" === "test";
-    }
+function getAndCache(url, requestOptions, force) {
+  if (force === void 0) {
+    force = "development" === "test";
+  }
 
-    if (force || !cache[url]) {
-      cache[url] = request(url, requestOptions);
-      return cache[url];
-    }
+  if (force || !cache[url]) {
+    cache[url] = request(url, requestOptions);
+    return cache[url];
+  }
 
-    return Promise.resolve(cache[url]);
-  };
-}();
+  return Promise.resolve(cache[url]);
+}
+
+exports.getAndCache = getAndCache;
 /**
  * Fetches the conformance statement from the given base URL.
  * Note that the result is cached in memory (until the page is reloaded in the
@@ -12019,19 +12174,22 @@ exports.getAndCache = function () {
  * @param [requestOptions] Any options passed to the fetch call
  */
 
-
 function fetchConformanceStatement(baseUrl, requestOptions) {
   if (baseUrl === void 0) {
     baseUrl = "/";
   }
 
   var url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
-  return exports.getAndCache(url, requestOptions).catch(function (ex) {
+  return getAndCache(url, requestOptions).catch(function (ex) {
     throw new Error("Failed to fetch the conformance statement from \"" + url + "\". " + ex);
   });
 }
 
 exports.fetchConformanceStatement = fetchConformanceStatement;
+/**
+ * Given a response object, generates and throws detailed HttpError.
+ * @param resp The `Response` object of a failed `fetch` request
+ */
 
 function humanizeError(_x2) {
   return _humanizeError.apply(this, arguments);
@@ -12109,12 +12267,6 @@ function _humanizeError() {
 }
 
 exports.humanizeError = humanizeError;
-
-function stripTrailingSlash(str) {
-  return String(str || "").replace(/\/+$/, "");
-}
-
-exports.stripTrailingSlash = stripTrailingSlash;
 /**
  * Walks through an object (or array) and returns the value found at the
  * provided path. This function is very simple so it intentionally does not
@@ -12162,6 +12314,11 @@ function setPath(obj, path, value) {
 }
 
 exports.setPath = setPath;
+/**
+ * If the argument is an array returns it as is. Otherwise puts it in an array
+ * (`[arg]`) and returns the result
+ * @param arg The element to test and possibly convert to array
+ */
 
 function makeArray(arg) {
   if (Array.isArray(arg)) {
@@ -12172,6 +12329,12 @@ function makeArray(arg) {
 }
 
 exports.makeArray = makeArray;
+/**
+ * Given a path, converts it to absolute url based on the `baseUrl`. If baseUrl
+ * is not provided, the result would be a rooted path (one that starts with `/`).
+ * @param path The path to convert
+ * @param baseUrl The base URL
+ */
 
 function absolute(path, baseUrl) {
   if (path.match(/^http/)) return path;
@@ -12208,6 +12371,11 @@ function randomString(strLength, charSet) {
 }
 
 exports.randomString = randomString;
+/**
+ * Decodes a JWT token and returns it's body.
+ * @param token The token to read
+ * @param env An `Adapter` or any other object that has an `atob` method
+ */
 
 function jwtDecode(token, env) {
   var payload = token.split(".")[1];
@@ -12233,8 +12401,8 @@ function byCode(observations, property) {
 
   function handleCodeableConcept(concept, observation) {
     if (concept && Array.isArray(concept.coding)) {
-      concept.coding.forEach(function (_ref2) {
-        var code = _ref2.code;
+      concept.coding.forEach(function (_ref5) {
+        var code = _ref5.code;
 
         if (code) {
           ret[code] = ret[code] || [];
@@ -12289,52 +12457,6 @@ function byCodes(observations, property) {
 }
 
 exports.byCodes = byCodes;
-
-function ensureNumerical(_ref3) {
-  var value = _ref3.value,
-      code = _ref3.code;
-
-  if (typeof value !== "number") {
-    throw new Error("Found a non-numerical unit: " + value + " " + code);
-  }
-}
-
-exports.ensureNumerical = ensureNumerical;
-exports.units = {
-  cm: function cm(_ref4) {
-    var code = _ref4.code,
-        value = _ref4.value;
-    ensureNumerical({
-      code: code,
-      value: value
-    });
-    if (code == "cm") return value;
-    if (code == "m") return value * 100;
-    if (code == "in") return value * 2.54;
-    if (code == "[in_us]") return value * 2.54;
-    if (code == "[in_i]") return value * 2.54;
-    if (code == "ft") return value * 30.48;
-    if (code == "[ft_us]") return value * 30.48;
-    throw new Error("Unrecognized length unit: " + code);
-  },
-  kg: function kg(_ref5) {
-    var code = _ref5.code,
-        value = _ref5.value;
-    ensureNumerical({
-      code: code,
-      value: value
-    });
-    if (code == "kg") return value;
-    if (code == "g") return value / 1000;
-    if (code.match(/lb/)) return value / 2.20462;
-    if (code.match(/oz/)) return value / 35.274;
-    throw new Error("Unrecognized weight unit: " + code);
-  },
-  any: function any(pq) {
-    ensureNumerical(pq);
-    return pq.value;
-  }
-};
 /**
  * Given a conformance statement and a resource type, returns the name of the
  * URL parameter that can be used to scope the resource type by patient ID.
@@ -12486,12 +12608,17 @@ var settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts");
 
 exports.KEY = settings_1.SMART_KEY;
 var debug = lib_1.debug.extend("oauth2");
+
+function isBrowser() {
+  return typeof window === "object";
+}
 /**
  * Fetches the well-known json file from the given base URL.
  * Note that the result is cached in memory (until the page is reloaded in the
  * browser) because it might have to be re-used by the client
  * @param baseUrl The base URL of the FHIR server
  */
+
 
 function fetchWellKnownJson(baseUrl, requestOptions) {
   if (baseUrl === void 0) {
@@ -12505,6 +12632,9 @@ function fetchWellKnownJson(baseUrl, requestOptions) {
 }
 
 exports.fetchWellKnownJson = fetchWellKnownJson;
+/**
+ * Fetch a "WellKnownJson" and extract the SMART endpoints from it
+ */
 
 function getSecurityExtensionsFromWellKnownJson(baseUrl, requestOptions) {
   if (baseUrl === void 0) {
@@ -12523,6 +12653,10 @@ function getSecurityExtensionsFromWellKnownJson(baseUrl, requestOptions) {
     };
   });
 }
+/**
+ * Fetch a `CapabilityStatement` and extract the SMART endpoints from it
+ */
+
 
 function getSecurityExtensionsFromConformanceStatement(baseUrl, requestOptions) {
   if (baseUrl === void 0) {
@@ -12637,6 +12771,12 @@ function getSecurityExtensions(env, baseUrl) {
 
 exports.getSecurityExtensions = getSecurityExtensions;
 /**
+ * Starts the SMART Launch Sequence.
+ * > **IMPORTANT**:
+ *   `authorize()` will end up redirecting you to the authorization server.
+ *    This means that you should not add anything to the returned promise chain.
+ *    Any code written directly after the authorize() call might not be executed
+ *    due to that redirect!
  * @param env
  * @param [params]
  * @param [_noRedirect] If true, resolve with the redirect url without trying to redirect to it
@@ -12897,11 +13037,11 @@ function _completeAuth() {
 
           case 18:
             state = _context2.sent;
-            fullSessionStorageSupport = lib_1.isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // Do we have to remove the `code` and `state` params from the URL?
+            fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // Do we have to remove the `code` and `state` params from the URL?
 
             hasState = params.has("state");
 
-            if (lib_1.isBrowser() && lib_1.getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
+            if (isBrowser() && lib_1.getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
               // `code` is the flag that tell us to request an access token.
               // We have to remove it, otherwise the page will authorize on
               // every load!
@@ -13112,6 +13252,36 @@ function _ready() {
 }
 
 exports.ready = ready;
+/**
+ * This function can be used when you want to handle everything in one page
+ * (no launch endpoint needed). You can think of it as if it does:
+ * ```js
+ * authorize(options).then(ready)
+ * ```
+ *
+ * **Be careful with init()!** There are some details you need to be aware of:
+ *
+ * 1. It will only work if your launch_uri is the same as your redirect_uri.
+ *    While this should be valid, we can’t promise that every EHR will allow you
+ *    to register client with such settings.
+ * 2. Internally, `init()` will be called twice. First it will redirect to the
+ *    EHR, then the EHR will redirect back to the page where init() will be
+ *    called again to complete the authorization. This is generally fine,
+ *    because the returned promise will only be resolved once, after the second
+ *    execution, but please also consider the following:
+ *    - You should wrap all your app’s code in a function that is only executed
+ *      after `init()` resolves!
+ *    - Since the page will be loaded twice, you must be careful if your code
+ *      has global side effects that can persist between page reloads
+ *      (for example writing to localStorage).
+ * 3. For standalone launch, only use init in combination with offline_access
+ *    scope. Once the access_token expires, if you don’t have a refresh_token
+ *    there is no way to re-authorize properly. We detect that and delete the
+ *    expired access token, but it still means that the user will have to
+ *    refresh the page twice to re-authorize.
+ * @param env The adapter
+ * @param options The authorize options
+ */
 
 function init(_x8, _x9) {
   return _init.apply(this, arguments);

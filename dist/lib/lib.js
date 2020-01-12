@@ -1,6 +1,6 @@
 "use strict";
 /*
- * This file contains some shared functions. The are used by other modules, but
+ * This file contains some shared functions. They are used by other modules, but
  * are defined here so that tests can import this library and test them.
  */
 
@@ -23,15 +23,71 @@ const {
 const _debug = debug("FHIR");
 
 exports.debug = _debug;
+/**
+ * The cache for the `getAndCache` function
+ */
 
-function isBrowser() {
-  return typeof window === "object";
+const cache = {};
+/**
+ * A namespace with functions for converting between different measurement units
+ */
+
+exports.units = {
+  cm({
+    code,
+    value
+  }) {
+    ensureNumerical({
+      code,
+      value
+    });
+    if (code == "cm") return value;
+    if (code == "m") return value * 100;
+    if (code == "in") return value * 2.54;
+    if (code == "[in_us]") return value * 2.54;
+    if (code == "[in_i]") return value * 2.54;
+    if (code == "ft") return value * 30.48;
+    if (code == "[ft_us]") return value * 30.48;
+    throw new Error("Unrecognized length unit: " + code);
+  },
+
+  kg({
+    code,
+    value
+  }) {
+    ensureNumerical({
+      code,
+      value
+    });
+    if (code == "kg") return value;
+    if (code == "g") return value / 1000;
+    if (code.match(/lb/)) return value / 2.20462;
+    if (code.match(/oz/)) return value / 35.274;
+    throw new Error("Unrecognized weight unit: " + code);
+  },
+
+  any(pq) {
+    ensureNumerical(pq);
+    return pq.value;
+  }
+
+};
+/**
+ * Assertion function to guard arguments for `units` functions
+ */
+
+function ensureNumerical({
+  value,
+  code
+}) {
+  if (typeof value !== "number") {
+    throw new Error("Found a non-numerical unit: " + value + " " + code);
+  }
 }
-
-exports.isBrowser = isBrowser;
 /**
  * Used in fetch Promise chains to reject if the "ok" property is not true
  */
+
 
 async function checkResponse(resp) {
   if (!resp.ok) {
@@ -87,18 +143,25 @@ function request(url, options = {}) {
 }
 
 exports.request = request;
+/**
+ * Makes a request using `fetch` and stores the result in internal memory cache.
+ * The cache is cleared when the page is unloaded.
+ * @param url The URL to request
+ * @param requestOptions Request options
+ * @param force If true, reload from source and update the cache, even if it has
+ * already been cached.
+ */
 
-exports.getAndCache = (() => {
-  const cache = {};
-  return (url, requestOptions, force = process.env.NODE_ENV === "test") => {
-    if (force || !cache[url]) {
-      cache[url] = request(url, requestOptions);
-      return cache[url];
-    }
+function getAndCache(url, requestOptions, force = process.env.NODE_ENV === "test") {
+  if (force || !cache[url]) {
+    cache[url] = request(url, requestOptions);
+    return cache[url];
+  }
 
-    return Promise.resolve(cache[url]);
-  };
-})();
+  return Promise.resolve(cache[url]);
+}
+
+exports.getAndCache = getAndCache;
 /**
  * Fetches the conformance statement from the given base URL.
  * Note that the result is cached in memory (until the page is reloaded in the
@@ -107,15 +170,18 @@ exports.getAndCache = (() => {
  * @param [requestOptions] Any options passed to the fetch call
  */
 
-
 function fetchConformanceStatement(baseUrl = "/", requestOptions) {
   const url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
-  return exports.getAndCache(url, requestOptions).catch(ex => {
+  return getAndCache(url, requestOptions).catch(ex => {
     throw new Error(`Failed to fetch the conformance statement from "${url}". ${ex}`);
   });
 }
 
 exports.fetchConformanceStatement = fetchConformanceStatement;
+/**
+ * Given a response object, generates and throws detailed HttpError.
+ * @param resp The `Response` object of a failed `fetch` request
+ */
 
 async function humanizeError(resp) {
   let msg = `${resp.status} ${resp.statusText}\nURL: ${resp.url}`;
@@ -151,12 +217,6 @@ async function humanizeError(resp) {
 }
 
 exports.humanizeError = humanizeError;
-
-function stripTrailingSlash(str) {
-  return String(str || "").replace(/\/+$/, "");
-}
-
-exports.stripTrailingSlash = stripTrailingSlash;
 /**
  * Walks through an object (or array) and returns the value found at the
  * provided path. This function is very simple so it intentionally does not
@@ -198,6 +258,11 @@ function setPath(obj, path, value) {
 }
 
 exports.setPath = setPath;
+/**
+ * If the argument is an array returns it as is. Otherwise puts it in an array
+ * (`[arg]`) and returns the result
+ * @param arg The element to test and possibly convert to array
+ */
 
 function makeArray(arg) {
   if (Array.isArray(arg)) {
@@ -208,6 +273,12 @@ function makeArray(arg) {
 }
 
 exports.makeArray = makeArray;
+/**
+ * Given a path, converts it to absolute url based on the `baseUrl`. If baseUrl
+ * is not provided, the result would be a rooted path (one that starts with `/`).
+ * @param path The path to convert
+ * @param baseUrl The base URL
+ */
 
 function absolute(path, baseUrl) {
   if (path.match(/^http/)) return path;
@@ -236,6 +307,11 @@ function randomString(strLength = 8, charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef
 }
 
 exports.randomString = randomString;
+/**
+ * Decodes a JWT token and returns it's body.
+ * @param token The token to read
+ * @param env An `Adapter` or any other object that has an `atob` method
+ */
 
 function jwtDecode(token, env) {
   const payload = token.split(".")[1];
@@ -305,57 +381,6 @@ function byCodes(observations, property) {
 }
 
 exports.byCodes = byCodes;
-
-function ensureNumerical({
-  value,
-  code
-}) {
-  if (typeof value !== "number") {
-    throw new Error("Found a non-numerical unit: " + value + " " + code);
-  }
-}
-
-exports.ensureNumerical = ensureNumerical;
-exports.units = {
-  cm({
-    code,
-    value
-  }) {
-    ensureNumerical({
-      code,
-      value
-    });
-    if (code == "cm") return value;
-    if (code == "m") return value * 100;
-    if (code == "in") return value * 2.54;
-    if (code == "[in_us]") return value * 2.54;
-    if (code == "[in_i]") return value * 2.54;
-    if (code == "ft") return value * 30.48;
-    if (code == "[ft_us]") return value * 30.48;
-    throw new Error("Unrecognized length unit: " + code);
-  },
-
-  kg({
-    code,
-    value
-  }) {
-    ensureNumerical({
-      code,
-      value
-    });
-    if (code == "kg") return value;
-    if (code == "g") return value / 1000;
-    if (code.match(/lb/)) return value / 2.20462;
-    if (code.match(/oz/)) return value / 35.274;
-    throw new Error("Unrecognized weight unit: " + code);
-  },
-
-  any(pq) {
-    ensureNumerical(pq);
-    return pq.value;
-  }
-
-};
 /**
  * Given a conformance statement and a resource type, returns the name of the
  * URL parameter that can be used to scope the resource type by patient ID.

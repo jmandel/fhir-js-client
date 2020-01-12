@@ -1,5 +1,5 @@
 /*
- * This file contains some shared functions. The are used by other modules, but
+ * This file contains some shared functions. They are used by other modules, but
  * are defined here so that tests can import this library and test them.
  */
 
@@ -16,8 +16,47 @@ const { fetch } = typeof FHIRCLIENT_PURE !== "undefined" ? window : require("cro
 const _debug     = debug("FHIR");
 export { _debug as debug };
 
-export function isBrowser() {
-    return typeof window === "object";
+/**
+ * The cache for the `getAndCache` function
+ */
+const cache: fhirclient.JsonObject = {};
+
+/**
+ * A namespace with functions for converting between different measurement units
+ */
+export const units = {
+    cm({ code, value }: fhirclient.CodeValue) {
+        ensureNumerical({ code, value });
+        if (code == "cm"     ) return value;
+        if (code == "m"      ) return value *   100;
+        if (code == "in"     ) return value *  2.54;
+        if (code == "[in_us]") return value *  2.54;
+        if (code == "[in_i]" ) return value *  2.54;
+        if (code == "ft"     ) return value * 30.48;
+        if (code == "[ft_us]") return value * 30.48;
+        throw new Error("Unrecognized length unit: " + code);
+    },
+    kg({ code, value }: fhirclient.CodeValue){
+        ensureNumerical({ code, value });
+        if (code == "kg"    ) return value;
+        if (code == "g"     ) return value / 1000;
+        if (code.match(/lb/)) return value / 2.20462;
+        if (code.match(/oz/)) return value / 35.274;
+        throw new Error("Unrecognized weight unit: " + code);
+    },
+    any(pq: fhirclient.CodeValue){
+        ensureNumerical(pq);
+        return pq.value;
+    }
+};
+
+/**
+ * Assertion function to guard arguments for `units` functions
+ */
+function ensureNumerical({ value, code }: fhirclient.CodeValue) {
+    if (typeof value !== "number") {
+        throw new Error("Found a non-numerical unit: " + value + " " + code);
+    }
 }
 
 /**
@@ -75,17 +114,21 @@ export function request<T = Response | fhirclient.JsonObject | string>(
         });
 }
 
-export const getAndCache = (() => {
-    const cache: fhirclient.JsonObject = {};
-
-    return (url: string, requestOptions?: RequestInit, force = process.env.NODE_ENV === "test") => {
-        if (force || !cache[url]) {
-            cache[url] = request(url, requestOptions);
-            return cache[url];
-        }
-        return Promise.resolve(cache[url]);
-    };
-})() as (url: string, requestOptions?: RequestInit, force?: boolean) => Promise<any>;
+/**
+ * Makes a request using `fetch` and stores the result in internal memory cache.
+ * The cache is cleared when the page is unloaded.
+ * @param url The URL to request
+ * @param requestOptions Request options
+ * @param force If true, reload from source and update the cache, even if it has
+ * already been cached.
+ */
+export function getAndCache(url: string, requestOptions?: RequestInit, force: boolean = process.env.NODE_ENV === "test"): Promise<any> {
+    if (force || !cache[url]) {
+        cache[url] = request(url, requestOptions);
+        return cache[url];
+    }
+    return Promise.resolve(cache[url]);
+}
 
 /**
  * Fetches the conformance statement from the given base URL.
@@ -104,7 +147,11 @@ export function fetchConformanceStatement(baseUrl = "/", requestOptions?: Reques
     });
 }
 
-export async function humanizeError(resp: fhirclient.JsonObject) {
+/**
+ * Given a response object, generates and throws detailed HttpError.
+ * @param resp The `Response` object of a failed `fetch` request
+ */
+export async function humanizeError(resp: Response) {
     let msg = `${resp.status} ${resp.statusText}\nURL: ${resp.url}`;
 
     try {
@@ -132,10 +179,6 @@ export async function humanizeError(resp: fhirclient.JsonObject) {
     }
 
     throw new HttpError(msg, resp.status, resp.statusText);
-}
-
-export function stripTrailingSlash(str: string) {
-    return String(str || "").replace(/\/+$/, "");
 }
 
 /**
@@ -179,6 +222,11 @@ export function setPath(obj: fhirclient.JsonObject, path: string, value: any): f
     return obj;
 }
 
+/**
+ * If the argument is an array returns it as is. Otherwise puts it in an array
+ * (`[arg]`) and returns the result
+ * @param arg The element to test and possibly convert to array
+ */
 export function makeArray<T = any>(arg: any): T[] {
     if (Array.isArray(arg)) {
         return arg;
@@ -186,6 +234,12 @@ export function makeArray<T = any>(arg: any): T[] {
     return [arg];
 }
 
+/**
+ * Given a path, converts it to absolute url based on the `baseUrl`. If baseUrl
+ * is not provided, the result would be a rooted path (one that starts with `/`).
+ * @param path The path to convert
+ * @param baseUrl The base URL
+ */
 export function absolute(path: string, baseUrl?: string): string
 {
     if (path.match(/^http/)) return path;
@@ -213,6 +267,11 @@ export function randomString(
     return result.join("");
 }
 
+/**
+ * Decodes a JWT token and returns it's body.
+ * @param token The token to read
+ * @param env An `Adapter` or any other object that has an `atob` method
+ */
 export function jwtDecode(token: string, env: fhirclient.Adapter): fhirclient.IDToken
 {
     const payload = token.split(".")[1];
@@ -242,7 +301,7 @@ export function byCode(
         if (concept && Array.isArray(concept.coding)) {
             concept.coding.forEach(({ code }) => {
                 if (code) {
-                    ret[code] = ret[code] || [];
+                    ret[code] = ret[code] || [] as any;
                     ret[code].push(observation);
                 }
             });
@@ -288,38 +347,6 @@ export function byCodes(
             [] as fhirclient.FHIR.Observation[]
         );
 }
-
-export function ensureNumerical({ value, code }: fhirclient.CodeValue) {
-    if (typeof value !== "number") {
-        throw new Error("Found a non-numerical unit: " + value + " " + code);
-    }
-}
-
-export const units = {
-    cm({ code, value }: fhirclient.CodeValue) {
-        ensureNumerical({ code, value });
-        if (code == "cm"     ) return value;
-        if (code == "m"      ) return value *   100;
-        if (code == "in"     ) return value *  2.54;
-        if (code == "[in_us]") return value *  2.54;
-        if (code == "[in_i]" ) return value *  2.54;
-        if (code == "ft"     ) return value * 30.48;
-        if (code == "[ft_us]") return value * 30.48;
-        throw new Error("Unrecognized length unit: " + code);
-    },
-    kg({ code, value }: fhirclient.CodeValue){
-        ensureNumerical({ code, value });
-        if (code == "kg"    ) return value;
-        if (code == "g"     ) return value / 1000;
-        if (code.match(/lb/)) return value / 2.20462;
-        if (code.match(/oz/)) return value / 35.274;
-        throw new Error("Unrecognized weight unit: " + code);
-    },
-    any(pq: fhirclient.CodeValue){
-        ensureNumerical(pq);
-        return pq.value;
-    }
-};
 
 /**
  * Given a conformance statement and a resource type, returns the name of the
