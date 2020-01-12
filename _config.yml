@@ -1,6 +1,0 @@
-include:
-    - "_*_.html"
-    - "_*_.*.html"
-    - "docs/typedoc/modules/*"
-    - "docs/typedoc/modules/_*_.html"
-    - "docs/typedoc/modules/_*_*_.html"
