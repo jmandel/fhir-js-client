@@ -2,3 +2,4 @@ theme: jekyll-theme-cayman
 include:
     - "_*_.html"
     - "_*_.*.html"
+    - "_lib_.html"
