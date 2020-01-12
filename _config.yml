@@ -1,1 +1,2 @@
-keep_files: "docs/typedoc"
+keep_files:
+    - "docs/typedoc/"
