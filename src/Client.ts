@@ -243,6 +243,7 @@ export default class Client
          * A method to fetch the current patient resource from the FHIR server.
          * If there is no patient context, it will reject with an error.
          * @param [requestOptions] Any options to pass to the `fetch` call.
+         * @category Request
          */
         read: (requestOptions?: RequestInit) => Promise<fhirclient.FHIR.Patient>
 
@@ -256,6 +257,7 @@ export default class Client
          * ```js
          * client.patient.request("Observation")
          * ```
+         * @category Request
          */
         request: (requestOptions: string|URL|fhirclient.RequestOptions, fhirOptions?: fhirclient.FhirOptions) => Promise<fhirclient.JsonObject>
 
@@ -283,6 +285,7 @@ export default class Client
          * A method to fetch the current encounter resource from the FHIR server.
          * If there is no encounter context, it will reject with an error.
          * @param [requestOptions] Any options to pass to the `fetch` call.
+         * @category Request
          */
         read: (requestOptions?: RequestInit) => Promise<fhirclient.FHIR.Encounter>
     };
@@ -302,6 +305,7 @@ export default class Client
          * A method to fetch the current user resource from the FHIR server.
          * If there is no user context, it will reject with an error.
          * @param [requestOptions] Any options to pass to the `fetch` call.
+         * @category Request
          */
         read: (requestOptions?: RequestInit) => Promise<
             fhirclient.FHIR.Patient |
@@ -335,7 +339,7 @@ export default class Client
 
     /**
      * Refers to the refresh task while it is being performed.
-     * @see Client.refresh
+     * @see [[refresh]]
      */
     private _refreshTask: Promise<any> | null;
 
@@ -633,6 +637,7 @@ export default class Client
      * @param [requestOptions] Any options to be passed to the fetch call.
      * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
      * but other headers can be added.
+     * @category Request
      */
     create(resource: fhirclient.FHIR.Resource, requestOptions: RequestInit = {}): Promise<fhirclient.FHIR.Resource>
     {
@@ -653,6 +658,7 @@ export default class Client
      * @param requestOptions Any options to be passed to the fetch call.
      * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
      * but other headers can be added.
+     * @category Request
      */
     update(resource: fhirclient.FHIR.Resource, requestOptions: RequestInit = {}): Promise<fhirclient.FHIR.Resource>
     {
@@ -673,6 +679,7 @@ export default class Client
      * (format: `resourceType/id`)
      * @param requestOptions Any options (except `method` which will be fixed
      * to `DELETE`) to be passed to the fetch call.
+     * @category Request
      */
     delete(url: string, requestOptions: RequestInit = {}): Promise<fhirclient.FHIR.Resource>
     {
@@ -688,6 +695,7 @@ export default class Client
      * or an object which will be passed to fetch()
      * @param fhirOptions Additional options to control the behavior
      * @param _resolvedRefs DO NOT USE! Used internally.
+     * @category Request
      */
     async request<T = any>(
         requestOptions: string|URL|fhirclient.RequestOptions,
@@ -906,6 +914,7 @@ export default class Client
      * @param requestOptions Any options to pass to the fetch call. Most of them
      * will be overridden, bit it might still be useful for passing additional
      * request calls or an abort signal.
+     * @category Request
      */
     refresh(requestOptions: RequestInit = {}): Promise<fhirclient.ClientState>
     {
@@ -987,6 +996,7 @@ export default class Client
      * @todo This should be deprecated and moved elsewhere. One should not have
      * to obtain an instance of `Client` just to use utility functions like this.
      * @deprecated
+     * @category Utility
      */
     byCode(
         observations: fhirclient.FHIR.Observation | fhirclient.FHIR.Observation[],
@@ -1011,6 +1021,7 @@ export default class Client
      * @todo This should be deprecated and moved elsewhere. One should not have
      * to obtain an instance of `Client` just to use utility functions like this.
      * @deprecated
+     * @category Utility
      */
     byCodes(
         observations: fhirclient.FHIR.Observation | fhirclient.FHIR.Observation[],
@@ -1020,6 +1031,9 @@ export default class Client
         return byCodes(observations, property);
     }
 
+    /**
+     * @category Utility
+     */
     units = units;
 
     /**
@@ -1033,6 +1047,7 @@ export default class Client
      * @todo This should be deprecated and moved elsewhere. One should not have
      * to obtain an instance of `Client` just to use utility functions like this.
      * @deprecated
+     * @category Utility
      */
     getPath(obj: fhirclient.JsonObject, path = ""): any {
         return getPath(obj, path);

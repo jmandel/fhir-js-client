@@ -226,6 +226,7 @@ export function setPath(obj: fhirclient.JsonObject, path: string, value: any): f
  * If the argument is an array returns it as is. Otherwise puts it in an array
  * (`[arg]`) and returns the result
  * @param arg The element to test and possibly convert to array
+ * @category Utility
  */
 export function makeArray<T = any>(arg: any): T[] {
     if (Array.isArray(arg)) {
@@ -253,6 +254,7 @@ export function absolute(path: string, baseUrl?: string): string
  * @param strLength The length of the output string. Defaults to 8.
  * @param charSet A string containing all the possible characters.
  *     Defaults to all the upper and lower-case letters plus digits.
+ * @category Utility
  */
 export function randomString(
     strLength = 8,
@@ -271,6 +273,7 @@ export function randomString(
  * Decodes a JWT token and returns it's body.
  * @param token The token to read
  * @param env An `Adapter` or any other object that has an `atob` method
+ * @category Utility
  */
 export function jwtDecode(token: string, env: fhirclient.Adapter): fhirclient.IDToken
 {

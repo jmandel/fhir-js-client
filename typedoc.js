@@ -61,8 +61,9 @@ module.exports = {
     // --options                 Specify a js option file that should be loaded. If not specified TypeDoc will look for 'typedoc.js' in the current directory.
     // --plugin                  Specify the npm plugins that should be loaded. Omit to load all installed plugins, set to 'none' to load no plugins.
     // --readme                  Path to the readme file that should be displayed on the index page. Pass `none` to disable the index page and start the documentation on the globals page.
-    readme: "../README.md"
+    readme: "../README.md",
     // --theme                   Specify the path to the theme that should be used or 'default' or 'minimal' to use built-in themes.
+    theme: "docs/typedoc-theme"
     // --toc                     Specifies the top level table of contents.
     // --tsconfig                Specify a typescript config file that should be loaded. If not specified TypeDoc will look for 'tsconfig.json' in the current directory.
 };
