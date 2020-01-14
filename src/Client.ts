@@ -633,6 +633,8 @@ export default class Client
     }
 
     /**
+     * Creates a new resource in a server-assigned location
+     * @see http://hl7.org/fhir/http.html#create
      * @param resource A FHIR resource to be created
      * @param [requestOptions] Any options to be passed to the fetch call.
      * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
@@ -648,12 +650,16 @@ export default class Client
             body: JSON.stringify(resource),
             headers: {
                 ...requestOptions.headers || {},
+                // TODO: Do we need to alternate with "application/json+fhir"?
                 "Content-Type": "application/fhir+json"
             }
         });
     }
 
     /**
+     * Creates a new current version for an existing resource or creates an
+     * initial version if no resource already exists for the given id.
+     * @see http://hl7.org/fhir/http.html#update
      * @param resource A FHIR resource to be updated
      * @param requestOptions Any options to be passed to the fetch call.
      * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
@@ -669,12 +675,15 @@ export default class Client
             body: JSON.stringify(resource),
             headers: {
                 ...requestOptions.headers || {},
+                // TODO: Do we need to alternate with "application/json+fhir"?
                 "Content-Type": "application/fhir+json"
             }
         });
     }
 
     /**
+     * Removes an existing resource.
+     * @see http://hl7.org/fhir/http.html#delete
      * @param url Relative URI of the FHIR resource to be deleted
      * (format: `resourceType/id`)
      * @param requestOptions Any options (except `method` which will be fixed
