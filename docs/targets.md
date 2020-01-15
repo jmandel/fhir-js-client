@@ -23,7 +23,7 @@ First, lets see how the authorization can be delayed until the the user actually
 needs it.
 
 ### Standalone Launch
-This is already easy to for standalone launched apps. They have a `launch` entry
+This is already easy to do for standalone launched apps. They have a `launch` entry
 point that contains all the information to perform the launch. This means that
 you can build an app that does whatever it does, and somewhere in the UI you can
 have a button or link to your SMART entry point. Whenever the user clicks that
@@ -71,7 +71,7 @@ FHIR.oauth2.authorize({
 });
 ```
 
-##  Authorization in different window
+##  Authorization in different window (since v2.3.0)
 Now that we are able to authorize on demand, we might also want to do that in a
 popup window (or any other valid window target). Here are some examples:
 
@@ -96,7 +96,7 @@ FHIR.oauth2.authorize({
 ```
 
 In this case (`completeInTarget: true`), the popup will remain open and the app
-will render inside of it.
+will render inside it.
 ```js
 FHIR.oauth2.authorize({
     target: "popup",
