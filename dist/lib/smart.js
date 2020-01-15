@@ -369,7 +369,7 @@ exports.isInPopUp = isInPopUp; // TODO: Check origin
 function onMessage(e) {
   if (e.data.type == "completeAuth") {
     window.removeEventListener("message", onMessage);
-    window.location.assign(e.data.url);
+    window.location.href = e.data.url;
   }
 }
 /**

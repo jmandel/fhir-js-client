@@ -391,7 +391,7 @@ export function isInPopUp() {
 function onMessage(e: MessageEvent) {
     if (e.data.type == "completeAuth") {
         window.removeEventListener("message", onMessage);
-        window.location.assign(e.data.url);
+        window.location.href = e.data.url;
     }
 }
 
