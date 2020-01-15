@@ -27,7 +27,7 @@ const { Response } = typeof FHIRCLIENT_PURE !== "undefined" ? window : require("
 const debug = _debug.extend("client");
 
 /**
- * Adds patient context to requestOptions object to be used with `Client.request`
+ * Adds patient context to requestOptions object to be used with [[Client.request]]
  * @param requestOptions Can be a string URL (relative to the serviceUrl), or an
  * object which will be passed to fetch()
  * @param client Current FHIR client object containing patient context
@@ -248,7 +248,7 @@ export default class Client
         read: (requestOptions?: RequestInit) => Promise<fhirclient.FHIR.Patient>
 
         /**
-         * This is similar to `Client.request` but it makes requests in the
+         * This is similar to [[Client.request]] but it makes requests in the
          * context of the current patient. For example, instead of doing
          * ```js
          * client.request("Observation?patient=" + client.patient.id)
@@ -416,7 +416,7 @@ export default class Client
      * This method is used to make the "link" between the `fhirclient` and the
      * `fhir.js`, if one is available.
      * **Note:** This is called by the constructor. If fhir.js is available in
-     * the global scope as `fhir`, it will automatically be linked to any `Client`
+     * the global scope as `fhir`, it will automatically be linked to any [[Client]]
      * instance. You should only use this method to connect to `fhir.js` which
      * is not global.
      */
@@ -564,8 +564,8 @@ export default class Client
 
     /**
      * Returns the profile of the logged_in user (if any). This is a string
-     * having the following shape "{user type}/{user id}". For example:
-     * "Practitioner/abc" or "Patient/xyz".
+     * having the following shape `"{user type}/{user id}"`. For example:
+     * `"Practitioner/abc"` or `"Patient/xyz"`.
      */
     getFhirUser(): string | null
     {
@@ -917,7 +917,7 @@ export default class Client
      * expired (or this fails for any other reason) it will be deleted from the
      * state, so that we don't enter into loops trying to re-authorize.
      *
-     * This method is typically called internally from `Client.request` if
+     * This method is typically called internally from [[Client.request]] if
      * certain request fails with 401.
      *
      * @param requestOptions Any options to pass to the fetch call. Most of them
@@ -1003,7 +1003,7 @@ export default class Client
      * @param observations Array of observations
      * @param property The name of a CodeableConcept property to group by
      * @todo This should be deprecated and moved elsewhere. One should not have
-     * to obtain an instance of `Client` just to use utility functions like this.
+     * to obtain an instance of [[Client]] just to use utility functions like this.
      * @deprecated
      * @category Utility
      */
@@ -1028,7 +1028,7 @@ export default class Client
      * @param observations Array of observations
      * @param property The name of a CodeableConcept property to group by
      * @todo This should be deprecated and moved elsewhere. One should not have
-     * to obtain an instance of `Client` just to use utility functions like this.
+     * to obtain an instance of [[Client]] just to use utility functions like this.
      * @deprecated
      * @category Utility
      */
@@ -1054,7 +1054,7 @@ export default class Client
      * @param path The path (eg. "a.b.4.c")
      * @returns {*} Whatever is found in the path or undefined
      * @todo This should be deprecated and moved elsewhere. One should not have
-     * to obtain an instance of `Client` just to use utility functions like this.
+     * to obtain an instance of [[Client]] just to use utility functions like this.
      * @deprecated
      * @category Utility
      */

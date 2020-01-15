@@ -1036,7 +1036,7 @@ const {
 
 const debug = lib_1.debug.extend("client");
 /**
- * Adds patient context to requestOptions object to be used with `Client.request`
+ * Adds patient context to requestOptions object to be used with [[Client.request]]
  * @param requestOptions Can be a string URL (relative to the serviceUrl), or an
  * object which will be passed to fetch()
  * @param client Current FHIR client object containing patient context
@@ -1214,6 +1214,9 @@ class Client {
    * FhirJS, if one is available globally.
    */
   constructor(environment, state) {
+    /**
+     * @category Utility
+     */
     this.units = lib_1.units;
 
     const _state = typeof state == "string" ? {
@@ -1294,7 +1297,7 @@ class Client {
    * This method is used to make the "link" between the `fhirclient` and the
    * `fhir.js`, if one is available.
    * **Note:** This is called by the constructor. If fhir.js is available in
-   * the global scope as `fhir`, it will automatically be linked to any `Client`
+   * the global scope as `fhir`, it will automatically be linked to any [[Client]]
    * instance. You should only use this method to connect to `fhir.js` which
    * is not global.
    */
@@ -1450,8 +1453,8 @@ class Client {
   }
   /**
    * Returns the profile of the logged_in user (if any). This is a string
-   * having the following shape "{user type}/{user id}". For example:
-   * "Practitioner/abc" or "Patient/xyz".
+   * having the following shape `"{user type}/{user id}"`. For example:
+   * `"Practitioner/abc"` or `"Patient/xyz"`.
    */
 
 
@@ -1535,10 +1538,13 @@ class Client {
     this.state.tokenResponse = {};
   }
   /**
+   * Creates a new resource in a server-assigned location
+   * @see http://hl7.org/fhir/http.html#create
    * @param resource A FHIR resource to be created
    * @param [requestOptions] Any options to be passed to the fetch call.
    * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
    * but other headers can be added.
+   * @category Request
    */
 
 
@@ -1548,15 +1554,20 @@ class Client {
       method: "POST",
       body: JSON.stringify(resource),
       headers: { ...(requestOptions.headers || {}),
+        // TODO: Do we need to alternate with "application/json+fhir"?
         "Content-Type": "application/fhir+json"
       }
     });
   }
   /**
+   * Creates a new current version for an existing resource or creates an
+   * initial version if no resource already exists for the given id.
+   * @see http://hl7.org/fhir/http.html#update
    * @param resource A FHIR resource to be updated
    * @param requestOptions Any options to be passed to the fetch call.
    * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
    * but other headers can be added.
+   * @category Request
    */
 
 
@@ -1566,15 +1577,19 @@ class Client {
       method: "PUT",
       body: JSON.stringify(resource),
       headers: { ...(requestOptions.headers || {}),
+        // TODO: Do we need to alternate with "application/json+fhir"?
         "Content-Type": "application/fhir+json"
       }
     });
   }
   /**
+   * Removes an existing resource.
+   * @see http://hl7.org/fhir/http.html#delete
    * @param url Relative URI of the FHIR resource to be deleted
    * (format: `resourceType/id`)
    * @param requestOptions Any options (except `method` which will be fixed
    * to `DELETE`) to be passed to the fetch call.
+   * @category Request
    */
 
 
@@ -1589,6 +1604,7 @@ class Client {
    * or an object which will be passed to fetch()
    * @param fhirOptions Additional options to control the behavior
    * @param _resolvedRefs DO NOT USE! Used internally.
+   * @category Request
    */
 
 
@@ -1756,12 +1772,13 @@ class Client {
    * expired (or this fails for any other reason) it will be deleted from the
    * state, so that we don't enter into loops trying to re-authorize.
    *
-   * This method is typically called internally from `Client.request` if
+   * This method is typically called internally from [[Client.request]] if
    * certain request fails with 401.
    *
    * @param requestOptions Any options to pass to the fetch call. Most of them
    * will be overridden, bit it might still be useful for passing additional
    * request calls or an abort signal.
+   * @category Request
    */
 
 
@@ -1847,8 +1864,9 @@ class Client {
    * @param observations Array of observations
    * @param property The name of a CodeableConcept property to group by
    * @todo This should be deprecated and moved elsewhere. One should not have
-   * to obtain an instance of `Client` just to use utility functions like this.
+   * to obtain an instance of [[Client]] just to use utility functions like this.
    * @deprecated
+   * @category Utility
    */
 
 
@@ -1868,8 +1886,9 @@ class Client {
    * @param observations Array of observations
    * @param property The name of a CodeableConcept property to group by
    * @todo This should be deprecated and moved elsewhere. One should not have
-   * to obtain an instance of `Client` just to use utility functions like this.
+   * to obtain an instance of [[Client]] just to use utility functions like this.
    * @deprecated
+   * @category Utility
    */
 
 
@@ -1885,8 +1904,9 @@ class Client {
    * @param path The path (eg. "a.b.4.c")
    * @returns {*} Whatever is found in the path or undefined
    * @todo This should be deprecated and moved elsewhere. One should not have
-   * to obtain an instance of `Client` just to use utility functions like this.
+   * to obtain an instance of [[Client]] just to use utility functions like this.
    * @deprecated
+   * @category Utility
    */
 
 
@@ -2467,6 +2487,7 @@ exports.setPath = setPath;
  * If the argument is an array returns it as is. Otherwise puts it in an array
  * (`[arg]`) and returns the result
  * @param arg The element to test and possibly convert to array
+ * @category Utility
  */
 
 function makeArray(arg) {
@@ -2498,6 +2519,7 @@ exports.absolute = absolute;
  * @param strLength The length of the output string. Defaults to 8.
  * @param charSet A string containing all the possible characters.
  *     Defaults to all the upper and lower-case letters plus digits.
+ * @category Utility
  */
 
 function randomString(strLength = 8, charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") {
@@ -2516,6 +2538,7 @@ exports.randomString = randomString;
  * Decodes a JWT token and returns it's body.
  * @param token The token to read
  * @param env An `Adapter` or any other object that has an `atob` method
+ * @category Utility
  */
 
 function jwtDecode(token, env) {
@@ -2622,6 +2645,111 @@ function getPatientParam(conformance, resourceType) {
 }
 
 exports.getPatientParam = getPatientParam;
+/**
+ * Resolves a reference to target window. It may also open new window or tab if
+ * the `target = "popup"` or `target = "_blank"`.
+ * @param target
+ * @param width Only used when `target = "popup"`
+ * @param height Only used when `target = "popup"`
+ */
+
+async function getTargetWindow(target, width = 800, height = 720) {
+  // The target can be a function that returns the target. This can be
+  // used to open a layer pop-up with an iframe and then return a reference
+  // to that iframe (or its name)
+  if (typeof target == "function") {
+    target = await target();
+  } // The target can be a window reference
+
+
+  if (target && typeof target == "object") {
+    return target;
+  } // At this point target must be a string
+
+
+  if (typeof target != "string") {
+    _debug("Invalid target type '%s'. Failing back to '_self'.", typeof target);
+
+    return self;
+  } // Current window
+
+
+  if (target == "_self") {
+    return self;
+  } // The parent frame
+
+
+  if (target == "_parent") {
+    return parent;
+  } // The top window
+
+
+  if (target == "_top") {
+    return top;
+  } // New tab or window
+
+
+  if (target == "_blank") {
+    let error,
+        targetWindow = null;
+    ;
+
+    try {
+      targetWindow = window.open("", "SMARTAuthPopup");
+
+      if (!targetWindow) {
+        throw new Error("Perhaps window.open was blocked");
+      }
+    } catch (e) {
+      error = e;
+    }
+
+    if (!targetWindow) {
+      _debug("Cannot open window. Failing back to '_self'. %s", error);
+
+      return self;
+    } else {
+      return targetWindow;
+    }
+  } // Popup window
+
+
+  if (target == "popup") {
+    let error,
+        targetWindow = null; // if (!targetWindow || targetWindow.closed) {
+
+    try {
+      targetWindow = window.open("", "SMARTAuthPopup", ["height=" + height, "width=" + width, "menubar=0", "resizable=1", "status=0", "top=" + (screen.height - height) / 2, "left=" + (screen.width - width) / 2].join(","));
+
+      if (!targetWindow) {
+        throw new Error("Perhaps the popup window was blocked");
+      }
+    } catch (e) {
+      error = e;
+    }
+
+    if (!targetWindow) {
+      _debug("Cannot open window. Failing back to '_self'. %s", error);
+
+      return self;
+    } else {
+      return targetWindow;
+    }
+  } // Frame or window by name
+
+
+  const winOrFrame = frames[target];
+
+  if (winOrFrame) {
+    return winOrFrame;
+  }
+
+  _debug("Unknown target '%s'. Failing back to '_self'.", target);
+
+  return self;
+}
+
+exports.getTargetWindow = getTargetWindow;
 
 /***/ }),
 
@@ -2859,7 +2987,11 @@ async function authorize(env, params = {}, _noRedirect = false) {
     fakeTokenResponse,
     patientId,
     encounterId,
-    client_id
+    client_id,
+    target,
+    width,
+    height,
+    completeInTarget
   } = params;
   let {
     iss,
@@ -2903,10 +3035,12 @@ async function authorize(env, params = {}, _noRedirect = false) {
 
   if (launch && !scope.match(/launch/)) {
     scope += " launch";
-  } // prevent inheritance of tokenResponse from parent window
+  } // If `authorize` is called, make sure we clear any previous state (in case
+  // this is a re-authorize)
 
 
-  await storage.unset(settings_1.SMART_KEY); // create initial state
+  const oldKey = await storage.get(settings_1.SMART_KEY);
+  await storage.unset(oldKey); // create initial state
 
   const stateKey = lib_1.randomString(16);
   const state = {
@@ -2916,8 +3050,15 @@ async function authorize(env, params = {}, _noRedirect = false) {
     serverUrl,
     clientSecret,
     tokenResponse: {},
-    key: stateKey
-  }; // fakeTokenResponse to override stuff (useful in development)
+    key: stateKey,
+    completeInTarget: !!completeInTarget
+  };
+  const fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true;
+
+  if (fullSessionStorageSupport) {
+    await storage.set(settings_1.SMART_KEY, stateKey);
+  } // fakeTokenResponse to override stuff (useful in development)
+
 
   if (fakeTokenResponse) {
     Object.assign(state.tokenResponse, fakeTokenResponse);
@@ -2940,8 +3081,7 @@ async function authorize(env, params = {}, _noRedirect = false) {
   let redirectUrl = redirectUri + "?state=" + encodeURIComponent(stateKey); // bypass oauth if fhirServiceUrl is used (but iss takes precedence)
 
   if (fhirServiceUrl && !iss) {
-    debug("Making fake launch..."); // Storage.set(stateKey, state);
-
+    debug("Making fake launch...");
     await storage.set(stateKey, state);
 
     if (_noRedirect) {
@@ -2977,10 +3117,69 @@ async function authorize(env, params = {}, _noRedirect = false) {
     return redirectUrl;
   }
 
-  return await env.redirect(redirectUrl);
+  if (target && isBrowser()) {
+    let win;
+    win = await lib_1.getTargetWindow(target, width, height);
+
+    if (win !== self) {
+      try {
+        // Also remove any old state from the target window and then
+        // transfer the curremt state there
+        win.sessionStorage.removeItem(oldKey);
+        win.sessionStorage.setItem(stateKey, JSON.stringify(state));
+      } catch (ex) {
+        lib_1.debug(`Failed to modify window.sessionStorage. Perhaps it is from different origin?. Failing back to "_self". %s`, ex);
+        win = self;
+      }
+    }
+
+    try {
+      win.location.href = redirectUrl;
+    } catch (ex) {
+      lib_1.debug(`Failed to modify window.location. Perhaps it is from different origin?. Failing back to "_self". %s`, ex);
+      self.location.href = redirectUrl;
+    }
+
+    return;
+  } else {
+    return await env.redirect(redirectUrl);
+  }
 }
 
 exports.authorize = authorize;
+/**
+ * Checks if called within a frame. Only works in browsers!
+ * If the current window has a `parent` or `top` properties that refer to
+ * another window, returns true. If trying to access `top` or `parent` throws an
+ * error, returns true. Otherwise returns `false`.
+ */
+
+function isInFrame() {
+  try {
+    return self !== top && parent !== self;
+  } catch (e) {
+    return true;
+  }
+}
+
+exports.isInFrame = isInFrame;
+/**
+ * Checks if called within another window (popup or tab). Only works in browsers!
+ * To consider itself called in a new window, this function verifies that:
+ * 1. `self === top` (not in frame)
+ * 2. `!!opener && opener !== self` The window has an opener
+ * 3. `!!window.name` The window has a `name` set
+ */
+
+function isInPopUp() {
+  try {
+    return self === top && !!opener && opener !== self && !!window.name;
+  } catch (e) {
+    return false;
+  }
+}
+
+exports.isInPopUp = isInPopUp;
 /**
  * The completeAuth function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
@@ -3023,7 +3222,22 @@ async function completeAuth(env) {
 
 
   let state = await Storage.get(key);
-  const fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // Do we have to remove the `code` and `state` params from the URL?
+  const fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // If we are in a popup window or an iframe and the authorization is
+  // complete, send the location back to our opener and exit.
+
+  if (isBrowser() && state && !state.completeInTarget) {
+    if (isInFrame()) {
+      window.parent.location.href = url.href;
+      return new Promise(() => {});
+    }
+
+    if (isInPopUp()) {
+      window.opener.location.href = url.href;
+      if (window.name.indexOf("SMARTAuthPopup") === 0) window.close();
+      return new Promise(() => {});
+    }
+  } // Do we have to remove the `code` and `state` params from the URL?
+
 
   const hasState = params.has("state");
 

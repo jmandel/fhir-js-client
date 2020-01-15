@@ -74,6 +74,7 @@ export declare function setPath(obj: fhirclient.JsonObject, path: string, value:
  * If the argument is an array returns it as is. Otherwise puts it in an array
  * (`[arg]`) and returns the result
  * @param arg The element to test and possibly convert to array
+ * @category Utility
  */
 export declare function makeArray<T = any>(arg: any): T[];
 /**
@@ -89,12 +90,14 @@ export declare function absolute(path: string, baseUrl?: string): string;
  * @param strLength The length of the output string. Defaults to 8.
  * @param charSet A string containing all the possible characters.
  *     Defaults to all the upper and lower-case letters plus digits.
+ * @category Utility
  */
 export declare function randomString(strLength?: number, charSet?: string): string;
 /**
  * Decodes a JWT token and returns it's body.
  * @param token The token to read
  * @param env An `Adapter` or any other object that has an `atob` method
+ * @category Utility
  */
 export declare function jwtDecode(token: string, env: fhirclient.Adapter): fhirclient.IDToken;
 /**
@@ -129,3 +132,11 @@ export declare function byCodes(observations: fhirclient.FHIR.Observation | fhir
  * URL parameter that can be used to scope the resource type by patient ID.
  */
 export declare function getPatientParam(conformance: fhirclient.FHIR.CapabilityStatement, resourceType: string): string;
+/**
+ * Resolves a reference to target window. It may also open new window or tab if
+ * the `target = "popup"` or `target = "_blank"`.
+ * @param target
+ * @param width Only used when `target = "popup"`
+ * @param height Only used when `target = "popup"`
+ */
+export declare function getTargetWindow(target: fhirclient.WindowTarget, width?: number, height?: number): Promise<Window>;

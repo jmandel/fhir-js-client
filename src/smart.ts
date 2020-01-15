@@ -5,7 +5,8 @@ import {
     getPath,
     randomString,
     getAndCache,
-    fetchConformanceStatement
+    fetchConformanceStatement,
+    getTargetWindow
 } from "./lib";
 import Client from "./Client";
 import { SMART_KEY } from "./settings";
@@ -178,7 +179,11 @@ export async function authorize(env: fhirclient.Adapter, params: fhirclient.Auth
         fakeTokenResponse,
         patientId,
         encounterId,
-        client_id
+        client_id,
+        target,
+        width,
+        height,
+        completeInTarget
     } = params;
 
     let {
@@ -231,8 +236,10 @@ export async function authorize(env: fhirclient.Adapter, params: fhirclient.Auth
         scope += " launch";
     }
 
-    // prevent inheritance of tokenResponse from parent window
-    await storage.unset(SMART_KEY);
+    // If `authorize` is called, make sure we clear any previous state (in case
+    // this is a re-authorize)
+    const oldKey = await storage.get(SMART_KEY);
+    await storage.unset(oldKey);
 
     // create initial state
     const stateKey = randomString(16);
@@ -243,8 +250,17 @@ export async function authorize(env: fhirclient.Adapter, params: fhirclient.Auth
         serverUrl,
         clientSecret,
         tokenResponse: {},
-        key: stateKey
+        key: stateKey,
+        completeInTarget: !!completeInTarget
     };
+
+    const fullSessionStorageSupport = isBrowser() ?
+        getPath(env, "options.fullSessionStorageSupport") :
+        true;
+
+    if (fullSessionStorageSupport) {
+        await storage.set(SMART_KEY, stateKey);
+    }
 
     // fakeTokenResponse to override stuff (useful in development)
     if (fakeTokenResponse) {
@@ -266,7 +282,6 @@ export async function authorize(env: fhirclient.Adapter, params: fhirclient.Auth
     // bypass oauth if fhirServiceUrl is used (but iss takes precedence)
     if (fhirServiceUrl && !iss) {
         debug("Making fake launch...");
-        // Storage.set(stateKey, state);
         await storage.set(stateKey, state);
         if (_noRedirect) {
             return redirectUrl;
@@ -308,7 +323,67 @@ export async function authorize(env: fhirclient.Adapter, params: fhirclient.Auth
         return redirectUrl;
     }
 
-    return await env.redirect(redirectUrl);
+    if (target && isBrowser()) {
+        let win: Window;
+
+        win = await getTargetWindow(target, width, height);
+
+        if (win !== self) {
+            try {
+                // Also remove any old state from the target window and then
+                // transfer the curremt state there
+                win.sessionStorage.removeItem(oldKey);
+                win.sessionStorage.setItem(stateKey, JSON.stringify(state));
+            } catch (ex) {
+                _debug(`Failed to modify window.sessionStorage. Perhaps it is from different origin?. Failing back to "_self". %s`, ex);
+                win = self;
+            }
+        }
+
+        try {
+            win.location.href = redirectUrl;
+        } catch (ex) {
+            _debug(`Failed to modify window.location. Perhaps it is from different origin?. Failing back to "_self". %s`, ex);
+            self.location.href = redirectUrl;
+        }
+
+        return;
+    }
+    else {
+        return await env.redirect(redirectUrl);
+    }
+}
+
+/**
+ * Checks if called within a frame. Only works in browsers!
+ * If the current window has a `parent` or `top` properties that refer to
+ * another window, returns true. If trying to access `top` or `parent` throws an
+ * error, returns true. Otherwise returns `false`.
+ */
+export function isInFrame() {
+    try {
+        return self !== top && parent !== self;
+    } catch (e) {
+        return true;
+    }
+}
+
+/**
+ * Checks if called within another window (popup or tab). Only works in browsers!
+ * To consider itself called in a new window, this function verifies that:
+ * 1. `self === top` (not in frame)
+ * 2. `!!opener && opener !== self` The window has an opener
+ * 3. `!!window.name` The window has a `name` set
+ */
+export function isInPopUp() {
+    try {
+        return self === top &&
+               !!opener &&
+               opener !== self &&
+               !!window.name;
+    } catch (e) {
+        return false;
+    }
 }
 
 /**
@@ -360,6 +435,21 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
     const fullSessionStorageSupport = isBrowser() ?
         getPath(env, "options.fullSessionStorageSupport") :
         true;
+
+    // If we are in a popup window or an iframe and the authorization is
+    // complete, send the location back to our opener and exit.
+    if (isBrowser() && state && !state.completeInTarget) {
+        if (isInFrame()) {
+            window.parent.location.href = url.href;
+            return new Promise(() => { /* leave it pending!!! */ });
+        }
+
+        if (isInPopUp()) {
+            window.opener.location.href = url.href;
+            if (window.name.indexOf("SMARTAuthPopup") === 0) window.close();
+            return new Promise(() => { /* leave it pending!!! */ });
+        }
+    }
 
     // Do we have to remove the `code` and `state` params from the URL?
     const hasState = params.has("state");

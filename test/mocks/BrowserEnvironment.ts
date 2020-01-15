@@ -1,8 +1,8 @@
 /* global fhir */
 const EventEmitter = require("events");
-import MemoryStorage from "./MemoryStorage";
-import Location      from "./Location";
-import { fhirclient } from "../../src/types";
+import MemoryStorage       from "./MemoryStorage";
+import MockLocation        from "./Location";
+import { fhirclient }      from "../../src/types";
 import { AbortController } from "abortcontroller-polyfill/dist/cjs-ponyfill";
 
 
@@ -18,7 +18,7 @@ export default class BrowserEnvironment extends EventEmitter implements fhirclie
             fullSessionStorageSupport: true,
             ...options
         };
-        this._location = new Location("http://localhost");
+        this._location = new MockLocation("http://localhost");
     }
 
     get fhir()

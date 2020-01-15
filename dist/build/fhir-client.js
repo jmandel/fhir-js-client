@@ -10363,7 +10363,7 @@ var _ref = typeof FHIRCLIENT_PURE !== "undefined" ? window : __webpack_require__
 
 var debug = lib_1.debug.extend("client");
 /**
- * Adds patient context to requestOptions object to be used with `Client.request`
+ * Adds patient context to requestOptions object to be used with [[Client.request]]
  * @param requestOptions Can be a string URL (relative to the serviceUrl), or an
  * object which will be passed to fetch()
  * @param client Current FHIR client object containing patient context
@@ -10617,6 +10617,9 @@ function () {
   function Client(environment, state) {
     var _this = this;
 
+    /**
+     * @category Utility
+     */
     this.units = lib_1.units;
 
     var _state = typeof state == "string" ? {
@@ -10731,7 +10734,7 @@ function () {
    * This method is used to make the "link" between the `fhirclient` and the
    * `fhir.js`, if one is available.
    * **Note:** This is called by the constructor. If fhir.js is available in
-   * the global scope as `fhir`, it will automatically be linked to any `Client`
+   * the global scope as `fhir`, it will automatically be linked to any [[Client]]
    * instance. You should only use this method to connect to `fhir.js` which
    * is not global.
    */
@@ -10888,8 +10891,8 @@ function () {
   }
   /**
    * Returns the profile of the logged_in user (if any). This is a string
-   * having the following shape "{user type}/{user id}". For example:
-   * "Practitioner/abc" or "Patient/xyz".
+   * having the following shape `"{user type}/{user id}"`. For example:
+   * `"Practitioner/abc"` or `"Patient/xyz"`.
    */
   ;
 
@@ -11008,10 +11011,13 @@ function () {
     return _clearState;
   }()
   /**
+   * Creates a new resource in a server-assigned location
+   * @see http://hl7.org/fhir/http.html#create
    * @param resource A FHIR resource to be created
    * @param [requestOptions] Any options to be passed to the fetch call.
    * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
    * but other headers can be added.
+   * @category Request
    */
   ;
 
@@ -11025,15 +11031,20 @@ function () {
       method: "POST",
       body: JSON.stringify(resource),
       headers: Object.assign({}, requestOptions.headers || {}, {
+        // TODO: Do we need to alternate with "application/json+fhir"?
         "Content-Type": "application/fhir+json"
       })
     }));
   }
   /**
+   * Creates a new current version for an existing resource or creates an
+   * initial version if no resource already exists for the given id.
+   * @see http://hl7.org/fhir/http.html#update
    * @param resource A FHIR resource to be updated
    * @param requestOptions Any options to be passed to the fetch call.
    * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
    * but other headers can be added.
+   * @category Request
    */
   ;
 
@@ -11047,15 +11058,19 @@ function () {
       method: "PUT",
       body: JSON.stringify(resource),
       headers: Object.assign({}, requestOptions.headers || {}, {
+        // TODO: Do we need to alternate with "application/json+fhir"?
         "Content-Type": "application/fhir+json"
       })
     }));
   }
   /**
+   * Removes an existing resource.
+   * @see http://hl7.org/fhir/http.html#delete
    * @param url Relative URI of the FHIR resource to be deleted
    * (format: `resourceType/id`)
    * @param requestOptions Any options (except `method` which will be fixed
    * to `DELETE`) to be passed to the fetch call.
+   * @category Request
    */
   ;
 
@@ -11074,6 +11089,7 @@ function () {
    * or an object which will be passed to fetch()
    * @param fhirOptions Additional options to control the behavior
    * @param _resolvedRefs DO NOT USE! Used internally.
+   * @category Request
    */
   ;
 
@@ -11397,12 +11413,13 @@ function () {
    * expired (or this fails for any other reason) it will be deleted from the
    * state, so that we don't enter into loops trying to re-authorize.
    *
-   * This method is typically called internally from `Client.request` if
+   * This method is typically called internally from [[Client.request]] if
    * certain request fails with 401.
    *
    * @param requestOptions Any options to pass to the fetch call. Most of them
    * will be overridden, bit it might still be useful for passing additional
    * request calls or an abort signal.
+   * @category Request
    */
   ;
 
@@ -11494,8 +11511,9 @@ function () {
    * @param observations Array of observations
    * @param property The name of a CodeableConcept property to group by
    * @todo This should be deprecated and moved elsewhere. One should not have
-   * to obtain an instance of `Client` just to use utility functions like this.
+   * to obtain an instance of [[Client]] just to use utility functions like this.
    * @deprecated
+   * @category Utility
    */
   ;
 
@@ -11515,8 +11533,9 @@ function () {
    * @param observations Array of observations
    * @param property The name of a CodeableConcept property to group by
    * @todo This should be deprecated and moved elsewhere. One should not have
-   * to obtain an instance of `Client` just to use utility functions like this.
+   * to obtain an instance of [[Client]] just to use utility functions like this.
    * @deprecated
+   * @category Utility
    */
   ;
 
@@ -11532,8 +11551,9 @@ function () {
    * @param path The path (eg. "a.b.4.c")
    * @returns {*} Whatever is found in the path or undefined
    * @todo This should be deprecated and moved elsewhere. One should not have
-   * to obtain an instance of `Client` just to use utility functions like this.
+   * to obtain an instance of [[Client]] just to use utility functions like this.
    * @deprecated
+   * @category Utility
    */
   ;
 
@@ -12318,6 +12338,7 @@ exports.setPath = setPath;
  * If the argument is an array returns it as is. Otherwise puts it in an array
  * (`[arg]`) and returns the result
  * @param arg The element to test and possibly convert to array
+ * @category Utility
  */
 
 function makeArray(arg) {
@@ -12349,6 +12370,7 @@ exports.absolute = absolute;
  * @param strLength The length of the output string. Defaults to 8.
  * @param charSet A string containing all the possible characters.
  *     Defaults to all the upper and lower-case letters plus digits.
+ * @category Utility
  */
 
 function randomString(strLength, charSet) {
@@ -12375,6 +12397,7 @@ exports.randomString = randomString;
  * Decodes a JWT token and returns it's body.
  * @param token The token to read
  * @param env An `Adapter` or any other object that has an `atob` method
+ * @category Utility
  */
 
 function jwtDecode(token, env) {
@@ -12501,6 +12524,196 @@ function getPatientParam(conformance, resourceType) {
 }
 
 exports.getPatientParam = getPatientParam;
+/**
+ * Resolves a reference to target window. It may also open new window or tab if
+ * the `target = "popup"` or `target = "_blank"`.
+ * @param target
+ * @param width Only used when `target = "popup"`
+ * @param height Only used when `target = "popup"`
+ */
+
+function getTargetWindow(_x3, _x4, _x5) {
+  return _getTargetWindow.apply(this, arguments);
+}
+
+function _getTargetWindow() {
+  _getTargetWindow = (0, _asyncToGenerator2.default)(
+  /*#__PURE__*/
+  _regenerator.default.mark(function _callee3(target, width, height) {
+    var error, targetWindow, _error, _targetWindow, winOrFrame;
+
+    return _regenerator.default.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            if (width === void 0) {
+              width = 800;
+            }
+
+            if (height === void 0) {
+              height = 720;
+            }
+
+            if (!(typeof target == "function")) {
+              _context3.next = 6;
+              break;
+            }
+
+            _context3.next = 5;
+            return target();
+
+          case 5:
+            target = _context3.sent;
+
+          case 6:
+            if (!(target && typeof target == "object")) {
+              _context3.next = 8;
+              break;
+            }
+
+            return _context3.abrupt("return", target);
+
+          case 8:
+            if (!(typeof target != "string")) {
+              _context3.next = 11;
+              break;
+            }
+
+            _debug("Invalid target type '%s'. Failing back to '_self'.", typeof target);
+
+            return _context3.abrupt("return", self);
+
+          case 11:
+            if (!(target == "_self")) {
+              _context3.next = 13;
+              break;
+            }
+
+            return _context3.abrupt("return", self);
+
+          case 13:
+            if (!(target == "_parent")) {
+              _context3.next = 15;
+              break;
+            }
+
+            return _context3.abrupt("return", parent);
+
+          case 15:
+            if (!(target == "_top")) {
+              _context3.next = 17;
+              break;
+            }
+
+            return _context3.abrupt("return", top);
+
+          case 17:
+            if (!(target == "_blank")) {
+              _context3.next = 35;
+              break;
+            }
+
+            targetWindow = null;
+            ;
+            _context3.prev = 20;
+            targetWindow = window.open("", "SMARTAuthPopup");
+
+            if (targetWindow) {
+              _context3.next = 24;
+              break;
+            }
+
+            throw new Error("Perhaps window.open was blocked");
+
+          case 24:
+            _context3.next = 29;
+            break;
+
+          case 26:
+            _context3.prev = 26;
+            _context3.t0 = _context3["catch"](20);
+            error = _context3.t0;
+
+          case 29:
+            if (targetWindow) {
+              _context3.next = 34;
+              break;
+            }
+
+            _debug("Cannot open window. Failing back to '_self'. %s", error);
+
+            return _context3.abrupt("return", self);
+
+          case 34:
+            return _context3.abrupt("return", targetWindow);
+
+          case 35:
+            if (!(target == "popup")) {
+              _context3.next = 52;
+              break;
+            }
+
+            _targetWindow = null; // if (!targetWindow || targetWindow.closed) {
+
+            _context3.prev = 37;
+            _targetWindow = window.open("", "SMARTAuthPopup", ["height=" + height, "width=" + width, "menubar=0", "resizable=1", "status=0", "top=" + (screen.height - height) / 2, "left=" + (screen.width - width) / 2].join(","));
+
+            if (_targetWindow) {
+              _context3.next = 41;
+              break;
+            }
+
+            throw new Error("Perhaps the popup window was blocked");
+
+          case 41:
+            _context3.next = 46;
+            break;
+
+          case 43:
+            _context3.prev = 43;
+            _context3.t1 = _context3["catch"](37);
+            _error = _context3.t1;
+
+          case 46:
+            if (_targetWindow) {
+              _context3.next = 51;
+              break;
+            }
+
+            _debug("Cannot open window. Failing back to '_self'. %s", _error);
+
+            return _context3.abrupt("return", self);
+
+          case 51:
+            return _context3.abrupt("return", _targetWindow);
+
+          case 52:
+            // Frame or window by name
+            winOrFrame = frames[target];
+
+            if (!winOrFrame) {
+              _context3.next = 55;
+              break;
+            }
+
+            return _context3.abrupt("return", winOrFrame);
+
+          case 55:
+            _debug("Unknown target '%s'. Failing back to '_self'.", target);
+
+            return _context3.abrupt("return", self);
+
+          case 57:
+          case "end":
+            return _context3.stop();
+        }
+      }
+    }, _callee3, null, [[20, 26], [37, 43]]);
+  }));
+  return _getTargetWindow.apply(this, arguments);
+}
+
+exports.getTargetWindow = getTargetWindow;
 
 /***/ }),
 
@@ -12574,6 +12787,8 @@ __webpack_require__(/*! core-js/modules/es.array.filter */ "./node_modules/core-
 __webpack_require__(/*! core-js/modules/es.array.join */ "./node_modules/core-js/modules/es.array.join.js");
 
 __webpack_require__(/*! core-js/modules/es.array.map */ "./node_modules/core-js/modules/es.array.map.js");
+
+__webpack_require__(/*! core-js/modules/es.function.name */ "./node_modules/core-js/modules/es.function.name.js");
 
 __webpack_require__(/*! core-js/modules/es.object.assign */ "./node_modules/core-js/modules/es.object.assign.js");
 
@@ -12790,7 +13005,7 @@ function _authorize() {
   _authorize = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
   _regenerator.default.mark(function _callee(env, params, _noRedirect) {
-    var _params, redirect_uri, clientSecret, fakeTokenResponse, patientId, encounterId, client_id, _params2, iss, launch, fhirServiceUrl, redirectUri, _params2$scope, scope, clientId, url, storage, serverUrl, stateKey, state, redirectUrl, extensions, redirectParams;
+    var _params, redirect_uri, clientSecret, fakeTokenResponse, patientId, encounterId, client_id, target, width, height, completeInTarget, _params2, iss, launch, fhirServiceUrl, redirectUri, _params2$scope, scope, clientId, url, storage, serverUrl, oldKey, stateKey, state, fullSessionStorageSupport, redirectUrl, extensions, redirectParams, win;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -12805,7 +13020,7 @@ function _authorize() {
             }
 
             // Obtain input
-            _params = params, redirect_uri = _params.redirect_uri, clientSecret = _params.clientSecret, fakeTokenResponse = _params.fakeTokenResponse, patientId = _params.patientId, encounterId = _params.encounterId, client_id = _params.client_id;
+            _params = params, redirect_uri = _params.redirect_uri, clientSecret = _params.clientSecret, fakeTokenResponse = _params.fakeTokenResponse, patientId = _params.patientId, encounterId = _params.encounterId, client_id = _params.client_id, target = _params.target, width = _params.width, height = _params.height, completeInTarget = _params.completeInTarget;
             _params2 = params, iss = _params2.iss, launch = _params2.launch, fhirServiceUrl = _params2.fhirServiceUrl, redirectUri = _params2.redirectUri, _params2$scope = _params2.scope, scope = _params2$scope === void 0 ? "" : _params2$scope, clientId = _params2.clientId;
             url = env.getUrl();
             storage = env.getStorage(); // For these three an url param takes precedence over inline option
@@ -12845,13 +13060,19 @@ function _authorize() {
 
             if (launch && !scope.match(/launch/)) {
               scope += " launch";
-            } // prevent inheritance of tokenResponse from parent window
+            } // If `authorize` is called, make sure we clear any previous state (in case
+            // this is a re-authorize)
 
 
             _context.next = 19;
-            return storage.unset(settings_1.SMART_KEY);
+            return storage.get(settings_1.SMART_KEY);
 
           case 19:
+            oldKey = _context.sent;
+            _context.next = 22;
+            return storage.unset(oldKey);
+
+          case 22:
             // create initial state
             stateKey = lib_1.randomString(16);
             state = {
@@ -12861,9 +13082,21 @@ function _authorize() {
               serverUrl: serverUrl,
               clientSecret: clientSecret,
               tokenResponse: {},
-              key: stateKey
-            }; // fakeTokenResponse to override stuff (useful in development)
+              key: stateKey,
+              completeInTarget: !!completeInTarget
+            };
+            fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true;
 
+            if (!fullSessionStorageSupport) {
+              _context.next = 28;
+              break;
+            }
+
+            _context.next = 28;
+            return storage.set(settings_1.SMART_KEY, stateKey);
+
+          case 28:
+            // fakeTokenResponse to override stuff (useful in development)
             if (fakeTokenResponse) {
               Object.assign(state.tokenResponse, fakeTokenResponse);
             } // Fixed patientId (useful in development)
@@ -12885,61 +13118,60 @@ function _authorize() {
             redirectUrl = redirectUri + "?state=" + encodeURIComponent(stateKey); // bypass oauth if fhirServiceUrl is used (but iss takes precedence)
 
             if (!(fhirServiceUrl && !iss)) {
-              _context.next = 34;
+              _context.next = 41;
               break;
             }
 
-            debug("Making fake launch..."); // Storage.set(stateKey, state);
-
-            _context.next = 29;
-            return storage.set(stateKey, state);
-
-          case 29:
-            if (!_noRedirect) {
-              _context.next = 31;
-              break;
-            }
-
-            return _context.abrupt("return", redirectUrl);
-
-          case 31:
-            _context.next = 33;
-            return env.redirect(redirectUrl);
-
-          case 33:
-            return _context.abrupt("return", _context.sent);
-
-          case 34:
+            debug("Making fake launch...");
             _context.next = 36;
-            return getSecurityExtensions(env, serverUrl);
+            return storage.set(stateKey, state);
 
           case 36:
-            extensions = _context.sent;
-            Object.assign(state, extensions);
-            _context.next = 40;
-            return storage.set(stateKey, state);
-
-          case 40:
-            if (state.authorizeUri) {
-              _context.next = 46;
-              break;
-            }
-
             if (!_noRedirect) {
-              _context.next = 43;
+              _context.next = 38;
               break;
             }
 
             return _context.abrupt("return", redirectUrl);
 
-          case 43:
-            _context.next = 45;
+          case 38:
+            _context.next = 40;
             return env.redirect(redirectUrl);
 
-          case 45:
+          case 40:
             return _context.abrupt("return", _context.sent);
 
-          case 46:
+          case 41:
+            _context.next = 43;
+            return getSecurityExtensions(env, serverUrl);
+
+          case 43:
+            extensions = _context.sent;
+            Object.assign(state, extensions);
+            _context.next = 47;
+            return storage.set(stateKey, state);
+
+          case 47:
+            if (state.authorizeUri) {
+              _context.next = 53;
+              break;
+            }
+
+            if (!_noRedirect) {
+              _context.next = 50;
+              break;
+            }
+
+            return _context.abrupt("return", redirectUrl);
+
+          case 50:
+            _context.next = 52;
+            return env.redirect(redirectUrl);
+
+          case 52:
+            return _context.abrupt("return", _context.sent);
+
+          case 53:
             // build the redirect uri
             redirectParams = ["response_type=code", "client_id=" + encodeURIComponent(clientId || ""), "scope=" + encodeURIComponent(scope), "redirect_uri=" + encodeURIComponent(redirectUri), "aud=" + encodeURIComponent(serverUrl), "state=" + encodeURIComponent(stateKey)]; // also pass this in case of EHR launch
 
@@ -12950,20 +13182,53 @@ function _authorize() {
             redirectUrl = state.authorizeUri + "?" + redirectParams.join("&");
 
             if (!_noRedirect) {
-              _context.next = 51;
+              _context.next = 58;
               break;
             }
 
             return _context.abrupt("return", redirectUrl);
 
-          case 51:
-            _context.next = 53;
+          case 58:
+            if (!(target && isBrowser())) {
+              _context.next = 67;
+              break;
+            }
+
+            _context.next = 61;
+            return lib_1.getTargetWindow(target, width, height);
+
+          case 61:
+            win = _context.sent;
+
+            if (win !== self) {
+              try {
+                // Also remove any old state from the target window and then
+                // transfer the curremt state there
+                win.sessionStorage.removeItem(oldKey);
+                win.sessionStorage.setItem(stateKey, JSON.stringify(state));
+              } catch (ex) {
+                lib_1.debug("Failed to modify window.sessionStorage. Perhaps it is from different origin?. Failing back to \"_self\". %s", ex);
+                win = self;
+              }
+            }
+
+            try {
+              win.location.href = redirectUrl;
+            } catch (ex) {
+              lib_1.debug("Failed to modify window.location. Perhaps it is from different origin?. Failing back to \"_self\". %s", ex);
+              self.location.href = redirectUrl;
+            }
+
+            return _context.abrupt("return");
+
+          case 67:
+            _context.next = 69;
             return env.redirect(redirectUrl);
 
-          case 53:
+          case 69:
             return _context.abrupt("return", _context.sent);
 
-          case 54:
+          case 70:
           case "end":
             return _context.stop();
         }
@@ -12974,6 +13239,39 @@ function _authorize() {
 }
 
 exports.authorize = authorize;
+/**
+ * Checks if called within a frame. Only works in browsers!
+ * If the current window has a `parent` or `top` properties that refer to
+ * another window, returns true. If trying to access `top` or `parent` throws an
+ * error, returns true. Otherwise returns `false`.
+ */
+
+function isInFrame() {
+  try {
+    return self !== top && parent !== self;
+  } catch (e) {
+    return true;
+  }
+}
+
+exports.isInFrame = isInFrame;
+/**
+ * Checks if called within another window (popup or tab). Only works in browsers!
+ * To consider itself called in a new window, this function verifies that:
+ * 1. `self === top` (not in frame)
+ * 2. `!!opener && opener !== self` The window has an opener
+ * 3. `!!window.name` The window has a `name` set
+ */
+
+function isInPopUp() {
+  try {
+    return self === top && !!opener && opener !== self && !!window.name;
+  } catch (e) {
+    return false;
+  }
+}
+
+exports.isInPopUp = isInPopUp;
 /**
  * The completeAuth function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
@@ -13037,8 +13335,34 @@ function _completeAuth() {
 
           case 18:
             state = _context2.sent;
-            fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // Do we have to remove the `code` and `state` params from the URL?
+            fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // If we are in a popup window or an iframe and the authorization is
+            // complete, send the location back to our opener and exit.
 
+            if (!(isBrowser() && state && !state.completeInTarget)) {
+              _context2.next = 28;
+              break;
+            }
+
+            if (!isInFrame()) {
+              _context2.next = 24;
+              break;
+            }
+
+            window.parent.location.href = url.href;
+            return _context2.abrupt("return", new Promise(function () {}));
+
+          case 24:
+            if (!isInPopUp()) {
+              _context2.next = 28;
+              break;
+            }
+
+            window.opener.location.href = url.href;
+            if (window.name.indexOf("SMARTAuthPopup") === 0) window.close();
+            return _context2.abrupt("return", new Promise(function () {}));
+
+          case 28:
+            // Do we have to remove the `code` and `state` params from the URL?
             hasState = params.has("state");
 
             if (isBrowser() && lib_1.getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
@@ -13074,83 +13398,83 @@ function _completeAuth() {
 
 
             if (state) {
-              _context2.next = 24;
+              _context2.next = 32;
               break;
             }
 
             throw new Error("No state found! Please (re)launch the app.");
 
-          case 24:
+          case 32:
             // Assume the client has already completed a token exchange when
             // there is no code (but we have a state) or access token is found in state
             authorized = !code || ((_b = (_a = state) === null || _a === void 0 ? void 0 : _a.tokenResponse) === null || _b === void 0 ? void 0 : _b.access_token); // If we are authorized already, then this is just a reload.
             // Otherwise, we have to complete the code flow
 
             if (!(!authorized && state.tokenUri)) {
-              _context2.next = 43;
+              _context2.next = 51;
               break;
             }
 
             if (code) {
-              _context2.next = 28;
+              _context2.next = 36;
               break;
             }
 
             throw new Error("'code' url parameter is required");
 
-          case 28:
+          case 36:
             debug("Preparing to exchange the code for access token...");
             requestOptions = buildTokenRequest(env, code, state);
             debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
             // includes an access token or a message indicating that the
             // authorization request has been denied.
 
-            _context2.next = 33;
+            _context2.next = 41;
             return lib_1.request(state.tokenUri, requestOptions);
 
-          case 33:
+          case 41:
             tokenResponse = _context2.sent;
             debug("Token response: %O", tokenResponse);
 
             if (tokenResponse.access_token) {
-              _context2.next = 37;
+              _context2.next = 45;
               break;
             }
 
             throw new Error("Failed to obtain access token.");
 
-          case 37:
+          case 45:
             // save the tokenResponse so that we don't have to re-authorize on
             // every page reload
             state = Object.assign({}, state, {
               tokenResponse: tokenResponse
             });
-            _context2.next = 40;
+            _context2.next = 48;
             return Storage.set(key, state);
 
-          case 40:
+          case 48:
             debug("Authorization successful!");
-            _context2.next = 44;
+            _context2.next = 52;
             break;
 
-          case 43:
+          case 51:
             debug(((_d = (_c = state) === null || _c === void 0 ? void 0 : _c.tokenResponse) === null || _d === void 0 ? void 0 : _d.access_token) ? "Already authorized" : "No authorization needed");
 
-          case 44:
+          case 52:
             if (!fullSessionStorageSupport) {
-              _context2.next = 47;
+              _context2.next = 55;
               break;
             }
 
-            _context2.next = 47;
+            _context2.next = 55;
             return Storage.set(settings_1.SMART_KEY, key);
 
-          case 47:
+          case 55:
             client = new Client_1.default(env, state);
             debug("Created client instance: %O", client);
             return _context2.abrupt("return", client);
 
-          case 50:
+          case 58:
           case "end":
             return _context2.stop();
         }

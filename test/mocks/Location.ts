@@ -1,12 +1,47 @@
-export default class Location
-{
-    public href: string;
+import { EventEmitter } from "events";
 
-    constructor(url: string) {
-        this.href = url;
+export default class Location extends EventEmitter
+{
+    private _href: string;
+
+    private _readonly = false;
+
+    constructor(url: string = "http://localhost") {
+        super();
+        this._href = url;
     }
 
-    public toString() {
-        return this.href;
+    get href()
+    {
+        return this._href;
+    }
+
+    set href(value)
+    {
+        if (this._readonly) {
+            throw new Error("Cannot change window location");
+        }
+        this._href = value;
+        this.emit("change", value);
+    }
+
+    get readonly()
+    {
+        return this._readonly;
+    }
+
+    set readonly(value: boolean)
+    {
+        this._readonly = !!value;
+    }
+
+    assign(href: string)
+    {
+        this.href = href;
+    }
+
+    toString()
+    {
+        return this._href;
     }
 }

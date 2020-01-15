@@ -96,6 +96,7 @@
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_types_d_.fhirclient.clientstate.html#authorizeuri" class="tsd-kind-icon">authorize<wbr>Uri</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_types_d_.fhirclient.clientstate.html#clientid" class="tsd-kind-icon">client<wbr>Id</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_types_d_.fhirclient.clientstate.html#clientsecret" class="tsd-kind-icon">client<wbr>Secret</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_types_d_.fhirclient.clientstate.html#completeintarget" class="tsd-kind-icon">complete<wbr>InTarget</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_types_d_.fhirclient.clientstate.html#key" class="tsd-kind-icon">key</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_types_d_.fhirclient.clientstate.html#password" class="tsd-kind-icon">password</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_types_d_.fhirclient.clientstate.html#redirecturi" class="tsd-kind-icon">redirect<wbr>Uri</a></li>
@@ -118,7 +119,7 @@
 					<div class="tsd-signature tsd-kind-icon">authorize<wbr>Uri<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/52c04d0/src/types.d.ts#L286">src/types.d.ts:286</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/967b905/src/types.d.ts#L291">src/types.d.ts:291</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -133,7 +134,7 @@
 					<div class="tsd-signature tsd-kind-icon">client<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/52c04d0/src/types.d.ts#L236">src/types.d.ts:236</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/967b905/src/types.d.ts#L241">src/types.d.ts:241</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -149,7 +150,7 @@
 					<div class="tsd-signature tsd-kind-icon">client<wbr>Secret<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/52c04d0/src/types.d.ts#L253">src/types.d.ts:253</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/967b905/src/types.d.ts#L258">src/types.d.ts:258</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -159,12 +160,29 @@
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
+					<a name="completeintarget" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> complete<wbr>InTarget</h3>
+					<div class="tsd-signature tsd-kind-icon">complete<wbr>InTarget<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/967b905/src/types.d.ts#L309">src/types.d.ts:309</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>If <code>true</code>, the app requested to be initialized in the specified <a href="_types_d_.fhirclient.authorizeparams.html#target">target</a>.
+								Otherwise, the app requested to be initialized in the window in which
+							<a href="_types_d_.fhirclient.smart.html#authorize">authorize</a> was called.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
 					<a name="key" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> key</h3>
 					<div class="tsd-signature tsd-kind-icon">key<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/52c04d0/src/types.d.ts#L297">src/types.d.ts:297</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/967b905/src/types.d.ts#L302">src/types.d.ts:302</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -179,7 +197,7 @@
 					<div class="tsd-signature tsd-kind-icon">password<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/52c04d0/src/types.d.ts#L275">src/types.d.ts:275</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/967b905/src/types.d.ts#L280">src/types.d.ts:280</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -194,7 +212,7 @@
 					<div class="tsd-signature tsd-kind-icon">redirect<wbr>Uri<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/52c04d0/src/types.d.ts#L242">src/types.d.ts:242</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/967b905/src/types.d.ts#L247">src/types.d.ts:247</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -210,7 +228,7 @@
 					<div class="tsd-signature tsd-kind-icon">registration<wbr>Uri<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/52c04d0/src/types.d.ts#L281">src/types.d.ts:281</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/967b905/src/types.d.ts#L286">src/types.d.ts:286</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -226,7 +244,7 @@
 					<div class="tsd-signature tsd-kind-icon">scope<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/52c04d0/src/types.d.ts#L248">src/types.d.ts:248</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/967b905/src/types.d.ts#L253">src/types.d.ts:253</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -246,7 +264,7 @@
 					<div class="tsd-signature tsd-kind-icon">server<wbr>Url<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/52c04d0/src/types.d.ts#L230">src/types.d.ts:230</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/967b905/src/types.d.ts#L235">src/types.d.ts:235</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -262,7 +280,7 @@
 					<div class="tsd-signature tsd-kind-icon">token<wbr>Response<span class="tsd-signature-symbol">:</span> <a href="_types_d_.fhirclient.tokenresponse.html" class="tsd-signature-type">TokenResponse</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/52c04d0/src/types.d.ts#L265">src/types.d.ts:265</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/967b905/src/types.d.ts#L270">src/types.d.ts:270</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -278,7 +296,7 @@
 					<div class="tsd-signature tsd-kind-icon">token<wbr>Uri<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/52c04d0/src/types.d.ts#L292">src/types.d.ts:292</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/967b905/src/types.d.ts#L297">src/types.d.ts:297</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -294,7 +312,7 @@
 					<div class="tsd-signature tsd-kind-icon">username<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/52c04d0/src/types.d.ts#L270">src/types.d.ts:270</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/967b905/src/types.d.ts#L275">src/types.d.ts:275</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -397,6 +415,9 @@
 								<a href="_types_d_.fhirclient.clientstate.html#clientsecret" class="tsd-kind-icon">client<wbr>Secret</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
+								<a href="_types_d_.fhirclient.clientstate.html#completeintarget" class="tsd-kind-icon">complete<wbr>InTarget</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
 								<a href="_types_d_.fhirclient.clientstate.html#key" class="tsd-kind-icon">key</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
@@ -467,6 +488,12 @@
 						<a href="../modules/_types_d_.fhirclient.html#smartauthenticationmethod" class="tsd-kind-icon">SMARTAuthentication<wbr>Method</a>
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported">
+						<a href="../modules/_types_d_.fhirclient.html#windowtarget" class="tsd-kind-icon">Window<wbr>Target</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported">
+						<a href="../modules/_types_d_.fhirclient.html#windowtargetvariable" class="tsd-kind-icon">Window<wbr>Target<wbr>Variable</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported">
 						<a href="../modules/_types_d_.fhirclient.html#clienttype" class="tsd-kind-icon">client<wbr>Type</a>
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported">
@@ -489,6 +516,9 @@
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported">
 						<a href="../modules/_types_d_.fhirclient.html#storagefactory" class="tsd-kind-icon">storage<wbr>Factory</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module tsd-is-not-exported">
+						<a href="../modules/_types_d_.fhirclient.html#windowtargetfunction" class="tsd-kind-icon">Window<wbr>Target<wbr>Function</a>
 					</li>
 				</ul>
 			</nav>

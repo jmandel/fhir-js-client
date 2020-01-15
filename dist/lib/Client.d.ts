@@ -39,10 +39,11 @@ export default class Client {
          * A method to fetch the current patient resource from the FHIR server.
          * If there is no patient context, it will reject with an error.
          * @param [requestOptions] Any options to pass to the `fetch` call.
+         * @category Request
          */
         read: (requestOptions?: RequestInit) => Promise<fhirclient.FHIR.Patient>;
         /**
-         * This is similar to `Client.request` but it makes requests in the
+         * This is similar to [[Client.request]] but it makes requests in the
          * context of the current patient. For example, instead of doing
          * ```js
          * client.request("Observation?patient=" + client.patient.id)
@@ -51,6 +52,7 @@ export default class Client {
          * ```js
          * client.patient.request("Observation")
          * ```
+         * @category Request
          */
         request: (requestOptions: string | URL | fhirclient.RequestOptions, fhirOptions?: fhirclient.FhirOptions) => Promise<fhirclient.JsonObject>;
         /**
@@ -74,6 +76,7 @@ export default class Client {
          * A method to fetch the current encounter resource from the FHIR server.
          * If there is no encounter context, it will reject with an error.
          * @param [requestOptions] Any options to pass to the `fetch` call.
+         * @category Request
          */
         read: (requestOptions?: RequestInit) => Promise<fhirclient.FHIR.Encounter>;
     };
@@ -90,6 +93,7 @@ export default class Client {
          * A method to fetch the current user resource from the FHIR server.
          * If there is no user context, it will reject with an error.
          * @param [requestOptions] Any options to pass to the `fetch` call.
+         * @category Request
          */
         read: (requestOptions?: RequestInit) => Promise<fhirclient.FHIR.Patient | fhirclient.FHIR.Practitioner | fhirclient.FHIR.RelatedPerson>;
         /**
@@ -115,7 +119,7 @@ export default class Client {
     api: fhirclient.JsonObject | undefined;
     /**
      * Refers to the refresh task while it is being performed.
-     * @see Client.refresh
+     * @see [[refresh]]
      */
     private _refreshTask;
     /**
@@ -127,7 +131,7 @@ export default class Client {
      * This method is used to make the "link" between the `fhirclient` and the
      * `fhir.js`, if one is available.
      * **Note:** This is called by the constructor. If fhir.js is available in
-     * the global scope as `fhir`, it will automatically be linked to any `Client`
+     * the global scope as `fhir`, it will automatically be linked to any [[Client]]
      * instance. You should only use this method to connect to `fhir.js` which
      * is not global.
      */
@@ -152,8 +156,8 @@ export default class Client {
     getIdToken(): fhirclient.IDToken | null;
     /**
      * Returns the profile of the logged_in user (if any). This is a string
-     * having the following shape "{user type}/{user id}". For example:
-     * "Practitioner/abc" or "Patient/xyz".
+     * having the following shape `"{user type}/{user id}"`. For example:
+     * `"Practitioner/abc"` or `"Patient/xyz"`.
      */
     getFhirUser(): string | null;
     /**
@@ -176,24 +180,34 @@ export default class Client {
      */
     private _clearState;
     /**
+     * Creates a new resource in a server-assigned location
+     * @see http://hl7.org/fhir/http.html#create
      * @param resource A FHIR resource to be created
      * @param [requestOptions] Any options to be passed to the fetch call.
      * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
      * but other headers can be added.
+     * @category Request
      */
     create(resource: fhirclient.FHIR.Resource, requestOptions?: RequestInit): Promise<fhirclient.FHIR.Resource>;
     /**
+     * Creates a new current version for an existing resource or creates an
+     * initial version if no resource already exists for the given id.
+     * @see http://hl7.org/fhir/http.html#update
      * @param resource A FHIR resource to be updated
      * @param requestOptions Any options to be passed to the fetch call.
      * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
      * but other headers can be added.
+     * @category Request
      */
     update(resource: fhirclient.FHIR.Resource, requestOptions?: RequestInit): Promise<fhirclient.FHIR.Resource>;
     /**
+     * Removes an existing resource.
+     * @see http://hl7.org/fhir/http.html#delete
      * @param url Relative URI of the FHIR resource to be deleted
      * (format: `resourceType/id`)
      * @param requestOptions Any options (except `method` which will be fixed
      * to `DELETE`) to be passed to the fetch call.
+     * @category Request
      */
     delete(url: string, requestOptions?: RequestInit): Promise<fhirclient.FHIR.Resource>;
     /**
@@ -201,6 +215,7 @@ export default class Client {
      * or an object which will be passed to fetch()
      * @param fhirOptions Additional options to control the behavior
      * @param _resolvedRefs DO NOT USE! Used internally.
+     * @category Request
      */
     request<T = any>(requestOptions: string | URL | fhirclient.RequestOptions, fhirOptions?: fhirclient.FhirOptions, _resolvedRefs?: fhirclient.JsonObject): Promise<T>;
     /**
@@ -208,12 +223,13 @@ export default class Client {
      * expired (or this fails for any other reason) it will be deleted from the
      * state, so that we don't enter into loops trying to re-authorize.
      *
-     * This method is typically called internally from `Client.request` if
+     * This method is typically called internally from [[Client.request]] if
      * certain request fails with 401.
      *
      * @param requestOptions Any options to pass to the fetch call. Most of them
      * will be overridden, bit it might still be useful for passing additional
      * request calls or an abort signal.
+     * @category Request
      */
     refresh(requestOptions?: RequestInit): Promise<fhirclient.ClientState>;
     /**
@@ -228,8 +244,9 @@ export default class Client {
      * @param observations Array of observations
      * @param property The name of a CodeableConcept property to group by
      * @todo This should be deprecated and moved elsewhere. One should not have
-     * to obtain an instance of `Client` just to use utility functions like this.
+     * to obtain an instance of [[Client]] just to use utility functions like this.
      * @deprecated
+     * @category Utility
      */
     byCode(observations: fhirclient.FHIR.Observation | fhirclient.FHIR.Observation[], property: string): fhirclient.ObservationMap;
     /**
@@ -245,10 +262,14 @@ export default class Client {
      * @param observations Array of observations
      * @param property The name of a CodeableConcept property to group by
      * @todo This should be deprecated and moved elsewhere. One should not have
-     * to obtain an instance of `Client` just to use utility functions like this.
+     * to obtain an instance of [[Client]] just to use utility functions like this.
      * @deprecated
+     * @category Utility
      */
     byCodes(observations: fhirclient.FHIR.Observation | fhirclient.FHIR.Observation[], property: string): (...codes: string[]) => any[];
+    /**
+     * @category Utility
+     */
     units: {
         cm({ code, value }: fhirclient.CodeValue): number;
         kg({ code, value }: fhirclient.CodeValue): number;
@@ -263,8 +284,9 @@ export default class Client {
      * @param path The path (eg. "a.b.4.c")
      * @returns {*} Whatever is found in the path or undefined
      * @todo This should be deprecated and moved elsewhere. One should not have
-     * to obtain an instance of `Client` just to use utility functions like this.
+     * to obtain an instance of [[Client]] just to use utility functions like this.
      * @deprecated
+     * @category Utility
      */
     getPath(obj: fhirclient.JsonObject, path?: string): any;
     /**

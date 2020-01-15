@@ -262,6 +262,7 @@ exports.setPath = setPath;
  * If the argument is an array returns it as is. Otherwise puts it in an array
  * (`[arg]`) and returns the result
  * @param arg The element to test and possibly convert to array
+ * @category Utility
  */
 
 function makeArray(arg) {
@@ -293,6 +294,7 @@ exports.absolute = absolute;
  * @param strLength The length of the output string. Defaults to 8.
  * @param charSet A string containing all the possible characters.
  *     Defaults to all the upper and lower-case letters plus digits.
+ * @category Utility
  */
 
 function randomString(strLength = 8, charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") {
@@ -311,6 +313,7 @@ exports.randomString = randomString;
  * Decodes a JWT token and returns it's body.
  * @param token The token to read
  * @param env An `Adapter` or any other object that has an `atob` method
+ * @category Utility
  */
 
 function jwtDecode(token, env) {
@@ -417,3 +420,108 @@ function getPatientParam(conformance, resourceType) {
 }
 
 exports.getPatientParam = getPatientParam;
+/**
+ * Resolves a reference to target window. It may also open new window or tab if
+ * the `target = "popup"` or `target = "_blank"`.
+ * @param target
+ * @param width Only used when `target = "popup"`
+ * @param height Only used when `target = "popup"`
+ */
+
+async function getTargetWindow(target, width = 800, height = 720) {
+  // The target can be a function that returns the target. This can be
+  // used to open a layer pop-up with an iframe and then return a reference
+  // to that iframe (or its name)
+  if (typeof target == "function") {
+    target = await target();
+  } // The target can be a window reference
+
+
+  if (target && typeof target == "object") {
+    return target;
+  } // At this point target must be a string
+
+
+  if (typeof target != "string") {
+    _debug("Invalid target type '%s'. Failing back to '_self'.", typeof target);
+
+    return self;
+  } // Current window
+
+
+  if (target == "_self") {
+    return self;
+  } // The parent frame
+
+
+  if (target == "_parent") {
+    return parent;
+  } // The top window
+
+
+  if (target == "_top") {
+    return top;
+  } // New tab or window
+
+
+  if (target == "_blank") {
+    let error,
+        targetWindow = null;
+    ;
+
+    try {
+      targetWindow = window.open("", "SMARTAuthPopup");
+
+      if (!targetWindow) {
+        throw new Error("Perhaps window.open was blocked");
+      }
+    } catch (e) {
+      error = e;
+    }
+
+    if (!targetWindow) {
+      _debug("Cannot open window. Failing back to '_self'. %s", error);
+
+      return self;
+    } else {
+      return targetWindow;
+    }
+  } // Popup window
+
+
+  if (target == "popup") {
+    let error,
+        targetWindow = null; // if (!targetWindow || targetWindow.closed) {
+
+    try {
+      targetWindow = window.open("", "SMARTAuthPopup", ["height=" + height, "width=" + width, "menubar=0", "resizable=1", "status=0", "top=" + (screen.height - height) / 2, "left=" + (screen.width - width) / 2].join(","));
+
+      if (!targetWindow) {
+        throw new Error("Perhaps the popup window was blocked");
+      }
+    } catch (e) {
+      error = e;
+    }
+
+    if (!targetWindow) {
+      _debug("Cannot open window. Failing back to '_self'. %s", error);
+
+      return self;
+    } else {
+      return targetWindow;
+    }
+  } // Frame or window by name
+
+
+  const winOrFrame = frames[target];
+
+  if (winOrFrame) {
+    return winOrFrame;
+  }
+
+  _debug("Unknown target '%s'. Failing back to '_self'.", target);
+
+  return self;
+}
+
+exports.getTargetWindow = getTargetWindow;

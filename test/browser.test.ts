@@ -2,10 +2,12 @@ import { URL }    from "url";
 import { expect } from "@hapi/code";
 import * as Lab   from "@hapi/lab";
 import * as smart from "../src/smart";
+import * as lib   from "../src/lib";
 
 // mocks
 import BrowserEnv from "./mocks/BrowserEnvironment";
-import Window     from "./mocks/Window";
+import MockWindow from "./mocks/Window";
+import MockScreen from "./mocks/Screen";
 import mockServer from "./mocks/mockServer";
 
 export const lab = Lab.script();
@@ -18,7 +20,7 @@ const {
     afterEach
 } = lab;
 
-declare var window: Window;
+declare var window: MockWindow;
 
 let mockDataServer: any, mockUrl: string;
 
@@ -54,15 +56,25 @@ after(() => {
 });
 
 beforeEach(() => {
-    (global as any).window = new Window();
+    (global as any).window = (global as any).self = new MockWindow();
+    (global as any).top    = window.top;
+    (global as any).parent = window.parent;
+    (global as any).frames = window.frames;
+    (global as any).screen = new MockScreen();
+    (global as any).frames = {};
 });
 
 afterEach(() => {
     mockServer.clear();
+    delete (global as any).self;
+    delete (global as any).top;
+    delete (global as any).parent;
+    delete (global as any).frames;
     delete (global as any).window;
     delete (global as any).fetch;
-    // window.FHIR.oauth2.settings.fullSessionStorageSupport = true;
-    // window.FHIR.oauth2.settings.replaceBrowserHistory = true;
+    delete (global as any).screen;
+    delete (global as any).frames;
+    delete (global as any).opener;
 });
 
 // -----------------------------------------------------------------------------
@@ -888,5 +900,270 @@ describe("smart", () => {
             expect(client.getUserId()).to.equal("smart-Practitioner-71482713");
             expect(client.getUserType()).to.equal("Practitioner");
         });
+    });
+});
+
+describe("Targets", () => {
+
+    async function testTarget(targetWindow, options) {
+
+        const env     = new BrowserEnv();
+        const storage = env.getStorage();
+
+        // mock our oauth endpoints
+        mockServer.mock({
+            headers: { "content-type": "application/json" },
+            status: 200,
+            body: {
+                authorization_endpoint: mockUrl,
+                token_endpoint: mockUrl
+            }
+        });
+
+        const locationChangeListener = new Promise(resolve => {
+            targetWindow.location.once("change", resolve);
+        });
+
+        // Call our launch code.
+        await smart.authorize(env, {
+            iss      : mockUrl,
+            launch   : "123",
+            scope    : "my_scope",
+            client_id: "my_client_id",
+            ...options
+        });
+        // .then(resolve)
+        // .catch(console.error);
+
+        await locationChangeListener;
+
+        // Now we have been redirected to `redirect` and then back to our
+        // redirect_uri. It is time to complete the authorization. All that
+        // should have happened in the targetWindow.
+        const redirect = new URL(targetWindow.location.href);
+
+        // Get the state parameter from the URL
+        const state = redirect.searchParams.get("state");
+
+        // Verify that the state is set
+        expect(await storage.get(state), "must have set a state at " + state).to.exist();
+    }
+
+    it('target: () => "_top"', async () => {
+        const top = (global as any).top = (global as any).window.top = new MockWindow();
+        await testTarget(top, { target: () => "_top" });
+    });
+
+    it('target: "_top"', async () => {
+        const top = (global as any).top = (global as any).window.top = new MockWindow();
+        await testTarget(top, { target: "_top" });
+    });
+
+    it('target: "_top", completeInTarget: true', async () => {
+        const top = (global as any).top = (global as any).window.top = new MockWindow();
+        await testTarget(top, { target: "_top", completeInTarget: true });
+    });
+
+    it('target: "_parent"', async () => {
+        const parent = (global as any).parent = (global as any).window.parent = new MockWindow();
+        await testTarget(parent, { target: "_parent" });
+    });
+
+    it("target: window", async () => {
+        await testTarget(window, { target: window });
+    });
+
+    it("target: invalidWindow corrected to _self", async () => {
+        await testTarget(window, { target: {} });
+    });
+
+    it("target: invalidFunction corrected to _self", async () => {
+        await testTarget(window, { target: () => NaN });
+    });
+
+    it("target: 'namedFrame'", async () => {
+        const frame = new MockWindow();
+        (global as any).frames = { namedFrame: frame };
+        await testTarget(frame, { target: "namedFrame" });
+    });
+
+    it("target: 'xyz' corrected to _self", async () => {
+        await testTarget(window, { target: "xyz" });
+    });
+
+    it("forbidden frame defaults to _self", async () => {
+        const frame = new MockWindow();
+        (global as any).frames = { namedFrame: frame };
+        frame.location.readonly = true;
+        await testTarget(window, { target: "namedFrame" });
+    });
+
+    it("forbidden popup defaults to _self", async () => {
+        (self as any).once("beforeOpen", e => e.prevent());
+        await testTarget(window, { target: "popup" });
+    });
+
+    describe("getTargetWindow", () => {
+        it ('"_top"', async () => {
+            expect(await lib.getTargetWindow("_top" )).to.equal(top);
+        });
+        it ('() => "_top"', async () => {
+            expect(await lib.getTargetWindow(() => "_top" )).to.equal(top);
+        });
+        it ('async () => "_top"', async () => {
+            expect(await lib.getTargetWindow(async () => "_top" )).to.equal(top);
+        });
+
+        it ('"_self"', async () => {
+            expect(await lib.getTargetWindow("_self" )).to.equal(self);
+        });
+        it ('() => "_self"', async () => {
+            expect(await lib.getTargetWindow(() => "_self" )).to.equal(self);
+        });
+        it ('async () => "_self"', async () => {
+            expect(await lib.getTargetWindow(async () => "_self" )).to.equal(self);
+        });
+
+        it ('"_parent"', async () => {
+            expect(await lib.getTargetWindow("_parent" )).to.equal(parent);
+        });
+        it ('() => "_parent"', async () => {
+            expect(await lib.getTargetWindow(() => "_parent" )).to.equal(parent);
+        });
+        it ('async () => "_parent"', async () => {
+            expect(await lib.getTargetWindow(async () => "_parent" )).to.equal(parent);
+        });
+
+
+        it ('"_blank"', async () => {
+            await lib.getTargetWindow("_blank" );
+        });
+        it ('() => "_blank"', async () => {
+            await lib.getTargetWindow(() => "_blank" );
+        });
+        it ('async () => "_blank"', async () => {
+            await lib.getTargetWindow(async () => "_blank" );
+        });
+
+        it ('blocked "_blank" fails back to "_self"', async () => {
+            (self as any).once("beforeOpen", e => e.prevent());
+            expect(await lib.getTargetWindow("_blank")).to.equal(self);
+        });
+        it ('blocked () => "_blank" fails back to "_self"', async () => {
+            (self as any).once("beforeOpen", e => e.prevent());
+            expect(await lib.getTargetWindow(() => "_blank")).to.equal(self);
+        });
+        it ('blocked async () => "_blank" fails back to "_self"', async () => {
+            (self as any).once("beforeOpen", e => e.prevent());
+            expect(await lib.getTargetWindow(async () => "_blank")).to.equal(self);
+        });
+
+        it ('"popup"', async () => {
+            await lib.getTargetWindow("popup" );
+        });
+        it ('() => "popup"', async () => {
+            await lib.getTargetWindow(() => "popup" );
+        });
+        it ('async () => "popup"', async () => {
+            await lib.getTargetWindow(async () => "popup" );
+        });
+
+        it ('blocked "popup" fails back to "_self"', async () => {
+            (self as any).once("beforeOpen", e => e.prevent());
+            expect(await lib.getTargetWindow("popup")).to.equal(self);
+        });
+        it ('blocked () => "popup" fails back to "_self"', async () => {
+            (self as any).once("beforeOpen", e => e.prevent());
+            expect(await lib.getTargetWindow(() => "popup")).to.equal(self);
+        });
+        it ('blocked async () => "popup" fails back to "_self"', async () => {
+            (self as any).once("beforeOpen", e => e.prevent());
+            expect(await lib.getTargetWindow(async () => "popup")).to.equal(self);
+        });
+
+        it ("accepts frame by name", async () => {
+            const dummy = {} as Window;
+            (global as any).frames.dummy = dummy;
+            expect(await lib.getTargetWindow("dummy")).to.equal(dummy);
+        });
+
+        it ('unknown frame name fails back to "_self"', async () => {
+            expect(await lib.getTargetWindow("whatever")).to.equal(self);
+        });
+
+        it ('unknown frame index fails back to "_self"', async () => {
+            expect(await lib.getTargetWindow(0)).to.equal(self);
+        });
+
+        it ("accepts window references", async () => {
+            const dummy = {} as Window;
+            expect(await lib.getTargetWindow(dummy)).to.equal(dummy);
+        });
+
+        // it ('"popup"', async () => {
+        //     const popup = await lib.loadUrl("x", { target: "popup" });
+        //     expect(popup.location.href).to.equal("x");
+        // });
+
+        // it ('forbidden "popup" defaults to _self', async () => {
+        //     (self as any).once("beforeOpen", e => e.prevent());
+        //     const popup = await lib.loadUrl("x", { target: "popup" });
+        //     expect(self.location.href).to.equal("x");
+        // });
+    });
+
+    describe("isInFrame", () => {
+        it ("returns false by default", () => {
+            expect(smart.isInFrame()).to.equal(false);
+        });
+        it ("returns true in frames by default", () => {
+            (global as any).top = (global as any).window.top = new MockWindow();
+            (global as any).parent = (global as any).window.parent = top;
+            expect(smart.isInFrame()).to.equal(true);
+        });
+    });
+    describe("isInPopUp", () => {
+        it ("returns false by default", () => {
+            expect(smart.isInPopUp()).to.equal(false);
+        });
+        it ("returns false if self !== top", () => {
+            (global as any).top = new MockWindow();
+            expect(smart.isInPopUp()).to.equal(false);
+        });
+        it ("returns false if !opener", () => {
+            (global as any).opener = null;
+            expect(smart.isInPopUp()).to.equal(false);
+        });
+        it ("returns false if opener === self", () => {
+            (global as any).opener = self;
+            expect(smart.isInPopUp()).to.equal(false);
+        });
+        it ("returns false if !window.name", () => {
+            (global as any).window.name = "";
+            expect(smart.isInPopUp()).to.equal(false);
+        });
+        it ("returns true in popups", () => {
+            (global as any).opener = new MockWindow();
+            (global as any).window.name = "whatever";
+            expect(smart.isInPopUp()).to.equal(true);
+        });
+        // it ("returns true top or parent are not accessible", () => {
+        //     const self = new MockWindow();
+        //     const win = {
+        //         self,
+        //         top: self,
+        //         // get parent() {
+        //         //     throw new Error("Not accessible");
+        //         // }
+        //     };
+        //     // (global as any).top = new MockWindow();
+        //     Object.assign(global as any, win);
+        //     Object.defineProperty(global, "parent", {
+        //         get() {
+        //             throw new Error("Not accessible");
+        //         }
+        //     });
+        //     expect(smart.isInFrame()).to.equal(true);
+        // });
     });
 });

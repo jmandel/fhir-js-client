@@ -31,6 +31,21 @@ export declare function getSecurityExtensions(env: fhirclient.Adapter, baseUrl?:
  */
 export declare function authorize(env: fhirclient.Adapter, params?: fhirclient.AuthorizeParams, _noRedirect?: boolean): Promise<string | void>;
 /**
+ * Checks if called within a frame. Only works in browsers!
+ * If the current window has a `parent` or `top` properties that refer to
+ * another window, returns true. If trying to access `top` or `parent` throws an
+ * error, returns true. Otherwise returns `false`.
+ */
+export declare function isInFrame(): boolean;
+/**
+ * Checks if called within another window (popup or tab). Only works in browsers!
+ * To consider itself called in a new window, this function verifies that:
+ * 1. `self === top` (not in frame)
+ * 2. `!!opener && opener !== self` The window has an opener
+ * 3. `!!window.name` The window has a `name` set
+ */
+export declare function isInPopUp(): boolean;
+/**
  * The completeAuth function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
  * authorization server..

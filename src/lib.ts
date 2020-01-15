@@ -386,3 +386,104 @@ export function getPatientParam(conformance: fhirclient.FHIR.CapabilityStatement
 
     return out;
 }
+
+/**
+ * Resolves a reference to target window. It may also open new window or tab if
+ * the `target = "popup"` or `target = "_blank"`.
+ * @param target
+ * @param width Only used when `target = "popup"`
+ * @param height Only used when `target = "popup"`
+ */
+export async function getTargetWindow(target: fhirclient.WindowTarget, width: number = 800, height: number = 720): Promise<Window>
+{
+    // The target can be a function that returns the target. This can be
+    // used to open a layer pop-up with an iframe and then return a reference
+    // to that iframe (or its name)
+    if (typeof target == "function") {
+        target = await target();
+    }
+
+    // The target can be a window reference
+    if (target && typeof target == "object") {
+        return target;
+    }
+
+    // At this point target must be a string
+    if (typeof target != "string") {
+        _debug("Invalid target type '%s'. Failing back to '_self'.", typeof target);
+        return self;
+    }
+
+    // Current window
+    if (target == "_self") {
+        return self;
+    }
+
+    // The parent frame
+    if (target == "_parent") {
+        return parent;
+    }
+
+    // The top window
+    if (target == "_top") {
+        return top;
+    }
+
+    // New tab or window
+    if (target == "_blank") {
+        let error, targetWindow: Window | null = null;;
+        try {
+            targetWindow = window.open("", "SMARTAuthPopup");
+            if (!targetWindow) {
+                throw new Error("Perhaps window.open was blocked");
+            }
+        } catch (e) {
+            error = e;
+        }
+
+        if (!targetWindow) {
+            _debug("Cannot open window. Failing back to '_self'. %s", error);
+            return self;
+        } else {
+            return targetWindow;
+        }
+    }
+
+    // Popup window
+    if (target == "popup") {
+        let error, targetWindow: Window | null = null;
+        // if (!targetWindow || targetWindow.closed) {
+        try {
+            targetWindow = window.open("", "SMARTAuthPopup", [
+                "height=" + height,
+                "width=" + width,
+                "menubar=0",
+                "resizable=1",
+                "status=0",
+                "top=" + (screen.height - height) / 2,
+                "left=" + (screen.width - width) / 2
+            ].join(","));
+            if (!targetWindow) {
+                throw new Error("Perhaps the popup window was blocked");
+            }
+        } catch (e) {
+            error = e;
+        }
+
+        if (!targetWindow) {
+            _debug("Cannot open window. Failing back to '_self'. %s", error);
+            return self;
+        } else {
+            return targetWindow;
+        }
+    }
+
+    // Frame or window by name
+    const winOrFrame: Window = frames[target as any];
+    if (winOrFrame) {
+        return winOrFrame;
+    }
+
+    _debug("Unknown target '%s'. Failing back to '_self'.", target);
+    return self;
+}

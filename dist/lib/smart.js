@@ -171,7 +171,11 @@ async function authorize(env, params = {}, _noRedirect = false) {
     fakeTokenResponse,
     patientId,
     encounterId,
-    client_id
+    client_id,
+    target,
+    width,
+    height,
+    completeInTarget
   } = params;
   let {
     iss,
@@ -215,10 +219,12 @@ async function authorize(env, params = {}, _noRedirect = false) {
 
   if (launch && !scope.match(/launch/)) {
     scope += " launch";
-  } // prevent inheritance of tokenResponse from parent window
+  } // If `authorize` is called, make sure we clear any previous state (in case
+  // this is a re-authorize)
 
 
-  await storage.unset(settings_1.SMART_KEY); // create initial state
+  const oldKey = await storage.get(settings_1.SMART_KEY);
+  await storage.unset(oldKey); // create initial state
 
   const stateKey = lib_1.randomString(16);
   const state = {
@@ -228,8 +234,15 @@ async function authorize(env, params = {}, _noRedirect = false) {
     serverUrl,
     clientSecret,
     tokenResponse: {},
-    key: stateKey
-  }; // fakeTokenResponse to override stuff (useful in development)
+    key: stateKey,
+    completeInTarget: !!completeInTarget
+  };
+  const fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true;
+
+  if (fullSessionStorageSupport) {
+    await storage.set(settings_1.SMART_KEY, stateKey);
+  } // fakeTokenResponse to override stuff (useful in development)
+
 
   if (fakeTokenResponse) {
     Object.assign(state.tokenResponse, fakeTokenResponse);
@@ -252,8 +265,7 @@ async function authorize(env, params = {}, _noRedirect = false) {
   let redirectUrl = redirectUri + "?state=" + encodeURIComponent(stateKey); // bypass oauth if fhirServiceUrl is used (but iss takes precedence)
 
   if (fhirServiceUrl && !iss) {
-    debug("Making fake launch..."); // Storage.set(stateKey, state);
-
+    debug("Making fake launch...");
     await storage.set(stateKey, state);
 
     if (_noRedirect) {
@@ -289,10 +301,69 @@ async function authorize(env, params = {}, _noRedirect = false) {
     return redirectUrl;
   }
 
-  return await env.redirect(redirectUrl);
+  if (target && isBrowser()) {
+    let win;
+    win = await lib_1.getTargetWindow(target, width, height);
+
+    if (win !== self) {
+      try {
+        // Also remove any old state from the target window and then
+        // transfer the curremt state there
+        win.sessionStorage.removeItem(oldKey);
+        win.sessionStorage.setItem(stateKey, JSON.stringify(state));
+      } catch (ex) {
+        lib_1.debug(`Failed to modify window.sessionStorage. Perhaps it is from different origin?. Failing back to "_self". %s`, ex);
+        win = self;
+      }
+    }
+
+    try {
+      win.location.href = redirectUrl;
+    } catch (ex) {
+      lib_1.debug(`Failed to modify window.location. Perhaps it is from different origin?. Failing back to "_self". %s`, ex);
+      self.location.href = redirectUrl;
+    }
+
+    return;
+  } else {
+    return await env.redirect(redirectUrl);
+  }
 }
 
 exports.authorize = authorize;
+/**
+ * Checks if called within a frame. Only works in browsers!
+ * If the current window has a `parent` or `top` properties that refer to
+ * another window, returns true. If trying to access `top` or `parent` throws an
+ * error, returns true. Otherwise returns `false`.
+ */
+
+function isInFrame() {
+  try {
+    return self !== top && parent !== self;
+  } catch (e) {
+    return true;
+  }
+}
+
+exports.isInFrame = isInFrame;
+/**
+ * Checks if called within another window (popup or tab). Only works in browsers!
+ * To consider itself called in a new window, this function verifies that:
+ * 1. `self === top` (not in frame)
+ * 2. `!!opener && opener !== self` The window has an opener
+ * 3. `!!window.name` The window has a `name` set
+ */
+
+function isInPopUp() {
+  try {
+    return self === top && !!opener && opener !== self && !!window.name;
+  } catch (e) {
+    return false;
+  }
+}
+
+exports.isInPopUp = isInPopUp;
 /**
  * The completeAuth function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
@@ -335,7 +406,22 @@ async function completeAuth(env) {
 
 
   let state = await Storage.get(key);
-  const fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // Do we have to remove the `code` and `state` params from the URL?
+  const fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // If we are in a popup window or an iframe and the authorization is
+  // complete, send the location back to our opener and exit.
+
+  if (isBrowser() && state && !state.completeInTarget) {
+    if (isInFrame()) {
+      window.parent.location.href = url.href;
+      return new Promise(() => {});
+    }
+
+    if (isInPopUp()) {
+      window.opener.location.href = url.href;
+      if (window.name.indexOf("SMARTAuthPopup") === 0) window.close();
+      return new Promise(() => {});
+    }
+  } // Do we have to remove the `code` and `state` params from the URL?
+
 
   const hasState = params.has("state");
 

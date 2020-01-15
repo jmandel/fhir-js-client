@@ -22,7 +22,7 @@ const {
 
 const debug = lib_1.debug.extend("client");
 /**
- * Adds patient context to requestOptions object to be used with `Client.request`
+ * Adds patient context to requestOptions object to be used with [[Client.request]]
  * @param requestOptions Can be a string URL (relative to the serviceUrl), or an
  * object which will be passed to fetch()
  * @param client Current FHIR client object containing patient context
@@ -200,6 +200,9 @@ class Client {
    * FhirJS, if one is available globally.
    */
   constructor(environment, state) {
+    /**
+     * @category Utility
+     */
     this.units = lib_1.units;
 
     const _state = typeof state == "string" ? {
@@ -280,7 +283,7 @@ class Client {
    * This method is used to make the "link" between the `fhirclient` and the
    * `fhir.js`, if one is available.
    * **Note:** This is called by the constructor. If fhir.js is available in
-   * the global scope as `fhir`, it will automatically be linked to any `Client`
+   * the global scope as `fhir`, it will automatically be linked to any [[Client]]
    * instance. You should only use this method to connect to `fhir.js` which
    * is not global.
    */
@@ -436,8 +439,8 @@ class Client {
   }
   /**
    * Returns the profile of the logged_in user (if any). This is a string
-   * having the following shape "{user type}/{user id}". For example:
-   * "Practitioner/abc" or "Patient/xyz".
+   * having the following shape `"{user type}/{user id}"`. For example:
+   * `"Practitioner/abc"` or `"Patient/xyz"`.
    */
 
 
@@ -521,10 +524,13 @@ class Client {
     this.state.tokenResponse = {};
   }
   /**
+   * Creates a new resource in a server-assigned location
+   * @see http://hl7.org/fhir/http.html#create
    * @param resource A FHIR resource to be created
    * @param [requestOptions] Any options to be passed to the fetch call.
    * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
    * but other headers can be added.
+   * @category Request
    */
 
 
@@ -534,15 +540,20 @@ class Client {
       method: "POST",
       body: JSON.stringify(resource),
       headers: Object.assign(Object.assign({}, requestOptions.headers || {}), {
+        // TODO: Do we need to alternate with "application/json+fhir"?
         "Content-Type": "application/fhir+json"
       })
     }));
   }
   /**
+   * Creates a new current version for an existing resource or creates an
+   * initial version if no resource already exists for the given id.
+   * @see http://hl7.org/fhir/http.html#update
    * @param resource A FHIR resource to be updated
    * @param requestOptions Any options to be passed to the fetch call.
    * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
    * but other headers can be added.
+   * @category Request
    */
 
 
@@ -552,15 +563,19 @@ class Client {
       method: "PUT",
       body: JSON.stringify(resource),
       headers: Object.assign(Object.assign({}, requestOptions.headers || {}), {
+        // TODO: Do we need to alternate with "application/json+fhir"?
         "Content-Type": "application/fhir+json"
       })
     }));
   }
   /**
+   * Removes an existing resource.
+   * @see http://hl7.org/fhir/http.html#delete
    * @param url Relative URI of the FHIR resource to be deleted
    * (format: `resourceType/id`)
    * @param requestOptions Any options (except `method` which will be fixed
    * to `DELETE`) to be passed to the fetch call.
+   * @category Request
    */
 
 
@@ -575,6 +590,7 @@ class Client {
    * or an object which will be passed to fetch()
    * @param fhirOptions Additional options to control the behavior
    * @param _resolvedRefs DO NOT USE! Used internally.
+   * @category Request
    */
 
 
@@ -741,12 +757,13 @@ class Client {
    * expired (or this fails for any other reason) it will be deleted from the
    * state, so that we don't enter into loops trying to re-authorize.
    *
-   * This method is typically called internally from `Client.request` if
+   * This method is typically called internally from [[Client.request]] if
    * certain request fails with 401.
    *
    * @param requestOptions Any options to pass to the fetch call. Most of them
    * will be overridden, bit it might still be useful for passing additional
    * request calls or an abort signal.
+   * @category Request
    */
 
 
@@ -832,8 +849,9 @@ class Client {
    * @param observations Array of observations
    * @param property The name of a CodeableConcept property to group by
    * @todo This should be deprecated and moved elsewhere. One should not have
-   * to obtain an instance of `Client` just to use utility functions like this.
+   * to obtain an instance of [[Client]] just to use utility functions like this.
    * @deprecated
+   * @category Utility
    */
 
 
@@ -853,8 +871,9 @@ class Client {
    * @param observations Array of observations
    * @param property The name of a CodeableConcept property to group by
    * @todo This should be deprecated and moved elsewhere. One should not have
-   * to obtain an instance of `Client` just to use utility functions like this.
+   * to obtain an instance of [[Client]] just to use utility functions like this.
    * @deprecated
+   * @category Utility
    */
 
 
@@ -870,8 +889,9 @@ class Client {
    * @param path The path (eg. "a.b.4.c")
    * @returns {*} Whatever is found in the path or undefined
    * @todo This should be deprecated and moved elsewhere. One should not have
-   * to obtain an instance of `Client` just to use utility functions like this.
+   * to obtain an instance of [[Client]] just to use utility functions like this.
    * @deprecated
+   * @category Utility
    */
 
 
