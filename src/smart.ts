@@ -458,7 +458,7 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
             return new Promise(() => { /* leave it pending!!! */ });
         }
 
-        if (isInPopUp() && !url.searchParams.get("complete")) {
+        else if (isInPopUp() && !url.searchParams.get("complete")) {
             url.searchParams.set("complete", "1");
             window.opener.postMessage({
                 type: "completeAuth",
@@ -469,7 +469,9 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
             return new Promise(() => { /* leave it pending!!! */ });
         }
 
-        console.log("================= HERE =================");
+        else {
+            url.searchParams.delete("complete");
+        }
     }
 
     // Do we have to remove the `code` and `state` params from the URL?

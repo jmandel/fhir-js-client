@@ -3243,9 +3243,7 @@ async function completeAuth(env) {
       }, origin); // window.parent.location.href = url.href;
 
       return new Promise(() => {});
-    }
-
-    if (isInPopUp() && !url.searchParams.get("complete")) {
+    } else if (isInPopUp() && !url.searchParams.get("complete")) {
       url.searchParams.set("complete", "1");
       window.opener.postMessage({
         type: "completeAuth",
@@ -3254,9 +3252,9 @@ async function completeAuth(env) {
 
       if (window.name.indexOf("SMARTAuthPopup") === 0) window.close();
       return new Promise(() => {});
+    } else {
+      url.searchParams.delete("complete");
     }
-
-    console.log("================= HERE =================");
   } // Do we have to remove the `code` and `state` params from the URL?
 
 

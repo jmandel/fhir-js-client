@@ -13348,12 +13348,12 @@ function _completeAuth() {
             // complete, send the location back to our opener and exit.
 
             if (!(isBrowser() && state && !state.completeInTarget)) {
-              _context2.next = 31;
+              _context2.next = 35;
               break;
             }
 
             if (!(isInFrame() && !url.searchParams.get("complete"))) {
-              _context2.next = 25;
+              _context2.next = 27;
               break;
             }
 
@@ -13365,9 +13365,9 @@ function _completeAuth() {
 
             return _context2.abrupt("return", new Promise(function () {}));
 
-          case 25:
+          case 27:
             if (!(isInPopUp() && !url.searchParams.get("complete"))) {
-              _context2.next = 30;
+              _context2.next = 34;
               break;
             }
 
@@ -13380,10 +13380,10 @@ function _completeAuth() {
             if (window.name.indexOf("SMARTAuthPopup") === 0) window.close();
             return _context2.abrupt("return", new Promise(function () {}));
 
-          case 30:
-            console.log("================= HERE =================");
+          case 34:
+            url.searchParams.delete("complete");
 
-          case 31:
+          case 35:
             // Do we have to remove the `code` and `state` params from the URL?
             hasState = params.has("state");
 
@@ -13420,83 +13420,83 @@ function _completeAuth() {
 
 
             if (state) {
-              _context2.next = 35;
+              _context2.next = 39;
               break;
             }
 
             throw new Error("No state found! Please (re)launch the app.");
 
-          case 35:
+          case 39:
             // Assume the client has already completed a token exchange when
             // there is no code (but we have a state) or access token is found in state
             authorized = !code || ((_b = (_a = state) === null || _a === void 0 ? void 0 : _a.tokenResponse) === null || _b === void 0 ? void 0 : _b.access_token); // If we are authorized already, then this is just a reload.
             // Otherwise, we have to complete the code flow
 
             if (!(!authorized && state.tokenUri)) {
-              _context2.next = 54;
+              _context2.next = 58;
               break;
             }
 
             if (code) {
-              _context2.next = 39;
+              _context2.next = 43;
               break;
             }
 
             throw new Error("'code' url parameter is required");
 
-          case 39:
+          case 43:
             debug("Preparing to exchange the code for access token...");
             requestOptions = buildTokenRequest(env, code, state);
             debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
             // includes an access token or a message indicating that the
             // authorization request has been denied.
 
-            _context2.next = 44;
+            _context2.next = 48;
             return lib_1.request(state.tokenUri, requestOptions);
 
-          case 44:
+          case 48:
             tokenResponse = _context2.sent;
             debug("Token response: %O", tokenResponse);
 
             if (tokenResponse.access_token) {
-              _context2.next = 48;
+              _context2.next = 52;
               break;
             }
 
             throw new Error("Failed to obtain access token.");
 
-          case 48:
+          case 52:
             // save the tokenResponse so that we don't have to re-authorize on
             // every page reload
             state = Object.assign({}, state, {
               tokenResponse: tokenResponse
             });
-            _context2.next = 51;
+            _context2.next = 55;
             return Storage.set(key, state);
 
-          case 51:
+          case 55:
             debug("Authorization successful!");
-            _context2.next = 55;
+            _context2.next = 59;
             break;
 
-          case 54:
+          case 58:
             debug(((_d = (_c = state) === null || _c === void 0 ? void 0 : _c.tokenResponse) === null || _d === void 0 ? void 0 : _d.access_token) ? "Already authorized" : "No authorization needed");
 
-          case 55:
+          case 59:
             if (!fullSessionStorageSupport) {
-              _context2.next = 58;
+              _context2.next = 62;
               break;
             }
 
-            _context2.next = 58;
+            _context2.next = 62;
             return Storage.set(settings_1.SMART_KEY, key);
 
-          case 58:
+          case 62:
             client = new Client_1.default(env, state);
             debug("Created client instance: %O", client);
             return _context2.abrupt("return", client);
 
-          case 61:
+          case 65:
           case "end":
             return _context2.stop();
         }
