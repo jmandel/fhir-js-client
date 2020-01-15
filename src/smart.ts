@@ -448,7 +448,8 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
     // If we are in a popup window or an iframe and the authorization is
     // complete, send the location back to our opener and exit.
     if (isBrowser() && state && !state.completeInTarget) {
-        if (isInFrame()) {
+        if (isInFrame() && !url.searchParams.get("complete")) {
+            url.searchParams.set("complete", "1");
             window.parent.postMessage({
                 type: "completeAuth",
                 url : url.href
