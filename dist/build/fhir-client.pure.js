@@ -3124,7 +3124,7 @@ async function authorize(env, params = {}, _noRedirect = false) {
     if (win !== self) {
       try {
         // Also remove any old state from the target window and then
-        // transfer the curremt state there
+        // transfer the current state there
         win.sessionStorage.removeItem(oldKey);
         win.sessionStorage.setItem(stateKey, JSON.stringify(state));
       } catch (ex) {
@@ -3135,6 +3135,7 @@ async function authorize(env, params = {}, _noRedirect = false) {
 
     try {
       win.location.href = redirectUrl;
+      self.addEventListener("message", onMessage);
     } catch (ex) {
       lib_1.debug(`Failed to modify window.location. Perhaps it is from different origin?. Failing back to "_self". %s`, ex);
       self.location.href = redirectUrl;
@@ -3179,12 +3180,20 @@ function isInPopUp() {
   }
 }
 
-exports.isInPopUp = isInPopUp;
+exports.isInPopUp = isInPopUp; // TODO: Check origin
+
+function onMessage(e) {
+  if (e.data.type == "completeAuth") {
+    window.removeEventListener("message", onMessage);
+    window.location.assign(e.data.url);
+  }
+}
 /**
  * The completeAuth function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
  * authorization server..
  */
+
 
 async function completeAuth(env) {
   var _a, _b, _c, _d;
@@ -3227,12 +3236,20 @@ async function completeAuth(env) {
 
   if (isBrowser() && state && !state.completeInTarget) {
     if (isInFrame()) {
-      window.parent.location.href = url.href;
+      window.parent.postMessage({
+        type: "completeAuth",
+        url: url.href
+      }, origin); // window.parent.location.href = url.href;
+
       return new Promise(() => {});
     }
 
     if (isInPopUp()) {
-      window.opener.location.href = url.href;
+      window.opener.postMessage({
+        type: "completeAuth",
+        url: url.href
+      }, origin); // window.opener.location.href = url.href;
+
       if (window.name.indexOf("SMARTAuthPopup") === 0) window.close();
       return new Promise(() => {});
     }
