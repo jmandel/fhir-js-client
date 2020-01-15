@@ -458,7 +458,7 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
             return new Promise(() => { /* leave it pending!!! */ });
         }
 
-        if (isInPopUp()) {
+        if (isInPopUp() && !url.searchParams.get("complete")) {
             url.searchParams.set("complete", "1");
             window.opener.postMessage({
                 type: "completeAuth",

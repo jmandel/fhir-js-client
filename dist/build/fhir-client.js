@@ -13366,7 +13366,7 @@ function _completeAuth() {
             return _context2.abrupt("return", new Promise(function () {}));
 
           case 25:
-            if (!isInPopUp()) {
+            if (!(isInPopUp() && !url.searchParams.get("complete"))) {
               _context2.next = 30;
               break;
             }

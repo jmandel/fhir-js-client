@@ -429,7 +429,7 @@ async function completeAuth(env) {
       return new Promise(() => {});
     }
 
-    if (isInPopUp()) {
+    if (isInPopUp() && !url.searchParams.get("complete")) {
       url.searchParams.set("complete", "1");
       window.opener.postMessage({
         type: "completeAuth",
