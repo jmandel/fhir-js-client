@@ -430,6 +430,7 @@ async function completeAuth(env) {
     }
 
     if (isInPopUp()) {
+      url.searchParams.set("complete", "1");
       window.opener.postMessage({
         type: "completeAuth",
         url: url.href
