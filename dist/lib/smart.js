@@ -437,6 +437,8 @@ async function completeAuth(env) {
       if (window.name.indexOf("SMARTAuthPopup") === 0) window.close();
       return new Promise(() => {});
     }
+
+    console.log("================= HERE =================");
   } // Do we have to remove the `code` and `state` params from the URL?
 
 

@@ -13348,7 +13348,7 @@ function _completeAuth() {
             // complete, send the location back to our opener and exit.
 
             if (!(isBrowser() && state && !state.completeInTarget)) {
-              _context2.next = 28;
+              _context2.next = 29;
               break;
             }
 
@@ -13379,6 +13379,9 @@ function _completeAuth() {
             return _context2.abrupt("return", new Promise(function () {}));
 
           case 28:
+            console.log("================= HERE =================");
+
+          case 29:
             // Do we have to remove the `code` and `state` params from the URL?
             hasState = params.has("state");
 
@@ -13415,83 +13418,83 @@ function _completeAuth() {
 
 
             if (state) {
-              _context2.next = 32;
+              _context2.next = 33;
               break;
             }
 
             throw new Error("No state found! Please (re)launch the app.");
 
-          case 32:
+          case 33:
             // Assume the client has already completed a token exchange when
             // there is no code (but we have a state) or access token is found in state
             authorized = !code || ((_b = (_a = state) === null || _a === void 0 ? void 0 : _a.tokenResponse) === null || _b === void 0 ? void 0 : _b.access_token); // If we are authorized already, then this is just a reload.
             // Otherwise, we have to complete the code flow
 
             if (!(!authorized && state.tokenUri)) {
-              _context2.next = 51;
+              _context2.next = 52;
               break;
             }
 
             if (code) {
-              _context2.next = 36;
+              _context2.next = 37;
               break;
             }
 
             throw new Error("'code' url parameter is required");
 
-          case 36:
+          case 37:
             debug("Preparing to exchange the code for access token...");
             requestOptions = buildTokenRequest(env, code, state);
             debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
             // includes an access token or a message indicating that the
             // authorization request has been denied.
 
-            _context2.next = 41;
+            _context2.next = 42;
             return lib_1.request(state.tokenUri, requestOptions);
 
-          case 41:
+          case 42:
             tokenResponse = _context2.sent;
             debug("Token response: %O", tokenResponse);
 
             if (tokenResponse.access_token) {
-              _context2.next = 45;
+              _context2.next = 46;
               break;
             }
 
             throw new Error("Failed to obtain access token.");
 
-          case 45:
+          case 46:
             // save the tokenResponse so that we don't have to re-authorize on
             // every page reload
             state = Object.assign({}, state, {
               tokenResponse: tokenResponse
             });
-            _context2.next = 48;
+            _context2.next = 49;
             return Storage.set(key, state);
 
-          case 48:
+          case 49:
             debug("Authorization successful!");
-            _context2.next = 52;
+            _context2.next = 53;
             break;
 
-          case 51:
+          case 52:
             debug(((_d = (_c = state) === null || _c === void 0 ? void 0 : _c.tokenResponse) === null || _d === void 0 ? void 0 : _d.access_token) ? "Already authorized" : "No authorization needed");
 
-          case 52:
+          case 53:
             if (!fullSessionStorageSupport) {
-              _context2.next = 55;
+              _context2.next = 56;
               break;
             }
 
-            _context2.next = 55;
+            _context2.next = 56;
             return Storage.set(settings_1.SMART_KEY, key);
 
-          case 55:
+          case 56:
             client = new Client_1.default(env, state);
             debug("Created client instance: %O", client);
             return _context2.abrupt("return", client);
 
-          case 58:
+          case 59:
           case "end":
             return _context2.stop();
         }

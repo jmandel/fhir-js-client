@@ -466,6 +466,8 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
             if (window.name.indexOf("SMARTAuthPopup") === 0) window.close();
             return new Promise(() => { /* leave it pending!!! */ });
         }
+
+        console.log("================= HERE =================");
     }
 
     // Do we have to remove the `code` and `state` params from the URL?
