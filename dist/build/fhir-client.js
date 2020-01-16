@@ -13083,7 +13083,7 @@ function _authorize() {
               clientSecret: clientSecret,
               tokenResponse: {},
               key: stateKey,
-              completeInTarget: !!completeInTarget
+              completeInTarget: completeInTarget
             };
             fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true;
 
@@ -13212,11 +13212,15 @@ function _authorize() {
               }
             }
 
-            try {
-              win.location.href = redirectUrl;
-              self.addEventListener("message", onMessage);
-            } catch (ex) {
-              lib_1.debug("Failed to modify window.location. Perhaps it is from different origin?. Failing back to \"_self\". %s", ex);
+            if (win !== self) {
+              try {
+                win.location.href = redirectUrl;
+                self.addEventListener("message", onMessage);
+              } catch (ex) {
+                lib_1.debug("Failed to modify window.location. Perhaps it is from different origin?. Failing back to \"_self\". %s", ex);
+                self.location.href = redirectUrl;
+              }
+            } else {
               self.location.href = redirectUrl;
             }
 
@@ -13295,7 +13299,7 @@ function _completeAuth() {
   _completeAuth = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
   _regenerator.default.mark(function _callee2(env) {
-    var _a, _b, _c, _d, url, Storage, params, key, code, authError, authErrorDescription, state, fullSessionStorageSupport, hasState, authorized, requestOptions, tokenResponse, client;
+    var _a, _b, _c, _d, url, Storage, params, key, code, authError, authErrorDescription, state, fullSessionStorageSupport, inFrame, inPopUp, hasState, authorized, requestOptions, tokenResponse, client;
 
     return _regenerator.default.wrap(function _callee2$(_context2) {
       while (1) {
@@ -13345,45 +13349,48 @@ function _completeAuth() {
           case 18:
             state = _context2.sent;
             fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // If we are in a popup window or an iframe and the authorization is
-            // complete, send the location back to our opener and exit.
+            // complete, send the location back to our opener and exit. Note that
+            // completeInTarget will only exist in state if we are in another window.
 
-            if (!(isBrowser() && state && !state.completeInTarget)) {
-              _context2.next = 35;
+            if (!(isBrowser() && state && state.completeInTarget === false)) {
+              _context2.next = 28;
               break;
             }
 
-            if (!(isInFrame() && !url.searchParams.get("complete"))) {
+            inFrame = isInFrame();
+            inPopUp = isInPopUp(); // we are about to return to the opener/parent where completeAuth will
+            // be called again. In rare cases the opener or parent might also be
+            // a frame or popup. Then inFrame or inPopUp will be true but we still
+            // have to stop going up the chain. To guard against that weird form of
+            // recursion we pass one additional parameter to the url which we later
+            // remove.
+
+            if (!((inFrame || inPopUp) && !url.searchParams.get("complete"))) {
               _context2.next = 27;
               break;
             }
 
             url.searchParams.set("complete", "1");
-            window.parent.postMessage({
-              type: "completeAuth",
-              url: url.href
-            }, origin); // window.parent.location.href = url.href;
+
+            if (inFrame) {
+              window.parent.postMessage({
+                type: "completeAuth",
+                url: url.href
+              }, origin);
+            } else if (inPopUp) {
+              window.opener.postMessage({
+                type: "completeAuth",
+                url: url.href
+              }, origin);
+              if (window.name.indexOf("SMARTAuthPopup") === 0) window.close();
+            }
 
             return _context2.abrupt("return", new Promise(function () {}));
 
           case 27:
-            if (!(isInPopUp() && !url.searchParams.get("complete"))) {
-              _context2.next = 34;
-              break;
-            }
-
-            url.searchParams.set("complete", "1");
-            window.opener.postMessage({
-              type: "completeAuth",
-              url: url.href
-            }, origin); // window.opener.location.href = url.href;
-
-            if (window.name.indexOf("SMARTAuthPopup") === 0) window.close();
-            return _context2.abrupt("return", new Promise(function () {}));
-
-          case 34:
             url.searchParams.delete("complete");
 
-          case 35:
+          case 28:
             // Do we have to remove the `code` and `state` params from the URL?
             hasState = params.has("state");
 
@@ -13420,83 +13427,83 @@ function _completeAuth() {
 
 
             if (state) {
-              _context2.next = 39;
+              _context2.next = 32;
               break;
             }
 
             throw new Error("No state found! Please (re)launch the app.");
 
-          case 39:
+          case 32:
             // Assume the client has already completed a token exchange when
             // there is no code (but we have a state) or access token is found in state
             authorized = !code || ((_b = (_a = state) === null || _a === void 0 ? void 0 : _a.tokenResponse) === null || _b === void 0 ? void 0 : _b.access_token); // If we are authorized already, then this is just a reload.
             // Otherwise, we have to complete the code flow
 
             if (!(!authorized && state.tokenUri)) {
-              _context2.next = 58;
+              _context2.next = 51;
               break;
             }
 
             if (code) {
-              _context2.next = 43;
+              _context2.next = 36;
               break;
             }
 
             throw new Error("'code' url parameter is required");
 
-          case 43:
+          case 36:
             debug("Preparing to exchange the code for access token...");
             requestOptions = buildTokenRequest(env, code, state);
             debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
             // includes an access token or a message indicating that the
             // authorization request has been denied.
 
-            _context2.next = 48;
+            _context2.next = 41;
             return lib_1.request(state.tokenUri, requestOptions);
 
-          case 48:
+          case 41:
             tokenResponse = _context2.sent;
             debug("Token response: %O", tokenResponse);
 
             if (tokenResponse.access_token) {
-              _context2.next = 52;
+              _context2.next = 45;
               break;
             }
 
             throw new Error("Failed to obtain access token.");
 
-          case 52:
+          case 45:
             // save the tokenResponse so that we don't have to re-authorize on
             // every page reload
             state = Object.assign({}, state, {
               tokenResponse: tokenResponse
             });
-            _context2.next = 55;
+            _context2.next = 48;
             return Storage.set(key, state);
 
-          case 55:
+          case 48:
             debug("Authorization successful!");
-            _context2.next = 59;
+            _context2.next = 52;
             break;
 
-          case 58:
+          case 51:
             debug(((_d = (_c = state) === null || _c === void 0 ? void 0 : _c.tokenResponse) === null || _d === void 0 ? void 0 : _d.access_token) ? "Already authorized" : "No authorization needed");
 
-          case 59:
+          case 52:
             if (!fullSessionStorageSupport) {
-              _context2.next = 62;
+              _context2.next = 55;
               break;
             }
 
-            _context2.next = 62;
+            _context2.next = 55;
             return Storage.set(settings_1.SMART_KEY, key);
 
-          case 62:
+          case 55:
             client = new Client_1.default(env, state);
             debug("Created client instance: %O", client);
             return _context2.abrupt("return", client);
 
-          case 65:
+          case 58:
           case "end":
             return _context2.stop();
         }

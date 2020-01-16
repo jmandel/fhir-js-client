@@ -251,7 +251,7 @@ export async function authorize(env: fhirclient.Adapter, params: fhirclient.Auth
         clientSecret,
         tokenResponse: {},
         key: stateKey,
-        completeInTarget: !!completeInTarget
+        completeInTarget
     };
 
     const fullSessionStorageSupport = isBrowser() ?
@@ -340,11 +340,15 @@ export async function authorize(env: fhirclient.Adapter, params: fhirclient.Auth
             }
         }
 
-        try {
-            win.location.href = redirectUrl;
-            self.addEventListener("message", onMessage);
-        } catch (ex) {
-            _debug(`Failed to modify window.location. Perhaps it is from different origin?. Failing back to "_self". %s`, ex);
+        if (win !== self) {
+            try {
+                win.location.href = redirectUrl;
+                self.addEventListener("message", onMessage);
+            } catch (ex) {
+                _debug(`Failed to modify window.location. Perhaps it is from different origin?. Failing back to "_self". %s`, ex);
+                self.location.href = redirectUrl;
+            }
+        } else {
             self.location.href = redirectUrl;
         }
 
@@ -446,32 +450,40 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
         true;
 
     // If we are in a popup window or an iframe and the authorization is
-    // complete, send the location back to our opener and exit.
-    if (isBrowser() && state && !state.completeInTarget) {
-        if (isInFrame() && !url.searchParams.get("complete")) {
+    // complete, send the location back to our opener and exit. Note that
+    // completeInTarget will only exist in state if we are in another window.
+    if (isBrowser() && state && state.completeInTarget === false) {
+
+        const inFrame = isInFrame();
+        const inPopUp = isInPopUp();
+
+        // we are about to return to the opener/parent where completeAuth will
+        // be called again. In rare cases the opener or parent might also be
+        // a frame or popup. Then inFrame or inPopUp will be true but we still
+        // have to stop going up the chain. To guard against that weird form of
+        // recursion we pass one additional parameter to the url which we later
+        // remove.
+        if ((inFrame || inPopUp) && !url.searchParams.get("complete")) {
             url.searchParams.set("complete", "1");
-            window.parent.postMessage({
-                type: "completeAuth",
-                url : url.href
-            }, origin);
-            // window.parent.location.href = url.href;
+
+            if (inFrame) {
+                window.parent.postMessage({
+                    type: "completeAuth",
+                    url : url.href
+                }, origin);
+            }
+            else if (inPopUp) {
+                window.opener.postMessage({
+                    type: "completeAuth",
+                    url : url.href
+                }, origin);
+                if (window.name.indexOf("SMARTAuthPopup") === 0) window.close();
+            }
+
             return new Promise(() => { /* leave it pending!!! */ });
         }
 
-        else if (isInPopUp() && !url.searchParams.get("complete")) {
-            url.searchParams.set("complete", "1");
-            window.opener.postMessage({
-                type: "completeAuth",
-                url : url.href
-            }, origin);
-            // window.opener.location.href = url.href;
-            if (window.name.indexOf("SMARTAuthPopup") === 0) window.close();
-            return new Promise(() => { /* leave it pending!!! */ });
-        }
-
-        else {
-            url.searchParams.delete("complete");
-        }
+        url.searchParams.delete("complete");
     }
 
     // Do we have to remove the `code` and `state` params from the URL?
