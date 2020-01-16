@@ -465,12 +465,12 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
         // remove.
         if ((inFrame || inPopUp) && !url.searchParams.get("complete")) {
             url.searchParams.set("complete", "1");
-
+            const { href, origin } = url;
             if (inFrame) {
-                parent.postMessage({ type: "completeAuth", url: url.href }, origin);
+                parent.postMessage({ type: "completeAuth", url: href }, origin);
             }
             else if (inPopUp) {
-                opener.postMessage({ type: "completeAuth", url: url.href }, origin);
+                opener.postMessage({ type: "completeAuth", url: href }, origin);
                 if (window.name.indexOf("SMARTAuthPopup") === 0) window.close();
             }
 
