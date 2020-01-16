@@ -13353,7 +13353,7 @@ function _completeAuth() {
             // completeInTarget will only exist in state if we are in another window.
 
             if (!(isBrowser() && state && !state.completeInTarget)) {
-              _context2.next = 28;
+              _context2.next = 27;
               break;
             }
 
@@ -13373,12 +13373,12 @@ function _completeAuth() {
             url.searchParams.set("complete", "1");
 
             if (inFrame) {
-              window.parent.postMessage({
+              parent.postMessage({
                 type: "completeAuth",
                 url: url.href
               }, origin);
             } else if (inPopUp) {
-              window.opener.postMessage({
+              opener.postMessage({
                 type: "completeAuth",
                 url: url.href
               }, origin);
@@ -13388,10 +13388,8 @@ function _completeAuth() {
             return _context2.abrupt("return", new Promise(function () {}));
 
           case 27:
-            url.searchParams.delete("complete");
+            url.searchParams.delete("complete"); // Do we have to remove the `code` and `state` params from the URL?
 
-          case 28:
-            // Do we have to remove the `code` and `state` params from the URL?
             hasState = params.has("state");
 
             if (isBrowser() && lib_1.getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {

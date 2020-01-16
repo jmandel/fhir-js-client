@@ -476,9 +476,9 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
 
             return new Promise(() => { /* leave it pending!!! */ });
         }
-
-        url.searchParams.delete("complete");
     }
+
+    url.searchParams.delete("complete");
 
     // Do we have to remove the `code` and `state` params from the URL?
     const hasState = params.has("state");

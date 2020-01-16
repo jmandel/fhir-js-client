@@ -436,12 +436,12 @@ async function completeAuth(env) {
       url.searchParams.set("complete", "1");
 
       if (inFrame) {
-        window.parent.postMessage({
+        parent.postMessage({
           type: "completeAuth",
           url: url.href
         }, origin);
       } else if (inPopUp) {
-        window.opener.postMessage({
+        opener.postMessage({
           type: "completeAuth",
           url: url.href
         }, origin);
@@ -450,10 +450,9 @@ async function completeAuth(env) {
 
       return new Promise(() => {});
     }
+  }
 
-    url.searchParams.delete("complete");
-  } // Do we have to remove the `code` and `state` params from the URL?
-
+  url.searchParams.delete("complete"); // Do we have to remove the `code` and `state` params from the URL?
 
   const hasState = params.has("state");
 
