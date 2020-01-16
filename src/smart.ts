@@ -452,7 +452,7 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
     // If we are in a popup window or an iframe and the authorization is
     // complete, send the location back to our opener and exit. Note that
     // completeInTarget will only exist in state if we are in another window.
-    if (isBrowser() && state && state.completeInTarget === false) {
+    if (isBrowser() && state && !state.completeInTarget) {
 
         const inFrame = isInFrame();
         const inPopUp = isInPopUp();
@@ -467,16 +467,10 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
             url.searchParams.set("complete", "1");
 
             if (inFrame) {
-                window.parent.postMessage({
-                    type: "completeAuth",
-                    url : url.href
-                }, origin);
+                parent.postMessage({ type: "completeAuth", url: url.href }, origin);
             }
             else if (inPopUp) {
-                window.opener.postMessage({
-                    type: "completeAuth",
-                    url : url.href
-                }, origin);
+                opener.postMessage({ type: "completeAuth", url: url.href }, origin);
                 if (window.name.indexOf("SMARTAuthPopup") === 0) window.close();
             }
 

@@ -13352,7 +13352,7 @@ function _completeAuth() {
             // complete, send the location back to our opener and exit. Note that
             // completeInTarget will only exist in state if we are in another window.
 
-            if (!(isBrowser() && state && state.completeInTarget === false)) {
+            if (!(isBrowser() && state && !state.completeInTarget)) {
               _context2.next = 28;
               break;
             }

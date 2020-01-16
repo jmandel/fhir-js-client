@@ -423,7 +423,7 @@ async function completeAuth(env) {
   // complete, send the location back to our opener and exit. Note that
   // completeInTarget will only exist in state if we are in another window.
 
-  if (isBrowser() && state && state.completeInTarget === false) {
+  if (isBrowser() && state && !state.completeInTarget) {
     const inFrame = isInFrame();
     const inPopUp = isInPopUp(); // we are about to return to the opener/parent where completeAuth will
     // be called again. In rare cases the opener or parent might also be
