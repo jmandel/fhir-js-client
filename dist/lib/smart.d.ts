@@ -46,6 +46,12 @@ export declare function isInFrame(): boolean;
  */
 export declare function isInPopUp(): boolean;
 /**
+ * Another window can send a "completeAuth" message to this one, making it to
+ * navigate to e.data.url
+ * @param e The message event
+ */
+export declare function onMessage(e: MessageEvent): void;
+/**
  * The completeAuth function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
  * authorization server..

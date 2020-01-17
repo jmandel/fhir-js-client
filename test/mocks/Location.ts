@@ -25,6 +25,11 @@ export default class Location extends EventEmitter
         this.emit("change", value);
     }
 
+    get origin()
+    {
+        return new URL(this._href).origin;
+    }
+
     get readonly()
     {
         return this._readonly;

@@ -1,4 +1,5 @@
 import MockLocation from "./Location";
+import MockSessionStorage from "./SessionStorage";
 import { EventEmitter } from "events";
 
 class History
@@ -17,34 +18,6 @@ class History
 }
 
 // tslint:disable-next-line:max-classes-per-file
-class FakeSessionStorage
-{
-    private _data: { [key: string]: any };
-
-    constructor()
-    {
-        this._data = {};
-    }
-
-    setItem(key: string, value: any) {
-        this._data[key] = value;
-        return value;
-    }
-
-    getItem(key: string) {
-        return Object.prototype.hasOwnProperty.call(this._data, key) ? this._data[key] : null;
-    }
-
-    removeItem(key: string) {
-        if (key in this._data) {
-            delete this._data[key];
-            return true;
-        }
-        return false;
-    }
-}
-
-// tslint:disable-next-line:max-classes-per-file
 export default class Window extends EventEmitter
 {
     FHIR: any;
@@ -57,7 +30,7 @@ export default class Window extends EventEmitter
     location: MockLocation;
     name: string;
     features: string;
-    sessionStorage: FakeSessionStorage;
+    sessionStorage: MockSessionStorage;
 
     constructor(url = "http://localhost", name = "", features = "")
     {
@@ -66,7 +39,7 @@ export default class Window extends EventEmitter
         this.features = features;
         this.history = new History();
         this.location = new MockLocation(url);
-        this.sessionStorage = new FakeSessionStorage();
+        this.sessionStorage = new MockSessionStorage();
 
         this.frames = {};
         this.parent = this;
@@ -97,9 +70,17 @@ export default class Window extends EventEmitter
         this.on(event, handler);
     }
 
-    postMessage(event: MessageEvent)
+    removeEventListener(event: string, handler: () => any)
     {
-        this.emit("message", event);
+        this.removeListener(event, handler);
+    }
+
+    postMessage(event: any, origin?: string)
+    {
+        this.emit("message", {
+            data: event,
+            origin
+        });
     }
 
     open(url: string, name: string, features: string)
@@ -114,5 +95,9 @@ export default class Window extends EventEmitter
             return null;
         }
         return new Window(url, name, features);
+    }
+
+    close() {
+        /* stub */
     }
 }

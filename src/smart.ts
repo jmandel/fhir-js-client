@@ -391,9 +391,13 @@ export function isInPopUp() {
     }
 }
 
-// TODO: Check origin
-function onMessage(e: MessageEvent) {
-    if (e.data.type == "completeAuth") {
+/**
+ * Another window can send a "completeAuth" message to this one, making it to
+ * navigate to e.data.url
+ * @param e The message event
+ */
+export function onMessage(e: MessageEvent) {
+    if (e.data.type == "completeAuth" && e.origin === new URL(self.location.href).origin) {
         window.removeEventListener("message", onMessage);
         window.location.href = e.data.url;
     }
@@ -450,8 +454,7 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
         true;
 
     // If we are in a popup window or an iframe and the authorization is
-    // complete, send the location back to our opener and exit. Note that
-    // completeInTarget will only exist in state if we are in another window.
+    // complete, send the location back to our opener and exit.
     if (isBrowser() && state && !state.completeInTarget) {
 
         const inFrame = isInFrame();
@@ -469,9 +472,9 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
             if (inFrame) {
                 parent.postMessage({ type: "completeAuth", url: href }, origin);
             }
-            else if (inPopUp) {
+            if (inPopUp) {
                 opener.postMessage({ type: "completeAuth", url: href }, origin);
-                if (window.name.indexOf("SMARTAuthPopup") === 0) window.close();
+                window.close();
             }
 
             return new Promise(() => { /* leave it pending!!! */ });

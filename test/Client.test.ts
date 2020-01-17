@@ -7,6 +7,7 @@ import mockServer     from "./mocks/mockServer";
 import ServerEnv      from "./mocks/ServerEnvironment";
 import BrowserEnv     from "./mocks/BrowserEnvironment";
 import BrowserEnvFhir from "./mocks/BrowserEnvironmentWithFhirJs";
+import Window         from "./mocks/Window";
 import str            from "../src/strings";
 import Client         from "../src/Client";
 import { KEY }        from "../src/smart";
@@ -54,6 +55,7 @@ after(() => {
 afterEach(() => {
     mockServer.clear();
     clientDebug._calls.length = 0;
+    delete (global as any).sessionStorage;
 });
 
 
@@ -2761,6 +2763,8 @@ describe("FHIR.client", () => {
     });
 
     it ("client.refresh", async () => {
+        const self    = new Window();
+        (global as any).sessionStorage = self.sessionStorage;
         const env     = new BrowserEnv();
         const storage = env.getStorage();
         const key     = "my-key";
@@ -2954,6 +2958,8 @@ describe("FHIR.client", () => {
 
     describe("_clearState()", () => {
         crossPlatformTest(async (env) => {
+            const self    = new Window();
+            (global as any).sessionStorage = self.sessionStorage;
             const client = new Client(env, {
                 serverUrl: mockUrl,
                 scope: "openid fhirUser",

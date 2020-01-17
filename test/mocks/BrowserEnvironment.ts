@@ -1,7 +1,6 @@
 /* global fhir */
 const EventEmitter = require("events");
-import MemoryStorage       from "./MemoryStorage";
-import MockLocation        from "./Location";
+import BrowserStorage      from "../../src/storage/BrowserStorage";
 import { fhirclient }      from "../../src/types";
 import { AbortController } from "abortcontroller-polyfill/dist/cjs-ponyfill";
 
@@ -18,7 +17,6 @@ export default class BrowserEnvironment extends EventEmitter implements fhirclie
             fullSessionStorageSupport: true,
             ...options
         };
-        this._location = new MockLocation("http://localhost");
     }
 
     get fhir()
@@ -28,26 +26,26 @@ export default class BrowserEnvironment extends EventEmitter implements fhirclie
 
     getUrl()
     {
-        return new URL(this._location.href);
+        return new URL(window.location.href);
     }
 
     redirect(to: string)
     {
-        this._location.href = to;
+        window.location.href = to;
         this.emit("redirect");
     }
 
     getStorage()
     {
         if (!this._storage) {
-            this._storage = new MemoryStorage();
+            this._storage = new BrowserStorage();
         }
         return this._storage;
     }
 
     relative(url: string)
     {
-        return new URL(url, this._location.href).href;
+        return new URL(url, window.location.href).href;
     }
 
     getSmartApi(): any
@@ -67,6 +65,6 @@ export default class BrowserEnvironment extends EventEmitter implements fhirclie
 
     getAbortController()
     {
-        return AbortController;
+        return AbortController as any;
     }
 }

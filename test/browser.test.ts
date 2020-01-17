@@ -62,6 +62,7 @@ beforeEach(() => {
     (global as any).frames = window.frames;
     (global as any).screen = new MockScreen();
     (global as any).frames = {};
+    (global as any).sessionStorage = self.sessionStorage;
 });
 
 afterEach(() => {
@@ -75,6 +76,7 @@ afterEach(() => {
     delete (global as any).screen;
     delete (global as any).frames;
     delete (global as any).opener;
+    delete (global as any).sessionStorage;
 });
 
 // -----------------------------------------------------------------------------
@@ -905,7 +907,7 @@ describe("smart", () => {
 
 describe("Targets", () => {
 
-    async function testTarget(targetWindow, options) {
+    async function testTarget(targetWindow, options, type?: string) {
 
         const env     = new BrowserEnv();
         const storage = env.getStorage();
@@ -920,9 +922,26 @@ describe("Targets", () => {
             }
         });
 
-        const locationChangeListener = new Promise(resolve => {
-            targetWindow.location.once("change", resolve);
+        const locationChangeListener1 = new Promise(resolve => {
+            targetWindow.location.once("change", () => {
+                const top = (global as any).top;
+                (global as any).self = (global as any).window = targetWindow;
+                if (type == "frame") {
+                    (global as any).parent = top;
+                } else if (type == "popup") {
+                    (global as any).parent = targetWindow;
+                    (global as any).opener = top;
+                    (global as any).top    = targetWindow;
+                    (global as any).window.name = "SMARTAuthPopup";
+                }
+
+                smart.completeAuth(new BrowserEnv());
+                resolve();
+            });
         });
+        // const locationChangeListener2 = new Promise(resolve => {
+        //     (self as any).location.once("change", resolve);
+        // });
 
         // Call our launch code.
         await smart.authorize(env, {
@@ -935,7 +954,8 @@ describe("Targets", () => {
         // .then(resolve)
         // .catch(console.error);
 
-        await locationChangeListener;
+        await locationChangeListener1;
+        // await locationChangeListener2;
 
         // Now we have been redirected to `redirect` and then back to our
         // redirect_uri. It is time to complete the authorization. All that
@@ -983,9 +1003,19 @@ describe("Targets", () => {
 
     it("target: 'namedFrame'", async () => {
         const frame = new MockWindow();
+        frame.parent = self;
+        frame.top = self;
         (global as any).frames = { namedFrame: frame };
-        await testTarget(frame, { target: "namedFrame" });
+        await testTarget(frame, { target: "namedFrame" }, "frame");
     });
+
+    // it("target: 'popup'", async () => {
+    //     const frame = new MockWindow();
+    //     frame.parent = self;
+    //     frame.top = self;
+    //     (global as any).frames = { namedFrame: frame };
+    //     await testTarget(frame, { target: "namedFrame" }, "frame");
+    // });
 
     it("target: 'xyz' corrected to _self", async () => {
         await testTarget(window, { target: "xyz" });
@@ -1122,6 +1152,7 @@ describe("Targets", () => {
             expect(smart.isInFrame()).to.equal(true);
         });
     });
+
     describe("isInPopUp", () => {
         it ("returns false by default", () => {
             expect(smart.isInPopUp()).to.equal(false);
@@ -1165,5 +1196,102 @@ describe("Targets", () => {
         //     });
         //     expect(smart.isInFrame()).to.equal(true);
         // });
+    });
+
+    it ("authorize in popup returns control to opener", (next) => {
+        const opener = new MockWindow("http://localhost?state=TEST");
+        opener.location.once("change", () => next());
+        (global as any).opener = opener;
+
+        // pretend that we are in a popup
+        const popup  = new MockWindow("http://localhost?state=TEST", "SMARTAuthPopup");
+        (global as any).parent = popup;
+        (global as any).top = (global as any).self = popup;
+        // (global as any).self   = popup;
+        (global as any).window = popup;
+        (global as any).sessionStorage = popup.sessionStorage;
+        popup.sessionStorage.setItem("SMART_KEY", '"TEST"');
+        popup.sessionStorage.setItem("TEST", JSON.stringify({}));
+
+        smart.completeAuth(new BrowserEnv());
+    });
+
+    it ("authorize in frame returns control to parent", (next) => {
+        const parent = new MockWindow("http://localhost?state=TEST");
+        parent.location.once("change", () => next());
+        (global as any).parent = parent;
+        (global as any).top    = top;
+
+        // pretend that we are in a popup
+        const frame  = new MockWindow("http://localhost?state=TEST");
+        (global as any).self = frame;
+        (global as any).window = frame;
+        (global as any).sessionStorage = frame.sessionStorage;
+        sessionStorage.setItem("SMART_KEY", '"TEST"');
+        sessionStorage.setItem("TEST", JSON.stringify({}));
+
+        smart.completeAuth(new BrowserEnv());
+    });
+
+    it ("authorize in frame does not return control to parent if 'complete' is true", async () => {
+        const parent = new MockWindow("http://localhost");
+        // parent.location.once("change", () => next());
+        (global as any).parent = parent;
+        (global as any).top    = parent;
+
+        // pretend that we are in a popup
+        const frame  = new MockWindow("http://localhost?state=TEST&complete=1");
+        (global as any).self   = frame;
+        (global as any).window = frame;
+        (global as any).sessionStorage = frame.sessionStorage;
+        // frame.sessionStorage.setItem("SMART_KEY", '"TEST"');
+        sessionStorage.setItem("TEST", JSON.stringify({
+            // completeInTarget: true
+        }));
+
+        await expect(smart.completeAuth(new BrowserEnv())).to.reject();
+    });
+
+    describe("onMessage", () => {
+        it ("ignores postMessage if the event type is not 'completeAuth'", () => {
+            let error = null;
+            window.location.once("change", () => {
+                error = new Error("The event should be ignored");
+            });
+            window.addEventListener("message", smart.onMessage);
+            window.postMessage({
+                type: "not completeAuth",
+                url: window.location.href
+            }, window.location.origin);
+            expect(error).to.equal(null);
+        });
+
+        it ("ignores postMessage if the origin is wrong", () => {
+            let error = null;
+            window.location.once("change", () => {
+                error = new Error("The event should be ignored");
+            });
+            window.addEventListener("message", smart.onMessage);
+            window.postMessage({
+                type: "completeAuth",
+                url: window.location.href
+            }, "whatever");
+            expect(error).to.equal(null);
+        });
+
+        it ("accepts postMessage if the event type is 'completeAuth' and removes itself", () => {
+            let count = 0;
+            window.location.once("change", () => count += 1);
+            window.addEventListener("message", smart.onMessage);
+            window.postMessage({
+                type: "completeAuth",
+                url: window.location.href
+            }, window.location.origin);
+            window.postMessage({
+                type: "completeAuth",
+                url: window.location.href
+            }, window.location.origin);
+            expect(count).to.equal(1);
+        });
     });
 });

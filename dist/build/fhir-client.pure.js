@@ -3184,20 +3184,26 @@ function isInPopUp() {
   }
 }
 
-exports.isInPopUp = isInPopUp; // TODO: Check origin
+exports.isInPopUp = isInPopUp;
+/**
+ * Another window can send a "completeAuth" message to this one, making it to
+ * navigate to e.data.url
+ * @param e The message event
+ */
 
 function onMessage(e) {
-  if (e.data.type == "completeAuth") {
+  if (e.data.type == "completeAuth" && e.origin === new URL(self.location.href).origin) {
     window.removeEventListener("message", onMessage);
     window.location.href = e.data.url;
   }
 }
+
+exports.onMessage = onMessage;
 /**
  * The completeAuth function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
  * authorization server..
  */
-
 
 async function completeAuth(env) {
   var _a, _b, _c, _d;
@@ -3236,8 +3242,7 @@ async function completeAuth(env) {
 
   let state = await Storage.get(key);
   const fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // If we are in a popup window or an iframe and the authorization is
-  // complete, send the location back to our opener and exit. Note that
-  // completeInTarget will only exist in state if we are in another window.
+  // complete, send the location back to our opener and exit.
 
   if (isBrowser() && state && !state.completeInTarget) {
     const inFrame = isInFrame();
@@ -3250,18 +3255,24 @@ async function completeAuth(env) {
 
     if ((inFrame || inPopUp) && !url.searchParams.get("complete")) {
       url.searchParams.set("complete", "1");
+      const {
+        href,
+        origin
+      } = url;
 
       if (inFrame) {
         parent.postMessage({
           type: "completeAuth",
-          url: url.href
+          url: href
         }, origin);
-      } else if (inPopUp) {
+      }
+
+      if (inPopUp) {
         opener.postMessage({
           type: "completeAuth",
-          url: url.href
+          url: href
         }, origin);
-        if (window.name.indexOf("SMARTAuthPopup") === 0) window.close();
+        window.close();
       }
 
       return new Promise(() => {});

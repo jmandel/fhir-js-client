@@ -26,7 +26,7 @@ module.exports = {
     // sourcemaps --------------------------------------------------------------
 
     // enable support for sourcemaps (-S, --sourcemaps)
-    // sourcemaps: true,
+    sourcemaps: true,
 
     // transform ---------------------------------------------------------------
     // javascript file that exports an array of objects ie.
