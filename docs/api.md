@@ -45,6 +45,16 @@ These should **ONLY** be used in development.
 |encounterId      |`String`  | The ID of the selected encounter. If you are launching against an open FHIR server, there is no way to obtain the launch context that would (in some EHRs) include the selected encounter ID. This way you can "inject" that ID and make the client behave as if this is the currently active encounter.
 |launch           |`String`  | The launch identifier that is typically provided by the launching EHR as `launch` url parameter. In development it is sometimes useful to be able to pass this as an option. For example, this could allow you to simulate launches from you tests.
 |fakeTokenResponse|`Object`  | Useful for testing. This object can contain any properties that are typically contained in an [access token response](http://hl7.org/fhir/smart-app-launch/#step-3-app-exchanges-authorization-code-for-access-token). These properties will be stored into the client state, making it "believe" that it has been authorized.
+|target|`string` or `number` or `function` or `Window`| Where to start the auth flow. This option is only applicable in browsers and is ignored on the server. Can be one of:
+         - `_self`    Authorize in the same window (**default**)
+         - `_top`     Authorize in the topmost window
+         - `_parent`  Authorize in the parent window
+         - `_blank`   Authorize in new tab or window
+         - `"popup"`  Open a popup, authorize in it and close it when done
+         - `String`   Frame name (string index in window.frames)
+         - `Number`   Numeric index in `window.frames`
+         - `Object`   Window reference (must have the same `origin`)
+         - `Function` A function that returns one of the above values or a promise that will resolve to such value.
 
 ### ready([onSuccess [, onError]]) `Promise<Client>`
 This should be called on your `redirect_uri`. Returns a Promise that will eventually be resolved with a Client instance that you can use to query the fhir server.
