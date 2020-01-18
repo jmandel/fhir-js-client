@@ -72,6 +72,9 @@ FHIR.oauth2.authorize({
 ```
 
 ##  Authorization in different window (since v2.3.0)
+[Live Examples](https://fmv99.csb.app/)
+
+
 Now that we are able to authorize on demand, we might also want to do that in a
 popup window (or any other valid window target). Here are some examples:
 
