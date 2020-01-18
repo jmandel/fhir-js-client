@@ -50,14 +50,14 @@ These should **ONLY** be used in development.
 | | | `"_top"`    Authorize in the topmost window
 | | | `"_parent"` Authorize in the parent window
 | | | `"_blank"`  Authorize in new tab or window
-| | | `"popup"`   Open a popup, authorize in it and close it when done
+| | | `"popup"`   Open a popup, authorize in it and close it when done (unless `completeInTarget` is `true`)
 | | | `String`    Frame name (string index in window.frames)
 | | | `Number`    Numeric index in `window.frames`
 | | | `Object`    Window reference (must have the same `origin`)
 | | | `Function`  A function that returns one of the above values or a promise that will resolve to such value.
-|completeInTarget|`boolean`| If `true`, the app will be initialized in the specified `target`. Otherwise, the app will be initialized in the window in which`authorize` was called. This option is only applicable if `target` is used and refers to another window.
-|width|`number`| The width of the authorization popup window. Only used in browsers and if the `target` option is set to "popup".
-|height|`number`| The height of the authorization popup window. Only used in browsers and if the `target` option is set to "popup".
+|completeInTarget|`boolean`| If `true`, the app will be initialized in the specified `target`. Otherwise, the app will be initialized in the window in which`authorize` was called. This option is only applicable if `target` is used and refers to another window.  Defaults to `false`.
+|width|`number`| The width of the authorization popup window. Only used in browsers and if the `target` option is set to "popup". Defaults to `800`.
+|height|`number`| The height of the authorization popup window. Only used in browsers and if the `target` option is set to "popup". Defaults to `720`.
 
 
 ### ready([onSuccess [, onError]]) `Promise<Client>`

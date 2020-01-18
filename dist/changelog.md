@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.3.0
+- Added API documentation generated from source - http://docs.smarthealthit.org/client-js/typedoc/
+- Added ability ri authorize in different window or frame - http://docs.smarthealthit.org/client-js/targets.html
+- Fixed a Hapi.js issue with detecting the protocol of the request #69
+
 ## v2.2.0
 - Rewritten in TypeScript to improve readability and maintainability
 - Fixed some build errors (#68)
