@@ -4,6 +4,7 @@ import Client from "../Client";
 import ServerStorage from "../storage/ServerStorage";
 import { AbortController } from "abortcontroller-polyfill/dist/cjs-ponyfill";
 import { IncomingMessage, ServerResponse } from "http";
+import { TLSSocket } from "tls";
 
 
 interface NodeAdapterOptions {
@@ -44,6 +45,16 @@ export default class NodeAdapter implements fhirclient.Adapter
     }
 
     /**
+     * Returns the protocol of the current request ("http" or "https")
+     */
+    getProtocol(): string
+    {
+        const req = this.options.request;
+        const proto = (req.socket as TLSSocket).encrypted ? "https" : "http";
+        return req.headers["x-forwarded-proto"] as string || proto;
+    }
+
+    /**
      * Given the current environment, this method must return the current url
      * as URL instance. In Node we might be behind a proxy!
      */
@@ -59,8 +70,8 @@ export default class NodeAdapter implements fhirclient.Adapter
             }
         }
 
-        const protocol = req.headers["x-forwarded-proto"] || (req as any).protocol || "http";
-        const orig = String(/*req.originalUrl || */req.headers["x-original-uri"] || req.url);
+        const protocol = this.getProtocol();
+        const orig = String(req.headers["x-original-uri"] || req.url);
         return new URL(orig, protocol + "://" + host);
     }
 

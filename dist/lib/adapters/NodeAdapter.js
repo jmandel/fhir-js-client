@@ -36,6 +36,16 @@ class NodeAdapter {
     return new URL(path, this.getUrl().href).href;
   }
   /**
+   * Returns the protocol of the current request ("http" or "https")
+   */
+
+
+  getProtocol() {
+    const req = this.options.request;
+    const proto = req.socket.encrypted ? "https" : "http";
+    return req.headers["x-forwarded-proto"] || proto;
+  }
+  /**
    * Given the current environment, this method must return the current url
    * as URL instance. In Node we might be behind a proxy!
    */
@@ -53,10 +63,8 @@ class NodeAdapter {
       }
     }
 
-    const protocol = req.headers["x-forwarded-proto"] || req.protocol || "http";
-    const orig = String(
-    /*req.originalUrl || */
-    req.headers["x-original-uri"] || req.url);
+    const protocol = this.getProtocol();
+    const orig = String(req.headers["x-original-uri"] || req.url);
     return new URL(orig, protocol + "://" + host);
   }
   /**

@@ -27,6 +27,10 @@ export default class NodeAdapter implements fhirclient.Adapter {
      */
     relative(path: string): string;
     /**
+     * Returns the protocol of the current request ("http" or "https")
+     */
+    getProtocol(): string;
+    /**
      * Given the current environment, this method must return the current url
      * as URL instance. In Node we might be behind a proxy!
      */

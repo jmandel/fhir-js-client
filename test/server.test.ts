@@ -261,10 +261,9 @@ describe("NodeAdapter", () => {
         ];
 
         map.forEach(meta => {
-            const adapter = new Adapter({
-                request : meta.request as IncomingMessage,
-                response: {} as any
-            });
+            const request = meta.request as IncomingMessage;
+            request.socket = {} as any;
+            const adapter = new Adapter({ request, response: {} as any });
             expect(adapter.getUrl().href).to.equal(meta.result);
         });
     });

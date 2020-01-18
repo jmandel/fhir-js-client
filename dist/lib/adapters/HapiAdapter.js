@@ -57,7 +57,17 @@ class HapiAdapter extends NodeAdapter_1.default {
 
   redirect(location) {
     return this._responseToolkit.redirect(location);
-  }
+  } // /**
+  //  * Returns the protocol of the current request
+  //  */
+  // getProtocol(): string
+  // {
+  //     const req = this.options.request;
+  //     return req.headers["x-forwarded-proto"] as string || String(
+  //         this._request.url.protocol || "http"
+  //     ).replace(":", "");
+  // }
+
   /**
    * This is the static entry point and MUST be provided
    * @param request The hapi request
