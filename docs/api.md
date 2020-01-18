@@ -46,15 +46,19 @@ These should **ONLY** be used in development.
 |launch           |`String`  | The launch identifier that is typically provided by the launching EHR as `launch` url parameter. In development it is sometimes useful to be able to pass this as an option. For example, this could allow you to simulate launches from you tests.
 |fakeTokenResponse|`Object`  | Useful for testing. This object can contain any properties that are typically contained in an [access token response](http://hl7.org/fhir/smart-app-launch/#step-3-app-exchanges-authorization-code-for-access-token). These properties will be stored into the client state, making it "believe" that it has been authorized.
 |target|`string` or `number` or `function` or `Window`| Where to start the auth flow. This option is only applicable in browsers and is ignored on the server. Can be one of:
-| | | `_self`    Authorize in the same window (**default**)
-| | | `_top`     Authorize in the topmost window
-| | | `_parent`  Authorize in the parent window
-| | | `_blank`   Authorize in new tab or window
-| | | `"popup"`  Open a popup, authorize in it and close it when done
-| | | `String`   Frame name (string index in window.frames)
-| | | `Number`   Numeric index in `window.frames`
-| | | `Object`   Window reference (must have the same `origin`)
-| | | `Function` A function that returns one of the above values or a promise that will resolve to such value. ```
+| | | `"_self"`   Authorize in the same window (**default**)
+| | | `"_top"`    Authorize in the topmost window
+| | | `"_parent"` Authorize in the parent window
+| | | `"_blank"`  Authorize in new tab or window
+| | | `"popup"`   Open a popup, authorize in it and close it when done
+| | | `String`    Frame name (string index in window.frames)
+| | | `Number`    Numeric index in `window.frames`
+| | | `Object`    Window reference (must have the same `origin`)
+| | | `Function`  A function that returns one of the above values or a promise that will resolve to such value.
+|completeInTarget|`boolean`| If `true`, the app will be initialized in the specified `target`. Otherwise, the app will be initialized in the window in which`authorize` was called. This option is only applicable if `target` is used and refers to another window.
+|width|`number`| The width of the authorization popup window. Only used in browsers and if the `target` option is set to "popup".
+|height|`number`| The height of the authorization popup window. Only used in browsers and if the `target` option is set to "popup".
+
 
 ### ready([onSuccess [, onError]]) `Promise<Client>`
 This should be called on your `redirect_uri`. Returns a Promise that will eventually be resolved with a Client instance that you can use to query the fhir server.
