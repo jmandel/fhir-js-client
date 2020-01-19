@@ -13294,7 +13294,7 @@ exports.isInPopUp = isInPopUp;
 function onMessage(e) {
   if (e.data.type == "completeAuth" && e.origin === new URL(self.location.href).origin) {
     window.removeEventListener("message", onMessage);
-    window.location.assign(e.data.url);
+    window.location.href = e.data.url + "&noCache=" + Date.now();
   }
 }
 
