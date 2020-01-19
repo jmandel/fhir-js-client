@@ -13370,7 +13370,7 @@ function _completeAuth() {
               break;
             }
 
-            inFrame = isInFrame() && parent.FHIR;
+            inFrame = isInFrame();
             inPopUp = isInPopUp(); // we are about to return to the opener/parent where completeAuth will
             // be called again. In rare cases the opener or parent might also be
             // a frame or popup. Then inFrame or inPopUp will be true but we still

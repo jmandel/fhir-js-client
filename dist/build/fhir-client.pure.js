@@ -3233,7 +3233,7 @@ async function completeAuth(env) {
     throw new Error([authError, authErrorDescription].filter(Boolean).join(": "));
   }
 
-  debug("key: %s, code: %O", key, code); // key might be coming from the page url so it might be empty or missing
+  debug("key: %s, code: %s", key, code); // key might be coming from the page url so it might be empty or missing
 
   if (!key) {
     throw new Error("No 'state' parameter found. Please (re)launch the app.");

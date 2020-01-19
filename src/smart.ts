@@ -439,7 +439,7 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
         ].filter(Boolean).join(": "));
     }
 
-    debug("key: %s, code: %O", key, code);
+    debug("key: %s, code: %s", key, code);
 
     // key might be coming from the page url so it might be empty or missing
     if (!key) {
