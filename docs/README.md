@@ -9,7 +9,12 @@ It works both in browsers (IE 10+) and on the server (Node 10+).
 > This is the documentation for version 2+. If you want to migrate from older versions, please check out **[what's new in v2](http://docs.smarthealthit.org/client-js/v2.html)** and [migration instructions](migration).
 
 
-[![CircleCI](https://circleci.com/gh/smart-on-fhir/client-js/tree/master.svg?style=svg)](https://circleci.com/gh/smart-on-fhir/client-js/tree/master) [![Coverage Status](https://coveralls.io/repos/github/smart-on-fhir/client-js/badge.svg?branch=master)](https://coveralls.io/github/smart-on-fhir/client-js?branch=master) [![npm version](https://badge.fury.io/js/fhirclient.svg)](https://badge.fury.io/js/fhirclient)
+[![CircleCI](https://circleci.com/gh/smart-on-fhir/client-js/tree/master.svg?style=svg)](https://circleci.com/gh/smart-on-fhir/client-js/tree/master)
+[![Coverage Status](https://coveralls.io/repos/github/smart-on-fhir/client-js/badge.svg?branch=master)](https://coveralls.io/github/smart-on-fhir/client-js?branch=master)
+[![npm version](https://badge.fury.io/js/fhirclient.svg)](https://badge.fury.io/js/fhirclient)
+[![types](https://badgen.net/npm/types/fhirclient)](https://badgen.net/npm/types/fhirclient)
+[![node](https://badgen.net/npm/node/fhirclient)](https://badgen.net/npm/node/fhirclient)
+[![downloads](https://badgen.net/npm/dt/fhirclient)](https://badgen.net/npm/dt/fhirclient)
 
 ## Table of Contents
 ---

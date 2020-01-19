@@ -25,7 +25,9 @@
     "cross-fetch": "^3.0.4",
     "debug": "^4.1.1"
   },
-  "engine": "node >= 10",
+  "engines": {
+    "node": ">=10"
+  },
   "browserslist": [
     "last 2 Chrome versions",
     "last 2 firefox versions",
