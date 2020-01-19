@@ -14,7 +14,7 @@ It works both in browsers (IE 10+) and on the server (Node 10+).
 [![npm version](https://badge.fury.io/js/fhirclient.svg)](https://badge.fury.io/js/fhirclient)
 [![types](https://badgen.net/npm/types/fhirclient)](https://badgen.net/npm/types/fhirclient)
 <!--[![node](https://badgen.net/npm/node/fhirclient)](https://badgen.net/npm/node/fhirclient)-->
-[![downloads](https://badgen.net/npm/dt/fhirclient)](https://badgen.net/npm/dt/fhirclient)
+[![downloads](https://badgen.net/npm/dt/fhirclient)](https://www.npmtrends.com/fhirclient)
 
 ## Table of Contents
 ---
