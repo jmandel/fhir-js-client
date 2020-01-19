@@ -13366,11 +13366,11 @@ function _completeAuth() {
             // complete, send the location back to our opener and exit.
 
             if (!(isBrowser() && state && !state.completeInTarget)) {
-              _context2.next = 33;
+              _context2.next = 29;
               break;
             }
 
-            inFrame = isInFrame();
+            inFrame = isInFrame() && parent.FHIR;
             inPopUp = isInPopUp(); // we are about to return to the opener/parent where completeAuth will
             // be called again. In rare cases the opener or parent might also be
             // a frame or popup. Then inFrame or inPopUp will be true but we still
@@ -13379,38 +13379,31 @@ function _completeAuth() {
             // remove.
 
             if (!((inFrame || inPopUp) && !url.searchParams.get("complete"))) {
-              _context2.next = 33;
+              _context2.next = 29;
               break;
             }
 
             url.searchParams.set("complete", "1");
             href = url.href, origin = url.origin;
 
-            if (!inFrame) {
-              _context2.next = 29;
-              break;
+            if (inFrame) {
+              parent.postMessage({
+                type: "completeAuth",
+                url: href
+              }, origin);
             }
 
-            parent.postMessage({
-              type: "completeAuth",
-              url: href
-            }, origin);
+            if (inPopUp) {
+              opener.postMessage({
+                type: "completeAuth",
+                url: href
+              }, origin);
+              window.close();
+            }
+
             return _context2.abrupt("return", new Promise(function () {}));
 
           case 29:
-            if (!inPopUp) {
-              _context2.next = 33;
-              break;
-            }
-
-            opener.postMessage({
-              type: "completeAuth",
-              url: href
-            }, origin);
-            window.close();
-            return _context2.abrupt("return", new Promise(function () {}));
-
-          case 33:
             url.searchParams.delete("complete"); // Do we have to remove the `code` and `state` params from the URL?
 
             hasState = params.has("state");
@@ -13448,83 +13441,83 @@ function _completeAuth() {
 
 
             if (state) {
-              _context2.next = 38;
+              _context2.next = 34;
               break;
             }
 
             throw new Error("No state found! Please (re)launch the app.");
 
-          case 38:
+          case 34:
             // Assume the client has already completed a token exchange when
             // there is no code (but we have a state) or access token is found in state
             authorized = !code || ((_b = (_a = state) === null || _a === void 0 ? void 0 : _a.tokenResponse) === null || _b === void 0 ? void 0 : _b.access_token); // If we are authorized already, then this is just a reload.
             // Otherwise, we have to complete the code flow
 
             if (!(!authorized && state.tokenUri)) {
-              _context2.next = 57;
+              _context2.next = 53;
               break;
             }
 
             if (code) {
-              _context2.next = 42;
+              _context2.next = 38;
               break;
             }
 
             throw new Error("'code' url parameter is required");
 
-          case 42:
+          case 38:
             debug("Preparing to exchange the code for access token...");
             requestOptions = buildTokenRequest(env, code, state);
             debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
             // includes an access token or a message indicating that the
             // authorization request has been denied.
 
-            _context2.next = 47;
+            _context2.next = 43;
             return lib_1.request(state.tokenUri, requestOptions);
 
-          case 47:
+          case 43:
             tokenResponse = _context2.sent;
             debug("Token response: %O", tokenResponse);
 
             if (tokenResponse.access_token) {
-              _context2.next = 51;
+              _context2.next = 47;
               break;
             }
 
             throw new Error("Failed to obtain access token.");
 
-          case 51:
+          case 47:
             // save the tokenResponse so that we don't have to re-authorize on
             // every page reload
             state = Object.assign({}, state, {
               tokenResponse: tokenResponse
             });
-            _context2.next = 54;
+            _context2.next = 50;
             return Storage.set(key, state);
 
-          case 54:
+          case 50:
             debug("Authorization successful!");
-            _context2.next = 58;
+            _context2.next = 54;
             break;
 
-          case 57:
+          case 53:
             debug(((_d = (_c = state) === null || _c === void 0 ? void 0 : _c.tokenResponse) === null || _d === void 0 ? void 0 : _d.access_token) ? "Already authorized" : "No authorization needed");
 
-          case 58:
+          case 54:
             if (!fullSessionStorageSupport) {
-              _context2.next = 61;
+              _context2.next = 57;
               break;
             }
 
-            _context2.next = 61;
+            _context2.next = 57;
             return Storage.set(settings_1.SMART_KEY, key);
 
-          case 61:
+          case 57:
             client = new Client_1.default(env, state);
             debug("Created client instance: %O", client);
             return _context2.abrupt("return", client);
 
-          case 64:
+          case 60:
           case "end":
             return _context2.stop();
         }
