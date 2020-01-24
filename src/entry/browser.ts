@@ -28,7 +28,7 @@ if (typeof FHIRCLIENT_PURE == "undefined") {
     }
 }
 
-// $lab:coverage:off
+// $lab:coverage:off$
 const FHIR = {
     AbortController: window.AbortController,
     client,

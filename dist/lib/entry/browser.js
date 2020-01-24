@@ -28,7 +28,7 @@ if (typeof FHIRCLIENT_PURE == "undefined") {
     window.Request = fetch.Request;
     window.Response = fetch.Response;
   }
-} // $lab:coverage:off
+} // $lab:coverage:off$
 
 
 const FHIR = {

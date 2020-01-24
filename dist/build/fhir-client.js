@@ -4355,6 +4355,23 @@ module.exports = function (it) {
 
 /***/ }),
 
+/***/ "./node_modules/core-js/internals/same-value.js":
+/*!******************************************************!*\
+  !*** ./node_modules/core-js/internals/same-value.js ***!
+  \******************************************************/
+/*! all exports used */
+/***/ (function(module, exports) {
+
+// `SameValue` abstract operation
+// https://tc39.github.io/ecma262/#sec-samevalue
+module.exports = Object.is || function is(x, y) {
+  // eslint-disable-next-line no-self-compare
+  return x === y ? x !== 0 || 1 / x === 1 / y : x != x && y != y;
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/set-global.js":
 /*!******************************************************!*\
   !*** ./node_modules/core-js/internals/set-global.js ***!
@@ -6409,6 +6426,52 @@ fixRegExpWellKnownSymbolLogic('replace', 2, function (REPLACE, nativeReplace, ma
       return capture === undefined ? '' : capture;
     });
   }
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/es.string.search.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/core-js/modules/es.string.search.js ***!
+  \**********************************************************/
+/*! all exports used */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var fixRegExpWellKnownSymbolLogic = __webpack_require__(/*! ../internals/fix-regexp-well-known-symbol-logic */ "./node_modules/core-js/internals/fix-regexp-well-known-symbol-logic.js");
+var anObject = __webpack_require__(/*! ../internals/an-object */ "./node_modules/core-js/internals/an-object.js");
+var requireObjectCoercible = __webpack_require__(/*! ../internals/require-object-coercible */ "./node_modules/core-js/internals/require-object-coercible.js");
+var sameValue = __webpack_require__(/*! ../internals/same-value */ "./node_modules/core-js/internals/same-value.js");
+var regExpExec = __webpack_require__(/*! ../internals/regexp-exec-abstract */ "./node_modules/core-js/internals/regexp-exec-abstract.js");
+
+// @@search logic
+fixRegExpWellKnownSymbolLogic('search', 1, function (SEARCH, nativeSearch, maybeCallNative) {
+  return [
+    // `String.prototype.search` method
+    // https://tc39.github.io/ecma262/#sec-string.prototype.search
+    function search(regexp) {
+      var O = requireObjectCoercible(this);
+      var searcher = regexp == undefined ? undefined : regexp[SEARCH];
+      return searcher !== undefined ? searcher.call(regexp, O) : new RegExp(regexp)[SEARCH](String(O));
+    },
+    // `RegExp.prototype[@@search]` method
+    // https://tc39.github.io/ecma262/#sec-regexp.prototype-@@search
+    function (regexp) {
+      var res = maybeCallNative(nativeSearch, regexp, this);
+      if (res.done) return res.value;
+
+      var rx = anObject(regexp);
+      var S = String(this);
+
+      var previousLastIndex = rx.lastIndex;
+      if (!sameValue(previousLastIndex, 0)) rx.lastIndex = 0;
+      var result = regExpExec(rx, S);
+      if (!sameValue(rx.lastIndex, previousLastIndex)) rx.lastIndex = previousLastIndex;
+      return result === null ? -1 : result.index;
+    }
+  ];
 });
 
 
@@ -10327,6 +10390,8 @@ __webpack_require__(/*! core-js/modules/es.string.match */ "./node_modules/core-
 
 __webpack_require__(/*! core-js/modules/es.string.replace */ "./node_modules/core-js/modules/es.string.replace.js");
 
+__webpack_require__(/*! core-js/modules/es.string.search */ "./node_modules/core-js/modules/es.string.search.js");
+
 __webpack_require__(/*! core-js/modules/es.string.split */ "./node_modules/core-js/modules/es.string.split.js");
 
 __webpack_require__(/*! core-js/modules/es.string.trim */ "./node_modules/core-js/modules/es.string.trim.js");
@@ -11447,8 +11512,10 @@ function () {
     }
 
     var scopes = lib_1.getPath(this, "state.tokenResponse.scope") || "";
+    var hasOfflineAccess = scopes.search(/\boffline_access\b/) > -1;
+    var hasOnlineAccess = scopes.search(/\bonline_access\b/) > -1;
 
-    if (scopes.indexOf("offline_access") == -1 && scopes.indexOf("online_access") == -1) {
+    if (!hasOfflineAccess && !hasOnlineAccess) {
       throw new Error("Unable to refresh. No offline_access or online_access scope found.");
     } // This method is typically called internally from `request` if certain
     // request fails with 401. However, clients will often run multiple
@@ -11464,7 +11531,7 @@ function () {
           "content-type": "application/x-www-form-urlencoded"
         }),
         body: "grant_type=refresh_token&refresh_token=" + encodeURIComponent(refreshToken),
-        credentials: "include"
+        credentials: hasOnlineAccess ? "include" : "same-origin"
       })).then(function (data) {
         if (!data.access_token) {
           throw new Error("No access token received");
@@ -11928,7 +11995,7 @@ if (typeof FHIRCLIENT_PURE == "undefined") {
     window.Request = fetch.Request;
     window.Response = fetch.Response;
   }
-} // $lab:coverage:off
+} // $lab:coverage:off$
 
 
 var FHIR = {
