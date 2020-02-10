@@ -3117,16 +3117,6 @@ describe("FHIR.client", () => {
             client.request = async (options: any) => options;
             let result: any;
 
-            result = await client.create(resource);
-            expect(result).to.equal({
-                url    : "Patient",
-                method : "POST",
-                body   : JSON.stringify(resource),
-                headers: {
-                    "Content-Type": "application/fhir+json"
-                }
-            });
-
             // Standard usage
             result = await client.create(resource);
             expect(result).to.equal({
@@ -3134,7 +3124,7 @@ describe("FHIR.client", () => {
                 method : "POST",
                 body   : JSON.stringify(resource),
                 headers: {
-                    "Content-Type": "application/fhir+json"
+                    "Content-Type": "application/json"
                 }
             });
 
@@ -3146,7 +3136,8 @@ describe("FHIR.client", () => {
                 // @ts-ignore
                 signal: "whatever",
                 headers: {
-                    "x-custom": "value"
+                    "x-custom": "value",
+                    "Content-Type": "application/fhir+json"
                 }
             });
             expect(result).to.equal({
@@ -3157,6 +3148,24 @@ describe("FHIR.client", () => {
                 headers: {
                     "x-custom": "value",
                     "Content-Type": "application/fhir+json"
+                }
+            });
+
+            // Passing options but no headers
+            result = await client.create(resource, {
+                url   : "a",
+                method: "b",
+                body  : "c",
+                // @ts-ignore
+                signal: "whatever"
+            });
+            expect(result).to.equal({
+                url    : "Patient",
+                method : "POST",
+                body   : JSON.stringify(resource),
+                signal : "whatever",
+                headers: {
+                    "Content-Type": "application/json"
                 }
             });
         });
@@ -3176,7 +3185,7 @@ describe("FHIR.client", () => {
                 method : "PUT",
                 body   : JSON.stringify(resource),
                 headers: {
-                    "Content-Type": "application/fhir+json"
+                    "Content-Type": "application/json"
                 }
             });
 
@@ -3188,7 +3197,8 @@ describe("FHIR.client", () => {
                 // @ts-ignore
                 signal: "whatever",
                 headers: {
-                    "x-custom": "value"
+                    "x-custom": "value",
+                    "Content-Type": "application/fhir+json"
                 }
             });
             expect(result).to.equal({
@@ -3199,6 +3209,24 @@ describe("FHIR.client", () => {
                 headers: {
                     "x-custom": "value",
                     "Content-Type": "application/fhir+json"
+                }
+            });
+
+            // Passing options but no headers
+            result = await client.update(resource, {
+                url   : "a",
+                method: "b",
+                body  : "c",
+                // @ts-ignore
+                signal: "whatever"
+            });
+            expect(result).to.equal({
+                url    : "Patient/2",
+                method : "PUT",
+                body   : JSON.stringify(resource),
+                signal: "whatever",
+                headers: {
+                    "Content-Type": "application/json"
                 }
             });
         });

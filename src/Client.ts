@@ -637,8 +637,7 @@ export default class Client
      * @see http://hl7.org/fhir/http.html#create
      * @param resource A FHIR resource to be created
      * @param [requestOptions] Any options to be passed to the fetch call.
-     * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
-     * but other headers can be added.
+     * Note that `method` and `body` will be ignored.
      * @category Request
      */
     create(resource: fhirclient.FHIR.Resource, requestOptions: RequestInit = {}): Promise<fhirclient.FHIR.Resource>
@@ -649,9 +648,9 @@ export default class Client
             method: "POST",
             body: JSON.stringify(resource),
             headers: {
-                ...requestOptions.headers || {},
                 // TODO: Do we need to alternate with "application/json+fhir"?
-                "Content-Type": "application/fhir+json"
+                "Content-Type": "application/json",
+                ...requestOptions.headers
             }
         });
     }
@@ -662,8 +661,7 @@ export default class Client
      * @see http://hl7.org/fhir/http.html#update
      * @param resource A FHIR resource to be updated
      * @param requestOptions Any options to be passed to the fetch call.
-     * Note that `method`, `body` and `headers["Content-Type"]` will be ignored
-     * but other headers can be added.
+     * Note that `method` and `body` will be ignored.
      * @category Request
      */
     update(resource: fhirclient.FHIR.Resource, requestOptions: RequestInit = {}): Promise<fhirclient.FHIR.Resource>
@@ -674,9 +672,9 @@ export default class Client
             method: "PUT",
             body: JSON.stringify(resource),
             headers: {
-                ...requestOptions.headers || {},
                 // TODO: Do we need to alternate with "application/json+fhir"?
-                "Content-Type": "application/fhir+json"
+                "Content-Type": "application/json",
+                ...requestOptions.headers
             }
         });
     }
