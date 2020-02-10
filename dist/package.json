@@ -18,12 +18,14 @@
   "modules.root": "lib",
   "types": "index.d.ts",
   "dependencies": {
-    "@types/hapi": "^18.0.3",
-    "@types/node": "^13.1.4",
     "abortcontroller-polyfill": "^1.4.0",
     "core-js": "^3.5.0",
     "cross-fetch": "^3.0.4",
     "debug": "^4.1.1"
+  },
+  "peerDependencies": {
+    "@types/node": ">=10",
+    "@types/hapi": ">=18"
   },
   "engines": {
     "node": ">=10"
