@@ -103,12 +103,14 @@ export function request<T = Response | fhirclient.JsonObject | string>(
     })
         .then(checkResponse)
         .then((res: Response) => {
-            const type = res.headers.get("Content-Type") + "";
-            if (type.match(/\bjson\b/i)) {
-                return responseToJSON(res);
-            }
-            if (type.match(/^text\//i)) {
-                return res.text();
+            if (res.status !== 201) {
+                const type = res.headers.get("Content-Type") + "";
+                if (type.match(/\bjson\b/i)) {
+                    return responseToJSON(res);
+                }
+                if (type.match(/^text\//i)) {
+                    return res.text();
+                }
             }
             return res;
         });
