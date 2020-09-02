@@ -26,6 +26,10 @@ app.all("*", (req, res, next) => {
     const settings = mocks.shift();
 
     setTimeout(() => {
+        if (settings.handler) {
+            return settings.handler(req, res, next);
+        }
+
         if (settings.headers) {
             res.set(settings.headers);
         }

@@ -948,34 +948,61 @@ export default class Client
         // This method is typically called internally from `request` if certain
         // request fails with 401. However, clients will often run multiple
         // requests in parallel which may result in multiple refresh calls.
-        // To avoid that, we keep a to the current refresh task (if any).
+        // To avoid that, we keep a reference to the current refresh task (if any).
         if (!this._refreshTask) {
-            this._refreshTask = request<fhirclient.TokenResponse>(tokenUri, {
+
+            const refreshRequestOptions = {
                 ...requestOptions,
-                mode   : "cors",
                 method : "POST",
                 headers: {
                     ...(requestOptions.headers || {}),
                     "content-type": "application/x-www-form-urlencoded"
                 },
-                body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}`,
-                credentials: hasOnlineAccess ? "include" : "same-origin"
-            }).then(data => {
+                body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}`
+            };
+
+            refreshRequestOptions.mode = "cors";
+
+            // custom credentials value can be passed on manual calls
+            if (!refreshRequestOptions.credentials) {
+                refreshRequestOptions.credentials = hasOnlineAccess ? "include" : "same-origin";
+            }
+
+            // custom authorization header can be passed on manual calls
+            if (!("authorization" in refreshRequestOptions.headers)) {
+                const { clientSecret, clientId } = this.state;
+                if (clientSecret) {
+                    // @ts-ignore
+                    refreshRequestOptions.headers.authorization = "Basic " + this.environment.btoa(
+                        clientId + ":" + clientSecret
+                    );
+                }
+            }
+
+            this._refreshTask = request<fhirclient.TokenResponse>(tokenUri, refreshRequestOptions)
+            .catch((error: Error) => {
+                if (refreshRequestOptions.credentials != "omit") {
+                    refreshRequestOptions.credentials = "omit";
+                    return request<fhirclient.TokenResponse>(tokenUri, refreshRequestOptions);
+                }
+                throw error;
+            })
+            .then(data => {
                 if (!data.access_token) {
                     throw new Error("No access token received");
                 }
-                return data;
-            }).then(data => {
-                debugRefresh("Received new access token %O", data);
+                debugRefresh("Received new access token response %O", data);
                 Object.assign(this.state.tokenResponse, data);
                 return this.state;
-            }).catch((error: Error) => {
+            })
+            .catch((error: Error) => {
                 if (this.state?.tokenResponse?.refresh_token) {
                     debugRefresh("Deleting the expired or invalid refresh token.");
                     delete this.state.tokenResponse.refresh_token;
                 }
                 throw error;
-            }).finally(() => {
+            })
+            .finally(() => {
                 this._refreshTask = null;
                 const key = this.state.key;
                 if (key) {
