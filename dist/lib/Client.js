@@ -624,7 +624,7 @@ class Client {
     const options = {
       graph: fhirOptions.graph !== false,
       flat: !!fhirOptions.flat,
-      pageLimit: (_a = fhirOptions.pageLimit, _a !== null && _a !== void 0 ? _a : 1),
+      pageLimit: (_a = fhirOptions.pageLimit) !== null && _a !== void 0 ? _a : 1,
       resolveReferences: fhirOptions.resolveReferences || [],
       useRefreshToken: fhirOptions.useRefreshToken !== false,
       onPage: typeof fhirOptions.onPage == "function" ? fhirOptions.onPage : undefined
@@ -791,26 +791,49 @@ class Client {
     } // This method is typically called internally from `request` if certain
     // request fails with 401. However, clients will often run multiple
     // requests in parallel which may result in multiple refresh calls.
-    // To avoid that, we keep a to the current refresh task (if any).
+    // To avoid that, we keep a reference to the current refresh task (if any).
 
 
     if (!this._refreshTask) {
-      this._refreshTask = lib_1.request(tokenUri, Object.assign(Object.assign({}, requestOptions), {
-        mode: "cors",
+      const refreshRequestOptions = Object.assign(Object.assign({}, requestOptions), {
         method: "POST",
         headers: Object.assign(Object.assign({}, requestOptions.headers || {}), {
           "content-type": "application/x-www-form-urlencoded"
         }),
-        body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}`,
-        credentials: hasOnlineAccess ? "include" : "same-origin"
-      })).then(data => {
+        body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}`
+      });
+      refreshRequestOptions.mode = "cors"; // custom credentials value can be passed on manual calls
+
+      if (!refreshRequestOptions.credentials) {
+        refreshRequestOptions.credentials = hasOnlineAccess ? "include" : "same-origin";
+      } // custom authorization header can be passed on manual calls
+
+
+      if (!("authorization" in refreshRequestOptions.headers)) {
+        const {
+          clientSecret,
+          clientId
+        } = this.state;
+
+        if (clientSecret) {
+          // @ts-ignore
+          refreshRequestOptions.headers.authorization = "Basic " + this.environment.btoa(clientId + ":" + clientSecret);
+        }
+      }
+
+      this._refreshTask = lib_1.request(tokenUri, refreshRequestOptions).catch(error => {
+        if (refreshRequestOptions.credentials != "omit") {
+          refreshRequestOptions.credentials = "omit";
+          return lib_1.request(tokenUri, refreshRequestOptions);
+        }
+
+        throw error;
+      }).then(data => {
         if (!data.access_token) {
           throw new Error("No access token received");
         }
 
-        return data;
-      }).then(data => {
-        debugRefresh("Received new access token %O", data);
+        debugRefresh("Received new access token response %O", data);
         Object.assign(this.state.tokenResponse, data);
         return this.state;
       }).catch(error => {
@@ -920,7 +943,7 @@ class Client {
     return this.getFhirVersion().then(v => {
       var _a;
 
-      return _a = settings_1.fhirVersions[v], _a !== null && _a !== void 0 ? _a : 0;
+      return (_a = settings_1.fhirVersions[v]) !== null && _a !== void 0 ? _a : 0;
     });
   }
 

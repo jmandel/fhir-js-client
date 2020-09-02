@@ -1640,7 +1640,7 @@ class Client {
     const options = {
       graph: fhirOptions.graph !== false,
       flat: !!fhirOptions.flat,
-      pageLimit: (_a = fhirOptions.pageLimit, _a !== null && _a !== void 0 ? _a : 1),
+      pageLimit: (_a = fhirOptions.pageLimit) !== null && _a !== void 0 ? _a : 1,
       resolveReferences: fhirOptions.resolveReferences || [],
       useRefreshToken: fhirOptions.useRefreshToken !== false,
       onPage: typeof fhirOptions.onPage == "function" ? fhirOptions.onPage : undefined
@@ -1808,26 +1808,49 @@ class Client {
     } // This method is typically called internally from `request` if certain
     // request fails with 401. However, clients will often run multiple
     // requests in parallel which may result in multiple refresh calls.
-    // To avoid that, we keep a to the current refresh task (if any).
+    // To avoid that, we keep a reference to the current refresh task (if any).
 
 
     if (!this._refreshTask) {
-      this._refreshTask = lib_1.request(tokenUri, { ...requestOptions,
-        mode: "cors",
+      const refreshRequestOptions = { ...requestOptions,
         method: "POST",
         headers: { ...(requestOptions.headers || {}),
           "content-type": "application/x-www-form-urlencoded"
         },
-        body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}`,
-        credentials: hasOnlineAccess ? "include" : "same-origin"
+        body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}`
+      };
+      refreshRequestOptions.mode = "cors"; // custom credentials value can be passed on manual calls
+
+      if (!refreshRequestOptions.credentials) {
+        refreshRequestOptions.credentials = hasOnlineAccess ? "include" : "same-origin";
+      } // custom authorization header can be passed on manual calls
+
+
+      if (!("authorization" in refreshRequestOptions.headers)) {
+        const {
+          clientSecret,
+          clientId
+        } = this.state;
+
+        if (clientSecret) {
+          // @ts-ignore
+          refreshRequestOptions.headers.authorization = "Basic " + this.environment.btoa(clientId + ":" + clientSecret);
+        }
+      }
+
+      this._refreshTask = lib_1.request(tokenUri, refreshRequestOptions).catch(error => {
+        if (refreshRequestOptions.credentials != "omit") {
+          refreshRequestOptions.credentials = "omit";
+          return lib_1.request(tokenUri, refreshRequestOptions);
+        }
+
+        throw error;
       }).then(data => {
         if (!data.access_token) {
           throw new Error("No access token received");
         }
 
-        return data;
-      }).then(data => {
-        debugRefresh("Received new access token %O", data);
+        debugRefresh("Received new access token response %O", data);
         Object.assign(this.state.tokenResponse, data);
         return this.state;
       }).catch(error => {
@@ -1937,7 +1960,7 @@ class Client {
     return this.getFhirVersion().then(v => {
       var _a;
 
-      return _a = settings_1.fhirVersions[v], _a !== null && _a !== void 0 ? _a : 0;
+      return (_a = settings_1.fhirVersions[v]) !== null && _a !== void 0 ? _a : 0;
     });
   }
 
@@ -2233,6 +2256,7 @@ module.exports = FHIR; // $lab:coverage:on$
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.jwtDecode = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.humanizeError = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
 
 const HttpError_1 = __webpack_require__(/*! ./HttpError */ "./src/HttpError.ts");
 
@@ -2467,17 +2491,22 @@ function getPath(obj, path = "") {
 exports.getPath = getPath;
 /**
  * Like getPath, but if the node is found, its value is set to @value
- * @param obj   The object (or Array) to walk through
- * @param path  The path (eg. "a.b.4.c")
+ * @param obj The object (or Array) to walk through
+ * @param path The path (eg. "a.b.4.c")
  * @param value The value to set
+ * @param createEmpty If true, create missing intermediate objects or arrays
  * @returns The modified object
  */
 
-function setPath(obj, path, value) {
+function setPath(obj, path, value, createEmpty = false) {
   path.trim().split(".").reduce((out, key, idx, arr) => {
     if (out && idx === arr.length - 1) {
       out[key] = value;
     } else {
+      if (out && out[key] === undefined && createEmpty) {
+        out[key] = arr[idx + 1].match(/^[0-9]+$/) ? [] : {};
+      }
+
       return out ? out[key] : undefined;
     }
   }, obj);
@@ -2694,7 +2723,6 @@ async function getTargetWindow(target, width = 800, height = 720) {
   if (target == "_blank") {
     let error,
         targetWindow = null;
-    ;
 
     try {
       targetWindow = window.open("", "SMARTAuthPopup");
@@ -2768,6 +2796,7 @@ exports.getTargetWindow = getTargetWindow;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.SMART_KEY = exports.patientParams = exports.fhirVersions = exports.patientCompartment = void 0;
 /**
  * Combined list of FHIR resource types accepting patient parameter in FHIR R2-R4
  */
@@ -2821,6 +2850,7 @@ exports.SMART_KEY = "SMART_KEY";
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.init = exports.ready = exports.buildTokenRequest = exports.completeAuth = exports.onMessage = exports.isInPopUp = exports.isInFrame = exports.authorize = exports.getSecurityExtensions = exports.fetchWellKnownJson = exports.KEY = void 0;
 /* global window */
 
 const lib_1 = __webpack_require__(/*! ./lib */ "./src/lib.ts");
@@ -2829,7 +2859,12 @@ const Client_1 = __webpack_require__(/*! ./Client */ "./src/Client.ts");
 
 const settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts");
 
-exports.KEY = settings_1.SMART_KEY;
+Object.defineProperty(exports, "KEY", {
+  enumerable: true,
+  get: function () {
+    return settings_1.SMART_KEY;
+  }
+});
 const debug = lib_1.debug.extend("oauth2");
 
 function isBrowser() {
@@ -3208,7 +3243,7 @@ exports.onMessage = onMessage;
  */
 
 async function completeAuth(env) {
-  var _a, _b, _c, _d;
+  var _a, _b;
 
   const url = env.getUrl();
   const Storage = env.getStorage();
@@ -3323,7 +3358,7 @@ async function completeAuth(env) {
   // there is no code (but we have a state) or access token is found in state
 
 
-  const authorized = !code || ((_b = (_a = state) === null || _a === void 0 ? void 0 : _a.tokenResponse) === null || _b === void 0 ? void 0 : _b.access_token); // If we are authorized already, then this is just a reload.
+  const authorized = !code || ((_a = state === null || state === void 0 ? void 0 : state.tokenResponse) === null || _a === void 0 ? void 0 : _a.access_token); // If we are authorized already, then this is just a reload.
   // Otherwise, we have to complete the code flow
 
   if (!authorized && state.tokenUri) {
@@ -3352,7 +3387,7 @@ async function completeAuth(env) {
     await Storage.set(key, state);
     debug("Authorization successful!");
   } else {
-    debug(((_d = (_c = state) === null || _c === void 0 ? void 0 : _c.tokenResponse) === null || _d === void 0 ? void 0 : _d.access_token) ? "Already authorized" : "No authorization needed");
+    debug(((_b = state === null || state === void 0 ? void 0 : state.tokenResponse) === null || _b === void 0 ? void 0 : _b.access_token) ? "Already authorized" : "No authorization needed");
   }
 
   if (fullSessionStorageSupport) {

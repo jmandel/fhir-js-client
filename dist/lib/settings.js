@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.SMART_KEY = exports.patientParams = exports.fhirVersions = exports.patientCompartment = void 0;
 /**
  * Combined list of FHIR resource types accepting patient parameter in FHIR R2-R4
  */

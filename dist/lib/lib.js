@@ -7,6 +7,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.jwtDecode = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.humanizeError = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
 
 const HttpError_1 = require("./HttpError");
 
@@ -240,17 +241,22 @@ function getPath(obj, path = "") {
 exports.getPath = getPath;
 /**
  * Like getPath, but if the node is found, its value is set to @value
- * @param obj   The object (or Array) to walk through
- * @param path  The path (eg. "a.b.4.c")
+ * @param obj The object (or Array) to walk through
+ * @param path The path (eg. "a.b.4.c")
  * @param value The value to set
+ * @param createEmpty If true, create missing intermediate objects or arrays
  * @returns The modified object
  */
 
-function setPath(obj, path, value) {
+function setPath(obj, path, value, createEmpty = false) {
   path.trim().split(".").reduce((out, key, idx, arr) => {
     if (out && idx === arr.length - 1) {
       out[key] = value;
     } else {
+      if (out && out[key] === undefined && createEmpty) {
+        out[key] = arr[idx + 1].match(/^[0-9]+$/) ? [] : {};
+      }
+
       return out ? out[key] : undefined;
     }
   }, obj);
@@ -467,7 +473,6 @@ async function getTargetWindow(target, width = 800, height = 720) {
   if (target == "_blank") {
     let error,
         targetWindow = null;
-    ;
 
     try {
       targetWindow = window.open("", "SMARTAuthPopup");

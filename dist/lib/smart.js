@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.init = exports.ready = exports.buildTokenRequest = exports.completeAuth = exports.onMessage = exports.isInPopUp = exports.isInFrame = exports.authorize = exports.getSecurityExtensions = exports.fetchWellKnownJson = exports.KEY = void 0;
 /* global window */
 
 const lib_1 = require("./lib");
@@ -11,7 +12,12 @@ const Client_1 = require("./Client");
 
 const settings_1 = require("./settings");
 
-exports.KEY = settings_1.SMART_KEY;
+Object.defineProperty(exports, "KEY", {
+  enumerable: true,
+  get: function () {
+    return settings_1.SMART_KEY;
+  }
+});
 const debug = lib_1.debug.extend("oauth2");
 
 function isBrowser() {
@@ -390,7 +396,7 @@ exports.onMessage = onMessage;
  */
 
 async function completeAuth(env) {
-  var _a, _b, _c, _d;
+  var _a, _b;
 
   const url = env.getUrl();
   const Storage = env.getStorage();
@@ -505,7 +511,7 @@ async function completeAuth(env) {
   // there is no code (but we have a state) or access token is found in state
 
 
-  const authorized = !code || ((_b = (_a = state) === null || _a === void 0 ? void 0 : _a.tokenResponse) === null || _b === void 0 ? void 0 : _b.access_token); // If we are authorized already, then this is just a reload.
+  const authorized = !code || ((_a = state === null || state === void 0 ? void 0 : state.tokenResponse) === null || _a === void 0 ? void 0 : _a.access_token); // If we are authorized already, then this is just a reload.
   // Otherwise, we have to complete the code flow
 
   if (!authorized && state.tokenUri) {
@@ -534,7 +540,7 @@ async function completeAuth(env) {
     await Storage.set(key, state);
     debug("Authorization successful!");
   } else {
-    debug(((_d = (_c = state) === null || _c === void 0 ? void 0 : _c.tokenResponse) === null || _d === void 0 ? void 0 : _d.access_token) ? "Already authorized" : "No authorization needed");
+    debug(((_b = state === null || state === void 0 ? void 0 : state.tokenResponse) === null || _b === void 0 ? void 0 : _b.access_token) ? "Already authorized" : "No authorization needed");
   }
 
   if (fullSessionStorageSupport) {
