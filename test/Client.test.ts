@@ -2832,7 +2832,8 @@ describe("FHIR.client", () => {
             mockServer.mock({
                 handler(req, res: Response) {
                     count += 1;
-                    res.writeHead(400, "Test Error").end();
+                    res.writeHead(400, "Test Error");
+                    res.end();
                 }
             });
             mockServer.mock({
