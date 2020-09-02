@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.3.1
+- `client.create` and `client.update` are using `"Content-Type": "application/json"` header by default
+- `client.create` and `client.update` alow custom `Content-Type` to be specified
+- `node` and `hapi` type definitions are moved to peer dependencies to avoid build conflicts
+
 ## v2.3.0
 - Added API documentation generated from source - http://docs.smarthealthit.org/client-js/typedoc/
 - Added ability to authorize in different window or frame - http://docs.smarthealthit.org/client-js/targets.html
