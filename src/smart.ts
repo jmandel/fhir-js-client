@@ -213,7 +213,7 @@ export async function authorize(env: fhirclient.Adapter, params: fhirclient.Auth
 
     if (!redirectUri) {
         redirectUri = env.relative(".");
-    } else {
+    } else if (!redirectUri.match(/^https?\:\/\//)) {
         redirectUri = env.relative(redirectUri);
     }
 

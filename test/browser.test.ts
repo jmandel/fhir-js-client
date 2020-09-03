@@ -701,6 +701,18 @@ describe("Browser tests", () => {
 
                 expect(url).to.startWith("http://localhost/x?state=");
             });
+
+            it ("works with absolute redirectUri", async () => {
+                const env = new BrowserEnv();
+                const url = await smart.authorize(env, {
+                    fhirServiceUrl: "http://localhost",
+                    redirectUri: "https://test.com"
+                }, true);
+                const state = (new URL(url as string)).searchParams.get("state");
+                expect(await env.getStorage().get(state)).to.include({
+                    redirectUri: "https://test.com"
+                });
+            });
         });
 
         describe("completeAuth", () => {
