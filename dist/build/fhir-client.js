@@ -13402,7 +13402,7 @@ function _authorize() {
 
             if (!redirectUri) {
               redirectUri = env.relative(".");
-            } else {
+            } else if (!redirectUri.match(/^https?\:\/\//)) {
               redirectUri = env.relative(redirectUri);
             }
 

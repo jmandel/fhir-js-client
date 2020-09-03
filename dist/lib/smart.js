@@ -208,7 +208,7 @@ async function authorize(env, params = {}, _noRedirect = false) {
 
   if (!redirectUri) {
     redirectUri = env.relative(".");
-  } else {
+  } else if (!redirectUri.match(/^https?\:\/\//)) {
     redirectUri = env.relative(redirectUri);
   }
 
