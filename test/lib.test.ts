@@ -251,5 +251,18 @@ describe("Lib", () => {
                 await expect(lib.fetchConformanceStatement(mockUrl)).to.reject(Error, /Not Found/);
             });
         });
+
+        describe("request", () => {
+
+            it ("returns the response object if the server replies with 201", async () => {
+                mockServer.mock({
+                    headers: { "location": "whatever" },
+                    status : 201,
+                    body   : null
+                });
+                const response: Response = await lib.request(mockUrl);
+                expect(response.headers.get("location")).to.equal("whatever");
+            });
+        });
     });
 });
