@@ -1,7 +1,3 @@
----
-title:  "SMART JS Client - SMART API"
----
-
 # SMART API
 
 The SMART API is a collection of SMART-specific methods (`authorize`, `ready`, `init`) for app authorization and launch.
