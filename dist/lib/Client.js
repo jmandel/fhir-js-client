@@ -72,9 +72,7 @@ async function contextualize(requestOptions, client) {
 
 
 function getRef(refId, cache, client, signal) {
-  const sub = cache[refId];
-
-  if (!sub) {
+  if (!cache[refId]) {
     // Note that we set cache[refId] immediately! When the promise is
     // settled it will be updated. This is to avoid a ref being fetched
     // twice because some of these requests are executed in parallel.
@@ -88,10 +86,9 @@ function getRef(refId, cache, client, signal) {
       delete cache[refId];
       throw error;
     });
-    return cache[refId];
   }
 
-  return sub;
+  return Promise.resolve(cache[refId]);
 }
 /**
  * Resolves a reference in the given resource.
