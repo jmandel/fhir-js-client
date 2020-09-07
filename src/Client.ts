@@ -80,8 +80,7 @@ function getRef(
     client: Client,
     signal?: AbortSignal
 ): Promise<fhirclient.JsonObject> {
-    const sub = cache[refId];
-    if (!sub) {
+    if (!cache[refId]) {
 
         // Note that we set cache[refId] immediately! When the promise is
         // settled it will be updated. This is to avoid a ref being fetched
@@ -96,9 +95,9 @@ function getRef(
             delete cache[refId];
             throw error;
         });
-        return cache[refId];
     }
-    return sub;
+
+    return Promise.resolve(cache[refId]);
 }
 
 /**

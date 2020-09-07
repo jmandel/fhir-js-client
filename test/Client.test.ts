@@ -1214,6 +1214,60 @@ describe("FHIR.client", () => {
             });
         });
 
+        it ("mixed example #88", async () => {
+            const json = {
+                contained: [
+                    {
+                        subject: {
+                            reference: "Patient/1"
+                        }
+                    },
+                    {
+                        beneficiary: {
+                            reference: "Patient/1"
+                        }
+                    }
+                ],
+                patient: {
+                    reference: "Patient/1"
+                }
+            };
+
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: json
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: { resourceType: "Patient", id: 1 }
+                });
+
+                const result = await client.request(
+                    "ExplanationOfBenefit/17",
+                    {
+                        resolveReferences: [
+                            "patient",
+                            "contained.0.subject",
+                            "contained.1.beneficiary"
+                        ],
+                        graph: true
+                    }
+                );
+
+                expect(result.patient).to.equal({ resourceType: "Patient", id: 1 });
+                expect(result.contained[0].subject).to.equal({ resourceType: "Patient", id: 1 });
+                expect(result.contained[1].beneficiary).to.equal({ resourceType: "Patient", id: 1 });
+            });
+        });
+
         describe ("ignores missing ref", async () => {
             crossPlatformTest(async (env) => {
                 const client = new Client(env, {
