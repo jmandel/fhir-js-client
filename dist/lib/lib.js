@@ -129,14 +129,16 @@ function request(url, options = {}) {
       accept: "application/json"
     }, options.headers)
   })).then(checkResponse).then(res => {
-    const type = res.headers.get("Content-Type") + "";
+    if (res.status !== 201) {
+      const type = res.headers.get("Content-Type") + "";
 
-    if (type.match(/\bjson\b/i)) {
-      return responseToJSON(res);
-    }
+      if (type.match(/\bjson\b/i)) {
+        return responseToJSON(res);
+      }
 
-    if (type.match(/^text\//i)) {
-      return res.text();
+      if (type.match(/^text\//i)) {
+        return res.text();
+      }
     }
 
     return res;

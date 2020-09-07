@@ -12492,14 +12492,16 @@ function request(url, options) {
       accept: "application/json"
     }, options.headers)
   })).then(checkResponse).then(function (res) {
-    var type = res.headers.get("Content-Type") + "";
+    if (res.status !== 201) {
+      var type = res.headers.get("Content-Type") + "";
 
-    if (type.match(/\bjson\b/i)) {
-      return responseToJSON(res);
-    }
+      if (type.match(/\bjson\b/i)) {
+        return responseToJSON(res);
+      }
 
-    if (type.match(/^text\//i)) {
-      return res.text();
+      if (type.match(/^text\//i)) {
+        return res.text();
+      }
     }
 
     return res;
@@ -13368,7 +13370,7 @@ function authorize(_x, _x2, _x3) {
 
 function _authorize() {
   _authorize = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(env, params, _noRedirect) {
-    var _params, redirect_uri, clientSecret, fakeTokenResponse, patientId, encounterId, client_id, target, width, height, completeInTarget, _params2, iss, launch, fhirServiceUrl, redirectUri, _params2$scope, scope, clientId, url, storage, serverUrl, oldKey, stateKey, state, fullSessionStorageSupport, redirectUrl, extensions, redirectParams, win;
+    var _params, redirect_uri, clientSecret, fakeTokenResponse, patientId, encounterId, client_id, target, width, height, _params2, iss, launch, fhirServiceUrl, redirectUri, _params2$scope, scope, clientId, completeInTarget, url, storage, serverUrl, inFrame, inPopUp, oldKey, stateKey, state, fullSessionStorageSupport, redirectUrl, extensions, redirectParams, win;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -13383,8 +13385,8 @@ function _authorize() {
             }
 
             // Obtain input
-            _params = params, redirect_uri = _params.redirect_uri, clientSecret = _params.clientSecret, fakeTokenResponse = _params.fakeTokenResponse, patientId = _params.patientId, encounterId = _params.encounterId, client_id = _params.client_id, target = _params.target, width = _params.width, height = _params.height, completeInTarget = _params.completeInTarget;
-            _params2 = params, iss = _params2.iss, launch = _params2.launch, fhirServiceUrl = _params2.fhirServiceUrl, redirectUri = _params2.redirectUri, _params2$scope = _params2.scope, scope = _params2$scope === void 0 ? "" : _params2$scope, clientId = _params2.clientId;
+            _params = params, redirect_uri = _params.redirect_uri, clientSecret = _params.clientSecret, fakeTokenResponse = _params.fakeTokenResponse, patientId = _params.patientId, encounterId = _params.encounterId, client_id = _params.client_id, target = _params.target, width = _params.width, height = _params.height;
+            _params2 = params, iss = _params2.iss, launch = _params2.launch, fhirServiceUrl = _params2.fhirServiceUrl, redirectUri = _params2.redirectUri, _params2$scope = _params2.scope, scope = _params2$scope === void 0 ? "" : _params2$scope, clientId = _params2.clientId, completeInTarget = _params2.completeInTarget;
             url = env.getUrl();
             storage = env.getStorage(); // For these three an url param takes precedence over inline option
 
@@ -13423,19 +13425,35 @@ function _authorize() {
 
             if (launch && !scope.match(/launch/)) {
               scope += " launch";
+            }
+
+            if (isBrowser()) {
+              inFrame = isInFrame();
+              inPopUp = isInPopUp();
+
+              if ((inFrame || inPopUp) && completeInTarget !== true && completeInTarget !== false) {
+                // completeInTarget will default to true if authorize is called from
+                // within an iframe. This is to avoid issues when the entire app
+                // happens to be rendered in an iframe (including in some EHRs),
+                // even though that was not how the app developer's intention.
+                completeInTarget = inFrame; // In this case we can't always make the best decision so ask devs
+                // to be explicit in their configuration.
+
+                console.warn('Your app is being authorized from within an iframe or popup ' + 'window. Please be explicit and provide a "completeInTarget" ' + 'option. Use "true" to complete the authorization in the ' + 'same window, or "false" to try to complete it in the parent ' + 'or the opener window. See http://docs.smarthealthit.org/client-js/api.html');
+              }
             } // If `authorize` is called, make sure we clear any previous state (in case
             // this is a re-authorize)
 
 
-            _context.next = 19;
+            _context.next = 20;
             return storage.get(settings_1.SMART_KEY);
 
-          case 19:
+          case 20:
             oldKey = _context.sent;
-            _context.next = 22;
+            _context.next = 23;
             return storage.unset(oldKey);
 
-          case 22:
+          case 23:
             // create initial state
             stateKey = lib_1.randomString(16);
             state = {
@@ -13451,14 +13469,14 @@ function _authorize() {
             fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true;
 
             if (!fullSessionStorageSupport) {
-              _context.next = 28;
+              _context.next = 29;
               break;
             }
 
-            _context.next = 28;
+            _context.next = 29;
             return storage.set(settings_1.SMART_KEY, stateKey);
 
-          case 28:
+          case 29:
             // fakeTokenResponse to override stuff (useful in development)
             if (fakeTokenResponse) {
               Object.assign(state.tokenResponse, fakeTokenResponse);
@@ -13481,60 +13499,60 @@ function _authorize() {
             redirectUrl = redirectUri + "?state=" + encodeURIComponent(stateKey); // bypass oauth if fhirServiceUrl is used (but iss takes precedence)
 
             if (!(fhirServiceUrl && !iss)) {
-              _context.next = 41;
+              _context.next = 42;
               break;
             }
 
             debug("Making fake launch...");
-            _context.next = 36;
+            _context.next = 37;
             return storage.set(stateKey, state);
 
-          case 36:
+          case 37:
             if (!_noRedirect) {
-              _context.next = 38;
+              _context.next = 39;
               break;
             }
 
             return _context.abrupt("return", redirectUrl);
 
-          case 38:
-            _context.next = 40;
+          case 39:
+            _context.next = 41;
             return env.redirect(redirectUrl);
-
-          case 40:
-            return _context.abrupt("return", _context.sent);
 
           case 41:
-            _context.next = 43;
+            return _context.abrupt("return", _context.sent);
+
+          case 42:
+            _context.next = 44;
             return getSecurityExtensions(env, serverUrl);
 
-          case 43:
+          case 44:
             extensions = _context.sent;
             Object.assign(state, extensions);
-            _context.next = 47;
+            _context.next = 48;
             return storage.set(stateKey, state);
 
-          case 47:
+          case 48:
             if (state.authorizeUri) {
-              _context.next = 53;
+              _context.next = 54;
               break;
             }
 
             if (!_noRedirect) {
-              _context.next = 50;
+              _context.next = 51;
               break;
             }
 
             return _context.abrupt("return", redirectUrl);
 
-          case 50:
-            _context.next = 52;
+          case 51:
+            _context.next = 53;
             return env.redirect(redirectUrl);
 
-          case 52:
+          case 53:
             return _context.abrupt("return", _context.sent);
 
-          case 53:
+          case 54:
             // build the redirect uri
             redirectParams = ["response_type=code", "client_id=" + encodeURIComponent(clientId || ""), "scope=" + encodeURIComponent(scope), "redirect_uri=" + encodeURIComponent(redirectUri), "aud=" + encodeURIComponent(serverUrl), "state=" + encodeURIComponent(stateKey)]; // also pass this in case of EHR launch
 
@@ -13545,22 +13563,22 @@ function _authorize() {
             redirectUrl = state.authorizeUri + "?" + redirectParams.join("&");
 
             if (!_noRedirect) {
-              _context.next = 58;
+              _context.next = 59;
               break;
             }
 
             return _context.abrupt("return", redirectUrl);
 
-          case 58:
+          case 59:
             if (!(target && isBrowser())) {
-              _context.next = 67;
+              _context.next = 68;
               break;
             }
 
-            _context.next = 61;
+            _context.next = 62;
             return lib_1.getTargetWindow(target, width, height);
 
-          case 61:
+          case 62:
             win = _context.sent;
 
             if (win !== self) {
@@ -13589,14 +13607,14 @@ function _authorize() {
 
             return _context.abrupt("return");
 
-          case 67:
-            _context.next = 69;
+          case 68:
+            _context.next = 70;
             return env.redirect(redirectUrl);
 
-          case 69:
+          case 70:
             return _context.abrupt("return", _context.sent);
 
-          case 70:
+          case 71:
           case "end":
             return _context.stop();
         }

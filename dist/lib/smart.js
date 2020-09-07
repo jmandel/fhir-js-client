@@ -180,8 +180,7 @@ async function authorize(env, params = {}, _noRedirect = false) {
     client_id,
     target,
     width,
-    height,
-    completeInTarget
+    height
   } = params;
   let {
     iss,
@@ -189,7 +188,8 @@ async function authorize(env, params = {}, _noRedirect = false) {
     fhirServiceUrl,
     redirectUri,
     scope = "",
-    clientId
+    clientId,
+    completeInTarget
   } = params;
   const url = env.getUrl();
   const storage = env.getStorage(); // For these three an url param takes precedence over inline option
@@ -225,6 +225,22 @@ async function authorize(env, params = {}, _noRedirect = false) {
 
   if (launch && !scope.match(/launch/)) {
     scope += " launch";
+  }
+
+  if (isBrowser()) {
+    const inFrame = isInFrame();
+    const inPopUp = isInPopUp();
+
+    if ((inFrame || inPopUp) && completeInTarget !== true && completeInTarget !== false) {
+      // completeInTarget will default to true if authorize is called from
+      // within an iframe. This is to avoid issues when the entire app
+      // happens to be rendered in an iframe (including in some EHRs),
+      // even though that was not how the app developer's intention.
+      completeInTarget = inFrame; // In this case we can't always make the best decision so ask devs
+      // to be explicit in their configuration.
+
+      console.warn('Your app is being authorized from within an iframe or popup ' + 'window. Please be explicit and provide a "completeInTarget" ' + 'option. Use "true" to complete the authorization in the ' + 'same window, or "false" to try to complete it in the parent ' + 'or the opener window. See http://docs.smarthealthit.org/client-js/api.html');
+    }
   } // If `authorize` is called, make sure we clear any previous state (in case
   // this is a re-authorize)
 
