@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.3.5
+- The `completeInTarget` authorize option defaults to `true` if the app was loaded in an iframe
+- The `redirectUri` option accepts absolute URLs and does not append "/" to them
+- The `refresh` client method will now use basic authorization for confidential clients
+- The `refresh` client method will now try to make its request both with and without credentials
+- The `request` client method will now return the response object if the response status is 201 (can get the `location` header after create)
+- Added the `getState` method of the `Client` for state introspections
+
 ## v2.3.1
 - `client.create` and `client.update` are using `"Content-Type": "application/json"` header by default
 - `client.create` and `client.update` alow custom `Content-Type` to be specified

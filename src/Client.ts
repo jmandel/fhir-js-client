@@ -1090,6 +1090,22 @@ export default class Client
     }
 
     /**
+     * Returns a copy of the client state. Accepts a dot-separated path argument
+     * (same as for `getPath`) to allow for selecting specific properties.
+     * Examples:
+     * ```js
+     * client.getState(); // -> the entire state object
+     * client.getState("serverUrl"); // -> the URL we are connected to
+     * client.getState("tokenResponse.patient"); // -> The selected patient ID (if any)
+     * ```
+     * @param path The path (eg. "a.b.4.c")
+     * @returns {*} Whatever is found in the path or undefined
+     */
+    getState(path = "") {
+        return getPath({ ...this.state }, path);
+    }
+
+    /**
      * Returns a promise that will be resolved with the fhir version as defined
      * in the CapabilityStatement.
      */

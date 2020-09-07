@@ -3347,6 +3347,38 @@ describe("FHIR.client", () => {
         });
     });
 
+    describe("getState", () => {
+        it ("returns the entire state", () => {
+            const state = { a: { b: [ { c: 2 } ] }, serverUrl: "http://x" };
+            // @ts-ignore
+            const client = new Client({}, state);
+            expect(client.getState()).to.equal(state);
+        });
+
+        it ("can get single path", () => {
+            const state = { a: { b: [ { c: 2 } ] }, serverUrl: "http://x" };
+            // @ts-ignore
+            const client = new Client({}, state);
+            expect(client.getState("serverUrl")).to.equal(state.serverUrl);
+        });
+
+        it ("can get nested path", () => {
+            const state = { a: { b: [ { c: 2 } ] }, serverUrl: "http://x" };
+            // @ts-ignore
+            const client = new Client({}, state);
+            expect(client.getState("a.b.0.c")).to.equal(2);
+        });
+
+        it ("keeps state immutable", () => {
+            const state = { a: { b: [ { c: 2 } ] }, serverUrl: "http://x" };
+            // @ts-ignore
+            const client = new Client({}, state);
+            const result = client.getState();
+            result.a = 5;
+            expect(client.getState("a")).to.equal(state.a);
+        });
+    });
+
     describe("create", () => {
         crossPlatformTest(async (env) => {
             const client = new Client(env, mockUrl);
