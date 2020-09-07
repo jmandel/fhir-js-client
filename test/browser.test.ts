@@ -1,3 +1,5 @@
+// import "../src/types";
+
 require("./mocks/mockDebug");
 import { URL }    from "url";
 import { expect } from "@hapi/code";
@@ -10,6 +12,7 @@ import BrowserEnv from "./mocks/BrowserEnvironment";
 import MockWindow from "./mocks/Window";
 import MockScreen from "./mocks/Screen";
 import mockServer from "./mocks/mockServer";
+import { fhirclient } from "../src/types";
 
 export const lab = Lab.script();
 const {
@@ -1053,33 +1056,33 @@ describe("Browser tests", () => {
 
         describe("getTargetWindow", () => {
             it ('"_top"', async () => {
-                expect(await lib.getTargetWindow("_top" )).to.equal(top);
+                expect(await lib.getTargetWindow("_top")).to.equal(top);
             });
             it ('() => "_top"', async () => {
-                expect(await lib.getTargetWindow(() => "_top" )).to.equal(top);
+                expect(await lib.getTargetWindow((() => "_top") as fhirclient.WindowTarget)).to.equal(top);
             });
             it ('async () => "_top"', async () => {
-                expect(await lib.getTargetWindow(async () => "_top" )).to.equal(top);
+                expect(await lib.getTargetWindow((async () => "_top") as fhirclient.WindowTarget)).to.equal(top);
             });
 
             it ('"_self"', async () => {
                 expect(await lib.getTargetWindow("_self" )).to.equal(self);
             });
             it ('() => "_self"', async () => {
-                expect(await lib.getTargetWindow(() => "_self" )).to.equal(self);
+                expect(await lib.getTargetWindow((() => "_self") as fhirclient.WindowTarget)).to.equal(self);
             });
             it ('async () => "_self"', async () => {
-                expect(await lib.getTargetWindow(async () => "_self" )).to.equal(self);
+                expect(await lib.getTargetWindow((async () => "_self") as fhirclient.WindowTarget)).to.equal(self);
             });
 
             it ('"_parent"', async () => {
                 expect(await lib.getTargetWindow("_parent" )).to.equal(parent);
             });
             it ('() => "_parent"', async () => {
-                expect(await lib.getTargetWindow(() => "_parent" )).to.equal(parent);
+                expect(await lib.getTargetWindow((() => "_parent") as fhirclient.WindowTarget)).to.equal(parent);
             });
             it ('async () => "_parent"', async () => {
-                expect(await lib.getTargetWindow(async () => "_parent" )).to.equal(parent);
+                expect(await lib.getTargetWindow((async () => "_parent") as fhirclient.WindowTarget)).to.equal(parent);
             });
 
 
@@ -1087,10 +1090,10 @@ describe("Browser tests", () => {
                 await lib.getTargetWindow("_blank" );
             });
             it ('() => "_blank"', async () => {
-                await lib.getTargetWindow(() => "_blank" );
+                await lib.getTargetWindow((() => "_blank") as fhirclient.WindowTarget);
             });
             it ('async () => "_blank"', async () => {
-                await lib.getTargetWindow(async () => "_blank" );
+                await lib.getTargetWindow((async () => "_blank") as fhirclient.WindowTarget);
             });
 
             it ('blocked "_blank" fails back to "_self"', async () => {
@@ -1099,21 +1102,21 @@ describe("Browser tests", () => {
             });
             it ('blocked () => "_blank" fails back to "_self"', async () => {
                 (self as any).once("beforeOpen", e => e.prevent());
-                expect(await lib.getTargetWindow(() => "_blank")).to.equal(self);
+                expect(await lib.getTargetWindow((() => "_blank") as fhirclient.WindowTarget)).to.equal(self);
             });
             it ('blocked async () => "_blank" fails back to "_self"', async () => {
                 (self as any).once("beforeOpen", e => e.prevent());
-                expect(await lib.getTargetWindow(async () => "_blank")).to.equal(self);
+                expect(await lib.getTargetWindow((async () => "_blank") as fhirclient.WindowTarget)).to.equal(self);
             });
 
             it ('"popup"', async () => {
                 await lib.getTargetWindow("popup" );
             });
             it ('() => "popup"', async () => {
-                await lib.getTargetWindow(() => "popup" );
+                await lib.getTargetWindow((() => "popup") as fhirclient.WindowTarget);
             });
             it ('async () => "popup"', async () => {
-                await lib.getTargetWindow(async () => "popup" );
+                await lib.getTargetWindow((async () => "popup") as fhirclient.WindowTarget);
             });
 
             it ('blocked "popup" fails back to "_self"', async () => {
@@ -1122,11 +1125,11 @@ describe("Browser tests", () => {
             });
             it ('blocked () => "popup" fails back to "_self"', async () => {
                 (self as any).once("beforeOpen", e => e.prevent());
-                expect(await lib.getTargetWindow(() => "popup")).to.equal(self);
+                expect(await lib.getTargetWindow((() => "popup") as fhirclient.WindowTarget)).to.equal(self);
             });
             it ('blocked async () => "popup" fails back to "_self"', async () => {
                 (self as any).once("beforeOpen", e => e.prevent());
-                expect(await lib.getTargetWindow(async () => "popup")).to.equal(self);
+                expect(await lib.getTargetWindow((async () => "popup") as fhirclient.WindowTarget)).to.equal(self);
             });
 
             it ("accepts frame by name", async () => {

@@ -65,12 +65,12 @@ export default class Window extends EventEmitter
         return Buffer.from(str, "base64").toString("ascii");
     }
 
-    addEventListener(event: string, handler: () => any)
+    addEventListener(event: string, handler: (event?:any) => any)
     {
         this.on(event, handler);
     }
 
-    removeEventListener(event: string, handler: () => any)
+    removeEventListener(event: string, handler: (event?:any) => any)
     {
         this.removeListener(event, handler);
     }
