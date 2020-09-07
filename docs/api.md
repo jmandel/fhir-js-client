@@ -1,5 +1,5 @@
 ---
-title:  "SMART JS Client"
+title:  "SMART JS Client - SMART API"
 ---
 
 # SMART API

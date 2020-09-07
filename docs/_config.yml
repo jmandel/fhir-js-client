@@ -1,4 +1,5 @@
 theme: jekyll-theme-cayman
+title: "SMART JS Client"
 include:
     - "_*_.html"
     - "_*_.*.html"
