@@ -55,7 +55,7 @@ These should **ONLY** be used in development.
 | | | `Number`    Numeric index in `window.frames`
 | | | `Object`    Window reference (must have the same `origin`)
 | | | `Function`  A function that returns one of the above values or a promise that will resolve to such value.
-|completeInTarget|`boolean`| If `true`, the app will be initialized in the specified `target`. Otherwise, the app will be initialized in the window in which`authorize` was called. This option is only applicable if `target` is used and refers to another window.  Defaults to `false`.
+|completeInTarget|`boolean`| If `true`, the app will be initialized in the specified `target`. Otherwise, the app will be initialized in the window in which`authorize` was called. This option is only applicable if `target` is used and refers to another window, or if the app is loaded in an iframe or popup window. Defaults to `true` if the app is started in an iframe and to `false` otherwise. Note that you SHOULD always set this option if your app is loaded in a popup or frame (which might even happen in some EHR environments).
 |width|`number`| The width of the authorization popup window. Only used in browsers and if the `target` option is set to "popup". Defaults to `800`.
 |height|`number`| The height of the authorization popup window. Only used in browsers and if the `target` option is set to "popup". Defaults to `720`.
 
