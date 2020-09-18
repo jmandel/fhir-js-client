@@ -254,14 +254,19 @@ describe("Lib", () => {
 
         describe("request", () => {
 
-            it ("returns the response object if the server replies with 201", async () => {
+            it ("follows the location header if the server replies with 201", async () => {
                 mockServer.mock({
-                    headers: { "location": "whatever" },
+                    headers: { "location": mockUrl },
                     status : 201,
                     body   : null
                 });
-                const response: Response = await lib.request(mockUrl);
-                expect(response.headers.get("location")).to.equal("whatever");
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status : 200,
+                    body   : { result: "success" }
+                });
+                const response = await lib.request(mockUrl);
+                expect(response).to.equal({ result: "success" });
             });
         });
     });
