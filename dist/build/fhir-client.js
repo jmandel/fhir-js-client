@@ -12510,19 +12510,56 @@ function request(url, options) {
       accept: "application/json"
     }, options.headers)
   })).then(checkResponse).then(function (res) {
-    if (res.status !== 201) {
-      var type = res.headers.get("Content-Type") + "";
+    var type = res.headers.get("Content-Type") + "";
 
-      if (type.match(/\bjson\b/i)) {
-        return responseToJSON(res);
-      }
-
-      if (type.match(/^text\//i)) {
-        return res.text();
-      }
+    if (type.match(/\bjson\b/i)) {
+      return responseToJSON(res).then(function (body) {
+        return {
+          res: res,
+          body: body
+        };
+      });
     }
 
-    return res;
+    if (type.match(/^text\//i)) {
+      return res.text().then(function (body) {
+        return {
+          res: res,
+          body: body
+        };
+      });
+    }
+
+    return {
+      res: res
+    };
+  }).then(function (_ref5) {
+    var res = _ref5.res,
+        body = _ref5.body;
+
+    // Some servers will reply after CREATE with json content type but with
+    // empty body. In this case check if a location header is received and
+    // fetch that to use it as the final result.
+    if (!body && res.status == 201) {
+      var location = res.headers.get("location") + "";
+
+      if (location) {
+        return request(location, Object.assign({}, options, {
+          method: "GET",
+          body: null
+        }));
+      }
+    } // For any non-text and non-json response return the Response object.
+    // This to let users decide if they want to call text(), blob() or
+    // something else on it
+
+
+    if (body === undefined) {
+      return res;
+    } // Otherwise just return the parsed body (can also be "" or null)
+
+
+    return body;
   });
 }
 
@@ -12795,8 +12832,8 @@ function byCode(observations, property) {
 
   function handleCodeableConcept(concept, observation) {
     if (concept && Array.isArray(concept.coding)) {
-      concept.coding.forEach(function (_ref5) {
-        var code = _ref5.code;
+      concept.coding.forEach(function (_ref6) {
+        var code = _ref6.code;
 
         if (code) {
           ret[code] = ret[code] || [];

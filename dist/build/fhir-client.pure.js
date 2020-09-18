@@ -2394,19 +2394,52 @@ function request(url, options = {}) {
       ...options.headers
     }
   }).then(checkResponse).then(res => {
-    if (res.status !== 201) {
-      const type = res.headers.get("Content-Type") + "";
+    const type = res.headers.get("Content-Type") + "";
 
-      if (type.match(/\bjson\b/i)) {
-        return responseToJSON(res);
-      }
-
-      if (type.match(/^text\//i)) {
-        return res.text();
-      }
+    if (type.match(/\bjson\b/i)) {
+      return responseToJSON(res).then(body => ({
+        res,
+        body
+      }));
     }
 
-    return res;
+    if (type.match(/^text\//i)) {
+      return res.text().then(body => ({
+        res,
+        body
+      }));
+    }
+
+    return {
+      res
+    };
+  }).then(({
+    res,
+    body
+  }) => {
+    // Some servers will reply after CREATE with json content type but with
+    // empty body. In this case check if a location header is received and
+    // fetch that to use it as the final result.
+    if (!body && res.status == 201) {
+      const location = res.headers.get("location") + "";
+
+      if (location) {
+        return request(location, { ...options,
+          method: "GET",
+          body: null
+        });
+      }
+    } // For any non-text and non-json response return the Response object.
+    // This to let users decide if they want to call text(), blob() or
+    // something else on it
+
+
+    if (body === undefined) {
+      return res;
+    } // Otherwise just return the parsed body (can also be "" or null)
+
+
+    return body;
   });
 }
 
