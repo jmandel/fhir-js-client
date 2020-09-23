@@ -11081,7 +11081,7 @@ var Client = /*#__PURE__*/function () {
       var options = {
         baseUrl: this.state.serverUrl.replace(/\/$/, "")
       };
-      var accessToken = lib_1.getPath(this, "state.tokenResponse.access_token");
+      var accessToken = this.getState("tokenResponse.access_token");
 
       if (accessToken) {
         options.auth = {
@@ -11101,7 +11101,7 @@ var Client = /*#__PURE__*/function () {
       }
 
       this.api = fhirJs(options);
-      var patientId = lib_1.getPath(this, "state.tokenResponse.patient");
+      var patientId = this.getState("tokenResponse.patient");
 
       if (patientId) {
         this.patient.api = fhirJs(Object.assign({}, options, {
@@ -11275,7 +11275,7 @@ var Client = /*#__PURE__*/function () {
   ;
 
   _proto.getAuthorizationHeader = function getAuthorizationHeader() {
-    var accessToken = lib_1.getPath(this, "state.tokenResponse.access_token");
+    var accessToken = this.getState("tokenResponse.access_token");
 
     if (accessToken) {
       return "Bearer " + accessToken;
@@ -11429,7 +11429,7 @@ var Client = /*#__PURE__*/function () {
     var _request = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee6(requestOptions, fhirOptions, _resolvedRefs) {
       var _this2 = this;
 
-      var _a, debugRequest, url, authHeader, options, signal;
+      var _a, debugRequest, url, authHeader, options, signal, job;
 
       return _regenerator.default.wrap(function _callee6$(_context6) {
         while (1) {
@@ -11480,25 +11480,11 @@ var Client = /*#__PURE__*/function () {
               };
               debugRequest("%s, options: %O, fhirOptions: %O", url, requestOptions, options);
               signal = requestOptions.signal || undefined;
-              return _context6.abrupt("return", lib_1.request(url, requestOptions) // Automatic re-auth via refresh token -----------------------------
-              .catch(function (error) {
-                debugRequest("%o", error);
-
-                if (error.status == 401 && options.useRefreshToken) {
-                  var hasRefreshToken = lib_1.getPath(_this2, "state.tokenResponse.refresh_token");
-
-                  if (hasRefreshToken) {
-                    return _this2.refresh({
-                      signal: signal
-                    }).then(function () {
-                      return _this2.request(Object.assign({}, requestOptions, {
-                        url: url
-                      }), options, _resolvedRefs);
-                    });
-                  }
-                }
-
-                throw error;
+              job = options.useRefreshToken ? this.refreshIfNeeded({
+                signal: signal
+              }) : Promise.resolve(this.state);
+              return _context6.abrupt("return", job.then(function () {
+                return lib_1.request(url, requestOptions);
               }) // Handle 401 ------------------------------------------------------
               .catch( /*#__PURE__*/function () {
                 var _ref3 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3(error) {
@@ -11511,7 +11497,7 @@ var Client = /*#__PURE__*/function () {
                             break;
                           }
 
-                          if (lib_1.getPath(_this2, "state.tokenResponse.access_token")) {
+                          if (_this2.getState("tokenResponse.access_token")) {
                             _context3.next = 3;
                             break;
                           }
@@ -11712,7 +11698,7 @@ var Client = /*#__PURE__*/function () {
                 });
               }));
 
-            case 13:
+            case 14:
             case "end":
               return _context6.stop();
           }
@@ -11727,6 +11713,40 @@ var Client = /*#__PURE__*/function () {
     return request;
   }()
   /**
+   * Checks if access token and refresh token are present. If they are, and if
+   * the access token is expired or is about to expire in the next 10 seconds,
+   * calls `this.refresh()` to obtain new access token.
+   * @param requestOptions Any options to pass to the fetch call. Most of them
+   * will be overridden, bit it might still be useful for passing additional
+   * request options or an abort signal.
+   * @category Request
+   */
+  ;
+
+  _proto.refreshIfNeeded = function refreshIfNeeded(requestOptions) {
+    if (requestOptions === void 0) {
+      requestOptions = {};
+    }
+
+    var accessToken = this.getState("tokenResponse.access_token");
+    var outdated = false;
+
+    if (accessToken) {
+      var tokenBody = JSON.parse(this.environment.atob(accessToken.split(".")[1]));
+      outdated = tokenBody.exp - 10 < Date.now() / 1000;
+    }
+
+    if (outdated) {
+      var refreshToken = this.getState("tokenResponse.refresh_token");
+
+      if (refreshToken) {
+        return this.refresh(requestOptions);
+      }
+    }
+
+    return Promise.resolve(this.state);
+  }
+  /**
    * Use the refresh token to obtain new access token. If the refresh token is
    * expired (or this fails for any other reason) it will be deleted from the
    * state, so that we don't enter into loops trying to re-authorize.
@@ -11736,7 +11756,7 @@ var Client = /*#__PURE__*/function () {
    *
    * @param requestOptions Any options to pass to the fetch call. Most of them
    * will be overridden, bit it might still be useful for passing additional
-   * request calls or an abort signal.
+   * request options or an abort signal.
    * @category Request
    */
   ;
@@ -11764,7 +11784,7 @@ var Client = /*#__PURE__*/function () {
       throw new Error("Unable to refresh. No tokenUri found.");
     }
 
-    var scopes = lib_1.getPath(this, "state.tokenResponse.scope") || "";
+    var scopes = this.getState("tokenResponse.scope") || "";
     var hasOfflineAccess = scopes.search(/\boffline_access\b/) > -1;
     var hasOnlineAccess = scopes.search(/\bonline_access\b/) > -1;
 

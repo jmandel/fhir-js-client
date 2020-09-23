@@ -1305,7 +1305,7 @@ class Client {
       const options = {
         baseUrl: this.state.serverUrl.replace(/\/$/, "")
       };
-      const accessToken = lib_1.getPath(this, "state.tokenResponse.access_token");
+      const accessToken = this.getState("tokenResponse.access_token");
 
       if (accessToken) {
         options.auth = {
@@ -1326,7 +1326,7 @@ class Client {
       }
 
       this.api = fhirJs(options);
-      const patientId = lib_1.getPath(this, "state.tokenResponse.patient");
+      const patientId = this.getState("tokenResponse.patient");
 
       if (patientId) {
         this.patient.api = fhirJs({ ...options,
@@ -1500,7 +1500,7 @@ class Client {
 
 
   getAuthorizationHeader() {
-    const accessToken = lib_1.getPath(this, "state.tokenResponse.access_token");
+    const accessToken = this.getState("tokenResponse.access_token");
 
     if (accessToken) {
       return "Bearer " + accessToken;
@@ -1644,28 +1644,14 @@ class Client {
     };
     debugRequest("%s, options: %O, fhirOptions: %O", url, requestOptions, options);
     const signal = requestOptions.signal || undefined;
-    return lib_1.request(url, requestOptions) // Automatic re-auth via refresh token -----------------------------
-    .catch(error => {
-      debugRequest("%o", error);
-
-      if (error.status == 401 && options.useRefreshToken) {
-        const hasRefreshToken = lib_1.getPath(this, "state.tokenResponse.refresh_token");
-
-        if (hasRefreshToken) {
-          return this.refresh({
-            signal
-          }).then(() => this.request({ ...requestOptions,
-            url
-          }, options, _resolvedRefs));
-        }
-      }
-
-      throw error;
-    }) // Handle 401 ------------------------------------------------------
+    const job = options.useRefreshToken ? this.refreshIfNeeded({
+      signal
+    }) : Promise.resolve(this.state);
+    return job.then(() => lib_1.request(url, requestOptions)) // Handle 401 ------------------------------------------------------
     .catch(async error => {
       if (error.status == 401) {
         // !accessToken -> not authorized -> No session. Need to launch.
-        if (!lib_1.getPath(this, "state.tokenResponse.access_token")) {
+        if (!this.getState("tokenResponse.access_token")) {
           throw new Error("This app cannot be accessed directly. Please launch it as SMART app!");
         } // auto-refresh not enabled and Session expired.
         // Need to re-launch. Clear state to start over!
@@ -1765,6 +1751,36 @@ class Client {
     });
   }
   /**
+   * Checks if access token and refresh token are present. If they are, and if
+   * the access token is expired or is about to expire in the next 10 seconds,
+   * calls `this.refresh()` to obtain new access token.
+   * @param requestOptions Any options to pass to the fetch call. Most of them
+   * will be overridden, bit it might still be useful for passing additional
+   * request options or an abort signal.
+   * @category Request
+   */
+
+
+  refreshIfNeeded(requestOptions = {}) {
+    const accessToken = this.getState("tokenResponse.access_token");
+    let outdated = false;
+
+    if (accessToken) {
+      const tokenBody = JSON.parse(this.environment.atob(accessToken.split(".")[1]));
+      outdated = tokenBody.exp - 10 < Date.now() / 1000;
+    }
+
+    if (outdated) {
+      const refreshToken = this.getState("tokenResponse.refresh_token");
+
+      if (refreshToken) {
+        return this.refresh(requestOptions);
+      }
+    }
+
+    return Promise.resolve(this.state);
+  }
+  /**
    * Use the refresh token to obtain new access token. If the refresh token is
    * expired (or this fails for any other reason) it will be deleted from the
    * state, so that we don't enter into loops trying to re-authorize.
@@ -1774,7 +1790,7 @@ class Client {
    *
    * @param requestOptions Any options to pass to the fetch call. Most of them
    * will be overridden, bit it might still be useful for passing additional
-   * request calls or an abort signal.
+   * request options or an abort signal.
    * @category Request
    */
 
@@ -1796,7 +1812,7 @@ class Client {
       throw new Error("Unable to refresh. No tokenUri found.");
     }
 
-    const scopes = lib_1.getPath(this, "state.tokenResponse.scope") || "";
+    const scopes = this.getState("tokenResponse.scope") || "";
     const hasOfflineAccess = scopes.search(/\boffline_access\b/) > -1;
     const hasOnlineAccess = scopes.search(/\bonline_access\b/) > -1;
 
