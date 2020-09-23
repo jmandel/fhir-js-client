@@ -757,24 +757,13 @@ export default class Client
 
         const signal = (requestOptions as RequestInit).signal || undefined;
 
+        const job = options.useRefreshToken ?
+            this.refreshIfNeeded({ signal }) :
+            Promise.resolve(this.state);
 
-        return request(url, requestOptions)
-
-            // Automatic re-auth via refresh token -----------------------------
-            .catch((error: HttpError) => {
-                debugRequest("%o", error);
-                if (error.status == 401 && options.useRefreshToken) {
-                    const hasRefreshToken = getPath(this, "state.tokenResponse.refresh_token");
-                    if (hasRefreshToken) {
-                        return this.refresh({ signal }).then(() => this.request(
-                            { ...(requestOptions as fhirclient.RequestOptions), url },
-                            options,
-                            _resolvedRefs
-                        ));
-                    }
-                }
-                throw error;
-            })
+        return job
+            
+            .then(() => request(url, requestOptions as fhirclient.RequestOptions) as Promise<T>)
 
             // Handle 401 ------------------------------------------------------
             .catch(async (error: HttpError) => {
@@ -821,10 +810,10 @@ export default class Client
                     return data;
 
                 // Resolve References ------------------------------------------
-                return (async (_data) => {
+                return (async (_data: fhirclient.FHIR.Resource) => {
 
                     if (_data.resourceType == "Bundle") {
-                        await Promise.all((_data.entry as fhirclient.FHIR.BundleEntry[] || []).map(item => resolveRefs(
+                        await Promise.all(((_data as fhirclient.FHIR.Bundle).entry || []).map(item => resolveRefs(
                             item.resource,
                             options,
                             _resolvedRefs,
@@ -907,6 +896,32 @@ export default class Client
                         return _data;
                     });
             });
+    }
+
+    /**
+     * Checks if access token and refresh token are present. If they are, and if
+     * the access token is expired or is about to expire in the next 10 seconds,
+     * calls `this.refresh()` to obtain new access token.
+     * @param requestOptions 
+     */
+    refreshIfNeeded(requestOptions: RequestInit = {}): Promise<fhirclient.ClientState>
+    {
+        const accessToken  = this.getState("tokenResponse.access_token");
+        let outdated = false;
+
+        if (accessToken) {
+            const tokenBody = JSON.parse(this.environment.atob(accessToken.split(".")[1]));
+            outdated = tokenBody.exp - 10 < Date.now() / 1000;
+        }
+
+        if (outdated) {
+            const refreshToken = this.getState("tokenResponse.refresh_token");
+            if (refreshToken) {
+                return this.refresh(requestOptions);
+            }
+        }
+
+        return Promise.resolve(this.state);
     }
 
     /**

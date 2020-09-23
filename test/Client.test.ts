@@ -746,38 +746,155 @@ describe("FHIR.client", () => {
     });
 
     describe("client.request", () => {
+
+        // Argument validation -------------------------------------------------
         it("rejects if no url is provided", async () => {
             // @ts-ignore
             const client = new Client({}, "http://localhost");
             await expect(client.request()).to.reject();
         });
 
-        it("rejects on 401 with no refresh token", async () => {
-            // @ts-ignore
-            const client = new Client({}, mockUrl);
-            const mock = {
-                status: 401,
-                body: "Unauthorized"
-            };
-            mockServer.mock(mock);
-            await expect(client.request("/")).to.reject();
+        // Token expiration and refresh ----------------------------------------
+
+        describe ("throws if 401 and no accessToken", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, mockUrl);
+                mockServer.mock({ status: 401 });
+                await expect(client.request("/")).to.reject();
+            });
         });
 
-        it("rejects on 401 with useRefreshToken = false", async () => {
-            // @ts-ignore
-            const client = new Client({}, {
-                serverUrl: mockUrl,
-                tokenResponse: {
-                    refresh_token: "whatever"
-                }
+        describe ("throws if 401 and no fhirOptions.useRefreshToken", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        access_token: "whatever"
+                    }
+                });
+                mockServer.mock({ status: 401 });
+                await expect(client.request("/", {
+                    useRefreshToken: false
+                })).to.reject();
             });
-            const mock = {
-                status: 401,
-                body: "Unauthorized"
-            };
-            mockServer.mock(mock);
-            await expect(client.request("/", { useRefreshToken: false })).to.reject();
         });
+
+        describe ("throws if 401 and no refresh_token", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        access_token: "whatever"
+                    }
+                });
+                mockServer.mock({ status: 401 });
+                await expect(client.request("/")).to.reject();
+            });
+        });
+
+        describe ("throws if 401 after refresh", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        access_token: "whatever",
+                        refresh_token: "whatever"
+                    }
+                });
+                mockServer.mock({ status: 401 });
+                await expect(client.request("/")).to.reject();
+            });
+        });
+
+        describe ("throws if 403 after refresh", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, mockUrl);
+                mockServer.mock({ status: 403 });
+                await expect(client.request("/")).to.reject();
+            });
+        });
+
+        describe("auto-refresh if access token is expired", () => {
+            crossPlatformTest(async (env) => {
+                const exp = Math.round(Date.now() / 1000) - 20;
+                const access_token = `x.${env.btoa(`{"exp":${exp}}`)}.x`;
+                console.log(access_token)
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenUri: mockUrl,
+                    tokenResponse: {
+                        access_token,
+                        refresh_token: "whatever",
+                        scope: "offline_access"
+                    }
+                });
+                mockServer.mock({
+                    status: 200,
+                    headers: {
+                        "content-type": "application/json"
+                    },
+                    body: {
+                        access_token: "x"
+                    }
+                });
+                mockServer.mock({ status: 200, body: "OK" });
+                const result = await client.request("/");
+                expect(result).to.equal("OK");
+                expect(client.state.tokenResponse.access_token).to.equal("x");
+            });
+        });
+
+        describe("auto-refresh if access token is about to expire", () => {
+            crossPlatformTest(async (env) => {
+                const exp = Math.round(Date.now() / 1000) - 5;
+                const access_token = `x.${env.btoa(`{"exp":${exp}}`)}.x`;
+                console.log(access_token)
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenUri: mockUrl,
+                    tokenResponse: {
+                        access_token,
+                        refresh_token: "whatever",
+                        scope: "offline_access"
+                    }
+                });
+                mockServer.mock({
+                    status: 200,
+                    headers: {
+                        "content-type": "application/json"
+                    },
+                    body: {
+                        access_token: "x"
+                    }
+                });
+                mockServer.mock({ status: 200, body: "OK" });
+                const result = await client.request("/");
+                expect(result).to.equal("OK");
+                expect(client.state.tokenResponse.access_token).to.equal("x");
+            });
+        });
+
+        describe("no auto-refresh if the access token is not expired", () => {
+            crossPlatformTest(async (env) => {
+                const exp = Math.round(Date.now() / 1000) + 50;
+                const access_token = `x.${env.btoa(`{"exp":${exp}}`)}.x`;
+                console.log(access_token)
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenUri: mockUrl,
+                    tokenResponse: {
+                        access_token,
+                        refresh_token: "whatever",
+                        scope: "offline_access"
+                    }
+                });
+                mockServer.mock({ status: 200, body: "OK" });
+                const result = await client.request("/");
+                expect(result).to.equal("OK");
+            });
+        });
+
+        // ---------------------------------------------------------------------
 
         describe ("can fetch single resource", () => {
             const mock = {
@@ -1985,64 +2102,6 @@ describe("FHIR.client", () => {
             });
         });
 
-        describe ("throws if 401 and no accessToken", () => {
-            crossPlatformTest(async (env) => {
-                const client = new Client(env, mockUrl);
-                mockServer.mock({ status: 401 });
-                await expect(client.request("/")).to.reject();
-            });
-        });
-
-        describe ("throws if 401 and no fhirOptions.useRefreshToken", () => {
-            crossPlatformTest(async (env) => {
-                const client = new Client(env, {
-                    serverUrl: mockUrl,
-                    tokenResponse: {
-                        access_token: "whatever"
-                    }
-                });
-                mockServer.mock({ status: 401 });
-                await expect(client.request("/", {
-                    useRefreshToken: false
-                })).to.reject();
-            });
-        });
-
-        describe ("throws if 401 and no refresh_token", () => {
-            crossPlatformTest(async (env) => {
-                const client = new Client(env, {
-                    serverUrl: mockUrl,
-                    tokenResponse: {
-                        access_token: "whatever"
-                    }
-                });
-                mockServer.mock({ status: 401 });
-                await expect(client.request("/")).to.reject();
-            });
-        });
-
-        describe ("throws if 401 after refresh", () => {
-            crossPlatformTest(async (env) => {
-                const client = new Client(env, {
-                    serverUrl: mockUrl,
-                    tokenResponse: {
-                        access_token: "whatever",
-                        refresh_token: "whatever"
-                    }
-                });
-                mockServer.mock({ status: 401 });
-                await expect(client.request("/")).to.reject();
-            });
-        });
-
-        describe ("throws if 403 after refresh", () => {
-            crossPlatformTest(async (env) => {
-                const client = new Client(env, mockUrl);
-                mockServer.mock({ status: 403 });
-                await expect(client.request("/")).to.reject();
-            });
-        });
-
 
         // flat ----------------------------------------------------------------
 
@@ -2668,8 +2727,6 @@ describe("FHIR.client", () => {
             });
         });
     });
-
-    // -------------------------------------------------------------------------
 
     describe ("client.user", () => {
         const idToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJwcm9maWxlIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MjA4MDQxNiIsImZoaXJVc2VyIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MjA4MDQxNiIsInN1YiI6IjM2YTEwYmM0ZDJhNzM1OGI0YWZkYWFhZjlhZjMyYmFjY2FjYmFhYmQxMDkxYmQ0YTgwMjg0MmFkNWNhZGQxNzgiLCJpc3MiOiJodHRwOi8vbGF1bmNoLnNtYXJ0aGVhbHRoaXQub3JnIiwiaWF0IjoxNTU5MzkyMjk1LCJleHAiOjE1NTkzOTU4OTV9.niEs55G4AFJZtU_b9Y1Y6DQmXurUZZkh3WCudZgwvYasxVU8x3gJiX3jqONttqPhkh7418EFssCKnnaBlUDwsbhp7xdWN4o1L1NvH4bp_R_zJ25F1s6jLmNm2Qp9LqU133PEdcRIqQPgBMyZBWUTyxQ9ihKY1RAjlztAULQ3wKea-rfe0BXJZeUJBsQPzYCnbKY1dON_NRd8N9pTImqf41MpIbEe7YEOHuirIb6HBpurhAHjTLDv1IuHpEAOxpmtxVVHiVf-FYXzTFmn4cGe2PsNJfBl8R_zow2n6qaSANdvSxJDE4DUgIJ6H18wiSJJHp6Plf_bapccAwxbx-zZCw";
