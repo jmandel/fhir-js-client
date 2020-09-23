@@ -902,7 +902,10 @@ export default class Client
      * Checks if access token and refresh token are present. If they are, and if
      * the access token is expired or is about to expire in the next 10 seconds,
      * calls `this.refresh()` to obtain new access token.
-     * @param requestOptions 
+     * @param requestOptions Any options to pass to the fetch call. Most of them
+     * will be overridden, bit it might still be useful for passing additional
+     * request options or an abort signal.
+     * @category Request
      */
     refreshIfNeeded(requestOptions: RequestInit = {}): Promise<fhirclient.ClientState>
     {
@@ -934,7 +937,7 @@ export default class Client
      *
      * @param requestOptions Any options to pass to the fetch call. Most of them
      * will be overridden, bit it might still be useful for passing additional
-     * request calls or an abort signal.
+     * request options or an abort signal.
      * @category Request
      */
     refresh(requestOptions: RequestInit = {}): Promise<fhirclient.ClientState>

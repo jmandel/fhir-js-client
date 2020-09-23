@@ -40,7 +40,7 @@ The **fhirOptions** object is optional and can contain the following properties:
     - If the target is an array of references (E.g. [Patient.generalPractitioner](http://hl7.org/fhir/R4/patient-definitions.html#Patient.generalPractitioner)), you can request one or more of them by index (E.g. `generalPractitioner.0`). If the index is not specified, all the references in the array will be resolved.
     - The order in which the reference paths are specified does not matter. For example, if you use `["subject", "encounter.serviceProvider", "encounter"]`, the library should figure out that `encounter.serviceProvider` must be fetched after `encounter`. In fact, in this case it will first fetch subject and encounter in parallel, and then proceed to encounter.serviceProvider.
     - This option does not work with contained references (they are "already resolved" anyway).
-- **useRefreshToken** `Boolean` - **Defaults to `true`**. If the client is authorized, it will possess an access token and pass it with the requests it makes. When that token expires, you should get back a `401 Unauthorized` response. When that happens, if the client also has a refresh token and if `useRefreshToken` is `true` (default), the client will attempt to automatically re-authorize itself and then it will re-run the failed request and eventually resolve it's promise with the final result. This means that your requests should never fail with `401`, unless the refresh token is also expired. If you don't want this, you can set `useRefreshToken` to `false`. There is a `refresh` method on the client that can be called manually to renew the access token.
+- **useRefreshToken** `Boolean` - **Defaults to `true`**. If the client is authorized, it will possess an access token and pass it with the requests it makes. When that token expires, you should get back a `401 Unauthorized` response. To prevent this from happening, the client will check the access token expiration time before making requests. If the token is expired, or if it is about to expire in the next 10 seconds, a refresh call will be made to obtain new access token before making the actual request. By setting `useRefreshToken` to `false` you can disable this behavior. There are `refresh` and `refreshIfNeeded` methods on the client (described below) that can be called manually to renew the access token.
 
 ***Examples:***
 
@@ -143,6 +143,11 @@ state, so that we don't enter into loops trying to re-authorize.
 for you!
 
 Resolves with the updated state or rejects with an error.
+
+### client.refreshIfNeeded(requestOptions = {}) `Promise<Object>`
+Checks if access token and refresh token are present. If they are, and if
+the access token is expired or is about to expire in the next 10 seconds,
+calls `client.refresh()` to obtain new access token.
 
 ### client.api `Object`
 
