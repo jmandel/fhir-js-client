@@ -426,7 +426,7 @@ export default class Client
                 baseUrl: this.state.serverUrl.replace(/\/$/, "")
             };
 
-            const accessToken = getPath(this, "state.tokenResponse.access_token");
+            const accessToken = this.getState("tokenResponse.access_token");
             if (accessToken) {
                 options.auth = { token: accessToken };
             }
@@ -441,7 +441,7 @@ export default class Client
             }
             this.api = fhirJs(options);
 
-            const patientId = getPath(this, "state.tokenResponse.patient");
+            const patientId = this.getState("tokenResponse.patient");
             if (patientId) {
                 this.patient.api = fhirJs({
                     ...options,
@@ -606,7 +606,7 @@ export default class Client
      */
     getAuthorizationHeader(): string | null
     {
-        const accessToken = getPath(this, "state.tokenResponse.access_token");
+        const accessToken = this.getState("tokenResponse.access_token");
         if (accessToken) {
             return "Bearer " + accessToken;
         }
@@ -770,7 +770,7 @@ export default class Client
                 if (error.status == 401) {
 
                     // !accessToken -> not authorized -> No session. Need to launch.
-                    if (!getPath(this, "state.tokenResponse.access_token")) {
+                    if (!this.getState("tokenResponse.access_token")) {
                         throw new Error("This app cannot be accessed directly. Please launch it as SMART app!");
                     }
 
@@ -952,7 +952,7 @@ export default class Client
             throw new Error("Unable to refresh. No tokenUri found.");
         }
 
-        const scopes = getPath(this, "state.tokenResponse.scope") || "";
+        const scopes = this.getState("tokenResponse.scope") || "";
         const hasOfflineAccess = scopes.search(/\boffline_access\b/) > -1;
         const hasOnlineAccess = scopes.search(/\bonline_access\b/) > -1;
         if (!hasOfflineAccess && !hasOnlineAccess) {
