@@ -973,21 +973,16 @@ export default class Client
         if (!this._refreshTask) {
 
             const refreshRequestOptions = {
+                credentials: this.environment.options.refreshTokenWithCredentials || "same-origin",
                 ...requestOptions,
                 method : "POST",
+                mode   : "cors" as RequestMode,
                 headers: {
                     ...(requestOptions.headers || {}),
                     "content-type": "application/x-www-form-urlencoded"
                 },
                 body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}`
             };
-
-            refreshRequestOptions.mode = "cors";
-
-            // custom credentials value can be passed on manual calls
-            if (!refreshRequestOptions.credentials) {
-                refreshRequestOptions.credentials = hasOnlineAccess ? "include" : "same-origin";
-            }
 
             // custom authorization header can be passed on manual calls
             if (!("authorization" in refreshRequestOptions.headers)) {
@@ -1001,13 +996,6 @@ export default class Client
             }
 
             this._refreshTask = request<fhirclient.TokenResponse>(tokenUri, refreshRequestOptions)
-            .catch((error: Error) => {
-                if (refreshRequestOptions.credentials != "omit") {
-                    refreshRequestOptions.credentials = "omit";
-                    return request<fhirclient.TokenResponse>(tokenUri, refreshRequestOptions);
-                }
-                throw error;
-            })
             .then(data => {
                 if (!data.access_token) {
                     throw new Error("No access token received");

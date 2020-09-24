@@ -270,7 +270,20 @@ function getPath(obj, path = "") {
     return obj;
   }
 
-  return path.split(".").reduce((out, key) => out ? out[key] : undefined, obj);
+  let segments = path.split(".");
+  let result = obj;
+
+  while (result && segments.length) {
+    const key = segments.shift();
+
+    if (!key && Array.isArray(result)) {
+      return result.map(o => getPath(o, segments.join(".")));
+    } else {
+      result = result[key];
+    }
+  }
+
+  return result;
 }
 
 exports.getPath = getPath;

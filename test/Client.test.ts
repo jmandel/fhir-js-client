@@ -13,7 +13,6 @@ import Client         from "../src/Client";
 import { KEY }        from "../src/smart";
 import Adapter        from "../src/adapters/BrowserAdapter";
 import { fhirclient } from "../src/types";
-import { Response }   from "express";
 
 export const lab = Lab.script();
 const { it, describe, before, after, afterEach } = lab;
@@ -2977,85 +2976,6 @@ describe("FHIR.client", () => {
             expect((client.state.tokenResponse as any).headers.authorization).to.exist();
         });
 
-        it ("Retries with credentials=omit", async () => {
-            const self    = new Window();
-            (global as any).sessionStorage = self.sessionStorage;
-            const env     = new BrowserEnv();
-            const storage = env.getStorage();
-            const key     = "my-key";
-            const state = {
-                serverUrl: mockUrl,
-                tokenUri: mockUrl,
-                tokenResponse: {
-                    refresh_token: "test_refresh_token",
-                    expires_in   : 1,
-                    access_token : "test_access_token",
-                    scope        : "offline_access"
-                },
-                key
-            };
-
-            storage.set(KEY, key);
-            storage.set(key, state);
-
-            const client = new Client(env, state);
-
-            let count = 0;
-            mockServer.mock({
-                handler(req, res: Response) {
-                    count += 1;
-                    res.writeHead(400, "Test Error");
-                    res.end();
-                }
-            });
-            mockServer.mock({
-                handler(req, res) {
-                    count += 1;
-                    res.json({
-                        headers: req.headers,
-                        expires_in: 3600,
-                        access_token: "x"
-                    });
-                }
-            });
-
-            await client.refresh();
-            expect(count).to.equal(2);
-        });
-
-        it ("Does not retry if credentials = omit", async () => {
-            const self    = new Window();
-            (global as any).sessionStorage = self.sessionStorage;
-            const env     = new BrowserEnv();
-            const storage = env.getStorage();
-            const key     = "my-key";
-            const state = {
-                serverUrl: mockUrl,
-                tokenUri: mockUrl,
-                tokenResponse: {
-                    refresh_token: "test_refresh_token",
-                    expires_in   : 1,
-                    access_token : "test_access_token",
-                    scope        : "offline_access"
-                },
-                key
-            };
-
-            storage.set(KEY, key);
-            storage.set(key, state);
-
-            const client = new Client(env, state);
-
-            mockServer.mock({
-                status: 401
-            });
-
-            return client.refresh({ credentials: "omit" }).then(
-                () => { throw new Error("Should have failed"); },
-                () => {}
-            );
-        });
-
         it ("Ignores parallel invocations", async () => {
             const self    = new Window();
             (global as any).sessionStorage = self.sessionStorage;
@@ -3212,7 +3132,6 @@ describe("FHIR.client", () => {
 
             // 2. Automatic refresh
             (client.state.tokenResponse as any).expires_in = 0;
-            mockServer.mock({ status: 401, body: "Unauthorized" });
             mockServer.mock(fakeTokenResponse);
             mockServer.mock({
                 status: 200,

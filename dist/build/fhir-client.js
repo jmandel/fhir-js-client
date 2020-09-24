@@ -10851,14 +10851,18 @@ function resolveRef(obj, path, graph, cache, client, signal) {
 
   if (node) {
     var isArray = Array.isArray(node);
-    return Promise.all(lib_1.makeArray(node).map(function (item, i) {
+    return Promise.all(lib_1.makeArray(node).filter(Boolean).map(function (item, i) {
       var ref = item.reference;
 
       if (ref) {
         return getRef(ref, cache, client, signal).then(function (sub) {
           if (graph) {
             if (isArray) {
-              lib_1.setPath(obj, path + "." + i, sub);
+              if (path.indexOf("..") > -1) {
+                lib_1.setPath(obj, "" + path.replace("..", "." + i + "."), sub);
+              } else {
+                lib_1.setPath(obj, path + "." + i, sub);
+              }
             } else {
               lib_1.setPath(obj, path, sub);
             }
@@ -11797,19 +11801,16 @@ var Client = /*#__PURE__*/function () {
 
 
     if (!this._refreshTask) {
-      var refreshRequestOptions = Object.assign({}, requestOptions, {
+      var refreshRequestOptions = Object.assign({
+        credentials: this.environment.options.refreshTokenWithCredentials || "same-origin"
+      }, requestOptions, {
         method: "POST",
+        mode: "cors",
         headers: Object.assign({}, requestOptions.headers || {}, {
           "content-type": "application/x-www-form-urlencoded"
         }),
         body: "grant_type=refresh_token&refresh_token=" + encodeURIComponent(refreshToken)
-      });
-      refreshRequestOptions.mode = "cors"; // custom credentials value can be passed on manual calls
-
-      if (!refreshRequestOptions.credentials) {
-        refreshRequestOptions.credentials = hasOnlineAccess ? "include" : "same-origin";
-      } // custom authorization header can be passed on manual calls
-
+      }); // custom authorization header can be passed on manual calls
 
       if (!("authorization" in refreshRequestOptions.headers)) {
         var _this$state3 = this.state,
@@ -11822,14 +11823,7 @@ var Client = /*#__PURE__*/function () {
         }
       }
 
-      this._refreshTask = lib_1.request(tokenUri, refreshRequestOptions).catch(function (error) {
-        if (refreshRequestOptions.credentials != "omit") {
-          refreshRequestOptions.credentials = "omit";
-          return lib_1.request(tokenUri, refreshRequestOptions);
-        }
-
-        throw error;
-      }).then(function (data) {
+      this._refreshTask = lib_1.request(tokenUri, refreshRequestOptions).then(function (data) {
         if (!data.access_token) {
           throw new Error("No access token received");
         }
@@ -12139,7 +12133,21 @@ var BrowserAdapter = /*#__PURE__*/function () {
       // instances instantiated on a single thread to continue to
       // function without having sessionStorage data shared
       // across the embedded IE instances.
-      fullSessionStorageSupport: true
+      fullSessionStorageSupport: true,
+      // Do we want to send cookies while making a request to the token
+      // endpoint in order to obtain new access token using existing
+      // refresh token. In rare cases the auth server might require the
+      // client to send cookies along with those requests. In this case
+      // developers will have to change this before initializing the app
+      // like so:
+      // `FHIR.oauth2.settings.refreshTokenWithCredentials = "include";`
+      // or
+      // `FHIR.oauth2.settings.refreshTokenWithCredentials = "same-origin";`
+      // Can be one of:
+      // "include"     - always send cookies
+      // "same-origin" - only send cookies if we are on the same domain (default)
+      // "omit"        - do not send cookies
+      refreshTokenWithCredentials: "same-origin"
     }, options);
   }
   /**
@@ -12349,6 +12357,8 @@ __webpack_require__(/*! core-js/modules/es.array.find */ "./node_modules/core-js
 __webpack_require__(/*! core-js/modules/es.array.for-each */ "./node_modules/core-js/modules/es.array.for-each.js");
 
 __webpack_require__(/*! core-js/modules/es.array.join */ "./node_modules/core-js/modules/es.array.join.js");
+
+__webpack_require__(/*! core-js/modules/es.array.map */ "./node_modules/core-js/modules/es.array.map.js");
 
 __webpack_require__(/*! core-js/modules/es.array.reduce */ "./node_modules/core-js/modules/es.array.reduce.js");
 
@@ -12727,9 +12737,22 @@ function getPath(obj, path) {
     return obj;
   }
 
-  return path.split(".").reduce(function (out, key) {
-    return out ? out[key] : undefined;
-  }, obj);
+  var segments = path.split(".");
+  var result = obj;
+
+  while (result && segments.length) {
+    var key = segments.shift();
+
+    if (!key && Array.isArray(result)) {
+      return result.map(function (o) {
+        return getPath(o, segments.join("."));
+      });
+    } else {
+      result = result[key];
+    }
+  }
+
+  return result;
 }
 
 exports.getPath = getPath;

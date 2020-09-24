@@ -95,6 +95,7 @@
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_types_d_.fhirclient.browserfhirsettings.html#fullsessionstoragesupport" class="tsd-kind-icon">full<wbr>Session<wbr>Storage<wbr>Support</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_types_d_.fhirclient.browserfhirsettings.html#refreshtokenwithcredentials" class="tsd-kind-icon">refresh<wbr>Token<wbr>With<wbr>Credentials</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_types_d_.fhirclient.browserfhirsettings.html#replacebrowserhistory" class="tsd-kind-icon">replace<wbr>Browser<wbr>History</a></li>
 							</ul>
 						</section>
@@ -109,7 +110,7 @@
 					<div class="tsd-signature tsd-kind-icon">full<wbr>Session<wbr>Storage<wbr>Support<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/d51863b/src/types.d.ts#L88">src/types.d.ts:88</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/8b5884a/src/types.d.ts#L88">src/types.d.ts:88</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -125,12 +126,39 @@
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
+					<a name="refreshtokenwithcredentials" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> refresh<wbr>Token<wbr>With<wbr>Credentials</h3>
+					<div class="tsd-signature tsd-kind-icon">refresh<wbr>Token<wbr>With<wbr>Credentials<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"omit"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"include"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"same-origin"</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/8b5884a/src/types.d.ts#L105">src/types.d.ts:105</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Do we want to send cookies while making a request to the token
+								endpoint in order to obtain new access token using existing
+								refresh token. In rare cases the auth server might require the
+								client to send cookies along with those requests. In this case
+								developers will have to change this before initializing the app
+								like so:
+								<code>FHIR.oauth2.settings.refreshTokenWithCredentials = &quot;include&quot;;</code>
+								or
+								<code>FHIR.oauth2.settings.refreshTokenWithCredentials = &quot;same-origin&quot;;</code>
+								Can be one of:
+								&quot;include&quot;     - always send cookies
+								&quot;same-origin&quot; - only send cookies if we are on the same domain (default)
+							&quot;omit&quot;        - do not send cookies</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
 					<a name="replacebrowserhistory" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> replace<wbr>Browser<wbr>History</h3>
 					<div class="tsd-signature tsd-kind-icon">replace<wbr>Browser<wbr>History<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/d51863b/src/types.d.ts#L77">src/types.d.ts:77</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/8b5884a/src/types.d.ts#L77">src/types.d.ts:77</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -224,6 +252,9 @@
 						<ul>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
 								<a href="_types_d_.fhirclient.browserfhirsettings.html#fullsessionstoragesupport" class="tsd-kind-icon">full<wbr>Session<wbr>Storage<wbr>Support</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
+								<a href="_types_d_.fhirclient.browserfhirsettings.html#refreshtokenwithcredentials" class="tsd-kind-icon">refresh<wbr>Token<wbr>With<wbr>Credentials</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
 								<a href="_types_d_.fhirclient.browserfhirsettings.html#replacebrowserhistory" class="tsd-kind-icon">replace<wbr>Browser<wbr>History</a>

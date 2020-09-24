@@ -10,7 +10,7 @@ export default class ServerEnvironment implements fhirclient.Adapter
 
     storage: any;
 
-    options: any;
+    options: fhirclient.JsonObject;
 
     constructor(request?: any, response?: any, storage?: any)
     {
@@ -26,6 +26,12 @@ export default class ServerEnvironment implements fhirclient.Adapter
         } else {
             this.storage = new ServerStorage(this.request);
         }
+
+        this.options = {
+            request : this.request,
+            response: this.response,
+            storage : this.storage
+        };
     }
 
     getUrl()

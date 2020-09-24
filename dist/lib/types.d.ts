@@ -87,6 +87,23 @@ declare namespace fhirclient {
          */
         fullSessionStorageSupport?: boolean;
 
+        /**
+         * Do we want to send cookies while making a request to the token
+         * endpoint in order to obtain new access token using existing
+         * refresh token. In rare cases the auth server might require the
+         * client to send cookies along with those requests. In this case
+         * developers will have to change this before initializing the app
+         * like so:
+         * `FHIR.oauth2.settings.refreshTokenWithCredentials = "include";`
+         * or
+         * `FHIR.oauth2.settings.refreshTokenWithCredentials = "same-origin";`
+         * Can be one of:
+         * "include"     - always send cookies
+         * "same-origin" - only send cookies if we are on the same domain (default)
+         * "omit"        - do not send cookies
+         */
+        refreshTokenWithCredentials?: "omit" | "include" | "same-origin";
+
         // storage?: Storage | ((options?: JsonObject) => Storage);
     }
 
