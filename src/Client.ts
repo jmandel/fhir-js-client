@@ -115,13 +115,17 @@ function resolveRef(
     const node = getPath(obj, path);
     if (node) {
         const isArray = Array.isArray(node);
-        return Promise.all(makeArray(node).map((item, i) => {
+        return Promise.all(makeArray(node).filter(Boolean).map((item, i) => {
             const ref = item.reference;
             if (ref) {
                 return getRef(ref, cache, client, signal).then(sub => {
                     if (graph) {
                         if (isArray) {
-                            setPath(obj, `${path}.${i}`, sub);
+                            if (path.indexOf("..") > -1) {
+                                setPath(obj, `${path.replace("..", `.${i}.`)}`, sub);    
+                            } else {
+                                setPath(obj, `${path}.${i}`, sub);
+                            }
                         } else {
                             setPath(obj, path, sub);
                         }

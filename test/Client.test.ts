@@ -818,7 +818,6 @@ describe("FHIR.client", () => {
             crossPlatformTest(async (env) => {
                 const exp = Math.round(Date.now() / 1000) - 20;
                 const access_token = `x.${env.btoa(`{"exp":${exp}}`)}.x`;
-                console.log(access_token)
                 const client = new Client(env, {
                     serverUrl: mockUrl,
                     tokenUri: mockUrl,
@@ -848,7 +847,6 @@ describe("FHIR.client", () => {
             crossPlatformTest(async (env) => {
                 const exp = Math.round(Date.now() / 1000) - 5;
                 const access_token = `x.${env.btoa(`{"exp":${exp}}`)}.x`;
-                console.log(access_token)
                 const client = new Client(env, {
                     serverUrl: mockUrl,
                     tokenUri: mockUrl,
@@ -878,7 +876,6 @@ describe("FHIR.client", () => {
             crossPlatformTest(async (env) => {
                 const exp = Math.round(Date.now() / 1000) + 50;
                 const access_token = `x.${env.btoa(`{"exp":${exp}}`)}.x`;
-                console.log(access_token)
                 const client = new Client(env, {
                     serverUrl: mockUrl,
                     tokenUri: mockUrl,
@@ -1331,7 +1328,7 @@ describe("FHIR.client", () => {
             });
         });
 
-        it ("mixed example #88", async () => {
+        describe ("mixed example #88", async () => {
             const json = {
                 contained: [
                     {
@@ -1382,6 +1379,70 @@ describe("FHIR.client", () => {
                 expect(result.patient).to.equal({ resourceType: "Patient", id: 1 });
                 expect(result.contained[0].subject).to.equal({ resourceType: "Patient", id: 1 });
                 expect(result.contained[1].beneficiary).to.equal({ resourceType: "Patient", id: 1 });
+            });
+        });
+
+        describe ("mixed example #73", async () => {
+            const json = {
+                identifier: [
+                    {
+                        assigner: {
+                            reference: "Organization/2"
+                        }
+                    },
+                    {
+                        assigner: {
+                            reference: "Organization/3"
+                        }
+                    }
+                ]
+            };
+
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: json
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: { resourceType: "Organization", id: 2 }
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: { resourceType: "Organization", id: 3 }
+                });
+
+                const result = await client.request(
+                    "ExplanationOfBenefit/17",
+                    {
+                        resolveReferences: "identifier..assigner",
+                        graph: true
+                    }
+                );
+
+                expect(result.identifier).to.equal([
+                    {
+                        assigner: {
+                            resourceType: "Organization",
+                            id: 2
+                        }
+                    },
+                    {
+                        assigner: {
+                            resourceType: "Organization",
+                            id: 3
+                        }
+                    }
+                ]);
             });
         });
 

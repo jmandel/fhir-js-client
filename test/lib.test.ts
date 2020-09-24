@@ -14,12 +14,60 @@ describe("Lib", () => {
         it ("works as expected", () => {
             const data = { a: 1, b: [0, { a: 2 }] };
             expect(lib.setPath(data, "b.1.a", 3)).to.equal({ a: 1, b: [0, { a: 3 }] });
-            expect(lib.setPath(data, "b.2", 7)).to.equal({ a: 1, b: [0, { a: 3 }, 7] });
+            expect(lib.setPath(data, "b.2"  , 7)).to.equal({ a: 1, b: [0, { a: 3 }, 7] });
         });
 
         it ("does nothing if the first argument is null", () => {
             // @ts-ignore
             expect(lib.setPath(null, "b.1.a", 3)).to.equal(null);
+        });
+    });
+
+    describe("getPath", () => {
+        it ("returns the first arg if no path", () => {
+            const data = {};
+            expect(lib.getPath(data)).to.equal(data);
+        });
+
+        it ("returns the first arg for empty path", () => {
+            const data = {};
+            expect(lib.getPath(data, "")).to.equal(data);
+        });
+
+        it ("works as expected", () => {
+            const data = { a: 1, b: [0, { a: 2 }] };
+            expect(lib.getPath(data, "b.1.a")).to.equal(2);
+            expect(lib.getPath(data, "b.4.a")).to.equal(undefined);
+        });
+
+        it ("dive into arrays", () => {
+            const data = {
+                a: [
+                    { x: [ { y: 2, z: 3 } ] },
+                    { x: [ { y: 4, z: 5 } ] }
+                ]
+            };
+
+            const map = {
+                "a"           : [ { x: [ { y: 2, z: 3 } ] }, { x: [ { y: 4, z: 5 } ] } ],
+                "a."          : [ { x: [ { y: 2, z: 3 } ] }, { x: [ { y: 4, z: 5 } ] } ],
+                "a.."         : [ { x: [ { y: 2, z: 3 } ] }, { x: [ { y: 4, z: 5 } ] } ],
+                "a.length"    : 2,
+                "a.0"         : { x: [ { y: 2, z: 3 } ] },
+                "a.1"         : { x: [ { y: 4, z: 5 } ] },
+                "a..x"        : [ [ { y: 2, z: 3 } ], [ { y: 4, z: 5 } ] ], // data.a.map(o => o.x),
+                "a..x.length" : [ 1, 1 ], // data.a.map(o => o.x.length),
+                "a..x.0"      : [ { y: 2, z: 3 }, { y: 4, z: 5 } ], // data.a.map(o => o.x[0]),
+                "a..x.1"      : [ undefined, undefined ], // data.a.map(o => o.x[1]),
+                "a..x.0.y"    : [ 2, 4 ], // data.a.map(o => o.x[0].y),
+                "a..x.0.z"    : [ 3, 5 ], // data.a.map(o => o.x[0].z),
+                "a..x..y"     : [[2], [4]], // data.a.map(o => o.x.map(o => o.y)),
+                "a..x..z"     : [[3], [5]], // data.a.map(o => o.x.map(o => o.z)),
+            };
+
+            for (let path in map) {
+                expect(lib.getPath(data, path)).to.equal(map[path]);
+            }
         });
     });
 
