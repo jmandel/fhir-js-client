@@ -835,10 +835,14 @@ describe("FHIR.client", () => {
                         access_token: "x"
                     }
                 });
-                mockServer.mock({ status: 200, body: "OK" });
+                mockServer.mock({
+                    handler(req, res) {
+                        res.json(req.headers.authorization)
+                    }
+                });
                 const result = await client.request("/");
-                expect(result).to.equal("OK");
                 expect(client.state.tokenResponse.access_token).to.equal("x");
+                expect(result).to.equal("Bearer x");
             });
         });
 

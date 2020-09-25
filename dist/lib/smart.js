@@ -527,7 +527,7 @@ async function completeAuth(env) {
   // there is no code (but we have a state) or access token is found in state
 
 
-  const authorized = !code || ((_a = state === null || state === void 0 ? void 0 : state.tokenResponse) === null || _a === void 0 ? void 0 : _a.access_token); // If we are authorized already, then this is just a reload.
+  const authorized = !code || ((_a = state.tokenResponse) === null || _a === void 0 ? void 0 : _a.access_token); // If we are authorized already, then this is just a reload.
   // Otherwise, we have to complete the code flow
 
   if (!authorized && state.tokenUri) {
@@ -556,7 +556,7 @@ async function completeAuth(env) {
     await Storage.set(key, state);
     debug("Authorization successful!");
   } else {
-    debug(((_b = state === null || state === void 0 ? void 0 : state.tokenResponse) === null || _b === void 0 ? void 0 : _b.access_token) ? "Already authorized" : "No authorization needed");
+    debug(((_b = state.tokenResponse) === null || _b === void 0 ? void 0 : _b.access_token) ? "Already authorized" : "No authorization needed");
   }
 
   if (fullSessionStorageSupport) {

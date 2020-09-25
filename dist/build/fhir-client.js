@@ -11433,7 +11433,7 @@ var Client = /*#__PURE__*/function () {
     var _request = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee6(requestOptions, fhirOptions, _resolvedRefs) {
       var _this2 = this;
 
-      var _a, debugRequest, url, authHeader, options, signal, job;
+      var _a, debugRequest, url, options, signal, job;
 
       return _regenerator.default.wrap(function _callee6$(_context6) {
         while (1) {
@@ -11464,16 +11464,7 @@ var Client = /*#__PURE__*/function () {
                 url = String(requestOptions.url);
               }
 
-              url = lib_1.absolute(url, this.state.serverUrl); // authentication ------------------------------------------------------
-
-              authHeader = this.getAuthorizationHeader();
-
-              if (authHeader) {
-                requestOptions.headers = Object.assign({}, requestOptions.headers, {
-                  Authorization: authHeader
-                });
-              }
-
+              url = lib_1.absolute(url, this.state.serverUrl);
               options = {
                 graph: fhirOptions.graph !== false,
                 flat: !!fhirOptions.flat,
@@ -11482,12 +11473,28 @@ var Client = /*#__PURE__*/function () {
                 useRefreshToken: fhirOptions.useRefreshToken !== false,
                 onPage: typeof fhirOptions.onPage == "function" ? fhirOptions.onPage : undefined
               };
-              debugRequest("%s, options: %O, fhirOptions: %O", url, requestOptions, options);
-              signal = requestOptions.signal || undefined;
+              signal = requestOptions.signal || undefined; // Refresh the access token if needed
+
               job = options.useRefreshToken ? this.refreshIfNeeded({
                 signal: signal
-              }) : Promise.resolve(this.state);
-              return _context6.abrupt("return", job.then(function () {
+              }).then(function () {
+                return requestOptions;
+              }) : Promise.resolve(requestOptions);
+              return _context6.abrupt("return", job // Add the Authorization header now, after the access token might
+              // have been updated
+              .then(function (requestOptions) {
+                var authHeader = _this2.getAuthorizationHeader();
+
+                if (authHeader) {
+                  requestOptions.headers = Object.assign({}, requestOptions.headers, {
+                    Authorization: authHeader
+                  });
+                }
+
+                return requestOptions;
+              }) // Make the request
+              .then(function (requestOptions) {
+                debugRequest("%s, options: %O, fhirOptions: %O", url, requestOptions, options);
                 return lib_1.request(url, requestOptions);
               }) // Handle 401 ------------------------------------------------------
               .catch( /*#__PURE__*/function () {
@@ -11702,7 +11709,7 @@ var Client = /*#__PURE__*/function () {
                 });
               }));
 
-            case 14:
+            case 11:
             case "end":
               return _context6.stop();
           }
@@ -13919,7 +13926,7 @@ function _completeAuth() {
           case 34:
             // Assume the client has already completed a token exchange when
             // there is no code (but we have a state) or access token is found in state
-            authorized = !code || ((_a = state === null || state === void 0 ? void 0 : state.tokenResponse) === null || _a === void 0 ? void 0 : _a.access_token); // If we are authorized already, then this is just a reload.
+            authorized = !code || ((_a = state.tokenResponse) === null || _a === void 0 ? void 0 : _a.access_token); // If we are authorized already, then this is just a reload.
             // Otherwise, we have to complete the code flow
 
             if (!(!authorized && state.tokenUri)) {
@@ -13970,7 +13977,7 @@ function _completeAuth() {
             break;
 
           case 53:
-            debug(((_b = state === null || state === void 0 ? void 0 : state.tokenResponse) === null || _b === void 0 ? void 0 : _b.access_token) ? "Already authorized" : "No authorization needed");
+            debug(((_b = state.tokenResponse) === null || _b === void 0 ? void 0 : _b.access_token) ? "Already authorized" : "No authorization needed");
 
           case 54:
             if (!fullSessionStorageSupport) {

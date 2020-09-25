@@ -730,15 +730,6 @@ export default class Client
 
         url = absolute(url, this.state.serverUrl);
 
-        // authentication ------------------------------------------------------
-        const authHeader = this.getAuthorizationHeader();
-        if (authHeader) {
-            requestOptions.headers = {
-                ...requestOptions.headers,
-                Authorization: authHeader
-            };
-        }
-
         const options = {
             graph: fhirOptions.graph !== false,
             flat : !!fhirOptions.flat,
@@ -752,22 +743,38 @@ export default class Client
                 undefined
         };
 
-        debugRequest(
-            "%s, options: %O, fhirOptions: %O",
-            url,
-            requestOptions,
-            options
-        );
-
         const signal = (requestOptions as RequestInit).signal || undefined;
 
+        // Refresh the access token if needed
         const job = options.useRefreshToken ?
-            this.refreshIfNeeded({ signal }) :
-            Promise.resolve(this.state);
+            this.refreshIfNeeded({ signal }).then(() => requestOptions as fhirclient.RequestOptions) :
+            Promise.resolve(requestOptions as fhirclient.RequestOptions);
 
         return job
+
+            // Add the Authorization header now, after the access token might
+            // have been updated
+            .then(requestOptions => {
+                const authHeader = this.getAuthorizationHeader();
+                if (authHeader) {
+                    requestOptions.headers = {
+                        ...requestOptions.headers,
+                        Authorization: authHeader
+                    };
+                }
+                return requestOptions;
+            })
             
-            .then(() => request(url, requestOptions as fhirclient.RequestOptions) as Promise<T>)
+            // Make the request
+            .then(requestOptions => {
+                debugRequest(
+                    "%s, options: %O, fhirOptions: %O",
+                    url,
+                    requestOptions,
+                    options
+                );
+                return request(url, requestOptions) as Promise<T>
+            })
 
             // Handle 401 ------------------------------------------------------
             .catch(async (error: HttpError) => {

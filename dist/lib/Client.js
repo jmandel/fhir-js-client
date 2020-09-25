@@ -612,16 +612,7 @@ class Client {
       url = String(requestOptions.url);
     }
 
-    url = lib_1.absolute(url, this.state.serverUrl); // authentication ------------------------------------------------------
-
-    const authHeader = this.getAuthorizationHeader();
-
-    if (authHeader) {
-      requestOptions.headers = Object.assign(Object.assign({}, requestOptions.headers), {
-        Authorization: authHeader
-      });
-    }
-
+    url = lib_1.absolute(url, this.state.serverUrl);
     const options = {
       graph: fhirOptions.graph !== false,
       flat: !!fhirOptions.flat,
@@ -630,12 +621,28 @@ class Client {
       useRefreshToken: fhirOptions.useRefreshToken !== false,
       onPage: typeof fhirOptions.onPage == "function" ? fhirOptions.onPage : undefined
     };
-    debugRequest("%s, options: %O, fhirOptions: %O", url, requestOptions, options);
-    const signal = requestOptions.signal || undefined;
+    const signal = requestOptions.signal || undefined; // Refresh the access token if needed
+
     const job = options.useRefreshToken ? this.refreshIfNeeded({
       signal
-    }) : Promise.resolve(this.state);
-    return job.then(() => lib_1.request(url, requestOptions)) // Handle 401 ------------------------------------------------------
+    }).then(() => requestOptions) : Promise.resolve(requestOptions);
+    return job // Add the Authorization header now, after the access token might
+    // have been updated
+    .then(requestOptions => {
+      const authHeader = this.getAuthorizationHeader();
+
+      if (authHeader) {
+        requestOptions.headers = Object.assign(Object.assign({}, requestOptions.headers), {
+          Authorization: authHeader
+        });
+      }
+
+      return requestOptions;
+    }) // Make the request
+    .then(requestOptions => {
+      debugRequest("%s, options: %O, fhirOptions: %O", url, requestOptions, options);
+      return lib_1.request(url, requestOptions);
+    }) // Handle 401 ------------------------------------------------------
     .catch(async error => {
       if (error.status == 401) {
         // !accessToken -> not authorized -> No session. Need to launch.
