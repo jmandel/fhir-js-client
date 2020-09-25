@@ -40,6 +40,7 @@ The **fhirOptions** object is optional and can contain the following properties:
     - If the target is an array of references (E.g. [Patient.generalPractitioner](http://hl7.org/fhir/R4/patient-definitions.html#Patient.generalPractitioner)), you can request one or more of them by index (E.g. `generalPractitioner.0`). If the index is not specified, all the references in the array will be resolved.
     - The order in which the reference paths are specified does not matter. For example, if you use `["subject", "encounter.serviceProvider", "encounter"]`, the library should figure out that `encounter.serviceProvider` must be fetched after `encounter`. In fact, in this case it will first fetch subject and encounter in parallel, and then proceed to encounter.serviceProvider.
     - This option does not work with contained references (they are "already resolved" anyway).
+    - You can use `..` to loop through arrays. For example `identifier..assigner` will match if `identifier` is an array of objects having an `assigner` reference property. This is not recursive, meaning that `..` can only be used once in each path expression and paths like `identifier..assigner..whatever` will not work.
 - **useRefreshToken** `Boolean` - **Defaults to `true`**. If the client is authorized, it will possess an access token and pass it with the requests it makes. When that token expires, you should get back a `401 Unauthorized` response. To prevent this from happening, the client will check the access token expiration time before making requests. If the token is expired, or if it is about to expire in the next 10 seconds, a refresh call will be made to obtain new access token before making the actual request. By setting `useRefreshToken` to `false` you can disable this behavior. There are `refresh` and `refreshIfNeeded` methods on the client (described below) that can be called manually to renew the access token.
 
 ***Examples:***
@@ -96,8 +97,9 @@ client.request(
     resolveReferences: [
         "context",                 // The Encounter
         "context.serviceProvider", // The Organization (hospital)
-        "performer.0",             // The Practitioner
-        "subject"                  // The Patient
+        "performer.0",             // The Practitioner (or use "performer" to get all practitioners)
+        "subject",                 // The Patient
+        "identifier..assigner"     // All identifier assigners
     ]
 );
 ```
