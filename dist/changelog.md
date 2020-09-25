@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.3.8
+- Changed the way the "auto-refresh" flow works. Before `2.3.8` the client was obtaining new access token if a request fails with `401`. Since `2.3.8`, the client will check the access token expiration time before making a request. This is done to avoid CORS-related issues with servers that do not emit CORS headers in case of error.
+- The refresh token requests will now be sent without credentials. In the rare cases when the auth server requires the app to send cookies, developers will have to configure the client to do so.
+- Added support for the `..` path operator in `client.getPath`, `client.getState` and the `resolveReferences` option of `client.request`. This was done to allow paths like `identifier..assigner`, which will match if identifier is an array of objects having an assigner reference property.
+
 ## v2.3.5
 - The `completeInTarget` authorize option defaults to `true` if the app was loaded in an iframe
 - The `redirectUri` option accepts absolute URLs and does not append "/" to them
