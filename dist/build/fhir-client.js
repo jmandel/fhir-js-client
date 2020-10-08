@@ -12010,8 +12010,24 @@ Object.defineProperty(exports, "__esModule", {
 var HttpError = /*#__PURE__*/function (_Error) {
   (0, _inheritsLoose2.default)(HttpError, _Error);
 
-  function HttpError(message, statusCode, statusText) {
+  function HttpError(message, statusCode, statusText, body) {
     var _this;
+
+    if (message === void 0) {
+      message = "Unknown error";
+    }
+
+    if (statusCode === void 0) {
+      statusCode = 0;
+    }
+
+    if (statusText === void 0) {
+      statusText = "Error";
+    }
+
+    if (body === void 0) {
+      body = null;
+    }
 
     _this = _Error.call(this, message) || this;
     _this.message = message;
@@ -12019,6 +12035,7 @@ var HttpError = /*#__PURE__*/function (_Error) {
     _this.statusCode = statusCode;
     _this.status = statusCode;
     _this.statusText = statusText;
+    _this.body = body;
     return _this;
   }
 
@@ -12030,34 +12047,9 @@ var HttpError = /*#__PURE__*/function (_Error) {
       statusCode: this.statusCode,
       status: this.status,
       statusText: this.statusText,
-      message: this.message
+      message: this.message,
+      body: this.body
     };
-  };
-
-  HttpError.create = function create(failure) {
-    // start with generic values
-    var status = 0;
-    var statusText = "Error";
-    var message = "Unknown error";
-
-    if (failure) {
-      if (typeof failure == "object") {
-        if (failure instanceof Error) {
-          message = failure.message;
-        } else if (failure.error) {
-          status = failure.error.status || 0;
-          statusText = failure.error.statusText || "Error";
-
-          if (failure.error.responseText) {
-            message = failure.error.responseText;
-          }
-        }
-      } else if (typeof failure == "string") {
-        message = failure;
-      }
-    }
-
-    return new HttpError(message, status, statusText);
   };
 
   return HttpError;
@@ -12655,69 +12647,73 @@ function humanizeError(_x2) {
 
 function _humanizeError() {
   _humanizeError = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2(resp) {
-    var msg, type, json, text;
+    var msg, body, type;
     return _regenerator.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
             msg = resp.status + " " + resp.statusText + "\nURL: " + resp.url;
-            _context2.prev = 1;
+            body = null;
+            _context2.prev = 2;
             type = resp.headers.get("Content-Type") || "text/plain";
 
             if (!type.match(/\bjson\b/i)) {
-              _context2.next = 8;
+              _context2.next = 11;
               break;
             }
 
-            _context2.next = 6;
+            _context2.next = 7;
             return resp.json();
 
-          case 6:
-            json = _context2.sent;
+          case 7:
+            body = _context2.sent;
 
-            if (json.error) {
-              msg += "\n" + json.error;
+            if (body.error) {
+              msg += "\n" + body.error;
 
-              if (json.error_description) {
-                msg += ": " + json.error_description;
+              if (body.error_description) {
+                msg += ": " + body.error_description;
               }
             } else {
-              msg += "\n\n" + JSON.stringify(json, null, 4);
+              msg += "\n\n" + JSON.stringify(body, null, 4);
             }
 
-          case 8:
+            _context2.next = 16;
+            break;
+
+          case 11:
             if (!type.match(/^text\//i)) {
-              _context2.next = 13;
+              _context2.next = 16;
               break;
             }
 
-            _context2.next = 11;
+            _context2.next = 14;
             return resp.text();
 
-          case 11:
-            text = _context2.sent;
+          case 14:
+            body = _context2.sent;
 
-            if (text) {
-              msg += "\n\n" + text;
+            if (body) {
+              msg += "\n\n" + body;
             }
 
-          case 13:
-            _context2.next = 17;
+          case 16:
+            _context2.next = 20;
             break;
 
-          case 15:
-            _context2.prev = 15;
-            _context2.t0 = _context2["catch"](1);
-
-          case 17:
-            throw new HttpError_1.default(msg, resp.status, resp.statusText);
-
           case 18:
+            _context2.prev = 18;
+            _context2.t0 = _context2["catch"](2);
+
+          case 20:
+            throw new HttpError_1.default(msg, resp.status, resp.statusText, body);
+
+          case 21:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, null, [[1, 15]]);
+    }, _callee2, null, [[2, 18]]);
   }));
   return _humanizeError.apply(this, arguments);
 }

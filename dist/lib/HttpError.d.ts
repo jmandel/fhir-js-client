@@ -1,10 +1,4 @@
-interface ErrorResponse {
-    error?: {
-        status?: number;
-        statusText?: string;
-        responseText?: string;
-    };
-}
+import { fhirclient } from "./types";
 export default class HttpError extends Error {
     /**
      * The HTTP status code for this error
@@ -20,14 +14,18 @@ export default class HttpError extends Error {
      * The HTTP status text corresponding to this error
      */
     statusText: string;
-    constructor(message: string, statusCode: number, statusText: string);
+    /**
+     * The parsed response body. Can be an OperationOutcome resource, a string
+     * or null.
+     */
+    body: fhirclient.FHIR.Resource | string | null;
+    constructor(message?: string, statusCode?: number, statusText?: string, body?: fhirclient.FHIR.Resource | string | null);
     toJSON(): {
         name: string;
         statusCode: number;
         status: number;
         statusText: string;
         message: string;
+        body: string | fhirclient.FHIR.Resource;
     };
-    static create(failure?: string | Error | ErrorResponse): HttpError;
 }
-export {};

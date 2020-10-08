@@ -175,32 +175,33 @@ export function fetchConformanceStatement(baseUrl = "/", requestOptions?: Reques
  */
 export async function humanizeError(resp: Response) {
     let msg = `${resp.status} ${resp.statusText}\nURL: ${resp.url}`;
+    let body = null;
 
     try {
         const type = resp.headers.get("Content-Type") || "text/plain";
         if (type.match(/\bjson\b/i)) {
-            const json = await resp.json();
-            if (json.error) {
-                msg += "\n" + json.error;
-                if (json.error_description) {
-                    msg += ": " + json.error_description;
+            body = await resp.json();
+            if (body.error) {
+                msg += "\n" + body.error;
+                if (body.error_description) {
+                    msg += ": " + body.error_description;
                 }
             }
             else {
-                msg += "\n\n" + JSON.stringify(json, null, 4);
+                msg += "\n\n" + JSON.stringify(body, null, 4);
             }
         }
-        if (type.match(/^text\//i)) {
-            const text = await resp.text();
-            if (text) {
-                msg += "\n\n" + text;
+        else if (type.match(/^text\//i)) {
+            body = await resp.text();
+            if (body) {
+                msg += "\n\n" + body;
             }
         }
     } catch (_) {
         // ignore
     }
 
-    throw new HttpError(msg, resp.status, resp.statusText);
+    throw new HttpError(msg, resp.status, resp.statusText, body);
 }
 
 /**

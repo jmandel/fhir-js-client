@@ -7,80 +7,102 @@ const { it, describe } = lab;
 
 describe("HttpError", () => {
     it ("create with no args", () => {
-        const error = HttpError.create();
+        const error = new HttpError();
         expect(error.name).to.equal("HttpError");
         expect(error.message).to.equal("Unknown error");
         expect(error.statusCode).to.equal(0);
         expect(error.status).to.equal(0);
         expect(error.statusText).to.equal("Error");
+        expect(error.body).to.equal(null);
     });
 
-    it ("create from string", () => {
-        const error = HttpError.create("Test Error");
+    it ("can set the message", () => {
+        const error = new HttpError("Test Error");
         expect(error.name).to.equal("HttpError");
         expect(error.message).to.equal("Test Error");
         expect(error.statusCode).to.equal(0);
         expect(error.status).to.equal(0);
         expect(error.statusText).to.equal("Error");
+        expect(error.body).to.equal(null);
         expect(JSON.stringify(error)).to.equal(JSON.stringify({
             name      : "HttpError",
             statusCode: 0,
             status    : 0,
             statusText: "Error",
-            message   : "Test Error"
+            message   : "Test Error",
+            body      : null
         }));
     });
 
-    it ("create from Error", () => {
-        const error = HttpError.create(new Error("Test Error"));
+    it ("can set the statusCode", () => {
+        const error = new HttpError("Test Error", 234);
         expect(error.name).to.equal("HttpError");
         expect(error.message).to.equal("Test Error");
-        expect(error.statusCode).to.equal(0);
-        expect(error.status).to.equal(0);
+        expect(error.statusCode).to.equal(234);
+        expect(error.status).to.equal(234);
         expect(error.statusText).to.equal("Error");
+        expect(error.body).to.equal(null);
+        expect(JSON.stringify(error)).to.equal(JSON.stringify({
+            name      : "HttpError",
+            statusCode: 234,
+            status    : 234,
+            statusText: "Error",
+            message   : "Test Error",
+            body      : null
+        }));
     });
 
-    it ("create from response object having error property", () => {
-        const error = HttpError.create({
-            error: {
-                status: 404,
-                statusText: "Not Found",
-                responseText: "Test Error"
-            }
-        });
+    it ("can set the statusText", () => {
+        const error = new HttpError("Test Error", 234, "Test");
         expect(error.name).to.equal("HttpError");
         expect(error.message).to.equal("Test Error");
-        expect(error.statusCode).to.equal(404);
-        expect(error.status).to.equal(404);
-        expect(error.statusText).to.equal("Not Found");
+        expect(error.statusCode).to.equal(234);
+        expect(error.status).to.equal(234);
+        expect(error.statusText).to.equal("Test");
+        expect(error.body).to.equal(null);
+        expect(JSON.stringify(error)).to.equal(JSON.stringify({
+            name      : "HttpError",
+            statusCode: 234,
+            status    : 234,
+            statusText: "Test",
+            message   : "Test Error",
+            body      : null
+        }));
     });
 
-    it ("create from incompatible object", () => {
-        // @ts-ignore
-        const error = HttpError.create({ error: "test" });
+    it ("can set the body as text", () => {
+        const error = new HttpError("Test Error", 234, "Test", "test body");
         expect(error.name).to.equal("HttpError");
-        expect(error.message).to.equal("Unknown error");
-        expect(error.statusCode).to.equal(0);
-        expect(error.status).to.equal(0);
-        expect(error.statusText).to.equal("Error");
+        expect(error.message).to.equal("Test Error");
+        expect(error.statusCode).to.equal(234);
+        expect(error.status).to.equal(234);
+        expect(error.statusText).to.equal("Test");
+        expect(error.body).to.equal("test body");
+        expect(JSON.stringify(error)).to.equal(JSON.stringify({
+            name      : "HttpError",
+            statusCode: 234,
+            status    : 234,
+            statusText: "Test",
+            message   : "Test Error",
+            body      : "test body"
+        }));
     });
 
-    it ("create from empty object", () => {
-        const error = HttpError.create({});
+    it ("can set the body as object", () => {
+        const error = new HttpError("Test Error", 234, "Test", { a: 2 });
         expect(error.name).to.equal("HttpError");
-        expect(error.message).to.equal("Unknown error");
-        expect(error.statusCode).to.equal(0);
-        expect(error.status).to.equal(0);
-        expect(error.statusText).to.equal("Error");
-    });
-
-    it ("create from incompatible argument", () => {
-        // @ts-ignore
-        const error = HttpError.create(true);
-        expect(error.name).to.equal("HttpError");
-        expect(error.message).to.equal("Unknown error");
-        expect(error.statusCode).to.equal(0);
-        expect(error.status).to.equal(0);
-        expect(error.statusText).to.equal("Error");
+        expect(error.message).to.equal("Test Error");
+        expect(error.statusCode).to.equal(234);
+        expect(error.status).to.equal(234);
+        expect(error.statusText).to.equal("Test");
+        expect(error.body).to.equal({ a: 2 });
+        expect(JSON.stringify(error)).to.equal(JSON.stringify({
+            name      : "HttpError",
+            statusCode: 234,
+            status    : 234,
+            statusText: "Test",
+            message   : "Test Error",
+            body      : { a: 2 }
+        }));
     });
 });

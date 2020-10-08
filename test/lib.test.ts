@@ -99,19 +99,31 @@ describe("Lib", () => {
         });
     });
 
-    describe("humanizeError", () => {
+    describe("humanizeError", async () => {
         it ("parses json", async () => {
-            const res = new Response("{}", {
+            const json = { a: 2 };
+            const res = new Response(JSON.stringify(json, null, 4), {
                 status: 400,
                 statusText: "Bad Request",
                 headers: {
                     "Content-Type": "application/json"
                 }
             });
-            await expect(lib.humanizeError(res)).to.reject(
-                HttpError,
-                "400 Bad Request\nURL: \n\n{}"
-            );
+
+            let error;
+            try {
+                await lib.humanizeError(res);
+            } catch(err) {
+                error = err;
+            }
+
+            if(!error) {
+                throw new Error("Should have failed");
+            }
+
+            expect(error).to.be.an.instanceOf(HttpError);
+            expect(error.message).to.equal('400 Bad Request\nURL: \n\n' + JSON.stringify(json, null, 4));
+            expect(error.body).to.equal(json);
         });
 
         it ("parses json and respects 'error'", async () => {
@@ -131,10 +143,11 @@ describe("Lib", () => {
         });
 
         it ("parses json and respects 'error' and 'error_description'", async () => {
-            const res = new Response(JSON.stringify({
+            const json = {
                 error: "my-error",
                 error_description: "my-error-description"
-            }), {
+            };
+            const res = new Response(JSON.stringify(json), {
                 status: 400,
                 statusText: "Bad Request",
                 headers: {
@@ -155,10 +168,46 @@ describe("Lib", () => {
                     "Content-Type": "text/plain"
                 }
             });
-            await expect(lib.humanizeError(res)).to.reject(
-                HttpError,
-                "400 Bad Request\nURL: \n\nmy-error"
-            );
+
+            let error;
+            try {
+                await lib.humanizeError(res);
+            } catch(err) {
+                error = err;
+            }
+
+            if(!error) {
+                throw new Error("Should have failed");
+            }
+
+            expect(error).to.be.an.instanceOf(HttpError);
+            expect(error.message).to.equal('400 Bad Request\nURL: \n\nmy-error');
+            expect(error.body).to.equal("my-error");
+        });
+
+        it ("produces generic error for unknown response types", async () => {
+            const res = new Response("my-error", {
+                status: 400,
+                statusText: "Bad Request",
+                headers: {
+                    "Content-Type": "application/pdf"
+                }
+            });
+
+            let error;
+            try {
+                await lib.humanizeError(res);
+            } catch(err) {
+                error = err;
+            }
+
+            if(!error) {
+                throw new Error("Should have failed");
+            }
+
+            expect(error).to.be.an.instanceOf(HttpError);
+            expect(error.message).to.equal('400 Bad Request\nURL: ');
+            expect(error.body).to.equal(null);
         });
     });
 

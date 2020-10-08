@@ -2017,13 +2017,14 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 class HttpError extends Error {
-  constructor(message, statusCode, statusText) {
+  constructor(message = "Unknown error", statusCode = 0, statusText = "Error", body = null) {
     super(message);
     this.message = message;
     this.name = "HttpError";
     this.statusCode = statusCode;
     this.status = statusCode;
     this.statusText = statusText;
+    this.body = body;
   }
 
   toJSON() {
@@ -2032,34 +2033,9 @@ class HttpError extends Error {
       statusCode: this.statusCode,
       status: this.status,
       statusText: this.statusText,
-      message: this.message
+      message: this.message,
+      body: this.body
     };
-  }
-
-  static create(failure) {
-    // start with generic values
-    let status = 0;
-    let statusText = "Error";
-    let message = "Unknown error";
-
-    if (failure) {
-      if (typeof failure == "object") {
-        if (failure instanceof Error) {
-          message = failure.message;
-        } else if (failure.error) {
-          status = failure.error.status || 0;
-          statusText = failure.error.statusText || "Error";
-
-          if (failure.error.responseText) {
-            message = failure.error.responseText;
-          }
-        }
-      } else if (typeof failure == "string") {
-        message = failure;
-      }
-    }
-
-    return new HttpError(message, status, statusText);
   }
 
 }
@@ -2517,35 +2493,34 @@ exports.fetchConformanceStatement = fetchConformanceStatement;
 
 async function humanizeError(resp) {
   let msg = `${resp.status} ${resp.statusText}\nURL: ${resp.url}`;
+  let body = null;
 
   try {
     const type = resp.headers.get("Content-Type") || "text/plain";
 
     if (type.match(/\bjson\b/i)) {
-      const json = await resp.json();
+      body = await resp.json();
 
-      if (json.error) {
-        msg += "\n" + json.error;
+      if (body.error) {
+        msg += "\n" + body.error;
 
-        if (json.error_description) {
-          msg += ": " + json.error_description;
+        if (body.error_description) {
+          msg += ": " + body.error_description;
         }
       } else {
-        msg += "\n\n" + JSON.stringify(json, null, 4);
+        msg += "\n\n" + JSON.stringify(body, null, 4);
       }
-    }
+    } else if (type.match(/^text\//i)) {
+      body = await resp.text();
 
-    if (type.match(/^text\//i)) {
-      const text = await resp.text();
-
-      if (text) {
-        msg += "\n\n" + text;
+      if (body) {
+        msg += "\n\n" + body;
       }
     }
   } catch (_) {// ignore
   }
 
-  throw new HttpError_1.default(msg, resp.status, resp.statusText);
+  throw new HttpError_1.default(msg, resp.status, resp.statusText, body);
 }
 
 exports.humanizeError = humanizeError;

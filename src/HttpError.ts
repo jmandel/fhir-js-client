@@ -1,10 +1,6 @@
-interface ErrorResponse {
-    error?: {
-        status?: number
-        statusText?: string
-        responseText?: string
-    };
-}
+import { fhirclient } from "./types";
+
+
 export default class HttpError extends Error
 {
     /**
@@ -24,13 +20,25 @@ export default class HttpError extends Error
      */
     statusText: string;
 
-    constructor(message: string, statusCode: number, statusText: string) {
+    /**
+     * The parsed response body. Can be an OperationOutcome resource, a string
+     * or null.
+     */
+    body: fhirclient.FHIR.Resource | string | null;
+
+    constructor(
+        message   : string = "Unknown error",
+        statusCode: number = 0,
+        statusText: string = "Error",
+        body      : fhirclient.FHIR.Resource | string | null = null
+    ) {
         super(message);
         this.message    = message;
         this.name       = "HttpError";
         this.statusCode = statusCode;
         this.status     = statusCode;
         this.statusText = statusText;
+        this.body       = body;
     }
 
     toJSON() {
@@ -39,34 +47,8 @@ export default class HttpError extends Error
             statusCode: this.statusCode,
             status    : this.status,
             statusText: this.statusText,
-            message   : this.message
+            message   : this.message,
+            body      : this.body
         };
-    }
-
-    static create(failure?: string | Error | ErrorResponse) {
-        // start with generic values
-        let status: string | number = 0;
-        let statusText = "Error";
-        let message = "Unknown error";
-
-        if (failure) {
-            if (typeof failure == "object") {
-                if (failure instanceof Error) {
-                    message = failure.message;
-                }
-                else if (failure.error) {
-                    status = failure.error.status || 0;
-                    statusText = failure.error.statusText || "Error";
-                    if (failure.error.responseText) {
-                        message = failure.error.responseText;
-                    }
-                }
-            }
-            else if (typeof failure == "string") {
-                message = failure;
-            }
-        }
-
-        return new HttpError(message, status, statusText);
     }
 }
