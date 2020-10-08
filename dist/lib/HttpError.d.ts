@@ -15,17 +15,17 @@ export default class HttpError extends Error {
      */
     statusText: string;
     /**
-     * The parsed response body. Can be an OperationOutcome resource, a string
-     * or null.
+     * The parsed response body. Can be an OperationOutcome resource, s JSON
+     * object, a string or null.
      */
-    body: fhirclient.FHIR.Resource | string | null;
-    constructor(message?: string, statusCode?: number, statusText?: string, body?: fhirclient.FHIR.Resource | string | null);
+    body: fhirclient.JsonObject | string | null;
+    constructor(message?: string, statusCode?: number, statusText?: string, body?: fhirclient.JsonObject | string | null);
     toJSON(): {
         name: string;
         statusCode: number;
         status: number;
         statusText: string;
         message: string;
-        body: string | fhirclient.FHIR.Resource;
+        body: string | fhirclient.JsonObject;
     };
 }

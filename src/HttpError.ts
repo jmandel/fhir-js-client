@@ -21,16 +21,16 @@ export default class HttpError extends Error
     statusText: string;
 
     /**
-     * The parsed response body. Can be an OperationOutcome resource, a string
-     * or null.
+     * The parsed response body. Can be an OperationOutcome resource, s JSON
+     * object, a string or null.
      */
-    body: fhirclient.FHIR.Resource | string | null;
+    body: fhirclient.JsonObject | string | null;
 
     constructor(
         message   : string = "Unknown error",
         statusCode: number = 0,
         statusText: string = "Error",
-        body      : fhirclient.FHIR.Resource | string | null = null
+        body      : fhirclient.JsonObject | string | null = null
     ) {
         super(message);
         this.message    = message;
