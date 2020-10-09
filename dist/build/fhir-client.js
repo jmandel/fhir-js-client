@@ -11740,19 +11740,11 @@ var Client = /*#__PURE__*/function () {
     }
 
     var accessToken = this.getState("tokenResponse.access_token");
-    var outdated = false;
+    var refreshToken = this.getState("tokenResponse.refresh_token");
+    var expiresAt = this.state.expiresAt || 0;
 
-    if (accessToken) {
-      var tokenBody = JSON.parse(this.environment.atob(accessToken.split(".")[1]));
-      outdated = tokenBody.exp - 10 < Date.now() / 1000;
-    }
-
-    if (outdated) {
-      var refreshToken = this.getState("tokenResponse.refresh_token");
-
-      if (refreshToken) {
-        return this.refresh(requestOptions);
-      }
+    if (accessToken && refreshToken && expiresAt - 10 < Date.now() / 1000) {
+      return this.refresh(requestOptions);
     }
 
     return Promise.resolve(this.state);
@@ -11837,6 +11829,7 @@ var Client = /*#__PURE__*/function () {
 
         debugRefresh("Received new access token response %O", data);
         Object.assign(_this3.state.tokenResponse, data);
+        _this3.state.expiresAt = lib_1.getAccessTokenExpiration(data, _this3.environment);
         return _this3.state;
       }).catch(function (error) {
         var _a, _b;
@@ -12390,7 +12383,7 @@ var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/r
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.jwtDecode = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.humanizeError = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
+exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.getAccessTokenExpiration = exports.jwtDecode = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.humanizeError = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
 
 var HttpError_1 = __webpack_require__(/*! ./HttpError */ "./src/HttpError.ts");
 
@@ -12856,10 +12849,39 @@ exports.randomString = randomString;
 
 function jwtDecode(token, env) {
   var payload = token.split(".")[1];
-  return JSON.parse(env.atob(payload));
+  return payload ? JSON.parse(env.atob(payload)) : null;
 }
 
 exports.jwtDecode = jwtDecode;
+/**
+ * Given a token response, computes and returns the expiresAt timestamp.
+ * Note that this should only be used immediately after an access token is
+ * received, otherwise the computed timestamp will be incorrect.
+ * @param tokenResponse
+ * @param env
+ */
+
+function getAccessTokenExpiration(tokenResponse, env) {
+  var now = Math.floor(Date.now() / 1000); // Option 1 - using the expires_in property of the token response
+
+  if (tokenResponse.expires_in) {
+    return now + tokenResponse.expires_in;
+  } // Option 2 - using the exp property of JWT tokens (must not assume JWT!)
+
+
+  if (tokenResponse.access_token) {
+    var tokenBody = jwtDecode(tokenResponse.access_token, env);
+
+    if (tokenBody && tokenBody.exp) {
+      return tokenBody.exp;
+    }
+  } // Option 3 - if none of the above worked set this to 5 minutes after now
+
+
+  return now + 300;
+}
+
+exports.getAccessTokenExpiration = getAccessTokenExpiration;
 /**
  * Groups the observations by code. Returns a map that will look like:
  * ```js
@@ -13926,7 +13948,7 @@ function _completeAuth() {
             // Otherwise, we have to complete the code flow
 
             if (!(!authorized && state.tokenUri)) {
-              _context2.next = 53;
+              _context2.next = 54;
               break;
             }
 
@@ -13959,37 +13981,39 @@ function _completeAuth() {
             throw new Error("Failed to obtain access token.");
 
           case 47:
-            // save the tokenResponse so that we don't have to re-authorize on
+            // Now we need to determine when is this authorization going to expire
+            state.expiresAt = lib_1.getAccessTokenExpiration(tokenResponse, env); // save the tokenResponse so that we don't have to re-authorize on
             // every page reload
+
             state = Object.assign({}, state, {
               tokenResponse: tokenResponse
             });
-            _context2.next = 50;
+            _context2.next = 51;
             return Storage.set(key, state);
 
-          case 50:
+          case 51:
             debug("Authorization successful!");
-            _context2.next = 54;
+            _context2.next = 55;
             break;
 
-          case 53:
+          case 54:
             debug(((_b = state.tokenResponse) === null || _b === void 0 ? void 0 : _b.access_token) ? "Already authorized" : "No authorization needed");
 
-          case 54:
+          case 55:
             if (!fullSessionStorageSupport) {
-              _context2.next = 57;
+              _context2.next = 58;
               break;
             }
 
-            _context2.next = 57;
+            _context2.next = 58;
             return Storage.set(settings_1.SMART_KEY, key);
 
-          case 57:
+          case 58:
             client = new Client_1.default(env, state);
             debug("Created client instance: %O", client);
             return _context2.abrupt("return", client);
 
-          case 60:
+          case 61:
           case "end":
             return _context2.stop();
         }

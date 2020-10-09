@@ -370,7 +370,7 @@ export function byCode(
         if (concept && Array.isArray(concept.coding)) {
             concept.coding.forEach(({ code }) => {
                 if (code) {
-                    ret[code] = ret[code] || [] as any;
+                    ret[code] = ret[code] || [] as fhirclient.FHIR.Observation[];
                     ret[code].push(observation);
                 }
             });

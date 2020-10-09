@@ -1774,19 +1774,11 @@ class Client {
 
   refreshIfNeeded(requestOptions = {}) {
     const accessToken = this.getState("tokenResponse.access_token");
-    let outdated = false;
+    const refreshToken = this.getState("tokenResponse.refresh_token");
+    const expiresAt = this.state.expiresAt || 0;
 
-    if (accessToken) {
-      const tokenBody = JSON.parse(this.environment.atob(accessToken.split(".")[1]));
-      outdated = tokenBody.exp - 10 < Date.now() / 1000;
-    }
-
-    if (outdated) {
-      const refreshToken = this.getState("tokenResponse.refresh_token");
-
-      if (refreshToken) {
-        return this.refresh(requestOptions);
-      }
+    if (accessToken && refreshToken && expiresAt - 10 < Date.now() / 1000) {
+      return this.refresh(requestOptions);
     }
 
     return Promise.resolve(this.state);
@@ -1866,6 +1858,7 @@ class Client {
 
         debugRefresh("Received new access token response %O", data);
         Object.assign(this.state.tokenResponse, data);
+        this.state.expiresAt = lib_1.getAccessTokenExpiration(data, this.environment);
         return this.state;
       }).catch(error => {
         var _a, _b;
@@ -2278,7 +2271,7 @@ module.exports = FHIR; // $lab:coverage:on$
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.jwtDecode = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.humanizeError = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
+exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.getAccessTokenExpiration = exports.jwtDecode = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.humanizeError = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
 
 const HttpError_1 = __webpack_require__(/*! ./HttpError */ "./src/HttpError.ts");
 
@@ -2643,10 +2636,39 @@ exports.randomString = randomString;
 
 function jwtDecode(token, env) {
   const payload = token.split(".")[1];
-  return JSON.parse(env.atob(payload));
+  return payload ? JSON.parse(env.atob(payload)) : null;
 }
 
 exports.jwtDecode = jwtDecode;
+/**
+ * Given a token response, computes and returns the expiresAt timestamp.
+ * Note that this should only be used immediately after an access token is
+ * received, otherwise the computed timestamp will be incorrect.
+ * @param tokenResponse
+ * @param env
+ */
+
+function getAccessTokenExpiration(tokenResponse, env) {
+  const now = Math.floor(Date.now() / 1000); // Option 1 - using the expires_in property of the token response
+
+  if (tokenResponse.expires_in) {
+    return now + tokenResponse.expires_in;
+  } // Option 2 - using the exp property of JWT tokens (must not assume JWT!)
+
+
+  if (tokenResponse.access_token) {
+    let tokenBody = jwtDecode(tokenResponse.access_token, env);
+
+    if (tokenBody && tokenBody.exp) {
+      return tokenBody.exp;
+    }
+  } // Option 3 - if none of the above worked set this to 5 minutes after now
+
+
+  return now + 300;
+}
+
+exports.getAccessTokenExpiration = getAccessTokenExpiration;
 /**
  * Groups the observations by code. Returns a map that will look like:
  * ```js
@@ -3462,9 +3484,11 @@ async function completeAuth(env) {
 
     if (!tokenResponse.access_token) {
       throw new Error("Failed to obtain access token.");
-    } // save the tokenResponse so that we don't have to re-authorize on
-    // every page reload
+    } // Now we need to determine when is this authorization going to expire
 
+
+    state.expiresAt = lib_1.getAccessTokenExpiration(tokenResponse, env); // save the tokenResponse so that we don't have to re-authorize on
+    // every page reload
 
     state = { ...state,
       tokenResponse

@@ -757,19 +757,11 @@ class Client {
 
   refreshIfNeeded(requestOptions = {}) {
     const accessToken = this.getState("tokenResponse.access_token");
-    let outdated = false;
+    const refreshToken = this.getState("tokenResponse.refresh_token");
+    const expiresAt = this.state.expiresAt || 0;
 
-    if (accessToken) {
-      const tokenBody = JSON.parse(this.environment.atob(accessToken.split(".")[1]));
-      outdated = tokenBody.exp - 10 < Date.now() / 1000;
-    }
-
-    if (outdated) {
-      const refreshToken = this.getState("tokenResponse.refresh_token");
-
-      if (refreshToken) {
-        return this.refresh(requestOptions);
-      }
+    if (accessToken && refreshToken && expiresAt - 10 < Date.now() / 1000) {
+      return this.refresh(requestOptions);
     }
 
     return Promise.resolve(this.state);
@@ -849,6 +841,7 @@ class Client {
 
         debugRefresh("Received new access token response %O", data);
         Object.assign(this.state.tokenResponse, data);
+        this.state.expiresAt = lib_1.getAccessTokenExpiration(data, this.environment);
         return this.state;
       }).catch(error => {
         var _a, _b;

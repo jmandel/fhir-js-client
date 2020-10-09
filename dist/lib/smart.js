@@ -546,9 +546,11 @@ async function completeAuth(env) {
 
     if (!tokenResponse.access_token) {
       throw new Error("Failed to obtain access token.");
-    } // save the tokenResponse so that we don't have to re-authorize on
-    // every page reload
+    } // Now we need to determine when is this authorization going to expire
 
+
+    state.expiresAt = lib_1.getAccessTokenExpiration(tokenResponse, env); // save the tokenResponse so that we don't have to re-authorize on
+    // every page reload
 
     state = Object.assign(Object.assign({}, state), {
       tokenResponse

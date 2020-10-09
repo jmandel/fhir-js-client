@@ -554,11 +554,11 @@ describe("FHIR.client", () => {
                 mockServer.mock({
                     headers: { "content-type": "application/json" },
                     status: 200,
-                    body: { id: "encounter-id" }
+                    body: { resourceType: "Encounter", id: "encounter-id" }
                 });
                 (client.state.tokenResponse as any).encounter = "whatever";
                 const encounter = await client.encounter.read();
-                expect(encounter).to.equal({ id: "encounter-id" });
+                expect(encounter).to.equal({ resourceType: "Encounter", id: "encounter-id" });
             });
         });
 
@@ -602,7 +602,7 @@ describe("FHIR.client", () => {
                 mockServer.mock({
                     headers: { "content-type": "application/json" },
                     status: 200,
-                    body: { id: "user-id" }
+                    body: { resourceType: "Patient", id: "user-id" }
                 });
                 (client.state.tokenResponse as any).id_token =
                 "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9." +
@@ -620,7 +620,7 @@ describe("FHIR.client", () => {
                 "pmtxVVHiVf-FYXzTFmn4cGe2PsNJfBl8R_zow2n6qaSANdvSxJDE4D" +
                 "UgIJ6H18wiSJJHp6Plf_bapccAwxbx-zZCw";
                 const user = await client.user.read();
-                expect(user).to.equal({ id: "user-id" });
+                expect(user).to.equal({ resourceType: "Patient", id: "user-id" });
             });
         });
 
@@ -3317,14 +3317,10 @@ describe("FHIR.client", () => {
             const client = new Client(env, "http://localhost");
             const observation1 = require("./mocks/Observation-1.json");
             const observation2 = require("./mocks/Observation-2.json");
-            // const patient1     = require("./mocks/Patient-1.json");
-            // const patient2     = require("./mocks/Patient-2.json");
 
             const resources = [
                 observation1,
                 observation2,
-                // patient1,
-                // patient2,
                 {},
                 {
                     resourceType: "Observation",
@@ -3349,17 +3345,17 @@ describe("FHIR.client", () => {
                 }
             ];
 
-            expect(client.byCode(resources, "code")).to.equal({
+            expect<fhirclient.ObservationMap>(client.byCode(resources, "code")).to.equal({
                 "55284-4": [ observation1 ],
                 "6082-2" : [ observation2 ]
             });
 
-            expect(client.byCode(resources, "category")).to.equal({
+            expect<fhirclient.ObservationMap>(client.byCode(resources, "category")).to.equal({
                 "vital-signs": [ observation1 ],
                 "laboratory" : [ observation2 ]
             });
 
-            expect(client.byCode(resources, "missing")).to.equal({});
+            expect<fhirclient.ObservationMap>(client.byCode(resources, "missing")).to.equal({});
         });
     });
 

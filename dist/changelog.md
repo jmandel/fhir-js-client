@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.9
+- Fixed the way access token expiration is computed for non-jwt tokens (#101).
+- Added a `body` property to the `HttpError` instances (#100). It will contain the parsed response body from failed requests which can be JSON (typically an `OperationOutcome` resource), a string or `null`.
+
 ## v2.3.8
 - Changed the way the "auto-refresh" flow works. Before `2.3.8` the client was obtaining new access token if a request fails with `401`. Since `2.3.8`, the client will check the access token expiration time before making a request. This is done to avoid CORS-related issues with servers that do not emit CORS headers in case of error.
 - The refresh token requests will now be sent without credentials. In the rare cases when the auth server requires the app to send cookies, developers will have to configure the client to do so.

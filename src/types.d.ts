@@ -113,7 +113,7 @@ declare namespace fhirclient {
     }
 
     interface ObservationMap {
-        [code: string]: FHIR.Observation;
+        [code: string]: FHIR.Observation[];
     }
 
     interface Adapter {

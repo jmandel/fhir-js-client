@@ -100,7 +100,15 @@ export declare function randomString(strLength?: number, charSet?: string): stri
  * @param env An `Adapter` or any other object that has an `atob` method
  * @category Utility
  */
-export declare function jwtDecode(token: string, env: fhirclient.Adapter): fhirclient.IDToken;
+export declare function jwtDecode(token: string, env: fhirclient.Adapter): fhirclient.JsonObject | null;
+/**
+ * Given a token response, computes and returns the expiresAt timestamp.
+ * Note that this should only be used immediately after an access token is
+ * received, otherwise the computed timestamp will be incorrect.
+ * @param tokenResponse
+ * @param env
+ */
+export declare function getAccessTokenExpiration(tokenResponse: fhirclient.TokenResponse, env: fhirclient.Adapter): number;
 /**
  * Groups the observations by code. Returns a map that will look like:
  * ```js
