@@ -313,10 +313,12 @@ export function randomString(
  * @param env An `Adapter` or any other object that has an `atob` method
  * @category Utility
  */
-export function jwtDecode(token: string, env: fhirclient.Adapter): fhirclient.IDToken
+export function jwtDecode(token: string, env: fhirclient.Adapter): fhirclient.JsonObject | null
 {
     const payload = token.split(".")[1];
-    return JSON.parse(env.atob(payload));
+    return payload ? JSON.parse(env.atob(payload)) : null;
+}
+
 }
 
 /**

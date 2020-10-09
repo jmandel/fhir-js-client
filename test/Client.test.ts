@@ -750,6 +750,7 @@ describe("FHIR.client", () => {
         it("rejects if no url is provided", async () => {
             // @ts-ignore
             const client = new Client({}, "http://localhost");
+            // @ts-ignore
             await expect(client.request()).to.reject();
         });
 
@@ -3115,7 +3116,6 @@ describe("FHIR.client", () => {
             storage.set(KEY, key);
             storage.set(key, state);
 
-            // @ts-ignore
             const client = new Client(env, state);
             // console.log("===> ", env, storage);
 

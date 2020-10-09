@@ -554,7 +554,7 @@ export default class Client
                 }
                 return null;
             }
-            return jwtDecode(idToken, this.environment);
+            return jwtDecode(idToken, this.environment) as fhirclient.IDToken;
         }
         if (this.state.authorizeUri) {
             debug(str.noIfNoAuth, "the id_token");
