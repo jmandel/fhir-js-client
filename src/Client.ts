@@ -10,7 +10,8 @@ import {
     byCodes,
     units,
     getPatientParam,
-    fetchConformanceStatement
+    fetchConformanceStatement,
+    getAccessTokenExpiration
 } from "./lib";
 
 import str from "./strings";
@@ -921,18 +922,11 @@ export default class Client
     refreshIfNeeded(requestOptions: RequestInit = {}): Promise<fhirclient.ClientState>
     {
         const accessToken  = this.getState("tokenResponse.access_token");
-        let outdated = false;
+        const refreshToken = this.getState("tokenResponse.refresh_token");
+        const expiresAt    = this.state.expiresAt || 0;
 
-        if (accessToken) {
-            const tokenBody = JSON.parse(this.environment.atob(accessToken.split(".")[1]));
-            outdated = tokenBody.exp - 10 < Date.now() / 1000;
-        }
-
-        if (outdated) {
-            const refreshToken = this.getState("tokenResponse.refresh_token");
-            if (refreshToken) {
-                return this.refresh(requestOptions);
-            }
+        if (accessToken && refreshToken && expiresAt - 10 < Date.now() / 1000) {
+            return this.refresh(requestOptions);
         }
 
         return Promise.resolve(this.state);
@@ -1009,6 +1003,7 @@ export default class Client
                 }
                 debugRefresh("Received new access token response %O", data);
                 Object.assign(this.state.tokenResponse, data);
+                this.state.expiresAt = getAccessTokenExpiration(data, this.environment);
                 return this.state;
             })
             .catch((error: Error) => {

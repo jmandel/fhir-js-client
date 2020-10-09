@@ -4,6 +4,8 @@ import { Response } from "cross-fetch";
 import * as lib     from "../src/lib";
 import HttpError    from "../src/HttpError";
 import mockServer   from "./mocks/mockServer";
+import ServerEnv    from "./mocks/ServerEnvironment";
+import BrowserEnv   from "./mocks/BrowserEnvironment";
 
 export const lab = Lab.script();
 const { it, describe, beforeEach, afterEach } = lab;
@@ -222,6 +224,47 @@ describe("Lib", () => {
             expect(lib.randomString(8, "abc")).to.match(/^[abc]{8}$/);
             expect(lib.randomString(8, "xyz")).to.match(/^[xyz]{8}$/);
             expect(lib.randomString(8, "123")).to.match(/^[123]{8}$/);
+        });
+    });
+
+    describe("getAccessTokenExpiration", () => {
+
+        it ("Using expires_in in the browser", () => {
+            const now = Math.floor(Date.now() / 1000);
+            expect(lib.getAccessTokenExpiration({ expires_in: 10 }, new BrowserEnv())).to.equal(now + 10);
+        });
+
+        it ("Using expires_in on the server", () => {
+            const now = Math.floor(Date.now() / 1000);
+            expect(lib.getAccessTokenExpiration({ expires_in: 10 }, new ServerEnv())).to.equal(now + 10);
+        });
+
+        it ("Using token.exp in the browser", () => {
+            const env = new BrowserEnv();
+            const now = Math.floor(Date.now() / 1000);
+            const access_token = "." + env.btoa(JSON.stringify({ exp: now + 10 })) + ".";
+            expect(lib.getAccessTokenExpiration({ access_token }, env)).to.equal(now + 10);
+        });
+
+        it ("Using token.exp on the server", () => {
+            const env = new ServerEnv();
+            const now = Math.floor(Date.now() / 1000);
+            const access_token = "." + env.btoa(JSON.stringify({ exp: now + 10 })) + ".";
+            expect(lib.getAccessTokenExpiration({ access_token }, env)).to.equal(now + 10);
+        });
+
+        it ("fails back to 5 min in the browser", () => {
+            const env = new BrowserEnv();
+            const now = Math.floor(Date.now() / 1000);
+            const access_token = "x";
+            expect(lib.getAccessTokenExpiration({ access_token }, env)).to.equal(now + 300);
+        });
+
+        it ("fails back to 5 min on the server", () => {
+            const env = new ServerEnv();
+            const now = Math.floor(Date.now() / 1000);
+            const access_token = "x";
+            expect(lib.getAccessTokenExpiration({ access_token }, env)).to.equal(now + 300);
         });
     });
 

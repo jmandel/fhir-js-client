@@ -324,6 +324,13 @@ declare namespace fhirclient {
          * [[authorize]] was called.
          */
         completeInTarget?: boolean;
+
+        /**
+         * An Unix timestamp (JSON numeric value representing the number of
+         * seconds since 1970). This updated every time an access token is
+         * received from the server.
+         */
+        expiresAt?: number;
     }
 
     /**

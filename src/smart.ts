@@ -6,6 +6,7 @@ import {
     randomString,
     getAndCache,
     fetchConformanceStatement,
+    getAccessTokenExpiration,
     getTargetWindow
 } from "./lib";
 import Client from "./Client";
@@ -561,6 +562,7 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
         debug("Preparing to exchange the code for access token...");
         const requestOptions = buildTokenRequest(env, code, state);
         debug("Token request options: %O", requestOptions);
+
         // The EHR authorization server SHALL return a JSON structure that
         // includes an access token or a message indicating that the
         // authorization request has been denied.
@@ -569,6 +571,10 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
         if (!tokenResponse.access_token) {
             throw new Error("Failed to obtain access token.");
         }
+
+        // Now we need to determine when is this authorization going to expire
+        state.expiresAt = getAccessTokenExpiration(tokenResponse, env);
+
         // save the tokenResponse so that we don't have to re-authorize on
         // every page reload
         state = { ...state, tokenResponse };

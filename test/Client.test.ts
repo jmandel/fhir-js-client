@@ -821,6 +821,7 @@ describe("FHIR.client", () => {
                 const client = new Client(env, {
                     serverUrl: mockUrl,
                     tokenUri: mockUrl,
+                    expiresAt: exp,
                     tokenResponse: {
                         access_token,
                         refresh_token: "whatever",
@@ -854,6 +855,7 @@ describe("FHIR.client", () => {
                 const client = new Client(env, {
                     serverUrl: mockUrl,
                     tokenUri: mockUrl,
+                    expiresAt: exp,
                     tokenResponse: {
                         access_token,
                         refresh_token: "whatever",
@@ -883,6 +885,7 @@ describe("FHIR.client", () => {
                 const client = new Client(env, {
                     serverUrl: mockUrl,
                     tokenUri: mockUrl,
+                    expiresAt: exp,
                     tokenResponse: {
                         access_token,
                         refresh_token: "whatever",
@@ -3135,7 +3138,7 @@ describe("FHIR.client", () => {
             expect((client.state.tokenResponse as any).expires_in).to.equal(3600);
 
             // 2. Automatic refresh
-            (client.state.tokenResponse as any).expires_in = 0;
+            client.state.expiresAt = 0;
             mockServer.mock(fakeTokenResponse);
             mockServer.mock({
                 status: 200,
