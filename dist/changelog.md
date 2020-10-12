@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.3.9
+## v2.3.10
 - Fixed the way access token expiration is computed for non-jwt tokens (#101).
 - Added a `body` property to the `HttpError` instances (#100). It will contain the parsed response body from failed requests which can be JSON (typically an `OperationOutcome` resource), a string or `null`.
 
