@@ -1,29 +1,72 @@
 {
-  "name": "fhir-js-client",
-  "version": "0.0.1",
+  "name": "fhirclient",
+  "version": "2.3.10",
   "description": "JavaScript client for Fast Healthcare Interoperability Resources",
-  "author": "Josh Mandel <joshua.mandel@childrens.harvard.edu>",
+  "author": "SMART Health IT <support@smarthealthit.org> (https://smarthealthit.org/)",
+  "contributors": [
+    "Josh Mandel <joshua.mandel@childrens.harvard.edu>",
+    "Vladimir Ignatov <vlad.ignatov@gmail.com>"
+  ],
+  "keywords": [
+    "SMART",
+    "FHIR",
+    "Client"
+  ],
+  "license": "Apache-2.0",
+  "main": "src/index.js",
+  "browser": "src/browser.js",
   "dependencies": {
-    "btoa": "*",
-    "browserify": "<4.0.0",
-    "jquery": "*"
+    "@types/hapi": "^18.0.3",
+    "abortcontroller-polyfill": "^1.5.0",
+    "core-js": "^3.6.5",
+    "cross-fetch": "^3.0.5",
+    "debug": "^4.1.1"
   },
   "scripts": {
-    "test": "mocha -c -R spec"
+    "test": "lab test/*.test.ts",
+    "pack": "webpack",
+    "build": "npm run build:module && npm run pack",
+    "build:dev": "webpack --watch",
+    "cover": "lab -r lcov -o lcov.info test/**.ts && cat lcov.info | coveralls && rm -rf lcov.info",
+    "build:module": "cp src/types.d.ts dist/lib && tsc -p tsconfig.module.json && babel --env-name module -d dist/lib dist/lib",
+    "doc": "typedoc src && touch docs/typedoc/.nojekyll"
   },
   "devDependencies": {
-    "mocha": "*",
-    "should": "*",
-    "sinon": "*",
-    "grunt": "~0.4.1",
-    "grunt-browserify": "~2.0.8",
-    "grunt-contrib-concat": "~0.3.0",
-    "grunt-contrib-clean": "~0.5.0",
-    "grunt-shell": "~0.3.1",
-    "jsdom": "*",
-    "grunt-curl": "~1.5.1",
-    "browserify-shim": "~3.4.1",
-    "grunt-contrib-uglify": "~0.4.0"
+    "@babel/cli": "^7.11.5",
+    "@babel/core": "^7.11.5",
+    "@babel/plugin-transform-runtime": "^7.11.5",
+    "@babel/preset-env": "^7.11.5",
+    "@babel/runtime": "^7.11.2",
+    "@hapi/code": "^8.0.2",
+    "@hapi/lab": "^23.0.0",
+    "@types/debug": "^4.1.5",
+    "@types/express": "^4.17.8",
+    "@types/node": "^13.13.16",
+    "babel-loader": "^8.1.0",
+    "babel-polyfill": "^6.26.0",
+    "cors": "^2.8.5",
+    "coveralls": "^3.1.0",
+    "express": "^4.17.1",
+    "fhir.js": "0.0.22",
+    "jsdom": "^15.2.1",
+    "lab-transform-typescript": "^3.0.1",
+    "ts-loader": "^6.2.2",
+    "tslint": "^5.20.1",
+    "typedoc": "^0.15.8",
+    "typescript": "^3.9.7",
+    "webpack": "^4.44.1",
+    "webpack-bundle-analyzer": "^3.8.0",
+    "webpack-cli": "^3.3.12",
+    "webpack-merge": "^4.2.2"
   },
-  "engine": "node >= 0.6.0"
+  "engine": "node >= 10",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smart-on-fhir/client-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/smart-on-fhir/client-js/issues"
+  },
+  "homepage": "http://docs.smarthealthit.org/client-js/",
+  "types": "src/types.d.ts"
 }

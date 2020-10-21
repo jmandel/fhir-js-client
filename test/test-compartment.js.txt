@@ -1,0 +1,167 @@
+const Request = require("request");
+
+// baseUrl - the url of the FHIR server
+// patient - the ID of some patient that exists on that server
+const SERVERS = [
+    {
+        baseUrl: "https://r2.smarthealthit.org",
+        patient: "57b85682-ce42-4187-a593-7864248a9484"
+    },
+    {
+        baseUrl: "https://r3.smarthealthit.org",
+        patient: "d0d0cde0-4b21-42f6-9c1e-bfa447d72059"
+    },
+    {
+        baseUrl: "https://r4.smarthealthit.org",
+        patient: "af0e5952-c2ac-44fc-a896-36e9e30c2097"
+    },
+    {
+        baseUrl: "https://api.logicahealth.org/hspcdemo/open",
+        patient: "SMART-1288992"
+    }
+];
+
+const Compartment = [
+    "Account",
+    "AdverseEvent",
+    "AllergyIntolerance",
+    "Appointment",
+    "AppointmentResponse",
+    "AuditEvent",
+    "Basic",
+    "BodySite",
+    "BodyStructure",
+    "CarePlan",
+    "CareTeam",
+    "ChargeItem",
+    "Claim",
+    "ClaimResponse",
+    "ClinicalImpression",
+    "Communication",
+    "CommunicationRequest",
+    "Composition",
+    "Condition",
+    "Consent",
+    "Coverage",
+    "CoverageEligibilityRequest",
+    "CoverageEligibilityResponse",
+    "DetectedIssue",
+    "DeviceRequest",
+    "DeviceUseRequest",
+    "DeviceUseStatement",
+    "DiagnosticOrder",
+    "DiagnosticReport",
+    "DocumentManifest",
+    "DocumentReference",
+    "EligibilityRequest",
+    "Encounter",
+    "EnrollmentRequest",
+    "EpisodeOfCare",
+    "ExplanationOfBenefit",
+    "FamilyMemberHistory",
+    "Flag",
+    "Goal",
+    "Group",
+    "ImagingManifest",
+    "ImagingObjectSelection",
+    "ImagingStudy",
+    "Immunization",
+    "ImmunizationEvaluation",
+    "ImmunizationRecommendation",
+    "Invoice",
+    "List",
+    "MeasureReport",
+    "Media",
+    "MedicationAdministration",
+    "MedicationDispense",
+    "MedicationOrder",
+    "MedicationRequest",
+    "MedicationStatement",
+    "MolecularSequence",
+    "NutritionOrder",
+    "Observation",
+    "Order",
+    "Patient",
+    "Person",
+    "Procedure",
+    "ProcedureRequest",
+    "Provenance",
+    "QuestionnaireResponse",
+    "ReferralRequest",
+    "RelatedPerson",
+    "RequestGroup",
+    "ResearchSubject",
+    "RiskAssessment",
+    "Schedule",
+    "ServiceRequest",
+    "Specimen",
+    "SupplyDelivery",
+    "SupplyRequest",
+    "VisionPrescription"
+];
+
+function request(url)
+{
+    return new Promise((resolve, reject) => {
+        console.log(`Requesting "${url}"`);
+        Request({ url, json: true }, (error, resp) => {
+            if (error) {
+                return reject(error);
+            }
+
+            if (resp.statusCode >= 400) {
+                return reject(new Error(
+                    `Requesting "${url}" returned ${resp.statusCode} status code. ${JSON.stringify(resp.body, null, 4)}`
+                ));
+            }
+
+            resolve(resp);
+        });
+    });
+}
+
+function fetchConformance(baseUrl)
+{
+    const url = String(baseUrl).replace(/\/*$/, "/") + "metadata";
+    return request(url).then(res => res.body).catch(ex => {
+        throw new Error(`Failed to fetch the conformance statement from "${url}". ${ex}`);
+    });
+}
+
+function getPatientParam(conformance, resourceType)
+{
+    const PatientParams = [
+        "requester",
+        "patient",
+        "subject",
+        "member",
+        "actor",
+        "beneficiary"
+    ];
+    const meta = conformance.rest[0].resource.find(o => o.type === resourceType);
+    if (!meta) throw new Error("Resource not supported");
+    if (resourceType == "Patient" && meta.searchParam.find(x => x.name == "_id")) return "_id";
+    let out = PatientParams.find(p => meta.searchParam.find(x => x.name == p));
+
+    // if (!out) {
+    //     throw new Error("I don't know what param to use for " + resourceType);
+    // }
+    return out;
+}
+
+async function init()
+{
+    for (let { baseUrl, patient } of SERVERS) {
+        const conformance = await fetchConformance(baseUrl);
+
+        for (let meta of conformance.rest[0].resource) {
+            if (Compartment.indexOf(meta.type) > -1) {
+                let paramName = getPatientParam(conformance, meta.type);
+                if (paramName)
+                    await request(`${baseUrl}/${meta.type}?${paramName}=${patient}`);
+            }
+        }
+    }
+}
+
+init();

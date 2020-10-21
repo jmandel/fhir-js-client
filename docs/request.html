@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Request Examples</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="assets/prism.css"/>
+        <style>
+        .codepen-later {
+            position: relative;
+        }
+
+        .codepen-later > button {
+            padding: 6px 26px;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-weight: bold;
+        }
+
+        .live-code {
+            display: none;
+        }
+
+        section {
+            margin: 2em 0 3em;
+        }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2 class="page-header"><code>client.request(requestOptions, fhirOptions)</code></h2>
+            <section>
+                <p>
+                    The request method returns a promise that will be resolved with different
+                    values, depending on the <code>fhirOptions</code> argument.
+                </p>
+                <ul>
+                    <li>
+                        The typical output is the FHIR response data.
+                    </li>
+                    <li>
+                        If you request multiple pages (using <code>pageLimit</code>), the result
+                        will be an array.
+                    </li>
+                    <li>
+                        If you use the <code>onPage</code> callback, the result will be <code>null</code>.
+                    </li>
+                </ul>
+            </section>
+
+            <h3 class="page-header">Examples</h3>
+
+            <!-- =========================================================== -->
+            <section>
+                <h3>Fetch a resource</h3>
+                <div class="codepen-later">
+                    <pre data-lang="js" class="dead-code">const client = new FHIR.client("https://r3.smarthealthit.org");
+client.request("Patient/2e27c71e-30c8-4ceb-8c1c-5641e066c0a4");</pre>
+                    <pre data-lang="js" class="live-code">function display(data) {
+    const output = document.getElementById("output");
+    output.innerText = data instanceof Error ?
+        String(data) :
+        JSON.stringify(data, null, 4);
+}
+        
+const client = new FHIR.client("https://r3.smarthealthit.org");
+client.request("Patient/2e27c71e-30c8-4ceb-8c1c-5641e066c0a4")
+    .then(display)
+    .catch(display);</pre>
+                </div>
+            </section>
+
+            <!-- =========================================================== -->
+            <section>
+                <h3>Display the current patient</h3>
+                <p>
+                    Authenticated clients will have <code>patient.id</code>. This example uses an open FHIR
+                    server so we pass a <code>patient</code> to manually specify which the current patient is.
+                </p>
+                <div class="codepen-later">
+                    <pre data-lang="js" class="dead-code">const client = new FHIR.client({
+    serverUrl: "https://r3.smarthealthit.org",
+    tokenResponse: {
+        patient: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
+    }
+});
+
+client.request(`Patient/${client.patient.id}`);</pre>
+                    <pre data-lang="js" class="live-code">function display(data) {
+    const output = document.getElementById("output");
+    output.innerText = data instanceof Error ?
+        String(data) :
+        JSON.stringify(data, null, 4);
+}
+
+const client = new FHIR.client({
+    serverUrl: "https://r3.smarthealthit.org",
+    tokenResponse: {
+        patient: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
+    }
+});
+
+client.request(`Patient/${client.patient.id}`)
+    .then(display)
+    .catch(display);</pre>
+                </div>
+            </section>
+
+            <!-- =========================================================== -->
+            <section>
+                <h3>Display the current patient from EHR</h3>
+                <div>
+                    <pre data-lang="js">// launch.html
+FHIR.oauth2.authorize({
+    "client_id": "my-client-id",
+    "scope": "launch"
+});
+
+// index.html
+FHIR.oauth2.ready(client => client.request(`Patient/${client.patient.id}`));</pre>
+                </div>
+            </section>
+
+            <!-- =========================================================== -->
+            <section>
+                <h3>Display the current user</h3>
+                <p>
+                    Properly launched and authenticated clients will have an <code>user</code> property.
+                    To get that, you need to request <code>openid</code> and <code>fhirUser</code>
+                    scopes. This example uses an open FHIR server so we pass an <code>id_token</code>
+                    to manually specify which the current user is.
+                </p>
+                <div class="codepen-later">
+                    <pre data-lang="js" class="dead-code">const id_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9." +
+"eyJwcm9maWxlIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb2" +
+"5lci03MjA4MDQxNiIsImZoaXJVc2VyIjoiUHJhY3RpdGlvbmVyL3Nt" +
+"YXJ0LVByYWN0aXRpb25lci03MjA4MDQxNiIsInN1YiI6IjM2YTEwYm" +
+"M0ZDJhNzM1OGI0YWZkYWFhZjlhZjMyYmFjY2FjYmFhYmQxMDkxYmQ0" +
+"YTgwMjg0MmFkNWNhZGQxNzgiLCJpc3MiOiJodHRwOi8vbGF1bmNoLn" +
+"NtYXJ0aGVhbHRoaXQub3JnIiwiaWF0IjoxNTU5MzkyMjk1LCJleHAi" +
+"OjE1NTkzOTU4OTV9.niEs55G4AFJZtU_b9Y1Y6DQmXurUZZkh3WCud" +
+"ZgwvYasxVU8x3gJiX3jqONttqPhkh7418EFssCKnnaBlUDwsbhp7xd" +
+"WN4o1L1NvH4bp_R_zJ25F1s6jLmNm2Qp9LqU133PEdcRIqQPgBMyZB" +
+"WUTyxQ9ihKY1RAjlztAULQ3wKea-rfe0BXJZeUJBsQPzYCnbKY1dON" +
+"_NRd8N9pTImqf41MpIbEe7YEOHuirIb6HBpurhAHjTLDv1IuHpEAOx" +
+"pmtxVVHiVf-FYXzTFmn4cGe2PsNJfBl8R_zow2n6qaSANdvSxJDE4D" +
+"UgIJ6H18wiSJJHp6Plf_bapccAwxbx-zZCw";
+
+const client = new FHIR.client({
+    serverUrl: "https://r3.smarthealthit.org",
+    tokenResponse: { id_token }
+});
+
+client.request(client.user.fhirUser);</pre>
+                    <pre data-lang="js" class="live-code">const id_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9." +
+"eyJwcm9maWxlIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb2" +
+"5lci03MjA4MDQxNiIsImZoaXJVc2VyIjoiUHJhY3RpdGlvbmVyL3Nt" +
+"YXJ0LVByYWN0aXRpb25lci03MjA4MDQxNiIsInN1YiI6IjM2YTEwYm" +
+"M0ZDJhNzM1OGI0YWZkYWFhZjlhZjMyYmFjY2FjYmFhYmQxMDkxYmQ0" +
+"YTgwMjg0MmFkNWNhZGQxNzgiLCJpc3MiOiJodHRwOi8vbGF1bmNoLn" +
+"NtYXJ0aGVhbHRoaXQub3JnIiwiaWF0IjoxNTU5MzkyMjk1LCJleHAi" +
+"OjE1NTkzOTU4OTV9.niEs55G4AFJZtU_b9Y1Y6DQmXurUZZkh3WCud" +
+"ZgwvYasxVU8x3gJiX3jqONttqPhkh7418EFssCKnnaBlUDwsbhp7xd" +
+"WN4o1L1NvH4bp_R_zJ25F1s6jLmNm2Qp9LqU133PEdcRIqQPgBMyZB" +
+"WUTyxQ9ihKY1RAjlztAULQ3wKea-rfe0BXJZeUJBsQPzYCnbKY1dON" +
+"_NRd8N9pTImqf41MpIbEe7YEOHuirIb6HBpurhAHjTLDv1IuHpEAOx" +
+"pmtxVVHiVf-FYXzTFmn4cGe2PsNJfBl8R_zow2n6qaSANdvSxJDE4D" +
+"UgIJ6H18wiSJJHp6Plf_bapccAwxbx-zZCw";
+                    
+function display(data) {
+    const output = document.getElementById("output");
+    output.innerText = data instanceof Error ?
+        String(data) :
+        JSON.stringify(data, null, 4);
+}
+
+const client = new FHIR.client({
+    serverUrl: "https://r3.smarthealthit.org",
+    tokenResponse: { id_token }
+});
+
+client.request(client.user.fhirUser).then(display).catch(display);</pre>
+                </div>
+            </section>
+
+            <!-- =========================================================== -->
+            <section>
+                <h3>Display the current user from EHR</h3>
+                <p>
+                    Properly launched and authenticated clients will have <code>userId</code>.
+                    To get that, you need to request <code>openid</code> and <code>fhirUser</code>
+                    scopes.
+                </p>
+                <div>
+                    <pre data-lang="js">// launch.html
+FHIR.oauth2.authorize({
+    "client_id": "my-client-id",
+    "scope": "openid fhirUser"
+});
+
+// index.html
+FHIR.oauth2.ready(client => client.request(client.user.fhirUser));</pre>
+                </div>
+            </section>
+
+            <!-- =========================================================== -->
+            <section>
+                <h3>Display patient medications</h3>
+                <div class="codepen-later">
+                    <pre data-lang="babel" class="dead-code">const client  = new FHIR.client("https://r3.smarthealthit.org");
+const getPath = client.getPath;
+
+client.request(`/MedicationRequest?patient=smart-1642068`, {
+    resolveReferences: "medicationReference"
+}).then(data => data.entry.map(item => getMedicationName(
+    getPath(item, "resource.medicationCodeableConcept.coding") ||
+    getPath(item, "resource.medicationReference.code.coding")
+)));</pre>
+                    <pre data-lang="babel" class="live-code">const rxnorm  = "http://www.nlm.nih.gov/research/umls/rxnorm";
+const client  = new FHIR.client("https://r3.smarthealthit.org");
+const getPath = client.getPath;
+
+function display(data) {
+    const output = document.getElementById("output");
+    output.innerText = data instanceof Error ?
+        String(data) :
+        JSON.stringify(data, null, 4);
+}
+
+function getMedicationName(medCodings = []) {
+    var coding = medCodings.find(c => c.system === rxnorm);
+    return coding && coding.display || "Unnamed Medication(TM)";
+}
+
+client.request(`/MedicationRequest?patient=smart-1642068`, {
+    resolveReferences: "medicationReference"
+}).then(data => data.entry.map(item => getMedicationName(
+    getPath(item, "resource.medicationCodeableConcept.coding") ||
+    getPath(item, "resource.medicationReference.code.coding")
+))).then(display, display);</pre>
+                </div>
+            </section>
+
+            <!-- =========================================================== -->
+            <section>
+                <h3>Resolve references</h3>
+                <p>
+                    You can pass one or more reference paths as <code>resolveReferences</code>
+                    option. The final result will contain the references replaced with resolved
+                    resources.
+                </p> 
+                <div class="codepen-later">
+                    <pre data-lang="js" class="dead-code">const client = new FHIR.client("https://r3.smarthealthit.org");
+client.request("/Encounter/3d1ae6a9-b8c1-4c12-a8ba-b44d96ddfe24", {
+    resolveReferences: ["serviceProvider", "subject"]
+});</pre>
+                    <pre data-lang="js" class="live-code">const client = new FHIR.client("https://r3.smarthealthit.org");
+
+function display(data) {
+    const output = document.getElementById("output");
+    output.innerText = data instanceof Error ?
+        String(data) :
+        JSON.stringify(data, null, 4);
+}
+
+client.request("/Encounter/3d1ae6a9-b8c1-4c12-a8ba-b44d96ddfe24", {
+    resolveReferences: ["serviceProvider", "subject"]
+}).then(display).catch(display);</pre>
+                </div>
+            </section>
+
+            <!-- =========================================================== -->
+            <section>
+                <h3>Fetch references to external object</h3>
+                <p>
+                    In most cases having the resolved references mounted on the result structure
+                    is very convenient. However, sometimes you might want to keep the original
+                    response as is, or you may want to have a map of resolved references that can
+                    be re-used later. To do so, you can use the same <code>resolveReferences</code>
+                    option but combine it with <code>graph: false</code>. Then, the result will
+                    contain two properties - <code>data</code> and <code>references</code>. Example:
+                </p>
+                <div class="codepen-later">
+                    <pre data-lang="js" class="dead-code">const client = new FHIR.client("https://r3.smarthealthit.org");
+client.request("/Encounter/3d1ae6a9-b8c1-4c12-a8ba-b44d96ddfe24", {
+    resolveReferences: ["serviceProvider", "subject"],
+    graph: false
+});</pre>
+                    <pre data-lang="js" class="live-code">function display(data) {
+    const output = document.getElementById("output");
+    output.innerText = data instanceof Error ?
+        String(data) :
+        JSON.stringify(data, null, 4);
+}
+
+const client = new FHIR.client("https://r3.smarthealthit.org");
+
+client.request("/Encounter/3d1ae6a9-b8c1-4c12-a8ba-b44d96ddfe24", {
+    resolveReferences: ["serviceProvider", "subject"],
+    graph: false
+}).then(display).catch(display);</pre>
+                </div>
+            </section>
+            
+            <!-- =========================================================== -->
+            <section>
+                <h3>Get multiple pages</h3>
+                <p>
+                    This shows how to fetch 2 pages. Not that the result is an array of page bundles.
+                </p>
+                <div class="codepen-later">
+                    <pre data-lang="js" class="dead-code">const client = new FHIR.client("https://r3.smarthealthit.org");
+client.request("/Patient", { pageLimit: 2 });</pre>
+                    <pre data-lang="js" class="live-code">function display(data) {
+    const output = document.getElementById("output");
+    output.innerText = data instanceof Error ?
+        String(data) :
+        JSON.stringify(data, null, 4);
+}
+
+const client = new FHIR.client("https://r3.smarthealthit.org");
+client.request("/Patient", { pageLimit: 2 }).then(display).catch(display);</pre>
+                </div>
+            </section>
+            
+            <!-- =========================================================== -->
+            <section>
+                <h3>Get all pages</h3>
+                <p>
+                    To get all available pages use <code>pageLimit: 0</code>:
+                </p>
+                <div class="codepen-later">
+                    <pre data-lang="js" class="dead-code">const client = new FHIR.client("https://r3.smarthealthit.org");
+client.request("/Claim", { pageLimit: 0 });</pre>
+                    <pre data-lang="js" class="live-code">function display(data) {
+    const output = document.getElementById("output");
+    output.innerText = data instanceof Error ?
+        String(data) :
+        JSON.stringify(data, null, 4);
+}
+
+const client = new FHIR.client("https://r3.smarthealthit.org");
+client.request("/Claim", { pageLimit: 0 })
+    .then(display).catch(display);</pre>
+                </div>
+            </section>
+
+            <br/>
+            <br/>
+        </div>
+        <script async src="https://static.codepen.io/assets/embed/ei.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+        <script type="text/javascript" src="assets/prism.js"></script>
+        <script>
+        jQuery(function($) {
+
+            $("pre").addClass("language-js").each(function(i, el) {
+                Prism.highlightElement(el);
+            });
+
+            $(".codepen-later").each(function(i, el) {
+                $(el).prepend('<button class="btn btn-default try-btn" type="button">Try Me</button>');
+            });
+
+            $(document).on("click", ".try-btn", function(e) {
+                var wrapper = $(e.target).parent();
+                wrapper.find(".dead-code").remove();
+                var codePre = wrapper.find("pre");
+                var codepenWrap = $('<div/>').attr({
+                    "class": "codepen",
+                    "data-height": Math.max(Math.ceil((codePre.text().split("\n").length) * 19) + 100, 200),
+                    "data-theme-id": "light",
+                    "data-editable": "true",
+                    "data-default-tab": "js,result",
+                    "data-user": "smarthealthit",
+                    "data-prefill": JSON.stringify({
+                        tags: [],
+                        stylesheets: [],
+                        scripts: [
+                            // "https://docs.smarthealthit.org/client-js/build/fhir-client.js"
+                            // "https://combinatronics.com/smart-on-fhir/client-js/master/build/fhir-client.js"
+                            "https://combinatronics.com/smart-on-fhir/client-js/master/dist/build/fhir-client.js"
+                        ]
+                    })
+                });
+                codePre = codePre.wrap(codepenWrap);
+                codePre.before(
+                    '<pre data-lang="html">&lt;pre id="output">Loading...&lt;/pre></pre>'
+                );
+                wrapper.removeClass("codepen-later");
+                $(e.target).remove();
+                window.__CPEmbed(codepenWrap[0]);
+            });
+        });
+        </script>
+    </body>
+</html>
