@@ -5,7 +5,6 @@ This library is designed to be used in SMART apps (and not just FHIR apps). This
 1. Open servers do not require authentication
 2. Open servers do not support SMART, thus they cannot provide you with launch context. There is no current patient, user or encounter. The app is free to choose what to access.
 3. In open servers, the app has full access which cannot be restricted with scopes.
-4. It is not possible to make an EHR launch against an open server.
 
 ## Working with open servers only
 If you are working on an app that is ONLY going to connect to an open server, then please ignore the SMART part of the documentation. You don't need to authorize. All you need is to create a client instance like so:
@@ -39,7 +38,7 @@ In this way you pre-select the patient and `client.patient.id` would return `'12
 ## Working with both open and protected servers
 Ideally, an app should be capable of working with both protected and open servers. However, this may not always be possible out of the box. For example if the app relies on EHR launch and uses context APIs like `client.patient...` or `client.user...`, then the developer assumes that the launch context must be available.
 
-In real life, developers often design their apps as SMART apps, but also want to be able to launch them against open servers for testing purposes. There are several way to achieve that:
+In real life, developers often design their apps as SMART apps, but also want to be able to launch them against open servers for testing purposes. There are several ways to achieve that:
 
 ### Using multiple launch files
 If the app is designed for EHR launch, the typical approach is to have separate locations for your launch_uri and redirect_uri. For example, you may have a `launch.html` file where you call `FHIR.oauth2.authorize({...});` and an `index.html` file where uou call `FHIR.oauth2.ready();` and initialize your app. To support multiple environments you can have multiple launch files. For example:
@@ -51,7 +50,6 @@ If the app is designed for EHR launch, the typical approach is to have separate 
  <head>
      <title>Launch From Cerner</title>
      <script src="dist/build/fhir-client.js"></script>
-     
  </head>
  <body>
     <h3>Loading...</h3>
@@ -73,7 +71,6 @@ If the app is designed for EHR launch, the typical approach is to have separate 
  <head>
      <title>Launch From Epic</title>
      <script src="dist/build/fhir-client.js"></script>
-     
  </head>
  <body>
     <h3>Loading...</h3>
@@ -95,7 +92,6 @@ If the app is designed for EHR launch, the typical approach is to have separate 
  <head>
      <title>Launch From Epic</title>
      <script src="dist/build/fhir-client.js"></script>
-     
  </head>
  <body>
     <h3>Loading...</h3>
