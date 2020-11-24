@@ -203,7 +203,16 @@ Returns a promise that will be resolved with the numeric FHIR version:
 - `3` for **STU3**
 - `4` for **R4**
 - `0` if the version is not known
-    
+
+### client.getState(path=""): `any`
+When called without an argument returns a copy of the client state. Accepts a dot-separated path argument (same as for `getPath`) to allow for selecting specific state properties. Note that this is the preferred way to read the state because `client.state.tokenResponse.patient` will throw an error if `client.state.tokenResponse` is undefined, while `client.getState("tokenResponse.patient")` will ignore that and just return `undefined`.
+
+Examples:
+```js
+client.getState(); // -> the entire state object
+client.getState("serverUrl"); // -> the URL we are connected to
+client.getState("tokenResponse.patient"); // -> The selected patient ID (if any)
+```
 
 ---
 

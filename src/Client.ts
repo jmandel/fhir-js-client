@@ -794,6 +794,10 @@ export default class Client
                         throw new Error(str.expired);
                     }
 
+                    // In rare cases we may have a valid access token and a refresh
+                    // token and the request might still fail with 401 just because
+                    // the access token has just been revoked.
+
                     // otherwise -> auto-refresh failed. Session expired.
                     // Need to re-launch. Clear state to start over!
                     debugRequest("Auto-refresh failed! Please re-launch the app.");
