@@ -44,6 +44,7 @@ It works both in browsers (IE 10+) and on the server (Node 10+).
 - Other Examples
     - [Request examples](http://docs.smarthealthit.org/client-js/request.html)
     - [Example fhir.js methods and analog request calls](fhirjs-equivalents.md)
+    - [Running an app against multiple servers](https://github.com/Unite-Genomics/react-fhir-sample-app)
 
 <br/><br/>
 
