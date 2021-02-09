@@ -805,7 +805,8 @@ export default class Client
 
                     // !accessToken -> not authorized -> No session. Need to launch.
                     if (!this.getState("tokenResponse.access_token")) {
-                        throw new Error("This app cannot be accessed directly. Please launch it as SMART app!");
+                        error.message += " This app cannot be accessed directly. Please launch it as SMART app!";
+                        throw error;
                     }
 
                     // auto-refresh not enabled and Session expired.
@@ -813,7 +814,8 @@ export default class Client
                     if (!options.useRefreshToken) {
                         debugRequest("Your session has expired and the useRefreshToken option is set to false. Please re-launch the app.");
                         await this._clearState();
-                        throw new Error(str.expired);
+                        error.message += " " + str.expired;
+                        throw error;
                     }
 
                     // In rare cases we may have a valid access token and a refresh
@@ -824,7 +826,8 @@ export default class Client
                     // Need to re-launch. Clear state to start over!
                     debugRequest("Auto-refresh failed! Please re-launch the app.");
                     await this._clearState();
-                    throw new Error(str.expired);
+                    error.message += " " + str.expired;
+                    throw error;
                 }
                 throw error;
             })
