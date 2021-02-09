@@ -208,12 +208,70 @@ declare namespace fhirclient {
 
     type storageFactory = (options?: JsonObject) => Storage;
 
+    interface IncludeResponseHint {
+        includeResponse?: boolean
+        [k: string]: any
+    }
+
     /**
-     * Options that must contain an `url` property (String|URL). Any other
+     * A function or method that makes requests to the backend server. If the
+     * `includeResponse` option is `true` resolves with `CombinedFetchResult`
+     * where the `response` property is the `Response` object and the `body`
+     * property is the result of type `R` (if any). Otherwise resolves with the
+     * result as `R`.
+     * @param R The expected return type
+     * @param O May contain the `includeResponse` flag to signal that we also
+     * want to receive the raw response object. Any other option will be passed
+     * to the underlying `fetch` call.
+     */
+    type RequestFunction<R = any> = <O extends IncludeResponseHint = {}>(requestOptions?: O) => 
+        Promise<O["includeResponse"] extends true ? CombinedFetchResult<R> : R>;
+
+    /**
+     * Options passed to the lib.request function
+     */
+    interface FetchOptions extends RequestInit {
+        /**
+         * If `true` the request function will be instructed to resolve with a
+         * [[CombinedFetchResult]] object that contains the `Response` object
+         * abd the parsed body (if any)
+         */
+        includeResponse?: boolean;
+    }
+
+    /**
+     * If an `includeResponse` is set to true when calling the lib.request
+     * function the returned object will include the Response object and the
+     * parsed body if available
+     */
+    interface CombinedFetchResult<T = fhirclient.JsonObject | string> {
+        body?: T
+        response: Response
+    } 
+    
+    /**
+     * The return type of the lib.request function
+     */
+    type FetchResult = Response | fhirclient.JsonObject | string | CombinedFetchResult
+
+    /**
+     * Options that must contain an `url` property (String|URL).
+     * A `includeResponse` boolean option might also be passed. Any other
      * properties will be passed to the underlying `fetch()` call.
      */
     interface RequestOptions extends RequestInit {
+        /**
+         * The URL to request
+         */
         url: string | URL;
+
+        /**
+         * If set to true the request function will resolve with an object
+         * like `{ body: any, response: Response }` so that users have
+         * access to the response object and it's properties like headers
+         * status etc.
+         */
+        includeResponse?: boolean;
     }
 
     /**

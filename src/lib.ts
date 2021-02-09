@@ -88,11 +88,12 @@ export function responseToJSON(resp: Response): Promise<object|string> {
  * - If the response is text return the result text
  * - Otherwise return the response object on which we call stuff like `.blob()`
  */
-export function request<T = Response | fhirclient.JsonObject | string>(
+export function request<T = fhirclient.FetchResult>(
     url: string | Request,
-    options: RequestInit = {}
+    requestOptions: fhirclient.FetchOptions = {}
 ): Promise<T>
 {
+    const { includeResponse, ...options } = requestOptions;
     return fetch(url, {
         mode: "cors",
         ...options,
@@ -120,8 +121,12 @@ export function request<T = Response | fhirclient.JsonObject | string>(
         if (!body && res.status == 201) {
             const location = res.headers.get("location") + "";
             if (location) {
-                return request(location, { ...options, method: "GET", body: null });
+                return request(location, { ...options, method: "GET", body: null, includeResponse });
             }
+        }
+
+        if (includeResponse) {
+            return { body, response: res };
         }
 
         // For any non-text and non-json response return the Response object.

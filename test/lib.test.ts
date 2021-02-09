@@ -6,6 +6,7 @@ import HttpError    from "../src/HttpError";
 import mockServer   from "./mocks/mockServer";
 import ServerEnv    from "./mocks/ServerEnvironment";
 import BrowserEnv   from "./mocks/BrowserEnvironment";
+import { fhirclient } from "../src/types";
 
 export const lab = Lab.script();
 const { it, describe, beforeEach, afterEach } = lab;
@@ -302,7 +303,7 @@ describe("Lib", () => {
                     const addr: any = mockDataServer.address();
                     mockUrl = `http://127.0.0.1:${addr.port}`;
                     // console.log(`Mock Data Server listening at ${mockUrl}`);
-                    resolve();
+                    resolve(void 0);
                 });
             });
         });
@@ -316,7 +317,7 @@ describe("Lib", () => {
                             console.log("Error shutting down the mock-data server: ", error);
                         }
                         // console.log("Mock Data Server CLOSED!");
-                        resolve();
+                        resolve(void 0);
                     });
                 });
             }
@@ -407,6 +408,18 @@ describe("Lib", () => {
                 });
                 const response = await lib.request(mockUrl);
                 expect(response).to.equal({ result: "success" });
+            });
+
+            it ("respects the includeResponse option", async () => {
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status : 200,
+                    body   : { result: "success" }
+                });
+
+                const result = await lib.request<fhirclient.CombinedFetchResult>(mockUrl, { includeResponse: true });
+                expect(result.body).to.equal({ result: "success" });
+                expect(result.response.headers.get("Content-Type")).to.startWith("application/json");
             });
         });
     });

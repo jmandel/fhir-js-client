@@ -32,7 +32,7 @@ before(() => {
             const addr = mockDataServer.address();
             mockUrl = `http://127.0.0.1:${addr.port}`;
             // console.log(`Mock Data Server listening at ${mockUrl}`);
-            resolve();
+            resolve(void 0);
         });
     });
 });
@@ -47,7 +47,7 @@ after(() => {
                     reject(new Error("Error shutting down the mock-data server: " + error));
                 }
                 // console.log("Mock Data Server CLOSED!");
-                resolve();
+                resolve(void 0);
             });
         });
     }
@@ -141,23 +141,18 @@ describe("FHIR.client", () => {
             });
         });
 
-        const mock = {
-            headers: { "content-type": "application/json" },
-            status: 200,
-            body: {
-                resourceType: "Patient",
-                id: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
-            }
-        };
-        const tests: fhirclient.JsonObject = {
-            "works in the browser": new BrowserEnv(),
-            "works on the server" : new ServerEnv()
-        };
+        it ("works as expected", () => {
+            crossPlatformTest(async (env) => {
+                const mock = {
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Patient",
+                        id: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
+                    }
+                };
 
-        // tslint:disable-next-line:forin
-        for (const name in tests) {
-            it (name, async () => {
-                const client = new Client(tests[name], {
+                const client = new Client(env, {
                     serverUrl: mockUrl,
                     tokenResponse: {
                         patient: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
@@ -167,7 +162,35 @@ describe("FHIR.client", () => {
                 const result = await client.patient.read();
                 expect(result).to.include({ resourceType: "Patient", id: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4" });
             });
-        }
+        });
+
+        it ("works with includeResponse: true", () => {
+            crossPlatformTest(async (env) => {
+                const mock = {
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Patient",
+                        id: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
+                    }
+                };
+
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        patient: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
+                    }
+                });
+
+                mockServer.mock(mock);
+                // const patient1 = await client.patient.read({});
+                // const patient2 = await client.patient.read({ includeResponse: false });
+                const result = await client.patient.read({ includeResponse: true });
+                expect(result.body).to.include({ resourceType: "Patient", id: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4" });
+                expect(result.response.status).to.equal(200);
+            });
+        });
+
     });
 
     describe("patient.request", () => {
@@ -538,6 +561,53 @@ describe("FHIR.client", () => {
                 await expect(client.patient.request("Patient")).to.reject();
             });
         });
+
+        describe("works as expected with includeResponse: true", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        patient: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
+                    }
+                });
+
+                // Mock the conformance statement
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        rest: [{
+                            resource: [{
+                                type: "Observation",
+                                searchParam: [
+                                    { name: "patient" }
+                                ]
+                            }]
+                        }]
+                    }
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Observation",
+                        id: "whatever"
+                    }
+                });
+
+                // const result = await client.patient.request<fhirclient.CombinedFetchResult<fhirclient.FHIR.Resource>>({
+                //     url: "Observation",
+                //     includeResponse: true
+                // });
+                const result = await client.patient.request<fhirclient.JsonObject>({
+                    url: "Observation",
+                    includeResponse: true
+                });
+                expect(result.body).to.include({ resourceType: "Observation", id: "whatever" });
+                expect(result.response.status).to.equal(200);
+            });
+        });
     });
 
     describe("encounter.read", () => {
@@ -585,6 +655,27 @@ describe("FHIR.client", () => {
                 await expect(task).to.reject(
                     Error, "The user aborted a request."
                 );
+            });
+        });
+
+        describe("works with includeResponse: true", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        encounter: "x"
+                    }
+                });
+
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: { resourceType: "Encounter", id: "encounter-id" }
+                });
+
+                const result = await client.encounter.read({ includeResponse: true });
+                expect(result.body).to.equal({ resourceType: "Encounter", id: "encounter-id" });
+                expect(result.response.status).to.equal(200);
             });
         });
     });
@@ -661,9 +752,32 @@ describe("FHIR.client", () => {
                 );
             });
         });
+
+        it ("works with includeResponse: true", () => {
+            crossPlatformTest(async (env) => {
+                const mock = {
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: { resourceType: "Patient", id: "user-id" },
+                    _delay: 10
+                };
+
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    tokenResponse: {
+                        patient: "whatever"
+                    }
+                });
+
+                mockServer.mock(mock);
+                const result = await client.user.read({ includeResponse: true });
+                expect(result.body).to.equal({ resourceType: "Patient", id: "user-id" });
+                expect(result.response.status).to.equal(200);
+            });
+        });
     });
 
-    describe("fhir.js api", () => {
+    describe("fhir.js api", { timeout: 5000 }, () => {
         it ("does not work without fhir.js", async () => {
             const env    = new BrowserEnv();
             // @ts-ignore
@@ -1222,7 +1336,7 @@ describe("FHIR.client", () => {
                     return new Promise(resolve => {
                         setTimeout(() => {
                             pages.push(page);
-                            resolve();
+                            resolve(void 0);
                         }, 100);
                     });
                 };
@@ -2794,6 +2908,182 @@ describe("FHIR.client", () => {
                 await expect(task).to.reject(Error, "The user aborted a request.");
             });
         });
+
+        // includeResponse -----------------------------------------------------
+        describe ("can fetch single resource with includeResponse: true", () => {
+            const mock = {
+                headers: { "content-type": "application/json" },
+                status: 200,
+                body: { id: "patient-id" }
+            };
+            const tests: fhirclient.JsonObject = {
+                "works in the browser": new BrowserEnv(),
+                "works on the server" : new ServerEnv()
+            };
+
+            // tslint:disable-next-line:forin
+            for (const name in tests) {
+                it (name, async () => {
+                    const client = new Client(tests[name], { serverUrl: mockUrl });
+                    mockServer.mock(mock);
+                    const result = await client.request<fhirclient.CombinedFetchResult>({
+                        url: "/Patient/patient-id",
+                        includeResponse: true
+                    });
+                    expect(result.body).to.include({ id: "patient-id" });
+                    expect(result.response.status).to.equal(200);
+                });
+            }
+        });
+
+        describe ("can fetch all pages with includeResponse: true", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, { serverUrl: mockUrl });
+
+                // Page 1
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Bundle",
+                        entry: [],
+                        link: [{ relation: "next", url: "whatever" }]
+                    }
+                });
+
+                // Page 2
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Bundle",
+                        entry: []
+                    }
+                });
+
+                const result = await client.request<fhirclient.CombinedFetchResult>({
+                    url: "/Patient",
+                    includeResponse: true
+                }, { pageLimit: 0 });
+                expect(result.body).to.be.an.array();
+                expect(result.body.length).to.equal(2);
+                expect(result.response.status).to.equal(200);
+            });
+        });
+
+        describe ("can resolve refs on pages with includeResponse: true", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, { serverUrl: mockUrl });
+
+                // Main page 1
+                mockServer.mock({
+                    headers: {
+                        "content-type": "application/json",
+                        "x-custom": "test"
+                    },
+                    status: 200,
+                    body: {
+                        resourceType: "Bundle",
+                        pageId: 1,
+                        link: [{ relation: "next", url: "whatever" }],
+                        entry: [{
+                            resource: {
+                                resourceType: "Patient",
+                                id: "pt-1",
+                                ref1: {
+                                    reference: "whatever-1"
+                                }
+                            }
+                        }]
+                    }
+                });
+
+                // Referenced page 1
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Ref",
+                        id: "Ref-whatever-1"
+                    }
+                });
+
+                // Main page 2
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Bundle",
+                        pageId: 2,
+                        entry: [{
+                            resource: {
+                                resourceType: "Patient",
+                                id: "pt-2",
+                                ref1: {
+                                    reference: "whatever-2"
+                                }
+                            }
+                        }]
+                    }
+                });
+
+                // Referenced page 2
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        resourceType: "Ref",
+                        id: "Ref-whatever-2"
+                    }
+                });
+
+                const result = await client.request<fhirclient.CombinedFetchResult>(
+                    {
+                        url: "/Patient",
+                        includeResponse: true
+                    },
+                    {
+                        resolveReferences: "ref1",
+                        pageLimit: 0
+                    }
+                );
+
+                expect(result.response.status).to.equal(200);
+                expect(result.response.headers.get("x-custom")).to.equal("test");
+                expect(result.body).to.equal([
+                    {
+                        resourceType: "Bundle",
+                        pageId: 1,
+                        link: [{ relation: "next", url: "whatever" }],
+                        entry: [{
+                            resource: {
+                                resourceType: "Patient",
+                                id: "pt-1",
+                                ref1: {
+                                    resourceType: "Ref",
+                                    id: "Ref-whatever-1"
+                                }
+                            }
+                        }]
+                    },
+                    {
+                        resourceType: "Bundle",
+                        pageId: 2,
+                        entry: [{
+                            resource: {
+                                resourceType: "Patient",
+                                id: "pt-2",
+                                ref1: {
+                                    resourceType: "Ref",
+                                    id: "Ref-whatever-2"
+                                }
+                            }
+                        }]
+                    }
+                ]);
+            });
+        });
+
     });
 
     describe ("client.user", () => {
@@ -3477,8 +3767,20 @@ describe("FHIR.client", () => {
         crossPlatformTest(async (env) => {
             const client = new Client(env, mockUrl);
             const resource = { resourceType: "Patient" };
-            client.request = async (options: any) => options;
+
             let result: any;
+
+            // Passing the includeResponse option
+            mockServer.mock({
+                status: 200,
+                body: resource,
+                headers: { "Content-Type": "application/json" }
+            });
+            result = await client.create(resource, { includeResponse: true });
+            expect(result.body).to.equal(resource);
+            expect(result.response.status).to.equal(200);
+
+            client.request = async (options: any) => options;
 
             // Standard usage
             result = await client.create(resource);
@@ -3538,8 +3840,19 @@ describe("FHIR.client", () => {
         crossPlatformTest(async (env) => {
             const client = new Client(env, mockUrl);
             const resource = { resourceType: "Patient", id: "2" };
-            client.request = async (options: any) => options;
             let result: any;
+
+            // Passing the includeResponse option
+            mockServer.mock({
+                status: 200,
+                body: resource,
+                headers: { "Content-Type": "application/json" }
+            });
+            result = await client.update(resource, { includeResponse: true });
+            expect(result.body).to.equal(resource);
+            expect(result.response.status).to.equal(200);
+
+            client.request = async (options: any) => options;
 
             // Standard usage
             result = await client.update(resource);
@@ -3598,8 +3911,21 @@ describe("FHIR.client", () => {
     describe("delete", () => {
         crossPlatformTest(async (env) => {
             const client = new Client(env, mockUrl);
-            client.request = async (options: any) => options;
+            
             let result: any;
+
+            // Passing the includeResponse option
+            mockServer.mock({
+                status: 200,
+                body: { result: "success" },
+                headers: { "Content-Type": "application/json" }
+            });
+            
+            result = await client.delete("Patient/2", { includeResponse: true });
+            expect(result.body).to.equal({ result: "success" });
+            expect(result.response.status).to.equal(200);
+
+            client.request = async (options: any) => options;
 
             // Standard usage
             result = await client.delete("Patient/2");

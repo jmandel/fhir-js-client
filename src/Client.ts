@@ -246,10 +246,10 @@ export default class Client
         /**
          * A method to fetch the current patient resource from the FHIR server.
          * If there is no patient context, it will reject with an error.
-         * @param [requestOptions] Any options to pass to the `fetch` call.
+         * @param {fhirclient.FetchOptions} [requestOptions] Any options to pass to the `fetch` call.
          * @category Request
          */
-        read: (requestOptions?: RequestInit) => Promise<fhirclient.FHIR.Patient>
+        read: fhirclient.RequestFunction<fhirclient.FHIR.Patient>
 
         /**
          * This is similar to [[Client.request]] but it makes requests in the
@@ -261,9 +261,17 @@ export default class Client
          * ```js
          * client.patient.request("Observation")
          * ```
+         * The return type depends on the arguments. Typically it will be the
+         * response payload JSON object. Can also be a string or the `Response`
+         * object itself if we have received a non-json result, which allows us
+         * to handle even binary responses. Can also be a [[CombinedFetchResult]]
+         * object if the `requestOptions.includeResponse`s has been set to true.
          * @category Request
          */
-        request: (requestOptions: string|URL|fhirclient.RequestOptions, fhirOptions?: fhirclient.FhirOptions) => Promise<fhirclient.JsonObject>
+        request: <R = fhirclient.FetchResult>(
+            requestOptions: string|URL|fhirclient.RequestOptions,
+            fhirOptions?: fhirclient.FhirOptions
+        ) => Promise<R>
 
         /**
          * This is the FhirJS Patient API. It will ONLY exist if the `Client`
@@ -291,7 +299,7 @@ export default class Client
          * @param [requestOptions] Any options to pass to the `fetch` call.
          * @category Request
          */
-        read: (requestOptions?: RequestInit) => Promise<fhirclient.FHIR.Encounter>
+        read: fhirclient.RequestFunction<fhirclient.FHIR.Encounter>
     };
 
     /**
@@ -311,7 +319,7 @@ export default class Client
          * @param [requestOptions] Any options to pass to the `fetch` call.
          * @category Request
          */
-        read: (requestOptions?: RequestInit) => Promise<
+        read: fhirclient.RequestFunction<
             fhirclient.FHIR.Patient |
             fhirclient.FHIR.Practitioner |
             fhirclient.FHIR.RelatedPerson
@@ -369,7 +377,7 @@ export default class Client
         // patient api ---------------------------------------------------------
         this.patient = {
             get id() { return client.getPatientId(); },
-            read: (requestOptions: RequestInit = {}) => {
+            read: (requestOptions) => {
                 const id = this.patient.id;
                 return id ?
                     this.request({ ...requestOptions, url: `Patient/${id}` }) :
@@ -390,7 +398,7 @@ export default class Client
         // encounter api -------------------------------------------------------
         this.encounter = {
             get id() { return client.getEncounterId(); },
-            read: (requestOptions: RequestInit = {}) => {
+            read: requestOptions => {
                 const id = this.encounter.id;
                 return id ?
                     this.request({ ...requestOptions, url: `Encounter/${id}` }) :
@@ -403,7 +411,7 @@ export default class Client
             get fhirUser() { return client.getFhirUser(); },
             get id() { return client.getUserId(); },
             get resourceType() { return client.getUserType(); },
-            read: (requestOptions: RequestInit = {}) => {
+            read: requestOptions => {
                 const fhirUser = this.user.fhirUser;
                 return fhirUser ?
                     this.request({ ...requestOptions, url: fhirUser }) :
@@ -644,9 +652,12 @@ export default class Client
      * Note that `method` and `body` will be ignored.
      * @category Request
      */
-    create(resource: fhirclient.FHIR.Resource, requestOptions: RequestInit = {}): Promise<fhirclient.FHIR.Resource>
+    create<R = fhirclient.FHIR.Resource, O extends fhirclient.FetchOptions = {}>(
+        resource: fhirclient.FHIR.Resource,
+        requestOptions?: O
+    ): Promise<O["includeResponse"] extends true ? fhirclient.CombinedFetchResult<R> : R>
     {
-        return this.request<fhirclient.FHIR.Resource>({
+        return this.request({
             ...requestOptions,
             url: `${resource.resourceType}`,
             method: "POST",
@@ -654,7 +665,7 @@ export default class Client
             headers: {
                 // TODO: Do we need to alternate with "application/json+fhir"?
                 "Content-Type": "application/json",
-                ...requestOptions.headers
+                ...(requestOptions || {}).headers
             }
         });
     }
@@ -668,9 +679,12 @@ export default class Client
      * Note that `method` and `body` will be ignored.
      * @category Request
      */
-    update(resource: fhirclient.FHIR.Resource, requestOptions: RequestInit = {}): Promise<fhirclient.FHIR.Resource>
+    update<R = fhirclient.FHIR.Resource, O extends fhirclient.FetchOptions = {}>(
+        resource: fhirclient.FHIR.Resource,
+        requestOptions?: O
+    ): Promise<O["includeResponse"] extends true ? fhirclient.CombinedFetchResult<R> : R>
     {
-        return this.request<fhirclient.FHIR.Resource>({
+        return this.request({
             ...requestOptions,
             url: `${resource.resourceType}/${resource.id}`,
             method: "PUT",
@@ -678,7 +692,7 @@ export default class Client
             headers: {
                 // TODO: Do we need to alternate with "application/json+fhir"?
                 "Content-Type": "application/json",
-                ...requestOptions.headers
+                ...(requestOptions || {}).headers
             }
         });
     }
@@ -692,9 +706,9 @@ export default class Client
      * to `DELETE`) to be passed to the fetch call.
      * @category Request
      */
-    delete(url: string, requestOptions: RequestInit = {}): Promise<fhirclient.FHIR.Resource>
+    delete<R = unknown>(url: string, requestOptions: fhirclient.FetchOptions = {}): Promise<R>
     {
-        return this.request<fhirclient.FHIR.Resource>({
+        return this.request<R>({
             ...requestOptions,
             url,
             method: "DELETE"
@@ -751,6 +765,8 @@ export default class Client
             this.refreshIfNeeded({ signal }).then(() => requestOptions as fhirclient.RequestOptions) :
             Promise.resolve(requestOptions as fhirclient.RequestOptions);
 
+        let response: Response | undefined;
+
         return job
 
             // Add the Authorization header now, after the access token might
@@ -774,7 +790,13 @@ export default class Client
                     requestOptions,
                     options
                 );
-                return request(url, requestOptions) as Promise<T>
+                return request<fhirclient.FetchResult>(url, requestOptions).then(result => {
+                    if (requestOptions.includeResponse) {
+                        response = (result as fhirclient.CombinedFetchResult).response;
+                        return (result as fhirclient.CombinedFetchResult).body;
+                    }
+                    return result;
+                });
             })
 
             // Handle 401 ------------------------------------------------------
@@ -815,14 +837,16 @@ export default class Client
                 throw error;
             })
 
-            .then(data => {
+            .then((data: any) => {
 
-                // Handle raw responses (anything other than json) -------------
+                // At this point we don't know what `data` actually is!
+
+                // We might gen an empty or falsy result. If so return it as is
                 if (!data)
                     return data;
-                if (typeof data == "string")
-                    return data;
-                if (data instanceof Response)
+                
+                // Handle raw responses
+                if (typeof data == "string" || data instanceof Response)
                     return data;
 
                 // Resolve References ------------------------------------------
@@ -908,6 +932,15 @@ export default class Client
                                 data: _data,
                                 references: _resolvedRefs
                             };
+                        }
+                        return _data;
+                    })
+                    .then(_data => {
+                        if ((requestOptions as fhirclient.FetchOptions).includeResponse) {
+                            return {
+                                body: _data,
+                                response
+                            }
                         }
                         return _data;
                     });

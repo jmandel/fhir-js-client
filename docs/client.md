@@ -42,6 +42,22 @@ The **fhirOptions** object is optional and can contain the following properties:
     - This option does not work with contained references (they are "already resolved" anyway).
     - You can use `..` to loop through arrays. For example `identifier..assigner` will match if `identifier` is an array of objects having an `assigner` reference property. This is not recursive, meaning that `..` can only be used once in each path expression and paths like `identifier..assigner..whatever` will not work.
 - **useRefreshToken** `Boolean` - **Defaults to `true`**. If the client is authorized, it will possess an access token and pass it with the requests it makes. When that token expires, you should get back a `401 Unauthorized` response. To prevent this from happening, the client will check the access token expiration time before making requests. If the token is expired, or if it is about to expire in the next 10 seconds, a refresh call will be made to obtain new access token before making the actual request. By setting `useRefreshToken` to `false` you can disable this behavior. There are `refresh` and `refreshIfNeeded` methods on the client (described below) that can be called manually to renew the access token.
+- **includeResponse** `Boolean` - **Defaults to `false`**. (since v2.3.11) In rare cases, one might have to access the raw response object and read response headers or do something else with it. If this option is set to true, the request method will resolve with an object having it's usual result in a `body` property and the `Response` object in `response` property. See the return types below for an example. Note that if this is a complex request resulting in multiple HTTP requests (for example to fetch multiple pages), the `response` property will contain the first response object. Any subsequent  recursive request responses cannot be accessed. This option can also be passed to other high-level request methods, including `client.create`, `client.update`, `client.delete`, `client.patient.read`, `client.user.read`, `client.encounter.read` and `client.patient.request`.
+
+#### Return Values
+This `client.request` method will always return a `Promise` but it may be resolved with different values depending on the passed arguments or the server response. Here are some examples:
+
+|Return Value|Happens if|Example
+|------------|----------|-------
+|`String`    |The server replies with `text/plain` or other non-json mime type containing the word `text`|`client.request("someFile.txt");`
+|[Response](https://developer.mozilla.org/en-US/docs/Web/API/Response)|The server replies with anything other than json or text|`client.request("someFile.pdf");`
+|`FHIR Resource`|If we request a resource and the server replies with json|`client.request("Patient/id");`
+|`FHIR Bundle`|If we request a bundle and the server replies with json|`client.request("Patient");`
+|`Array of FHIR bundles`|If we request a bundle and the server replies with json and we use the `pageLimit` option|`client.request("Patient", { pageLimit: 0 });`
+|`Array of FHIR resources`|If we request a bundle and the server replies with json and we use the `flat` option|`client.request("Patient", { pageLimit: 0, flat: true });`
+|`null`|If we use the `onPage` callback to handle results as they arrive. In this case we don't use the result. We only need to know when the download is complete.|`client.request("Patient", { pageLimit: 5, onPage(bundle) { ... }});`
+|`{ response: `[Response](https://developer.mozilla.org/en-US/docs/Web/API/Response)`, body: <any of the above>}`|When we use the `includeResponse` option (since v2.3.11)|`client.request("Patient/id", { includeResponse: true });`
+
 
 ***Examples:***
 
