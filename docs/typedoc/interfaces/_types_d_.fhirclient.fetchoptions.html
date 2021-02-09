@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>FhirOptions | fhirclient</title>
+	<title>FetchOptions | fhirclient</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -60,10 +60,10 @@
 					<a href="../modules/_types_d_.fhirclient.html">fhirclient</a>
 				</li>
 				<li>
-					<a href="_types_d_.fhirclient.fhiroptions.html">FhirOptions</a>
+					<a href="_types_d_.fhirclient.fetchoptions.html">FetchOptions</a>
 				</li>
 			</ul>
-			<h1>Interface FhirOptions</h1>
+			<h1>Interface FetchOptions</h1>
 		</div>
 	</div>
 </header>
@@ -73,8 +73,7 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Additional options that can be passed to <code>client.request</code> to control its
-						behavior</p>
+						<p>Options passed to the lib.request function</p>
 					</div>
 				</div>
 			</section>
@@ -82,7 +81,12 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">FhirOptions</span>
+						<span class="tsd-signature-type">RequestInit</span>
+						<ul class="tsd-hierarchy">
+							<li>
+								<span class="target">FetchOptions</span>
+							</li>
+						</ul>
 					</li>
 				</ul>
 			</section>
@@ -93,12 +97,20 @@
 						<section class="tsd-index-section tsd-is-not-exported">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_types_d_.fhirclient.fhiroptions.html#flat" class="tsd-kind-icon">flat</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_types_d_.fhirclient.fhiroptions.html#graph" class="tsd-kind-icon">graph</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_types_d_.fhirclient.fhiroptions.html#onpage" class="tsd-kind-icon">on<wbr>Page</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_types_d_.fhirclient.fhiroptions.html#pagelimit" class="tsd-kind-icon">page<wbr>Limit</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_types_d_.fhirclient.fhiroptions.html#resolvereferences" class="tsd-kind-icon">resolve<wbr>References</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_types_d_.fhirclient.fhiroptions.html#userefreshtoken" class="tsd-kind-icon">use<wbr>Refresh<wbr>Token</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported"><a href="_types_d_.fhirclient.fetchoptions.html#body" class="tsd-kind-icon">body</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported"><a href="_types_d_.fhirclient.fetchoptions.html#cache" class="tsd-kind-icon">cache</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported"><a href="_types_d_.fhirclient.fetchoptions.html#credentials" class="tsd-kind-icon">credentials</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported"><a href="_types_d_.fhirclient.fetchoptions.html#headers" class="tsd-kind-icon">headers</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_types_d_.fhirclient.fetchoptions.html#includeresponse" class="tsd-kind-icon">include<wbr>Response</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported"><a href="_types_d_.fhirclient.fetchoptions.html#integrity" class="tsd-kind-icon">integrity</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported"><a href="_types_d_.fhirclient.fetchoptions.html#keepalive" class="tsd-kind-icon">keepalive</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported"><a href="_types_d_.fhirclient.fetchoptions.html#method" class="tsd-kind-icon">method</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported"><a href="_types_d_.fhirclient.fetchoptions.html#mode" class="tsd-kind-icon">mode</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported"><a href="_types_d_.fhirclient.fetchoptions.html#redirect" class="tsd-kind-icon">redirect</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported"><a href="_types_d_.fhirclient.fetchoptions.html#referrer" class="tsd-kind-icon">referrer</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported"><a href="_types_d_.fhirclient.fetchoptions.html#referrerpolicy" class="tsd-kind-icon">referrer<wbr>Policy</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported"><a href="_types_d_.fhirclient.fetchoptions.html#signal" class="tsd-kind-icon">signal</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported"><a href="_types_d_.fhirclient.fetchoptions.html#window" class="tsd-kind-icon">window</a></li>
 							</ul>
 						</section>
 					</div>
@@ -106,177 +118,228 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group tsd-is-not-exported">
 				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-					<a name="flat" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> flat</h3>
-					<div class="tsd-signature tsd-kind-icon">flat<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+					<a name="body" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> body</h3>
+					<div class="tsd-signature tsd-kind-icon">body<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">BodyInit</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></div>
 					<aside class="tsd-sources">
+						<p>Inherited from RequestInit.body</p>
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L600">src/types.d.ts:600</a></li>
+							<li>Defined in node_modules/typedoc/node_modules/typescript/lib/lib.dom.d.ts:1529</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>When fetching a <code>Bundle</code>, you are typically only interested in the
-								included resources which are located at <code>{response}.entry[N].resource</code>.
-								If this option is set to <code>true</code>, the returned result will be an array of
-								resources instead of the whole bundle. This is especially useful when
-								multiple pages are fetched, because an array of page bundles is not that
-								useful and will often have to be converted to array of resources that is
-							easier to iterate.</p>
-							<ul>
-								<li>This option is ignored if the response is not a bundle.</li>
-								<li>If you use <code>onPage</code> callback with <code>flat: true</code>, it will receive that
-								array of resources instead of the page bundle.</li>
-								<li>Resources from multiple pages are flattened into single array (unless
-								you use <code>onPage</code>, which will be called with one array for each page).</li>
-								<li>Defaults to <code>false</code>.</li>
-								<li>Finally, <code>Bundle.entry</code> is optional in FHIR and that leads to bugs in
-									apps that assume that it is always present. With <code>flat: true</code>, you will
-									always get an array, even if it is empty, and even if no <code>entry</code> is
-								found in the response bundle.</li>
-							</ul>
+							<p>A BodyInit object or null to set request&#39;s body.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+					<a name="cache" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> cache</h3>
+					<div class="tsd-signature tsd-kind-icon">cache<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">RequestCache</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from RequestInit.cache</p>
+						<ul>
+							<li>Defined in node_modules/typedoc/node_modules/typescript/lib/lib.dom.d.ts:1533</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A string indicating how the request will interact with the browser&#39;s cache to set request&#39;s cache.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+					<a name="credentials" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> credentials</h3>
+					<div class="tsd-signature tsd-kind-icon">credentials<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">RequestCredentials</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from RequestInit.credentials</p>
+						<ul>
+							<li>Defined in node_modules/typedoc/node_modules/typescript/lib/lib.dom.d.ts:1537</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A string indicating whether credentials will be sent with the request always, never, or only when sent to a same-origin URL. Sets request&#39;s credentials.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+					<a name="headers" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> headers</h3>
+					<div class="tsd-signature tsd-kind-icon">headers<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">HeadersInit</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from RequestInit.headers</p>
+						<ul>
+							<li>Defined in node_modules/typedoc/node_modules/typescript/lib/lib.dom.d.ts:1541</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A Headers object, an object literal, or an array of two-item arrays to set request&#39;s headers.</p>
 						</div>
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-					<a name="graph" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> graph</h3>
-					<div class="tsd-signature tsd-kind-icon">graph<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span></div>
+					<a name="includeresponse" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> include<wbr>Response</h3>
+					<div class="tsd-signature tsd-kind-icon">include<wbr>Response<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L607">src/types.d.ts:607</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L239">src/types.d.ts:239</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>Only applicable if you use <code>resolveReferences</code>. If <code>false</code>, the resolved
-								references will not be &quot;mounted&quot; in the result tree, but will be returned
-							as separate map object instead. <strong>Defaults to <code>true</code></strong>.</p>
+							<p>If <code>true</code> the request function will be instructed to resolve with a
+								<a href="_types_d_.fhirclient.combinedfetchresult.html">CombinedFetchResult</a> object that contains the <code>Response</code> object
+							abd the parsed body (if any)</p>
 						</div>
 					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-					<a name="onpage" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> on<wbr>Page</h3>
-					<div class="tsd-signature tsd-kind-icon">on<wbr>Page<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">function</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+					<a name="integrity" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> integrity</h3>
+					<div class="tsd-signature tsd-kind-icon">integrity<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
+						<p>Inherited from RequestInit.integrity</p>
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L579">src/types.d.ts:579</a></li>
+							<li>Defined in node_modules/typedoc/node_modules/typescript/lib/lib.dom.d.ts:1545</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>When you fetch multiple pages the resulting array may be very large,
-								requiring a lot of time and memory. It is often better if you specify a
-								page callback instead. The <code>onPage</code> callback will be called once for each
-								page with the page Bundle as it&#39;s argument. If you use <code>resolveReferences</code>
-								and <code>graph: false</code>, the references will be passed to <code>onPage</code> as second
-							argument.</p>
-							<ul>
-								<li>If <code>onPage</code> returns a promise it will be awaited for, meaning that no
-								more pages will be fetched until the <code>onPage</code> promise is resolved.</li>
-								<li>If <code>onPage</code> returns a rejected promise or throws an error, the client
-								will not continue fetching more pages.</li>
-								<li>If you use <code>onPage</code> callback, the promise returned by <code>request()</code> will
-									be resolved with <code>null</code>. This is to avoid building that huge array in
-									memory. By using the <code>onPage</code> option you are stating that you will
-									handle the result one page at a time, instead of expecting to receive
-								the big combined result.</li>
-							</ul>
-						</div>
-						<dl class="tsd-comment-tags">
-							<dt>param</dt>
-							<dd><p>Depending in the other options can be <code>Bundle</code>, <code>Bundle[]</code>,
-								<code>Resource[]</code></p>
-							</dd>
-							<dt>param</dt>
-							<dd><p>Map of resolved references. Only available if the <code>graph</code>
-								option is set to <code>false</code></p>
-							</dd>
-						</dl>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-					<a name="pagelimit" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> page<wbr>Limit</h3>
-					<div class="tsd-signature tsd-kind-icon">page<wbr>Limit<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L556">src/types.d.ts:556</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>When you request a Bundle, the result will typically come back in pages
-								and you will only get the first page. You can use <code>pageLimit</code> greater
-								than <code>1</code> to request multiple pages. For example <code>pageLimit: 3</code> will fetch
-								the first 3 pages as array. To fetch all the available pages you can set
-							this to <code>0</code>.</p>
-							<ul>
-								<li>Defaults to <code>1</code>.</li>
-								<li>Ignored if the response is not a <code>Bundle</code>.</li>
-							</ul>
+							<p>A cryptographic hash of the resource to be fetched by request. Sets request&#39;s integrity.</p>
 						</div>
 					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-					<a name="resolvereferences" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> resolve<wbr>References</h3>
-					<div class="tsd-signature tsd-kind-icon">resolve<wbr>References<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+					<a name="keepalive" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> keepalive</h3>
+					<div class="tsd-signature tsd-kind-icon">keepalive<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span></div>
 					<aside class="tsd-sources">
+						<p>Inherited from RequestInit.keepalive</p>
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L628">src/types.d.ts:628</a></li>
+							<li>Defined in node_modules/typedoc/node_modules/typescript/lib/lib.dom.d.ts:1549</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>One or more references to resolve. Single item can be specified as a
-								string or as an array of one string. Multiple items must be specified as
-							array.</p>
-							<ul>
-								<li>Each item is a dot-separated path to the desired reference within the
-									result object, excluding the &quot;reference&quot; property. For example
-								<code>context.serviceProvider</code> will look for <code>{Response}.context.serviceProvider.reference</code>.</li>
-								<li>If the target is an array of references (E.g.
-									<a href="http://hl7.org/fhir/R4/patient-definitions.html#Patient.generalPractitioner">Patient.generalPractitioner</a>), you can request one or more of them by index (E.g. <code>generalPractitioner.0</code>).
-									If the index is not specified, all the references in the array will be
-								resolved.</li>
-								<li>The order in which the reference paths are specified does not matter.
-									For example, if you use <code>[&quot;subject&quot;, &quot;encounter.serviceProvider&quot;, &quot;encounter&quot;]</code>,
-									the library should figure out that <code>encounter.serviceProvider</code> must be
-									fetched after <code>encounter</code>. In fact, in this case it will first fetch
-								subject and encounter in parallel, and then proceed to encounter.serviceProvider.</li>
-								<li>This option does not work with contained references (they are &quot;already
-								resolved&quot; anyway).</li>
-							</ul>
+							<p>A boolean to set request&#39;s keepalive.</p>
 						</div>
 					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-					<a name="userefreshtoken" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> use<wbr>Refresh<wbr>Token</h3>
-					<div class="tsd-signature tsd-kind-icon">use<wbr>Refresh<wbr>Token<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+					<a name="method" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> method</h3>
+					<div class="tsd-signature tsd-kind-icon">method<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
+						<p>Inherited from RequestInit.method</p>
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L643">src/types.d.ts:643</a></li>
+							<li>Defined in node_modules/typedoc/node_modules/typescript/lib/lib.dom.d.ts:1553</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>If the client is authorized, it will possess an access token and pass it
-								with the requests it makes. When that token expires, you should get back
-								a <code>401 Unauthorized</code> response. When that happens, if the client also has
-								a refresh token and if <code>useRefreshToken</code> is <code>true</code> (default), the client
-								will attempt to automatically re-authorize itself and then it will re-run
-								the failed request and eventually resolve it&#39;s promise with the final
-								result. This means that your requests should never fail with <code>401</code>,
-								unless the refresh token is also expired. If you don&#39;t want this, you can
-								set <code>useRefreshToken</code> to <code>false</code>. There is a <code>refresh</code> method on the
-							client that can be called manually to renew the access token.</p>
-							<ul>
-								<li><strong>Defaults to <code>true</code></strong>.</li>
-							</ul>
+							<p>A string to set request&#39;s method.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+					<a name="mode" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> mode</h3>
+					<div class="tsd-signature tsd-kind-icon">mode<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">RequestMode</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from RequestInit.mode</p>
+						<ul>
+							<li>Defined in node_modules/typedoc/node_modules/typescript/lib/lib.dom.d.ts:1557</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A string to indicate whether the request will use CORS, or will be restricted to same-origin URLs. Sets request&#39;s mode.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+					<a name="redirect" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> redirect</h3>
+					<div class="tsd-signature tsd-kind-icon">redirect<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">RequestRedirect</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from RequestInit.redirect</p>
+						<ul>
+							<li>Defined in node_modules/typedoc/node_modules/typescript/lib/lib.dom.d.ts:1561</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A string indicating whether request follows redirects, results in an error upon encountering a redirect, or returns the redirect (in an opaque fashion). Sets request&#39;s redirect.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+					<a name="referrer" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> referrer</h3>
+					<div class="tsd-signature tsd-kind-icon">referrer<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from RequestInit.referrer</p>
+						<ul>
+							<li>Defined in node_modules/typedoc/node_modules/typescript/lib/lib.dom.d.ts:1565</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A string whose value is a same-origin URL, &quot;about:client&quot;, or the empty string, to set request&#39;s referrer.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+					<a name="referrerpolicy" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> referrer<wbr>Policy</h3>
+					<div class="tsd-signature tsd-kind-icon">referrer<wbr>Policy<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ReferrerPolicy</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from RequestInit.referrerPolicy</p>
+						<ul>
+							<li>Defined in node_modules/typedoc/node_modules/typescript/lib/lib.dom.d.ts:1569</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A referrer policy to set request&#39;s referrerPolicy.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+					<a name="signal" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> signal</h3>
+					<div class="tsd-signature tsd-kind-icon">signal<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">AbortSignal</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from RequestInit.signal</p>
+						<ul>
+							<li>Defined in node_modules/typedoc/node_modules/typescript/lib/lib.dom.d.ts:1573</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>An AbortSignal to set request&#39;s signal.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+					<a name="window" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> window</h3>
+					<div class="tsd-signature tsd-kind-icon">window<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from RequestInit.window</p>
+						<ul>
+							<li>Defined in node_modules/typedoc/node_modules/typescript/lib/lib.dom.d.ts:1577</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Can only be null. Used to disassociate request from any Window.</p>
 						</div>
 					</div>
 				</section>
@@ -368,36 +431,60 @@
 					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
 						<a href="_types_d_.fhirclient.combinedfetchresult.html" class="tsd-kind-icon">Combined<wbr>Fetch<wbr>Result</a>
 					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
-						<a href="_types_d_.fhirclient.fetchoptions.html" class="tsd-kind-icon">Fetch<wbr>Options</a>
-					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
-						<a href="_types_d_.fhirclient.fhiroptions.html" class="tsd-kind-icon">Fhir<wbr>Options</a>
+						<a href="_types_d_.fhirclient.fetchoptions.html" class="tsd-kind-icon">Fetch<wbr>Options</a>
 						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-								<a href="_types_d_.fhirclient.fhiroptions.html#flat" class="tsd-kind-icon">flat</a>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+								<a href="_types_d_.fhirclient.fetchoptions.html#body" class="tsd-kind-icon">body</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+								<a href="_types_d_.fhirclient.fetchoptions.html#cache" class="tsd-kind-icon">cache</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+								<a href="_types_d_.fhirclient.fetchoptions.html#credentials" class="tsd-kind-icon">credentials</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+								<a href="_types_d_.fhirclient.fetchoptions.html#headers" class="tsd-kind-icon">headers</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-								<a href="_types_d_.fhirclient.fhiroptions.html#graph" class="tsd-kind-icon">graph</a>
+								<a href="_types_d_.fhirclient.fetchoptions.html#includeresponse" class="tsd-kind-icon">include<wbr>Response</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-								<a href="_types_d_.fhirclient.fhiroptions.html#onpage" class="tsd-kind-icon">on<wbr>Page</a>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+								<a href="_types_d_.fhirclient.fetchoptions.html#integrity" class="tsd-kind-icon">integrity</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-								<a href="_types_d_.fhirclient.fhiroptions.html#pagelimit" class="tsd-kind-icon">page<wbr>Limit</a>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+								<a href="_types_d_.fhirclient.fetchoptions.html#keepalive" class="tsd-kind-icon">keepalive</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-								<a href="_types_d_.fhirclient.fhiroptions.html#resolvereferences" class="tsd-kind-icon">resolve<wbr>References</a>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+								<a href="_types_d_.fhirclient.fetchoptions.html#method" class="tsd-kind-icon">method</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-								<a href="_types_d_.fhirclient.fhiroptions.html#userefreshtoken" class="tsd-kind-icon">use<wbr>Refresh<wbr>Token</a>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+								<a href="_types_d_.fhirclient.fetchoptions.html#mode" class="tsd-kind-icon">mode</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+								<a href="_types_d_.fhirclient.fetchoptions.html#redirect" class="tsd-kind-icon">redirect</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+								<a href="_types_d_.fhirclient.fetchoptions.html#referrer" class="tsd-kind-icon">referrer</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+								<a href="_types_d_.fhirclient.fetchoptions.html#referrerpolicy" class="tsd-kind-icon">referrer<wbr>Policy</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+								<a href="_types_d_.fhirclient.fetchoptions.html#signal" class="tsd-kind-icon">signal</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
+								<a href="_types_d_.fhirclient.fetchoptions.html#window" class="tsd-kind-icon">window</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
+						<a href="_types_d_.fhirclient.fhiroptions.html" class="tsd-kind-icon">Fhir<wbr>Options</a>
+					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
 						<a href="_types_d_.fhirclient.idtoken.html" class="tsd-kind-icon">IDToken</a>
 					</li>

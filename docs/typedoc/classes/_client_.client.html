@@ -132,12 +132,12 @@
 							</ul>
 							<h3>Request Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_client_.client.html#create" class="tsd-kind-icon">create</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_client_.client.html#delete" class="tsd-kind-icon">delete</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="_client_.client.html#create" class="tsd-kind-icon">create</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="_client_.client.html#delete" class="tsd-kind-icon">delete</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_client_.client.html#refresh" class="tsd-kind-icon">refresh</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_client_.client.html#refreshifneeded" class="tsd-kind-icon">refresh<wbr>IfNeeded</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="_client_.client.html#request-1" class="tsd-kind-icon">request</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_client_.client.html#update" class="tsd-kind-icon">update</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="_client_.client.html#update" class="tsd-kind-icon">update</a></li>
 							</ul>
 							<h3>Utility Methods</h3>
 							<ul class="tsd-index-list">
@@ -161,7 +161,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L348">src/Client.ts:348</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L356">src/Client.ts:356</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -192,7 +192,7 @@
 					<div class="tsd-signature tsd-kind-icon">_refresh<wbr>Task<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L348">src/Client.ts:348</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L356">src/Client.ts:356</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -212,7 +212,7 @@
 					<div class="tsd-signature tsd-kind-icon">api<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_types_d_.fhirclient.jsonobject.html" class="tsd-signature-type">JsonObject</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L342">src/Client.ts:342</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L350">src/Client.ts:350</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -229,7 +229,7 @@
 					<div class="tsd-signature tsd-kind-icon">encounter<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L280">src/Client.ts:280</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L288">src/Client.ts:288</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -252,7 +252,7 @@
 								</div>
 							</li>
 							<li class="tsd-parameter">
-								<h5>read<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">function</span></h5>
+								<h5>read<span class="tsd-signature-symbol">: </span><a href="../modules/_types_d_.fhirclient.html#requestfunction" class="tsd-signature-type">RequestFunction</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.fhir.encounter.html" class="tsd-signature-type">Encounter</a><span class="tsd-signature-symbol">&gt;</span></h5>
 								<div class="tsd-comment tsd-typography">
 									<div class="lead">
 										<p>A method to fetch the current encounter resource from the FHIR server.
@@ -264,24 +264,6 @@
 										</dd>
 									</dl>
 								</div>
-								<ul class="tsd-parameters">
-									<li class="tsd-parameter-siganture">
-										<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-variable tsd-is-not-exported">
-											<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>requestOptions<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">RequestInit</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.fhir.encounter.html" class="tsd-signature-type">Encounter</a><span class="tsd-signature-symbol">&gt;</span></li>
-										</ul>
-										<ul class="tsd-descriptions">
-											<li class="tsd-description">
-												<h4 class="tsd-parameters-title">Parameters</h4>
-												<ul class="tsd-parameters">
-													<li>
-														<h5><span class="tsd-flag ts-flagOptional">Optional</span> requestOptions: <span class="tsd-signature-type">RequestInit</span></h5>
-													</li>
-												</ul>
-												<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.fhir.encounter.html" class="tsd-signature-type">Encounter</a><span class="tsd-signature-symbol">&gt;</span></h4>
-											</li>
-										</ul>
-									</li>
-								</ul>
 							</li>
 						</ul>
 					</div>
@@ -292,7 +274,7 @@
 					<div class="tsd-signature tsd-kind-icon">environment<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_types_d_.fhirclient.adapter.html" class="tsd-signature-type">Adapter</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L233">src/Client.ts:233</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L233">src/Client.ts:233</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -312,7 +294,7 @@
 					<div class="tsd-signature tsd-kind-icon">patient<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L239">src/Client.ts:239</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L239">src/Client.ts:239</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -342,7 +324,7 @@
 								</div>
 							</li>
 							<li class="tsd-parameter">
-								<h5>read<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">function</span></h5>
+								<h5>read<span class="tsd-signature-symbol">: </span><a href="../modules/_types_d_.fhirclient.html#requestfunction" class="tsd-signature-type">RequestFunction</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.fhir.patient.html" class="tsd-signature-type">Patient</a><span class="tsd-signature-symbol">&gt;</span></h5>
 								<div class="tsd-comment tsd-typography">
 									<div class="lead">
 										<p>A method to fetch the current patient resource from the FHIR server.
@@ -350,28 +332,10 @@
 									</div>
 									<dl class="tsd-comment-tags">
 										<dt>param</dt>
-										<dd><p>options to pass to the <code>fetch</code> call.</p>
+										<dd><p>Any options to pass to the <code>fetch</code> call.</p>
 										</dd>
 									</dl>
 								</div>
-								<ul class="tsd-parameters">
-									<li class="tsd-parameter-siganture">
-										<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-variable tsd-is-not-exported">
-											<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>requestOptions<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">RequestInit</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.fhir.patient.html" class="tsd-signature-type">Patient</a><span class="tsd-signature-symbol">&gt;</span></li>
-										</ul>
-										<ul class="tsd-descriptions">
-											<li class="tsd-description">
-												<h4 class="tsd-parameters-title">Parameters</h4>
-												<ul class="tsd-parameters">
-													<li>
-														<h5><span class="tsd-flag ts-flagOptional">Optional</span> requestOptions: <span class="tsd-signature-type">RequestInit</span></h5>
-													</li>
-												</ul>
-												<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.fhir.patient.html" class="tsd-signature-type">Patient</a><span class="tsd-signature-symbol">&gt;</span></h4>
-											</li>
-										</ul>
-									</li>
-								</ul>
 							</li>
 							<li class="tsd-parameter">
 								<h5>request<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">function</span></h5>
@@ -382,15 +346,26 @@
 										<pre><code class="language-js">client.request(<span class="hljs-string">"Observation?patient="</span> + client.patient.id)</code></pre>
 										<p>you can do</p>
 										<pre><code class="language-js">client.patient.request(<span class="hljs-string">"Observation"</span>)</code></pre>
+										<p>The return type depends on the arguments. Typically it will be the
+											response payload JSON object. Can also be a string or the <code>Response</code>
+											object itself if we have received a non-json result, which allows us
+											to handle even binary responses. Can also be a <a href="../interfaces/_types_d_.fhirclient.combinedfetchresult.html">CombinedFetchResult</a>
+										object if the <code>requestOptions.includeResponse</code>s has been set to true.</p>
 									</div>
 								</div>
 								<ul class="tsd-parameters">
 									<li class="tsd-parameter-siganture">
-										<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-variable tsd-is-not-exported">
-											<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>requestOptions<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">URL</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/_types_d_.fhirclient.requestoptions.html" class="tsd-signature-type">RequestOptions</a>, fhirOptions<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_types_d_.fhirclient.fhiroptions.html" class="tsd-signature-type">FhirOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.jsonobject.html" class="tsd-signature-type">JsonObject</a><span class="tsd-signature-symbol">&gt;</span></li>
+										<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-variable tsd-has-type-parameter tsd-is-not-exported">
+											<li class="tsd-signature tsd-kind-icon">&lt;R&gt;<span class="tsd-signature-symbol">(</span>requestOptions<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">URL</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/_types_d_.fhirclient.requestoptions.html" class="tsd-signature-type">RequestOptions</a>, fhirOptions<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_types_d_.fhirclient.fhiroptions.html" class="tsd-signature-type">FhirOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">R</span><span class="tsd-signature-symbol">&gt;</span></li>
 										</ul>
 										<ul class="tsd-descriptions">
 											<li class="tsd-description">
+												<h4 class="tsd-type-parameters-title">Type parameters</h4>
+												<ul class="tsd-type-parameters">
+													<li>
+														<h4>R</h4>
+													</li>
+												</ul>
 												<h4 class="tsd-parameters-title">Parameters</h4>
 												<ul class="tsd-parameters">
 													<li>
@@ -400,7 +375,7 @@
 														<h5><span class="tsd-flag ts-flagOptional">Optional</span> fhirOptions: <a href="../interfaces/_types_d_.fhirclient.fhiroptions.html" class="tsd-signature-type">FhirOptions</a></h5>
 													</li>
 												</ul>
-												<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.jsonobject.html" class="tsd-signature-type">JsonObject</a><span class="tsd-signature-symbol">&gt;</span></h4>
+												<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">R</span><span class="tsd-signature-symbol">&gt;</span></h4>
 											</li>
 										</ul>
 									</li>
@@ -415,7 +390,7 @@
 					<div class="tsd-signature tsd-kind-icon">state<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_types_d_.fhirclient.clientstate.html" class="tsd-signature-type">ClientState</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L225">src/Client.ts:225</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L225">src/Client.ts:225</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -433,7 +408,7 @@
 					<div class="tsd-signature tsd-kind-icon">user<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L301">src/Client.ts:301</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L309">src/Client.ts:309</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -470,7 +445,7 @@
 								</div>
 							</li>
 							<li class="tsd-parameter">
-								<h5>read<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">function</span></h5>
+								<h5>read<span class="tsd-signature-symbol">: </span><a href="../modules/_types_d_.fhirclient.html#requestfunction" class="tsd-signature-type">RequestFunction</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.fhir.patient.html" class="tsd-signature-type">Patient</a><span class="tsd-signature-symbol"> | </span><a href="../interfaces/_types_d_.fhirclient.fhir.practitioner.html" class="tsd-signature-type">Practitioner</a><span class="tsd-signature-symbol"> | </span><a href="../interfaces/_types_d_.fhirclient.fhir.relatedperson.html" class="tsd-signature-type">RelatedPerson</a><span class="tsd-signature-symbol">&gt;</span></h5>
 								<div class="tsd-comment tsd-typography">
 									<div class="lead">
 										<p>A method to fetch the current user resource from the FHIR server.
@@ -482,24 +457,6 @@
 										</dd>
 									</dl>
 								</div>
-								<ul class="tsd-parameters">
-									<li class="tsd-parameter-siganture">
-										<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-variable tsd-is-not-exported">
-											<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>requestOptions<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">RequestInit</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.fhir.patient.html" class="tsd-signature-type">Patient</a><span class="tsd-signature-symbol"> | </span><a href="../interfaces/_types_d_.fhirclient.fhir.practitioner.html" class="tsd-signature-type">Practitioner</a><span class="tsd-signature-symbol"> | </span><a href="../interfaces/_types_d_.fhirclient.fhir.relatedperson.html" class="tsd-signature-type">RelatedPerson</a><span class="tsd-signature-symbol">&gt;</span></li>
-										</ul>
-										<ul class="tsd-descriptions">
-											<li class="tsd-description">
-												<h4 class="tsd-parameters-title">Parameters</h4>
-												<ul class="tsd-parameters">
-													<li>
-														<h5><span class="tsd-flag ts-flagOptional">Optional</span> requestOptions: <span class="tsd-signature-type">RequestInit</span></h5>
-													</li>
-												</ul>
-												<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.fhir.patient.html" class="tsd-signature-type">Patient</a><span class="tsd-signature-symbol"> | </span><a href="../interfaces/_types_d_.fhirclient.fhir.practitioner.html" class="tsd-signature-type">Practitioner</a><span class="tsd-signature-symbol"> | </span><a href="../interfaces/_types_d_.fhirclient.fhir.relatedperson.html" class="tsd-signature-type">RelatedPerson</a><span class="tsd-signature-symbol">&gt;</span></h4>
-											</li>
-										</ul>
-									</li>
-								</ul>
 							</li>
 							<li class="tsd-parameter">
 								<h5>resource<wbr>Type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
@@ -527,7 +484,7 @@
 					<div class="tsd-signature tsd-kind-icon">units<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span><span class="tsd-signature-symbol"> =&nbsp;units</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L1084">src/Client.ts:1084</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L1124">src/Client.ts:1124</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -544,7 +501,7 @@
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/lib.ts#L47">src/lib.ts:47</a></li>
+												<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/lib.ts#L47">src/lib.ts:47</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
@@ -565,7 +522,7 @@
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/lib.ts#L28">src/lib.ts:28</a></li>
+												<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/lib.ts#L28">src/lib.ts:28</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
@@ -594,7 +551,7 @@
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/lib.ts#L39">src/lib.ts:39</a></li>
+												<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/lib.ts#L39">src/lib.ts:39</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
@@ -630,7 +587,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L629">src/Client.ts:629</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L637">src/Client.ts:637</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -653,7 +610,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L427">src/Client.ts:427</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L435">src/Client.ts:435</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -686,7 +643,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L612">src/Client.ts:612</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L620">src/Client.ts:620</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -712,7 +669,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L498">src/Client.ts:498</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L506">src/Client.ts:506</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -740,7 +697,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L1135">src/Client.ts:1135</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L1175">src/Client.ts:1175</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -768,7 +725,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L574">src/Client.ts:574</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L582">src/Client.ts:582</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -795,7 +752,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L1123">src/Client.ts:1123</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L1163">src/Client.ts:1163</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -818,7 +775,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L531">src/Client.ts:531</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L539">src/Client.ts:539</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -845,7 +802,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L464">src/Client.ts:464</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L472">src/Client.ts:472</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -871,7 +828,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L1115">src/Client.ts:1115</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L1155">src/Client.ts:1155</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -908,7 +865,7 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L586">src/Client.ts:586</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L594">src/Client.ts:594</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -933,7 +890,7 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L599">src/Client.ts:599</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L607">src/Client.ts:607</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -952,17 +909,17 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Request Methods</h2>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
 					<a name="create" class="tsd-anchor"></a>
 					<h3>create</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">create<span class="tsd-signature-symbol">(</span>resource<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_d_.fhirclient.fhir.resource.html" class="tsd-signature-type">Resource</a>, requestOptions<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">RequestInit</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.fhir.resource.html" class="tsd-signature-type">Resource</a><span class="tsd-signature-symbol">&gt;</span></li>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">create&lt;R, O&gt;<span class="tsd-signature-symbol">(</span>resource<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_d_.fhirclient.fhir.resource.html" class="tsd-signature-type">Resource</a>, requestOptions<span class="tsd-signature-symbol">?: </span><a href="" class="tsd-signature-type">O</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">O[&quot;includeResponse&quot;] extends true ? CombinedFetchResult&lt;R&gt; : R</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L647">src/Client.ts:647</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L655">src/Client.ts:655</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -975,6 +932,15 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 									</dd>
 								</dl>
 							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>R</h4>
+								</li>
+								<li>
+									<h4>O<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_d_.fhirclient.fetchoptions.html" class="tsd-signature-type">FetchOptions</a></h4>
+								</li>
+							</ul>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
@@ -984,24 +950,24 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> requestOptions: <span class="tsd-signature-type">RequestInit</span><span class="tsd-signature-symbol"> =&nbsp;{}</span></h5>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> requestOptions: <a href="" class="tsd-signature-type">O</a></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.fhir.resource.html" class="tsd-signature-type">Resource</a><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">O[&quot;includeResponse&quot;] extends true ? CombinedFetchResult&lt;R&gt; : R</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
 					<a name="delete" class="tsd-anchor"></a>
 					<h3>delete</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">delete<span class="tsd-signature-symbol">(</span>url<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, requestOptions<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">RequestInit</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.fhir.resource.html" class="tsd-signature-type">Resource</a><span class="tsd-signature-symbol">&gt;</span></li>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">delete&lt;R&gt;<span class="tsd-signature-symbol">(</span>url<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, requestOptions<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_types_d_.fhirclient.fetchoptions.html" class="tsd-signature-type">FetchOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">R</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L695">src/Client.ts:695</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L709">src/Client.ts:709</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1014,6 +980,12 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 									</dd>
 								</dl>
 							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>R</h4>
+								</li>
+							</ul>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
@@ -1024,14 +996,14 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> requestOptions: <span class="tsd-signature-type">RequestInit</span><span class="tsd-signature-symbol"> =&nbsp;{}</span></h5>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> requestOptions: <a href="../interfaces/_types_d_.fhirclient.fetchoptions.html" class="tsd-signature-type">FetchOptions</a><span class="tsd-signature-symbol"> =&nbsp;{}</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>Any options (except <code>method</code> which will be fixed
 										to <code>DELETE</code>) to be passed to the fetch call.</p>
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.fhir.resource.html" class="tsd-signature-type">Resource</a><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">R</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -1045,7 +1017,7 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L948">src/Client.ts:948</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L988">src/Client.ts:988</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1082,7 +1054,7 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L922">src/Client.ts:922</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L962">src/Client.ts:962</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1117,7 +1089,7 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L711">src/Client.ts:711</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L725">src/Client.ts:725</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1154,17 +1126,17 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
 					<a name="update" class="tsd-anchor"></a>
 					<h3>update</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">update<span class="tsd-signature-symbol">(</span>resource<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_d_.fhirclient.fhir.resource.html" class="tsd-signature-type">Resource</a>, requestOptions<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">RequestInit</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.fhir.resource.html" class="tsd-signature-type">Resource</a><span class="tsd-signature-symbol">&gt;</span></li>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">update&lt;R, O&gt;<span class="tsd-signature-symbol">(</span>resource<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_d_.fhirclient.fhir.resource.html" class="tsd-signature-type">Resource</a>, requestOptions<span class="tsd-signature-symbol">?: </span><a href="" class="tsd-signature-type">O</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">O[&quot;includeResponse&quot;] extends true ? CombinedFetchResult&lt;R&gt; : R</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L671">src/Client.ts:671</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L682">src/Client.ts:682</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1178,6 +1150,15 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 									</dd>
 								</dl>
 							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>R</h4>
+								</li>
+								<li>
+									<h4>O<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_d_.fhirclient.fetchoptions.html" class="tsd-signature-type">FetchOptions</a></h4>
+								</li>
+							</ul>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
@@ -1187,14 +1168,14 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> requestOptions: <span class="tsd-signature-type">RequestInit</span><span class="tsd-signature-symbol"> =&nbsp;{}</span></h5>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> requestOptions: <a href="" class="tsd-signature-type">O</a></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>Any options to be passed to the fetch call.
 										Note that <code>method</code> and <code>body</code> will be ignored.</p>
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.fhir.resource.html" class="tsd-signature-type">Resource</a><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">O[&quot;includeResponse&quot;] extends true ? CombinedFetchResult&lt;R&gt; : R</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -1211,7 +1192,7 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L1048">src/Client.ts:1048</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L1088">src/Client.ts:1088</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1261,7 +1242,7 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L1073">src/Client.ts:1073</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L1113">src/Client.ts:1113</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1330,7 +1311,7 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/Client.ts#L1099">src/Client.ts:1099</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/Client.ts#L1139">src/Client.ts:1139</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1473,10 +1454,10 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="_client_.client.html#connect" class="tsd-kind-icon">connect</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
 								<a href="_client_.client.html#create" class="tsd-kind-icon">create</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
 								<a href="_client_.client.html#delete" class="tsd-kind-icon">delete</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
@@ -1521,7 +1502,7 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
 								<a href="_client_.client.html#request-1" class="tsd-kind-icon">request</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
 								<a href="_client_.client.html#update" class="tsd-kind-icon">update</a>
 							</li>
 						</ul>

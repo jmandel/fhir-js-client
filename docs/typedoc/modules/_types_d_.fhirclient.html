@@ -85,8 +85,11 @@
 								<li class="tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported"><a href="../interfaces/_types_d_.fhirclient.browserfhirsettings.html" class="tsd-kind-icon">BrowserFHIRSettings</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported"><a href="../interfaces/_types_d_.fhirclient.clientstate.html" class="tsd-kind-icon">Client<wbr>State</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported"><a href="../interfaces/_types_d_.fhirclient.codevalue.html" class="tsd-kind-icon">Code<wbr>Value</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported"><a href="../interfaces/_types_d_.fhirclient.combinedfetchresult.html" class="tsd-kind-icon">Combined<wbr>Fetch<wbr>Result</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported"><a href="../interfaces/_types_d_.fhirclient.fetchoptions.html" class="tsd-kind-icon">Fetch<wbr>Options</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported"><a href="../interfaces/_types_d_.fhirclient.fhiroptions.html" class="tsd-kind-icon">Fhir<wbr>Options</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported"><a href="../interfaces/_types_d_.fhirclient.idtoken.html" class="tsd-kind-icon">IDToken</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported"><a href="../interfaces/_types_d_.fhirclient.includeresponsehint.html" class="tsd-kind-icon">Include<wbr>Response<wbr>Hint</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported"><a href="../interfaces/_types_d_.fhirclient.jsonobject.html" class="tsd-kind-icon">Json<wbr>Object</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported"><a href="../interfaces/_types_d_.fhirclient.oauthsecurityextensions.html" class="tsd-kind-icon">OAuth<wbr>Security<wbr>Extensions</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported"><a href="../interfaces/_types_d_.fhirclient.observationmap.html" class="tsd-kind-icon">Observation<wbr>Map</a></li>
@@ -101,6 +104,8 @@
 						<section class="tsd-index-section tsd-is-not-exported">
 							<h3>Type aliases</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported"><a href="_types_d_.fhirclient.html#fetchresult" class="tsd-kind-icon">Fetch<wbr>Result</a></li>
+								<li class="tsd-kind-type-alias tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported"><a href="_types_d_.fhirclient.html#requestfunction" class="tsd-kind-icon">Request<wbr>Function</a></li>
 								<li class="tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported"><a href="_types_d_.fhirclient.html#smartauthenticationmethod" class="tsd-kind-icon">SMARTAuthentication<wbr>Method</a></li>
 								<li class="tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported"><a href="_types_d_.fhirclient.html#windowtarget" class="tsd-kind-icon">Window<wbr>Target</a></li>
 								<li class="tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported"><a href="_types_d_.fhirclient.html#windowtargetvariable" class="tsd-kind-icon">Window<wbr>Target<wbr>Variable</a></li>
@@ -126,12 +131,91 @@
 			<section class="tsd-panel-group tsd-member-group tsd-is-not-exported">
 				<h2>Type aliases</h2>
 				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported">
+					<a name="fetchresult" class="tsd-anchor"></a>
+					<h3>Fetch<wbr>Result</h3>
+					<div class="tsd-signature tsd-kind-icon">Fetch<wbr>Result<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Response</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/_types_d_.fhirclient.jsonobject.html" class="tsd-signature-type">JsonObject</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/_types_d_.fhirclient.combinedfetchresult.html" class="tsd-signature-type">CombinedFetchResult</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L255">src/types.d.ts:255</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The return type of the lib.request function</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
+					<a name="requestfunction" class="tsd-anchor"></a>
+					<h3>Request<wbr>Function</h3>
+					<div class="tsd-signature tsd-kind-icon">Request<wbr>Function&lt;R&gt;<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L227">src/types.d.ts:227</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A function or method that makes requests to the backend server. If the
+								<code>includeResponse</code> option is <code>true</code> resolves with <code>CombinedFetchResult</code>
+								where the <code>response</code> property is the <code>Response</code> object and the <code>body</code>
+								property is the result of type <code>R</code> (if any). Otherwise resolves with the
+							result as <code>R</code>.</p>
+						</div>
+						<dl class="tsd-comment-tags">
+							<dt>param</dt>
+							<dd><p>May contain the <code>includeResponse</code> flag to signal that we also
+									want to receive the raw response object. Any other option will be passed
+								to the underlying <code>fetch</code> call.</p>
+							</dd>
+						</dl>
+					</div>
+					<h4 class="tsd-type-parameters-title">Type parameters</h4>
+					<ul class="tsd-type-parameters">
+						<li>
+							<h4>R</h4>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>The expected return type</p>
+								</div>
+							</div>
+						</li>
+					</ul>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter-siganture">
+								<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-type-alias tsd-has-type-parameter tsd-is-not-exported">
+									<li class="tsd-signature tsd-kind-icon">&lt;O&gt;<span class="tsd-signature-symbol">(</span>requestOptions<span class="tsd-signature-symbol">?: </span><a href="" class="tsd-signature-type">O</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">O[&quot;includeResponse&quot;] extends true ? CombinedFetchResult&lt;R&gt; : R</span><span class="tsd-signature-symbol">&gt;</span></li>
+								</ul>
+								<ul class="tsd-descriptions">
+									<li class="tsd-description">
+										<h4 class="tsd-type-parameters-title">Type parameters</h4>
+										<ul class="tsd-type-parameters">
+											<li>
+												<h4>O<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_d_.fhirclient.includeresponsehint.html" class="tsd-signature-type">IncludeResponseHint</a></h4>
+											</li>
+										</ul>
+										<h4 class="tsd-parameters-title">Parameters</h4>
+										<ul class="tsd-parameters">
+											<li>
+												<h5><span class="tsd-flag ts-flagOptional">Optional</span> requestOptions: <a href="" class="tsd-signature-type">O</a></h5>
+											</li>
+										</ul>
+										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">O[&quot;includeResponse&quot;] extends true ? CombinedFetchResult&lt;R&gt; : R</span><span class="tsd-signature-symbol">&gt;</span></h4>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported">
 					<a name="smartauthenticationmethod" class="tsd-anchor"></a>
 					<h3>SMARTAuthentication<wbr>Method</h3>
 					<div class="tsd-signature tsd-kind-icon">SMARTAuthentication<wbr>Method<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"client_secret_post"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"client_secret_basic"</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/types.d.ts#L680">src/types.d.ts:680</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L748">src/types.d.ts:748</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -141,7 +225,7 @@
 					<div class="tsd-signature tsd-kind-icon">Window<wbr>Target<span class="tsd-signature-symbol">:</span> <a href="_types_d_.fhirclient.html#windowtargetvariable" class="tsd-signature-type">WindowTargetVariable</a><span class="tsd-signature-symbol"> | </span><a href="_types_d_.fhirclient.html#windowtargetfunction" class="tsd-signature-type">WindowTargetFunction</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/types.d.ts#L206">src/types.d.ts:206</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L206">src/types.d.ts:206</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -151,7 +235,7 @@
 					<div class="tsd-signature tsd-kind-icon">Window<wbr>Target<wbr>Variable<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"_self"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"_top"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"_parent"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"_blank"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"popup"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Window</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/types.d.ts#L203">src/types.d.ts:203</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L203">src/types.d.ts:203</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -161,7 +245,7 @@
 					<div class="tsd-signature tsd-kind-icon">client<wbr>Type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"client-public"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"client-confidential-symmetric"</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/types.d.ts#L684">src/types.d.ts:684</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L752">src/types.d.ts:752</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -171,7 +255,7 @@
 					<div class="tsd-signature tsd-kind-icon">launch<wbr>Context<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"context-banner"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"context-style"</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/types.d.ts#L688">src/types.d.ts:688</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L756">src/types.d.ts:756</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -181,7 +265,7 @@
 					<div class="tsd-signature tsd-kind-icon">launch<wbr>ContextEHR<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"context-ehr-patient"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"context-ehr-encounter"</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/types.d.ts#L690">src/types.d.ts:690</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L758">src/types.d.ts:758</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -191,7 +275,7 @@
 					<div class="tsd-signature tsd-kind-icon">launch<wbr>Context<wbr>Standalone<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"context-standalone-patient"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"context-standalone-encounter"</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/types.d.ts#L692">src/types.d.ts:692</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L760">src/types.d.ts:760</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -201,7 +285,7 @@
 					<div class="tsd-signature tsd-kind-icon">launch<wbr>Mode<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"launch-ehr"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"launch-standalone"</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/types.d.ts#L682">src/types.d.ts:682</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L750">src/types.d.ts:750</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -211,7 +295,7 @@
 					<div class="tsd-signature tsd-kind-icon">permissions<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"permission-offline"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"permission-patient"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"permission-user"</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/types.d.ts#L694">src/types.d.ts:694</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L762">src/types.d.ts:762</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -221,7 +305,7 @@
 					<div class="tsd-signature tsd-kind-icon">single<wbr>Sign<wbr>On<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"sso-openid-connect"</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/types.d.ts#L686">src/types.d.ts:686</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L754">src/types.d.ts:754</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -231,7 +315,7 @@
 					<div class="tsd-signature tsd-kind-icon">storage<wbr>Factory<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/types.d.ts#L209">src/types.d.ts:209</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L209">src/types.d.ts:209</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -270,7 +354,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/types.d.ts#L204">src/types.d.ts:204</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L204">src/types.d.ts:204</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="_types_d_.fhirclient.html#windowtargetvariable" class="tsd-signature-type">WindowTargetVariable</a></h4>
@@ -278,7 +362,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/types.d.ts#L205">src/types.d.ts:205</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L205">src/types.d.ts:205</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_types_d_.fhirclient.html#windowtargetvariable" class="tsd-signature-type">WindowTargetVariable</a><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -370,11 +454,20 @@
 					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
 						<a href="../interfaces/_types_d_.fhirclient.codevalue.html" class="tsd-kind-icon">Code<wbr>Value</a>
 					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
+						<a href="../interfaces/_types_d_.fhirclient.combinedfetchresult.html" class="tsd-kind-icon">Combined<wbr>Fetch<wbr>Result</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
+						<a href="../interfaces/_types_d_.fhirclient.fetchoptions.html" class="tsd-kind-icon">Fetch<wbr>Options</a>
+					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
 						<a href="../interfaces/_types_d_.fhirclient.fhiroptions.html" class="tsd-kind-icon">Fhir<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
 						<a href="../interfaces/_types_d_.fhirclient.idtoken.html" class="tsd-kind-icon">IDToken</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
+						<a href="../interfaces/_types_d_.fhirclient.includeresponsehint.html" class="tsd-kind-icon">Include<wbr>Response<wbr>Hint</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
 						<a href="../interfaces/_types_d_.fhirclient.jsonobject.html" class="tsd-kind-icon">Json<wbr>Object</a>
@@ -402,6 +495,12 @@
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
 						<a href="../interfaces/_types_d_.fhirclient.wellknownsmartconfiguration.html" class="tsd-kind-icon">Well<wbr>Known<wbr>Smart<wbr>Configuration</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported">
+						<a href="_types_d_.fhirclient.html#fetchresult" class="tsd-kind-icon">Fetch<wbr>Result</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
+						<a href="_types_d_.fhirclient.html#requestfunction" class="tsd-kind-icon">Request<wbr>Function</a>
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported">
 						<a href="_types_d_.fhirclient.html#smartauthenticationmethod" class="tsd-kind-icon">SMARTAuthentication<wbr>Method</a>

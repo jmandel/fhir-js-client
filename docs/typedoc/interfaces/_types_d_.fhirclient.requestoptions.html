@@ -73,7 +73,8 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Options that must contain an <code>url</code> property (String|URL). Any other
+						<p>Options that must contain an <code>url</code> property (String|URL).
+							A <code>includeResponse</code> boolean option might also be passed. Any other
 						properties will be passed to the underlying <code>fetch()</code> call.</p>
 					</div>
 				</div>
@@ -102,6 +103,7 @@
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported"><a href="_types_d_.fhirclient.requestoptions.html#cache" class="tsd-kind-icon">cache</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported"><a href="_types_d_.fhirclient.requestoptions.html#credentials" class="tsd-kind-icon">credentials</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported"><a href="_types_d_.fhirclient.requestoptions.html#headers" class="tsd-kind-icon">headers</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_types_d_.fhirclient.requestoptions.html#includeresponse" class="tsd-kind-icon">include<wbr>Response</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported"><a href="_types_d_.fhirclient.requestoptions.html#integrity" class="tsd-kind-icon">integrity</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported"><a href="_types_d_.fhirclient.requestoptions.html#keepalive" class="tsd-kind-icon">keepalive</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported"><a href="_types_d_.fhirclient.requestoptions.html#method" class="tsd-kind-icon">method</a></li>
@@ -180,6 +182,24 @@
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
 							<p>A Headers object, an object literal, or an array of two-item arrays to set request&#39;s headers.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
+					<a name="includeresponse" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> include<wbr>Response</h3>
+					<div class="tsd-signature tsd-kind-icon">include<wbr>Response<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L274">src/types.d.ts:274</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>If set to true the request function will resolve with an object
+								like <code>{ body: any, response: Response }</code> so that users have
+								access to the response object and it&#39;s properties like headers
+							status etc.</p>
 						</div>
 					</div>
 				</section>
@@ -317,9 +337,14 @@
 					<div class="tsd-signature tsd-kind-icon">url<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">URL</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/ce794fb/src/types.d.ts#L216">src/types.d.ts:216</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/28cbfad/src/types.d.ts#L266">src/types.d.ts:266</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The URL to request</p>
+						</div>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
 					<a name="window" class="tsd-anchor"></a>
@@ -422,11 +447,20 @@
 					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
 						<a href="_types_d_.fhirclient.codevalue.html" class="tsd-kind-icon">Code<wbr>Value</a>
 					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
+						<a href="_types_d_.fhirclient.combinedfetchresult.html" class="tsd-kind-icon">Combined<wbr>Fetch<wbr>Result</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
+						<a href="_types_d_.fhirclient.fetchoptions.html" class="tsd-kind-icon">Fetch<wbr>Options</a>
+					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
 						<a href="_types_d_.fhirclient.fhiroptions.html" class="tsd-kind-icon">Fhir<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
 						<a href="_types_d_.fhirclient.idtoken.html" class="tsd-kind-icon">IDToken</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
+						<a href="_types_d_.fhirclient.includeresponsehint.html" class="tsd-kind-icon">Include<wbr>Response<wbr>Hint</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
 						<a href="_types_d_.fhirclient.jsonobject.html" class="tsd-kind-icon">Json<wbr>Object</a>
@@ -453,6 +487,9 @@
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
 								<a href="_types_d_.fhirclient.requestoptions.html#headers" class="tsd-kind-icon">headers</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
+								<a href="_types_d_.fhirclient.requestoptions.html#includeresponse" class="tsd-kind-icon">include<wbr>Response</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
 								<a href="_types_d_.fhirclient.requestoptions.html#integrity" class="tsd-kind-icon">integrity</a>
@@ -502,6 +539,12 @@
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
 						<a href="_types_d_.fhirclient.wellknownsmartconfiguration.html" class="tsd-kind-icon">Well<wbr>Known<wbr>Smart<wbr>Configuration</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported">
+						<a href="../modules/_types_d_.fhirclient.html#fetchresult" class="tsd-kind-icon">Fetch<wbr>Result</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
+						<a href="../modules/_types_d_.fhirclient.html#requestfunction" class="tsd-kind-icon">Request<wbr>Function</a>
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported">
 						<a href="../modules/_types_d_.fhirclient.html#smartauthenticationmethod" class="tsd-kind-icon">SMARTAuthentication<wbr>Method</a>
