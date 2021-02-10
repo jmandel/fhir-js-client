@@ -1,108 +1,112 @@
 import { expect } from "@hapi/code";
 import * as Lab   from "@hapi/lab";
 import HttpError  from "../src/HttpError";
+import {Response} from "cross-fetch";
 
 export const lab = Lab.script();
 const { it, describe } = lab;
 
 describe("HttpError", () => {
-    it ("create with no args", () => {
-        const error = new HttpError();
+    it ("create from text response", async () => {
+        const resp = new Response("Test error", {
+            status: 400,
+            statusText: "Bad Request (test)",
+            headers: {
+                "content-type": "text/plain"
+            }
+        });
+        const error = new HttpError(resp);
         expect(error.name).to.equal("HttpError");
-        expect(error.message).to.equal("Unknown error");
-        expect(error.statusCode).to.equal(0);
-        expect(error.status).to.equal(0);
-        expect(error.statusText).to.equal("Error");
-        expect(error.body).to.equal(null);
-    });
-
-    it ("can set the message", () => {
-        const error = new HttpError("Test Error");
-        expect(error.name).to.equal("HttpError");
-        expect(error.message).to.equal("Test Error");
-        expect(error.statusCode).to.equal(0);
-        expect(error.status).to.equal(0);
-        expect(error.statusText).to.equal("Error");
-        expect(error.body).to.equal(null);
+        expect(error.message).to.equal("400 Bad Request (test)\nURL: ");
+        expect(error.statusCode).to.equal(400);
+        expect(error.status).to.equal(400);
+        expect(error.statusText).to.equal("Bad Request (test)");
+        await error.parse();
+        expect(error.message).to.equal("400 Bad Request (test)\nURL: \n\nTest error");
         expect(JSON.stringify(error)).to.equal(JSON.stringify({
             name      : "HttpError",
-            statusCode: 0,
-            status    : 0,
-            statusText: "Error",
-            message   : "Test Error",
-            body      : null
+            statusCode: 400,
+            status    : 400,
+            statusText: "Bad Request (test)",
+            message   : "400 Bad Request (test)\nURL: \n\nTest error"
         }));
     });
 
-    it ("can set the statusCode", () => {
-        const error = new HttpError("Test Error", 234);
-        expect(error.name).to.equal("HttpError");
-        expect(error.message).to.equal("Test Error");
-        expect(error.statusCode).to.equal(234);
-        expect(error.status).to.equal(234);
-        expect(error.statusText).to.equal("Error");
-        expect(error.body).to.equal(null);
-        expect(JSON.stringify(error)).to.equal(JSON.stringify({
-            name      : "HttpError",
-            statusCode: 234,
-            status    : 234,
-            statusText: "Error",
-            message   : "Test Error",
-            body      : null
-        }));
+    it ("parse ignores unknown mime types", async () => {
+        const resp = new Response("Test error", {
+            status: 400,
+            statusText: "Bad Request (test)",
+            headers: {
+                "content-type": "application/pdf"
+            }
+        });
+        const error = new HttpError(resp);
+        expect(error.message).to.equal("400 Bad Request (test)\nURL: ");
+        await error.parse();
+        expect(error.message).to.equal("400 Bad Request (test)\nURL: ");
     });
 
-    it ("can set the statusText", () => {
-        const error = new HttpError("Test Error", 234, "Test");
+    it ("create from json response", async () => {
+        const resp = new Response('{"x":"y"}', {
+            status: 400,
+            statusText: "Bad Request (test)",
+            headers: {
+                "content-type": "application/json"
+            }
+        });
+        const error = new HttpError(resp);
         expect(error.name).to.equal("HttpError");
-        expect(error.message).to.equal("Test Error");
-        expect(error.statusCode).to.equal(234);
-        expect(error.status).to.equal(234);
-        expect(error.statusText).to.equal("Test");
-        expect(error.body).to.equal(null);
-        expect(JSON.stringify(error)).to.equal(JSON.stringify({
-            name      : "HttpError",
-            statusCode: 234,
-            status    : 234,
-            statusText: "Test",
-            message   : "Test Error",
-            body      : null
-        }));
+        expect(error.message).to.equal("400 Bad Request (test)\nURL: ");
+        expect(error.statusCode).to.equal(400);
+        expect(error.status).to.equal(400);
+        expect(error.statusText).to.equal("Bad Request (test)");
+        await error.parse();
+        expect(error.message).to.equal('400 Bad Request (test)\nURL: \n\n{\n    "x": "y"\n}');
     });
 
-    it ("can set the body as text", () => {
-        const error = new HttpError("Test Error", 234, "Test", "test body");
+    it ("create from json response having error property", async () => {
+        const resp = new Response('{"error":"x"}', {
+            status: 400,
+            statusText: "Bad Request (test)",
+            headers: {
+                "content-type": "application/json"
+            }
+        });
+        const error = new HttpError(resp);
         expect(error.name).to.equal("HttpError");
-        expect(error.message).to.equal("Test Error");
-        expect(error.statusCode).to.equal(234);
-        expect(error.status).to.equal(234);
-        expect(error.statusText).to.equal("Test");
-        expect(error.body).to.equal("test body");
-        expect(JSON.stringify(error)).to.equal(JSON.stringify({
-            name      : "HttpError",
-            statusCode: 234,
-            status    : 234,
-            statusText: "Test",
-            message   : "Test Error",
-            body      : "test body"
-        }));
+        expect(error.message).to.equal("400 Bad Request (test)\nURL: ");
+        expect(error.statusCode).to.equal(400);
+        expect(error.status).to.equal(400);
+        expect(error.statusText).to.equal("Bad Request (test)");
+        await error.parse();
+        expect(error.message).to.equal(
+            '400 Bad Request (test)\nURL: \nx'
+        );
     });
 
-    it ("can set the body as object", () => {
-        const error = new HttpError("Test Error", 234, "Test", { a: 2 });
+    it ("create from json response having error and error_description properties", async () => {
+        const resp = new Response('{"error":"x","error_description":"y"}', {
+            status: 400,
+            statusText: "Bad Request (test)",
+            headers: {
+                "content-type": "application/json"
+            }
+        });
+        const error = new HttpError(resp);
         expect(error.name).to.equal("HttpError");
-        expect(error.message).to.equal("Test Error");
-        expect(error.statusCode).to.equal(234);
-        expect(error.status).to.equal(234);
-        expect(error.statusText).to.equal("Test");
-        expect(error.body).to.equal({ a: 2 });
-        expect(JSON.stringify(error)).to.equal(JSON.stringify({
-            name      : "HttpError",
-            statusCode: 234,
-            status    : 234,
-            statusText: "Test",
-            message   : "Test Error",
-            body      : { a: 2 }
-        }));
+        expect(error.message).to.equal("400 Bad Request (test)\nURL: ");
+        expect(error.statusCode).to.equal(400);
+        expect(error.status).to.equal(400);
+        expect(error.statusText).to.equal("Bad Request (test)");
+        await error.parse();
+        expect(error.message).to.equal(
+            '400 Bad Request (test)\nURL: \nx: y'
+        );
+    });
+
+    it ("parse can be called twice", async () => {
+        const error = new HttpError(new Response());
+        await error.parse();
+        await error.parse();
     });
 });

@@ -21,24 +21,48 @@ export default class HttpError extends Error
     statusText: string;
 
     /**
-     * The parsed response body. Can be an OperationOutcome resource, s JSON
-     * object, a string or null.
+     * Reference to the HTTP Response object
      */
-    body: fhirclient.JsonObject | string | null;
+    response: Response;
 
-    constructor(
-        message   : string = "Unknown error",
-        statusCode: number = 0,
-        statusText: string = "Error",
-        body      : fhirclient.JsonObject | string | null = null
-    ) {
-        super(message);
-        this.message    = message;
+    constructor(response: Response) {
+        super(`${response.status} ${response.statusText}\nURL: ${response.url}`);
         this.name       = "HttpError";
-        this.statusCode = statusCode;
-        this.status     = statusCode;
-        this.statusText = statusText;
-        this.body       = body;
+        this.response   = response;
+        this.statusCode = response.status;
+        this.status     = response.status;
+        this.statusText = response.statusText;
+    }
+
+    async parse()
+    {
+        if (!this.response.bodyUsed) {
+            try {
+                const type = this.response.headers.get("Content-Type") || "text/plain";
+                if (type.match(/\bjson\b/i)) {
+                    let body = await this.response.json();
+                    if (body.error) {
+                        this.message += "\n" + body.error;
+                        if (body.error_description) {
+                            this.message += ": " + body.error_description;
+                        }
+                    }
+                    else {
+                        this.message += "\n\n" + JSON.stringify(body, null, 4);
+                    }
+                }
+                else if (type.match(/^text\//i)) {
+                    let body = await this.response.text();
+                    if (body) {
+                        this.message += "\n\n" + body;
+                    }
+                }
+            } catch {
+                // ignore
+            }
+        }
+
+        return this;
     }
 
     toJSON() {
@@ -47,8 +71,7 @@ export default class HttpError extends Error
             statusCode: this.statusCode,
             status    : this.status,
             statusText: this.statusText,
-            message   : this.message,
-            body      : this.body
+            message   : this.message
         };
     }
 }

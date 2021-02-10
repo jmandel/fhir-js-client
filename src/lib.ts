@@ -64,7 +64,9 @@ function ensureNumerical({ value, code }: fhirclient.CodeValue) {
  */
 export async function checkResponse(resp: Response): Promise<Response> {
     if (!resp.ok) {
-        throw (await humanizeError(resp));
+        const error = new HttpError(resp);
+        await error.parse();
+        throw error;
     }
     return resp;
 }
@@ -174,40 +176,6 @@ export function fetchConformanceStatement(baseUrl = "/", requestOptions?: Reques
     });
 }
 
-/**
- * Given a response object, generates and throws detailed HttpError.
- * @param resp The `Response` object of a failed `fetch` request
- */
-export async function humanizeError(resp: Response) {
-    let msg = `${resp.status} ${resp.statusText}\nURL: ${resp.url}`;
-    let body = null;
-
-    try {
-        const type = resp.headers.get("Content-Type") || "text/plain";
-        if (type.match(/\bjson\b/i)) {
-            body = await resp.json();
-            if (body.error) {
-                msg += "\n" + body.error;
-                if (body.error_description) {
-                    msg += ": " + body.error_description;
-                }
-            }
-            else {
-                msg += "\n\n" + JSON.stringify(body, null, 4);
-            }
-        }
-        else if (type.match(/^text\//i)) {
-            body = await resp.text();
-            if (body) {
-                msg += "\n\n" + body;
-            }
-        }
-    } catch (_) {
-        // ignore
-    }
-
-    throw new HttpError(msg, resp.status, resp.statusText, body);
-}
 
 /**
  * Walks through an object (or array) and returns the value found at the
