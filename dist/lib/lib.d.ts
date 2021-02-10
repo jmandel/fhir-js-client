@@ -29,7 +29,7 @@ export declare function responseToJSON(resp: Response): Promise<object | string>
  * - If the response is text return the result text
  * - Otherwise return the response object on which we call stuff like `.blob()`
  */
-export declare function request<T = Response | fhirclient.JsonObject | string>(url: string | Request, options?: RequestInit): Promise<T>;
+export declare function request<T = fhirclient.FetchResult>(url: string | Request, requestOptions?: fhirclient.FetchOptions): Promise<T>;
 /**
  * Makes a request using `fetch` and stores the result in internal memory cache.
  * The cache is cleared when the page is unloaded.
@@ -47,11 +47,6 @@ export declare function getAndCache(url: string, requestOptions?: RequestInit, f
  * @param [requestOptions] Any options passed to the fetch call
  */
 export declare function fetchConformanceStatement(baseUrl?: string, requestOptions?: RequestInit): Promise<fhirclient.FHIR.CapabilityStatement>;
-/**
- * Given a response object, generates and throws detailed HttpError.
- * @param resp The `Response` object of a failed `fetch` request
- */
-export declare function humanizeError(resp: Response): Promise<void>;
 /**
  * Walks through an object (or array) and returns the value found at the
  * provided path. This function is very simple so it intentionally does not

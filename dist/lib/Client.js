@@ -225,7 +225,7 @@ class Client {
         return client.getPatientId();
       },
 
-      read: (requestOptions = {}) => {
+      read: requestOptions => {
         const id = this.patient.id;
         return id ? this.request(Object.assign(Object.assign({}, requestOptions), {
           url: `Patient/${id}`
@@ -248,7 +248,7 @@ class Client {
         return client.getEncounterId();
       },
 
-      read: (requestOptions = {}) => {
+      read: requestOptions => {
         const id = this.encounter.id;
         return id ? this.request(Object.assign(Object.assign({}, requestOptions), {
           url: `Encounter/${id}`
@@ -269,7 +269,7 @@ class Client {
         return client.getUserType();
       },
 
-      read: (requestOptions = {}) => {
+      read: requestOptions => {
         const fhirUser = this.user.fhirUser;
         return fhirUser ? this.request(Object.assign(Object.assign({}, requestOptions), {
           url: fhirUser
@@ -534,7 +534,7 @@ class Client {
    */
 
 
-  create(resource, requestOptions = {}) {
+  create(resource, requestOptions) {
     return this.request(Object.assign(Object.assign({}, requestOptions), {
       url: `${resource.resourceType}`,
       method: "POST",
@@ -542,7 +542,7 @@ class Client {
       headers: Object.assign({
         // TODO: Do we need to alternate with "application/json+fhir"?
         "Content-Type": "application/json"
-      }, requestOptions.headers)
+      }, (requestOptions || {}).headers)
     }));
   }
   /**
@@ -556,7 +556,7 @@ class Client {
    */
 
 
-  update(resource, requestOptions = {}) {
+  update(resource, requestOptions) {
     return this.request(Object.assign(Object.assign({}, requestOptions), {
       url: `${resource.resourceType}/${resource.id}`,
       method: "PUT",
@@ -564,7 +564,7 @@ class Client {
       headers: Object.assign({
         // TODO: Do we need to alternate with "application/json+fhir"?
         "Content-Type": "application/json"
-      }, requestOptions.headers)
+      }, (requestOptions || {}).headers)
     }));
   }
   /**
@@ -626,6 +626,7 @@ class Client {
     const job = options.useRefreshToken ? this.refreshIfNeeded({
       signal
     }).then(() => requestOptions) : Promise.resolve(requestOptions);
+    let response;
     return job // Add the Authorization header now, after the access token might
     // have been updated
     .then(requestOptions => {
@@ -641,13 +642,21 @@ class Client {
     }) // Make the request
     .then(requestOptions => {
       debugRequest("%s, options: %O, fhirOptions: %O", url, requestOptions, options);
-      return lib_1.request(url, requestOptions);
+      return lib_1.request(url, requestOptions).then(result => {
+        if (requestOptions.includeResponse) {
+          response = result.response;
+          return result.body;
+        }
+
+        return result;
+      });
     }) // Handle 401 ------------------------------------------------------
     .catch(async error => {
       if (error.status == 401) {
         // !accessToken -> not authorized -> No session. Need to launch.
         if (!this.getState("tokenResponse.access_token")) {
-          throw new Error("This app cannot be accessed directly. Please launch it as SMART app!");
+          error.message += "\nThis app cannot be accessed directly. Please launch it as SMART app!";
+          throw error;
         } // auto-refresh not enabled and Session expired.
         // Need to re-launch. Clear state to start over!
 
@@ -655,14 +664,19 @@ class Client {
         if (!options.useRefreshToken) {
           debugRequest("Your session has expired and the useRefreshToken option is set to false. Please re-launch the app.");
           await this._clearState();
-          throw new Error(strings_1.default.expired);
-        } // otherwise -> auto-refresh failed. Session expired.
+          error.message += "\n" + strings_1.default.expired;
+          throw error;
+        } // In rare cases we may have a valid access token and a refresh
+        // token and the request might still fail with 401 just because
+        // the access token has just been revoked.
+        // otherwise -> auto-refresh failed. Session expired.
         // Need to re-launch. Clear state to start over!
 
 
         debugRequest("Auto-refresh failed! Please re-launch the app.");
         await this._clearState();
-        throw new Error(strings_1.default.expired);
+        error.message += "\n" + strings_1.default.expired;
+        throw error;
       }
 
       throw error;
@@ -674,10 +688,11 @@ class Client {
 
       throw error;
     }).then(data => {
-      // Handle raw responses (anything other than json) -------------
-      if (!data) return data;
-      if (typeof data == "string") return data;
-      if (data instanceof Response) return data; // Resolve References ------------------------------------------
+      // At this point we don't know what `data` actually is!
+      // We might gen an empty or falsy result. If so return it as is
+      if (!data) return data; // Handle raw responses
+
+      if (typeof data == "string" || data instanceof Response) return data; // Resolve References ------------------------------------------
 
       return (async _data => {
         if (_data.resourceType == "Bundle") {
@@ -737,6 +752,15 @@ class Client {
           return {
             data: _data,
             references: _resolvedRefs
+          };
+        }
+
+        return _data;
+      }).then(_data => {
+        if (requestOptions.includeResponse) {
+          return {
+            body: _data,
+            response
           };
         }
 

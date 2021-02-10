@@ -5,14 +5,44 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 class HttpError extends Error {
-  constructor(message = "Unknown error", statusCode = 0, statusText = "Error", body = null) {
-    super(message);
-    this.message = message;
+  constructor(response) {
+    super(`${response.status} ${response.statusText}\nURL: ${response.url}`);
     this.name = "HttpError";
-    this.statusCode = statusCode;
-    this.status = statusCode;
-    this.statusText = statusText;
-    this.body = body;
+    this.response = response;
+    this.statusCode = response.status;
+    this.status = response.status;
+    this.statusText = response.statusText;
+  }
+
+  async parse() {
+    if (!this.response.bodyUsed) {
+      try {
+        const type = this.response.headers.get("Content-Type") || "text/plain";
+
+        if (type.match(/\bjson\b/i)) {
+          let body = await this.response.json();
+
+          if (body.error) {
+            this.message += "\n" + body.error;
+
+            if (body.error_description) {
+              this.message += ": " + body.error_description;
+            }
+          } else {
+            this.message += "\n\n" + JSON.stringify(body, null, 4);
+          }
+        } else if (type.match(/^text\//i)) {
+          let body = await this.response.text();
+
+          if (body) {
+            this.message += "\n\n" + body;
+          }
+        }
+      } catch (_a) {// ignore
+      }
+    }
+
+    return this;
   }
 
   toJSON() {
@@ -21,8 +51,7 @@ class HttpError extends Error {
       statusCode: this.statusCode,
       status: this.status,
       statusText: this.statusText,
-      message: this.message,
-      body: this.body
+      message: this.message
     };
   }
 

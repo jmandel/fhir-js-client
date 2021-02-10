@@ -38,10 +38,10 @@ export default class Client {
         /**
          * A method to fetch the current patient resource from the FHIR server.
          * If there is no patient context, it will reject with an error.
-         * @param [requestOptions] Any options to pass to the `fetch` call.
+         * @param {fhirclient.FetchOptions} [requestOptions] Any options to pass to the `fetch` call.
          * @category Request
          */
-        read: (requestOptions?: RequestInit) => Promise<fhirclient.FHIR.Patient>;
+        read: fhirclient.RequestFunction<fhirclient.FHIR.Patient>;
         /**
          * This is similar to [[Client.request]] but it makes requests in the
          * context of the current patient. For example, instead of doing
@@ -52,9 +52,14 @@ export default class Client {
          * ```js
          * client.patient.request("Observation")
          * ```
+         * The return type depends on the arguments. Typically it will be the
+         * response payload JSON object. Can also be a string or the `Response`
+         * object itself if we have received a non-json result, which allows us
+         * to handle even binary responses. Can also be a [[CombinedFetchResult]]
+         * object if the `requestOptions.includeResponse`s has been set to true.
          * @category Request
          */
-        request: (requestOptions: string | URL | fhirclient.RequestOptions, fhirOptions?: fhirclient.FhirOptions) => Promise<fhirclient.JsonObject>;
+        request: <R = fhirclient.FetchResult>(requestOptions: string | URL | fhirclient.RequestOptions, fhirOptions?: fhirclient.FhirOptions) => Promise<R>;
         /**
          * This is the FhirJS Patient API. It will ONLY exist if the `Client`
          * instance is "connected" to FhirJS.
@@ -78,7 +83,7 @@ export default class Client {
          * @param [requestOptions] Any options to pass to the `fetch` call.
          * @category Request
          */
-        read: (requestOptions?: RequestInit) => Promise<fhirclient.FHIR.Encounter>;
+        read: fhirclient.RequestFunction<fhirclient.FHIR.Encounter>;
     };
     /**
      * The client may be associated with a specific user, if the scopes
@@ -95,7 +100,7 @@ export default class Client {
          * @param [requestOptions] Any options to pass to the `fetch` call.
          * @category Request
          */
-        read: (requestOptions?: RequestInit) => Promise<fhirclient.FHIR.Patient | fhirclient.FHIR.Practitioner | fhirclient.FHIR.RelatedPerson>;
+        read: fhirclient.RequestFunction<fhirclient.FHIR.Patient | fhirclient.FHIR.Practitioner | fhirclient.FHIR.RelatedPerson>;
         /**
          * Returns the profile of the logged_in user (if any), or null if the
          * user is not available. This is a string having the shape
@@ -187,7 +192,7 @@ export default class Client {
      * Note that `method` and `body` will be ignored.
      * @category Request
      */
-    create(resource: fhirclient.FHIR.Resource, requestOptions?: RequestInit): Promise<fhirclient.FHIR.Resource>;
+    create<R = fhirclient.FHIR.Resource, O extends fhirclient.FetchOptions = {}>(resource: fhirclient.FHIR.Resource, requestOptions?: O): Promise<O["includeResponse"] extends true ? fhirclient.CombinedFetchResult<R> : R>;
     /**
      * Creates a new current version for an existing resource or creates an
      * initial version if no resource already exists for the given id.
@@ -197,7 +202,7 @@ export default class Client {
      * Note that `method` and `body` will be ignored.
      * @category Request
      */
-    update(resource: fhirclient.FHIR.Resource, requestOptions?: RequestInit): Promise<fhirclient.FHIR.Resource>;
+    update<R = fhirclient.FHIR.Resource, O extends fhirclient.FetchOptions = {}>(resource: fhirclient.FHIR.Resource, requestOptions?: O): Promise<O["includeResponse"] extends true ? fhirclient.CombinedFetchResult<R> : R>;
     /**
      * Removes an existing resource.
      * @see http://hl7.org/fhir/http.html#delete
@@ -207,7 +212,7 @@ export default class Client {
      * to `DELETE`) to be passed to the fetch call.
      * @category Request
      */
-    delete(url: string, requestOptions?: RequestInit): Promise<fhirclient.FHIR.Resource>;
+    delete<R = unknown>(url: string, requestOptions?: fhirclient.FetchOptions): Promise<R>;
     /**
      * @param requestOptions Can be a string URL (relative to the serviceUrl),
      * or an object which will be passed to fetch()

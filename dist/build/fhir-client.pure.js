@@ -1239,7 +1239,7 @@ class Client {
         return client.getPatientId();
       },
 
-      read: (requestOptions = {}) => {
+      read: requestOptions => {
         const id = this.patient.id;
         return id ? this.request({ ...requestOptions,
           url: `Patient/${id}`
@@ -1262,7 +1262,7 @@ class Client {
         return client.getEncounterId();
       },
 
-      read: (requestOptions = {}) => {
+      read: requestOptions => {
         const id = this.encounter.id;
         return id ? this.request({ ...requestOptions,
           url: `Encounter/${id}`
@@ -1283,7 +1283,7 @@ class Client {
         return client.getUserType();
       },
 
-      read: (requestOptions = {}) => {
+      read: requestOptions => {
         const fhirUser = this.user.fhirUser;
         return fhirUser ? this.request({ ...requestOptions,
           url: fhirUser
@@ -1548,7 +1548,7 @@ class Client {
    */
 
 
-  create(resource, requestOptions = {}) {
+  create(resource, requestOptions) {
     return this.request({ ...requestOptions,
       url: `${resource.resourceType}`,
       method: "POST",
@@ -1556,7 +1556,7 @@ class Client {
       headers: {
         // TODO: Do we need to alternate with "application/json+fhir"?
         "Content-Type": "application/json",
-        ...requestOptions.headers
+        ...(requestOptions || {}).headers
       }
     });
   }
@@ -1571,7 +1571,7 @@ class Client {
    */
 
 
-  update(resource, requestOptions = {}) {
+  update(resource, requestOptions) {
     return this.request({ ...requestOptions,
       url: `${resource.resourceType}/${resource.id}`,
       method: "PUT",
@@ -1579,7 +1579,7 @@ class Client {
       headers: {
         // TODO: Do we need to alternate with "application/json+fhir"?
         "Content-Type": "application/json",
-        ...requestOptions.headers
+        ...(requestOptions || {}).headers
       }
     });
   }
@@ -1642,6 +1642,7 @@ class Client {
     const job = options.useRefreshToken ? this.refreshIfNeeded({
       signal
     }).then(() => requestOptions) : Promise.resolve(requestOptions);
+    let response;
     return job // Add the Authorization header now, after the access token might
     // have been updated
     .then(requestOptions => {
@@ -1657,13 +1658,21 @@ class Client {
     }) // Make the request
     .then(requestOptions => {
       debugRequest("%s, options: %O, fhirOptions: %O", url, requestOptions, options);
-      return lib_1.request(url, requestOptions);
+      return lib_1.request(url, requestOptions).then(result => {
+        if (requestOptions.includeResponse) {
+          response = result.response;
+          return result.body;
+        }
+
+        return result;
+      });
     }) // Handle 401 ------------------------------------------------------
     .catch(async error => {
       if (error.status == 401) {
         // !accessToken -> not authorized -> No session. Need to launch.
         if (!this.getState("tokenResponse.access_token")) {
-          throw new Error("This app cannot be accessed directly. Please launch it as SMART app!");
+          error.message += "\nThis app cannot be accessed directly. Please launch it as SMART app!";
+          throw error;
         } // auto-refresh not enabled and Session expired.
         // Need to re-launch. Clear state to start over!
 
@@ -1671,14 +1680,19 @@ class Client {
         if (!options.useRefreshToken) {
           debugRequest("Your session has expired and the useRefreshToken option is set to false. Please re-launch the app.");
           await this._clearState();
-          throw new Error(strings_1.default.expired);
-        } // otherwise -> auto-refresh failed. Session expired.
+          error.message += "\n" + strings_1.default.expired;
+          throw error;
+        } // In rare cases we may have a valid access token and a refresh
+        // token and the request might still fail with 401 just because
+        // the access token has just been revoked.
+        // otherwise -> auto-refresh failed. Session expired.
         // Need to re-launch. Clear state to start over!
 
 
         debugRequest("Auto-refresh failed! Please re-launch the app.");
         await this._clearState();
-        throw new Error(strings_1.default.expired);
+        error.message += "\n" + strings_1.default.expired;
+        throw error;
       }
 
       throw error;
@@ -1690,10 +1704,11 @@ class Client {
 
       throw error;
     }).then(data => {
-      // Handle raw responses (anything other than json) -------------
-      if (!data) return data;
-      if (typeof data == "string") return data;
-      if (data instanceof Response) return data; // Resolve References ------------------------------------------
+      // At this point we don't know what `data` actually is!
+      // We might gen an empty or falsy result. If so return it as is
+      if (!data) return data; // Handle raw responses
+
+      if (typeof data == "string" || data instanceof Response) return data; // Resolve References ------------------------------------------
 
       return (async _data => {
         if (_data.resourceType == "Bundle") {
@@ -1754,6 +1769,15 @@ class Client {
           return {
             data: _data,
             references: _resolvedRefs
+          };
+        }
+
+        return _data;
+      }).then(_data => {
+        if (requestOptions.includeResponse) {
+          return {
+            body: _data,
+            response
           };
         }
 
@@ -2010,14 +2034,44 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 class HttpError extends Error {
-  constructor(message = "Unknown error", statusCode = 0, statusText = "Error", body = null) {
-    super(message);
-    this.message = message;
+  constructor(response) {
+    super(`${response.status} ${response.statusText}\nURL: ${response.url}`);
     this.name = "HttpError";
-    this.statusCode = statusCode;
-    this.status = statusCode;
-    this.statusText = statusText;
-    this.body = body;
+    this.response = response;
+    this.statusCode = response.status;
+    this.status = response.status;
+    this.statusText = response.statusText;
+  }
+
+  async parse() {
+    if (!this.response.bodyUsed) {
+      try {
+        const type = this.response.headers.get("Content-Type") || "text/plain";
+
+        if (type.match(/\bjson\b/i)) {
+          let body = await this.response.json();
+
+          if (body.error) {
+            this.message += "\n" + body.error;
+
+            if (body.error_description) {
+              this.message += ": " + body.error_description;
+            }
+          } else {
+            this.message += "\n\n" + JSON.stringify(body, null, 4);
+          }
+        } else if (type.match(/^text\//i)) {
+          let body = await this.response.text();
+
+          if (body) {
+            this.message += "\n\n" + body;
+          }
+        }
+      } catch {// ignore
+      }
+    }
+
+    return this;
   }
 
   toJSON() {
@@ -2026,8 +2080,7 @@ class HttpError extends Error {
       statusCode: this.statusCode,
       status: this.status,
       statusText: this.statusText,
-      message: this.message,
-      body: this.body
+      message: this.message
     };
   }
 
@@ -2271,7 +2324,7 @@ module.exports = FHIR; // $lab:coverage:on$
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.getAccessTokenExpiration = exports.jwtDecode = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.humanizeError = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
+exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.getAccessTokenExpiration = exports.jwtDecode = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
 
 const HttpError_1 = __webpack_require__(/*! ./HttpError */ "./src/HttpError.ts");
 
@@ -2356,7 +2409,9 @@ function ensureNumerical({
 
 async function checkResponse(resp) {
   if (!resp.ok) {
-    throw await humanizeError(resp);
+    const error = new HttpError_1.default(resp);
+    await error.parse();
+    throw error;
   }
 
   return resp;
@@ -2385,7 +2440,11 @@ exports.responseToJSON = responseToJSON;
  * - Otherwise return the response object on which we call stuff like `.blob()`
  */
 
-function request(url, options = {}) {
+function request(url, requestOptions = {}) {
+  const {
+    includeResponse,
+    ...options
+  } = requestOptions;
   return fetch(url, {
     mode: "cors",
     ...options,
@@ -2426,9 +2485,17 @@ function request(url, options = {}) {
       if (location) {
         return request(location, { ...options,
           method: "GET",
-          body: null
+          body: null,
+          includeResponse
         });
       }
+    }
+
+    if (includeResponse) {
+      return {
+        body,
+        response: res
+      };
     } // For any non-text and non-json response return the Response object.
     // This to let users decide if they want to call text(), blob() or
     // something else on it
@@ -2479,44 +2546,6 @@ function fetchConformanceStatement(baseUrl = "/", requestOptions) {
 }
 
 exports.fetchConformanceStatement = fetchConformanceStatement;
-/**
- * Given a response object, generates and throws detailed HttpError.
- * @param resp The `Response` object of a failed `fetch` request
- */
-
-async function humanizeError(resp) {
-  let msg = `${resp.status} ${resp.statusText}\nURL: ${resp.url}`;
-  let body = null;
-
-  try {
-    const type = resp.headers.get("Content-Type") || "text/plain";
-
-    if (type.match(/\bjson\b/i)) {
-      body = await resp.json();
-
-      if (body.error) {
-        msg += "\n" + body.error;
-
-        if (body.error_description) {
-          msg += ": " + body.error_description;
-        }
-      } else {
-        msg += "\n\n" + JSON.stringify(body, null, 4);
-      }
-    } else if (type.match(/^text\//i)) {
-      body = await resp.text();
-
-      if (body) {
-        msg += "\n\n" + body;
-      }
-    }
-  } catch (_) {// ignore
-  }
-
-  throw new HttpError_1.default(msg, resp.status, resp.statusText, body);
-}
-
-exports.humanizeError = humanizeError;
 /**
  * Walks through an object (or array) and returns the value found at the
  * provided path. This function is very simple so it intentionally does not
@@ -3108,7 +3137,43 @@ exports.getSecurityExtensions = getSecurityExtensions;
  */
 
 async function authorize(env, params = {}, _noRedirect = false) {
+  const url = env.getUrl(); // Multiple config for EHR launches ---------------------------------------
+
+  if (Array.isArray(params)) {
+    const urlISS = url.searchParams.get("iss") || url.searchParams.get("fhirServiceUrl");
+
+    if (!urlISS) {
+      throw new Error('Passing in an "iss" url parameter is required if authorize ' + 'uses multiple configurations');
+    } // pick the right config
+
+
+    const cfg = params.find(x => {
+      if (x.issMatch) {
+        if (typeof x.issMatch === "function") {
+          return !!x.issMatch(urlISS);
+        }
+
+        if (typeof x.issMatch === "string") {
+          return x.issMatch === urlISS;
+        }
+
+        if (x.issMatch instanceof RegExp) {
+          return x.issMatch.test(urlISS);
+        }
+      }
+
+      return false;
+    });
+
+    if (!cfg) {
+      throw new Error(`No configuration found matching the current "iss" parameter "${urlISS}"`);
+    }
+
+    return await authorize(env, cfg, _noRedirect);
+  } // ------------------------------------------------------------------------
   // Obtain input
+
+
   const {
     redirect_uri,
     clientSecret,
@@ -3129,7 +3194,6 @@ async function authorize(env, params = {}, _noRedirect = false) {
     clientId,
     completeInTarget
   } = params;
-  const url = env.getUrl();
   const storage = env.getStorage(); // For these three an url param takes precedence over inline option
 
   iss = url.searchParams.get("iss") || iss;

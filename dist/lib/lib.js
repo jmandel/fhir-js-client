@@ -4,10 +4,21 @@
  * are defined here so that tests can import this library and test them.
  */
 
+var __rest = void 0 && (void 0).__rest || function (s, e) {
+  var t = {};
+
+  for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
+
+  if (s != null && typeof Object.getOwnPropertySymbols === "function") for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+    if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
+  }
+  return t;
+};
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.getAccessTokenExpiration = exports.jwtDecode = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.humanizeError = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
+exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.getAccessTokenExpiration = exports.jwtDecode = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
 
 const HttpError_1 = require("./HttpError");
 
@@ -92,7 +103,9 @@ function ensureNumerical({
 
 async function checkResponse(resp) {
   if (!resp.ok) {
-    throw await humanizeError(resp);
+    const error = new HttpError_1.default(resp);
+    await error.parse();
+    throw error;
   }
 
   return resp;
@@ -121,7 +134,12 @@ exports.responseToJSON = responseToJSON;
  * - Otherwise return the response object on which we call stuff like `.blob()`
  */
 
-function request(url, options = {}) {
+function request(url, requestOptions = {}) {
+  const {
+    includeResponse
+  } = requestOptions,
+        options = __rest(requestOptions, ["includeResponse"]);
+
   return fetch(url, Object.assign(Object.assign({
     mode: "cors"
   }, options), {
@@ -161,9 +179,17 @@ function request(url, options = {}) {
       if (location) {
         return request(location, Object.assign(Object.assign({}, options), {
           method: "GET",
-          body: null
+          body: null,
+          includeResponse
         }));
       }
+    }
+
+    if (includeResponse) {
+      return {
+        body,
+        response: res
+      };
     } // For any non-text and non-json response return the Response object.
     // This to let users decide if they want to call text(), blob() or
     // something else on it
@@ -214,44 +240,6 @@ function fetchConformanceStatement(baseUrl = "/", requestOptions) {
 }
 
 exports.fetchConformanceStatement = fetchConformanceStatement;
-/**
- * Given a response object, generates and throws detailed HttpError.
- * @param resp The `Response` object of a failed `fetch` request
- */
-
-async function humanizeError(resp) {
-  let msg = `${resp.status} ${resp.statusText}\nURL: ${resp.url}`;
-  let body = null;
-
-  try {
-    const type = resp.headers.get("Content-Type") || "text/plain";
-
-    if (type.match(/\bjson\b/i)) {
-      body = await resp.json();
-
-      if (body.error) {
-        msg += "\n" + body.error;
-
-        if (body.error_description) {
-          msg += ": " + body.error_description;
-        }
-      } else {
-        msg += "\n\n" + JSON.stringify(body, null, 4);
-      }
-    } else if (type.match(/^text\//i)) {
-      body = await resp.text();
-
-      if (body) {
-        msg += "\n\n" + body;
-      }
-    }
-  } catch (_) {// ignore
-  }
-
-  throw new HttpError_1.default(msg, resp.status, resp.statusText, body);
-}
-
-exports.humanizeError = humanizeError;
 /**
  * Walks through an object (or array) and returns the value found at the
  * provided path. This function is very simple so it intentionally does not

@@ -1,4 +1,3 @@
-import { fhirclient } from "./types";
 export default class HttpError extends Error {
     /**
      * The HTTP status code for this error
@@ -15,17 +14,16 @@ export default class HttpError extends Error {
      */
     statusText: string;
     /**
-     * The parsed response body. Can be an OperationOutcome resource, s JSON
-     * object, a string or null.
+     * Reference to the HTTP Response object
      */
-    body: fhirclient.JsonObject | string | null;
-    constructor(message?: string, statusCode?: number, statusText?: string, body?: fhirclient.JsonObject | string | null);
+    response: Response;
+    constructor(response: Response);
+    parse(): Promise<this>;
     toJSON(): {
         name: string;
         statusCode: number;
         status: number;
         statusText: string;
         message: string;
-        body: string | fhirclient.JsonObject;
     };
 }
