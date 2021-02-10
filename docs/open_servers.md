@@ -120,7 +120,7 @@ Using this setup, you can:
 - Open `launch_open.html` in the browser to test against an open server (http://r4.smarthealthit.org)
 
 ### 2. Using multiple launch configurations
-Since version `2.3.11` it is possible to pass an array of options to the `authorize` function. The idea is that the same app can be launched by multiple EHRs and the proper configuration will be picked based on the `iss` url parameter that the launch endpoint has received. This is more flexible because it allows us to reuse the same configuration for several ISS URLs. Here is an example:
+Since version `2.3.11` it is possible to pass an array of options to the `authorize` function. The idea is that the same app can be launched by multiple EHRs and the proper configuration will be picked based on the `iss` url parameter that the launch endpoint has received. This provides additional flexibility because it allows us to reuse the same configuration for several ISS URLs. Here is an example:
 ```js
 FHIR.oauth2.authorize([
     {
