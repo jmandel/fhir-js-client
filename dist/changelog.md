@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.3.11
+- `HttpError` instances (which are thrown when a request has failed) now have a `response` property that is a reference to the
+  Response object. This can be used to read response headers or inspect the response in some other way in case of error.
+- Client requests should now always fail with `HttpError`. Previously they were sometimes being rejected with custom `Error`
+  objects which do not have the response or the status code information.
+- All the request methods (except for the ones used for refreshing) can now accept new `includeResponse` boolean option. The affected methods are
+  `client.request`, `client.create`, `client.update`, `client.delete`, `client.patient.read`, `client.user.read`, `client.encounter.read` and `client.patient.request`.
+  [Read More](http://docs.smarthealthit.org/client-js/client.html)
+- In case of EHR launch the `authorize` function can now be called with an array of options. This makes it possible to pre-configure an
+  app to be launch-able from multiple EHRs. The right configuration will be picked based on the passed `iss` url parameter using the new 
+  `issMatch` option. [Read More](http://docs.smarthealthit.org/client-js/open_servers#2-using-multiple-launch-configurations)
+
 ## v2.3.10
 - Fixed the way access token expiration is computed for non-jwt tokens (#101).
 - Added a `body` property to the `HttpError` instances (#100). It will contain the parsed response body from failed requests which can be JSON (typically an `OperationOutcome` resource), a string or `null`.
