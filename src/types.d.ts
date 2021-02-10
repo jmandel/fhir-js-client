@@ -407,6 +407,16 @@ declare namespace fhirclient {
         iss?: string;
 
         /**
+         * Can be used to verify that the app is being launched against certain 
+         * servers. This is especially useful when working with multiple EHR
+         * configurations. Can be a string (in which case it will be expected to
+         * match the provided ISS exactly), a regular expression to test against
+         * the current ISS, or a function that will be called with the current
+         * ISS and should return true or false to signify if that ISS is acceptable.
+         */
+        issMatch?: string | RegExp | ((iss: string) => boolean);
+
+        /**
          * Do not pass use this option, unless you want to test it. It should come
          * as url parameter from the SMART authorization server as part of the EHR
          * launch sequence

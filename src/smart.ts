@@ -171,8 +171,45 @@ export function getSecurityExtensions(env: fhirclient.Adapter, baseUrl = "/"): P
  * @param [params]
  * @param [_noRedirect] If true, resolve with the redirect url without trying to redirect to it
  */
-export async function authorize(env: fhirclient.Adapter, params: fhirclient.AuthorizeParams = {}, _noRedirect: boolean = false): Promise<string|void>
+export async function authorize(
+    env: fhirclient.Adapter,
+    params: fhirclient.AuthorizeParams | fhirclient.AuthorizeParams[] = {},
+    _noRedirect: boolean = false
+): Promise<string|void>
 {
+    const url = env.getUrl();
+
+    // Multiple config for EHR launches ---------------------------------------
+    if (Array.isArray(params)) {
+        const urlISS = url.searchParams.get("iss") || url.searchParams.get("fhirServiceUrl");
+        if (!urlISS) {
+            throw new Error(
+                'Passing in an "iss" url parameter is required if authorize ' +
+                'uses multiple configurations'
+            );
+        }
+        // pick the right config
+        const cfg = params.find(x => {
+            if (x.issMatch) {
+                if (typeof x.issMatch === "function") {
+                    return !!x.issMatch(urlISS);
+                }
+                if (typeof x.issMatch === "string") {
+                    return x.issMatch === urlISS;
+                }
+                if (x.issMatch instanceof RegExp) {
+                    return x.issMatch.test(urlISS);
+                }
+            }
+            return false;
+        });
+        if (!cfg) {
+            throw new Error(`No configuration found matching the current "iss" parameter "${urlISS}"`);
+        }
+        return await authorize(env, cfg, _noRedirect);
+    }
+    // ------------------------------------------------------------------------
+
     // Obtain input
     const {
         redirect_uri,
@@ -196,7 +233,6 @@ export async function authorize(env: fhirclient.Adapter, params: fhirclient.Auth
         completeInTarget
     } = params;
 
-    const url     = env.getUrl();
     const storage = env.getStorage();
 
     // For these three an url param takes precedence over inline option

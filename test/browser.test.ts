@@ -45,7 +45,7 @@ describe("Browser tests", () => {
                 const addr: any = mockDataServer.address();
                 mockUrl = `http://127.0.0.1:${addr.port}`;
                 // console.log(`Mock Data Server listening at ${mockUrl}`);
-                resolve();
+                resolve(void 0);
             });
         });
     });
@@ -59,7 +59,7 @@ describe("Browser tests", () => {
                         console.log("Error shutting down the mock-data server: ", error);
                     }
                     // console.log("Mock Data Server CLOSED!");
-                    resolve();
+                    resolve(void 0);
                 });
             });
         }
@@ -715,6 +715,258 @@ describe("Browser tests", () => {
                 expect(await env.getStorage().get(state)).to.include({
                     redirectUri: "https://test.com"
                 });
+            });
+
+            // multi-config ---------------------------------------------------
+            it ("requires iss url param in multi mode", () => {
+                const env = new BrowserEnv({});
+                expect(smart.authorize(env, [], true)).to.reject(/"iss" url parameter is required/);
+            });
+
+            it ("throws if no matching config is found", () => {
+                const env = new BrowserEnv({});
+                env.redirect("http://localhost/?iss=" + mockUrl);
+                expect(smart.authorize(env, [
+                    {
+                        // no issMatch
+                    },
+                    {
+                        // invalid issMatch type
+                        // @ts-ignore
+                        issMatch: 5
+                    },
+                    {
+                        issMatch: "b"
+                    }
+                ], true)).to.reject(/No configuration found matching the current "iss" parameter/);
+            });
+
+            it ("can match using String", async () => {
+                const env = new BrowserEnv({});
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 404
+                });
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        rest: [
+                            {
+                                security: {
+                                    extension: [
+                                        {
+                                            url: "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris",
+                                            extension: [
+                                                // {
+                                                //     url: "authorize",
+                                                //     valueUri: "https://my-authorize-uri"
+                                                // },
+                                                {
+                                                    url: "token",
+                                                    valueUri: "https://my-token-uri"
+                                                },
+                                                {
+                                                    url: "register",
+                                                    valueUri: "https://my-registration-uri"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                });
+                env.redirect("http://localhost/?iss=" + mockUrl);
+                const url = await smart.authorize(env, [
+                    {
+                        issMatch: "whatever",
+                        fhirServiceUrl: "http://localhost",
+                        fakeTokenResponse: { a: 1, b: 2 },
+                        redirectUri: "y"
+                    },
+                    {
+                        issMatch: mockUrl,
+                        fhirServiceUrl: "http://localhost",
+                        fakeTokenResponse: { a: 1, b: 2 },
+                        redirectUri: "x"
+                    }
+                ],
+                true);
+
+                expect(url).to.startWith("http://localhost/x?state=");
+            });
+
+            it ("can match using RegExp", async () => {
+                const env = new BrowserEnv({});
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 404
+                });
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        rest: [
+                            {
+                                security: {
+                                    extension: [
+                                        {
+                                            url: "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris",
+                                            extension: [
+                                                // {
+                                                //     url: "authorize",
+                                                //     valueUri: "https://my-authorize-uri"
+                                                // },
+                                                {
+                                                    url: "token",
+                                                    valueUri: "https://my-token-uri"
+                                                },
+                                                {
+                                                    url: "register",
+                                                    valueUri: "https://my-registration-uri"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                });
+                env.redirect("http://localhost/?iss=" + mockUrl);
+                const url = await smart.authorize(env, [
+                    {
+                        issMatch: "whatever",
+                        fhirServiceUrl: "http://localhost",
+                        fakeTokenResponse: { a: 1, b: 2 },
+                        redirectUri: "y"
+                    },
+                    {
+                        issMatch: /^http\:\/\/127\.0\.0\.1/,
+                        fhirServiceUrl: "http://localhost",
+                        fakeTokenResponse: { a: 1, b: 2 },
+                        redirectUri: "x"
+                    }
+                ],
+                true);
+
+                expect(url).to.startWith("http://localhost/x?state=");
+            });
+
+            it ("can match using Function", async () => {
+                const env = new BrowserEnv({});
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 404
+                });
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        rest: [
+                            {
+                                security: {
+                                    extension: [
+                                        {
+                                            url: "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris",
+                                            extension: [
+                                                // {
+                                                //     url: "authorize",
+                                                //     valueUri: "https://my-authorize-uri"
+                                                // },
+                                                {
+                                                    url: "token",
+                                                    valueUri: "https://my-token-uri"
+                                                },
+                                                {
+                                                    url: "register",
+                                                    valueUri: "https://my-registration-uri"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                });
+                env.redirect("http://localhost/?iss=" + mockUrl);
+                const url = await smart.authorize(env, [
+                    {
+                        issMatch: (iss) => false,
+                        fhirServiceUrl: "http://localhost",
+                        fakeTokenResponse: { a: 1, b: 2 },
+                        redirectUri: "y"
+                    },
+                    {
+                        issMatch: (iss) => iss === mockUrl,
+                        fhirServiceUrl: "http://localhost",
+                        fakeTokenResponse: { a: 1, b: 2 },
+                        redirectUri: "x"
+                    }
+                ],
+                true);
+
+                expect(url).to.startWith("http://localhost/x?state=");
+            });
+
+            it ("can match using fhirServiceUrl", async () => {
+                const env = new BrowserEnv({});
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 404
+                });
+                mockServer.mock({
+                    headers: { "content-type": "application/json" },
+                    status: 200,
+                    body: {
+                        rest: [
+                            {
+                                security: {
+                                    extension: [
+                                        {
+                                            url: "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris",
+                                            extension: [
+                                                // {
+                                                //     url: "authorize",
+                                                //     valueUri: "https://my-authorize-uri"
+                                                // },
+                                                {
+                                                    url: "token",
+                                                    valueUri: "https://my-token-uri"
+                                                },
+                                                {
+                                                    url: "register",
+                                                    valueUri: "https://my-registration-uri"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                });
+                env.redirect("http://localhost/?fhirServiceUrl=" + mockUrl);
+                const url = await smart.authorize(env, [
+                    {
+                        issMatch: (iss) => false,
+                        fhirServiceUrl: "http://localhost",
+                        fakeTokenResponse: { a: 1, b: 2 },
+                        redirectUri: "y"
+                    },
+                    {
+                        issMatch: (iss) => iss === mockUrl,
+                        fhirServiceUrl: "http://localhost",
+                        fakeTokenResponse: { a: 1, b: 2 },
+                        redirectUri: "x"
+                    }
+                ],
+                true);
+
+                expect(url).to.startWith("http://localhost/x?state=");
             });
         });
 
