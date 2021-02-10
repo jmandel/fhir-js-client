@@ -37,6 +37,7 @@ It works both in browsers (IE 10+) and on the server (Node 10+).
     - [React / TypeScript SPA](https://4e7rl.codesandbox.io/test.html) - [Code](https://codesandbox.io/s/fhir-client-typescript-react-spa-4e7rl) - Example with React and TypeScript on a single page
     - [Advanced React Example](https://0q3n8.codesandbox.io) - [Code](https://codesandbox.io/s/fhir-client-react-react-router-context-0q3n8) - React with React Router, storing a FHIR client instance in React context
     - [Popups and frames](https://fmv99.csb.app/) - [Code](https://codesandbox.io/s/blissful-leavitt-fmv99)
+    - [Using multiple launch configurations (code)](https://codesandbox.io/s/fhir-client-browser-examples-35u09?file=/browser/multi_config/launch.html)
 - Server Examples
     - [Express Example](https://c0che.sse.codesandbox.io/) - [Code](https://codesandbox.io/s/jovial-dew-c0che)
     - [Native Example](https://q4mhq.sse.codesandbox.io/) - [Code](https://codesandbox.io/s/brave-wildflower-q4mhq)
