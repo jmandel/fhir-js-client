@@ -1,6 +1,6 @@
 # Working with open servers
 
-This library is designed to be used in SMART on FHIR apps. This means the server is protected using SMART for launch and authentication. In some cases (mostly for testing and development) it is also useful to connect to open servers. There are several major differences between "open" and "protected" FHIR servers:
+This library is designed to be used with [SMART on FHIR](http://hl7.org/fhir/smart-app-launch/index.html) apps. This means the server is protected using SMART for launch and authentication. In some cases (mostly for testing and development) it is also useful to connect to open servers. There are several major differences between "open" and "protected" FHIR servers:
 
 1. Open servers do not require authentication
 2. Open servers do not support SMART, thus they cannot provide you with launch context. There is no current patient, user or encounter. The app is free to choose what to access.
