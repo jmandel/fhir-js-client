@@ -1,6 +1,6 @@
 # Working with open servers
 
-This library is designed to be used in SMART apps (and not just FHIR apps). This implies that the server is protected and uses SMART for launch and authentication. However, in some cases (mostly for testing and development) it is also useful to connect to open servers. There are several major differences between "open" and "protected" FHIR servers:
+This library is designed to be used with [SMART on FHIR](http://hl7.org/fhir/smart-app-launch/index.html) apps. This means the server is protected using SMART for launch and authentication. In some cases (mostly for testing and development) it is also useful to connect to open servers. There are several major differences between "open" and "protected" FHIR servers:
 
 1. Open servers do not require authentication
 2. Open servers do not support SMART, thus they cannot provide you with launch context. There is no current patient, user or encounter. The app is free to choose what to access.
@@ -11,9 +11,9 @@ If you are working on an app that is ONLY going to connect to an open server, th
 ```js
 const client = FHIR.client("http://hapi.fhir.org/baseDstu3");
 ```
-Then use the `client instance to make requests as usual.
+Then use the client instance to make requests as usual.
 
-Note that unlike a SMART launched app, this one has no concept of "current" patient, user or encounter. This means that SMART-specific APIs will not work:
+Unlike a SMART launched app, this one has no concept of "current" patient, user or encounter. This means that SMART-specific APIs will not work:
 - `client.patient.id` will be `null`
 - `client.patient.read()` and `client.patient.request()` will reject with a "Patient is not available" error.
 
@@ -39,9 +39,9 @@ const client = FHIR.client({
 ```
 
 ## Working with both open and protected servers
-Ideally, an app should be capable of working with both protected and open servers. However, this may not always be possible out of the box. For example, if the app relies on EHR launch and uses context APIs like `client.patient...` or `client.user...`, then the developer assumes that the launch context must be available.
+Ideally, an app should be capable of working with both protected and open servers. This may not always be possible out of the box. For example, if the app relies on EHR launch and uses context APIs like `client.patient...` or `client.user...`, then the developer assumes that the launch context must be available.
 
-In real life, developers often design their apps as SMART apps, but also want to be able to launch them against open servers for testing purposes. There are several ways to achieve that:
+Developers often design their apps as SMART apps, but also want to be able to launch them against open servers for testing purposes. There are several ways to achieve that:
 
 ### 1. Using multiple launch files
 If the app is designed for EHR launch, the typical approach is to have separate locations for your launch_uri and redirect_uri. For example, you may have a `launch.html` file where you call `FHIR.oauth2.authorize({...});` and an `index.html` file where uou call `FHIR.oauth2.ready();` and initialize your app. To support multiple environments you can have multiple launch files. For example:
@@ -114,13 +114,13 @@ If the app is designed for EHR launch, the typical approach is to have separate 
 </html>
 ```
 
-Using this set up, you can:
+Using this setup, you can:
 - Register your app at Cerner using a `launch_uri` that points to `launch_cerner.html`
 - Register your app at Epic using a `launch_uri` that points to `launch_epic.html`
 - Open `launch_open.html` in the browser to test against an open server (http://r4.smarthealthit.org)
 
 ### 2. Using multiple launch configurations
-Since version `2.3.11` it is also possible to pass an array of options to the `authorize` function. The idea is that the same app can be launched by multiple EHRs and the proper configuration will be picked based on the `iss` url parameter that the launch endpoint has received. This is more flexible because it allows us to reuse the same configuration for several ISS URLs. Here is an example:
+Since version `2.3.11` it is possible to pass an array of options to the `authorize` function. The idea is that the same app can be launched by multiple EHRs and the proper configuration will be picked based on the `iss` url parameter that the launch endpoint has received. This is more flexible because it allows us to reuse the same configuration for several ISS URLs. Here is an example:
 ```js
 FHIR.oauth2.authorize([
     {
@@ -165,7 +165,7 @@ A few notes about using multiple configurations:
    an option. Many people prefer using `.env` files to store configuration data. However, that would imply that you have control over the environment and this is not usually true when the app is deployed in an EHR.
 
 ## Bypassing Authentication
-In addition to providing custom context variables (like `patientId` or `encounterId`), it is also possible to completely bypass the authentication. This is where things might get complicated but it is useful for testing. This "mode" is activated by setting the `fhirServiceUrl` option:
+In addition to providing custom context variables (like `patientId` or `encounterId`), it is possible to completely bypass the authentication. This is where things might get complicated but it is useful for testing. This "mode" is activated by setting the `fhirServiceUrl` option:
 ```js
 FHIR.oauth2.authorize({
     redirectUri: "./index.html",
