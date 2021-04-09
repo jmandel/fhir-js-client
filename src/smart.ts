@@ -169,12 +169,10 @@ export function getSecurityExtensions(env: fhirclient.Adapter, baseUrl = "/"): P
  *    due to that redirect!
  * @param env
  * @param [params]
- * @param [_noRedirect] If true, resolve with the redirect url without trying to redirect to it
  */
 export async function authorize(
     env: fhirclient.Adapter,
-    params: fhirclient.AuthorizeParams | fhirclient.AuthorizeParams[] = {},
-    _noRedirect: boolean = false
+    params: fhirclient.AuthorizeParams | fhirclient.AuthorizeParams[] = {}
 ): Promise<string|void>
 {
     const url = env.getUrl();
@@ -206,7 +204,7 @@ export async function authorize(
         if (!cfg) {
             throw new Error(`No configuration found matching the current "iss" parameter "${urlISS}"`);
         }
-        return await authorize(env, cfg, _noRedirect);
+        return await authorize(env, cfg);
     }
     // ------------------------------------------------------------------------
 
@@ -228,6 +226,7 @@ export async function authorize(
         launch,
         fhirServiceUrl,
         redirectUri,
+        noRedirect,
         scope = "",
         clientId,
         completeInTarget
@@ -344,7 +343,7 @@ export async function authorize(
     if (fhirServiceUrl && !iss) {
         debug("Making fake launch...");
         await storage.set(stateKey, state);
-        if (_noRedirect) {
+        if (noRedirect) {
             return redirectUrl;
         }
         return await env.redirect(redirectUrl);
@@ -357,7 +356,7 @@ export async function authorize(
 
     // If this happens to be an open server and there is no authorizeUri
     if (!state.authorizeUri) {
-        if (_noRedirect) {
+        if (noRedirect) {
             return redirectUrl;
         }
         return await env.redirect(redirectUrl);
@@ -380,7 +379,7 @@ export async function authorize(
 
     redirectUrl = state.authorizeUri + "?" + redirectParams.join("&");
 
-    if (_noRedirect) {
+    if (noRedirect) {
         return redirectUrl;
     }
 

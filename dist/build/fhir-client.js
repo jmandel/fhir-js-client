@@ -13525,16 +13525,15 @@ exports.getSecurityExtensions = getSecurityExtensions;
  *    due to that redirect!
  * @param env
  * @param [params]
- * @param [_noRedirect] If true, resolve with the redirect url without trying to redirect to it
  */
 
-function authorize(_x, _x2, _x3) {
+function authorize(_x, _x2) {
   return _authorize.apply(this, arguments);
 }
 
 function _authorize() {
-  _authorize = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(env, params, _noRedirect) {
-    var url, urlISS, cfg, _params, redirect_uri, clientSecret, fakeTokenResponse, patientId, encounterId, client_id, target, width, height, _params2, iss, launch, fhirServiceUrl, redirectUri, _params2$scope, scope, clientId, completeInTarget, storage, serverUrl, inFrame, inPopUp, oldKey, stateKey, state, fullSessionStorageSupport, redirectUrl, extensions, redirectParams, win;
+  _authorize = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(env, params) {
+    var url, urlISS, cfg, _params, redirect_uri, clientSecret, fakeTokenResponse, patientId, encounterId, client_id, target, width, height, _params2, iss, launch, fhirServiceUrl, redirectUri, noRedirect, _params2$scope, scope, clientId, completeInTarget, storage, serverUrl, inFrame, inPopUp, oldKey, stateKey, state, fullSessionStorageSupport, redirectUrl, extensions, redirectParams, win;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -13544,27 +13543,23 @@ function _authorize() {
               params = {};
             }
 
-            if (_noRedirect === void 0) {
-              _noRedirect = false;
-            }
-
             url = env.getUrl(); // Multiple config for EHR launches ---------------------------------------
 
             if (!Array.isArray(params)) {
-              _context.next = 13;
+              _context.next = 12;
               break;
             }
 
             urlISS = url.searchParams.get("iss") || url.searchParams.get("fhirServiceUrl");
 
             if (urlISS) {
-              _context.next = 7;
+              _context.next = 6;
               break;
             }
 
             throw new Error('Passing in an "iss" url parameter is required if authorize ' + 'uses multiple configurations');
 
-          case 7:
+          case 6:
             // pick the right config
             cfg = params.find(function (x) {
               if (x.issMatch) {
@@ -13585,24 +13580,24 @@ function _authorize() {
             });
 
             if (cfg) {
-              _context.next = 10;
+              _context.next = 9;
               break;
             }
 
             throw new Error("No configuration found matching the current \"iss\" parameter \"" + urlISS + "\"");
 
-          case 10:
-            _context.next = 12;
-            return authorize(env, cfg, _noRedirect);
+          case 9:
+            _context.next = 11;
+            return authorize(env, cfg);
 
-          case 12:
+          case 11:
             return _context.abrupt("return", _context.sent);
 
-          case 13:
+          case 12:
             // ------------------------------------------------------------------------
             // Obtain input
             _params = params, redirect_uri = _params.redirect_uri, clientSecret = _params.clientSecret, fakeTokenResponse = _params.fakeTokenResponse, patientId = _params.patientId, encounterId = _params.encounterId, client_id = _params.client_id, target = _params.target, width = _params.width, height = _params.height;
-            _params2 = params, iss = _params2.iss, launch = _params2.launch, fhirServiceUrl = _params2.fhirServiceUrl, redirectUri = _params2.redirectUri, _params2$scope = _params2.scope, scope = _params2$scope === void 0 ? "" : _params2$scope, clientId = _params2.clientId, completeInTarget = _params2.completeInTarget;
+            _params2 = params, iss = _params2.iss, launch = _params2.launch, fhirServiceUrl = _params2.fhirServiceUrl, redirectUri = _params2.redirectUri, noRedirect = _params2.noRedirect, _params2$scope = _params2.scope, scope = _params2$scope === void 0 ? "" : _params2$scope, clientId = _params2.clientId, completeInTarget = _params2.completeInTarget;
             storage = env.getStorage(); // For these three an url param takes precedence over inline option
 
             iss = url.searchParams.get("iss") || iss;
@@ -13626,13 +13621,13 @@ function _authorize() {
             serverUrl = String(iss || fhirServiceUrl || ""); // Validate input
 
             if (serverUrl) {
-              _context.next = 25;
+              _context.next = 24;
               break;
             }
 
             throw new Error("No server url found. It must be specified as `iss` or as " + "`fhirServiceUrl` parameter");
 
-          case 25:
+          case 24:
             if (iss) {
               debug("Making %s launch...", launch ? "EHR" : "standalone");
             } // append launch scope if needed
@@ -13660,15 +13655,15 @@ function _authorize() {
             // this is a re-authorize)
 
 
-            _context.next = 30;
+            _context.next = 29;
             return storage.get(settings_1.SMART_KEY);
 
-          case 30:
+          case 29:
             oldKey = _context.sent;
-            _context.next = 33;
+            _context.next = 32;
             return storage.unset(oldKey);
 
-          case 33:
+          case 32:
             // create initial state
             stateKey = lib_1.randomString(16);
             state = {
@@ -13684,14 +13679,14 @@ function _authorize() {
             fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true;
 
             if (!fullSessionStorageSupport) {
-              _context.next = 39;
+              _context.next = 38;
               break;
             }
 
-            _context.next = 39;
+            _context.next = 38;
             return storage.set(settings_1.SMART_KEY, stateKey);
 
-          case 39:
+          case 38:
             // fakeTokenResponse to override stuff (useful in development)
             if (fakeTokenResponse) {
               Object.assign(state.tokenResponse, fakeTokenResponse);
@@ -13714,60 +13709,60 @@ function _authorize() {
             redirectUrl = redirectUri + "?state=" + encodeURIComponent(stateKey); // bypass oauth if fhirServiceUrl is used (but iss takes precedence)
 
             if (!(fhirServiceUrl && !iss)) {
-              _context.next = 52;
+              _context.next = 51;
               break;
             }
 
             debug("Making fake launch...");
-            _context.next = 47;
+            _context.next = 46;
             return storage.set(stateKey, state);
 
-          case 47:
-            if (!_noRedirect) {
-              _context.next = 49;
+          case 46:
+            if (!noRedirect) {
+              _context.next = 48;
               break;
             }
 
             return _context.abrupt("return", redirectUrl);
 
-          case 49:
-            _context.next = 51;
+          case 48:
+            _context.next = 50;
             return env.redirect(redirectUrl);
+
+          case 50:
+            return _context.abrupt("return", _context.sent);
 
           case 51:
-            return _context.abrupt("return", _context.sent);
-
-          case 52:
-            _context.next = 54;
+            _context.next = 53;
             return getSecurityExtensions(env, serverUrl);
 
-          case 54:
+          case 53:
             extensions = _context.sent;
             Object.assign(state, extensions);
-            _context.next = 58;
+            _context.next = 57;
             return storage.set(stateKey, state);
 
-          case 58:
+          case 57:
             if (state.authorizeUri) {
-              _context.next = 64;
+              _context.next = 63;
               break;
             }
 
-            if (!_noRedirect) {
-              _context.next = 61;
+            if (!noRedirect) {
+              _context.next = 60;
               break;
             }
 
             return _context.abrupt("return", redirectUrl);
 
-          case 61:
-            _context.next = 63;
+          case 60:
+            _context.next = 62;
             return env.redirect(redirectUrl);
 
-          case 63:
+          case 62:
             return _context.abrupt("return", _context.sent);
 
-          case 64:
+          case 63:
             // build the redirect uri
             redirectParams = ["response_type=code", "client_id=" + encodeURIComponent(clientId || ""), "scope=" + encodeURIComponent(scope), "redirect_uri=" + encodeURIComponent(redirectUri), "aud=" + encodeURIComponent(serverUrl), "state=" + encodeURIComponent(stateKey)]; // also pass this in case of EHR launch
 
@@ -13777,23 +13772,23 @@ function _authorize() {
 
             redirectUrl = state.authorizeUri + "?" + redirectParams.join("&");
 
-            if (!_noRedirect) {
-              _context.next = 69;
+            if (!noRedirect) {
+              _context.next = 68;
               break;
             }
 
             return _context.abrupt("return", redirectUrl);
 
-          case 69:
+          case 68:
             if (!(target && isBrowser())) {
-              _context.next = 78;
+              _context.next = 77;
               break;
             }
 
-            _context.next = 72;
+            _context.next = 71;
             return lib_1.getTargetWindow(target, width, height);
 
-          case 72:
+          case 71:
             win = _context.sent;
 
             if (win !== self) {
@@ -13822,14 +13817,14 @@ function _authorize() {
 
             return _context.abrupt("return");
 
-          case 78:
-            _context.next = 80;
+          case 77:
+            _context.next = 79;
             return env.redirect(redirectUrl);
 
-          case 80:
+          case 79:
             return _context.abrupt("return", _context.sent);
 
-          case 81:
+          case 80:
           case "end":
             return _context.stop();
         }
@@ -13893,7 +13888,7 @@ exports.onMessage = onMessage;
  * authorization server..
  */
 
-function completeAuth(_x4) {
+function completeAuth(_x3) {
   return _completeAuth.apply(this, arguments);
 }
 
@@ -14171,7 +14166,7 @@ exports.buildTokenRequest = buildTokenRequest;
  * @param [onError]
  */
 
-function ready(_x5, _x6, _x7) {
+function ready(_x4, _x5, _x6) {
   return _ready.apply(this, arguments);
 }
 
@@ -14236,7 +14231,7 @@ exports.ready = ready;
  * @param options The authorize options
  */
 
-function init(_x8, _x9) {
+function init(_x7, _x8) {
   return _init.apply(this, arguments);
 }
 

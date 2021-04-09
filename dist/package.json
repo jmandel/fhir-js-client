@@ -1,6 +1,6 @@
 {
   "name": "fhirclient",
-  "version": "2.3.11",
+  "version": "2.4.0",
   "description": "JavaScript client for Fast Healthcare Interoperability Resources",
   "author": "SMART Health IT <support@smarthealthit.org> (https://smarthealthit.org/)",
   "contributors": [
@@ -24,8 +24,8 @@
     "debug": "^4.1.1"
   },
   "peerDependencies": {
-    "@types/node": ">=10",
-    "@types/hapi": ">=18"
+    "@types/hapi": ">=18",
+    "@types/node": ">=10"
   },
   "engines": {
     "node": ">=10"

@@ -27,9 +27,8 @@ export declare function getSecurityExtensions(env: fhirclient.Adapter, baseUrl?:
  *    due to that redirect!
  * @param env
  * @param [params]
- * @param [_noRedirect] If true, resolve with the redirect url without trying to redirect to it
  */
-export declare function authorize(env: fhirclient.Adapter, params?: fhirclient.AuthorizeParams | fhirclient.AuthorizeParams[], _noRedirect?: boolean): Promise<string | void>;
+export declare function authorize(env: fhirclient.Adapter, params?: fhirclient.AuthorizeParams | fhirclient.AuthorizeParams[]): Promise<string | void>;
 /**
  * Checks if called within a frame. Only works in browsers!
  * If the current window has a `parent` or `top` properties that refer to

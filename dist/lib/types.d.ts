@@ -446,6 +446,11 @@ declare namespace fhirclient {
         redirect_uri?: string;
 
         /**
+         * 
+         */
+        noRedirect?: boolean;
+
+        /**
          * The client_id that you have obtained while registering your app in the
          * EHR. This is not required if you only intend to communicate with open
          * FHIR servers. Note: For backwards compatibility reasons we also accept
