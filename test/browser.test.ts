@@ -312,8 +312,9 @@ describe("Browser tests", () => {
         it ("can bypass oauth by passing `fhirServiceUrl`", async () => {
             const env = new BrowserEnv();
             const url = await smart.authorize(env, {
-                fhirServiceUrl: "http://localhost"
-            }, true);
+                fhirServiceUrl: "http://localhost",
+                noRedirect: true
+            });
 
             expect(url).to.match(/http:\/\/localhost\/\?state=./);
         });
@@ -324,8 +325,9 @@ describe("Browser tests", () => {
             const redirect = await smart.authorize(env, {
                 fhirServiceUrl: "http://localhost",
                 scope: "x",
-                launch: "123"
-            }, true);
+                launch: "123",
+                noRedirect: true
+            });
             const state = (new URL(redirect as string)).searchParams.get("state");
             expect((await Storage.get(state)).scope).to.equal("x launch");
         });
@@ -607,8 +609,9 @@ describe("Browser tests", () => {
                 const env = new BrowserEnv();
                 const url = await smart.authorize(env, {
                     fhirServiceUrl: "http://localhost",
-                    encounterId: "whatever"
-                }, true);
+                    encounterId: "whatever",
+                    noRedirect: true
+                });
                 const state = (new URL(url as string)).searchParams.get("state");
                 expect(await env.getStorage().get(state)).to.include({
                     tokenResponse: { encounter: "whatever" }
@@ -619,8 +622,9 @@ describe("Browser tests", () => {
                 const env = new BrowserEnv();
                 const url = await smart.authorize(env, {
                     fhirServiceUrl: "http://localhost",
-                    patientId: "whatever"
-                }, true);
+                    patientId: "whatever",
+                    noRedirect: true
+                });
                 const state = (new URL(url as string)).searchParams.get("state");
                 expect(await env.getStorage().get(state)).to.include({
                     tokenResponse: { patient: "whatever" }
@@ -631,8 +635,9 @@ describe("Browser tests", () => {
                 const env = new BrowserEnv();
                 const url = await smart.authorize(env, {
                     fhirServiceUrl: "http://localhost",
-                    fakeTokenResponse: { a: 1, b: 2 }
-                }, true);
+                    fakeTokenResponse: { a: 1, b: 2 },
+                    noRedirect: true
+                });
                 const state = (new URL(url as string)).searchParams.get("state");
                 expect(await env.getStorage().get(state)).to.include({
                     tokenResponse: { a: 1, b: 2 }
@@ -652,8 +657,9 @@ describe("Browser tests", () => {
                 env.redirect("http://localhost/?iss=" + mockUrl);
                 const url = await smart.authorize(env, {
                     fhirServiceUrl: "http://localhost",
-                    fakeTokenResponse: { a: 1, b: 2 }
-                }, true);
+                    fakeTokenResponse: { a: 1, b: 2 },
+                    noRedirect: true
+                });
                 const aud = (new URL(url as string)).searchParams.get("aud");
                 expect(aud).to.equal(mockUrl);
             });
@@ -699,8 +705,9 @@ describe("Browser tests", () => {
                 const url = await smart.authorize(env, {
                     fhirServiceUrl: "http://localhost",
                     fakeTokenResponse: { a: 1, b: 2 },
-                    redirectUri: "x"
-                }, true);
+                    redirectUri: "x",
+                    noRedirect: true
+                });
 
                 expect(url).to.startWith("http://localhost/x?state=");
             });
@@ -709,8 +716,9 @@ describe("Browser tests", () => {
                 const env = new BrowserEnv();
                 const url = await smart.authorize(env, {
                     fhirServiceUrl: "http://localhost",
-                    redirectUri: "https://test.com"
-                }, true);
+                    redirectUri: "https://test.com",
+                    noRedirect: true
+                });
                 const state = (new URL(url as string)).searchParams.get("state");
                 expect(await env.getStorage().get(state)).to.include({
                     redirectUri: "https://test.com"
@@ -720,7 +728,7 @@ describe("Browser tests", () => {
             // multi-config ---------------------------------------------------
             it ("requires iss url param in multi mode", () => {
                 const env = new BrowserEnv({});
-                expect(smart.authorize(env, [], true)).to.reject(/"iss" url parameter is required/);
+                expect(smart.authorize(env, [{noRedirect: true}])).to.reject(/"iss" url parameter is required/);
             });
 
             it ("throws if no matching config is found", () => {
@@ -738,7 +746,7 @@ describe("Browser tests", () => {
                     {
                         issMatch: "b"
                     }
-                ], true)).to.reject(/No configuration found matching the current "iss" parameter/);
+                ])).to.reject(/No configuration found matching the current "iss" parameter/);
             });
 
             it ("can match using String", async () => {
@@ -784,16 +792,17 @@ describe("Browser tests", () => {
                         issMatch: "whatever",
                         fhirServiceUrl: "http://localhost",
                         fakeTokenResponse: { a: 1, b: 2 },
-                        redirectUri: "y"
+                        redirectUri: "y",
+                        noRedirect: true
                     },
                     {
                         issMatch: mockUrl,
                         fhirServiceUrl: "http://localhost",
                         fakeTokenResponse: { a: 1, b: 2 },
-                        redirectUri: "x"
+                        redirectUri: "x",
+                        noRedirect: true
                     }
-                ],
-                true);
+                ]);
 
                 expect(url).to.startWith("http://localhost/x?state=");
             });
@@ -841,16 +850,17 @@ describe("Browser tests", () => {
                         issMatch: "whatever",
                         fhirServiceUrl: "http://localhost",
                         fakeTokenResponse: { a: 1, b: 2 },
-                        redirectUri: "y"
+                        redirectUri: "y",
+                        noRedirect: true
                     },
                     {
                         issMatch: /^http\:\/\/127\.0\.0\.1/,
                         fhirServiceUrl: "http://localhost",
                         fakeTokenResponse: { a: 1, b: 2 },
-                        redirectUri: "x"
+                        redirectUri: "x",
+                        noRedirect: true
                     }
-                ],
-                true);
+                ]);
 
                 expect(url).to.startWith("http://localhost/x?state=");
             });
@@ -898,16 +908,17 @@ describe("Browser tests", () => {
                         issMatch: (iss) => false,
                         fhirServiceUrl: "http://localhost",
                         fakeTokenResponse: { a: 1, b: 2 },
-                        redirectUri: "y"
+                        redirectUri: "y",
+                        noRedirect: true
                     },
                     {
                         issMatch: (iss) => iss === mockUrl,
                         fhirServiceUrl: "http://localhost",
                         fakeTokenResponse: { a: 1, b: 2 },
-                        redirectUri: "x"
+                        redirectUri: "x",
+                        noRedirect: true
                     }
-                ],
-                true);
+                ]);
 
                 expect(url).to.startWith("http://localhost/x?state=");
             });
@@ -955,16 +966,17 @@ describe("Browser tests", () => {
                         issMatch: (iss) => false,
                         fhirServiceUrl: "http://localhost",
                         fakeTokenResponse: { a: 1, b: 2 },
-                        redirectUri: "y"
+                        redirectUri: "y",
+                        noRedirect: true
                     },
                     {
                         issMatch: (iss) => iss === mockUrl,
                         fhirServiceUrl: "http://localhost",
                         fakeTokenResponse: { a: 1, b: 2 },
-                        redirectUri: "x"
+                        redirectUri: "x",
+                        noRedirect: true
                     }
-                ],
-                true);
+                ]);
 
                 expect(url).to.startWith("http://localhost/x?state=");
             });

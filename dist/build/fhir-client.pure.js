@@ -3133,10 +3133,9 @@ exports.getSecurityExtensions = getSecurityExtensions;
  *    due to that redirect!
  * @param env
  * @param [params]
- * @param [_noRedirect] If true, resolve with the redirect url without trying to redirect to it
  */
 
-async function authorize(env, params = {}, _noRedirect = false) {
+async function authorize(env, params = {}) {
   const url = env.getUrl(); // Multiple config for EHR launches ---------------------------------------
 
   if (Array.isArray(params)) {
@@ -3169,7 +3168,7 @@ async function authorize(env, params = {}, _noRedirect = false) {
       throw new Error(`No configuration found matching the current "iss" parameter "${urlISS}"`);
     }
 
-    return await authorize(env, cfg, _noRedirect);
+    return await authorize(env, cfg);
   } // ------------------------------------------------------------------------
   // Obtain input
 
@@ -3190,6 +3189,7 @@ async function authorize(env, params = {}, _noRedirect = false) {
     launch,
     fhirServiceUrl,
     redirectUri,
+    noRedirect,
     scope = "",
     clientId,
     completeInTarget
@@ -3292,7 +3292,7 @@ async function authorize(env, params = {}, _noRedirect = false) {
     debug("Making fake launch...");
     await storage.set(stateKey, state);
 
-    if (_noRedirect) {
+    if (noRedirect) {
       return redirectUrl;
     }
 
@@ -3305,7 +3305,7 @@ async function authorize(env, params = {}, _noRedirect = false) {
   await storage.set(stateKey, state); // If this happens to be an open server and there is no authorizeUri
 
   if (!state.authorizeUri) {
-    if (_noRedirect) {
+    if (noRedirect) {
       return redirectUrl;
     }
 
@@ -3321,7 +3321,7 @@ async function authorize(env, params = {}, _noRedirect = false) {
 
   redirectUrl = state.authorizeUri + "?" + redirectParams.join("&");
 
-  if (_noRedirect) {
+  if (noRedirect) {
     return redirectUrl;
   }
 
