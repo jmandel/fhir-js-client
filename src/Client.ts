@@ -583,7 +583,12 @@ export default class Client
     {
         const idToken = this.getIdToken();
         if (idToken) {
-            return idToken.fhirUser || idToken.profile;
+            // Epic may return a full url
+            // @see https://github.com/smart-on-fhir/client-js/issues/105
+            if (idToken.fhirUser) {
+                return idToken.fhirUser.split("/").slice(-2).join("/");
+            }
+            return idToken.profile
         }
         return null;
     }
