@@ -7,7 +7,8 @@ import {
     getAndCache,
     fetchConformanceStatement,
     getAccessTokenExpiration,
-    getTargetWindow
+    getTargetWindow,
+    assert
 } from "./lib";
 import Client from "./Client";
 import { SMART_KEY } from "./settings";
@@ -201,9 +202,7 @@ export async function authorize(
             }
             return false;
         });
-        if (!cfg) {
-            throw new Error(`No configuration found matching the current "iss" parameter "${urlISS}"`);
-        }
+        assert(cfg, `No configuration found matching the current "iss" parameter "${urlISS}"`);
         return await authorize(env, cfg);
     }
     // ------------------------------------------------------------------------
@@ -502,9 +501,7 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
     debug("key: %s, code: %s", key, code);
 
     // key might be coming from the page url so it might be empty or missing
-    if (!key) {
-        throw new Error("No 'state' parameter found. Please (re)launch the app.");
-    }
+    assert(key, "No 'state' parameter found. Please (re)launch the app.");
 
     // Check if we have a previous state
     let state = (await Storage.get(key)) as fhirclient.ClientState;
@@ -578,9 +575,7 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
     }
 
     // If the state does not exist, it means the page has been loaded directly.
-    if (!state) {
-        throw new Error("No state found! Please (re)launch the app.");
-    }
+    assert(state, "No state found! Please (re)launch the app.");
 
     // Assume the client has already completed a token exchange when
     // there is no code (but we have a state) or access token is found in state
@@ -590,9 +585,7 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
     // Otherwise, we have to complete the code flow
     if (!authorized && state.tokenUri) {
 
-        if (!code) {
-            throw new Error("'code' url parameter is required");
-        }
+        assert(code, "'code' url parameter is required");
 
         debug("Preparing to exchange the code for access token...");
         const requestOptions = buildTokenRequest(env, code, state);
@@ -603,9 +596,7 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
         // authorization request has been denied.
         const tokenResponse = await request<fhirclient.TokenResponse>(state.tokenUri, requestOptions);
         debug("Token response: %O", tokenResponse);
-        if (!tokenResponse.access_token) {
-            throw new Error("Failed to obtain access token.");
-        }
+        assert(tokenResponse.access_token, "Failed to obtain access token.");
 
         // Now we need to determine when is this authorization going to expire
         state.expiresAt = getAccessTokenExpiration(tokenResponse, env);
@@ -640,17 +631,9 @@ export function buildTokenRequest(env: fhirclient.Adapter, code: string, state: 
 {
     const { redirectUri, clientSecret, tokenUri, clientId } = state;
 
-    if (!redirectUri) {
-        throw new Error("Missing state.redirectUri");
-    }
-
-    if (!tokenUri) {
-        throw new Error("Missing state.tokenUri");
-    }
-
-    if (!clientId) {
-        throw new Error("Missing state.clientId");
-    }
+    assert(redirectUri, "Missing state.redirectUri");
+    assert(tokenUri, "Missing state.tokenUri");
+    assert(clientId, "Missing state.clientId");
 
     const requestOptions: Record<string, any> = {
         method: "POST",

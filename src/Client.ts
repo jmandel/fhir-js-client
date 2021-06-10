@@ -12,7 +12,8 @@ import {
     getPatientParam,
     fetchConformanceStatement,
     getAccessTokenExpiration,
-    assertJsonPatch
+    assertJsonPatch,
+    assert
 } from "./lib";
 
 import str from "./strings";
@@ -44,15 +45,8 @@ async function contextualize(
 
     async function contextualURL(_url: URL) {
         const resourceType = _url.pathname.split("/").pop();
-
-        if (!resourceType) {
-            throw new Error(`Invalid url "${_url}"`);
-        }
-
-        if (patientCompartment.indexOf(resourceType) == -1) {
-            throw new Error(`Cannot filter "${resourceType}" resources by patient`);
-        }
-
+        assert(resourceType, `Invalid url "${_url}"`);
+        assert(patientCompartment.indexOf(resourceType) > -1, `Cannot filter "${resourceType}" resources by patient`);
         const conformance = await fetchConformanceStatement(client.state.serverUrl);
         const searchParam = getPatientParam(conformance, resourceType);
         _url.searchParams.set(searchParam, client.patient.id as string);
@@ -365,9 +359,10 @@ export default class Client
         const _state = typeof state == "string" ? { serverUrl: state } : state;
 
         // Valid serverUrl is required!
-        if (!_state.serverUrl || !_state.serverUrl.match(/https?:\/\/.+/)) {
-            throw new Error("A \"serverUrl\" option is required and must begin with \"http(s)\"");
-        }
+        assert(
+            _state.serverUrl && _state.serverUrl.match(/https?:\/\/.+/),
+            "A \"serverUrl\" option is required and must begin with \"http(s)\""
+        );
 
         this.state = _state;
         this.environment = environment;
@@ -769,9 +764,7 @@ export default class Client
     ): Promise<T>
     {
         const debugRequest = _debug.extend("client:request");
-        if (!requestOptions) {
-            throw new Error("request requires an url or request options as argument");
-        }
+        assert(requestOptions, "request requires an url or request options as argument");
 
         // url -----------------------------------------------------------------
         let url: string;
@@ -1031,21 +1024,15 @@ export default class Client
         debugRefresh("Attempting to refresh with refresh_token...");
 
         const refreshToken = this.state?.tokenResponse?.refresh_token;
-        if (!refreshToken) {
-            throw new Error("Unable to refresh. No refresh_token found.");
-        }
+        assert(refreshToken, "Unable to refresh. No refresh_token found.");
 
         const tokenUri = this.state.tokenUri;
-        if (!tokenUri) {
-            throw new Error("Unable to refresh. No tokenUri found.");
-        }
+        assert(tokenUri, "Unable to refresh. No tokenUri found.");
 
         const scopes = this.getState("tokenResponse.scope") || "";
         const hasOfflineAccess = scopes.search(/\boffline_access\b/) > -1;
         const hasOnlineAccess = scopes.search(/\bonline_access\b/) > -1;
-        if (!hasOfflineAccess && !hasOnlineAccess) {
-            throw new Error("Unable to refresh. No offline_access or online_access scope found.");
-        }
+        assert(hasOfflineAccess || hasOnlineAccess, "Unable to refresh. No offline_access or online_access scope found.");
 
         // This method is typically called internally from `request` if certain
         // request fails with 401. However, clients will often run multiple
@@ -1078,9 +1065,7 @@ export default class Client
 
             this._refreshTask = request<fhirclient.TokenResponse>(tokenUri, refreshRequestOptions)
             .then(data => {
-                if (!data.access_token) {
-                    throw new Error("No access token received");
-                }
+                assert(data.access_token, "No access token received");
                 debugRefresh("Received new access token response %O", data);
                 Object.assign(this.state.tokenResponse, data);
                 this.state.expiresAt = getAccessTokenExpiration(data, this.environment);
