@@ -13,7 +13,6 @@ import Client         from "../src/Client";
 import { KEY }        from "../src/smart";
 import Adapter        from "../src/adapters/BrowserAdapter";
 import { fhirclient } from "../src/types";
-import { SrvRecord } from "dns";
 
 export const lab = Lab.script();
 const { it, describe, before, after, afterEach } = lab;
