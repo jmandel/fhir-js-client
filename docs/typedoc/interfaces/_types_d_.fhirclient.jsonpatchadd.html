@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Extension | fhirclient</title>
+	<title>JsonPatchAdd | fhirclient</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -60,43 +60,23 @@
 					<a href="../modules/_types_d_.fhirclient.html">fhirclient</a>
 				</li>
 				<li>
-					<a href="../modules/_types_d_.fhirclient.fhir.html">FHIR</a>
-				</li>
-				<li>
-					<a href="_types_d_.fhirclient.fhir.extension.html">Extension</a>
+					<a href="_types_d_.fhirclient.jsonpatchadd.html">JsonPatchAdd</a>
 				</li>
 			</ul>
-			<h1>Interface Extension&lt;T&gt;</h1>
+			<h1>Interface JsonPatchAdd</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<section class="tsd-panel tsd-type-parameters">
-				<h3>Type parameters</h3>
-				<ul class="tsd-type-parameters">
-					<li>
-						<h4>T</h4>
-					</li>
-				</ul>
-			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<a href="_types_d_.fhirclient.fhir.element.html" class="tsd-signature-type">Element</a>
-						<ul class="tsd-hierarchy">
-							<li>
-								<span class="target">Extension</span>
-							</li>
-						</ul>
+						<span class="target">JsonPatchAdd</span>
 					</li>
 				</ul>
-			</section>
-			<section class="tsd-panel tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
-				<h3 class="tsd-before-signature">Indexable</h3>
-				<div class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">[</span>T: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><span class="tsd-signature-type">any</span></div>
 			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
@@ -105,9 +85,9 @@
 						<section class="tsd-index-section tsd-is-not-exported">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported"><a href="_types_d_.fhirclient.fhir.extension.html#extension" class="tsd-kind-icon">extension</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported"><a href="_types_d_.fhirclient.fhir.extension.html#id" class="tsd-kind-icon">id</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_types_d_.fhirclient.fhir.extension.html#url" class="tsd-kind-icon">url</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_types_d_.fhirclient.jsonpatchadd.html#op" class="tsd-kind-icon">op</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_types_d_.fhirclient.jsonpatchadd.html#path" class="tsd-kind-icon">path</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_types_d_.fhirclient.jsonpatchadd.html#value" class="tsd-kind-icon">value</a></li>
 							</ul>
 						</section>
 					</div>
@@ -115,42 +95,35 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group tsd-is-not-exported">
 				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
-					<a name="extension" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> extension</h3>
-					<div class="tsd-signature tsd-kind-icon">extension<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="_types_d_.fhirclient.fhir.extension.html" class="tsd-signature-type">Extension</a><span class="tsd-signature-symbol">&lt;</span><a href="../modules/_types_d_.fhirclient.fhir.html#valuex" class="tsd-signature-type">valueX</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
+					<a name="op" class="tsd-anchor"></a>
+					<h3>op</h3>
+					<div class="tsd-signature tsd-kind-icon">op<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"add"</span></div>
 					<aside class="tsd-sources">
-						<p>Inherited from <a href="_types_d_.fhirclient.fhir.element.html">Element</a>.<a href="_types_d_.fhirclient.fhir.element.html#extension">extension</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/types.d.ts#L929">src/types.d.ts:929</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
-					<a name="id" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> id</h3>
-					<div class="tsd-signature tsd-kind-icon">id<span class="tsd-signature-symbol">:</span> <a href="_types_d_.fhirclient.fhir.extension.html#id" class="tsd-signature-type">id</a></div>
-					<aside class="tsd-sources">
-						<p>Inherited from <a href="_types_d_.fhirclient.fhir.element.html">Element</a>.<a href="_types_d_.fhirclient.fhir.element.html#id">id</a></p>
-						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/types.d.ts#L928">src/types.d.ts:928</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/types.d.ts#L754">src/types.d.ts:754</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-					<a name="url" class="tsd-anchor"></a>
-					<h3>url</h3>
-					<div class="tsd-signature tsd-kind-icon">url<span class="tsd-signature-symbol">:</span> <a href="../modules/_types_d_.fhirclient.fhir.html#uri" class="tsd-signature-type">uri</a></div>
+					<a name="path" class="tsd-anchor"></a>
+					<h3>path</h3>
+					<div class="tsd-signature tsd-kind-icon">path<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/types.d.ts#L936">src/types.d.ts:936</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/types.d.ts#L754">src/types.d.ts:754</a></li>
 						</ul>
 					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>identifies the meaning of the extension</p>
-						</div>
-					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
+					<a name="value" class="tsd-anchor"></a>
+					<h3>value</h3>
+					<div class="tsd-signature tsd-kind-icon">value<span class="tsd-signature-symbol">:</span> <a href="../modules/_types_d_.fhirclient.html#jsonvalue" class="tsd-signature-type">JsonValue</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/types.d.ts#L754">src/types.d.ts:754</a></li>
+						</ul>
+					</aside>
 				</section>
 			</section>
 		</div>
@@ -211,7 +184,7 @@
 							<li class="current tsd-kind-module tsd-parent-kind-external-module tsd-is-not-exported">
 								<a href="../modules/_types_d_.fhirclient.html">fhirclient</a>
 								<ul>
-									<li class="current tsd-kind-module tsd-parent-kind-module tsd-is-not-exported">
+									<li class=" tsd-kind-module tsd-parent-kind-module tsd-is-not-exported">
 										<a href="../modules/_types_d_.fhirclient.fhir.html">FHIR</a>
 									</li>
 								</ul>
@@ -222,99 +195,24 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
-						<a href="_types_d_.fhirclient.fhir.backboneelement.html" class="tsd-kind-icon">Backbone<wbr>Element</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
-						<a href="_types_d_.fhirclient.fhir.bundle.html" class="tsd-kind-icon">Bundle</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
-						<a href="_types_d_.fhirclient.fhir.bundleentry.html" class="tsd-kind-icon">Bundle<wbr>Entry</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
-						<a href="_types_d_.fhirclient.fhir.bundlelink.html" class="tsd-kind-icon">Bundle<wbr>Link</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
-						<a href="_types_d_.fhirclient.fhir.capabilitystatement.html" class="tsd-kind-icon">Capability<wbr>Statement</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
-						<a href="_types_d_.fhirclient.fhir.codeableconcept.html" class="tsd-kind-icon">Codeable<wbr>Concept</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
-						<a href="_types_d_.fhirclient.fhir.coding.html" class="tsd-kind-icon">Coding</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
-						<a href="_types_d_.fhirclient.fhir.element.html" class="tsd-kind-icon">Element</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
-						<a href="_types_d_.fhirclient.fhir.encounter.html" class="tsd-kind-icon">Encounter</a>
-					</li>
 				</ul>
 				<ul class="current">
-					<li class="current tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
-						<a href="_types_d_.fhirclient.fhir.extension.html" class="tsd-kind-icon">Extension</a>
+					<li class="current tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
+						<a href="_types_d_.fhirclient.jsonpatchadd.html" class="tsd-kind-icon">Json<wbr>Patch<wbr>Add</a>
 						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
-								<a href="_types_d_.fhirclient.fhir.extension.html#extension" class="tsd-kind-icon">extension</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
-								<a href="_types_d_.fhirclient.fhir.extension.html#id" class="tsd-kind-icon">id</a>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
+								<a href="_types_d_.fhirclient.jsonpatchadd.html#op" class="tsd-kind-icon">op</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-								<a href="_types_d_.fhirclient.fhir.extension.html#url" class="tsd-kind-icon">url</a>
+								<a href="_types_d_.fhirclient.jsonpatchadd.html#path" class="tsd-kind-icon">path</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
+								<a href="_types_d_.fhirclient.jsonpatchadd.html#value" class="tsd-kind-icon">value</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
-						<a href="_types_d_.fhirclient.fhir.identifier.html" class="tsd-kind-icon">Identifier</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
-						<a href="_types_d_.fhirclient.fhir.meta.html" class="tsd-kind-icon">Meta</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
-						<a href="_types_d_.fhirclient.fhir.observation.html" class="tsd-kind-icon">Observation</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
-						<a href="_types_d_.fhirclient.fhir.patient.html" class="tsd-kind-icon">Patient</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
-						<a href="_types_d_.fhirclient.fhir.period.html" class="tsd-kind-icon">Period</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
-						<a href="_types_d_.fhirclient.fhir.practitioner.html" class="tsd-kind-icon">Practitioner</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
-						<a href="_types_d_.fhirclient.fhir.reference.html" class="tsd-kind-icon">Reference</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
-						<a href="_types_d_.fhirclient.fhir.relatedperson.html" class="tsd-kind-icon">Related<wbr>Person</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
-						<a href="_types_d_.fhirclient.fhir.resource.html" class="tsd-kind-icon">Resource</a>
-					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported">
-						<a href="../modules/_types_d_.fhirclient.fhir.html#code" class="tsd-kind-icon">code</a>
-					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported">
-						<a href="../modules/_types_d_.fhirclient.fhir.html#datetime" class="tsd-kind-icon">date<wbr>Time</a>
-					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported">
-						<a href="../modules/_types_d_.fhirclient.fhir.html#id" class="tsd-kind-icon">id</a>
-					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported">
-						<a href="../modules/_types_d_.fhirclient.fhir.html#instant" class="tsd-kind-icon">instant</a>
-					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported">
-						<a href="../modules/_types_d_.fhirclient.fhir.html#unsignedint" class="tsd-kind-icon">unsigned<wbr>Int</a>
-					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported">
-						<a href="../modules/_types_d_.fhirclient.fhir.html#uri" class="tsd-kind-icon">uri</a>
-					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported">
-						<a href="../modules/_types_d_.fhirclient.fhir.html#valuex" class="tsd-kind-icon">valueX</a>
-					</li>
 				</ul>
 			</nav>
 		</div>

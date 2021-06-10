@@ -723,19 +723,26 @@ export default class Client
 
     /**
      * Makes a JSON Patch to the given resource
-     * @see http://hl7.org/fhir/http.html#delete
+     * @see http://hl7.org/fhir/http.html#patch
      * @param url Relative URI of the FHIR resource to be patched
      * (format: `resourceType/id`)
      * @param patch A JSON Patch array to send to the server, For details
      * see https://datatracker.ietf.org/doc/html/rfc6902
-     * @param requestOptions Any options (except `method`, `url` and 'body`
-     * which will be fixed to `DELETE`) to be passed to the fetch call.
+     * @param requestOptions Any options to be passed to the fetch call,
+     * except for `method`, `url` and `body` which cannot be overridden.
+     * @since 2.4.0
      * @category Request
+     * @typeParam ResolveType This method would typically resolve with the
+     * patched resource or reject with an OperationOutcome. However, this may
+     * depend on the server implementation or even on the request headers.
+     * For that reason, if the default resolve type (which is
+     * [[fhirclient.FHIR.Resource]]) does not work for you, you can pass
+     * in your own resolve type parameter.
      */
-    async patch<R = fhirclient.FHIR.Resource>(url: string, patch: fhirclient.JsonPatch, requestOptions: fhirclient.FetchOptions = {}): Promise<R>
+    async patch<ResolveType=fhirclient.FHIR.Resource>(url: string, patch: fhirclient.JsonPatch, requestOptions: fhirclient.FetchOptions = {}): Promise<ResolveType>
     {
         assertJsonPatch(patch);
-        return this.request<R>({
+        return this.request<ResolveType>({
             ...requestOptions,
             url,
             method: "PATCH",

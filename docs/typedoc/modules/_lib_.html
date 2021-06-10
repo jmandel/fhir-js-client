@@ -81,6 +81,8 @@
 							<h3>Other Functions</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_lib_.html#absolute" class="tsd-kind-icon">absolute</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_lib_.html#assert" class="tsd-kind-icon">assert</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_lib_.html#assertjsonpatch" class="tsd-kind-icon">assert<wbr>Json<wbr>Patch</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_lib_.html#bycode" class="tsd-kind-icon">by<wbr>Code</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_lib_.html#bycodes" class="tsd-kind-icon">by<wbr>Codes</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_lib_.html#checkresponse" class="tsd-kind-icon">check<wbr>Response</a></li>
@@ -119,17 +121,17 @@
 					<div class="tsd-signature tsd-kind-icon">_debug<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;debug(&quot;FHIR&quot;)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L16">src/lib.ts:16</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L16">src/lib.ts:16</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
 					<a name="cache" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagConst">Const</span> cache</h3>
-					<div class="tsd-signature tsd-kind-icon">cache<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_types_d_.fhirclient.jsonobject.html" class="tsd-signature-type">JsonObject</a></div>
+					<div class="tsd-signature tsd-kind-icon">cache<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L22">src/lib.ts:22</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L22">src/lib.ts:22</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -144,7 +146,7 @@
 					<div class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;require(&quot;debug&quot;)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L9">src/lib.ts:9</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L9">src/lib.ts:9</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -154,7 +156,7 @@
 					<div class="tsd-signature tsd-kind-icon">fetch<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L13">src/lib.ts:13</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L13">src/lib.ts:13</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -171,7 +173,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L255">src/lib.ts:255</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L255">src/lib.ts:255</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -200,6 +202,55 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
+					<a name="assert" class="tsd-anchor"></a>
+					<h3>assert</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
+						<li class="tsd-signature tsd-kind-icon">assert<span class="tsd-signature-symbol">(</span>condition<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, message<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">asserts</span><span class="tsd-signature-type">condition</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L530">src/lib.ts:530</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>condition: <span class="tsd-signature-type">any</span></h5>
+								</li>
+								<li>
+									<h5>message: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">asserts</span><span class="tsd-signature-type">condition</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
+					<a name="assertjsonpatch" class="tsd-anchor"></a>
+					<h3>assert<wbr>Json<wbr>Patch</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
+						<li class="tsd-signature tsd-kind-icon">assert<wbr>Json<wbr>Patch<span class="tsd-signature-symbol">(</span>patch<span class="tsd-signature-symbol">: </span><a href="_types_d_.fhirclient.html#jsonpatch" class="tsd-signature-type">JsonPatch</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">asserts</span><span class="tsd-signature-type">patch</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L536">src/lib.ts:536</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>patch: <a href="_types_d_.fhirclient.html#jsonpatch" class="tsd-signature-type">JsonPatch</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">asserts</span><span class="tsd-signature-type">patch</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
 					<a name="bycode" class="tsd-anchor"></a>
 					<h3>by<wbr>Code</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
@@ -209,7 +260,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L335">src/lib.ts:335</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L335">src/lib.ts:335</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -251,7 +302,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L379">src/lib.ts:379</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L379">src/lib.ts:379</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -312,7 +363,7 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L65">src/lib.ts:65</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L65">src/lib.ts:65</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -340,7 +391,7 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L56">src/lib.ts:56</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L56">src/lib.ts:56</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -376,7 +427,7 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L169">src/lib.ts:169</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L169">src/lib.ts:169</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -412,7 +463,7 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L302">src/lib.ts:302</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L302">src/lib.ts:302</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -447,7 +498,7 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L154">src/lib.ts:154</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L154">src/lib.ts:154</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -486,13 +537,13 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 					<a name="getpath" class="tsd-anchor"></a>
 					<h3>get<wbr>Path</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Path<span class="tsd-signature-symbol">(</span>obj<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_d_.fhirclient.jsonobject.html" class="tsd-signature-type">JsonObject</a>, path<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Path<span class="tsd-signature-symbol">(</span>obj<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span>, path<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L189">src/lib.ts:189</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L189">src/lib.ts:189</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -506,7 +557,7 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>obj: <a href="../interfaces/_types_d_.fhirclient.jsonobject.html" class="tsd-signature-type">JsonObject</a></h5>
+									<h5>obj: <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>The object (or Array) to walk through</p>
 									</div>
@@ -533,7 +584,7 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L397">src/lib.ts:397</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L397">src/lib.ts:397</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -565,7 +616,7 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L436">src/lib.ts:436</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L436">src/lib.ts:436</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -606,7 +657,7 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L93">src/lib.ts:93</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L93">src/lib.ts:93</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -652,7 +703,7 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L79">src/lib.ts:79</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L79">src/lib.ts:79</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -676,13 +727,13 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 					<a name="setpath" class="tsd-anchor"></a>
 					<h3>set<wbr>Path</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">set<wbr>Path<span class="tsd-signature-symbol">(</span>obj<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_d_.fhirclient.jsonobject.html" class="tsd-signature-type">JsonObject</a>, path<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, createEmpty<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_d_.fhirclient.jsonobject.html" class="tsd-signature-type">JsonObject</a></li>
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Path<span class="tsd-signature-symbol">(</span>obj<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span>, path<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, createEmpty<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L218">src/lib.ts:218</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L218">src/lib.ts:218</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -693,7 +744,7 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>obj: <a href="../interfaces/_types_d_.fhirclient.jsonobject.html" class="tsd-signature-type">JsonObject</a></h5>
+									<h5>obj: <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>The object (or Array) to walk through</p>
 									</div>
@@ -717,7 +768,7 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_types_d_.fhirclient.jsonobject.html" class="tsd-signature-type">JsonObject</a></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
 							<p>The modified object</p>
 						</li>
 					</ul>
@@ -729,13 +780,13 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 					<a name="jwtdecode" class="tsd-anchor"></a>
 					<h3>jwt<wbr>Decode</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">jwt<wbr>Decode<span class="tsd-signature-symbol">(</span>token<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, env<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_d_.fhirclient.adapter.html" class="tsd-signature-type">Adapter</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_d_.fhirclient.jsonobject.html" class="tsd-signature-type">JsonObject</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></li>
+						<li class="tsd-signature tsd-kind-icon">jwt<wbr>Decode<span class="tsd-signature-symbol">(</span>token<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, env<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_d_.fhirclient.adapter.html" class="tsd-signature-type">Adapter</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L289">src/lib.ts:289</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L289">src/lib.ts:289</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -758,7 +809,7 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_types_d_.fhirclient.jsonobject.html" class="tsd-signature-type">JsonObject</a>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span>
 								<span class="tsd-signature-symbol"> | </span>
 								<span class="tsd-signature-type">null</span>
 							</h4>
@@ -775,7 +826,7 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L242">src/lib.ts:242</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L242">src/lib.ts:242</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -813,7 +864,7 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L270">src/lib.ts:270</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L270">src/lib.ts:270</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -851,7 +902,7 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 					<div class="tsd-signature tsd-kind-icon">units<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L27">src/lib.ts:27</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L27">src/lib.ts:27</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -869,7 +920,7 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 							<li class="tsd-description">
 								<aside class="tsd-sources">
 									<ul>
-										<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L47">src/lib.ts:47</a></li>
+										<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L47">src/lib.ts:47</a></li>
 									</ul>
 								</aside>
 								<h4 class="tsd-parameters-title">Parameters</h4>
@@ -892,7 +943,7 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 							<li class="tsd-description">
 								<aside class="tsd-sources">
 									<ul>
-										<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L28">src/lib.ts:28</a></li>
+										<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L28">src/lib.ts:28</a></li>
 									</ul>
 								</aside>
 								<h4 class="tsd-parameters-title">Parameters</h4>
@@ -923,7 +974,7 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 							<li class="tsd-description">
 								<aside class="tsd-sources">
 									<ul>
-										<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L39">src/lib.ts:39</a></li>
+										<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/e4de978/src/lib.ts#L39">src/lib.ts:39</a></li>
 									</ul>
 								</aside>
 								<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1019,6 +1070,12 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
 						<a href="_lib_.html#absolute" class="tsd-kind-icon">absolute</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="_lib_.html#assert" class="tsd-kind-icon">assert</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="_lib_.html#assertjsonpatch" class="tsd-kind-icon">assert<wbr>Json<wbr>Patch</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
 						<a href="_lib_.html#bycode" class="tsd-kind-icon">by<wbr>Code</a>

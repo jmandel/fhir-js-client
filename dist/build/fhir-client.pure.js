@@ -1463,6 +1463,12 @@ class Client {
     const idToken = this.getIdToken();
 
     if (idToken) {
+      // Epic may return a full url
+      // @see https://github.com/smart-on-fhir/client-js/issues/105
+      if (idToken.fhirUser) {
+        return idToken.fhirUser.split("/").slice(-2).join("/");
+      }
+
       return idToken.profile;
     }
 
@@ -1598,6 +1604,39 @@ class Client {
     return this.request({ ...requestOptions,
       url,
       method: "DELETE"
+    });
+  }
+  /**
+   * Makes a JSON Patch to the given resource
+   * @see http://hl7.org/fhir/http.html#patch
+   * @param url Relative URI of the FHIR resource to be patched
+   * (format: `resourceType/id`)
+   * @param patch A JSON Patch array to send to the server, For details
+   * see https://datatracker.ietf.org/doc/html/rfc6902
+   * @param requestOptions Any options to be passed to the fetch call,
+   * except for `method`, `url` and `body` which cannot be overridden.
+   * @since 2.4.0
+   * @category Request
+   * @typeParam ResolveType This method would typically resolve with the
+   * patched resource or reject with an OperationOutcome. However, this may
+   * depend on the server implementation or even on the request headers.
+   * For that reason, if the default resolve type (which is
+   * [[fhirclient.FHIR.Resource]]) does not work for you, you can pass
+   * in your own resolve type parameter.
+   */
+
+
+  async patch(url, patch, requestOptions = {}) {
+    lib_1.assertJsonPatch(patch);
+    return this.request({ ...requestOptions,
+      url,
+      method: "PATCH",
+      body: JSON.stringify(patch),
+      headers: {
+        "prefer": "return=presentation",
+        "content-type": "application/json-patch+json; charset=UTF-8",
+        ...requestOptions.headers
+      }
     });
   }
   /**
@@ -2324,7 +2363,7 @@ module.exports = FHIR; // $lab:coverage:on$
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.getAccessTokenExpiration = exports.jwtDecode = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
+exports.assertJsonPatch = exports.assert = exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.getAccessTokenExpiration = exports.jwtDecode = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
 
 const HttpError_1 = __webpack_require__(/*! ./HttpError */ "./src/HttpError.ts");
 
@@ -2480,7 +2519,7 @@ function request(url, requestOptions = {}) {
     // empty body. In this case check if a location header is received and
     // fetch that to use it as the final result.
     if (!body && res.status == 201) {
-      const location = res.headers.get("location") + "";
+      const location = res.headers.get("location");
 
       if (location) {
         return request(location, { ...options,
@@ -2900,6 +2939,35 @@ async function getTargetWindow(target, width = 800, height = 720) {
 }
 
 exports.getTargetWindow = getTargetWindow;
+
+function assert(condition, message) {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+exports.assert = assert;
+
+function assertJsonPatch(patch) {
+  assert(Array.isArray(patch), "The JSON patch must be an array");
+  assert(patch.length > 0, "The JSON patch array should not be empty");
+  patch.forEach(operation => {
+    assert(["add", "replace", "test", "move", "copy", "remove"].indexOf(operation.op) > -1, 'Each patch operation must have an "op" property which must be one of: "add", "replace", "test", "move", "copy", "remove"');
+    assert(operation.path && typeof operation.path, `Invalid "${operation.op}" operation. Missing "path" property`);
+
+    if (operation.op == "add" || operation.op == "replace" || operation.op == "test") {
+      assert("value" in operation, `Invalid "${operation.op}" operation. Missing "value" property`);
+      assert(Object.keys(operation).length == 3, `Invalid "${operation.op}" operation. Contains unknown properties`);
+    } else if (operation.op == "move" || operation.op == "copy") {
+      assert(typeof operation.from == "string", `Invalid "${operation.op}" operation. Requires a string "from" property`);
+      assert(Object.keys(operation).length == 3, `Invalid "${operation.op}" operation. Contains unknown properties`);
+    } else {
+      assert(Object.keys(operation).length == 2, `Invalid "${operation.op}" operation. Contains unknown properties`);
+    }
+  });
+}
+
+exports.assertJsonPatch = assertJsonPatch;
 
 /***/ }),
 

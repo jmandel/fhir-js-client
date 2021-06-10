@@ -2086,7 +2086,8 @@ footer {
   padding: 10px;
   border: 1px solid #eee;
   font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
-  font-size: 14px; }
+  font-size: 14px;
+  word-wrap: break-word; }
   .tsd-signature.tsd-kind-icon {
     padding-left: 30px; }
     .tsd-signature.tsd-kind-icon:before {
