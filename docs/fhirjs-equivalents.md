@@ -65,11 +65,9 @@ client.delete("ResourceType/resourceId")
 
 ### patch
 ```js
-client.request({
-    url: "ResourceType/resourceId",
-    method: "PATCH"
-    body: data
-})
+client.patch("ResourceType/resourceId", [
+    { op: "replace", path: "/something", value: "something else" }
+])
 ```
 
 ### transaction
