@@ -2,6 +2,7 @@
 import { expect }     from "@hapi/code";
 import * as Lab       from "@hapi/lab";
 import * as FS        from "fs";
+import * as jwt       from "jsonwebtoken"
 import mockDebug      from "./mocks/mockDebug";
 import mockServer     from "./mocks/mockServer";
 import ServerEnv      from "./mocks/ServerEnvironment";
@@ -3580,6 +3581,47 @@ describe("FHIR.client", () => {
             ]]);
         });
     });
+
+    describe("getFhirUser()", () => {
+        describe("works with fhirUser", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    scope: "openid fhirUser",
+                    tokenResponse: {
+                        id_token: jwt.sign({ fhirUser: "Patient/123" }, "secret")
+                    }
+                });
+                expect(client.getFhirUser()).to.equal("Patient/123");
+            });
+        })
+
+        describe("handles full urls in fhirUser", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    scope: "openid fhirUser",
+                    tokenResponse: {
+                        id_token: jwt.sign({ fhirUser: "http://fhir.dev/r5/Patient/123" }, "secret")
+                    }
+                });
+                expect(client.getFhirUser()).to.equal("Patient/123");
+            });
+        })
+
+        describe("works with profile", () => {
+            crossPlatformTest(async (env) => {
+                const client = new Client(env, {
+                    serverUrl: mockUrl,
+                    scope: "openid profile",
+                    tokenResponse: {
+                        id_token: jwt.sign({ profile: "Patient/123" }, "secret")
+                    }
+                });
+                expect(client.getFhirUser()).to.equal("Patient/123");
+            });
+        })
+    })
 
     describe("_clearState()", () => {
         crossPlatformTest(async (env) => {
