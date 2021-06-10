@@ -36,7 +36,8 @@ The **fhirOptions** object is optional and can contain the following properties:
     - Finally, `Bundle.entry` is optional in FHIR and that leads to bugs in apps that assume that it is always present. With `flat: true`, you will always get an array, even if it is empty, and even if no `entry` is found in the response bundle.
 - **graph** `Boolean` - Only applicable if you use `resolveReferences`. If `false`, the resolved references will not be "mounted" in the result tree, but will be returned as separate map object instead. **Defaults to `true`**.
 - **resolveReferences** `String|String[]` - One or more references to resolve. Single item can be specified as a string or as an array of one string. Multiple items must be specified as array.
-    - Each item is a dot-separated path to the desired reference within the result object, excluding the "reference" property. For example `context.serviceProvider` will look for `{Response}.context.serviceProvider.reference`.
+    - The paths are relative to the current resource. For example, use `subject` instead of `entry.resource.subject`.
+    - Path can have arbitrary depth but should not include the last `reference` segment. For example the path `a.b.c` will fetch `{current resource}.a.b.c.reference` but will mount the result at `{current resource}.a.b.c`.
     - If the target is an array of references (E.g. [Patient.generalPractitioner](http://hl7.org/fhir/R4/patient-definitions.html#Patient.generalPractitioner)), you can request one or more of them by index (E.g. `generalPractitioner.0`). If the index is not specified, all the references in the array will be resolved.
     - The order in which the reference paths are specified does not matter. For example, if you use `["subject", "encounter.serviceProvider", "encounter"]`, the library should figure out that `encounter.serviceProvider` must be fetched after `encounter`. In fact, in this case it will first fetch subject and encounter in parallel, and then proceed to encounter.serviceProvider.
     - This option does not work with contained references (they are "already resolved" anyway).
@@ -99,17 +100,15 @@ client.request("Patient", {
 **Resolve References**
 ```js
 // Resolves with augmented Encounter or rejects with an Error
-client.request(
-    "Encounter/518a522a-4b10-47db-9daf-53b726d32607",
+client.request("Encounter/518a522a-4b10-47db-9daf-53b726d32607", {
     resolveReferences: [ "serviceProvider" ]
-);
+});
 ```
 
 **Extracting multiple related resources from single Observation:**
 ```js
 // Resolves with Object (augmented Observation) or rejects with an Error
-client.request(
-    "Observation/smart-691-bmi",
+client.request("Observation/smart-691-bmi", {
     resolveReferences: [
         "context",                 // The Encounter
         "context.serviceProvider", // The Organization (hospital)
@@ -117,7 +116,7 @@ client.request(
         "subject",                 // The Patient
         "identifier..assigner"     // All identifier assigners
     ]
-);
+});
 ```
 
 **Getting the references as separate object**
@@ -131,11 +130,10 @@ the promise will be resolved with an object having two properties:
 
 ```js
 // Resolves with Object ({ data, references }) or rejects with an Error
-client.request(
-    "Encounter/518a522a-4b10-47db-9daf-53b726d32607",
+client.request("Encounter/518a522a-4b10-47db-9daf-53b726d32607", {
     resolveReferences: [ "serviceProvider" ],
     graph: false
-);
+});
 ```
 
 ### client.create(resource: Object, requestOptions = {}) `Promise<Object>`
