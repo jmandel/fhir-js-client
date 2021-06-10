@@ -1417,7 +1417,7 @@ describe("FHIR.client", () => {
             });
         });
 
-        describe ("does not fetch the same ref twice", async () => {
+        describe ("does not fetch the same ref twice", () => {
             crossPlatformTest(async (env) => {
                 const client = new Client(env, {
                     serverUrl: mockUrl
@@ -1449,7 +1449,7 @@ describe("FHIR.client", () => {
             });
         });
 
-        describe ("mixed example #88", async () => {
+        describe ("mixed example #88", () => {
             const json = {
                 contained: [
                     {
@@ -1503,7 +1503,7 @@ describe("FHIR.client", () => {
             });
         });
 
-        describe ("mixed example #73", async () => {
+        describe ("mixed example #73", () => {
             const json = {
                 identifier: [
                     {
@@ -1567,7 +1567,7 @@ describe("FHIR.client", () => {
             });
         });
 
-        describe ("ignores missing ref", async () => {
+        describe ("ignores missing ref", () => {
             crossPlatformTest(async (env) => {
                 const client = new Client(env, {
                     serverUrl: mockUrl
@@ -1596,7 +1596,7 @@ describe("FHIR.client", () => {
             });
         });
 
-        describe ("ignores missing ref from source", async () => {
+        describe ("ignores missing ref from source", () => {
             crossPlatformTest(async (env) => {
                 const client = new Client(env, {
                     serverUrl: mockUrl
@@ -1620,7 +1620,7 @@ describe("FHIR.client", () => {
             });
         });
 
-        describe ("warns about duplicate ref paths", async () => {
+        describe ("warns about duplicate ref paths", () => {
             crossPlatformTest(async (env) => {
                 const client = new Client(env, {
                     serverUrl: mockUrl
