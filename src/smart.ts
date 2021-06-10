@@ -652,7 +652,7 @@ export function buildTokenRequest(env: fhirclient.Adapter, code: string, state: 
         throw new Error("Missing state.clientId");
     }
 
-    const requestOptions: fhirclient.JsonObject = {
+    const requestOptions: Record<string, any> = {
         method: "POST",
         headers: { "content-type": "application/x-www-form-urlencoded" },
         body: `code=${code}&grant_type=authorization_code&redirect_uri=${

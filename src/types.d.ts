@@ -66,7 +66,7 @@ declare namespace fhirclient {
         client(state: string | fhirclient.ClientState): Client;
     }
 
-    interface BrowserFHIRSettings extends JsonObject {
+    interface BrowserFHIRSettings extends Record<string, any> {
 
         /**
          * Replaces the browser's current URL using
@@ -206,7 +206,7 @@ declare namespace fhirclient {
     type WindowTarget = WindowTargetVariable | typeof WindowTargetFunction;
 
 
-    type storageFactory = (options?: JsonObject) => Storage;
+    type storageFactory = (options?: Record<string, any>) => Storage;
 
     interface IncludeResponseHint {
         includeResponse?: boolean
@@ -744,9 +744,11 @@ declare namespace fhirclient {
         [key: string]: any;
     }
 
-    interface JsonObject {
-        [key: string]: any;
-    }
+    // JSON objects
+    interface JsonObject { [key: string]: JsonValue; }
+    type JsonPrimitive = string | number | boolean | null
+    type JsonValue = JsonPrimitive|JsonArray|JsonObject
+    type JsonArray = JsonValue[]
 
     // Capabilities ------------------------------------------------------------
 
@@ -943,7 +945,7 @@ declare namespace fhirclient {
             }>;
         }
 
-        interface Resource extends JsonObject {
+        interface Resource extends Record<string, any> {
             /**
              * Logical id of this artifact
              */

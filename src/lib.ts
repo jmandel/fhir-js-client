@@ -19,7 +19,7 @@ export { _debug as debug };
 /**
  * The cache for the `getAndCache` function
  */
-const cache: fhirclient.JsonObject = {};
+const cache: Record<string, any> = {};
 
 /**
  * A namespace with functions for converting between different measurement units
@@ -186,7 +186,7 @@ export function fetchConformanceStatement(baseUrl = "/", requestOptions?: Reques
  * @param path The path (eg. "a.b.4.c")
  * @returns {*} Whatever is found in the path or undefined
  */
-export function getPath(obj: fhirclient.JsonObject, path = ""): any {
+export function getPath(obj: Record<string, any>, path = ""): any {
     path = path.trim();
     if (!path) {
         return obj;
@@ -215,7 +215,7 @@ export function getPath(obj: fhirclient.JsonObject, path = ""): any {
  * @param createEmpty If true, create missing intermediate objects or arrays
  * @returns The modified object
  */
-export function setPath(obj: fhirclient.JsonObject, path: string, value: any, createEmpty = false): fhirclient.JsonObject {
+export function setPath(obj: Record<string, any>, path: string, value: any, createEmpty = false): Record<string, any> {
     path.trim().split(".").reduce(
         (out, key, idx, arr) => {
             if (out && idx === arr.length - 1) {
@@ -286,7 +286,7 @@ export function randomString(
  * @param env An `Adapter` or any other object that has an `atob` method
  * @category Utility
  */
-export function jwtDecode(token: string, env: fhirclient.Adapter): fhirclient.JsonObject | null
+export function jwtDecode(token: string, env: fhirclient.Adapter): Record<string, any> | null
 {
     const payload = token.split(".")[1];
     return payload ? JSON.parse(env.atob(payload)) : null;

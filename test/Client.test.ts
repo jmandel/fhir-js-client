@@ -63,7 +63,7 @@ afterEach(() => {
 
 
 function crossPlatformTest(callback: (env: Adapter) => void) {
-    const tests: fhirclient.JsonObject = {
+    const tests: Record<string, any> = {
         "works in the browser": new BrowserEnv(),
         "works on the server" : new ServerEnv({ session: {} })
     };
@@ -600,7 +600,7 @@ describe("FHIR.client", () => {
                 //     url: "Observation",
                 //     includeResponse: true
                 // });
-                const result = await client.patient.request<fhirclient.JsonObject>({
+                const result = await client.patient.request<Record<string, any>>({
                     url: "Observation",
                     includeResponse: true
                 });
@@ -957,7 +957,7 @@ describe("FHIR.client", () => {
                     }
                 });
                 const result = await client.request("/");
-                expect(client.state.tokenResponse.access_token).to.equal("x");
+                expect(client.state.tokenResponse?.access_token).to.equal("x");
                 expect(result).to.equal("Bearer x");
             });
         });
@@ -988,7 +988,7 @@ describe("FHIR.client", () => {
                 mockServer.mock({ status: 200, body: "OK" });
                 const result = await client.request("/");
                 expect(result).to.equal("OK");
-                expect(client.state.tokenResponse.access_token).to.equal("x");
+                expect(client.state.tokenResponse?.access_token).to.equal("x");
             });
         });
 
@@ -1020,7 +1020,7 @@ describe("FHIR.client", () => {
                 status: 200,
                 body: { id: "patient-id" }
             };
-            const tests: fhirclient.JsonObject = {
+            const tests: Record<string, any> = {
                 "works in the browser": new BrowserEnv(),
                 "works on the server" : new ServerEnv()
             };
@@ -1042,7 +1042,7 @@ describe("FHIR.client", () => {
                 status: 200,
                 body: { id: "patient-id" }
             };
-            const tests: fhirclient.JsonObject = {
+            const tests: Record<string, any> = {
                 "works in the browser": new BrowserEnv(),
                 "works on the server" : new ServerEnv()
             };
@@ -1064,7 +1064,7 @@ describe("FHIR.client", () => {
                 status: 200,
                 body: ""
             };
-            const tests: fhirclient.JsonObject = {
+            const tests: Record<string, any> = {
                 "works in the browser": new BrowserEnv(),
                 "works on the server" : new ServerEnv()
             };
@@ -1086,7 +1086,7 @@ describe("FHIR.client", () => {
                 status: 200,
                 body: { resourceType: "Patient" }
             };
-            const tests: fhirclient.JsonObject = {
+            const tests: Record<string, any> = {
                 "works in the browser": new BrowserEnv(),
                 "works on the server" : new ServerEnv()
             };
@@ -1107,7 +1107,7 @@ describe("FHIR.client", () => {
                 status: 200,
                 body: { resourceType: "Bundle", entry: [] }
             };
-            const tests: fhirclient.JsonObject = {
+            const tests: Record<string, any> = {
                 "works in the browser": new BrowserEnv(),
                 "works on the server" : new ServerEnv()
             };
@@ -2762,7 +2762,7 @@ describe("FHIR.client", () => {
                 body: { id: "patient-id" },
                 _delay: 10
             };
-            const tests: fhirclient.JsonObject = {
+            const tests: Record<string, any> = {
                 "works in the browser": new BrowserEnv(),
                 "works on the server" : new ServerEnv()
             };
@@ -2916,7 +2916,7 @@ describe("FHIR.client", () => {
                 status: 200,
                 body: { id: "patient-id" }
             };
-            const tests: fhirclient.JsonObject = {
+            const tests: Record<string, any> = {
                 "works in the browser": new BrowserEnv(),
                 "works on the server" : new ServerEnv()
             };
@@ -2966,7 +2966,7 @@ describe("FHIR.client", () => {
                     includeResponse: true
                 }, { pageLimit: 0 });
                 expect(result.body).to.be.an.array();
-                expect(result.body.length).to.equal(2);
+                expect(result.body?.length).to.equal(2);
                 expect(result.response.status).to.equal(200);
             });
         });

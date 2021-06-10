@@ -3,7 +3,7 @@ import { IncomingMessage, ServerResponse } from "http";
 import { fhirclient } from "../types";
 import { AbortController as Controller } from "abortcontroller-polyfill/dist/cjs-ponyfill";
 
-type storageFactory = (options?: fhirclient.JsonObject) => fhirclient.Storage;
+type storageFactory = (options?: Record<string, any>) => fhirclient.Storage;
 
 function smart(
     request: IncomingMessage,

@@ -77,7 +77,7 @@ async function contextualize(
  */
 function getRef(
     refId: string,
-    cache: fhirclient.JsonObject,
+    cache: Record<string, any>,
     client: Client,
     signal?: AbortSignal
 ): Promise<fhirclient.JsonObject> {
@@ -181,7 +181,7 @@ function resolveRefs(
 
     // 4. Group the paths by depth so that child refs are looked up
     // after their parents!
-    const groups: fhirclient.JsonObject = {};
+    const groups: Record<string, any> = {};
     paths.forEach(path => {
         const len = path.split(".").length;
         if (!groups[len]) {
@@ -277,7 +277,7 @@ export default class Client
          * This is the FhirJS Patient API. It will ONLY exist if the `Client`
          * instance is "connected" to FhirJS.
          */
-        api?: fhirclient.JsonObject
+        api?: Record<string, any>
     };
 
     /**
@@ -347,7 +347,7 @@ export default class Client
      * **NOTE:** This will only be available if `fhir.js` is used. Otherwise it
      * will be `undefined`.
      */
-    api: fhirclient.JsonObject | undefined;
+    api: Record<string, any> | undefined;
 
     /**
      * Refers to the refresh task while it is being performed.
@@ -432,10 +432,10 @@ export default class Client
      * instance. You should only use this method to connect to `fhir.js` which
      * is not global.
      */
-    connect(fhirJs?: (options: fhirclient.JsonObject) => fhirclient.JsonObject): Client
+    connect(fhirJs?: (options: Record<string, any>) => Record<string, any>): Client
     {
         if (typeof fhirJs == "function") {
-            const options: fhirclient.JsonObject = {
+            const options: Record<string, any> = {
                 baseUrl: this.state.serverUrl.replace(/\/$/, "")
             };
 
@@ -1141,7 +1141,7 @@ export default class Client
      * @deprecated
      * @category Utility
      */
-    getPath(obj: fhirclient.JsonObject, path = ""): any {
+    getPath(obj: Record<string, any>, path = ""): any {
         return getPath(obj, path);
     }
 
@@ -1178,6 +1178,6 @@ export default class Client
      * - 0 if the version is not known
      */
     getFhirRelease(): Promise<number> {
-        return this.getFhirVersion().then(v => (fhirVersions as fhirclient.JsonObject)[v] ?? 0);
+        return this.getFhirVersion().then(v => (fhirVersions as any)[v] ?? 0);
     }
 }
