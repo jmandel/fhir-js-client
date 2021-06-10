@@ -64,7 +64,7 @@ export default class Client {
          * This is the FhirJS Patient API. It will ONLY exist if the `Client`
          * instance is "connected" to FhirJS.
          */
-        api?: fhirclient.JsonObject;
+        api?: Record<string, any>;
     };
     /**
      * The client may be associated with a specific encounter, if the scopes
@@ -121,7 +121,7 @@ export default class Client {
      * **NOTE:** This will only be available if `fhir.js` is used. Otherwise it
      * will be `undefined`.
      */
-    api: fhirclient.JsonObject | undefined;
+    api: Record<string, any> | undefined;
     /**
      * Refers to the refresh task while it is being performed.
      * @see [[refresh]]
@@ -140,7 +140,7 @@ export default class Client {
      * instance. You should only use this method to connect to `fhir.js` which
      * is not global.
      */
-    connect(fhirJs?: (options: fhirclient.JsonObject) => fhirclient.JsonObject): Client;
+    connect(fhirJs?: (options: Record<string, any>) => Record<string, any>): Client;
     /**
      * Returns the ID of the selected patient or null. You should have requested
      * "launch/patient" scope. Otherwise this will return null.
@@ -213,6 +213,25 @@ export default class Client {
      * @category Request
      */
     delete<R = unknown>(url: string, requestOptions?: fhirclient.FetchOptions): Promise<R>;
+    /**
+     * Makes a JSON Patch to the given resource
+     * @see http://hl7.org/fhir/http.html#patch
+     * @param url Relative URI of the FHIR resource to be patched
+     * (format: `resourceType/id`)
+     * @param patch A JSON Patch array to send to the server, For details
+     * see https://datatracker.ietf.org/doc/html/rfc6902
+     * @param requestOptions Any options to be passed to the fetch call,
+     * except for `method`, `url` and `body` which cannot be overridden.
+     * @since 2.4.0
+     * @category Request
+     * @typeParam ResolveType This method would typically resolve with the
+     * patched resource or reject with an OperationOutcome. However, this may
+     * depend on the server implementation or even on the request headers.
+     * For that reason, if the default resolve type (which is
+     * [[fhirclient.FHIR.Resource]]) does not work for you, you can pass
+     * in your own resolve type parameter.
+     */
+    patch<ResolveType = fhirclient.FHIR.Resource>(url: string, patch: fhirclient.JsonPatch, requestOptions?: fhirclient.FetchOptions): Promise<ResolveType>;
     /**
      * @param requestOptions Can be a string URL (relative to the serviceUrl),
      * or an object which will be passed to fetch()
@@ -301,7 +320,7 @@ export default class Client {
      * @deprecated
      * @category Utility
      */
-    getPath(obj: fhirclient.JsonObject, path?: string): any;
+    getPath(obj: Record<string, any>, path?: string): any;
     /**
      * Returns a copy of the client state. Accepts a dot-separated path argument
      * (same as for `getPath`) to allow for selecting specific properties.

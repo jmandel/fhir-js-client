@@ -18,7 +18,7 @@ var __rest = void 0 && (void 0).__rest || function (s, e) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.getAccessTokenExpiration = exports.jwtDecode = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
+exports.assertJsonPatch = exports.assert = exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.getAccessTokenExpiration = exports.jwtDecode = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
 
 const HttpError_1 = require("./HttpError");
 
@@ -174,7 +174,7 @@ function request(url, requestOptions = {}) {
     // empty body. In this case check if a location header is received and
     // fetch that to use it as the final result.
     if (!body && res.status == 201) {
-      const location = res.headers.get("location") + "";
+      const location = res.headers.get("location");
 
       if (location) {
         return request(location, Object.assign(Object.assign({}, options), {
@@ -594,3 +594,32 @@ async function getTargetWindow(target, width = 800, height = 720) {
 }
 
 exports.getTargetWindow = getTargetWindow;
+
+function assert(condition, message) {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+exports.assert = assert;
+
+function assertJsonPatch(patch) {
+  assert(Array.isArray(patch), "The JSON patch must be an array");
+  assert(patch.length > 0, "The JSON patch array should not be empty");
+  patch.forEach(operation => {
+    assert(["add", "replace", "test", "move", "copy", "remove"].indexOf(operation.op) > -1, 'Each patch operation must have an "op" property which must be one of: "add", "replace", "test", "move", "copy", "remove"');
+    assert(operation.path && typeof operation.path, `Invalid "${operation.op}" operation. Missing "path" property`);
+
+    if (operation.op == "add" || operation.op == "replace" || operation.op == "test") {
+      assert("value" in operation, `Invalid "${operation.op}" operation. Missing "value" property`);
+      assert(Object.keys(operation).length == 3, `Invalid "${operation.op}" operation. Contains unknown properties`);
+    } else if (operation.op == "move" || operation.op == "copy") {
+      assert(typeof operation.from == "string", `Invalid "${operation.op}" operation. Requires a string "from" property`);
+      assert(Object.keys(operation).length == 3, `Invalid "${operation.op}" operation. Contains unknown properties`);
+    } else {
+      assert(Object.keys(operation).length == 2, `Invalid "${operation.op}" operation. Contains unknown properties`);
+    }
+  });
+}
+
+exports.assertJsonPatch = assertJsonPatch;

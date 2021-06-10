@@ -196,11 +196,7 @@ async function authorize(env, params = {}) {
 
       return false;
     });
-
-    if (!cfg) {
-      throw new Error(`No configuration found matching the current "iss" parameter "${urlISS}"`);
-    }
-
+    lib_1.assert(cfg, `No configuration found matching the current "iss" parameter "${urlISS}"`);
     return await authorize(env, cfg);
   } // ------------------------------------------------------------------------
   // Obtain input
@@ -476,10 +472,7 @@ async function completeAuth(env) {
 
   debug("key: %s, code: %s", key, code); // key might be coming from the page url so it might be empty or missing
 
-  if (!key) {
-    throw new Error("No 'state' parameter found. Please (re)launch the app.");
-  } // Check if we have a previous state
-
+  lib_1.assert(key, "No 'state' parameter found. Please (re)launch the app."); // Check if we have a previous state
 
   let state = await Storage.get(key);
   const fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // If we are in a popup window or an iframe and the authorization is
@@ -556,20 +549,14 @@ async function completeAuth(env) {
   } // If the state does not exist, it means the page has been loaded directly.
 
 
-  if (!state) {
-    throw new Error("No state found! Please (re)launch the app.");
-  } // Assume the client has already completed a token exchange when
+  lib_1.assert(state, "No state found! Please (re)launch the app."); // Assume the client has already completed a token exchange when
   // there is no code (but we have a state) or access token is found in state
-
 
   const authorized = !code || ((_a = state.tokenResponse) === null || _a === void 0 ? void 0 : _a.access_token); // If we are authorized already, then this is just a reload.
   // Otherwise, we have to complete the code flow
 
   if (!authorized && state.tokenUri) {
-    if (!code) {
-      throw new Error("'code' url parameter is required");
-    }
-
+    lib_1.assert(code, "'code' url parameter is required");
     debug("Preparing to exchange the code for access token...");
     const requestOptions = buildTokenRequest(env, code, state);
     debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
@@ -578,11 +565,7 @@ async function completeAuth(env) {
 
     const tokenResponse = await lib_1.request(state.tokenUri, requestOptions);
     debug("Token response: %O", tokenResponse);
-
-    if (!tokenResponse.access_token) {
-      throw new Error("Failed to obtain access token.");
-    } // Now we need to determine when is this authorization going to expire
-
+    lib_1.assert(tokenResponse.access_token, "Failed to obtain access token."); // Now we need to determine when is this authorization going to expire
 
     state.expiresAt = lib_1.getAccessTokenExpiration(tokenResponse, env); // save the tokenResponse so that we don't have to re-authorize on
     // every page reload
@@ -618,19 +601,9 @@ function buildTokenRequest(env, code, state) {
     tokenUri,
     clientId
   } = state;
-
-  if (!redirectUri) {
-    throw new Error("Missing state.redirectUri");
-  }
-
-  if (!tokenUri) {
-    throw new Error("Missing state.tokenUri");
-  }
-
-  if (!clientId) {
-    throw new Error("Missing state.clientId");
-  }
-
+  lib_1.assert(redirectUri, "Missing state.redirectUri");
+  lib_1.assert(tokenUri, "Missing state.tokenUri");
+  lib_1.assert(clientId, "Missing state.clientId");
   const requestOptions = {
     method: "POST",
     headers: {

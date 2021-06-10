@@ -1049,14 +1049,8 @@ async function contextualize(requestOptions, client) {
   async function contextualURL(_url) {
     const resourceType = _url.pathname.split("/").pop();
 
-    if (!resourceType) {
-      throw new Error(`Invalid url "${_url}"`);
-    }
-
-    if (settings_1.patientCompartment.indexOf(resourceType) == -1) {
-      throw new Error(`Cannot filter "${resourceType}" resources by patient`);
-    }
-
+    lib_1.assert(resourceType, `Invalid url "${_url}"`);
+    lib_1.assert(settings_1.patientCompartment.indexOf(resourceType) > -1, `Cannot filter "${resourceType}" resources by patient`);
     const conformance = await lib_1.fetchConformanceStatement(client.state.serverUrl);
     const searchParam = lib_1.getPatientParam(conformance, resourceType);
 
@@ -1225,10 +1219,7 @@ class Client {
     } : state; // Valid serverUrl is required!
 
 
-    if (!_state.serverUrl || !_state.serverUrl.match(/https?:\/\/.+/)) {
-      throw new Error("A \"serverUrl\" option is required and must begin with \"http(s)\"");
-    }
-
+    lib_1.assert(_state.serverUrl && _state.serverUrl.match(/https?:\/\/.+/), "A \"serverUrl\" option is required and must begin with \"http(s)\"");
     this.state = _state;
     this.environment = environment;
     this._refreshTask = null;
@@ -1652,11 +1643,7 @@ class Client {
     var _a;
 
     const debugRequest = lib_1.debug.extend("client:request");
-
-    if (!requestOptions) {
-      throw new Error("request requires an url or request options as argument");
-    } // url -----------------------------------------------------------------
-
+    lib_1.assert(requestOptions, "request requires an url or request options as argument"); // url -----------------------------------------------------------------
 
     let url;
 
@@ -1867,28 +1854,16 @@ class Client {
     const debugRefresh = lib_1.debug.extend("client:refresh");
     debugRefresh("Attempting to refresh with refresh_token...");
     const refreshToken = (_b = (_a = this.state) === null || _a === void 0 ? void 0 : _a.tokenResponse) === null || _b === void 0 ? void 0 : _b.refresh_token;
-
-    if (!refreshToken) {
-      throw new Error("Unable to refresh. No refresh_token found.");
-    }
-
+    lib_1.assert(refreshToken, "Unable to refresh. No refresh_token found.");
     const tokenUri = this.state.tokenUri;
-
-    if (!tokenUri) {
-      throw new Error("Unable to refresh. No tokenUri found.");
-    }
-
+    lib_1.assert(tokenUri, "Unable to refresh. No tokenUri found.");
     const scopes = this.getState("tokenResponse.scope") || "";
     const hasOfflineAccess = scopes.search(/\boffline_access\b/) > -1;
     const hasOnlineAccess = scopes.search(/\bonline_access\b/) > -1;
-
-    if (!hasOfflineAccess && !hasOnlineAccess) {
-      throw new Error("Unable to refresh. No offline_access or online_access scope found.");
-    } // This method is typically called internally from `request` if certain
+    lib_1.assert(hasOfflineAccess || hasOnlineAccess, "Unable to refresh. No offline_access or online_access scope found."); // This method is typically called internally from `request` if certain
     // request fails with 401. However, clients will often run multiple
     // requests in parallel which may result in multiple refresh calls.
     // To avoid that, we keep a reference to the current refresh task (if any).
-
 
     if (!this._refreshTask) {
       const refreshRequestOptions = {
@@ -1915,10 +1890,7 @@ class Client {
       }
 
       this._refreshTask = lib_1.request(tokenUri, refreshRequestOptions).then(data => {
-        if (!data.access_token) {
-          throw new Error("No access token received");
-        }
-
+        lib_1.assert(data.access_token, "No access token received");
         debugRefresh("Received new access token response %O", data);
         Object.assign(this.state.tokenResponse, data);
         this.state.expiresAt = lib_1.getAccessTokenExpiration(data, this.environment);
@@ -3231,11 +3203,7 @@ async function authorize(env, params = {}) {
 
       return false;
     });
-
-    if (!cfg) {
-      throw new Error(`No configuration found matching the current "iss" parameter "${urlISS}"`);
-    }
-
+    lib_1.assert(cfg, `No configuration found matching the current "iss" parameter "${urlISS}"`);
     return await authorize(env, cfg);
   } // ------------------------------------------------------------------------
   // Obtain input
@@ -3511,10 +3479,7 @@ async function completeAuth(env) {
 
   debug("key: %s, code: %s", key, code); // key might be coming from the page url so it might be empty or missing
 
-  if (!key) {
-    throw new Error("No 'state' parameter found. Please (re)launch the app.");
-  } // Check if we have a previous state
-
+  lib_1.assert(key, "No 'state' parameter found. Please (re)launch the app."); // Check if we have a previous state
 
   let state = await Storage.get(key);
   const fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // If we are in a popup window or an iframe and the authorization is
@@ -3591,20 +3556,14 @@ async function completeAuth(env) {
   } // If the state does not exist, it means the page has been loaded directly.
 
 
-  if (!state) {
-    throw new Error("No state found! Please (re)launch the app.");
-  } // Assume the client has already completed a token exchange when
+  lib_1.assert(state, "No state found! Please (re)launch the app."); // Assume the client has already completed a token exchange when
   // there is no code (but we have a state) or access token is found in state
-
 
   const authorized = !code || ((_a = state.tokenResponse) === null || _a === void 0 ? void 0 : _a.access_token); // If we are authorized already, then this is just a reload.
   // Otherwise, we have to complete the code flow
 
   if (!authorized && state.tokenUri) {
-    if (!code) {
-      throw new Error("'code' url parameter is required");
-    }
-
+    lib_1.assert(code, "'code' url parameter is required");
     debug("Preparing to exchange the code for access token...");
     const requestOptions = buildTokenRequest(env, code, state);
     debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
@@ -3613,11 +3572,7 @@ async function completeAuth(env) {
 
     const tokenResponse = await lib_1.request(state.tokenUri, requestOptions);
     debug("Token response: %O", tokenResponse);
-
-    if (!tokenResponse.access_token) {
-      throw new Error("Failed to obtain access token.");
-    } // Now we need to determine when is this authorization going to expire
-
+    lib_1.assert(tokenResponse.access_token, "Failed to obtain access token."); // Now we need to determine when is this authorization going to expire
 
     state.expiresAt = lib_1.getAccessTokenExpiration(tokenResponse, env); // save the tokenResponse so that we don't have to re-authorize on
     // every page reload
@@ -3653,19 +3608,9 @@ function buildTokenRequest(env, code, state) {
     tokenUri,
     clientId
   } = state;
-
-  if (!redirectUri) {
-    throw new Error("Missing state.redirectUri");
-  }
-
-  if (!tokenUri) {
-    throw new Error("Missing state.tokenUri");
-  }
-
-  if (!clientId) {
-    throw new Error("Missing state.clientId");
-  }
-
+  lib_1.assert(redirectUri, "Missing state.redirectUri");
+  lib_1.assert(tokenUri, "Missing state.tokenUri");
+  lib_1.assert(clientId, "Missing state.clientId");
   const requestOptions = {
     method: "POST",
     headers: {

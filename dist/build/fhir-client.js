@@ -10845,27 +10845,12 @@ function _contextualize() {
                     switch (_context8.prev = _context8.next) {
                       case 0:
                         resourceType = _url.pathname.split("/").pop();
-
-                        if (resourceType) {
-                          _context8.next = 3;
-                          break;
-                        }
-
-                        throw new Error("Invalid url \"" + _url + "\"");
-
-                      case 3:
-                        if (!(settings_1.patientCompartment.indexOf(resourceType) == -1)) {
-                          _context8.next = 5;
-                          break;
-                        }
-
-                        throw new Error("Cannot filter \"" + resourceType + "\" resources by patient");
-
-                      case 5:
-                        _context8.next = 7;
+                        lib_1.assert(resourceType, "Invalid url \"" + _url + "\"");
+                        lib_1.assert(settings_1.patientCompartment.indexOf(resourceType) > -1, "Cannot filter \"" + resourceType + "\" resources by patient");
+                        _context8.next = 5;
                         return lib_1.fetchConformanceStatement(client.state.serverUrl);
 
-                      case 7:
+                      case 5:
                         conformance = _context8.sent;
                         searchParam = lib_1.getPatientParam(conformance, resourceType);
 
@@ -10873,7 +10858,7 @@ function _contextualize() {
 
                         return _context8.abrupt("return", _url.href);
 
-                      case 11:
+                      case 9:
                       case "end":
                         return _context8.stop();
                     }
@@ -11067,10 +11052,7 @@ var Client = /*#__PURE__*/function () {
     } : state; // Valid serverUrl is required!
 
 
-    if (!_state.serverUrl || !_state.serverUrl.match(/https?:\/\/.+/)) {
-      throw new Error("A \"serverUrl\" option is required and must begin with \"http(s)\"");
-    }
-
+    lib_1.assert(_state.serverUrl && _state.serverUrl.match(/https?:\/\/.+/), "A \"serverUrl\" option is required and must begin with \"http(s)\"");
     this.state = _state;
     this.environment = environment;
     this._refreshTask = null;
@@ -11591,15 +11573,8 @@ var Client = /*#__PURE__*/function () {
               }
 
               debugRequest = lib_1.debug.extend("client:request");
+              lib_1.assert(requestOptions, "request requires an url or request options as argument"); // url -----------------------------------------------------------------
 
-              if (requestOptions) {
-                _context7.next = 5;
-                break;
-              }
-
-              throw new Error("request requires an url or request options as argument");
-
-            case 5:
               if (typeof requestOptions == "string" || requestOptions instanceof URL) {
                 url = String(requestOptions);
                 requestOptions = {};
@@ -11884,7 +11859,7 @@ var Client = /*#__PURE__*/function () {
                 });
               }));
 
-            case 11:
+            case 10:
             case "end":
               return _context7.stop();
           }
@@ -11951,28 +11926,16 @@ var Client = /*#__PURE__*/function () {
     var debugRefresh = lib_1.debug.extend("client:refresh");
     debugRefresh("Attempting to refresh with refresh_token...");
     var refreshToken = (_b = (_a = this.state) === null || _a === void 0 ? void 0 : _a.tokenResponse) === null || _b === void 0 ? void 0 : _b.refresh_token;
-
-    if (!refreshToken) {
-      throw new Error("Unable to refresh. No refresh_token found.");
-    }
-
+    lib_1.assert(refreshToken, "Unable to refresh. No refresh_token found.");
     var tokenUri = this.state.tokenUri;
-
-    if (!tokenUri) {
-      throw new Error("Unable to refresh. No tokenUri found.");
-    }
-
+    lib_1.assert(tokenUri, "Unable to refresh. No tokenUri found.");
     var scopes = this.getState("tokenResponse.scope") || "";
     var hasOfflineAccess = scopes.search(/\boffline_access\b/) > -1;
     var hasOnlineAccess = scopes.search(/\bonline_access\b/) > -1;
-
-    if (!hasOfflineAccess && !hasOnlineAccess) {
-      throw new Error("Unable to refresh. No offline_access or online_access scope found.");
-    } // This method is typically called internally from `request` if certain
+    lib_1.assert(hasOfflineAccess || hasOnlineAccess, "Unable to refresh. No offline_access or online_access scope found."); // This method is typically called internally from `request` if certain
     // request fails with 401. However, clients will often run multiple
     // requests in parallel which may result in multiple refresh calls.
     // To avoid that, we keep a reference to the current refresh task (if any).
-
 
     if (!this._refreshTask) {
       var refreshRequestOptions = Object.assign({
@@ -11998,10 +11961,7 @@ var Client = /*#__PURE__*/function () {
       }
 
       this._refreshTask = lib_1.request(tokenUri, refreshRequestOptions).then(function (data) {
-        if (!data.access_token) {
-          throw new Error("No access token received");
-        }
-
+        lib_1.assert(data.access_token, "No access token received");
         debugRefresh("Received new access token response %O", data);
         Object.assign(_this3.state.tokenResponse, data);
         _this3.state.expiresAt = lib_1.getAccessTokenExpiration(data, _this3.environment);
@@ -13725,7 +13685,7 @@ function _authorize() {
             url = env.getUrl(); // Multiple config for EHR launches ---------------------------------------
 
             if (!Array.isArray(params)) {
-              _context.next = 12;
+              _context.next = 11;
               break;
             }
 
@@ -13757,22 +13717,14 @@ function _authorize() {
 
               return false;
             });
-
-            if (cfg) {
-              _context.next = 9;
-              break;
-            }
-
-            throw new Error("No configuration found matching the current \"iss\" parameter \"" + urlISS + "\"");
-
-          case 9:
-            _context.next = 11;
+            lib_1.assert(cfg, "No configuration found matching the current \"iss\" parameter \"" + urlISS + "\"");
+            _context.next = 10;
             return authorize(env, cfg);
 
-          case 11:
+          case 10:
             return _context.abrupt("return", _context.sent);
 
-          case 12:
+          case 11:
             // ------------------------------------------------------------------------
             // Obtain input
             _params = params, redirect_uri = _params.redirect_uri, clientSecret = _params.clientSecret, fakeTokenResponse = _params.fakeTokenResponse, patientId = _params.patientId, encounterId = _params.encounterId, client_id = _params.client_id, target = _params.target, width = _params.width, height = _params.height;
@@ -13800,13 +13752,13 @@ function _authorize() {
             serverUrl = String(iss || fhirServiceUrl || ""); // Validate input
 
             if (serverUrl) {
-              _context.next = 24;
+              _context.next = 23;
               break;
             }
 
             throw new Error("No server url found. It must be specified as `iss` or as " + "`fhirServiceUrl` parameter");
 
-          case 24:
+          case 23:
             if (iss) {
               debug("Making %s launch...", launch ? "EHR" : "standalone");
             } // append launch scope if needed
@@ -13834,15 +13786,15 @@ function _authorize() {
             // this is a re-authorize)
 
 
-            _context.next = 29;
+            _context.next = 28;
             return storage.get(settings_1.SMART_KEY);
 
-          case 29:
+          case 28:
             oldKey = _context.sent;
-            _context.next = 32;
+            _context.next = 31;
             return storage.unset(oldKey);
 
-          case 32:
+          case 31:
             // create initial state
             stateKey = lib_1.randomString(16);
             state = {
@@ -13858,14 +13810,14 @@ function _authorize() {
             fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true;
 
             if (!fullSessionStorageSupport) {
-              _context.next = 38;
+              _context.next = 37;
               break;
             }
 
-            _context.next = 38;
+            _context.next = 37;
             return storage.set(settings_1.SMART_KEY, stateKey);
 
-          case 38:
+          case 37:
             // fakeTokenResponse to override stuff (useful in development)
             if (fakeTokenResponse) {
               Object.assign(state.tokenResponse, fakeTokenResponse);
@@ -13888,60 +13840,60 @@ function _authorize() {
             redirectUrl = redirectUri + "?state=" + encodeURIComponent(stateKey); // bypass oauth if fhirServiceUrl is used (but iss takes precedence)
 
             if (!(fhirServiceUrl && !iss)) {
-              _context.next = 51;
+              _context.next = 50;
               break;
             }
 
             debug("Making fake launch...");
-            _context.next = 46;
+            _context.next = 45;
             return storage.set(stateKey, state);
 
-          case 46:
+          case 45:
             if (!noRedirect) {
-              _context.next = 48;
+              _context.next = 47;
               break;
             }
 
             return _context.abrupt("return", redirectUrl);
 
-          case 48:
-            _context.next = 50;
+          case 47:
+            _context.next = 49;
             return env.redirect(redirectUrl);
+
+          case 49:
+            return _context.abrupt("return", _context.sent);
 
           case 50:
-            return _context.abrupt("return", _context.sent);
-
-          case 51:
-            _context.next = 53;
+            _context.next = 52;
             return getSecurityExtensions(env, serverUrl);
 
-          case 53:
+          case 52:
             extensions = _context.sent;
             Object.assign(state, extensions);
-            _context.next = 57;
+            _context.next = 56;
             return storage.set(stateKey, state);
 
-          case 57:
+          case 56:
             if (state.authorizeUri) {
-              _context.next = 63;
+              _context.next = 62;
               break;
             }
 
             if (!noRedirect) {
-              _context.next = 60;
+              _context.next = 59;
               break;
             }
 
             return _context.abrupt("return", redirectUrl);
 
-          case 60:
-            _context.next = 62;
+          case 59:
+            _context.next = 61;
             return env.redirect(redirectUrl);
 
-          case 62:
+          case 61:
             return _context.abrupt("return", _context.sent);
 
-          case 63:
+          case 62:
             // build the redirect uri
             redirectParams = ["response_type=code", "client_id=" + encodeURIComponent(clientId || ""), "scope=" + encodeURIComponent(scope), "redirect_uri=" + encodeURIComponent(redirectUri), "aud=" + encodeURIComponent(serverUrl), "state=" + encodeURIComponent(stateKey)]; // also pass this in case of EHR launch
 
@@ -13952,22 +13904,22 @@ function _authorize() {
             redirectUrl = state.authorizeUri + "?" + redirectParams.join("&");
 
             if (!noRedirect) {
-              _context.next = 68;
+              _context.next = 67;
               break;
             }
 
             return _context.abrupt("return", redirectUrl);
 
-          case 68:
+          case 67:
             if (!(target && isBrowser())) {
-              _context.next = 77;
+              _context.next = 76;
               break;
             }
 
-            _context.next = 71;
+            _context.next = 70;
             return lib_1.getTargetWindow(target, width, height);
 
-          case 71:
+          case 70:
             win = _context.sent;
 
             if (win !== self) {
@@ -13996,14 +13948,14 @@ function _authorize() {
 
             return _context.abrupt("return");
 
-          case 77:
-            _context.next = 79;
+          case 76:
+            _context.next = 78;
             return env.redirect(redirectUrl);
 
-          case 79:
+          case 78:
             return _context.abrupt("return", _context.sent);
 
-          case 80:
+          case 79:
           case "end":
             return _context.stop();
         }
@@ -14109,24 +14061,18 @@ function _completeAuth() {
           case 13:
             debug("key: %s, code: %s", key, code); // key might be coming from the page url so it might be empty or missing
 
-            if (key) {
-              _context2.next = 16;
-              break;
-            }
+            lib_1.assert(key, "No 'state' parameter found. Please (re)launch the app."); // Check if we have a previous state
 
-            throw new Error("No 'state' parameter found. Please (re)launch the app.");
-
-          case 16:
-            _context2.next = 18;
+            _context2.next = 17;
             return Storage.get(key);
 
-          case 18:
+          case 17:
             state = _context2.sent;
             fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // If we are in a popup window or an iframe and the authorization is
             // complete, send the location back to our opener and exit.
 
             if (!(isBrowser() && state && !state.completeInTarget)) {
-              _context2.next = 29;
+              _context2.next = 28;
               break;
             }
 
@@ -14139,7 +14085,7 @@ function _completeAuth() {
             // remove.
 
             if (!((inFrame || inPopUp) && !url.searchParams.get("complete"))) {
-              _context2.next = 29;
+              _context2.next = 28;
               break;
             }
 
@@ -14163,7 +14109,7 @@ function _completeAuth() {
 
             return _context2.abrupt("return", new Promise(function () {}));
 
-          case 29:
+          case 28:
             url.searchParams.delete("complete"); // Do we have to remove the `code` and `state` params from the URL?
 
             hasState = params.has("state");
@@ -14200,86 +14146,64 @@ function _completeAuth() {
             } // If the state does not exist, it means the page has been loaded directly.
 
 
-            if (state) {
-              _context2.next = 34;
-              break;
-            }
-
-            throw new Error("No state found! Please (re)launch the app.");
-
-          case 34:
-            // Assume the client has already completed a token exchange when
+            lib_1.assert(state, "No state found! Please (re)launch the app."); // Assume the client has already completed a token exchange when
             // there is no code (but we have a state) or access token is found in state
+
             authorized = !code || ((_a = state.tokenResponse) === null || _a === void 0 ? void 0 : _a.access_token); // If we are authorized already, then this is just a reload.
             // Otherwise, we have to complete the code flow
 
             if (!(!authorized && state.tokenUri)) {
-              _context2.next = 54;
+              _context2.next = 50;
               break;
             }
 
-            if (code) {
-              _context2.next = 38;
-              break;
-            }
-
-            throw new Error("'code' url parameter is required");
-
-          case 38:
+            lib_1.assert(code, "'code' url parameter is required");
             debug("Preparing to exchange the code for access token...");
             requestOptions = buildTokenRequest(env, code, state);
             debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
             // includes an access token or a message indicating that the
             // authorization request has been denied.
 
-            _context2.next = 43;
+            _context2.next = 40;
             return lib_1.request(state.tokenUri, requestOptions);
 
-          case 43:
+          case 40:
             tokenResponse = _context2.sent;
             debug("Token response: %O", tokenResponse);
+            lib_1.assert(tokenResponse.access_token, "Failed to obtain access token."); // Now we need to determine when is this authorization going to expire
 
-            if (tokenResponse.access_token) {
-              _context2.next = 47;
-              break;
-            }
-
-            throw new Error("Failed to obtain access token.");
-
-          case 47:
-            // Now we need to determine when is this authorization going to expire
             state.expiresAt = lib_1.getAccessTokenExpiration(tokenResponse, env); // save the tokenResponse so that we don't have to re-authorize on
             // every page reload
 
             state = Object.assign({}, state, {
               tokenResponse: tokenResponse
             });
-            _context2.next = 51;
+            _context2.next = 47;
             return Storage.set(key, state);
 
-          case 51:
+          case 47:
             debug("Authorization successful!");
-            _context2.next = 55;
+            _context2.next = 51;
             break;
 
-          case 54:
+          case 50:
             debug(((_b = state.tokenResponse) === null || _b === void 0 ? void 0 : _b.access_token) ? "Already authorized" : "No authorization needed");
 
-          case 55:
+          case 51:
             if (!fullSessionStorageSupport) {
-              _context2.next = 58;
+              _context2.next = 54;
               break;
             }
 
-            _context2.next = 58;
+            _context2.next = 54;
             return Storage.set(settings_1.SMART_KEY, key);
 
-          case 58:
+          case 54:
             client = new Client_1.default(env, state);
             debug("Created client instance: %O", client);
             return _context2.abrupt("return", client);
 
-          case 61:
+          case 57:
           case "end":
             return _context2.stop();
         }
@@ -14300,19 +14224,9 @@ function buildTokenRequest(env, code, state) {
       clientSecret = state.clientSecret,
       tokenUri = state.tokenUri,
       clientId = state.clientId;
-
-  if (!redirectUri) {
-    throw new Error("Missing state.redirectUri");
-  }
-
-  if (!tokenUri) {
-    throw new Error("Missing state.tokenUri");
-  }
-
-  if (!clientId) {
-    throw new Error("Missing state.clientId");
-  }
-
+  lib_1.assert(redirectUri, "Missing state.redirectUri");
+  lib_1.assert(tokenUri, "Missing state.tokenUri");
+  lib_1.assert(clientId, "Missing state.clientId");
   var requestOptions = {
     method: "POST",
     headers: {

@@ -35,14 +35,8 @@ async function contextualize(requestOptions, client) {
   async function contextualURL(_url) {
     const resourceType = _url.pathname.split("/").pop();
 
-    if (!resourceType) {
-      throw new Error(`Invalid url "${_url}"`);
-    }
-
-    if (settings_1.patientCompartment.indexOf(resourceType) == -1) {
-      throw new Error(`Cannot filter "${resourceType}" resources by patient`);
-    }
-
+    lib_1.assert(resourceType, `Invalid url "${_url}"`);
+    lib_1.assert(settings_1.patientCompartment.indexOf(resourceType) > -1, `Cannot filter "${resourceType}" resources by patient`);
     const conformance = await lib_1.fetchConformanceStatement(client.state.serverUrl);
     const searchParam = lib_1.getPatientParam(conformance, resourceType);
 
@@ -211,10 +205,7 @@ class Client {
     } : state; // Valid serverUrl is required!
 
 
-    if (!_state.serverUrl || !_state.serverUrl.match(/https?:\/\/.+/)) {
-      throw new Error("A \"serverUrl\" option is required and must begin with \"http(s)\"");
-    }
-
+    lib_1.assert(_state.serverUrl && _state.serverUrl.match(/https?:\/\/.+/), "A \"serverUrl\" option is required and must begin with \"http(s)\"");
     this.state = _state;
     this.environment = environment;
     this._refreshTask = null;
@@ -449,6 +440,12 @@ class Client {
     const idToken = this.getIdToken();
 
     if (idToken) {
+      // Epic may return a full url
+      // @see https://github.com/smart-on-fhir/client-js/issues/105
+      if (idToken.fhirUser) {
+        return idToken.fhirUser.split("/").slice(-2).join("/");
+      }
+
       return idToken.profile;
     }
 
@@ -585,6 +582,38 @@ class Client {
     }));
   }
   /**
+   * Makes a JSON Patch to the given resource
+   * @see http://hl7.org/fhir/http.html#patch
+   * @param url Relative URI of the FHIR resource to be patched
+   * (format: `resourceType/id`)
+   * @param patch A JSON Patch array to send to the server, For details
+   * see https://datatracker.ietf.org/doc/html/rfc6902
+   * @param requestOptions Any options to be passed to the fetch call,
+   * except for `method`, `url` and `body` which cannot be overridden.
+   * @since 2.4.0
+   * @category Request
+   * @typeParam ResolveType This method would typically resolve with the
+   * patched resource or reject with an OperationOutcome. However, this may
+   * depend on the server implementation or even on the request headers.
+   * For that reason, if the default resolve type (which is
+   * [[fhirclient.FHIR.Resource]]) does not work for you, you can pass
+   * in your own resolve type parameter.
+   */
+
+
+  async patch(url, patch, requestOptions = {}) {
+    lib_1.assertJsonPatch(patch);
+    return this.request(Object.assign(Object.assign({}, requestOptions), {
+      url,
+      method: "PATCH",
+      body: JSON.stringify(patch),
+      headers: Object.assign({
+        "prefer": "return=presentation",
+        "content-type": "application/json-patch+json; charset=UTF-8"
+      }, requestOptions.headers)
+    }));
+  }
+  /**
    * @param requestOptions Can be a string URL (relative to the serviceUrl),
    * or an object which will be passed to fetch()
    * @param fhirOptions Additional options to control the behavior
@@ -597,11 +626,7 @@ class Client {
     var _a;
 
     const debugRequest = lib_1.debug.extend("client:request");
-
-    if (!requestOptions) {
-      throw new Error("request requires an url or request options as argument");
-    } // url -----------------------------------------------------------------
-
+    lib_1.assert(requestOptions, "request requires an url or request options as argument"); // url -----------------------------------------------------------------
 
     let url;
 
@@ -811,28 +836,16 @@ class Client {
     const debugRefresh = lib_1.debug.extend("client:refresh");
     debugRefresh("Attempting to refresh with refresh_token...");
     const refreshToken = (_b = (_a = this.state) === null || _a === void 0 ? void 0 : _a.tokenResponse) === null || _b === void 0 ? void 0 : _b.refresh_token;
-
-    if (!refreshToken) {
-      throw new Error("Unable to refresh. No refresh_token found.");
-    }
-
+    lib_1.assert(refreshToken, "Unable to refresh. No refresh_token found.");
     const tokenUri = this.state.tokenUri;
-
-    if (!tokenUri) {
-      throw new Error("Unable to refresh. No tokenUri found.");
-    }
-
+    lib_1.assert(tokenUri, "Unable to refresh. No tokenUri found.");
     const scopes = this.getState("tokenResponse.scope") || "";
     const hasOfflineAccess = scopes.search(/\boffline_access\b/) > -1;
     const hasOnlineAccess = scopes.search(/\bonline_access\b/) > -1;
-
-    if (!hasOfflineAccess && !hasOnlineAccess) {
-      throw new Error("Unable to refresh. No offline_access or online_access scope found.");
-    } // This method is typically called internally from `request` if certain
+    lib_1.assert(hasOfflineAccess || hasOnlineAccess, "Unable to refresh. No offline_access or online_access scope found."); // This method is typically called internally from `request` if certain
     // request fails with 401. However, clients will often run multiple
     // requests in parallel which may result in multiple refresh calls.
     // To avoid that, we keep a reference to the current refresh task (if any).
-
 
     if (!this._refreshTask) {
       const refreshRequestOptions = Object.assign(Object.assign({
@@ -859,10 +872,7 @@ class Client {
       }
 
       this._refreshTask = lib_1.request(tokenUri, refreshRequestOptions).then(data => {
-        if (!data.access_token) {
-          throw new Error("No access token received");
-        }
-
+        lib_1.assert(data.access_token, "No access token received");
         debugRefresh("Received new access token response %O", data);
         Object.assign(this.state.tokenResponse, data);
         this.state.expiresAt = lib_1.getAccessTokenExpiration(data, this.environment);

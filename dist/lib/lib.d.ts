@@ -56,7 +56,7 @@ export declare function fetchConformanceStatement(baseUrl?: string, requestOptio
  * @param path The path (eg. "a.b.4.c")
  * @returns {*} Whatever is found in the path or undefined
  */
-export declare function getPath(obj: fhirclient.JsonObject, path?: string): any;
+export declare function getPath(obj: Record<string, any>, path?: string): any;
 /**
  * Like getPath, but if the node is found, its value is set to @value
  * @param obj The object (or Array) to walk through
@@ -65,7 +65,7 @@ export declare function getPath(obj: fhirclient.JsonObject, path?: string): any;
  * @param createEmpty If true, create missing intermediate objects or arrays
  * @returns The modified object
  */
-export declare function setPath(obj: fhirclient.JsonObject, path: string, value: any, createEmpty?: boolean): fhirclient.JsonObject;
+export declare function setPath(obj: Record<string, any>, path: string, value: any, createEmpty?: boolean): Record<string, any>;
 /**
  * If the argument is an array returns it as is. Otherwise puts it in an array
  * (`[arg]`) and returns the result
@@ -95,7 +95,7 @@ export declare function randomString(strLength?: number, charSet?: string): stri
  * @param env An `Adapter` or any other object that has an `atob` method
  * @category Utility
  */
-export declare function jwtDecode(token: string, env: fhirclient.Adapter): fhirclient.JsonObject | null;
+export declare function jwtDecode(token: string, env: fhirclient.Adapter): Record<string, any> | null;
 /**
  * Given a token response, computes and returns the expiresAt timestamp.
  * Note that this should only be used immediately after an access token is
@@ -144,3 +144,5 @@ export declare function getPatientParam(conformance: fhirclient.FHIR.CapabilityS
  * @param height Only used when `target = "popup"`
  */
 export declare function getTargetWindow(target: fhirclient.WindowTarget, width?: number, height?: number): Promise<Window>;
+export declare function assert(condition: any, message: string): asserts condition;
+export declare function assertJsonPatch(patch: fhirclient.JsonPatch): asserts patch;
