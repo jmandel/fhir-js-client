@@ -526,3 +526,9 @@ export async function getTargetWindow(target: fhirclient.WindowTarget, width: nu
     _debug("Unknown target '%s'. Failing back to '_self'.", target);
     return self;
 }
+
+export function assert(condition: any, message: string): asserts condition {
+    if (!(condition)) {
+        throw new Error(message)
+    }
+}
