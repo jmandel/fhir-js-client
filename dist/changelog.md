@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.4.0
+- Added `patch` method to the client
+- Added `noRedirect` authorize option 
+- Some bug fixes:
+  - Empty body response after create operation but no location header #118, #124
+  - Epic may return a full url #105
+- Small documentation and type definition changes and improvements
+
 ## v2.3.11
 - `HttpError` instances (which are thrown when a request has failed) now have a `response` property that is a reference to the
   Response object. This can be used to read response headers or inspect the response in some other way in case of error.
