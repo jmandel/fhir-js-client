@@ -532,3 +532,29 @@ export function assert(condition: any, message: string): asserts condition {
         throw new Error(message)
     }
 }
+
+export function assertJsonPatch(patch: fhirclient.JsonPatch): asserts patch {
+    assert(Array.isArray(patch), "The JSON patch must be an array")
+    assert(patch.length > 0, "The JSON patch array should not be empty")
+    patch.forEach((operation: fhirclient.JsonPatchOperation) => {
+        assert(
+            ["add", "replace", "test", "move", "copy", "remove"].indexOf(operation.op) > -1,
+            'Each patch operation must have an "op" property which must be one of: "add", "replace", "test", "move", "copy", "remove"'
+        )
+        assert(operation.path && typeof operation.path, `Invalid "${operation.op}" operation. Missing "path" property`)
+        
+        if (operation.op == "add" || operation.op == "replace" || operation.op == "test") {
+            assert("value" in operation, `Invalid "${operation.op}" operation. Missing "value" property`)
+            assert(Object.keys(operation).length == 3, `Invalid "${operation.op}" operation. Contains unknown properties`)
+        }
+
+        else if (operation.op == "move" || operation.op == "copy") {
+            assert(typeof operation.from == "string", `Invalid "${operation.op}" operation. Requires a string "from" property`)
+            assert(Object.keys(operation).length == 3, `Invalid "${operation.op}" operation. Contains unknown properties`)
+        }
+
+        else {
+            assert(Object.keys(operation).length == 2, `Invalid "${operation.op}" operation. Contains unknown properties`)
+        }
+    })
+}

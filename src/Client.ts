@@ -11,7 +11,8 @@ import {
     units,
     getPatientParam,
     fetchConformanceStatement,
-    getAccessTokenExpiration
+    getAccessTokenExpiration,
+    assertJsonPatch
 } from "./lib";
 
 import str from "./strings";
@@ -717,6 +718,33 @@ export default class Client
             ...requestOptions,
             url,
             method: "DELETE"
+        });
+    }
+
+    /**
+     * Makes a JSON Patch to the given resource
+     * @see http://hl7.org/fhir/http.html#delete
+     * @param url Relative URI of the FHIR resource to be patched
+     * (format: `resourceType/id`)
+     * @param patch A JSON Patch array to send to the server, For details
+     * see https://datatracker.ietf.org/doc/html/rfc6902
+     * @param requestOptions Any options (except `method`, `url` and 'body`
+     * which will be fixed to `DELETE`) to be passed to the fetch call.
+     * @category Request
+     */
+    async patch<R = fhirclient.FHIR.Resource>(url: string, patch: fhirclient.JsonPatch, requestOptions: fhirclient.FetchOptions = {}): Promise<R>
+    {
+        assertJsonPatch(patch);
+        return this.request<R>({
+            ...requestOptions,
+            url,
+            method: "PATCH",
+            body: JSON.stringify(patch),
+            headers: {
+                "prefer": "return=presentation",
+                "content-type": "application/json-patch+json; charset=UTF-8",
+                ...requestOptions.headers,
+            }
         });
     }
 

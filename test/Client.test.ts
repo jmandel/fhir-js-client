@@ -13,6 +13,7 @@ import Client         from "../src/Client";
 import { KEY }        from "../src/smart";
 import Adapter        from "../src/adapters/BrowserAdapter";
 import { fhirclient } from "../src/types";
+import { SrvRecord } from "dns";
 
 export const lab = Lab.script();
 const { it, describe, before, after, afterEach } = lab;
@@ -3957,6 +3958,125 @@ describe("FHIR.client", () => {
                 method: "DELETE",
                 signal: "whatever"
             });
+        });
+    });
+
+    describe("patch", () => {
+        crossPlatformTest(async (env) => {
+            const client = new Client(env, mockUrl);
+            
+            let result: any;
+
+            // Standard usage
+            mockServer.mock({
+                status: 200,
+                body: { result: "success" },
+                headers: { "Content-Type": "application/json" }
+            });
+            
+            result = await client.patch("Patient/2", [{ op: "remove", path: "/x" }], { includeResponse: true });
+            expect(result.body).to.equal({ result: "success" });
+            expect(result.response.status).to.equal(200);
+
+            // Modify the request method to return the request options
+            client.request = async (options: any) => options;
+
+            // Standard usage
+            result = await client.patch("Patient/2", [{ op: "remove", path: "/x" }]);
+            expect(result).to.equal({
+                url   : "Patient/2",
+                method: "PATCH",
+                body: '[{"op":"remove","path":"/x"}]',
+                headers: {
+                    "prefer": "return=presentation",
+                    "content-type": "application/json-patch+json; charset=UTF-8"
+                }
+            });
+
+            // Test what can be overridden
+            result = await client.patch("Patient/2", [{ op: "remove", path: "/x" }], {
+                // @ts-ignore
+                url   : "x",
+                method: "y",
+                other : 3,
+                headers: {
+                    prefer: "test",
+                    z: "22"
+                }
+            });
+            expect(result).to.equal({
+                url   : "Patient/2",
+                method: "PATCH",
+                body: '[{"op":"remove","path":"/x"}]',
+                other: 3,
+                headers: {
+                    "prefer": "test",
+                    "content-type": "application/json-patch+json; charset=UTF-8",
+                    "z": "22"
+                }
+            });
+
+            // Verify that abort signal is passed through
+            result = await client.patch("Patient/2", [{ op: "remove", path: "/x" }], {
+                // @ts-ignore
+                signal: "whatever"
+            });
+            expect(result).to.include({ signal: "whatever" });
+
+            // Validations ----------------------------------------------------
+
+            // @ts-ignore
+            expect(client.patch("x", null)).to.reject("The JSON patch must be an array");
+            
+            expect(client.patch("x", [])).to.reject("The JSON patch array should not be empty");
+            
+            // @ts-ignore
+            expect(client.patch("x", [{}])).to.reject(/Each patch operation must have an "op" property/);
+
+            expect(client.patch("x", [
+                // @ts-ignore
+                { op: "x" }
+            ])).to.reject(/Each patch operation must have an "op" property/);
+
+            expect(client.patch("x", [
+                // @ts-ignore
+                { op: "add" }
+            ])).to.reject(/Missing "path" property/);
+
+            expect(client.patch("x", [
+                // @ts-ignore
+                { op: "add", path: "/x" }
+            ])).to.reject(/Missing "value" property/);
+
+            expect(client.patch("x", [
+                // @ts-ignore
+                { op: "replace", path: "/x" }
+            ])).to.reject(/Missing "value" property/);
+
+            expect(client.patch("x", [
+                // @ts-ignore
+                { op: "test", path: "/x", value: 4, custom: true }
+            ])).to.reject(/Contains unknown properties/);
+
+            expect(client.patch("x", [
+                // @ts-ignore
+                { op: "move", path: "/x" }
+            ])).to.reject(/Requires a string "from" property/);
+
+            expect(client.patch("x", [
+                // @ts-ignore
+                { op: "copy", path: "/x" }
+            ])).to.reject(/Requires a string "from" property/);
+
+            expect(client.patch("x", [
+                // @ts-ignore
+                { op: "move", path: "/x", from: "/y", custom: true }
+            ])).to.reject(/Contains unknown properties/);
+
+            expect(client.patch("x", [
+                // @ts-ignore
+                { op: "remove", path: "/x", custom: true }
+            ])).to.reject(/Contains unknown properties/);
         });
     });
 
