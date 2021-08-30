@@ -296,6 +296,11 @@ declare namespace fhirclient {
          * for an access token.
          */
         tokenUri: string;
+
+        /**
+         * Supported PKCE Code challenge methods
+         */
+         codeChallengeMethods: string[];
     }
 
     /**
@@ -389,6 +394,17 @@ declare namespace fhirclient {
          * received from the server.
          */
         expiresAt?: number;
+
+        /**
+         * PKCE code challenge base value.
+         */
+        codeChallenge?: string;
+
+        /**
+          * PKCE code verification, formatted with base64url-encode (RFC 4648 § 5) 
+          * without padding, which is NOT the same as regular base64 encoding.
+          */
+        codeVerifier?: string;
     }
 
     /**
@@ -541,7 +557,13 @@ declare namespace fhirclient {
          * [[authorize]] was called.
          */
         completeInTarget?: boolean;
-    }
+
+        /**
+         * If the authorization flow will include PKCE.  Recommended if 
+         * supported by the server.
+         */
+         usePKCE?: boolean;
+      }
 
     /**
      * Additional options that can be passed to `client.request` to control its
@@ -762,6 +784,8 @@ declare namespace fhirclient {
 
     // Capabilities ------------------------------------------------------------
 
+    type codeChallengeMethod = "S256";
+
     type SMARTAuthenticationMethod = "client_secret_post" | "client_secret_basic";
 
     type launchMode = "launch-ehr" | "launch-standalone";
@@ -812,6 +836,11 @@ declare namespace fhirclient {
          * revoke a token.
          */
         revocation_endpoint?: string;
+
+        /**
+         * RECOMMENDED! PKCE challenge methods the server supports.
+         */
+        code_challenge_methods_supported?: codeChallengeMethod[];
 
         /**
          * Array of client authentication methods supported by the token endpoint.

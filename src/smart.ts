@@ -47,9 +47,10 @@ function getSecurityExtensionsFromWellKnownJson(baseUrl = "/", requestOptions?: 
             throw new Error("Invalid wellKnownJson");
         }
         return {
-            registrationUri: meta.registration_endpoint  || "",
-            authorizeUri   : meta.authorization_endpoint,
-            tokenUri       : meta.token_endpoint
+            registrationUri     : meta.registration_endpoint  || "",
+            authorizeUri        : meta.authorization_endpoint,
+            tokenUri            : meta.token_endpoint,
+            codeChallengeMethods: meta.code_challenge_methods_supported || []
         };
     });
 }
@@ -66,9 +67,10 @@ function getSecurityExtensionsFromConformanceStatement(baseUrl = "/", requestOpt
             .map(o => o.extension)[0];
 
         const out = {
-            registrationUri : "",
-            authorizeUri    : "",
-            tokenUri        : ""
+            registrationUri     : "",
+            authorizeUri        : "",
+            tokenUri            : "",
+            codeChallengeMethods: [],
         };
 
         if (extensions) {
@@ -133,6 +135,60 @@ function any(tasks: Task[]): Promise<any> {
         });
     });
 }
+
+/**
+ * The maximum length for a code verifier for the best security we can offer.
+ * Please note the NOTE section of RFC 7636 § 4.1 - the length must be >= 43,
+ * but <= 128, **after** base64 url encoding. This means 32 code verifier bytes
+ * encoded will be 43 bytes, or 96 bytes encoded will be 128 bytes. So 96 bytes
+ * is the highest valid value that can be used.
+ */
+ var RECOMMENDED_CODE_VERIFIER_LENGTH = 96;
+
+ /**
+  * Character set to generate code verifier defined in rfc7636.
+  */
+ var PKCE_CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+
+ /**
+  * Generates a code_verifier and code_challenge, as specified in rfc7636.
+  */
+ function generatePKCECodes(env: fhirclient.Adapter) {
+   var output = new Uint32Array(RECOMMENDED_CODE_VERIFIER_LENGTH);
+   crypto.getRandomValues(output);
+   var codeVerifier = base64urlEncode(env, Array.from(output).map(function (num) {
+     return PKCE_CHARSET[num % PKCE_CHARSET.length];
+   }).join(''));
+   return crypto.subtle.digest('SHA-256', new TextEncoder().encode(codeVerifier)).then(function (buffer) {
+     var hash = new Uint8Array(buffer);
+     var binary = '';
+     var hashLength = hash.byteLength;
+ 
+     for (var i = 0; i < hashLength; i++) {
+       binary += String.fromCharCode(hash[i]);
+     }
+ 
+     return binary;
+   }).then(val => base64urlEncode(env, val)).then(function (codeChallenge) {
+     return {
+       codeChallenge: codeChallenge,
+       codeVerifier: codeVerifier
+     };
+   });
+ }
+
+ /**
+  * Implements *base64url-encode* (RFC 4648 § 5) without padding, which is NOT
+  * the same as regular base64 encoding.
+  * @param value string to encode
+  */
+ function base64urlEncode(env: fhirclient.Adapter, value:string) {
+   var base64 = env.btoa(value);
+   base64 = base64.replace(/\+/g, '-');
+   base64 = base64.replace(/\//g, '_');
+   base64 = base64.replace(/=/g, '');
+   return base64;
+ }
 
 /**
  * Given a FHIR server, returns an object with it's Oauth security endpoints
@@ -217,7 +273,8 @@ export async function authorize(
         client_id,
         target,
         width,
-        height
+        height,
+        usePKCE,
     } = params;
 
     let {
@@ -376,6 +433,15 @@ export async function authorize(
         redirectParams.push("launch=" + encodeURIComponent(launch));
     }
 
+    if (usePKCE && extensions.codeChallengeMethods.includes('S256')) {
+      let codes = await generatePKCECodes(env);
+      Object.assign(state, codes);
+      await storage.set(stateKey, state); // note that the challenge is ALREADY encoded properly
+  
+      redirectParams.push("code_challenge=" + state.codeChallenge);
+      redirectParams.push("code_challenge_method=S256");
+    }
+  
     redirectUrl = state.authorizeUri + "?" + redirectParams.join("&");
 
     if (noRedirect) {
@@ -629,7 +695,7 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
  */
 export function buildTokenRequest(env: fhirclient.Adapter, code: string, state: fhirclient.ClientState): RequestInit
 {
-    const { redirectUri, clientSecret, tokenUri, clientId } = state;
+    const { redirectUri, clientSecret, tokenUri, clientId, codeVerifier } = state;
 
     assert(redirectUri, "Missing state.redirectUri");
     assert(tokenUri, "Missing state.tokenUri");
@@ -659,6 +725,11 @@ export function buildTokenRequest(env: fhirclient.Adapter, code: string, state: 
         requestOptions.body += `&client_id=${encodeURIComponent(clientId)}`;
     }
 
+    if (codeVerifier) {
+      debug("Found state.codeVerifier, adding to the POST body"); // Note that the codeVerifier is ALREADY encoded properly  
+      requestOptions.body += "&code_verifier=" + codeVerifier;
+    }
+  
     return requestOptions as RequestInit;
 }
 
