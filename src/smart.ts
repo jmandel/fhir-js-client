@@ -14,6 +14,8 @@ import Client from "./Client";
 import { SMART_KEY } from "./settings";
 import { fhirclient } from "./types";
 
+//import * as jose from 'node-jose';
+var jose = require('node-jose');
 
 const debug = _debug.extend("oauth2");
 
@@ -66,7 +68,7 @@ function getSecurityExtensionsFromConformanceStatement(baseUrl = "/", requestOpt
             .filter(e => e.url === nsUri)
             .map(o => o.extension)[0];
 
-        const out = {
+        const out:fhirclient.OAuthSecurityExtensions = {
             registrationUri     : "",
             authorizeUri        : "",
             tokenUri            : "",
@@ -153,41 +155,16 @@ function any(tasks: Task[]): Promise<any> {
  /**
   * Generates a code_verifier and code_challenge, as specified in rfc7636.
   */
- function generatePKCECodes(env: fhirclient.Adapter) {
-   var output = new Uint32Array(RECOMMENDED_CODE_VERIFIER_LENGTH);
-   crypto.getRandomValues(output);
-   var codeVerifier = base64urlEncode(env, Array.from(output).map(function (num) {
-     return PKCE_CHARSET[num % PKCE_CHARSET.length];
-   }).join(''));
-   return crypto.subtle.digest('SHA-256', new TextEncoder().encode(codeVerifier)).then(function (buffer) {
-     var hash = new Uint8Array(buffer);
-     var binary = '';
-     var hashLength = hash.byteLength;
- 
-     for (var i = 0; i < hashLength; i++) {
-       binary += String.fromCharCode(hash[i]);
-     }
- 
-     return binary;
-   }).then(val => base64urlEncode(env, val)).then(function (codeChallenge) {
+ function generatePKCECodes() {
+   var inputBytes:Buffer = jose.util.randomBytes(RECOMMENDED_CODE_VERIFIER_LENGTH);
+   var input:string = Array.from(inputBytes).map(function(val:number) { return PKCE_CHARSET[val % PKCE_CHARSET.length]; }).join('');
+   var codeVerifier:string = jose.util.base64url.encode(input);
+   
+   jose.JWA.digest('SHA-256', codeVerifier).then(function(code:Buffer) {
      return {
-       codeChallenge: codeChallenge,
-       codeVerifier: codeVerifier
-     };
-   });
- }
-
- /**
-  * Implements *base64url-encode* (RFC 4648 § 5) without padding, which is NOT
-  * the same as regular base64 encoding.
-  * @param value string to encode
-  */
- function base64urlEncode(env: fhirclient.Adapter, value:string) {
-   var base64 = env.btoa(value);
-   base64 = base64.replace(/\+/g, '-');
-   base64 = base64.replace(/\//g, '_');
-   base64 = base64.replace(/=/g, '');
-   return base64;
+     codeChallenge: jose.util.base64url.encode(code),
+     codeVerifier: codeVerifier,
+   }});
  }
 
 /**
@@ -274,7 +251,7 @@ export async function authorize(
         target,
         width,
         height,
-        usePKCE,
+        pkceMode,
     } = params;
 
     let {
@@ -433,8 +410,12 @@ export async function authorize(
         redirectParams.push("launch=" + encodeURIComponent(launch));
     }
 
-    if (usePKCE && extensions.codeChallengeMethods.includes('S256')) {
-      let codes = await generatePKCECodes(env);
+    if ((pkceMode === 'required') && (!(extensions.codeChallengeMethods.includes('S256')))) {
+      throw new Error("Required PKCE code challenge method (`S256`) was not found.");
+    }
+
+    if ((pkceMode !== 'disabled') && (extensions.codeChallengeMethods.includes('S256'))) {
+      let codes = await generatePKCECodes();
       Object.assign(state, codes);
       await storage.set(stateKey, state); // note that the challenge is ALREADY encoded properly
   
@@ -726,7 +707,8 @@ export function buildTokenRequest(env: fhirclient.Adapter, code: string, state: 
     }
 
     if (codeVerifier) {
-      debug("Found state.codeVerifier, adding to the POST body"); // Note that the codeVerifier is ALREADY encoded properly  
+      debug("Found state.codeVerifier, adding to the POST body")
+      // Note that the codeVerifier is ALREADY encoded properly  
       requestOptions.body += "&code_verifier=" + codeVerifier;
     }
   

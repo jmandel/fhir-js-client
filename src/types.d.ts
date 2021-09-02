@@ -205,6 +205,7 @@ declare namespace fhirclient {
     function WindowTargetFunction(): Promise<WindowTargetVariable>;
     type WindowTarget = WindowTargetVariable | typeof WindowTargetFunction;
 
+    type PkceMode = 'ifSupported' | 'required' | 'disabled';
 
     type storageFactory = (options?: Record<string, any>) => Storage;
 
@@ -559,10 +560,13 @@ declare namespace fhirclient {
         completeInTarget?: boolean;
 
         /**
-         * If the authorization flow will include PKCE.  Recommended if 
-         * supported by the server.
+         * Client expectations for PKCE (Proof Key for Code Exchange). Can be
+         * one of:
+         * - `ifSupported` Use if a matching code challenge method is available (**default**)
+         * - `required`    Do not attempt authorization to servers without support
+         * - `disabled`    Do not use PKCE
          */
-         usePKCE?: boolean;
+         pkceMode?: PkceMode;
       }
 
     /**
