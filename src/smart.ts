@@ -141,25 +141,18 @@ function any(tasks: Task[]): Promise<any> {
 /**
  * The maximum length for a code verifier for the best security we can offer.
  * Please note the NOTE section of RFC 7636 § 4.1 - the length must be >= 43,
- * but <= 128, **after** base64 url encoding. This means 32 code verifier bytes
- * encoded will be 43 bytes, or 96 bytes encoded will be 128 bytes. So 96 bytes
- * is the highest valid value that can be used.
+ * but <= 128, **after** base64 url encoding. Base64 expands from 'n' bytes
+ * to 4(n/3) bytes (log2(64) = 6; 4*6 = 24 bits; pad to multiple of 4). With 
+ * a max length of 128, we get: 128/4 = 32; 32*3 = 96 bytes for a max input.
  */
  var RECOMMENDED_CODE_VERIFIER_LENGTH = 96;
-
- /**
-  * Character set to generate code verifier defined in rfc7636.
-  */
- var PKCE_CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
 
  /**
   * Generates a code_verifier and code_challenge, as specified in rfc7636.
   */
  function generatePKCECodes() {
-   var inputBytes:Buffer = jose.util.randomBytes(RECOMMENDED_CODE_VERIFIER_LENGTH);
-   var input:string = Array.from(inputBytes).map(function(val:number) { return PKCE_CHARSET[val % PKCE_CHARSET.length]; }).join('');
-   var codeVerifier:string = jose.util.base64url.encode(input);
-   
+  var inputBytes:Buffer = jose.util.randomBytes(RECOMMENDED_CODE_VERIFIER_LENGTH);
+   var codeVerifier:string = jose.util.base64url.encode(inputBytes);
    jose.JWA.digest('SHA-256', codeVerifier).then(function(code:Buffer) {
      return {
      codeChallenge: jose.util.base64url.encode(code),
