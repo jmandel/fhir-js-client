@@ -3,6 +3,7 @@
 import Client from "./Client";
 import { getPath, byCodes, byCode } from "./lib";
 import { IncomingMessage } from "http";
+import { JWK } from "node-jose";
 
 // tslint:disable-next-line: no-namespace
 declare namespace fhirclient {
@@ -205,6 +206,7 @@ declare namespace fhirclient {
     function WindowTargetFunction(): Promise<WindowTargetVariable>;
     type WindowTarget = WindowTargetVariable | typeof WindowTargetFunction;
 
+    type PkceMode = 'ifSupported' | 'required' | 'disabled';
 
     type storageFactory = (options?: Record<string, any>) => Storage;
 
@@ -296,6 +298,11 @@ declare namespace fhirclient {
          * for an access token.
          */
         tokenUri: string;
+
+        /**
+         * Supported PKCE Code challenge methods
+         */
+         codeChallengeMethods: string[];
     }
 
     /**
@@ -328,7 +335,18 @@ declare namespace fhirclient {
         scope?: string;
 
         /**
-         * Your client secret if you have one (for confidential clients)
+         * Your client public JWKS url if you have one
+         * (for asymmetric confidential clients that have registereed a JWKS URL)
+         */
+        clientPublicKeySetUrl?:  AuthorizeParams['clientPublicKeySetUrl'];
+
+        /**
+         * Your client private JWK if you have one (for asymmetric confidential clients)
+         */
+        clientPrivateJwk?:  AuthorizeParams['clientPrivateJwk'];
+
+        /**
+         * Your client secret if you have one (for symmetric confidential clients)
          */
         clientSecret?: string;
 
@@ -389,6 +407,17 @@ declare namespace fhirclient {
          * received from the server.
          */
         expiresAt?: number;
+
+        /**
+         * PKCE code challenge base value.
+         */
+        codeChallenge?: string;
+
+        /**
+          * PKCE code verification, formatted with base64url-encode (RFC 4648 § 5) 
+          * without padding, which is NOT the same as regular base64 encoding.
+          */
+        codeVerifier?: string;
     }
 
     /**
@@ -500,6 +529,24 @@ declare namespace fhirclient {
         clientSecret?: string;
 
         /**
+         * If you have registered a confidential client and you host your public
+         * key online, you can pass your JWKS URL here **Note: ONLY use this on the server**, as the
+         * browsers are considered incapable of keeping a secret.
+         */
+        clientPublicKeySetUrl?: string; 
+
+        /**
+         * If you have registered a confidential client, you should pass your
+         * `clientPrivateJwk` here. **Note: ONLY use this on the server**, as the
+         * browsers are considered incapable of keeping a secret.
+         */
+         clientPrivateJwk?: { kid: string; kty: string, [k: string]: string } & (
+             {kty: "EC", alg: "ES384", crv: "P-384"} | 
+             {kty: "RSA", alg: "RS384" }
+        );
+
+
+        /**
          * Useful for testing. This object can contain any properties that are
          * typically contained in an [access token response](http://hl7.org/fhir/smart-app-launch/#step-3-app-exchanges-authorization-code-for-access-token).
          * These properties will be stored into the client state, as if it has been
@@ -541,7 +588,16 @@ declare namespace fhirclient {
          * [[authorize]] was called.
          */
         completeInTarget?: boolean;
-    }
+
+        /**
+         * Client expectations for PKCE (Proof Key for Code Exchange). Can be
+         * one of:
+         * - `ifSupported` Use if a matching code challenge method is available (**default**)
+         * - `required`    Do not attempt authorization to servers without support
+         * - `disabled`    Do not use PKCE
+         */
+         pkceMode?: PkceMode;
+      }
 
     /**
      * Additional options that can be passed to `client.request` to control its
@@ -762,7 +818,9 @@ declare namespace fhirclient {
 
     // Capabilities ------------------------------------------------------------
 
-    type SMARTAuthenticationMethod = "client_secret_post" | "client_secret_basic";
+    type codeChallengeMethod = "S256";
+
+    type SMARTAuthenticationMethod = "client_secret_post" | "client_secret_basic" | "private_key_jwt";
 
     type launchMode = "launch-ehr" | "launch-standalone";
 
@@ -812,6 +870,11 @@ declare namespace fhirclient {
          * revoke a token.
          */
         revocation_endpoint?: string;
+
+        /**
+         * RECOMMENDED! PKCE challenge methods the server supports.
+         */
+        code_challenge_methods_supported?: codeChallengeMethod[];
 
         /**
          * Array of client authentication methods supported by the token endpoint.

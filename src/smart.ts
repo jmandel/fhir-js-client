@@ -3,6 +3,7 @@ import {
     debug as _debug,
     request,
     getPath,
+    getTimeInFuture,
     randomString,
     getAndCache,
     fetchConformanceStatement,
@@ -14,6 +15,8 @@ import Client from "./Client";
 import { SMART_KEY } from "./settings";
 import { fhirclient } from "./types";
 
+import * as jose from 'node-jose';
+//var jose = require('node-jose');
 
 const debug = _debug.extend("oauth2");
 
@@ -47,9 +50,10 @@ function getSecurityExtensionsFromWellKnownJson(baseUrl = "/", requestOptions?: 
             throw new Error("Invalid wellKnownJson");
         }
         return {
-            registrationUri: meta.registration_endpoint  || "",
-            authorizeUri   : meta.authorization_endpoint,
-            tokenUri       : meta.token_endpoint
+            registrationUri     : meta.registration_endpoint  || "",
+            authorizeUri        : meta.authorization_endpoint,
+            tokenUri            : meta.token_endpoint,
+            codeChallengeMethods: meta.code_challenge_methods_supported || []
         };
     });
 }
@@ -65,10 +69,11 @@ function getSecurityExtensionsFromConformanceStatement(baseUrl = "/", requestOpt
             .filter(e => e.url === nsUri)
             .map(o => o.extension)[0];
 
-        const out = {
-            registrationUri : "",
-            authorizeUri    : "",
-            tokenUri        : ""
+        const out:fhirclient.OAuthSecurityExtensions = {
+            registrationUri     : "",
+            authorizeUri        : "",
+            tokenUri            : "",
+            codeChallengeMethods: [],
         };
 
         if (extensions) {
@@ -133,6 +138,28 @@ function any(tasks: Task[]): Promise<any> {
         });
     });
 }
+
+/**
+ * The maximum length for a code verifier for the best security we can offer.
+ * Please note the NOTE section of RFC 7636 § 4.1 - the length must be >= 43,
+ * but <= 128, **after** base64 url encoding. Base64 expands from 'n' bytes
+ * to 4(n/3) bytes (log2(64) = 6; 4*6 = 24 bits; pad to multiple of 4). With 
+ * a max length of 128, we get: 128/4 = 32; 32*3 = 96 bytes for a max input.
+ */
+ var RECOMMENDED_CODE_VERIFIER_LENGTH = 96;
+
+ /**
+  * Generates a code_verifier and code_challenge, as specified in rfc7636.
+  */
+ async function generatePKCECodes(): Promise<{codeChallenge: string, codeVerifier: string}> {
+  var inputBytes:Buffer = jose.util.randomBytes(RECOMMENDED_CODE_VERIFIER_LENGTH);
+   var codeVerifier:string = jose.util.base64url.encode(inputBytes);
+   const codeBuffer = await jose.JWA.digest('SHA-256', codeVerifier);
+    return {
+     codeChallenge: jose.util.base64url.encode(codeBuffer),
+     codeVerifier: codeVerifier,
+   };
+ }
 
 /**
  * Given a FHIR server, returns an object with it's Oauth security endpoints
@@ -211,13 +238,15 @@ export async function authorize(
     const {
         redirect_uri,
         clientSecret,
+        clientPrivateJwk,
         fakeTokenResponse,
         patientId,
         encounterId,
         client_id,
         target,
         width,
-        height
+        height,
+        pkceMode,
     } = params;
 
     let {
@@ -308,6 +337,7 @@ export async function authorize(
         redirectUri,
         serverUrl,
         clientSecret,
+        clientPrivateJwk,
         tokenResponse: {},
         key: stateKey,
         completeInTarget
@@ -376,6 +406,19 @@ export async function authorize(
         redirectParams.push("launch=" + encodeURIComponent(launch));
     }
 
+    if ((pkceMode === 'required') && (!(extensions.codeChallengeMethods.includes('S256')))) {
+      throw new Error("Required PKCE code challenge method (`S256`) was not found.");
+    }
+
+    if ((pkceMode !== 'disabled') && (extensions.codeChallengeMethods.includes('S256'))) {
+      let codes = await generatePKCECodes();
+      Object.assign(state, codes);
+      await storage.set(stateKey, state); // note that the challenge is ALREADY encoded properly
+  
+      redirectParams.push("code_challenge=" + state.codeChallenge);
+      redirectParams.push("code_challenge_method=S256");
+    }
+  
     redirectUrl = state.authorizeUri + "?" + redirectParams.join("&");
 
     if (noRedirect) {
@@ -588,7 +631,7 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
         assert(code, "'code' url parameter is required");
 
         debug("Preparing to exchange the code for access token...");
-        const requestOptions = buildTokenRequest(env, code, state);
+        const requestOptions = await buildTokenRequest(env, code, state);
         debug("Token request options: %O", requestOptions);
 
         // The EHR authorization server SHALL return a JSON structure that
@@ -627,9 +670,9 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
  * Builds the token request options. Does not make the request, just
  * creates it's configuration and returns it in a Promise.
  */
-export function buildTokenRequest(env: fhirclient.Adapter, code: string, state: fhirclient.ClientState): RequestInit
+export async function buildTokenRequest(env: fhirclient.Adapter, code: string, state: fhirclient.ClientState): Promise<RequestInit>
 {
-    const { redirectUri, clientSecret, tokenUri, clientId } = state;
+    const { redirectUri, clientSecret, clientPublicKeySetUrl, clientPrivateJwk, tokenUri, clientId, codeVerifier } = state;
 
     assert(redirectUri, "Missing state.redirectUri");
     assert(tokenUri, "Missing state.tokenUri");
@@ -654,11 +697,43 @@ export function buildTokenRequest(env: fhirclient.Adapter, code: string, state: 
             clientId + ":" + clientSecret
         );
         debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
+    } else if (clientPrivateJwk) {
+        const clientPrivateKey = await jose.JWK.asKey(clientPrivateJwk);
+
+        const jwtHeaders = {
+            typ: "JWT",
+            kid: clientPrivateJwk.kid,
+            jku: clientPublicKeySetUrl
+        };
+
+        const jwtClaims = {
+            iss: clientId,
+            sub: clientId,
+            aud: tokenUri,
+            jti: jose.util.randomBytes(32).toString("hex"),
+            exp: getTimeInFuture(120) // two minutes in the future
+        };
+        
+        const clientAssertion = await jose.JWS
+            .createSign({format: "compact", fields: jwtHeaders}, clientPrivateKey)
+            .update(JSON.stringify(jwtClaims))
+            .final() as unknown as string;
+
+        requestOptions.body += `&client_assertion_type=${encodeURIComponent("urn:ietf:params:oauth:client-assertion-type:jwt-bearer")}`;
+        requestOptions.body += `&client_assertion=${encodeURIComponent(clientAssertion)}`;
+        debug("Using state.clientPrivateJwk to add a client_assertion to the POST body")
+
     } else {
-        debug("No clientSecret found in state. Adding the clientId to the POST body");
+        debug("Public client detected; adding state.clientId to the POST body");
         requestOptions.body += `&client_id=${encodeURIComponent(clientId)}`;
     }
 
+    if (codeVerifier) {
+      debug("Found state.codeVerifier, adding to the POST body")
+      // Note that the codeVerifier is ALREADY encoded properly  
+      requestOptions.body += "&code_verifier=" + codeVerifier;
+    }
+  
     return requestOptions as RequestInit;
 }
 

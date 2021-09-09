@@ -116,6 +116,14 @@ describe("Lib", () => {
         });
     });
 
+    describe("getTimeInFuture", () => {
+        it ("Add X seconds to a supplied date", () => {
+            const now = new Date();
+            const delta = 123;
+            expect(lib.getTimeInFuture(delta, now)).to.equal(Math.floor(now.getTime() / 1000) + delta);
+        })
+    });
+
     describe("getAccessTokenExpiration", () => {
 
         it ("Using expires_in in the browser", () => {

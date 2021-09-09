@@ -34,6 +34,8 @@ declare var window: MockWindow;
 describe("Browser tests", () => {
 
     let mockDataServer: any, mockUrl: string;
+    
+    const mockCodeChallengeMethods:string[] = ['S256'];
 
     before(() => {
         return new Promise((resolve, reject) => {
@@ -156,6 +158,73 @@ describe("Browser tests", () => {
             expect(client.getUserId()).to.equal("smart-Practitioner-71482713");
             expect(client.getUserType()).to.equal("Practitioner");
         });
+
+        it ("code flow with PKCE advertised", async () => {
+
+          const env = new BrowserEnv();
+          const Storage = env.getStorage();
+
+          // mock our oauth endpoints
+          mockServer.mock({
+              headers: { "content-type": "application/json" },
+              status: 200,
+              body: {
+                  authorization_endpoint: mockUrl,
+                  token_endpoint: mockUrl,
+                  code_challenge_methods_supported: mockCodeChallengeMethods
+              }
+          });
+
+          // Call our launch code.
+          await smart.authorize(env, {
+              iss: mockUrl,
+              launch: "123",
+              scope: "my_scope",
+              client_id: "my_client_id",
+          });
+
+          // Now we have been redirected to `redirect` and then back to our
+          // redirect_uri. It is time to complete the authorization.
+          const redirect = env.getUrl();
+
+          // Get the state parameter from the URL
+          const state = redirect.searchParams.get("state");
+
+          expect(await Storage.get(state), "must have set a state at " + state).to.exist();
+
+          // mock our access token response
+          mockServer.mock({
+              headers: { "content-type": "application/json" },
+              status: 200,
+              body: {
+                  "need_patient_banner": true,
+                  "smart_style_url": "https://launch.smarthealthit.org/smart-style.json",
+                  "patient": "b2536dd3-bccd-4d22-8355-ab20acdf240b",
+                  "encounter": "e3ec2d15-4c27-4607-a45c-2f84962b0700",
+                  "refresh_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjb250ZXh0Ijp7Im5lZWRfcGF0aWVudF9iYW5uZXIiOnRydWUsInNtYXJ0X3N0eWxlX3VybCI6Imh0dHBzOi8vbGF1bmNoLnNtYXJ0aGVhbHRoaXQub3JnL3NtYXJ0LXN0eWxlLmpzb24iLCJwYXRpZW50IjoiYjI1MzZkZDMtYmNjZC00ZDIyLTgzNTUtYWIyMGFjZGYyNDBiIiwiZW5jb3VudGVyIjoiZTNlYzJkMTUtNGMyNy00NjA3LWE0NWMtMmY4NDk2MmIwNzAwIn0sImNsaWVudF9pZCI6Im15X3dlYl9hcHAiLCJzY29wZSI6Im9wZW5pZCBmaGlyVXNlciBvZmZsaW5lX2FjY2VzcyB1c2VyLyouKiBwYXRpZW50LyouKiBsYXVuY2gvZW5jb3VudGVyIGxhdW5jaC9wYXRpZW50IHByb2ZpbGUiLCJ1c2VyIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MTQ4MjcxMyIsImlhdCI6MTU1OTEzODkxMywiZXhwIjoxNTkwNjc0OTE0fQ.-Ey7wdFSlmfoQrm7HNxAgJQBJPKdtfH7kL1Z91L60_8",
+                  "token_type": "bearer",
+                  "scope": "openid fhirUser offline_access user/*.* patient/*.* launch/encounter launch/patient profile",
+                  "client_id": "my_web_app",
+                  "expires_in": 3600,
+                  "id_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJwcm9maWxlIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MTQ4MjcxMyIsImZoaXJVc2VyIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MTQ4MjcxMyIsImF1ZCI6Im15X3dlYl9hcHAiLCJzdWIiOiJkYjIzZDBkZTI1Njc4ZTY3MDk5YmM0MzQzMjNkYzBkOTY1MTNiNTUyMmQ0Yjc0MWNiYTM5ZjdjOTJkMGM0NmFlIiwiaXNzIjoiaHR0cDovL2xhdW5jaC5zbWFydGhlYWx0aGl0Lm9yZyIsImlhdCI6MTU1OTEzODkxNCwiZXhwIjoxNTU5MTQyNTE0fQ.OtbIcs5nyEKaD2kAPasm1DYFixHvVbkC1wQys3oa3T-4Tf8wxW56hzUK0ZQeOK_gEIxiSFn9tLoUvKau_M1WRVD11FPyulvs1Q8EbG5PQ83MBudcpZQJ_uuFbVcGsDMy2xEa_8jAHkHPAVNjj8FRsQCRZC0Hfg0NbXli3yOhAFK1LqTUcrnjfwD-sak0UGQS1H6OgILnTYLrlTTIonfnWRdpWJjjIh3_GCk5k-8LU8AARaPcSE3ZhezoKTSfwQn1XO101g5h337pZleaIlFlhxPRFSKtpXz7BEezkUi5CJqN4d2qNoBK9kapljFYEVdPjRqaBnt4blmyFRXjhdMNwA",
+                  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJuZWVkX3BhdGllbnRfYmFubmVyIjp0cnVlLCJzbWFydF9zdHlsZV91cmwiOiJodHRwczovL2xhdW5jaC5zbWFydGhlYWx0aGl0Lm9yZy9zbWFydC1zdHlsZS5qc29uIiwicGF0aWVudCI6ImIyNTM2ZGQzLWJjY2QtNGQyMi04MzU1LWFiMjBhY2RmMjQwYiIsImVuY291bnRlciI6ImUzZWMyZDE1LTRjMjctNDYwNy1hNDVjLTJmODQ5NjJiMDcwMCIsInJlZnJlc2hfdG9rZW4iOiJleUowZVhBaU9pSktWMVFpTENKaGJHY2lPaUpJVXpJMU5pSjkuZXlKamIyNTBaWGgwSWpwN0ltNWxaV1JmY0dGMGFXVnVkRjlpWVc1dVpYSWlPblJ5ZFdVc0luTnRZWEowWDNOMGVXeGxYM1Z5YkNJNkltaDBkSEJ6T2k4dmJHRjFibU5vTG5OdFlYSjBhR1ZoYkhSb2FYUXViM0puTDNOdFlYSjBMWE4wZVd4bExtcHpiMjRpTENKd1lYUnBaVzUwSWpvaVlqSTFNelprWkRNdFltTmpaQzAwWkRJeUxUZ3pOVFV0WVdJeU1HRmpaR1l5TkRCaUlpd2laVzVqYjNWdWRHVnlJam9pWlRObFl6SmtNVFV0TkdNeU55MDBOakEzTFdFME5XTXRNbVk0TkRrMk1tSXdOekF3SW4wc0ltTnNhV1Z1ZEY5cFpDSTZJbTE1WDNkbFlsOWhjSEFpTENKelkyOXdaU0k2SW05d1pXNXBaQ0JtYUdseVZYTmxjaUJ2Wm1ac2FXNWxYMkZqWTJWemN5QjFjMlZ5THlvdUtpQndZWFJwWlc1MEx5b3VLaUJzWVhWdVkyZ3ZaVzVqYjNWdWRHVnlJR3hoZFc1amFDOXdZWFJwWlc1MElIQnliMlpwYkdVaUxDSjFjMlZ5SWpvaVVISmhZM1JwZEdsdmJtVnlMM050WVhKMExWQnlZV04wYVhScGIyNWxjaTAzTVRRNE1qY3hNeUlzSW1saGRDSTZNVFUxT1RFek9Ea3hNeXdpWlhod0lqb3hOVGt3TmpjME9URTBmUS4tRXk3d2RGU2xtZm9Rcm03SE54QWdKUUJKUEtkdGZIN2tMMVo5MUw2MF84IiwidG9rZW5fdHlwZSI6ImJlYXJlciIsInNjb3BlIjoib3BlbmlkIGZoaXJVc2VyIG9mZmxpbmVfYWNjZXNzIHVzZXIvKi4qIHBhdGllbnQvKi4qIGxhdW5jaC9lbmNvdW50ZXIgbGF1bmNoL3BhdGllbnQgcHJvZmlsZSIsImNsaWVudF9pZCI6Im15X3dlYl9hcHAiLCJleHBpcmVzX2luIjozNjAwLCJpZF90b2tlbiI6ImV5SjBlWEFpT2lKS1YxUWlMQ0poYkdjaU9pSlNVekkxTmlKOS5leUp3Y205bWFXeGxJam9pVUhKaFkzUnBkR2x2Ym1WeUwzTnRZWEowTFZCeVlXTjBhWFJwYjI1bGNpMDNNVFE0TWpjeE15SXNJbVpvYVhKVmMyVnlJam9pVUhKaFkzUnBkR2x2Ym1WeUwzTnRZWEowTFZCeVlXTjBhWFJwYjI1bGNpMDNNVFE0TWpjeE15SXNJbUYxWkNJNkltMTVYM2RsWWw5aGNIQWlMQ0p6ZFdJaU9pSmtZakl6WkRCa1pUSTFOamM0WlRZM01EazVZbU0wTXpRek1qTmtZekJrT1RZMU1UTmlOVFV5TW1RMFlqYzBNV05pWVRNNVpqZGpPVEprTUdNME5tRmxJaXdpYVhOeklqb2lhSFIwY0RvdkwyeGhkVzVqYUM1emJXRnlkR2hsWVd4MGFHbDBMbTl5WnlJc0ltbGhkQ0k2TVRVMU9URXpPRGt4TkN3aVpYaHdJam94TlRVNU1UUXlOVEUwZlEuT3RiSWNzNW55RUthRDJrQVBhc20xRFlGaXhIdlZia0Mxd1F5czNvYTNULTRUZjh3eFc1Nmh6VUswWlFlT0tfZ0VJeGlTRm45dExvVXZLYXVfTTFXUlZEMTFGUHl1bHZzMVE4RWJHNVBRODNNQnVkY3BaUUpfdXVGYlZjR3NETXkyeEVhXzhqQUhrSFBBVk5qajhGUnNRQ1JaQzBIZmcwTmJYbGkzeU9oQUZLMUxxVFVjcm5qZndELXNhazBVR1FTMUg2T2dJTG5UWUxybFRUSW9uZm5XUmRwV0pqakloM19HQ2s1ay04TFU4QUFSYVBjU0UzWmhlem9LVFNmd1FuMVhPMTAxZzVoMzM3cFpsZWFJbEZsaHhQUkZTS3RwWHo3QkVlemtVaTVDSnFONGQycU5vQks5a2FwbGpGWUVWZFBqUnFhQm50NGJsbXlGUlhqaGRNTndBIiwiaWF0IjoxNTU5MTM4OTE0LCJleHAiOjE1NTkxNDI1MTR9.lhfmhXYfoaI4QcJYvFnr2FMn_RHO8aXSzzkXzwNpc7w",
+                  "code": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjb250ZXh0Ijp7Im5lZWRfcGF0aWVudF9iYW5uZXIiOnRydWUsInNtYXJ0X3N0eWxlX3VybCI6Imh0dHBzOi8vbGF1bmNoLnNtYXJ0aGVhbHRoaXQub3JnL3NtYXJ0LXN0eWxlLmpzb24iLCJwYXRpZW50IjoiYjI1MzZkZDMtYmNjZC00ZDIyLTgzNTUtYWIyMGFjZGYyNDBiIiwiZW5jb3VudGVyIjoiZTNlYzJkMTUtNGMyNy00NjA3LWE0NWMtMmY4NDk2MmIwNzAwIn0sImNsaWVudF9pZCI6Im15X3dlYl9hcHAiLCJzY29wZSI6Im9wZW5pZCBmaGlyVXNlciBvZmZsaW5lX2FjY2VzcyB1c2VyLyouKiBwYXRpZW50LyouKiBsYXVuY2gvZW5jb3VudGVyIGxhdW5jaC9wYXRpZW50IHByb2ZpbGUiLCJ1c2VyIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MTQ4MjcxMyIsImlhdCI6MTU1OTEzODkxMywiZXhwIjoxNTU5MTM5MjEzfQ.G2dLcSnjpwM_joWTxWLfL48vhdlj3zGV9Os5cKREYcY",
+                  state
+              }
+          });
+
+          env.redirect("http://localhost/?code=123&state=" + state);
+          const client = await smart.completeAuth(env);
+
+          // make sure tha browser history was replaced
+          expect(window.history._location).to.equal("http://localhost/");
+
+          expect(await Storage.get(smart.KEY), `must have set a state at ${smart.KEY}`).to.exist();
+          expect(client.getPatientId()).to.equal("b2536dd3-bccd-4d22-8355-ab20acdf240b");
+          expect(client.getEncounterId()).to.equal("e3ec2d15-4c27-4607-a45c-2f84962b0700");
+          expect(client.getUserId()).to.equal("smart-Practitioner-71482713");
+          expect(client.getUserType()).to.equal("Practitioner");
+      });
 
         it ("code flow with fullSessionStorageSupport = false", async () => {
 
@@ -397,6 +466,189 @@ describe("Browser tests", () => {
     });
 
     describe("smart", () => {
+      describe('PKCE', () => {
+        it ("use when supported and required", async () => {
+          const env = new BrowserEnv();
+
+          // mock our oauth endpoints
+          mockServer.mock({
+              headers: { "content-type": "application/json" },
+              status: 200,
+              body: {
+                  authorization_endpoint: mockUrl,
+                  token_endpoint: mockUrl,
+                  code_challenge_methods_supported: mockCodeChallengeMethods
+              }
+          });
+
+          // Call our launch code.
+          await smart.authorize(env, {
+              iss: mockUrl,
+              launch: "123",
+              scope: "my_scope",
+              client_id: "my_client_id",
+              pkceMode: 'required',
+          });
+
+          // Now we have been redirected to `redirect` and then back to our
+          // redirect_uri. It is time to complete the authorization.
+          const redirect = env.getUrl();
+
+          expect(redirect.searchParams.has('code_challenge')).to.equal(true);
+          expect(redirect.searchParams.has('code_challenge_method')).to.equal(true);
+          expect(redirect.searchParams.get('code_challenge_method')).to.equal(mockCodeChallengeMethods[0]);
+        });
+
+        it ("fail when not supported and required", async () => {
+          const env = new BrowserEnv();
+
+          // mock our oauth endpoints
+          mockServer.mock({
+              headers: { "content-type": "application/json" },
+              status: 200,
+              body: {
+                  authorization_endpoint: mockUrl,
+                  token_endpoint: mockUrl,
+                  code_challenge_methods_supported: []
+              }
+          });
+
+          await expect(
+            smart.authorize(env, {
+              iss: mockUrl,
+              launch: "123",
+              scope: "my_scope",
+              client_id: "my_client_id",
+              pkceMode: 'required',
+            }))
+            .to.reject(Error, /PKCE/);
+          });
+
+          it ("use when supported and optional", async () => {
+            const env = new BrowserEnv();
+
+            // mock our oauth endpoints
+            mockServer.mock({
+                headers: { "content-type": "application/json" },
+                status: 200,
+                body: {
+                    authorization_endpoint: mockUrl,
+                    token_endpoint: mockUrl,
+                    code_challenge_methods_supported: mockCodeChallengeMethods
+                }
+            });
+
+            // Call our launch code.
+            await smart.authorize(env, {
+                iss: mockUrl,
+                launch: "123",
+                scope: "my_scope",
+                client_id: "my_client_id",
+                pkceMode: 'ifSupported',
+            });
+
+            // Now we have been redirected to `redirect` and then back to our
+            // redirect_uri. It is time to complete the authorization.
+            const redirect = env.getUrl();
+
+            expect(redirect.searchParams.has('code_challenge')).to.equal(true);
+            expect(redirect.searchParams.has('code_challenge_method')).to.equal(true);
+            expect(redirect.searchParams.get('code_challenge_method')).to.equal(mockCodeChallengeMethods[0]);
+          });
+
+          it ("do not use when not supported and optional", async () => {
+            const env = new BrowserEnv();
+
+            // mock our oauth endpoints
+            mockServer.mock({
+                headers: { "content-type": "application/json" },
+                status: 200,
+                body: {
+                    authorization_endpoint: mockUrl,
+                    token_endpoint: mockUrl,
+                    code_challenge_methods_supported: []
+                }
+            });
+
+            // Call our launch code.
+            await smart.authorize(env, {
+                iss: mockUrl,
+                launch: "123",
+                scope: "my_scope",
+                client_id: "my_client_id",
+                pkceMode: 'ifSupported',
+            });
+
+            // Now we have been redirected to `redirect` and then back to our
+            // redirect_uri. It is time to complete the authorization.
+            const redirect = env.getUrl();
+
+            expect(redirect.searchParams.has('code_challenge')).to.equal(false);
+            expect(redirect.searchParams.has('code_challenge_method')).to.equal(false);
+          });
+
+          it ("do not use when supported and disabled", async () => {
+            const env = new BrowserEnv();
+
+            // mock our oauth endpoints
+            mockServer.mock({
+                headers: { "content-type": "application/json" },
+                status: 200,
+                body: {
+                    authorization_endpoint: mockUrl,
+                    token_endpoint: mockUrl,
+                    code_challenge_methods_supported: mockCodeChallengeMethods
+                }
+            });
+
+            // Call our launch code.
+            await smart.authorize(env, {
+                iss: mockUrl,
+                launch: "123",
+                scope: "my_scope",
+                client_id: "my_client_id",
+                pkceMode: 'disabled',
+            });
+
+            // Now we have been redirected to `redirect` and then back to our
+            // redirect_uri. It is time to complete the authorization.
+            const redirect = env.getUrl();
+
+            expect(redirect.searchParams.has('code_challenge')).to.equal(false);
+            expect(redirect.searchParams.has('code_challenge_method')).to.equal(false);
+          });
+
+          it ("do not use when not supported and disabled", async () => {
+            const env = new BrowserEnv();
+
+            // mock our oauth endpoints
+            mockServer.mock({
+                headers: { "content-type": "application/json" },
+                status: 200,
+                body: {
+                    authorization_endpoint: mockUrl,
+                    token_endpoint: mockUrl,
+                    code_challenge_methods_supported: []
+                }
+            });
+
+            // Call our launch code.
+            await smart.authorize(env, {
+                iss: mockUrl,
+                launch: "123",
+                scope: "my_scope",
+                client_id: "my_client_id",
+                pkceMode: 'ifSupported',
+            });
+
+            // Now we have been redirected to `redirect` and then back to our
+            // redirect_uri. It is time to complete the authorization.
+            const redirect = env.getUrl();
+
+            expect(redirect.searchParams.has('code_challenge')).to.equal(false);
+            expect(redirect.searchParams.has('code_challenge_method')).to.equal(false);
+          });
+        });
 
         describe("fetchWellKnownJson", () => {
             it("works", async () => {
@@ -445,11 +697,33 @@ describe("Browser tests", () => {
 
                 const result = await smart.getSecurityExtensions(new BrowserEnv(), mockUrl);
                 expect(result).to.equal({
-                    registrationUri : "https://my-register-uri",
-                    authorizeUri    : "https://my-authorize-uri",
-                    tokenUri        : "https://my-token-uri"
+                    registrationUri     : "https://my-register-uri",
+                    authorizeUri        : "https://my-authorize-uri",
+                    tokenUri            : "https://my-token-uri",
+                    codeChallengeMethods: []
                 });
             });
+
+            it("works with .well-known/smart-configuration - PKCE advertised", async () => {
+              mockServer.mock({
+                  headers: { "content-type": "application/json" },
+                  status: 200,
+                  body: {
+                      registration_endpoint           : "https://my-register-uri",
+                      authorization_endpoint          : "https://my-authorize-uri",
+                      token_endpoint                  : "https://my-token-uri",
+                      code_challenge_methods_supported: mockCodeChallengeMethods,
+                  }
+              });
+
+              const result = await smart.getSecurityExtensions(new BrowserEnv(), mockUrl);
+              expect(result).to.equal({
+                  registrationUri     : "https://my-register-uri",
+                  authorizeUri        : "https://my-authorize-uri",
+                  tokenUri            : "https://my-token-uri",
+                  codeChallengeMethods: ['S256'],
+              });
+          });
 
             it("fails back to conformance if .well-known/smart-configuration is bad", async () => {
                 mockServer.mock({
@@ -493,9 +767,10 @@ describe("Browser tests", () => {
 
                 const result = await smart.getSecurityExtensions(new BrowserEnv(), mockUrl);
                 expect(result).to.equal({
-                    registrationUri : "https://my-registration-uri",
-                    authorizeUri    : "https://my-authorize-uri",
-                    tokenUri        : "https://my-token-uri"
+                    registrationUri     : "https://my-registration-uri",
+                    authorizeUri        : "https://my-authorize-uri",
+                    tokenUri            : "https://my-token-uri",
+                    codeChallengeMethods: [],
                 });
             });
 
@@ -537,9 +812,10 @@ describe("Browser tests", () => {
 
                 const result = await smart.getSecurityExtensions(new BrowserEnv(), mockUrl);
                 expect(result).to.equal({
-                    registrationUri : "",
-                    authorizeUri    : "https://my-authorize-uri",
-                    tokenUri        : "https://my-token-uri"
+                    registrationUri     : "",
+                    authorizeUri        : "https://my-authorize-uri",
+                    tokenUri            : "https://my-token-uri",
+                    codeChallengeMethods: [],
                 });
             });
 
@@ -556,9 +832,10 @@ describe("Browser tests", () => {
 
                 const result = await smart.getSecurityExtensions(new BrowserEnv(), mockUrl);
                 expect(result).to.equal({
-                    registrationUri : "",
-                    authorizeUri    : "",
-                    tokenUri        : ""
+                    registrationUri     : "",
+                    authorizeUri        : "",
+                    tokenUri            : "",
+                    codeChallengeMethods: [],
                 });
             });
 
@@ -575,9 +852,10 @@ describe("Browser tests", () => {
 
                 const result = await smart.getSecurityExtensions(new BrowserEnv(), mockUrl);
                 expect(result).to.equal({
-                    registrationUri : "",
-                    authorizeUri    : "",
-                    tokenUri        : ""
+                    registrationUri     : "",
+                    authorizeUri        : "",
+                    tokenUri            : "",
+                    codeChallengeMethods: [],
                 });
             });
 
@@ -1017,24 +1295,40 @@ describe("Browser tests", () => {
 
             it ("rejects with missing state.redirectUri", () => {
                 // @ts-ignore
-                expect(() => smart.buildTokenRequest(new BrowserEnv(), "whatever", {}))
-                    .to.throw(Error, "Missing state.redirectUri");
+                expect(smart.buildTokenRequest(new BrowserEnv(), "whatever", {}))
+                    .to.reject("Missing state.redirectUri");
             });
             it ("rejects with missing state.tokenUri", () => {
                 // @ts-ignore
-                expect(() => smart.buildTokenRequest(new BrowserEnv(), "whatever", {
+                expect(smart.buildTokenRequest(new BrowserEnv(), "whatever", {
                     redirectUri: "whatever"
-                })).to.throw(Error, "Missing state.tokenUri");
+                })).to.reject("Missing state.tokenUri");
             });
             it ("rejects with missing state.clientId", () => {
                 // @ts-ignore
-                expect(() => smart.buildTokenRequest(new BrowserEnv(), "whatever", {
+                expect(smart.buildTokenRequest(new BrowserEnv(), "whatever", {
                     redirectUri: "whatever",
                     tokenUri: "whatever"
-                })).to.throw(Error, "Missing state.clientId");
+                })).to.reject("Missing state.clientId");
             });
 
-        });
+            it("uses state.codeVerifier", async () => {
+              const requestOptions = await smart.buildTokenRequest(
+                new BrowserEnv(),
+                "whatever",
+                {
+                  serverUrl: 'whatever',
+                  redirectUri: 'whatever',
+                  tokenUri: 'whatever',
+                  clientId: 'whatever',
+                  codeVerifier: 'whatever',
+                });
+
+              expect(requestOptions.body).to.exist();
+              expect(requestOptions.body).to.contain('&code_verifier=');
+            });
+
+    });
 
         describe("init", () => {
             it ("works in standalone mode", async () => {
