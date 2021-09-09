@@ -151,14 +151,14 @@ function any(tasks: Task[]): Promise<any> {
  /**
   * Generates a code_verifier and code_challenge, as specified in rfc7636.
   */
- function generatePKCECodes() {
+ async function generatePKCECodes(): Promise<{codeChallenge: string, codeVerifier: string}> {
   var inputBytes:Buffer = jose.util.randomBytes(RECOMMENDED_CODE_VERIFIER_LENGTH);
    var codeVerifier:string = jose.util.base64url.encode(inputBytes);
-   jose.JWA.digest('SHA-256', codeVerifier).then(function(code:Buffer) {
-     return {
-     codeChallenge: jose.util.base64url.encode(code),
+   const codeBuffer = await jose.JWA.digest('SHA-256', codeVerifier);
+    return {
+     codeChallenge: jose.util.base64url.encode(codeBuffer),
      codeVerifier: codeVerifier,
-   }});
+   };
  }
 
 /**
