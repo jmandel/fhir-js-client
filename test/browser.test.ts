@@ -1295,25 +1295,25 @@ describe("Browser tests", () => {
 
             it ("rejects with missing state.redirectUri", () => {
                 // @ts-ignore
-                expect(() => smart.buildTokenRequest(new BrowserEnv(), "whatever", {}))
-                    .to.throw(Error, "Missing state.redirectUri");
+                expect(smart.buildTokenRequest(new BrowserEnv(), "whatever", {}))
+                    .to.reject("Missing state.redirectUri");
             });
             it ("rejects with missing state.tokenUri", () => {
                 // @ts-ignore
-                expect(() => smart.buildTokenRequest(new BrowserEnv(), "whatever", {
+                expect(smart.buildTokenRequest(new BrowserEnv(), "whatever", {
                     redirectUri: "whatever"
-                })).to.throw(Error, "Missing state.tokenUri");
+                })).to.reject("Missing state.tokenUri");
             });
             it ("rejects with missing state.clientId", () => {
                 // @ts-ignore
-                expect(() => smart.buildTokenRequest(new BrowserEnv(), "whatever", {
+                expect(smart.buildTokenRequest(new BrowserEnv(), "whatever", {
                     redirectUri: "whatever",
                     tokenUri: "whatever"
-                })).to.throw(Error, "Missing state.clientId");
+                })).to.reject("Missing state.clientId");
             });
 
-            it("uses state.codeVerifier", () => {
-              const requestOptions = smart.buildTokenRequest(
+            it("uses state.codeVerifier", async () => {
+              const requestOptions = await smart.buildTokenRequest(
                 new BrowserEnv(),
                 "whatever",
                 {
@@ -1327,7 +1327,8 @@ describe("Browser tests", () => {
               expect(requestOptions.body).to.exist();
               expect(requestOptions.body).to.contain('&code_verifier=');
             });
-        });
+
+    });
 
         describe("init", () => {
             it ("works in standalone mode", async () => {

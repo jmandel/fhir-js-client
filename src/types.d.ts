@@ -3,6 +3,7 @@
 import Client from "./Client";
 import { getPath, byCodes, byCode } from "./lib";
 import { IncomingMessage } from "http";
+import { JWK } from "node-jose";
 
 // tslint:disable-next-line: no-namespace
 declare namespace fhirclient {
@@ -334,7 +335,18 @@ declare namespace fhirclient {
         scope?: string;
 
         /**
-         * Your client secret if you have one (for confidential clients)
+         * Your client public JWKS url if you have one
+         * (for asymmetric confidential clients that have registereed a JWKS URL)
+         */
+        clientPublicKeySetUrl?:  AuthorizeParams['clientPublicKeySetUrl'];
+
+        /**
+         * Your client private JWK if you have one (for asymmetric confidential clients)
+         */
+        clientPrivateJwk?:  AuthorizeParams['clientPrivateJwk'];
+
+        /**
+         * Your client secret if you have one (for symmetric confidential clients)
          */
         clientSecret?: string;
 
@@ -515,6 +527,24 @@ declare namespace fhirclient {
          * browsers are considered incapable of keeping a secret.
          */
         clientSecret?: string;
+
+        /**
+         * If you have registered a confidential client and you host your public
+         * key online, you can pass your JWKS URL here **Note: ONLY use this on the server**, as the
+         * browsers are considered incapable of keeping a secret.
+         */
+        clientPublicKeySetUrl?: string; 
+
+        /**
+         * If you have registered a confidential client, you should pass your
+         * `clientPrivateJwk` here. **Note: ONLY use this on the server**, as the
+         * browsers are considered incapable of keeping a secret.
+         */
+         clientPrivateJwk?: { kid: string; kty: string, [k: string]: string } & (
+             {kty: "EC", alg: "ES384", crv: "P-384"} | 
+             {kty: "RSA", alg: "RS384" }
+        );
+
 
         /**
          * Useful for testing. This object can contain any properties that are
@@ -790,7 +820,7 @@ declare namespace fhirclient {
 
     type codeChallengeMethod = "S256";
 
-    type SMARTAuthenticationMethod = "client_secret_post" | "client_secret_basic";
+    type SMARTAuthenticationMethod = "client_secret_post" | "client_secret_basic" | "private_key_jwt";
 
     type launchMode = "launch-ehr" | "launch-standalone";
 

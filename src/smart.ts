@@ -3,6 +3,7 @@ import {
     debug as _debug,
     request,
     getPath,
+    getTimeInFuture,
     randomString,
     getAndCache,
     fetchConformanceStatement,
@@ -14,8 +15,8 @@ import Client from "./Client";
 import { SMART_KEY } from "./settings";
 import { fhirclient } from "./types";
 
-//import * as jose from 'node-jose';
-var jose = require('node-jose');
+import * as jose from 'node-jose';
+//var jose = require('node-jose');
 
 const debug = _debug.extend("oauth2");
 
@@ -150,14 +151,14 @@ function any(tasks: Task[]): Promise<any> {
  /**
   * Generates a code_verifier and code_challenge, as specified in rfc7636.
   */
- function generatePKCECodes() {
+ async function generatePKCECodes(): Promise<{codeChallenge: string, codeVerifier: string}> {
   var inputBytes:Buffer = jose.util.randomBytes(RECOMMENDED_CODE_VERIFIER_LENGTH);
    var codeVerifier:string = jose.util.base64url.encode(inputBytes);
-   jose.JWA.digest('SHA-256', codeVerifier).then(function(code:Buffer) {
-     return {
-     codeChallenge: jose.util.base64url.encode(code),
+   const codeBuffer = await jose.JWA.digest('SHA-256', codeVerifier);
+    return {
+     codeChallenge: jose.util.base64url.encode(codeBuffer),
      codeVerifier: codeVerifier,
-   }});
+   };
  }
 
 /**
@@ -237,6 +238,7 @@ export async function authorize(
     const {
         redirect_uri,
         clientSecret,
+        clientPrivateJwk,
         fakeTokenResponse,
         patientId,
         encounterId,
@@ -335,6 +337,7 @@ export async function authorize(
         redirectUri,
         serverUrl,
         clientSecret,
+        clientPrivateJwk,
         tokenResponse: {},
         key: stateKey,
         completeInTarget
@@ -628,7 +631,7 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
         assert(code, "'code' url parameter is required");
 
         debug("Preparing to exchange the code for access token...");
-        const requestOptions = buildTokenRequest(env, code, state);
+        const requestOptions = await buildTokenRequest(env, code, state);
         debug("Token request options: %O", requestOptions);
 
         // The EHR authorization server SHALL return a JSON structure that
@@ -667,9 +670,9 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
  * Builds the token request options. Does not make the request, just
  * creates it's configuration and returns it in a Promise.
  */
-export function buildTokenRequest(env: fhirclient.Adapter, code: string, state: fhirclient.ClientState): RequestInit
+export async function buildTokenRequest(env: fhirclient.Adapter, code: string, state: fhirclient.ClientState): Promise<RequestInit>
 {
-    const { redirectUri, clientSecret, tokenUri, clientId, codeVerifier } = state;
+    const { redirectUri, clientSecret, clientPublicKeySetUrl, clientPrivateJwk, tokenUri, clientId, codeVerifier } = state;
 
     assert(redirectUri, "Missing state.redirectUri");
     assert(tokenUri, "Missing state.tokenUri");
@@ -694,8 +697,34 @@ export function buildTokenRequest(env: fhirclient.Adapter, code: string, state: 
             clientId + ":" + clientSecret
         );
         debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
+    } else if (clientPrivateJwk) {
+        const clientPrivateKey = await jose.JWK.asKey(clientPrivateJwk);
+
+        const jwtHeaders = {
+            typ: "JWT",
+            kid: clientPrivateJwk.kid,
+            jku: clientPublicKeySetUrl
+        };
+
+        const jwtClaims = {
+            iss: clientId,
+            sub: clientId,
+            aud: tokenUri,
+            jti: jose.util.randomBytes(32).toString("hex"),
+            exp: getTimeInFuture(120) // two minutes in the future
+        };
+        
+        const clientAssertion = await jose.JWS
+            .createSign({format: "compact", fields: jwtHeaders}, clientPrivateKey)
+            .update(JSON.stringify(jwtClaims))
+            .final() as unknown as string;
+
+        requestOptions.body += `&client_assertion_type=${encodeURIComponent("urn:ietf:params:oauth:client-assertion-type:jwt-bearer")}`;
+        requestOptions.body += `&client_assertion=${encodeURIComponent(clientAssertion)}`;
+        debug("Using state.clientPrivateJwk to add a client_assertion to the POST body")
+
     } else {
-        debug("No clientSecret found in state. Adding the clientId to the POST body");
+        debug("Public client detected; adding state.clientId to the POST body");
         requestOptions.body += `&client_id=${encodeURIComponent(clientId)}`;
     }
 
