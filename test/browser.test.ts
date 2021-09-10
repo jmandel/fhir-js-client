@@ -1341,11 +1341,7 @@ describe("Browser tests", () => {
                     }
                 });
 
-                mockServer.mock({
-                    status: 404
-                });
-
-                mockServer.mock({
+               mockServer.mock({
                     headers: { "content-type": "application/json" },
                     status: 200,
                     body: {
@@ -1417,11 +1413,7 @@ describe("Browser tests", () => {
                     }
                 });
 
-                mockServer.mock({
-                    status: 404
-                });
-
-                mockServer.mock({
+               mockServer.mock({
                     headers: { "content-type": "application/json" },
                     status: 200,
                     body: {

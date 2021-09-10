@@ -171,21 +171,9 @@ function any(tasks: Task[]): Promise<any> {
  */
 export function getSecurityExtensions(env: fhirclient.Adapter, baseUrl = "/"): Promise<fhirclient.OAuthSecurityExtensions>
 {
-    const AbortController = env.getAbortController();
-    const abortController1 = new AbortController();
-    const abortController2 = new AbortController();
-
-    return any([{
-        controller: abortController1,
-        promise: getSecurityExtensionsFromWellKnownJson(baseUrl, {
-            signal: abortController1.signal
-        })
-    }, {
-        controller: abortController2,
-        promise: getSecurityExtensionsFromConformanceStatement(baseUrl, {
-            signal: abortController2.signal
-        })
-    }]);
+    console.log("Getting sec extension", baseUrl)
+    return getSecurityExtensionsFromWellKnownJson(baseUrl)
+        .catch(e => getSecurityExtensionsFromConformanceStatement(baseUrl));
 }
 
 /**
