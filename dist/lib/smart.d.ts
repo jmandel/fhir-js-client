@@ -60,7 +60,7 @@ export declare function completeAuth(env: fhirclient.Adapter): Promise<Client>;
  * Builds the token request options. Does not make the request, just
  * creates it's configuration and returns it in a Promise.
  */
-export declare function buildTokenRequest(env: fhirclient.Adapter, code: string, state: fhirclient.ClientState): RequestInit;
+export declare function buildTokenRequest(env: fhirclient.Adapter, code: string, state: fhirclient.ClientState): Promise<RequestInit>;
 /**
  * @param env
  * @param [onSuccess]

@@ -18,7 +18,7 @@ var __rest = void 0 && (void 0).__rest || function (s, e) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.assertJsonPatch = exports.assert = exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.getAccessTokenExpiration = exports.jwtDecode = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
+exports.assertJsonPatch = exports.assert = exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.getAccessTokenExpiration = exports.getTimeInFuture = exports.jwtDecode = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
 
 const HttpError_1 = require("./HttpError");
 
@@ -363,6 +363,18 @@ function jwtDecode(token, env) {
 }
 
 exports.jwtDecode = jwtDecode;
+/**
+ * Add a supplied number of seconds to the supplied Date, returning
+ * an integer number of seconds since the epoch
+ * @param secondsAhead How far ahead, in seconds (defaults to 120 seconds)
+ * @param fromDate Initial time (defaults to current time)
+ */
+
+function getTimeInFuture(secondsAhead = 120, from = new Date()) {
+  return Math.floor(from.getTime() / 1000 + secondsAhead);
+}
+
+exports.getTimeInFuture = getTimeInFuture;
 /**
  * Given a token response, computes and returns the expiresAt timestamp.
  * Note that this should only be used immediately after an access token is
