@@ -1,11 +1,43 @@
 import base64url from 'base64url'
 import { webcrypto } from 'crypto'
+import { randomBytes as cryptoRandomBytes } from 'crypto'
 
-const wcrypto: SubtleCrypto = typeof window !== 'undefined' ?
+const RECOMMENDED_CODE_VERIFIER_LENGTH = 96;
+
+const wcrypto: SubtleCrypto = typeof window !== 'undefined' && window?.crypto?.subtle ?
      window.crypto.subtle
      : (webcrypto as any).subtle as SubtleCrypto;
 
 type JWSAlg = 'ES384' | 'RS384'
+
+export const digestSha256 = async (payload: string | ArrayBuffer) => {
+  let prepared: ArrayBuffer;
+
+  if (typeof payload === 'string') {
+    const encoder = new TextEncoder();
+    prepared = encoder.encode(payload).buffer;
+  } else {
+      prepared = payload
+  }
+
+  const hash = await wcrypto.digest('SHA-256', prepared);
+  return hash;
+}
+
+export const randomBytes = (count: number): Uint8Array => {
+  if (typeof window !== 'undefined' && window?.crypto?.getRandomValues) {
+    return window.crypto.getRandomValues(new Uint8Array(count));
+  } else {
+    return cryptoRandomBytes(count);
+  }
+}
+
+export const generatePKCEChallenge = async ():Promise<{codeChallenge: string, codeVerifier: string}> =>  {
+  const inputBytes = randomBytes(RECOMMENDED_CODE_VERIFIER_LENGTH);
+  const codeVerifier = base64url.encode(inputBytes as Buffer);
+  const codeChallenge = new TextDecoder().decode(await digestSha256(codeVerifier));
+  return {codeChallenge, codeVerifier}
+}
 
 const algs: Record<JWSAlg, RsaHashedKeyGenParams | EcKeyGenParams> = {
      "ES384":{name: "ECDSA", namedCurve: "P-384"} ,
@@ -15,7 +47,11 @@ const algs: Record<JWSAlg, RsaHashedKeyGenParams | EcKeyGenParams> = {
 const generateKey = async (jwsAlg: JWSAlg): Promise<CryptoKeyPair> =>
     wcrypto.generateKey(algs[jwsAlg], true, ["sign"]) as unknown as CryptoKeyPair
 
-const signCompactJws = async (privateKey: CryptoKey, header: any, payload: any): Promise<string> => {
+export const importKey = async (jwk: {alg: JWSAlg}): Promise<CryptoKey> =>
+    wcrypto.importKey("jwk", jwk, algs[jwk.alg], true, ['sign'])
+
+
+export const signCompactJws = async (privateKey: CryptoKey, header: any, payload: any): Promise<string> => {
     const jwsAlgs = Object.entries(algs).filter(([k, v]) => v.name=== privateKey.algorithm.name).map(([k,v]) => k);
     if (jwsAlgs.length !== 1) {
         throw "No JWS alg for " + privateKey.algorithm.name
@@ -35,6 +71,10 @@ const signCompactJws = async (privateKey: CryptoKey, header: any, payload: any):
     return jwt
 }
 
+// TODO: replace with a library that decodes to a byte array or similar rather than a string
+export const base64urlencode = (v: Uint8Array | Buffer): string => base64url.encode(v as Buffer)
+export const base64urldecode = (v: string): Uint8Array => Buffer.from(base64url.decode(v))
+
 async function test(){
     const esk = await generateKey('ES384');
     console.log(await signCompactJws(esk.privateKey!, {'jwku': 'sure'}, {iss: "issuer"}))
@@ -46,5 +86,3 @@ async function test(){
     const publicJwkR = await wcrypto.exportKey("jwk", rsk.publicKey!);
     console.log(JSON.stringify(publicJwkR))
 }
-
-test()

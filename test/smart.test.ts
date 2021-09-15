@@ -84,7 +84,7 @@ describe("smart", () => {
                 {
                     ...defaultStateAsymmetricAuth(),
                     clientPrivateJwk: { bad: true } as any
-                })).to.reject("unsupported key type");
+                })).to.reject();
         });
 
     });

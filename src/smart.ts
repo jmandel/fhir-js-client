@@ -14,9 +14,7 @@ import {
 import Client from "./Client";
 import { SMART_KEY } from "./settings";
 import { fhirclient } from "./types";
-
-import * as jose from 'node-jose';
-//var jose = require('node-jose');
+import * as security from "./security/index"
 
 const debug = _debug.extend("oauth2");
 
@@ -147,19 +145,6 @@ function any(tasks: Task[]): Promise<any> {
  * a max length of 128, we get: 128/4 = 32; 32*3 = 96 bytes for a max input.
  */
  var RECOMMENDED_CODE_VERIFIER_LENGTH = 96;
-
- /**
-  * Generates a code_verifier and code_challenge, as specified in rfc7636.
-  */
- async function generatePKCECodes(): Promise<{codeChallenge: string, codeVerifier: string}> {
-  var inputBytes:Buffer = jose.util.randomBytes(RECOMMENDED_CODE_VERIFIER_LENGTH);
-   var codeVerifier:string = jose.util.base64url.encode(inputBytes);
-   const codeBuffer = await jose.JWA.digest('SHA-256', codeVerifier);
-    return {
-     codeChallenge: jose.util.base64url.encode(codeBuffer),
-     codeVerifier: codeVerifier,
-   };
- }
 
 /**
  * Given a FHIR server, returns an object with it's Oauth security endpoints
@@ -399,7 +384,7 @@ export async function authorize(
     }
 
     if ((pkceMode !== 'disabled') && (extensions.codeChallengeMethods.includes('S256'))) {
-      let codes = await generatePKCECodes();
+      let codes = await security.generatePKCEChallenge()
       Object.assign(state, codes);
       await storage.set(stateKey, state); // note that the challenge is ALREADY encoded properly
   
@@ -686,7 +671,7 @@ export async function buildTokenRequest(env: fhirclient.Adapter, code: string, s
         );
         debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
     } else if (clientPrivateJwk) {
-        const clientPrivateKey = await jose.JWK.asKey(clientPrivateJwk);
+        const clientPrivateKey = await security.importKey(clientPrivateJwk)
 
         const jwtHeaders = {
             typ: "JWT",
@@ -698,15 +683,11 @@ export async function buildTokenRequest(env: fhirclient.Adapter, code: string, s
             iss: clientId,
             sub: clientId,
             aud: tokenUri,
-            jti: jose.util.randomBytes(32).toString("hex"),
+            jti: security.base64urlencode(security.randomBytes(32)),
             exp: getTimeInFuture(120) // two minutes in the future
         };
         
-        const clientAssertion = await jose.JWS
-            .createSign({format: "compact", fields: jwtHeaders}, clientPrivateKey)
-            .update(JSON.stringify(jwtClaims))
-            .final() as unknown as string;
-
+        const clientAssertion = await security.signCompactJws(clientPrivateKey, jwtHeaders, jwtClaims);
         requestOptions.body += `&client_assertion_type=${encodeURIComponent("urn:ietf:params:oauth:client-assertion-type:jwt-bearer")}`;
         requestOptions.body += `&client_assertion=${encodeURIComponent(clientAssertion)}`;
         debug("Using state.clientPrivateJwk to add a client_assertion to the POST body")
