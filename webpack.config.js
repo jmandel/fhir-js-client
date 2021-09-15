@@ -20,8 +20,12 @@ const BASE_CONFIG = {
         sideEffects: true
     },
     resolve: {
-        extensions: [".ts", ".js"]
-    }
+        extensions: [".ts", ".js"],
+    },
+    plugins: [
+        new DefinePlugin({ "IS_BROWSER": true }),
+    ]
+ 
 };
 
 const PURE_DEV_BUILD = merge(BASE_CONFIG, {
