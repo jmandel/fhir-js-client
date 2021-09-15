@@ -19,10 +19,12 @@
     "@types/hapi": "^18.0.3",
     "@types/node-jose": "^1.1.8",
     "abortcontroller-polyfill": "^1.5.0",
+    "base64url": "^3.0.1",
     "core-js": "^3.6.5",
     "cross-fetch": "^3.0.5",
     "debug": "^4.1.1",
-    "node-jose": "^2.0.0"
+    "node-jose": "^2.0.0",
+    "ts-node": "^10.2.1"
   },
   "scripts": {
     "test-only": "lab ",
@@ -45,7 +47,7 @@
     "@types/debug": "^4.1.5",
     "@types/express": "^4.17.8",
     "@types/jsonwebtoken": "^8.5.1",
-    "@types/node": "^13.13.16",
+    "@types/node": "^16.9.1",
     "babel-loader": "^8.1.0",
     "babel-polyfill": "^6.26.0",
     "cors": "^2.8.5",
