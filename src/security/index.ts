@@ -37,8 +37,8 @@ export const randomBytes = (count: number): Uint8Array => {
 const RECOMMENDED_CODE_VERIFIER_ENTROPY = 96;
 export const generatePKCEChallenge = async (entropy = RECOMMENDED_CODE_VERIFIER_ENTROPY):Promise<{codeChallenge: string, codeVerifier: string}> =>  {
   const inputBytes = randomBytes(entropy);
-  const codeVerifier = base64url.encode(inputBytes as Buffer);
-  const codeChallenge = new TextDecoder().decode(await digestSha256(codeVerifier));
+  const codeVerifier = base64urlencode(inputBytes);
+  const codeChallenge = base64urlencode(await digestSha256(codeVerifier));
   return {codeChallenge, codeVerifier}
 }
 
@@ -75,7 +75,7 @@ export const signCompactJws = async (privateKey: CryptoKey, header: any, payload
 }
 
 // TODO: replace with a library that decodes to a byte array or similar rather than a string
-export const base64urlencode = (v: Uint8Array | Buffer): string => base64url.encode(v as Buffer)
+export const base64urlencode = (v: Uint8Array | Buffer| ArrayBuffer): string =>  base64url.encode(Buffer.from(v))
 export const base64urldecode = (v: string): Uint8Array => Buffer.from(base64url.decode(v))
 
 async function test(){
