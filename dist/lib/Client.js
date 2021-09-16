@@ -1,8 +1,8 @@
 "use strict";
 
-require("core-js/modules/es.array.flat");
+require("core-js/modules/es.array.sort.js");
 
-require("core-js/modules/es.array.unscopables.flat");
+require("core-js/modules/es.array.flat.js");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
