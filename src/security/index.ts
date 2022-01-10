@@ -5,7 +5,7 @@ declare var IS_BROWSER: boolean;
 let wcrypto: SubtleCrypto;
 let cryptoRandomBytes: (count: number) => Uint8Array;
 
-if (typeof IS_BROWSER == 'undefined') {
+if (typeof IS_BROWSER == 'undefined' && (typeof window === 'undefined' || !window?.crypto?.subtle)) {
   wcrypto =  require('crypto').webcrypto.subtle
   cryptoRandomBytes = require('crypto').randomBytes
 } else {

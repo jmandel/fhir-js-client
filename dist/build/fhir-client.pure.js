@@ -5181,6 +5181,8 @@ exports.assertJsonPatch = assertJsonPatch;
 "use strict";
 /* WEBPACK VAR INJECTION */(function(Buffer) {
 
+var _a;
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });

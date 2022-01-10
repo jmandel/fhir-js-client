@@ -2,6 +2,8 @@
 
 require("core-js/modules/es.typed-array.sort.js");
 
+var _a;
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -12,7 +14,7 @@ const base64url_1 = require("base64url");
 let wcrypto;
 let cryptoRandomBytes;
 
-if (typeof IS_BROWSER == 'undefined') {
+if (typeof IS_BROWSER == 'undefined' && (typeof window === 'undefined' || !((_a = window === null || window === void 0 ? void 0 : window.crypto) === null || _a === void 0 ? void 0 : _a.subtle))) {
   wcrypto = require('crypto').webcrypto.subtle;
   cryptoRandomBytes = require('crypto').randomBytes;
 } else {
