@@ -20,7 +20,8 @@
     "base64url": "^3.0.1",
     "core-js": "^3.6.5",
     "cross-fetch": "^3.0.5",
-    "debug": "^4.1.1"
+    "debug": "^4.1.1",
+    "jose": "^4.6.0"
   },
   "scripts": {
     "test-only": "lab ",
@@ -45,7 +46,6 @@
     "@types/hapi": "^18.0.3",
     "@types/jsonwebtoken": "^8.5.1",
     "@types/node": "^16.9.1",
-    "@types/node-jose": "^1.1.8",
     "babel-loader": "^8.1.0",
     "babel-polyfill": "^6.26.0",
     "cors": "^2.8.5",
@@ -55,13 +55,12 @@
     "jsdom": "^15.2.1",
     "jsonwebtoken": "^8.5.1",
     "lab-transform-typescript": "^3.0.1",
-    "node-jose": "^2.0.0",
     "ts-loader": "^6.2.2",
     "ts-node": "^10.2.1",
     "tslint": "^5.20.1",
-    "typedoc": "^0.15.8",
+    "typedoc": "^0.22.13",
     "typescript": "^3.9.7",
-    "webpack": "^4.44.1",
+    "webpack": "^5.70.0",
     "webpack-bundle-analyzer": "^3.8.0",
     "webpack-cli": "^3.3.12",
     "webpack-merge": "^4.2.2"

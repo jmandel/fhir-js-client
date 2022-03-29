@@ -3,10 +3,10 @@ import * as Lab from "@hapi/lab";
 import * as smart from "../src/smart";
 import { fhirclient } from "../src/types";
 import ServerEnv from "./mocks/ServerEnvironment";
-import * as JOSE from "node-jose";
-
 export const lab = Lab.script();
 const { it, describe } = lab;
+
+import * as jose from 'jose';
 
 const defaultState = (): fhirclient.ClientState => ({
     serverUrl: 'https://server.example.org',
@@ -61,20 +61,21 @@ describe("smart", () => {
             const assertion = assertionMatch.groups.assertion;
             expect(assertion).not.to.be.null;
 
-            const key = await JOSE.JWK.asKey(defaultStateAsymmetricAuth().clientPrivateJwk);
-            let validated = await JOSE.JWS.createVerify(key).verify(assertion);
+            const clientKey = await jose.importJWK(defaultStateAsymmetricAuth().clientPrivateJwk);
+            let validated = await jose.compactVerify(assertion, clientKey)
             expect(validated).to.exist;
-            expect(validated.header["jku"]).to.equal(defaultStateAsymmetricAuth().clientPublicKeySetUrl);
-            expect(validated.header["kid"]).to.equal(key.kid);
-            expect(validated.header["typ"]).to.equal("JWT");
+            expect(validated.protectedHeader["jku"]).to.equal(defaultStateAsymmetricAuth().clientPublicKeySetUrl);
+            expect(validated.protectedHeader["kid"]).to.equal(defaultStateAsymmetricAuth().clientPrivateJwk.kid);
+            expect(validated.protectedHeader["typ"]).to.equal("JWT");
 
-            const payload = JSON.parse(validated.payload.toString());
+            let payload: any = JSON.parse(new TextDecoder().decode(validated.payload));
+
             expect(payload["aud"]).to.equal(defaultStateAsymmetricAuth().tokenUri);
             expect(payload["iss"]).to.equal(defaultStateAsymmetricAuth().clientId);
             expect(payload["sub"]).to.equal(defaultStateAsymmetricAuth().clientId);
-            expect(payload["exp"]).to.exist;
-            expect(payload["jti"]).to.exist;
-
+            expect(payload["exp"]).to.exist();
+            expect(payload["jti"]).to.exist();
+ 
         });
 
         it("fails with broken state.clientPrivateJwk", async () => {

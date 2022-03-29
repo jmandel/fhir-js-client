@@ -147,7 +147,7 @@ const BROWSER_PROD_BUILD = merge(BASE_CONFIG, {
         new BundleAnalyzerPlugin({
             analyzerMode  : "static",
             openAnalyzer  : false,
-            reportFilename: "bundle.dev.html"
+            reportFilename: "bundle.prod.html"
         })
     ]
 });

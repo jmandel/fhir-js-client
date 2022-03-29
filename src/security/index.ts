@@ -1,4 +1,11 @@
-import base64url from 'base64url'
+import * as jose from "jose";
+
+const base64urlencode: (input: Uint8Array | string)=> string = jose.base64url.encode;
+const base64urldecode: (input: Uint8Array | string)=> Uint8Array= jose.base64url.decode;
+
+export {
+  base64urldecode, base64urlencode
+}
 
 
 declare var IS_BROWSER: boolean;
@@ -23,7 +30,7 @@ export const digestSha256 = async (payload: string | ArrayBuffer) => {
   }
 
   const hash = await wcrypto.digest('SHA-256', prepared);
-  return hash;
+  return new Uint8Array(hash);
 }
 
 export const randomBytes = (count: number): Uint8Array => {
@@ -42,50 +49,32 @@ export const generatePKCEChallenge = async (entropy = RECOMMENDED_CODE_VERIFIER_
   return {codeChallenge, codeVerifier}
 }
 
-type JWSAlg = 'ES384' | 'RS384'
-const algs: Record<JWSAlg, RsaHashedKeyGenParams | EcKeyGenParams> = {
-     "ES384":{name: "ECDSA", namedCurve: "P-384"} ,
-     "RS384": {name: "RSASSA-PKCS1-v1_5", modulusLength: 4096, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-384'}
- }
+type SupportedAlg = 'ES384' | 'RS384'
+const generateKey = async (jwsAlg: SupportedAlg): Promise<jose.GenerateKeyPairResult> => jose.generateKeyPair(jwsAlg, {extractable: true})
 
-const generateKey = async (jwsAlg: JWSAlg): Promise<CryptoKeyPair> =>
-    wcrypto.generateKey(algs[jwsAlg], true, ["sign"]) as unknown as CryptoKeyPair
+export const importKey = async (jwk: {alg: SupportedAlg}): Promise<jose.KeyLike> => jose.importJWK(jwk) as Promise<jose.KeyLike>
 
-export const importKey = async (jwk: {alg: JWSAlg}): Promise<CryptoKey> =>
-    wcrypto.importKey("jwk", jwk, algs[jwk.alg], true, ['sign'])
-
-export const signCompactJws = async (privateKey: CryptoKey, header: any, payload: any): Promise<string> => {
-    const jwsAlgs = Object.entries(algs).filter(([k, v]) => v.name=== privateKey.algorithm.name).map(([k,v]) => k);
-    if (jwsAlgs.length !== 1) {
-        throw "No JWS alg for " + privateKey.algorithm.name
-    }
-
-    const jwtHeader = JSON.stringify({...header, alg: jwsAlgs[0]});
-    const jwtPayload = JSON.stringify(payload);
-    const jwtAuthenticatedContent = `${base64url.encode(jwtHeader)}.${base64url.encode(jwtPayload)}`;
-
-    const signature = (await wcrypto.sign({
-        ...privateKey.algorithm,
-        hash: 'SHA-384'},
-        privateKey,
-        Buffer.from(jwtAuthenticatedContent)))
-
-    const jwt = `${jwtAuthenticatedContent}.${base64url.encode(Buffer.from(signature))}`
-    return jwt
+export const signCompactJws = async (alg: SupportedAlg, privateKey: jose.KeyLike, header: any, payload: any): Promise<string> => {
+  return new jose.SignJWT(payload).setProtectedHeader({...header, alg}).sign(privateKey)
 }
 
-// TODO: replace with a library that decodes to a byte array or similar rather than a string
-export const base64urlencode = (v: Uint8Array | Buffer| ArrayBuffer): string =>  base64url.encode(Buffer.from(v))
-export const base64urldecode = (v: string): Uint8Array => Buffer.from(base64url.decode(v))
 
 async function test(){
     const esk = await generateKey('ES384');
-    console.log(await signCompactJws(esk.privateKey!, {'jwku': 'sure'}, {iss: "issuer"}))
-    const publicJwk = await wcrypto.exportKey("jwk", esk.publicKey!);
-    console.log(JSON.stringify(publicJwk))
+    console.log("Signed ES384", esk.privateKey);
+    const eskSigned = await new jose.SignJWT({
+      iss: "issuer"
+    }).setProtectedHeader({alg: 'ES384', jwku: "test"})
+    .sign(esk.privateKey);
+    console.log("Signed ES384", eskSigned);
+    console.log(JSON.stringify(await jose.exportJWK(esk.publicKey)))
 
     const rsk = await generateKey('RS384');
-    console.log(await signCompactJws(rsk.privateKey!, {'jwku': 'sure'}, {iss: "issuer"}))
-    const publicJwkR = await wcrypto.exportKey("jwk", rsk.publicKey!);
-    console.log(JSON.stringify(publicJwkR))
+    const rskSigned = await new jose.SignJWT({
+      iss: "issuer"
+    }).setProtectedHeader({alg: 'RS384', jwku: "test"})
+    .sign(rsk.privateKey);
+    console.log("Signed RS384", rskSigned);
+    console.log(JSON.stringify(await jose.exportJWK(rsk.publicKey)))
+
 }

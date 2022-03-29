@@ -657,7 +657,7 @@ async function buildTokenRequest(env, code, state) {
       exp: lib_1.getTimeInFuture(120) // two minutes in the future
 
     };
-    const clientAssertion = await security.signCompactJws(clientPrivateKey, jwtHeaders, jwtClaims);
+    const clientAssertion = await security.signCompactJws(clientPrivateJwk.alg, clientPrivateKey, jwtHeaders, jwtClaims);
     requestOptions.body += `&client_assertion_type=${encodeURIComponent("urn:ietf:params:oauth:client-assertion-type:jwt-bearer")}`;
     requestOptions.body += `&client_assertion=${encodeURIComponent(clientAssertion)}`;
     debug("Using state.clientPrivateJwk to add a client_assertion to the POST body");
