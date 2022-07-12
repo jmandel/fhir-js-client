@@ -245,7 +245,7 @@ export default class Client
          * @category Request
          */
         read: fhirclient.RequestFunction<fhirclient.FHIR.Patient>
-
+        
         /**
          * This is similar to [[Client.request]] but it makes requests in the
          * context of the current patient. For example, instead of doing

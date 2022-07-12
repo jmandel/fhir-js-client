@@ -97,6 +97,13 @@ export declare function randomString(strLength?: number, charSet?: string): stri
  */
 export declare function jwtDecode(token: string, env: fhirclient.Adapter): Record<string, any> | null;
 /**
+ * Add a supplied number of seconds to the supplied Date, returning
+ * an integer number of seconds since the epoch
+ * @param secondsAhead How far ahead, in seconds (defaults to 120 seconds)
+ * @param fromDate Initial time (defaults to current time)
+ */
+export declare function getTimeInFuture(secondsAhead?: number, from?: Date): number;
+/**
  * Given a token response, computes and returns the expiresAt timestamp.
  * Note that this should only be used immediately after an access token is
  * received, otherwise the computed timestamp will be incorrect.
