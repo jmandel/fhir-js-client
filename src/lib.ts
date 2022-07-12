@@ -296,10 +296,10 @@ export function jwtDecode(token: string, env: fhirclient.Adapter): Record<string
  * Add a supplied number of seconds to the supplied Date, returning
  * an integer number of seconds since the epoch
  * @param secondsAhead How far ahead, in seconds (defaults to 120 seconds)
- * @param fromDate Initial time (defaults to current time)
+ * @param from Initial time (defaults to current time)
  */
-export function getTimeInFuture(secondsAhead: number = 120, from = new Date()): number {
-    return Math.floor(from.getTime() / 1000 + secondsAhead) 
+export function getTimeInFuture(secondsAhead: number = 120, from?: Date | number): number {
+    return Math.floor(+(from || new Date()) / 1000 + secondsAhead) 
 }
 
 /**
