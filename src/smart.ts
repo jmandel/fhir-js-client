@@ -92,28 +92,19 @@ function getSecurityExtensionsFromConformanceStatement(baseUrl = "/", requestOpt
     });
 }
 
-/**
- * The maximum length for a code verifier for the best security we can offer.
- * Please note the NOTE section of RFC 7636 § 4.1 - the length must be >= 43,
- * but <= 128, **after** base64 url encoding. Base64 expands from 'n' bytes
- * to 4(n/3) bytes (log2(64) = 6; 4*6 = 24 bits; pad to multiple of 4). With 
- * a max length of 128, we get: 128/4 = 32; 32*3 = 96 bytes for a max input.
- */
-var RECOMMENDED_CODE_VERIFIER_LENGTH = 96;
 
 /**
  * Given a FHIR server, returns an object with it's Oauth security endpoints
  * that we are interested in. This will try to find the info in both the
  * `CapabilityStatement` and the `.well-known/smart-configuration`. Whatever
  * Arrives first will be used and the other request will be aborted.
- * @param [baseUrl] Fhir server base URL
- * @param [env] The Adapter
+ * @param [baseUrl = "/"] Fhir server base URL
  */
-export function getSecurityExtensions(env: fhirclient.Adapter, baseUrl = "/"): Promise<fhirclient.OAuthSecurityExtensions>
+export function getSecurityExtensions(baseUrl = "/"): Promise<fhirclient.OAuthSecurityExtensions>
 {
-    console.log("Getting sec extension", baseUrl)
-    return getSecurityExtensionsFromWellKnownJson(baseUrl)
-        .catch(e => getSecurityExtensionsFromConformanceStatement(baseUrl));
+    return getSecurityExtensionsFromWellKnownJson(baseUrl).catch(
+        () => getSecurityExtensionsFromConformanceStatement(baseUrl)
+    );
 }
 
 /**
@@ -307,7 +298,7 @@ export async function authorize(
     }
 
     // Get oauth endpoints and add them to the state
-    const extensions = await getSecurityExtensions(env, serverUrl);
+    const extensions = await getSecurityExtensions(serverUrl);
     Object.assign(state, extensions);
     await storage.set(stateKey, state);
 
