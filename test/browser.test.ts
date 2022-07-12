@@ -695,7 +695,7 @@ describe("Browser tests", () => {
                 //     }
                 // });
 
-                const result = await smart.getSecurityExtensions(new BrowserEnv(), mockUrl);
+                const result = await smart.getSecurityExtensions(mockUrl);
                 expect(result).to.equal({
                     registrationUri     : "https://my-register-uri",
                     authorizeUri        : "https://my-authorize-uri",
@@ -716,7 +716,7 @@ describe("Browser tests", () => {
                   }
               });
 
-              const result = await smart.getSecurityExtensions(new BrowserEnv(), mockUrl);
+              const result = await smart.getSecurityExtensions(mockUrl);
               expect(result).to.equal({
                   registrationUri     : "https://my-register-uri",
                   authorizeUri        : "https://my-authorize-uri",
@@ -765,7 +765,7 @@ describe("Browser tests", () => {
                     }
                 });
 
-                const result = await smart.getSecurityExtensions(new BrowserEnv(), mockUrl);
+                const result = await smart.getSecurityExtensions(mockUrl);
                 expect(result).to.equal({
                     registrationUri     : "https://my-registration-uri",
                     authorizeUri        : "https://my-authorize-uri",
@@ -810,7 +810,7 @@ describe("Browser tests", () => {
                     }
                 });
 
-                const result = await smart.getSecurityExtensions(new BrowserEnv(), mockUrl);
+                const result = await smart.getSecurityExtensions(mockUrl);
                 expect(result).to.equal({
                     registrationUri     : "",
                     authorizeUri        : "https://my-authorize-uri",
@@ -830,7 +830,7 @@ describe("Browser tests", () => {
                     body: {rest: [{}]}
                 });
 
-                const result = await smart.getSecurityExtensions(new BrowserEnv(), mockUrl);
+                const result = await smart.getSecurityExtensions(mockUrl);
                 expect(result).to.equal({
                     registrationUri     : "",
                     authorizeUri        : "",
@@ -850,7 +850,7 @@ describe("Browser tests", () => {
                     // body: {}
                 });
 
-                const result = await smart.getSecurityExtensions(new BrowserEnv(), mockUrl);
+                const result = await smart.getSecurityExtensions(mockUrl);
                 expect(result).to.equal({
                     registrationUri     : "",
                     authorizeUri        : "",
@@ -872,7 +872,7 @@ describe("Browser tests", () => {
                     status: 400,
                     body: {}
                 });
-                await expect(smart.getSecurityExtensions(new BrowserEnv(), mockUrl)).to.reject();
+                await expect(smart.getSecurityExtensions(mockUrl)).to.reject();
             });
         });
 
