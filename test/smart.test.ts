@@ -40,7 +40,7 @@ describe("smart", () => {
                 clientSecret: "test-secret"
             });
 
-            const authz = requestOptions.headers['Authorization'] as string;
+            const authz = requestOptions.headers?.['Authorization'] as string;
             expect(authz).to.exist;
             expect(authz).to.startWith("Basic ")
         });
@@ -58,7 +58,7 @@ describe("smart", () => {
             const assertionMatch = (requestOptions.body as string).match(/client_assertion=(?<assertion>[^&]+)/);
             expect(assertionMatch).not.to.be.null;
 
-            const assertion = assertionMatch.groups.assertion;
+            const assertion = assertionMatch?.groups?.assertion;
             expect(assertion).not.to.be.null;
 
             const clientKey = await jose.importJWK(defaultStateAsymmetricAuth().clientPrivateJwk);

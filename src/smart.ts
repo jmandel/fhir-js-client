@@ -272,17 +272,17 @@ export async function authorize(
 
     // fakeTokenResponse to override stuff (useful in development)
     if (fakeTokenResponse) {
-        Object.assign(state.tokenResponse, fakeTokenResponse);
+        Object.assign(state.tokenResponse!, fakeTokenResponse);
     }
 
     // Fixed patientId (useful in development)
     if (patientId) {
-        Object.assign(state.tokenResponse, { patient: patientId });
+        Object.assign(state.tokenResponse!, { patient: patientId });
     }
 
     // Fixed encounterId (useful in development)
     if (encounterId) {
-        Object.assign(state.tokenResponse, { encounter: encounterId });
+        Object.assign(state.tokenResponse!, { encounter: encounterId });
     }
 
     let redirectUrl = redirectUri + "?state=" + encodeURIComponent(stateKey);
