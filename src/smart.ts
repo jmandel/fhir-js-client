@@ -92,51 +92,6 @@ function getSecurityExtensionsFromConformanceStatement(baseUrl = "/", requestOpt
     });
 }
 
-interface Task {
-    controller: AbortController;
-    promise: Promise<any>;
-    complete?: boolean;
-}
-
-/**
- * This works similarly to `Promise.any()`. The tasks are objects containing a
- * request promise and it's AbortController. Returns a promise that will be
- * resolved with the return value of the first successful request, or rejected
- * with an aggregate error if all tasks fail. Any requests, other than the first
- * one that succeeds will be aborted.
- */
-function any(tasks: Task[]): Promise<any> {
-    const len = tasks.length;
-    const errors: Error[] = [];
-    let resolved = false;
-
-    return new Promise((resolve, reject) => {
-
-        function onSuccess(task: Task, result: any) {
-            task.complete = true;
-            if (!resolved) {
-                resolved = true;
-                tasks.forEach(t => {
-                    if (!t.complete) {
-                       t.controller.abort();
-                    }
-                });
-                resolve(result);
-            }
-        }
-
-        function onError(error: Error) {
-            if (errors.push(error) === len) {
-                reject(new Error(errors.map(e => e.message).join("; ")));
-            }
-        }
-
-        tasks.forEach(t => {
-            t.promise.then(result => onSuccess(t, result), onError);
-        });
-    });
-}
-
 /**
  * The maximum length for a code verifier for the best security we can offer.
  * Please note the NOTE section of RFC 7636 § 4.1 - the length must be >= 43,
@@ -144,7 +99,7 @@ function any(tasks: Task[]): Promise<any> {
  * to 4(n/3) bytes (log2(64) = 6; 4*6 = 24 bits; pad to multiple of 4). With 
  * a max length of 128, we get: 128/4 = 32; 32*3 = 96 bytes for a max input.
  */
- var RECOMMENDED_CODE_VERIFIER_LENGTH = 96;
+var RECOMMENDED_CODE_VERIFIER_LENGTH = 96;
 
 /**
  * Given a FHIR server, returns an object with it's Oauth security endpoints
