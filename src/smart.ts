@@ -326,16 +326,16 @@ export async function authorize(
     }
 
     if ((pkceMode === 'required') && (!(extensions.codeChallengeMethods.includes('S256')))) {
-      throw new Error("Required PKCE code challenge method (`S256`) was not found.");
+        throw new Error("Required PKCE code challenge method (`S256`) was not found.");
     }
 
     if ((pkceMode !== 'disabled') && (extensions.codeChallengeMethods.includes('S256'))) {
-      let codes = await security.generatePKCEChallenge()
-      Object.assign(state, codes);
-      await storage.set(stateKey, state); // note that the challenge is ALREADY encoded properly
+        let codes = await security.generatePKCEChallenge()
+        Object.assign(state, codes);
+        await storage.set(stateKey, state); // note that the challenge is ALREADY encoded properly
   
-      redirectParams.push("code_challenge=" + state.codeChallenge);
-      redirectParams.push("code_challenge_method=S256");
+        redirectParams.push("code_challenge=" + state.codeChallenge);
+        redirectParams.push("code_challenge_method=S256");
     }
   
     redirectUrl = state.authorizeUri + "?" + redirectParams.join("&");
