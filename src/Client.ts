@@ -1067,7 +1067,7 @@ export default class Client
             .then(data => {
                 assert(data.access_token, "No access token received");
                 debugRefresh("Received new access token response %O", data);
-                Object.assign(this.state.tokenResponse, data);
+                this.state.tokenResponse = { ...this.state.tokenResponse, data };
                 this.state.expiresAt = getAccessTokenExpiration(data, this.environment);
                 return this.state;
             })

@@ -475,7 +475,7 @@ export async function getTargetWindow(target: fhirclient.WindowTarget, width: nu
 
     // The top window
     if (target == "_top") {
-        return top;
+        return top || self;
     }
 
     // New tab or window
