@@ -1,5 +1,5 @@
 const path = require("path");
-const merge = require("webpack-merge");
+const merge = require("webpack-merge").default;
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 const { DefinePlugin } = require("webpack");
 
@@ -84,6 +84,7 @@ const PURE_PROD_BUILD = merge(BASE_CONFIG, {
 
 const BROWSER_DEV_BUILD = merge(BASE_CONFIG, {
     mode: "development",
+    target: "browserslist",
     output: {
         filename: "fhir-client.js"
     },
@@ -120,6 +121,7 @@ const BROWSER_DEV_BUILD = merge(BASE_CONFIG, {
 
 const BROWSER_PROD_BUILD = merge(BASE_CONFIG, {
     mode: "production",
+    target: "browserslist",
     output: {
         filename: "fhir-client.min.js"
     },
