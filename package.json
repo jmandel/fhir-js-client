@@ -25,7 +25,9 @@
     "core-js": "^3.23.4",
     "cross-fetch": "^3.0.5",
     "debug": "^4.1.1",
-    "jose": "^4.6.0"
+    "isomorphic-webcrypto": "^2.3.8",
+    "jose": "^4.6.0",
+    "js-base64": "^3.7.2"
   },
   "scripts": {
     "test-only": "lab ",
