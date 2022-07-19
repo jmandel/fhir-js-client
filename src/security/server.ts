@@ -69,4 +69,4 @@ async function test(){
     console.log(JSON.stringify(await exportJWK(rsk.publicKey)))
 }
 
-test()
+// test()
