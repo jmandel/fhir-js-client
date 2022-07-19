@@ -64,6 +64,8 @@ declare namespace fhirclient {
          * FHIR server.
          */
         client(state: string | fhirclient.ClientState): Client;
+
+        [key: string]: any
     }
 
     interface BrowserFHIRSettings extends Record<string, any> {

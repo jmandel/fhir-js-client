@@ -2,6 +2,7 @@ import { ready, authorize, init } from "../smart";
 import Client from "../Client";
 import BrowserStorage from "../storage/BrowserStorage";
 import { fhirclient } from "../types";
+import * as security from "../security/browser"
 
 /**
  * Browser Adapter
@@ -154,7 +155,10 @@ export default class BrowserAdapter implements fhirclient.Adapter
             authorize: options => authorize(this, options),
             init     : options => init(this, options),
             client   : (state: string | fhirclient.ClientState) => new Client(this, state),
-            options  : this.options
+            options  : this.options,
+            utils: {
+                security
+            }
         };
     }
 }

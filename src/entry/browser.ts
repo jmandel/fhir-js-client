@@ -9,7 +9,7 @@ import Client from "../Client";
 import BrowserAdapter from "../adapters/BrowserAdapter";
 
 const adapter = new BrowserAdapter();
-const { ready, authorize, init, client, options } = adapter.getSmartApi();
+const { ready, authorize, init, client, options, utils } = adapter.getSmartApi();
 
 // We have two kinds of browser builds - "pure" for new browsers and "legacy"
 // for old ones. In pure builds we assume that the browser supports everything
@@ -32,6 +32,7 @@ if (typeof FHIRCLIENT_PURE == "undefined") {
 const FHIR = {
     AbortController: window.AbortController,
     client,
+    utils,
     oauth2: {
         settings: options,
         ready,
