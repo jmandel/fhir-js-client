@@ -73,7 +73,7 @@
     "webpack-cli": "^4.10.0",
     "webpack-merge": "^5.8.0"
   },
-  "engine": "node >= 10",
+  "engine": "node >= 14",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/smart-on-fhir/client-js.git"
