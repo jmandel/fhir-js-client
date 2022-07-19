@@ -4,7 +4,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/node:16.16.0
+      - image: circleci/node:erbium-bullseye-browsers-legacy
     working_directory: ~/repo
 
     #branches:
