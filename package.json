@@ -13,6 +13,8 @@
     "Client"
   ],
   "license": "Apache-2.0",
+  "main": "dist/lib/entry/node.js",
+  "browser": "dist/lib/entry/browser.js",
   "browserslist": [
     "last 2 Chrome versions",
     "last 2 firefox versions",
