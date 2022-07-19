@@ -64,6 +64,8 @@ declare namespace fhirclient {
          * FHIR server.
          */
         client(state: string | fhirclient.ClientState): Client;
+
+        [key: string]: any
     }
 
     interface BrowserFHIRSettings extends Record<string, any> {
@@ -335,7 +337,7 @@ declare namespace fhirclient {
 
         /**
          * Your client public JWKS url if you have one
-         * (for asymmetric confidential clients that have registereed a JWKS URL)
+         * (for asymmetric confidential clients that have registered a JWKS URL)
          */
         clientPublicKeySetUrl?:  AuthorizeParams['clientPublicKeySetUrl'];
 

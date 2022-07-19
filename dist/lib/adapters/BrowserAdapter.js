@@ -9,6 +9,8 @@ const smart_1 = require("../smart");
 const Client_1 = require("../Client");
 
 const BrowserStorage_1 = require("../storage/BrowserStorage");
+
+const security = require("../security/browser");
 /**
  * Browser Adapter
  */
@@ -148,11 +150,14 @@ class BrowserAdapter {
 
   getSmartApi() {
     return {
-      ready: (...args) => smart_1.ready(this, ...args),
-      authorize: options => smart_1.authorize(this, options),
-      init: options => smart_1.init(this, options),
+      ready: (...args) => (0, smart_1.ready)(this, ...args),
+      authorize: options => (0, smart_1.authorize)(this, options),
+      init: options => (0, smart_1.init)(this, options),
       client: state => new Client_1.default(this, state),
-      options: this.options
+      options: this.options,
+      utils: {
+        security
+      }
     };
   }
 

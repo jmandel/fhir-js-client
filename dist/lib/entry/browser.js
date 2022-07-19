@@ -9,7 +9,8 @@ const {
   authorize,
   init,
   client,
-  options
+  options,
+  utils
 } = adapter.getSmartApi(); // We have two kinds of browser builds - "pure" for new browsers and "legacy"
 // for old ones. In pure builds we assume that the browser supports everything
 // we need. In legacy mode, the library also acts as a polyfill. Babel will
@@ -34,6 +35,7 @@ if (typeof FHIRCLIENT_PURE == "undefined") {
 const FHIR = {
   AbortController: window.AbortController,
   client,
+  utils,
   oauth2: {
     settings: options,
     ready,

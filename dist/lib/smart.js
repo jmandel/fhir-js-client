@@ -36,7 +36,7 @@ function isBrowser() {
 
 function fetchWellKnownJson(baseUrl = "/", requestOptions) {
   const url = String(baseUrl).replace(/\/*$/, "/") + ".well-known/smart-configuration";
-  return lib_1.getAndCache(url, requestOptions).catch(ex => {
+  return (0, lib_1.getAndCache)(url, requestOptions).catch(ex => {
     throw new Error(`Failed to fetch the well-known json "${url}". ${ex.message}`);
   });
 }
@@ -66,9 +66,9 @@ function getSecurityExtensionsFromWellKnownJson(baseUrl = "/", requestOptions) {
 
 
 function getSecurityExtensionsFromConformanceStatement(baseUrl = "/", requestOptions) {
-  return lib_1.fetchConformanceStatement(baseUrl, requestOptions).then(meta => {
+  return (0, lib_1.fetchConformanceStatement)(baseUrl, requestOptions).then(meta => {
     const nsUri = "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris";
-    const extensions = (lib_1.getPath(meta || {}, "rest.0.security.extension") || []).filter(e => e.url === nsUri).map(o => o.extension)[0];
+    const extensions = ((0, lib_1.getPath)(meta || {}, "rest.0.security.extension") || []).filter(e => e.url === nsUri).map(o => o.extension)[0];
     const out = {
       registrationUri: "",
       authorizeUri: "",
@@ -96,66 +96,16 @@ function getSecurityExtensionsFromConformanceStatement(baseUrl = "/", requestOpt
   });
 }
 /**
- * This works similarly to `Promise.any()`. The tasks are objects containing a
- * request promise and it's AbortController. Returns a promise that will be
- * resolved with the return value of the first successful request, or rejected
- * with an aggregate error if all tasks fail. Any requests, other than the first
- * one that succeeds will be aborted.
- */
-
-
-function any(tasks) {
-  const len = tasks.length;
-  const errors = [];
-  let resolved = false;
-  return new Promise((resolve, reject) => {
-    function onSuccess(task, result) {
-      task.complete = true;
-
-      if (!resolved) {
-        resolved = true;
-        tasks.forEach(t => {
-          if (!t.complete) {
-            t.controller.abort();
-          }
-        });
-        resolve(result);
-      }
-    }
-
-    function onError(error) {
-      if (errors.push(error) === len) {
-        reject(new Error(errors.map(e => e.message).join("; ")));
-      }
-    }
-
-    tasks.forEach(t => {
-      t.promise.then(result => onSuccess(t, result), onError);
-    });
-  });
-}
-/**
- * The maximum length for a code verifier for the best security we can offer.
- * Please note the NOTE section of RFC 7636 § 4.1 - the length must be >= 43,
- * but <= 128, **after** base64 url encoding. Base64 expands from 'n' bytes
- * to 4(n/3) bytes (log2(64) = 6; 4*6 = 24 bits; pad to multiple of 4). With
- * a max length of 128, we get: 128/4 = 32; 32*3 = 96 bytes for a max input.
- */
-
-
-var RECOMMENDED_CODE_VERIFIER_LENGTH = 96;
-/**
  * Given a FHIR server, returns an object with it's Oauth security endpoints
  * that we are interested in. This will try to find the info in both the
  * `CapabilityStatement` and the `.well-known/smart-configuration`. Whatever
  * Arrives first will be used and the other request will be aborted.
- * @param [baseUrl] Fhir server base URL
- * @param [env] The Adapter
+ * @param [baseUrl = "/"] Fhir server base URL
  */
 
-function getSecurityExtensions(env, baseUrl = "/") {
-  console.log("Getting sec extension", baseUrl);
-  return getSecurityExtensionsFromWellKnownJson(baseUrl).catch(e => getSecurityExtensionsFromConformanceStatement(baseUrl));
+
+function getSecurityExtensions(baseUrl = "/") {
+  return getSecurityExtensionsFromWellKnownJson(baseUrl).catch(() => getSecurityExtensionsFromConformanceStatement(baseUrl));
 }
 
 exports.getSecurityExtensions = getSecurityExtensions;
@@ -198,7 +148,7 @@ async function authorize(env, params = {}) {
 
       return false;
     });
-    lib_1.assert(cfg, `No configuration found matching the current "iss" parameter "${urlISS}"`);
+    (0, lib_1.assert)(cfg, `No configuration found matching the current "iss" parameter "${urlISS}"`);
     return await authorize(env, cfg);
   } // ------------------------------------------------------------------------
   // Obtain input
@@ -283,7 +233,7 @@ async function authorize(env, params = {}) {
   const oldKey = await storage.get(settings_1.SMART_KEY);
   await storage.unset(oldKey); // create initial state
 
-  const stateKey = lib_1.randomString(16);
+  const stateKey = (0, lib_1.randomString)(16);
   const state = {
     clientId,
     scope,
@@ -295,7 +245,7 @@ async function authorize(env, params = {}) {
     key: stateKey,
     completeInTarget
   };
-  const fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true;
+  const fullSessionStorageSupport = isBrowser() ? (0, lib_1.getPath)(env, "options.fullSessionStorageSupport") : true;
 
   if (fullSessionStorageSupport) {
     await storage.set(settings_1.SMART_KEY, stateKey);
@@ -334,7 +284,7 @@ async function authorize(env, params = {}) {
   } // Get oauth endpoints and add them to the state
 
 
-  const extensions = await getSecurityExtensions(env, serverUrl);
+  const extensions = await getSecurityExtensions(serverUrl);
   Object.assign(state, extensions);
   await storage.set(stateKey, state); // If this happens to be an open server and there is no authorizeUri
 
@@ -374,7 +324,7 @@ async function authorize(env, params = {}) {
 
   if (target && isBrowser()) {
     let win;
-    win = await lib_1.getTargetWindow(target, width, height);
+    win = await (0, lib_1.getTargetWindow)(target, width, height);
 
     if (win !== self) {
       try {
@@ -383,7 +333,7 @@ async function authorize(env, params = {}) {
         win.sessionStorage.removeItem(oldKey);
         win.sessionStorage.setItem(stateKey, JSON.stringify(state));
       } catch (ex) {
-        lib_1.debug(`Failed to modify window.sessionStorage. Perhaps it is from different origin?. Failing back to "_self". %s`, ex);
+        (0, lib_1.debug)(`Failed to modify window.sessionStorage. Perhaps it is from different origin?. Failing back to "_self". %s`, ex);
         win = self;
       }
     }
@@ -393,7 +343,7 @@ async function authorize(env, params = {}) {
         win.location.href = redirectUrl;
         self.addEventListener("message", onMessage);
       } catch (ex) {
-        lib_1.debug(`Failed to modify window.location. Perhaps it is from different origin?. Failing back to "_self". %s`, ex);
+        (0, lib_1.debug)(`Failed to modify window.location. Perhaps it is from different origin?. Failing back to "_self". %s`, ex);
         self.location.href = redirectUrl;
       }
     } else {
@@ -490,10 +440,10 @@ async function completeAuth(env) {
 
   debug("key: %s, code: %s", key, code); // key might be coming from the page url so it might be empty or missing
 
-  lib_1.assert(key, "No 'state' parameter found. Please (re)launch the app."); // Check if we have a previous state
+  (0, lib_1.assert)(key, "No 'state' parameter found. Please (re)launch the app."); // Check if we have a previous state
 
   let state = await Storage.get(key);
-  const fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // If we are in a popup window or an iframe and the authorization is
+  const fullSessionStorageSupport = isBrowser() ? (0, lib_1.getPath)(env, "options.fullSessionStorageSupport") : true; // If we are in a popup window or an iframe and the authorization is
   // complete, send the location back to our opener and exit.
 
   if (isBrowser() && state && !state.completeInTarget) {
@@ -535,7 +485,7 @@ async function completeAuth(env) {
 
   const hasState = params.has("state");
 
-  if (isBrowser() && lib_1.getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
+  if (isBrowser() && (0, lib_1.getPath)(env, "options.replaceBrowserHistory") && (code || hasState)) {
     // `code` is the flag that tell us to request an access token.
     // We have to remove it, otherwise the page will authorize on
     // every load!
@@ -567,25 +517,25 @@ async function completeAuth(env) {
   } // If the state does not exist, it means the page has been loaded directly.
 
 
-  lib_1.assert(state, "No state found! Please (re)launch the app."); // Assume the client has already completed a token exchange when
+  (0, lib_1.assert)(state, "No state found! Please (re)launch the app."); // Assume the client has already completed a token exchange when
   // there is no code (but we have a state) or access token is found in state
 
   const authorized = !code || ((_a = state.tokenResponse) === null || _a === void 0 ? void 0 : _a.access_token); // If we are authorized already, then this is just a reload.
   // Otherwise, we have to complete the code flow
 
   if (!authorized && state.tokenUri) {
-    lib_1.assert(code, "'code' url parameter is required");
+    (0, lib_1.assert)(code, "'code' url parameter is required");
     debug("Preparing to exchange the code for access token...");
     const requestOptions = await buildTokenRequest(env, code, state);
     debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
     // includes an access token or a message indicating that the
     // authorization request has been denied.
 
-    const tokenResponse = await lib_1.request(state.tokenUri, requestOptions);
+    const tokenResponse = await (0, lib_1.request)(state.tokenUri, requestOptions);
     debug("Token response: %O", tokenResponse);
-    lib_1.assert(tokenResponse.access_token, "Failed to obtain access token."); // Now we need to determine when is this authorization going to expire
+    (0, lib_1.assert)(tokenResponse.access_token, "Failed to obtain access token."); // Now we need to determine when is this authorization going to expire
 
-    state.expiresAt = lib_1.getAccessTokenExpiration(tokenResponse, env); // save the tokenResponse so that we don't have to re-authorize on
+    state.expiresAt = (0, lib_1.getAccessTokenExpiration)(tokenResponse, env); // save the tokenResponse so that we don't have to re-authorize on
     // every page reload
 
     state = Object.assign(Object.assign({}, state), {
@@ -622,9 +572,9 @@ async function buildTokenRequest(env, code, state) {
     clientId,
     codeVerifier
   } = state;
-  lib_1.assert(redirectUri, "Missing state.redirectUri");
-  lib_1.assert(tokenUri, "Missing state.tokenUri");
-  lib_1.assert(clientId, "Missing state.clientId");
+  (0, lib_1.assert)(redirectUri, "Missing state.redirectUri");
+  (0, lib_1.assert)(tokenUri, "Missing state.tokenUri");
+  (0, lib_1.assert)(clientId, "Missing state.clientId");
   const requestOptions = {
     method: "POST",
     headers: {
@@ -654,7 +604,7 @@ async function buildTokenRequest(env, code, state) {
       sub: clientId,
       aud: tokenUri,
       jti: security.base64urlencode(security.randomBytes(32)),
-      exp: lib_1.getTimeInFuture(120) // two minutes in the future
+      exp: (0, lib_1.getTimeInFuture)(120) // two minutes in the future
 
     };
     const clientAssertion = await security.signCompactJws(clientPrivateJwk.alg, clientPrivateKey, jwtHeaders, jwtClaims);

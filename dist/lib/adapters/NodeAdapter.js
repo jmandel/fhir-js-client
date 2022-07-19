@@ -140,9 +140,9 @@ class NodeAdapter {
 
   getSmartApi() {
     return {
-      ready: (...args) => smart_1.ready(this, ...args),
-      authorize: options => smart_1.authorize(this, options),
-      init: options => smart_1.init(this, options),
+      ready: (...args) => (0, smart_1.ready)(this, ...args),
+      authorize: options => (0, smart_1.authorize)(this, options),
+      init: options => (0, smart_1.init)(this, options),
       client: state => new Client_1.default(this, state),
       options: this.options
     };

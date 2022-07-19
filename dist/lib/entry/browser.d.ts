@@ -6,6 +6,7 @@ declare const FHIR: {
         prototype: AbortController;
     };
     client: (state: string | fhirclient.ClientState) => Client;
+    utils: any;
     oauth2: {
         settings: fhirclient.BrowserFHIRSettings;
         ready: {

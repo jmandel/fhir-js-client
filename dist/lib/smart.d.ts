@@ -14,10 +14,9 @@ export declare function fetchWellKnownJson(baseUrl?: string, requestOptions?: Re
  * that we are interested in. This will try to find the info in both the
  * `CapabilityStatement` and the `.well-known/smart-configuration`. Whatever
  * Arrives first will be used and the other request will be aborted.
- * @param [baseUrl] Fhir server base URL
- * @param [env] The Adapter
+ * @param [baseUrl = "/"] Fhir server base URL
  */
-export declare function getSecurityExtensions(env: fhirclient.Adapter, baseUrl?: string): Promise<fhirclient.OAuthSecurityExtensions>;
+export declare function getSecurityExtensions(baseUrl?: string): Promise<fhirclient.OAuthSecurityExtensions>;
 /**
  * Starts the SMART Launch Sequence.
  * > **IMPORTANT**:

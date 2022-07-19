@@ -367,11 +367,11 @@ exports.jwtDecode = jwtDecode;
  * Add a supplied number of seconds to the supplied Date, returning
  * an integer number of seconds since the epoch
  * @param secondsAhead How far ahead, in seconds (defaults to 120 seconds)
- * @param fromDate Initial time (defaults to current time)
+ * @param from Initial time (defaults to current time)
  */
 
-function getTimeInFuture(secondsAhead = 120, from = new Date()) {
-  return Math.floor(from.getTime() / 1000 + secondsAhead);
+function getTimeInFuture(secondsAhead = 120, from) {
+  return Math.floor(+(from || new Date()) / 1000 + secondsAhead);
 }
 
 exports.getTimeInFuture = getTimeInFuture;
@@ -542,7 +542,7 @@ async function getTargetWindow(target, width = 800, height = 720) {
 
 
   if (target == "_top") {
-    return top;
+    return top || self;
   } // New tab or window
 
 
