@@ -538,8 +538,8 @@ declare namespace fhirclient {
 
         /**
          * If you have registered a confidential client, you should pass your
-         * `clientPrivateJwk` here. **Note: ONLY use this on the server**, as the
-         * browsers are considered incapable of keeping a secret.
+         * `clientPrivateJwk` here. **Note: ONLY use this on the server**, as
+         * the browsers are considered incapable of keeping a secret.
          */
          clientPrivateJwk?: { kid: string; kty: string, [k: string]: string } & (
              {kty: "EC", alg: "ES384", crv: "P-384"} | 

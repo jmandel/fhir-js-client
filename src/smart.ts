@@ -102,9 +102,8 @@ function getSecurityExtensionsFromConformanceStatement(baseUrl = "/", requestOpt
  */
 export function getSecurityExtensions(baseUrl = "/"): Promise<fhirclient.OAuthSecurityExtensions>
 {
-    return getSecurityExtensionsFromWellKnownJson(baseUrl).catch(
-        () => getSecurityExtensionsFromConformanceStatement(baseUrl)
-    );
+    return getSecurityExtensionsFromWellKnownJson(baseUrl)
+        .catch(() => getSecurityExtensionsFromConformanceStatement(baseUrl));
 }
 
 /**
