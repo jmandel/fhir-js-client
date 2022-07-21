@@ -307,10 +307,10 @@ async function authorize(env, params = {}) {
     throw new Error("Required PKCE code challenge method (`S256`) was not found.");
   }
 
-  if (pkceMode !== 'disabled' && extensions.codeChallengeMethods.includes('S256')) {
+  if ((pkceMode === "unsafeV1" || pkceMode !== 'disabled') && extensions.codeChallengeMethods.includes('S256')) {
     let codes = await security.generatePKCEChallenge();
     Object.assign(state, codes);
-    await storage.set(stateKey, state); // note that the challenge is ALREADY encoded properly
+    await storage.set(stateKey, state); // note that the challenge is ALREADY encoded properly  
 
     redirectParams.push("code_challenge=" + state.codeChallenge);
     redirectParams.push("code_challenge_method=S256");
@@ -590,8 +590,8 @@ async function buildTokenRequest(env, code, state) {
   // client_id and the password is the app’s client_secret (see example).
 
   if (clientSecret) {
-    requestOptions.headers.Authorization = "Basic " + env.btoa(clientId + ":" + clientSecret);
-    debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
+    requestOptions.headers.authorization = "Basic " + env.btoa(clientId + ":" + clientSecret);
+    debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.authorization);
   } else if (clientPrivateJwk) {
     const clientPrivateKey = await security.importKey(clientPrivateJwk);
     const jwtHeaders = {

@@ -207,7 +207,7 @@ declare namespace fhirclient {
     function WindowTargetFunction(): Promise<WindowTargetVariable>;
     type WindowTarget = WindowTargetVariable | typeof WindowTargetFunction;
 
-    type PkceMode = 'ifSupported' | 'required' | 'disabled';
+    type PkceMode = 'ifSupported' | 'required' | 'disabled' | 'unsafeV1';
 
     type storageFactory = (options?: Record<string, any>) => Storage;
 
@@ -538,10 +538,10 @@ declare namespace fhirclient {
 
         /**
          * If you have registered a confidential client, you should pass your
-         * `clientPrivateJwk` here. **Note: ONLY use this on the server**, as the
-         * browsers are considered incapable of keeping a secret.
+         * `clientPrivateJwk` here. **Note: ONLY use this on the server**, as
+         * the browsers are considered incapable of keeping a secret.
          */
-         clientPrivateJwk?: { kid: string; kty: string, [k: string]: string } & (
+        clientPrivateJwk?: { kid: string; kty: string, [k: string]: string } & (
              {kty: "EC", alg: "ES384", crv: "P-384"} | 
              {kty: "RSA", alg: "RS384" }
         );
@@ -596,9 +596,12 @@ declare namespace fhirclient {
          * - `ifSupported` Use if a matching code challenge method is available (**default**)
          * - `required`    Do not attempt authorization to servers without support
          * - `disabled`    Do not use PKCE
+         * - `unsafeV1` Use against Smart v1 servers. Smart v1 does not define
+         *    conformance, so validate your server supports PKCE before using
+         *    this setting
          */
-         pkceMode?: PkceMode;
-      }
+        pkceMode?: PkceMode;
+    }
 
     /**
      * Additional options that can be passed to `client.request` to control its

@@ -17,7 +17,7 @@ class HttpError extends Error {
   async parse() {
     if (!this.response.bodyUsed) {
       try {
-        const type = this.response.headers.get("Content-Type") || "text/plain";
+        const type = this.response.headers.get("content-type") || "text/plain";
 
         if (type.match(/\bjson\b/i)) {
           let body = await this.response.json();

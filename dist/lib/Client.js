@@ -540,7 +540,7 @@ class Client {
       body: JSON.stringify(resource),
       headers: Object.assign({
         // TODO: Do we need to alternate with "application/json+fhir"?
-        "Content-Type": "application/json"
+        "content-type": "application/json"
       }, (requestOptions || {}).headers)
     }));
   }
@@ -562,7 +562,7 @@ class Client {
       body: JSON.stringify(resource),
       headers: Object.assign({
         // TODO: Do we need to alternate with "application/json+fhir"?
-        "Content-Type": "application/json"
+        "content-type": "application/json"
       }, (requestOptions || {}).headers)
     }));
   }
@@ -661,7 +661,7 @@ class Client {
 
       if (authHeader) {
         requestOptions.headers = Object.assign(Object.assign({}, requestOptions.headers), {
-          Authorization: authHeader
+          authorization: authHeader
         });
       }
 
@@ -876,9 +876,7 @@ class Client {
       this._refreshTask = (0, lib_1.request)(tokenUri, refreshRequestOptions).then(data => {
         (0, lib_1.assert)(data.access_token, "No access token received");
         debugRefresh("Received new access token response %O", data);
-        this.state.tokenResponse = Object.assign(Object.assign({}, this.state.tokenResponse), {
-          data
-        });
+        this.state.tokenResponse = Object.assign(Object.assign({}, this.state.tokenResponse), data);
         this.state.expiresAt = (0, lib_1.getAccessTokenExpiration)(data, this.environment);
         return this.state;
       }).catch(error => {

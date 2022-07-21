@@ -18,7 +18,7 @@ var __rest = void 0 && (void 0).__rest || function (s, e) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.assertJsonPatch = exports.assert = exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.getAccessTokenExpiration = exports.getTimeInFuture = exports.jwtDecode = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
+exports.assertJsonPatch = exports.assert = exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.getAccessTokenExpiration = exports.getTimeInFuture = exports.jwtDecode = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.loweCaseKeys = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
 
 const HttpError_1 = require("./HttpError");
 
@@ -123,6 +123,29 @@ function responseToJSON(resp) {
 }
 
 exports.responseToJSON = responseToJSON;
+
+function loweCaseKeys(obj) {
+  // Can be undefined to signal that this key should be removed
+  if (!obj) {
+    return obj;
+  } // Arrays are valid values in case of recursive calls
+
+
+  if (Array.isArray(obj)) {
+    return obj.map(v => v && typeof v === "object" ? loweCaseKeys(v) : v);
+  } // Plain object
+
+
+  let out = {};
+  Object.keys(obj).forEach(key => {
+    const lowerKey = key.toLowerCase();
+    const v = obj[key];
+    out[lowerKey] = v && typeof v == "object" ? loweCaseKeys(v) : v;
+  });
+  return out;
+}
+
+exports.loweCaseKeys = loweCaseKeys;
 /**
  * This is our built-in request function. It does a few things by default
  * (unless told otherwise):
@@ -145,9 +168,9 @@ function request(url, requestOptions = {}) {
   }, options), {
     headers: Object.assign({
       accept: "application/json"
-    }, options.headers)
+    }, loweCaseKeys(options.headers))
   })).then(checkResponse).then(res => {
-    const type = res.headers.get("Content-Type") + "";
+    const type = res.headers.get("content-type") + "";
 
     if (type.match(/\bjson\b/i)) {
       return responseToJSON(res).then(body => ({

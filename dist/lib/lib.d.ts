@@ -19,6 +19,7 @@ export declare function checkResponse(resp: Response): Promise<Response>;
  * instead.
  */
 export declare function responseToJSON(resp: Response): Promise<object | string>;
+export declare function loweCaseKeys<T = Record<string, any> | any[] | undefined>(obj: T): T;
 /**
  * This is our built-in request function. It does a few things by default
  * (unless told otherwise):

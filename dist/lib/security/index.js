@@ -2,7 +2,7 @@
 
 let api;
 
-if (IS_BROWSER) {
+if (typeof IS_BROWSER != "undefined") {
   api = require("./browser");
 } else {
   api = require("./server");

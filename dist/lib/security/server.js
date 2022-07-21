@@ -87,6 +87,4 @@ async function test() {
   }).sign(rsk.privateKey);
   console.log("Signed RS384", rskSigned);
   console.log(JSON.stringify(await (0, jose_1.exportJWK)(rsk.publicKey)));
-}
-
-test();
+} // test()

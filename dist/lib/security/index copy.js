@@ -556,6 +556,42 @@ require("core-js/modules/es.typed-array.set.js");
 
 require("core-js/modules/es.typed-array.sort.js");
 
+require("core-js/modules/es.typed-array.set.js");
+
+require("core-js/modules/es.typed-array.sort.js");
+
+require("core-js/modules/es.typed-array.set.js");
+
+require("core-js/modules/es.typed-array.sort.js");
+
+require("core-js/modules/es.typed-array.set.js");
+
+require("core-js/modules/es.typed-array.sort.js");
+
+require("core-js/modules/es.typed-array.set.js");
+
+require("core-js/modules/es.typed-array.sort.js");
+
+require("core-js/modules/es.typed-array.set.js");
+
+require("core-js/modules/es.typed-array.sort.js");
+
+require("core-js/modules/es.typed-array.set.js");
+
+require("core-js/modules/es.typed-array.sort.js");
+
+require("core-js/modules/es.typed-array.set.js");
+
+require("core-js/modules/es.typed-array.sort.js");
+
+require("core-js/modules/es.typed-array.set.js");
+
+require("core-js/modules/es.typed-array.sort.js");
+
+require("core-js/modules/es.typed-array.set.js");
+
+require("core-js/modules/es.typed-array.sort.js");
+
 var _a, _b;
 
 Object.defineProperty(exports, "__esModule", {
