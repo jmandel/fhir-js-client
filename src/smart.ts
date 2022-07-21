@@ -610,10 +610,10 @@ export async function buildTokenRequest(env: fhirclient.Adapter, code: string, s
     // Basic authentication is required, where the username is the app’s
     // client_id and the password is the app’s client_secret (see example).
     if (clientSecret) {
-        requestOptions.headers.Authorization = "Basic " + env.btoa(
+        requestOptions.headers.authorization = "Basic " + env.btoa(
             clientId + ":" + clientSecret
         );
-        debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
+        debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.authorization);
     } else if (clientPrivateJwk) {
         const clientPrivateKey = await security.importKey(clientPrivateJwk)
 

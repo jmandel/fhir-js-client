@@ -2709,7 +2709,7 @@ describe("FHIR.client", () => {
                 const client = new Client(env, mockUrl);
 
                 mockServer.mock({
-                    headers: { "Content-Type": "text/plain" },
+                    headers: { "content-type": "text/plain" },
                     status: 200,
                     body: "This is a text"
                 });
@@ -2728,7 +2728,7 @@ describe("FHIR.client", () => {
                 const goal64 = file.toString("base64");
 
                 mockServer.mock({
-                    headers: { "Content-Type": "image/png" },
+                    headers: { "content-type": "image/png" },
                     status: 200,
                     file: "json.png"
                 });
@@ -3816,7 +3816,7 @@ describe("FHIR.client", () => {
             mockServer.mock({
                 status: 200,
                 body: resource,
-                headers: { "Content-Type": "application/json" }
+                headers: { "content-type": "application/json" }
             });
             result = await client.create(resource, { includeResponse: true });
             expect(result.body).to.equal(resource);
@@ -3831,7 +3831,7 @@ describe("FHIR.client", () => {
                 method : "POST",
                 body   : JSON.stringify(resource),
                 headers: {
-                    "Content-Type": "application/json"
+                    "content-type": "application/json"
                 }
             });
 
@@ -3844,7 +3844,7 @@ describe("FHIR.client", () => {
                 signal: "whatever",
                 headers: {
                     "x-custom": "value",
-                    "Content-Type": "application/fhir+json"
+                    "content-type": "application/fhir+json"
                 }
             });
             expect(result).to.equal({
@@ -3854,7 +3854,7 @@ describe("FHIR.client", () => {
                 signal : "whatever",
                 headers: {
                     "x-custom": "value",
-                    "Content-Type": "application/fhir+json"
+                    "content-type": "application/fhir+json"
                 }
             });
 
@@ -3872,7 +3872,7 @@ describe("FHIR.client", () => {
                 body   : JSON.stringify(resource),
                 signal : "whatever",
                 headers: {
-                    "Content-Type": "application/json"
+                    "content-type": "application/json"
                 }
             });
         });
@@ -3888,7 +3888,7 @@ describe("FHIR.client", () => {
             mockServer.mock({
                 status: 200,
                 body: resource,
-                headers: { "Content-Type": "application/json" }
+                headers: { "content-type": "application/json" }
             });
             result = await client.update(resource, { includeResponse: true });
             expect(result.body).to.equal(resource);
@@ -3903,7 +3903,7 @@ describe("FHIR.client", () => {
                 method : "PUT",
                 body   : JSON.stringify(resource),
                 headers: {
-                    "Content-Type": "application/json"
+                    "content-type": "application/json"
                 }
             });
 
@@ -3916,7 +3916,7 @@ describe("FHIR.client", () => {
                 signal: "whatever",
                 headers: {
                     "x-custom": "value",
-                    "Content-Type": "application/fhir+json"
+                    "content-type": "application/fhir+json"
                 }
             });
             expect(result).to.equal({
@@ -3926,7 +3926,7 @@ describe("FHIR.client", () => {
                 signal: "whatever",
                 headers: {
                     "x-custom": "value",
-                    "Content-Type": "application/fhir+json"
+                    "content-type": "application/fhir+json"
                 }
             });
 
@@ -3944,7 +3944,7 @@ describe("FHIR.client", () => {
                 body   : JSON.stringify(resource),
                 signal: "whatever",
                 headers: {
-                    "Content-Type": "application/json"
+                    "content-type": "application/json"
                 }
             });
         });
@@ -3960,7 +3960,7 @@ describe("FHIR.client", () => {
             mockServer.mock({
                 status: 200,
                 body: { result: "success" },
-                headers: { "Content-Type": "application/json" }
+                headers: { "content-type": "application/json" }
             });
             
             result = await client.delete("Patient/2", { includeResponse: true });
@@ -4012,7 +4012,7 @@ describe("FHIR.client", () => {
             mockServer.mock({
                 status: 200,
                 body: { result: "success" },
-                headers: { "Content-Type": "application/json" }
+                headers: { "content-type": "application/json" }
             });
             
             result = await client.patch("Patient/2", [{ op: "remove", path: "/x" }], { includeResponse: true });

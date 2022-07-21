@@ -665,7 +665,7 @@ export default class Client
             body: JSON.stringify(resource),
             headers: {
                 // TODO: Do we need to alternate with "application/json+fhir"?
-                "Content-Type": "application/json",
+                "content-type": "application/json",
                 ...(requestOptions || {}).headers
             }
         });
@@ -692,7 +692,7 @@ export default class Client
             body: JSON.stringify(resource),
             headers: {
                 // TODO: Do we need to alternate with "application/json+fhir"?
-                "Content-Type": "application/json",
+                "content-type": "application/json",
                 ...(requestOptions || {}).headers
             }
         });
@@ -809,7 +809,7 @@ export default class Client
                 if (authHeader) {
                     requestOptions.headers = {
                         ...requestOptions.headers,
-                        Authorization: authHeader
+                        authorization: authHeader
                     };
                 }
                 return requestOptions;

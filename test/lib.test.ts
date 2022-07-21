@@ -315,7 +315,7 @@ describe("Lib", () => {
 
                 const result = await lib.request<fhirclient.CombinedFetchResult>(mockUrl, { includeResponse: true });
                 expect(result.body).to.equal({ result: "success" });
-                expect(result.response.headers.get("Content-Type")).to.startWith("application/json");
+                expect(result.response.headers.get("content-type")).to.startWith("application/json");
             });
         });
     });

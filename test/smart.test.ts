@@ -40,8 +40,8 @@ describe("smart", () => {
                 clientSecret: "test-secret"
             });
 
-            const authz = requestOptions.headers?.['Authorization'] as string;
-            expect(authz).to.exist;
+            const authz = requestOptions.headers?.['authorization'] as string;
+            expect(authz).to.exist();
             expect(authz).to.startWith("Basic ")
         });
 
