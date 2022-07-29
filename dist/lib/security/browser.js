@@ -86,22 +86,16 @@ async function importKey(jwk) {
 
 exports.importKey = importKey;
 
-async function signCompactJws(privateKey, header, payload) {
-  const jwsAlgs = Object.entries(ALGS).filter(([, v]) => v.name === privateKey.algorithm.name).map(([k]) => k);
-
-  if (jwsAlgs.length !== 1) {
-    throw "No JWS alg for " + privateKey.algorithm.name;
-  }
-
+async function signCompactJws(alg, privateKey, header, payload) {
   const jwtHeader = JSON.stringify(Object.assign(Object.assign({}, header), {
-    alg: jwsAlgs[0]
+    alg
   }));
   const jwtPayload = JSON.stringify(payload);
   const jwtAuthenticatedContent = `${(0, exports.base64urlencode)(jwtHeader)}.${(0, exports.base64urlencode)(jwtPayload)}`;
   const signature = await subtle.sign(Object.assign(Object.assign({}, privateKey.algorithm), {
     hash: 'SHA-384'
   }), privateKey, s2b(jwtAuthenticatedContent));
-  return `${jwtAuthenticatedContent}.${(0, exports.base64urlencode)(signature)}`;
+  return `${jwtAuthenticatedContent}.${(0, exports.base64urlencode)(ab2str(signature))}`;
 }
 
 exports.signCompactJws = signCompactJws;
@@ -112,4 +106,8 @@ function s2b(s) {
   for (var i = 0; i < s.length; i++) b[i] = s.charCodeAt(i);
 
   return b;
+}
+
+function ab2str(buf) {
+  return String.fromCharCode.apply(null, new Uint16Array(buf));
 }

@@ -35,12 +35,13 @@
         "test-only": "lab ",
         "test": "lab test/*.test.ts",
         "pack": "webpack",
-        "build": "npm run build:module && npm run pack",
+        "build": "npm run clean && npm run build:module && npm run pack",
         "build:dev": "webpack --watch",
         "cover": "lab -r lcov -o lcov.info test/**.ts && cat lcov.info | coveralls && rm -rf lcov.info",
         "build:module": "cp src/types.d.ts dist/lib && tsc -p tsconfig.module.json && babel --env-name module -d dist/lib dist/lib",
         "doc": "typedoc src && touch docs/typedoc/.nojekyll",
-        "wdio": "wdio run test/wdio.conf.ts"
+        "wdio": "wdio run test/wdio.conf.ts",
+        "clean": "rm -rf dist/build && rm -r dist/lib/*"
     },
     "devDependencies": {
         "@babel/cli": "^7.18.6",

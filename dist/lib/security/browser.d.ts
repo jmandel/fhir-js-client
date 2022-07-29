@@ -16,5 +16,5 @@ export declare function importKey(jwk: {
     alg: keyof typeof ALGS;
     [key: string]: any;
 }): Promise<CryptoKey>;
-export declare function signCompactJws(privateKey: CryptoKey, header: any, payload: any): Promise<string>;
+export declare function signCompactJws(alg: keyof typeof ALGS, privateKey: CryptoKey, header: any, payload: any): Promise<string>;
 export {};
