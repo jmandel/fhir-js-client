@@ -43,8 +43,8 @@ export async function digestSha256(payload: string) {
 
 export const generatePKCEChallenge = async (entropy = 96): Promise<PkcePair> => {
     const inputBytes    = randomBytes(entropy)
-    const codeVerifier  = base64urlencode(inputBytes as Buffer)
-    const codeChallenge = base64urlencode(await digestSha256(codeVerifier) as Buffer)
+    const codeVerifier  = base64urlencode(inputBytes)
+    const codeChallenge = base64urlencode(await digestSha256(codeVerifier))
     return { codeChallenge, codeVerifier }
 }
 
@@ -76,16 +76,24 @@ export async function signCompactJws(alg: keyof typeof ALGS, privateKey: CryptoK
         s2b(jwtAuthenticatedContent)
     );
 
-    return `${jwtAuthenticatedContent}.${base64urlencode(ab2str(signature))}`
+    return `${jwtAuthenticatedContent}.${fromUint8Array(new Uint8Array(signature))}`
 }
 
 function s2b ( s: string ) {
-    var b = new Uint8Array(s.length);
-    for ( var i = 0; i < s.length; i++ ) b[i] = s.charCodeAt(i);
+    const b = new Uint8Array(s.length);
+    const bs = utf8ToBinaryString(s)
+    for ( var i = 0; i < bs.length; i++ ) b[i] = bs.charCodeAt(i);
     return b;
 }
 
-function ab2str(buf: ArrayBuffer) {
-    return String.fromCharCode.apply(null, new Uint16Array(buf) as unknown as number[]);
+// UTF-8 to Binary String
+// Source: https://coolaj86.com/articles/sign-jwt-webcrypto-vanilla-js/
+// Because JavaScript has a strange relationship with strings
+// https://coolaj86.com/articles/base64-unicode-utf-8-javascript-and-you/
+function utf8ToBinaryString(str: string) {
+    // replaces any uri escape sequence, such as %0A, with binary escape, such as 0x0A
+    return encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(_, p1) {
+        return String.fromCharCode(parseInt(p1, 16));
+    });
 }
 
