@@ -324,11 +324,7 @@ export async function authorize(
         redirectParams.push("launch=" + encodeURIComponent(launch));
     }
 
-    if (pkceMode === 'required' && !extensions.codeChallengeMethods.includes('S256')) {
-        throw new Error("Required PKCE code challenge method (`S256`) was not found.");
-    }
-
-    if ((pkceMode === "unsafeV1" || pkceMode !== 'disabled') && extensions.codeChallengeMethods.includes('S256')) {
+    if (shouldIncludeChallenge(extensions.codeChallengeMethods.includes('S256'), pkceMode)) {
         let codes = await security.generatePKCEChallenge()
         Object.assign(state, codes);
         await storage.set(stateKey, state); // note that the challenge is ALREADY encoded properly  
@@ -376,6 +372,22 @@ export async function authorize(
     else {
         return await env.redirect(redirectUrl);
     }
+}
+
+function shouldIncludeChallenge(S256supported: boolean, pkceMode?: string) {
+    if (pkceMode === "disabled") {
+        return false;
+    }
+    if (pkceMode === "unsafeV1") {
+        return true;
+    }
+    if (pkceMode === "required") {
+        if (!S256supported) {
+            throw new Error("Required PKCE code challenge method (`S256`) was not found.");
+        }
+        return true;
+    }
+    return S256supported;
 }
 
 /**
