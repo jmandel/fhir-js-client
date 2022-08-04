@@ -165,6 +165,7 @@ export async function authorize(
         width,
         height,
         pkceMode,
+        clientPublicKeySetUrl
     } = params;
 
     let {
@@ -258,7 +259,8 @@ export async function authorize(
         clientPrivateJwk,
         tokenResponse: {},
         key: stateKey,
-        completeInTarget
+        completeInTarget,
+        clientPublicKeySetUrl
     };
 
     const fullSessionStorageSupport = isBrowser() ?
