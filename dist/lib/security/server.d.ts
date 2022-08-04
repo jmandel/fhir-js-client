@@ -15,4 +15,5 @@ export declare function generateKey(jwsAlg: SupportedAlg): Promise<GenerateKeyPa
 export declare function importKey(jwk: {
     alg: SupportedAlg;
 }): Promise<KeyLike>;
+export declare function exportKey(key: CryptoKey): Promise<import("jose").JWK>;
 export declare function signCompactJws(alg: SupportedAlg, privateKey: KeyLike, header: any, payload: any): Promise<string>;

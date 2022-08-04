@@ -3627,14 +3627,16 @@ __webpack_require__(/*! core-js/modules/es.typed-array.to-locale-string.js */ ".
 
 __webpack_require__(/*! core-js/modules/es.typed-array.to-string.js */ "./node_modules/core-js/modules/es.typed-array.to-string.js");
 
-__webpack_require__(/*! core-js/modules/es.typed-array.uint16-array.js */ "./node_modules/core-js/modules/es.typed-array.uint16-array.js");
+__webpack_require__(/*! core-js/modules/es.regexp.exec.js */ "./node_modules/core-js/modules/es.regexp.exec.js");
+
+__webpack_require__(/*! core-js/modules/es.string.replace.js */ "./node_modules/core-js/modules/es.string.replace.js");
 
 __webpack_require__(/*! core-js/modules/es.object.assign.js */ "./node_modules/core-js/modules/es.object.assign.js");
 
 Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
-exports.signCompactJws = exports.importKey = exports.generateKey = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = exports.base64urldecode = exports.base64urlencode = void 0;
+exports.signCompactJws = exports.exportKey = exports.importKey = exports.generateKey = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = exports.base64urldecode = exports.base64urlencode = void 0;
 
 var js_base64_1 = __webpack_require__(/*! js-base64 */ "./node_modules/js-base64/base64.js");
 
@@ -3812,37 +3814,71 @@ function _importKey() {
 
 exports.importKey = importKey;
 
-function signCompactJws(_x5, _x6, _x7, _x8) {
+function exportKey(_x5) {
+  return _exportKey.apply(this, arguments);
+}
+
+function _exportKey() {
+  _exportKey = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5(key) {
+    return _regenerator.default.wrap(function _callee5$(_context5) {
+      while (1) {
+        switch (_context5.prev = _context5.next) {
+          case 0:
+            _context5.prev = 0;
+            _context5.next = 3;
+            return subtle.exportKey("jwk", key);
+
+          case 3:
+            return _context5.abrupt("return", _context5.sent);
+
+          case 6:
+            _context5.prev = 6;
+            _context5.t0 = _context5["catch"](0);
+            throw new Error("exportKey is not supported by this browser: " + _context5.t0);
+
+          case 9:
+          case "end":
+            return _context5.stop();
+        }
+      }
+    }, _callee5, null, [[0, 6]]);
+  }));
+  return _exportKey.apply(this, arguments);
+}
+
+exports.exportKey = exportKey;
+
+function signCompactJws(_x6, _x7, _x8, _x9) {
   return _signCompactJws.apply(this, arguments);
 }
 
 function _signCompactJws() {
-  _signCompactJws = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5(alg, privateKey, header, payload) {
+  _signCompactJws = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee6(alg, privateKey, header, payload) {
     var jwtHeader, jwtPayload, jwtAuthenticatedContent, signature;
-    return _regenerator.default.wrap(function _callee5$(_context5) {
+    return _regenerator.default.wrap(function _callee6$(_context6) {
       while (1) {
-        switch (_context5.prev = _context5.next) {
+        switch (_context6.prev = _context6.next) {
           case 0:
             jwtHeader = JSON.stringify(Object.assign({}, header, {
               alg: alg
             }));
             jwtPayload = JSON.stringify(payload);
             jwtAuthenticatedContent = (0, exports.base64urlencode)(jwtHeader) + "." + (0, exports.base64urlencode)(jwtPayload);
-            _context5.next = 5;
+            _context6.next = 5;
             return subtle.sign(Object.assign({}, privateKey.algorithm, {
               hash: 'SHA-384'
             }), privateKey, s2b(jwtAuthenticatedContent));
 
           case 5:
-            signature = _context5.sent;
-            return _context5.abrupt("return", jwtAuthenticatedContent + "." + (0, exports.base64urlencode)(ab2str(signature)));
+            signature = _context6.sent;
+            return _context6.abrupt("return", jwtAuthenticatedContent + "." + (0, js_base64_1.fromUint8Array)(new Uint8Array(signature)));
 
           case 7:
           case "end":
-            return _context5.stop();
+            return _context6.stop();
         }
       }
-    }, _callee5);
+    }, _callee6);
   }));
   return _signCompactJws.apply(this, arguments);
 }
@@ -3851,16 +3887,24 @@ exports.signCompactJws = signCompactJws;
 
 function s2b(s) {
   var b = new Uint8Array(s.length);
+  var bs = utf8ToBinaryString(s);
 
-  for (var i = 0; i < s.length; i++) {
-    b[i] = s.charCodeAt(i);
+  for (var i = 0; i < bs.length; i++) {
+    b[i] = bs.charCodeAt(i);
   }
 
   return b;
-}
+} // UTF-8 to Binary String
+// Source: https://coolaj86.com/articles/sign-jwt-webcrypto-vanilla-js/
+// Because JavaScript has a strange relationship with strings
+// https://coolaj86.com/articles/base64-unicode-utf-8-javascript-and-you/
 
-function ab2str(buf) {
-  return String.fromCharCode.apply(null, new Uint16Array(buf));
+
+function utf8ToBinaryString(str) {
+  // replaces any uri escape sequence, such as %0A, with binary escape, such as 0x0A
+  return encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (_, p1) {
+    return String.fromCharCode(parseInt(p1, 16));
+  });
 }
 
 /***/ }),
@@ -4142,7 +4186,7 @@ function authorize(_x, _x2) {
 
 function _authorize() {
   _authorize = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(env, params) {
-    var url, urlISS, cfg, _params, redirect_uri, clientSecret, clientPrivateJwk, fakeTokenResponse, patientId, encounterId, client_id, target, width, height, pkceMode, _params2, iss, launch, fhirServiceUrl, redirectUri, noRedirect, _params2$scope, scope, clientId, completeInTarget, storage, serverUrl, inFrame, inPopUp, oldKey, stateKey, state, fullSessionStorageSupport, redirectUrl, extensions, redirectParams, codes, win;
+    var _a, url, urlISS, cfg, _params, redirect_uri, clientSecret, fakeTokenResponse, patientId, encounterId, client_id, target, width, height, pkceMode, clientPublicKeySetUrl, _params2, iss, launch, fhirServiceUrl, redirectUri, noRedirect, _params2$scope, scope, clientId, completeInTarget, clientPrivateJwk, storage, serverUrl, inFrame, inPopUp, oldKey, stateKey, state, fullSessionStorageSupport, redirectUrl, extensions, redirectParams, codes, win;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -4197,8 +4241,8 @@ function _authorize() {
           case 11:
             // ------------------------------------------------------------------------
             // Obtain input
-            _params = params, redirect_uri = _params.redirect_uri, clientSecret = _params.clientSecret, clientPrivateJwk = _params.clientPrivateJwk, fakeTokenResponse = _params.fakeTokenResponse, patientId = _params.patientId, encounterId = _params.encounterId, client_id = _params.client_id, target = _params.target, width = _params.width, height = _params.height, pkceMode = _params.pkceMode;
-            _params2 = params, iss = _params2.iss, launch = _params2.launch, fhirServiceUrl = _params2.fhirServiceUrl, redirectUri = _params2.redirectUri, noRedirect = _params2.noRedirect, _params2$scope = _params2.scope, scope = _params2$scope === void 0 ? "" : _params2$scope, clientId = _params2.clientId, completeInTarget = _params2.completeInTarget;
+            _params = params, redirect_uri = _params.redirect_uri, clientSecret = _params.clientSecret, fakeTokenResponse = _params.fakeTokenResponse, patientId = _params.patientId, encounterId = _params.encounterId, client_id = _params.client_id, target = _params.target, width = _params.width, height = _params.height, pkceMode = _params.pkceMode, clientPublicKeySetUrl = _params.clientPublicKeySetUrl;
+            _params2 = params, iss = _params2.iss, launch = _params2.launch, fhirServiceUrl = _params2.fhirServiceUrl, redirectUri = _params2.redirectUri, noRedirect = _params2.noRedirect, _params2$scope = _params2.scope, scope = _params2$scope === void 0 ? "" : _params2$scope, clientId = _params2.clientId, completeInTarget = _params2.completeInTarget, clientPrivateJwk = _params2.clientPrivateJwk;
             storage = env.getStorage(); // For these three an url param takes precedence over inline option
 
             iss = url.searchParams.get("iss") || iss;
@@ -4265,6 +4309,26 @@ function _authorize() {
             return storage.unset(oldKey);
 
           case 31:
+            if (!( // Browsers
+            Object.prototype.toString.call(clientPrivateJwk) == "[object CryptoKey]" || // Node
+            ((_a = clientPrivateJwk === null || clientPrivateJwk === void 0 ? void 0 : clientPrivateJwk.constructor) === null || _a === void 0 ? void 0 : _a.name) === "CryptoKey")) {
+              _context.next = 37;
+              break;
+            }
+
+            debug("Exporting private CryptoKey to store it as JWK in state...");
+            _context.next = 35;
+            return security.exportKey(clientPrivateJwk);
+
+          case 35:
+            clientPrivateJwk = _context.sent;
+
+            if (clientPrivateJwk && clientPrivateJwk.kty === "EC" && clientPrivateJwk.alg === undefined) {
+              // @ts-ignore
+              clientPrivateJwk.alg = "ES384";
+            }
+
+          case 37:
             // create initial state
             stateKey = (0, lib_1.randomString)(16);
             state = {
@@ -4276,19 +4340,20 @@ function _authorize() {
               clientPrivateJwk: clientPrivateJwk,
               tokenResponse: {},
               key: stateKey,
-              completeInTarget: completeInTarget
+              completeInTarget: completeInTarget,
+              clientPublicKeySetUrl: clientPublicKeySetUrl
             };
             fullSessionStorageSupport = isBrowser() ? (0, lib_1.getPath)(env, "options.fullSessionStorageSupport") : true;
 
             if (!fullSessionStorageSupport) {
-              _context.next = 37;
+              _context.next = 43;
               break;
             }
 
-            _context.next = 37;
+            _context.next = 43;
             return storage.set(settings_1.SMART_KEY, stateKey);
 
-          case 37:
+          case 43:
             // fakeTokenResponse to override stuff (useful in development)
             if (fakeTokenResponse) {
               Object.assign(state.tokenResponse, fakeTokenResponse);
@@ -4311,60 +4376,60 @@ function _authorize() {
             redirectUrl = redirectUri + "?state=" + encodeURIComponent(stateKey); // bypass oauth if fhirServiceUrl is used (but iss takes precedence)
 
             if (!(fhirServiceUrl && !iss)) {
-              _context.next = 50;
+              _context.next = 56;
               break;
             }
 
             debug("Making fake launch...");
-            _context.next = 45;
+            _context.next = 51;
             return storage.set(stateKey, state);
 
-          case 45:
+          case 51:
             if (!noRedirect) {
-              _context.next = 47;
+              _context.next = 53;
               break;
             }
 
             return _context.abrupt("return", redirectUrl);
 
-          case 47:
-            _context.next = 49;
+          case 53:
+            _context.next = 55;
             return env.redirect(redirectUrl);
 
-          case 49:
+          case 55:
             return _context.abrupt("return", _context.sent);
-
-          case 50:
-            _context.next = 52;
-            return getSecurityExtensions(serverUrl);
-
-          case 52:
-            extensions = _context.sent;
-            Object.assign(state, extensions);
-            _context.next = 56;
-            return storage.set(stateKey, state);
 
           case 56:
+            _context.next = 58;
+            return getSecurityExtensions(serverUrl);
+
+          case 58:
+            extensions = _context.sent;
+            Object.assign(state, extensions);
+            _context.next = 62;
+            return storage.set(stateKey, state);
+
+          case 62:
             if (state.authorizeUri) {
-              _context.next = 62;
+              _context.next = 68;
               break;
             }
 
             if (!noRedirect) {
-              _context.next = 59;
+              _context.next = 65;
               break;
             }
 
             return _context.abrupt("return", redirectUrl);
 
-          case 59:
-            _context.next = 61;
+          case 65:
+            _context.next = 67;
             return env.redirect(redirectUrl);
 
-          case 61:
+          case 67:
             return _context.abrupt("return", _context.sent);
 
-          case 62:
+          case 68:
             // build the redirect uri
             redirectParams = ["response_type=code", "client_id=" + encodeURIComponent(clientId || ""), "scope=" + encodeURIComponent(scope), "redirect_uri=" + encodeURIComponent(redirectUri), "aud=" + encodeURIComponent(serverUrl), "state=" + encodeURIComponent(stateKey)]; // also pass this in case of EHR launch
 
@@ -4372,53 +4437,45 @@ function _authorize() {
               redirectParams.push("launch=" + encodeURIComponent(launch));
             }
 
-            if (!(pkceMode === 'required' && !extensions.codeChallengeMethods.includes('S256'))) {
-              _context.next = 66;
+            if (!shouldIncludeChallenge(extensions.codeChallengeMethods.includes('S256'), pkceMode)) {
+              _context.next = 79;
               break;
             }
 
-            throw new Error("Required PKCE code challenge method (`S256`) was not found.");
-
-          case 66:
-            if (!((pkceMode === "unsafeV1" || pkceMode !== 'disabled') && extensions.codeChallengeMethods.includes('S256'))) {
-              _context.next = 75;
-              break;
-            }
-
-            _context.next = 69;
+            _context.next = 73;
             return security.generatePKCEChallenge();
 
-          case 69:
+          case 73:
             codes = _context.sent;
             Object.assign(state, codes);
-            _context.next = 73;
+            _context.next = 77;
             return storage.set(stateKey, state);
 
-          case 73:
+          case 77:
             // note that the challenge is ALREADY encoded properly  
             redirectParams.push("code_challenge=" + state.codeChallenge);
             redirectParams.push("code_challenge_method=S256");
 
-          case 75:
+          case 79:
             redirectUrl = state.authorizeUri + "?" + redirectParams.join("&");
 
             if (!noRedirect) {
-              _context.next = 78;
+              _context.next = 82;
               break;
             }
 
             return _context.abrupt("return", redirectUrl);
 
-          case 78:
+          case 82:
             if (!(target && isBrowser())) {
-              _context.next = 87;
+              _context.next = 91;
               break;
             }
 
-            _context.next = 81;
+            _context.next = 85;
             return (0, lib_1.getTargetWindow)(target, width, height);
 
-          case 81:
+          case 85:
             win = _context.sent;
 
             if (win !== self) {
@@ -4447,14 +4504,14 @@ function _authorize() {
 
             return _context.abrupt("return");
 
-          case 87:
-            _context.next = 89;
+          case 91:
+            _context.next = 93;
             return env.redirect(redirectUrl);
 
-          case 89:
+          case 93:
             return _context.abrupt("return", _context.sent);
 
-          case 90:
+          case 94:
           case "end":
             return _context.stop();
         }
@@ -4465,12 +4522,33 @@ function _authorize() {
 }
 
 exports.authorize = authorize;
+
+function shouldIncludeChallenge(S256supported, pkceMode) {
+  if (pkceMode === "disabled") {
+    return false;
+  }
+
+  if (pkceMode === "unsafeV1") {
+    return true;
+  }
+
+  if (pkceMode === "required") {
+    if (!S256supported) {
+      throw new Error("Required PKCE code challenge method (`S256`) was not found.");
+    }
+
+    return true;
+  }
+
+  return S256supported;
+}
 /**
  * Checks if called within a frame. Only works in browsers!
  * If the current window has a `parent` or `top` properties that refer to
  * another window, returns true. If trying to access `top` or `parent` throws an
  * error, returns true. Otherwise returns `false`.
  */
+
 
 function isInFrame() {
   try {
@@ -14078,25 +14156,6 @@ var IS_NOT_ARRAY_METHOD = Uint8ArrayPrototype.toString != arrayToString;
 // `%TypedArray%.prototype.toString` method
 // https://tc39.es/ecma262/#sec-%typedarray%.prototype.tostring
 exportTypedArrayMethod('toString', arrayToString, IS_NOT_ARRAY_METHOD);
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/es.typed-array.uint16-array.js":
-/*!*********************************************************************!*\
-  !*** ./node_modules/core-js/modules/es.typed-array.uint16-array.js ***!
-  \*********************************************************************/
-/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
-
-var createTypedArrayConstructor = __webpack_require__(/*! ../internals/typed-array-constructor */ "./node_modules/core-js/internals/typed-array-constructor.js");
-
-// `Uint16Array` constructor
-// https://tc39.es/ecma262/#sec-typedarray-objects
-createTypedArrayConstructor('Uint16', function (init) {
-  return function Uint16Array(data, byteOffset, length) {
-    return init(this, data, byteOffset, length);
-  };
-});
 
 
 /***/ }),

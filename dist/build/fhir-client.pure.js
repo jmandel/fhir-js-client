@@ -1987,7 +1987,7 @@ exports.assertJsonPatch = assertJsonPatch;
 Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
-exports.signCompactJws = exports.importKey = exports.generateKey = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = exports.base64urldecode = exports.base64urlencode = void 0;
+exports.signCompactJws = exports.exportKey = exports.importKey = exports.generateKey = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = exports.base64urldecode = exports.base64urlencode = void 0;
 
 const js_base64_1 = __webpack_require__(/*! js-base64 */ "./node_modules/js-base64/base64.js");
 
@@ -2066,6 +2066,16 @@ async function importKey(jwk) {
 
 exports.importKey = importKey;
 
+async function exportKey(key) {
+  try {
+    return await subtle.exportKey("jwk", key);
+  } catch (e) {
+    throw new Error(`exportKey is not supported by this browser: ${e}`);
+  }
+}
+
+exports.exportKey = exportKey;
+
 async function signCompactJws(alg, privateKey, header, payload) {
   const jwtHeader = JSON.stringify({ ...header,
     alg
@@ -2075,21 +2085,29 @@ async function signCompactJws(alg, privateKey, header, payload) {
   const signature = await subtle.sign({ ...privateKey.algorithm,
     hash: 'SHA-384'
   }, privateKey, s2b(jwtAuthenticatedContent));
-  return `${jwtAuthenticatedContent}.${(0, exports.base64urlencode)(ab2str(signature))}`;
+  return `${jwtAuthenticatedContent}.${(0, js_base64_1.fromUint8Array)(new Uint8Array(signature))}`;
 }
 
 exports.signCompactJws = signCompactJws;
 
 function s2b(s) {
-  var b = new Uint8Array(s.length);
+  const b = new Uint8Array(s.length);
+  const bs = utf8ToBinaryString(s);
 
-  for (var i = 0; i < s.length; i++) b[i] = s.charCodeAt(i);
+  for (var i = 0; i < bs.length; i++) b[i] = bs.charCodeAt(i);
 
   return b;
-}
+} // UTF-8 to Binary String
+// Source: https://coolaj86.com/articles/sign-jwt-webcrypto-vanilla-js/
+// Because JavaScript has a strange relationship with strings
+// https://coolaj86.com/articles/base64-unicode-utf-8-javascript-and-you/
 
-function ab2str(buf) {
-  return String.fromCharCode.apply(null, new Uint16Array(buf));
+
+function utf8ToBinaryString(str) {
+  // replaces any uri escape sequence, such as %0A, with binary escape, such as 0x0A
+  return encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (_, p1) {
+    return String.fromCharCode(parseInt(p1, 16));
+  });
 }
 
 /***/ }),
@@ -2296,6 +2314,8 @@ exports.getSecurityExtensions = getSecurityExtensions;
  */
 
 async function authorize(env, params = {}) {
+  var _a;
+
   const url = env.getUrl(); // Multiple config for EHR launches ---------------------------------------
 
   if (Array.isArray(params)) {
@@ -2332,7 +2352,6 @@ async function authorize(env, params = {}) {
   const {
     redirect_uri,
     clientSecret,
-    clientPrivateJwk,
     fakeTokenResponse,
     patientId,
     encounterId,
@@ -2340,7 +2359,8 @@ async function authorize(env, params = {}) {
     target,
     width,
     height,
-    pkceMode
+    pkceMode,
+    clientPublicKeySetUrl
   } = params;
   let {
     iss,
@@ -2350,7 +2370,8 @@ async function authorize(env, params = {}) {
     noRedirect,
     scope = "",
     clientId,
-    completeInTarget
+    completeInTarget,
+    clientPrivateJwk
   } = params;
   const storage = env.getStorage(); // For these three an url param takes precedence over inline option
 
@@ -2406,7 +2427,20 @@ async function authorize(env, params = {}) {
 
 
   const oldKey = await storage.get(settings_1.SMART_KEY);
-  await storage.unset(oldKey); // create initial state
+  await storage.unset(oldKey);
+
+  if ( // Browsers
+  Object.prototype.toString.call(clientPrivateJwk) == "[object CryptoKey]" || // Node
+  ((_a = clientPrivateJwk === null || clientPrivateJwk === void 0 ? void 0 : clientPrivateJwk.constructor) === null || _a === void 0 ? void 0 : _a.name) === "CryptoKey") {
+    debug("Exporting private CryptoKey to store it as JWK in state...");
+    clientPrivateJwk = await security.exportKey(clientPrivateJwk);
+
+    if (clientPrivateJwk && clientPrivateJwk.kty === "EC" && clientPrivateJwk.alg === undefined) {
+      // @ts-ignore
+      clientPrivateJwk.alg = "ES384";
+    }
+  } // create initial state
+
 
   const stateKey = (0, lib_1.randomString)(16);
   const state = {
@@ -2415,10 +2449,11 @@ async function authorize(env, params = {}) {
     redirectUri,
     serverUrl,
     clientSecret,
-    clientPrivateJwk,
+    clientPrivateJwk: clientPrivateJwk,
     tokenResponse: {},
     key: stateKey,
-    completeInTarget
+    completeInTarget,
+    clientPublicKeySetUrl
   };
   const fullSessionStorageSupport = isBrowser() ? (0, lib_1.getPath)(env, "options.fullSessionStorageSupport") : true;
 
@@ -2478,11 +2513,7 @@ async function authorize(env, params = {}) {
     redirectParams.push("launch=" + encodeURIComponent(launch));
   }
 
-  if (pkceMode === 'required' && !extensions.codeChallengeMethods.includes('S256')) {
-    throw new Error("Required PKCE code challenge method (`S256`) was not found.");
-  }
-
-  if ((pkceMode === "unsafeV1" || pkceMode !== 'disabled') && extensions.codeChallengeMethods.includes('S256')) {
+  if (shouldIncludeChallenge(extensions.codeChallengeMethods.includes('S256'), pkceMode)) {
     let codes = await security.generatePKCEChallenge();
     Object.assign(state, codes);
     await storage.set(stateKey, state); // note that the challenge is ALREADY encoded properly  
@@ -2532,12 +2563,33 @@ async function authorize(env, params = {}) {
 }
 
 exports.authorize = authorize;
+
+function shouldIncludeChallenge(S256supported, pkceMode) {
+  if (pkceMode === "disabled") {
+    return false;
+  }
+
+  if (pkceMode === "unsafeV1") {
+    return true;
+  }
+
+  if (pkceMode === "required") {
+    if (!S256supported) {
+      throw new Error("Required PKCE code challenge method (`S256`) was not found.");
+    }
+
+    return true;
+  }
+
+  return S256supported;
+}
 /**
  * Checks if called within a frame. Only works in browsers!
  * If the current window has a `parent` or `top` properties that refer to
  * another window, returns true. If trying to access `top` or `parent` throws an
  * error, returns true. Otherwise returns `false`.
  */
+
 
 function isInFrame() {
   try {

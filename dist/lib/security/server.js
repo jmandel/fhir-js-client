@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.signCompactJws = exports.importKey = exports.generateKey = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = exports.base64urldecode = exports.base64urlencode = void 0;
+exports.signCompactJws = exports.exportKey = exports.importKey = exports.generateKey = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = exports.base64urldecode = exports.base64urlencode = void 0;
 
 const jose_1 = require("jose");
 
@@ -57,6 +57,12 @@ async function importKey(jwk) {
 }
 
 exports.importKey = importKey;
+
+async function exportKey(key) {
+  return (0, jose_1.exportJWK)(key);
+}
+
+exports.exportKey = exportKey;
 
 async function signCompactJws(alg, privateKey, header, payload) {
   return new jose_1.SignJWT(payload).setProtectedHeader(Object.assign(Object.assign({}, header), {

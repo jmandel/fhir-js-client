@@ -7,7 +7,7 @@ require("core-js/modules/es.typed-array.sort.js");
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.signCompactJws = exports.importKey = exports.generateKey = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = exports.base64urldecode = exports.base64urlencode = void 0;
+exports.signCompactJws = exports.exportKey = exports.importKey = exports.generateKey = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = exports.base64urldecode = exports.base64urlencode = void 0;
 
 const js_base64_1 = require("js-base64");
 
@@ -86,6 +86,16 @@ async function importKey(jwk) {
 
 exports.importKey = importKey;
 
+async function exportKey(key) {
+  try {
+    return await subtle.exportKey("jwk", key);
+  } catch (e) {
+    throw new Error(`exportKey is not supported by this browser: ${e}`);
+  }
+}
+
+exports.exportKey = exportKey;
+
 async function signCompactJws(alg, privateKey, header, payload) {
   const jwtHeader = JSON.stringify(Object.assign(Object.assign({}, header), {
     alg
@@ -95,19 +105,27 @@ async function signCompactJws(alg, privateKey, header, payload) {
   const signature = await subtle.sign(Object.assign(Object.assign({}, privateKey.algorithm), {
     hash: 'SHA-384'
   }), privateKey, s2b(jwtAuthenticatedContent));
-  return `${jwtAuthenticatedContent}.${(0, exports.base64urlencode)(ab2str(signature))}`;
+  return `${jwtAuthenticatedContent}.${(0, js_base64_1.fromUint8Array)(new Uint8Array(signature))}`;
 }
 
 exports.signCompactJws = signCompactJws;
 
 function s2b(s) {
-  var b = new Uint8Array(s.length);
+  const b = new Uint8Array(s.length);
+  const bs = utf8ToBinaryString(s);
 
-  for (var i = 0; i < s.length; i++) b[i] = s.charCodeAt(i);
+  for (var i = 0; i < bs.length; i++) b[i] = bs.charCodeAt(i);
 
   return b;
-}
+} // UTF-8 to Binary String
+// Source: https://coolaj86.com/articles/sign-jwt-webcrypto-vanilla-js/
+// Because JavaScript has a strange relationship with strings
+// https://coolaj86.com/articles/base64-unicode-utf-8-javascript-and-you/
 
-function ab2str(buf) {
-  return String.fromCharCode.apply(null, new Uint16Array(buf));
+
+function utf8ToBinaryString(str) {
+  // replaces any uri escape sequence, such as %0A, with binary escape, such as 0x0A
+  return encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (_, p1) {
+    return String.fromCharCode(parseInt(p1, 16));
+  });
 }

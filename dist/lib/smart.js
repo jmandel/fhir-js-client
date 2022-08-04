@@ -121,6 +121,8 @@ exports.getSecurityExtensions = getSecurityExtensions;
  */
 
 async function authorize(env, params = {}) {
+  var _a;
+
   const url = env.getUrl(); // Multiple config for EHR launches ---------------------------------------
 
   if (Array.isArray(params)) {
@@ -157,7 +159,6 @@ async function authorize(env, params = {}) {
   const {
     redirect_uri,
     clientSecret,
-    clientPrivateJwk,
     fakeTokenResponse,
     patientId,
     encounterId,
@@ -165,7 +166,8 @@ async function authorize(env, params = {}) {
     target,
     width,
     height,
-    pkceMode
+    pkceMode,
+    clientPublicKeySetUrl
   } = params;
   let {
     iss,
@@ -175,7 +177,8 @@ async function authorize(env, params = {}) {
     noRedirect,
     scope = "",
     clientId,
-    completeInTarget
+    completeInTarget,
+    clientPrivateJwk
   } = params;
   const storage = env.getStorage(); // For these three an url param takes precedence over inline option
 
@@ -231,7 +234,20 @@ async function authorize(env, params = {}) {
 
 
   const oldKey = await storage.get(settings_1.SMART_KEY);
-  await storage.unset(oldKey); // create initial state
+  await storage.unset(oldKey);
+
+  if ( // Browsers
+  Object.prototype.toString.call(clientPrivateJwk) == "[object CryptoKey]" || // Node
+  ((_a = clientPrivateJwk === null || clientPrivateJwk === void 0 ? void 0 : clientPrivateJwk.constructor) === null || _a === void 0 ? void 0 : _a.name) === "CryptoKey") {
+    debug("Exporting private CryptoKey to store it as JWK in state...");
+    clientPrivateJwk = await security.exportKey(clientPrivateJwk);
+
+    if (clientPrivateJwk && clientPrivateJwk.kty === "EC" && clientPrivateJwk.alg === undefined) {
+      // @ts-ignore
+      clientPrivateJwk.alg = "ES384";
+    }
+  } // create initial state
+
 
   const stateKey = (0, lib_1.randomString)(16);
   const state = {
@@ -240,10 +256,11 @@ async function authorize(env, params = {}) {
     redirectUri,
     serverUrl,
     clientSecret,
-    clientPrivateJwk,
+    clientPrivateJwk: clientPrivateJwk,
     tokenResponse: {},
     key: stateKey,
-    completeInTarget
+    completeInTarget,
+    clientPublicKeySetUrl
   };
   const fullSessionStorageSupport = isBrowser() ? (0, lib_1.getPath)(env, "options.fullSessionStorageSupport") : true;
 
@@ -303,11 +320,7 @@ async function authorize(env, params = {}) {
     redirectParams.push("launch=" + encodeURIComponent(launch));
   }
 
-  if (pkceMode === 'required' && !extensions.codeChallengeMethods.includes('S256')) {
-    throw new Error("Required PKCE code challenge method (`S256`) was not found.");
-  }
-
-  if ((pkceMode === "unsafeV1" || pkceMode !== 'disabled') && extensions.codeChallengeMethods.includes('S256')) {
+  if (shouldIncludeChallenge(extensions.codeChallengeMethods.includes('S256'), pkceMode)) {
     let codes = await security.generatePKCEChallenge();
     Object.assign(state, codes);
     await storage.set(stateKey, state); // note that the challenge is ALREADY encoded properly  
@@ -357,12 +370,33 @@ async function authorize(env, params = {}) {
 }
 
 exports.authorize = authorize;
+
+function shouldIncludeChallenge(S256supported, pkceMode) {
+  if (pkceMode === "disabled") {
+    return false;
+  }
+
+  if (pkceMode === "unsafeV1") {
+    return true;
+  }
+
+  if (pkceMode === "required") {
+    if (!S256supported) {
+      throw new Error("Required PKCE code challenge method (`S256`) was not found.");
+    }
+
+    return true;
+  }
+
+  return S256supported;
+}
 /**
  * Checks if called within a frame. Only works in browsers!
  * If the current window has a `parent` or `top` properties that refer to
  * another window, returns true. If trying to access `top` or `parent` throws an
  * error, returns true. Otherwise returns `false`.
  */
+
 
 function isInFrame() {
   try {
