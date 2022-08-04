@@ -257,6 +257,15 @@ declare namespace fhirclient {
      */
     type FetchResult = Response | fhirclient.JsonObject | string | CombinedFetchResult
 
+    type JWK = {
+        kid: string;
+        kty: string,
+        [k: string]: string
+    } & (
+        { kty: "EC" , alg: "ES384", crv: "P-384"} | 
+        { kty: "RSA", alg: "RS384" }
+    );
+
     /**
      * Options that must contain an `url` property (String|URL).
      * A `includeResponse` boolean option might also be passed. Any other
@@ -344,7 +353,7 @@ declare namespace fhirclient {
         /**
          * Your client private JWK if you have one (for asymmetric confidential clients)
          */
-        clientPrivateJwk?:  AuthorizeParams['clientPrivateJwk'];
+        clientPrivateJwk?:  JWK;
 
         /**
          * Your client secret if you have one (for symmetric confidential clients)
@@ -541,10 +550,7 @@ declare namespace fhirclient {
          * `clientPrivateJwk` here. **Note: ONLY use this on the server**, as
          * the browsers are considered incapable of keeping a secret.
          */
-        clientPrivateJwk?: { kid: string; kty: string, [k: string]: string } & (
-             {kty: "EC", alg: "ES384", crv: "P-384"} | 
-             {kty: "RSA", alg: "RS384" }
-        );
+        clientPrivateJwk?: CryptoKey | JWK;
 
 
         /**

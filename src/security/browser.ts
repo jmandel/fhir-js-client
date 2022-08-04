@@ -1,4 +1,5 @@
 import { encodeURL, decode, fromUint8Array } from "js-base64"
+import { fhirclient } from "../types"
 const crypto: Crypto = require("isomorphic-webcrypto").default
 const subtle: SubtleCrypto = crypto.subtle
 
@@ -56,11 +57,19 @@ export async function generateKey(jwsAlg: keyof typeof ALGS): Promise<CryptoKeyP
     }
 }
 
-export async function importKey(jwk: {alg: keyof typeof ALGS, [key: string]: any}): Promise<CryptoKey> {
+export async function importKey(jwk: fhirclient.JWK): Promise<CryptoKey> {
     try {
         return await subtle.importKey("jwk", jwk, ALGS[jwk.alg], true, ['sign'])
     } catch (e) {
         throw new Error(`The ${jwk.alg} is not supported by this browser: ${e}`)
+    }
+}
+
+export async function exportKey(key: CryptoKey): Promise<fhirclient.JWK> {
+    try {
+        return await subtle.exportKey("jwk", key) as fhirclient.JWK
+    } catch (e) {
+        throw new Error(`exportKey is not supported by this browser: ${e}`)
     }
 }
 

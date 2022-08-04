@@ -51,6 +51,10 @@ export async function importKey(jwk: {alg: SupportedAlg}): Promise<KeyLike> {
     return importJWK(jwk) as Promise<KeyLike>
 }
 
+export async function exportKey(key: CryptoKey) {
+    return exportJWK(key)
+}
+
 export async function signCompactJws(alg: SupportedAlg, privateKey: KeyLike, header: any, payload: any): Promise<string> {
     return new SignJWT(payload).setProtectedHeader({...header, alg}).sign(privateKey)
 }
