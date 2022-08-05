@@ -4,7 +4,6 @@ import * as Lab       from "@hapi/lab";
 import * as smart     from "../src/smart";
 import { fhirclient } from "../src/types";
 import ServerEnv      from "./mocks/ServerEnvironment";
-import assert         from 'assert/strict';
 export const lab = Lab.script();
 const { it, describe } = lab;
 
@@ -76,10 +75,10 @@ describe("smart", () => {
             expect(assertionMatch).not.to.be.null;
 
             const assertion = assertionMatch?.groups?.assertion;
-            assert(assertion);
+            expect(assertion).to.exist;
 
             const clientKey = await jose.importJWK(defaultStateAsymmetricAuth.clientPrivateJwk!);
-            let validated = await jose.compactVerify(assertion, clientKey)
+            let validated = await jose.compactVerify(assertion!, clientKey)
             expect(validated).to.exist;
             expect(validated.protectedHeader["jku"]).to.equal(defaultStateAsymmetricAuth.clientPublicKeySetUrl);
             expect(validated.protectedHeader["kid"]).to.equal(defaultStateAsymmetricAuth.clientPrivateJwk!.kid);
@@ -124,9 +123,9 @@ describe("smart", () => {
             expect(assertionMatch).not.to.be.null;
 
             const assertion = assertionMatch?.groups?.assertion;
-            assert(assertion);
+            expect(assertion).to.exist;
 
-            const validated = await jose.compactVerify(assertion, publicKey)
+            const validated = await jose.compactVerify(assertion!, publicKey)
             expect(validated).to.exist;
             expect(validated.protectedHeader["jku"]).to.equal(jku);
             expect(validated.protectedHeader["kid"]).to.equal(kid);
@@ -173,9 +172,9 @@ describe("smart", () => {
             expect(assertionMatch).not.to.be.null;
 
             const assertion = assertionMatch?.groups?.assertion;
-            assert(assertion);
+            expect(assertion).to.exist;
 
-            const validated = await jose.compactVerify(assertion, publicKey)
+            const validated = await jose.compactVerify(assertion!, publicKey)
             expect(validated).to.exist;
             expect(validated.protectedHeader["jku"]).to.equal(jku);
             expect(validated.protectedHeader["kid"]).to.equal(kid);
