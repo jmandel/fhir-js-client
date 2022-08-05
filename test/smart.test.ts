@@ -4,7 +4,7 @@ import * as Lab       from "@hapi/lab";
 import * as smart     from "../src/smart";
 import { fhirclient } from "../src/types";
 import ServerEnv      from "./mocks/ServerEnvironment";
-import assert         from 'assert';
+import assert         from 'assert/strict';
 export const lab = Lab.script();
 const { it, describe } = lab;
 
