@@ -51,26 +51,22 @@ export async function importKey(jwk: {alg: SupportedAlg}): Promise<KeyLike> {
     return importJWK(jwk) as Promise<KeyLike>
 }
 
-export async function exportKey(key: CryptoKey) {
-    return exportJWK(key)
-}
-
 export async function signCompactJws(alg: SupportedAlg, privateKey: KeyLike, header: any, payload: any): Promise<string> {
     return new SignJWT(payload).setProtectedHeader({...header, alg}).sign(privateKey)
 }
 
-async function test(){
-    const esk = await generateKey('ES384');
-    console.log("ES384 privateKey:", esk.privateKey);
-    const eskSigned = await new SignJWT({ iss: "issuer" }).setProtectedHeader({ alg: 'ES384', jwku: "test" }).sign(esk.privateKey);
-    console.log("Signed ES384", eskSigned);
-    console.log(JSON.stringify(await exportJWK(esk.publicKey)))
+// async function test(){
+//     const esk = await generateKey('ES384');
+//     console.log("ES384 privateKey:", esk.privateKey);
+//     const eskSigned = await new SignJWT({ iss: "issuer" }).setProtectedHeader({ alg: 'ES384', jwku: "test" }).sign(esk.privateKey);
+//     console.log("Signed ES384", eskSigned);
+//     console.log(JSON.stringify(await exportJWK(esk.publicKey)))
 
-    const rsk = await generateKey('RS384');
-    console.log("RS384 privateKey:", rsk.privateKey);
-    const rskSigned = await new SignJWT({ iss: "issuer" }).setProtectedHeader({ alg: 'RS384', jwku: "test" }).sign(rsk.privateKey);
-    console.log("Signed RS384", rskSigned);
-    console.log(JSON.stringify(await exportJWK(rsk.publicKey)))
-}
+//     const rsk = await generateKey('RS384');
+//     console.log("RS384 privateKey:", rsk.privateKey);
+//     const rskSigned = await new SignJWT({ iss: "issuer" }).setProtectedHeader({ alg: 'RS384', jwku: "test" }).sign(rsk.privateKey);
+//     console.log("Signed RS384", rskSigned);
+//     console.log(JSON.stringify(await exportJWK(rsk.publicKey)))
+// }
 
 // test()

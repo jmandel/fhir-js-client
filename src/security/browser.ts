@@ -65,14 +65,6 @@ export async function importKey(jwk: fhirclient.JWK): Promise<CryptoKey> {
     }
 }
 
-export async function exportKey(key: CryptoKey): Promise<fhirclient.JWK> {
-    try {
-        return await subtle.exportKey("jwk", key) as fhirclient.JWK
-    } catch (e) {
-        throw new Error(`exportKey is not supported by this browser: ${e}`)
-    }
-}
-
 export async function signCompactJws(alg: keyof typeof ALGS, privateKey: CryptoKey, header: any, payload: any): Promise<string> {
 
     const jwtHeader  = JSON.stringify({ ...header, alg });

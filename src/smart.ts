@@ -248,21 +248,6 @@ export async function authorize(
     const oldKey = await storage.get(SMART_KEY);
     await storage.unset(oldKey);
 
-    if (
-        // Browsers
-        Object.prototype.toString.call(clientPrivateJwk) == "[object CryptoKey]" ||
-
-        // Node
-        clientPrivateJwk?.constructor?.name === "CryptoKey"
-    ) {
-        debug("Exporting private CryptoKey to store it as JWK in state...");
-        clientPrivateJwk = (await security.exportKey(clientPrivateJwk)) as fhirclient.JWK
-        if (clientPrivateJwk && clientPrivateJwk.kty === "EC" && clientPrivateJwk.alg === undefined) {
-            // @ts-ignore
-            clientPrivateJwk.alg = "ES384"
-        }
-    }
-
     // create initial state
     const stateKey = randomString(16);
     const state: fhirclient.ClientState = {
