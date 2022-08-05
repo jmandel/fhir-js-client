@@ -437,11 +437,11 @@ export function onMessage(e: MessageEvent) {
 }
 
 /**
- * The completeAuth function should only be called on the page that represents
+ * The ready function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
  * authorization server..
  */
-export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
+export async function ready(env: fhirclient.Adapter, options: fhirclient.ReadyOptions = {}): Promise<Client>
 {
     const url = env.getUrl();
     const Storage = env.getStorage();
@@ -462,7 +462,7 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
     // appending these parameters to the redirect url.
     // From client's point of view, this is not very reliable (because we can't
     // know how we have landed on this page - was it a redirect or was it loaded
-    // manually). However, if `completeAuth()` is being called, we can assume
+    // manually). However, if `ready()` is being called, we can assume
     // that the url comes from the auth server (otherwise the app won't work
     // anyway).
     if (authError || authErrorDescription) {
@@ -562,7 +562,12 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
         assert(code, "'code' url parameter is required");
 
         debug("Preparing to exchange the code for access token...");
-        const requestOptions = await buildTokenRequest(env, code, state);
+        const requestOptions = await buildTokenRequest(env, {
+            code,
+            state,
+            clientPublicKeySetUrl: options.clientPublicKeySetUrl,
+            privateKey: options.privateKey || state.clientPrivateJwk
+        });
         debug("Token request options: %O", requestOptions);
 
         // The EHR authorization server SHALL return a JSON structure that
@@ -601,9 +606,43 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
  * Builds the token request options. Does not make the request, just
  * creates it's configuration and returns it in a Promise.
  */
-export async function buildTokenRequest(env: fhirclient.Adapter, code: string, state: fhirclient.ClientState): Promise<RequestInit>
+export async function buildTokenRequest(
+    env: fhirclient.Adapter,
+    {
+        code,
+        state,
+        clientPublicKeySetUrl,
+        privateKey
+    }: {
+        /**
+         * The `code` URL parameter received from the auth redirect
+         */
+        code: string,
+        
+        /**
+         * The app state
+         */
+        state: fhirclient.ClientState
+
+        /**
+         * If provided overrides the `clientPublicKeySetUrl` from the authorize
+         * options (if any). Used for `jku` token header in case of asymmetric auth.
+         */
+        clientPublicKeySetUrl?: string
+
+        /**
+         * Can be a private JWK, or an object with alg, kid and key properties,
+         * where `key` is an un-extractable private CryptoKey object.
+         */
+        privateKey?: fhirclient.JWK | {
+            key: CryptoKey
+            alg: "RS384" | "ES384"
+            kid: string
+        }
+    }
+): Promise<RequestInit>
 {
-    const { redirectUri, clientSecret, clientPublicKeySetUrl, clientPrivateJwk, tokenUri, clientId, codeVerifier } = state;
+    const { redirectUri, clientSecret, tokenUri, clientId, codeVerifier } = state;
 
     assert(redirectUri, "Missing state.redirectUri");
     assert(tokenUri, "Missing state.tokenUri");
@@ -628,13 +667,17 @@ export async function buildTokenRequest(env: fhirclient.Adapter, code: string, s
             clientId + ":" + clientSecret
         );
         debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.authorization);
-    } else if (clientPrivateJwk) {
-        const clientPrivateKey = await security.importKey(clientPrivateJwk)
+    }
+    
+    // Asymmetric auth
+    else if (privateKey) {
+
+        const clientPrivateKey = privateKey.key || await security.importKey(privateKey)
 
         const jwtHeaders = {
             typ: "JWT",
-            kid: clientPrivateJwk.kid,
-            jku: clientPublicKeySetUrl
+            kid: privateKey.kid,
+            jku: clientPublicKeySetUrl || state.clientPublicKeySetUrl
         };
 
         const jwtClaims = {
@@ -645,12 +688,14 @@ export async function buildTokenRequest(env: fhirclient.Adapter, code: string, s
             exp: getTimeInFuture(120) // two minutes in the future
         };
         
-        const clientAssertion = await security.signCompactJws(clientPrivateJwk.alg, clientPrivateKey, jwtHeaders, jwtClaims);
+        const clientAssertion = await security.signCompactJws(privateKey.alg, clientPrivateKey, jwtHeaders, jwtClaims);
         requestOptions.body += `&client_assertion_type=${encodeURIComponent("urn:ietf:params:oauth:client-assertion-type:jwt-bearer")}`;
         requestOptions.body += `&client_assertion=${encodeURIComponent(clientAssertion)}`;
         debug("Using state.clientPrivateJwk to add a client_assertion to the POST body")
-
-    } else {
+    }
+    
+    // Public client
+    else {
         debug("Public client detected; adding state.clientId to the POST body");
         requestOptions.body += `&client_id=${encodeURIComponent(clientId)}`;
     }
@@ -662,23 +707,6 @@ export async function buildTokenRequest(env: fhirclient.Adapter, code: string, s
     }
   
     return requestOptions as RequestInit;
-}
-
-/**
- * @param env
- * @param [onSuccess]
- * @param [onError]
- */
-export async function ready(env: fhirclient.Adapter, onSuccess?: (client: Client) => any, onError?: (error: Error) => any): Promise<Client>
-{
-    let task = completeAuth(env);
-    if (onSuccess) {
-        task = task.then(onSuccess);
-    }
-    if (onError) {
-        task = task.catch(onError);
-    }
-    return task;
 }
 
 /**
@@ -709,9 +737,13 @@ export async function ready(env: fhirclient.Adapter, onSuccess?: (client: Client
  *    expired access token, but it still means that the user will have to
  *    refresh the page twice to re-authorize.
  * @param env The adapter
- * @param options The authorize options
+ * @param authorizeOptions The authorize options
  */
-export async function init(env: fhirclient.Adapter, options: fhirclient.AuthorizeParams): Promise<Client|never>
+export async function init(
+    env: fhirclient.Adapter,
+    authorizeOptions: fhirclient.AuthorizeParams,
+    readyOptions?: fhirclient.ReadyOptions
+): Promise<Client|never>
 {
     const url   = env.getUrl();
     const code  = url.searchParams.get("code");
@@ -719,7 +751,7 @@ export async function init(env: fhirclient.Adapter, options: fhirclient.Authoriz
 
     // if `code` and `state` params are present we need to complete the auth flow
     if (code && state) {
-        return completeAuth(env);
+        return ready(env, readyOptions);
     }
 
     // Check for existing client state. If state is found, it means a client
@@ -733,7 +765,7 @@ export async function init(env: fhirclient.Adapter, options: fhirclient.Authoriz
     }
 
     // Otherwise try to launch
-    return authorize(env, options).then(() => {
+    return authorize(env, authorizeOptions).then(() => {
         // `init` promises a Client but that cannot happen in this case. The
         // browser will be redirected (unload the page and be redirected back
         // to it later and the same init function will be called again). On

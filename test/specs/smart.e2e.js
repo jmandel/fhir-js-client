@@ -106,14 +106,18 @@ function execute(fn, ...args) {
 }
 
 function executeAsync(fn, ...args) {
-    return new Promise((resolve, reject) => {
-        browser.executeAsyncScript(fn, args, result => {
-            if (result.error) {
-                reject(result.error)
-            } else {
-                resolve(result.value)
-            }
-        });
+    return new Promise(resolve => {
+        browser.executeAsyncScript(fn, args, resolve);
+    }).then(result => {
+        if (!result) {
+            throw new Error(`Calling ${fn} returned no result`)
+        }
+        
+        if (result.value?.error) {
+            throw new Error(result.value.error + "")
+        }
+
+        return result.value
     });
 }
 
@@ -171,19 +175,10 @@ async function authorize(
     /** @type {any} */
     const result = await executeAsync(function(authorizeParams, done) {
         FHIR.oauth2.authorize({ ...authorizeParams, noRedirect: true }).then(
-            function(url) { done({ url      , error: null           }) },
-            function(err) { done({ url: null, error: err.toString() }) }
+            function(url) { done(url) },
+            function(err) { done({ error: err.toString() }) }
         );
     }, authorizeParams);
-
-    if (!result) {
-        // console.log("=====>", result)
-        throw new Error("Calling FHIR.oauth2.authorize returned no result")
-    }
-    
-    if (result.error) {
-        throw new Error(result.error + "")
-    }
 
     // Verify that .well-known/smart-configuration has been requested ----------
     if (mockWellKnownJson) {
@@ -210,7 +205,7 @@ async function authorize(
     }
 
     // Return the URL to run assertions on it ----------------------------------
-    const url = new URL(result.url);
+    const url = new URL(result);
 
     expect(url.searchParams.get("response_type"), "The redirect url should contain 'response_type=code'").to.equal("code")
     expect(url.searchParams.get("scope"), "The redirect url should contain 'launch' in its scope parameter").to.contain("launch")
@@ -222,18 +217,18 @@ async function authorize(
     return url
 }
 
-async function ready(stateID) {
-    const result = await executeAsync(function(done) {
-        FHIR.oauth2.ready().then(
+async function ready(stateID, options = {}) {
+    const result = await executeAsync(function(options, done) {
+        FHIR.oauth2.ready(options).then(
             function(client) {
                 window.SMART_CLIENT = client;
-                done(client.state);
+                done(client.state );
             },
             function(e) {
                 done({ error: e + "" });
             }
         );
-    });
+    }, options);
 
     // console.log("result:", result)
 
@@ -353,6 +348,7 @@ describe("authorization", () => {
     });
     
     after(() => {
+        browser.end()
         if (mockDataServer && mockDataServer.listening) {
             return new Promise(resolve => {
                 mockDataServer.close((error) => {
@@ -693,116 +689,59 @@ describe("authorization", () => {
 
         it (alg + " asymmetric auth with CryptoKey object", async () => {
 
-            await navigate(LAUNCH_URL);
-            await execute(
-                `history.replaceState(null, "", "${LAUNCH_URL}?launch=123&iss=${
-                encodeURIComponent(FHIR_URL)}")`
-            );
+            const kid = "my-kid";
 
-            mockServer.mock("/fhir/.well-known/smart-configuration", {
-                body: MOCK_WELL_KNOWN_JSON,
-                status: 200,
-                headers: {
-                    "content-type" : "application/json",
-                    "cache-control": "no-cache, no-store, must-revalidate",
-                    "pragma"       : "no-cache",
-                    "expires"      : "0"
-                }
-            });
-
-            const authorizeParams = {
+            const redirectUrl = await authorize({
                 client_id: CLIENT_ID,
                 scope    : "patient/*.read",
-                clientPublicKeySetUrl: KEY_SET_URL,
-                noRedirect: true
-            }
+                clientPublicKeySetUrl: KEY_SET_URL
+            });
 
-            const result = await executeAsync(function(authorizeParams, alg, done) {
-
-                crypto.subtle.generateKey(alg === "RS384" ? {
-                    name: "RSASSA-PKCS1-v1_5",
-                    modulusLength: 4096,
-                    publicExponent: new Uint8Array([1, 0, 1]),
-                    hash: {
-                        name: 'SHA-384'
-                    }
-                } : {
-                    name: "ECDSA",
-                    namedCurve: "P-384"
-                }, true, ["sign"])
-
-                .then(function(pair) {
-                    return Promise.all([
-                        crypto.subtle.exportKey("jwk", pair.privateKey),
-                        crypto.subtle.exportKey("jwk", pair.publicKey ),
-                        Promise.resolve(pair)
-                    ])
-                })
-                .then(function(keys) {
-                    FHIR.oauth2.authorize({
-                        ...authorizeParams,
-                        clientPrivateJwk: keys[2].privateKey
-                    }).then(function(url) {
-                        done({
-                            url,
-                            privateKey: { ...keys[0], alg },
-                            publicKey: { ...keys[1], alg },
-                            error: null
-                        })
-                    })
-                })
-                .catch(function(err) {
-                    done({ url: null, error: err.toString() })
-                });
-            }, authorizeParams, alg);
-        
-            if (!result) {
-                throw new Error("Calling FHIR.oauth2.authorize returned no result")
-            }
-            
-            if (result.error) {
-                throw new Error(result.error + "")
-            }
-
-            const { url, publicKey, privateKey } = result
-
-            // console.log("publicKey:", publicKey)
-            // console.log("privateKey:", privateKey)
-        
-            const redirectUrl = new URL(url);    
-
-            // Get the state parameter from the URL
             const stateID = redirectUrl.searchParams.get("state");
 
-            // Get the state object from sessionStorage
-            /** @type {any} */
-            const state = await execute(function(stateID) {
-                return JSON.parse(sessionStorage.getItem(stateID) || "null");
-            }, stateID);
-
-            // Verify the state is properly initialized
-            expect(state, `state should be stored at sessionStorage["${stateID}"]`).to.exist;
-            expect(state.authorizeUri, `state.authorizeUri should be "${AUTHORIZE_URL}"`).to.equal(AUTHORIZE_URL)
-            expect(state.tokenUri, `state.tokenUri should be "${TOKEN_URL}"`).to.equal(TOKEN_URL)
-            expect(state.redirectUri, `state.redirectUri should be "${REDIRECT_URL}"`).to.equal(REDIRECT_URL)
-            expect(state.serverUrl, `state.serverUrl should be "${FHIR_URL}"`).to.equal(FHIR_URL)
-            expect(state.registrationUri, `state.registrationUri should be "${REGISTER_URL}"`).to.equal(REGISTER_URL)
-            expect(state.clientId, `state.clientId should be "${CLIENT_ID}"`).to.equal(CLIENT_ID)
-            expect(state.scope, `state.scope should be "patient/*.read launch"`).to.equal("patient/*.read launch")
-            expect(state.key, `state.key should be "${stateID}"`).to.equal(stateID)
-            expect(state.tokenResponse, `state.tokenResponse should be initialized as an empty object`).to.deep.equal({})
-            expect(state.clientPrivateJwk, `The clientPrivateJwk object should be stored in state`).to.deep.equal({ ...privateKey, alg })
-            expect(state.clientPublicKeySetUrl, `The clientPublicKeySetUrl should be stored in state`).to.equal(KEY_SET_URL)
-
-            // Redirect
             await navigate(`${REDIRECT_URL}?code=123&state=${stateID}`);
-            
+
+            // 1. Create a key pair within the tested window
+            // 2. Export the public key as JWK to be used for virification later
+            // 3. Re-import the private key to make it non-extractable
+            // 4. Save the private key and return the publik JWK
+            const publicJWK = await executeAsync(async (alg, done) => {
+                try {
+                    const algorithm = alg === "RS384" ? {
+                        name: "RSASSA-PKCS1-v1_5",
+                        modulusLength: 4096,
+                        publicExponent: new Uint8Array([1, 0, 1]),
+                        hash: {
+                            name: 'SHA-384'
+                        }
+                    } : {
+                        name: "ECDSA",
+                        namedCurve: "P-384"
+                    };
+
+                    const { publicKey, privateKey } = await crypto.subtle.generateKey(
+                        algorithm,
+                        true,
+                        ["sign", "verify"]
+                    );
+
+                    const publicJWK = await crypto.subtle.exportKey("jwk", publicKey);
+                    const privateJWK = await crypto.subtle.exportKey("jwk", privateKey);
+
+                    window.PRIVATE_KEY = await crypto.subtle.importKey("jwk", privateJWK, algorithm, false, ["sign"])
+
+                    done(publicJWK)
+                } catch (e) {
+                    done({ error: e + "" })
+                }
+            }, alg);
+
             // Mock token response
             const tokenMock = mockServer.mock({ path: "/auth/token", method: "post" }, {
                 bodyParser: urlencoded({ extended: false }),
                 async handler(req, res) {
 
-                    const clientKey = await jose.importJWK(publicKey, alg);
+                    const clientKey = await jose.importJWK(publicJWK, alg);
                     
                     expect(req.body.client_assertion, "client_assertion should be sent in the POST body").to.exist;
                     expect(req.body.client_assertion_type, "proper client_assertion_type should be sent in the POST body").to.equal('urn:ietf:params:oauth:client-assertion-type:jwt-bearer');
@@ -814,8 +753,8 @@ describe("authorization", () => {
                     let validated = await jose.compactVerify(req.body.client_assertion, clientKey)
                     expect(validated, "client_assertion must be valid").to.exist;
                     expect(validated.protectedHeader.jku, `client_assertion jku header must be ${KEY_SET_URL}`).to.equal(KEY_SET_URL);
-                    expect(validated.protectedHeader.kid, `client_assertion jku header must be ${publicKey.kid}`).to.equal(publicKey.kid);
-                    expect(validated.protectedHeader.typ, "client_assertion jku header must be JWT").to.equal("JWT");
+                    expect(validated.protectedHeader.kid, `client_assertion kid header must be ${kid}`).to.equal(kid);
+                    expect(validated.protectedHeader.typ, "client_assertion typ header must be JWT").to.equal("JWT");
 
                     let payload = JSON.parse(new TextDecoder().decode(validated.payload));
                     expect(payload.aud, `The validated token payload aud property should be "${TOKEN_URL}"`).to.equal(TOKEN_URL);
@@ -827,8 +766,30 @@ describe("authorization", () => {
                     res.json(generateTokenResponse());
                 }
             });
-        
-            await ready(stateID)
+
+            await executeAsync(async (context, done) => {
+
+                FHIR.oauth2.ready({
+                    clientPublicKeySetUrl: context.KEY_SET_URL,
+                    privateKey: {
+                        alg: context.alg,
+                        kid: context.kid,
+                        key: window.PRIVATE_KEY
+                    }
+                }).then(
+                    function(client) {
+                        window.SMART_CLIENT = client;
+                        done(client.state);
+                    },
+                    function(e) {
+                        done({ error: e + "" });
+                    }
+                );
+            }, {
+                alg,
+                kid,
+                KEY_SET_URL
+            });
 
             expect(tokenMock._request, "Token endpoint should be called called").to.exist;
         });

@@ -1987,7 +1987,7 @@ exports.assertJsonPatch = assertJsonPatch;
 Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
-exports.signCompactJws = exports.exportKey = exports.importKey = exports.generateKey = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = exports.base64urldecode = exports.base64urlencode = void 0;
+exports.signCompactJws = exports.importKey = exports.generateKey = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = exports.base64urldecode = exports.base64urlencode = void 0;
 
 const js_base64_1 = __webpack_require__(/*! js-base64 */ "./node_modules/js-base64/base64.js");
 
@@ -2066,16 +2066,6 @@ async function importKey(jwk) {
 
 exports.importKey = importKey;
 
-async function exportKey(key) {
-  try {
-    return await subtle.exportKey("jwk", key);
-  } catch (e) {
-    throw new Error(`exportKey is not supported by this browser: ${e}`);
-  }
-}
-
-exports.exportKey = exportKey;
-
 async function signCompactJws(alg, privateKey, header, payload) {
   const jwtHeader = JSON.stringify({ ...header,
     alg
@@ -2121,13 +2111,13 @@ function utf8ToBinaryString(str) {
 "use strict";
 
 
-let api;
+let api; // $lab:coverage:off$
 
 if (true) {
   api = __webpack_require__(/*! ./browser */ "./src/security/browser.ts");
 } else {}
 
-module.exports = api;
+module.exports = api; // $lab:coverage:on$
 
 /***/ }),
 
@@ -2196,7 +2186,7 @@ exports.SMART_KEY = "SMART_KEY";
 Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
-exports.init = exports.ready = exports.buildTokenRequest = exports.completeAuth = exports.onMessage = exports.isInPopUp = exports.isInFrame = exports.authorize = exports.getSecurityExtensions = exports.fetchWellKnownJson = exports.KEY = void 0;
+exports.init = exports.buildTokenRequest = exports.ready = exports.onMessage = exports.isInPopUp = exports.isInFrame = exports.authorize = exports.getSecurityExtensions = exports.fetchWellKnownJson = exports.KEY = void 0;
 /* global window */
 
 const lib_1 = __webpack_require__(/*! ./lib */ "./src/lib.ts");
@@ -2314,8 +2304,6 @@ exports.getSecurityExtensions = getSecurityExtensions;
  */
 
 async function authorize(env, params = {}) {
-  var _a;
-
   const url = env.getUrl(); // Multiple config for EHR launches ---------------------------------------
 
   if (Array.isArray(params)) {
@@ -2427,20 +2415,7 @@ async function authorize(env, params = {}) {
 
 
   const oldKey = await storage.get(settings_1.SMART_KEY);
-  await storage.unset(oldKey);
-
-  if ( // Browsers
-  Object.prototype.toString.call(clientPrivateJwk) == "[object CryptoKey]" || // Node
-  ((_a = clientPrivateJwk === null || clientPrivateJwk === void 0 ? void 0 : clientPrivateJwk.constructor) === null || _a === void 0 ? void 0 : _a.name) === "CryptoKey") {
-    debug("Exporting private CryptoKey to store it as JWK in state...");
-    clientPrivateJwk = await security.exportKey(clientPrivateJwk);
-
-    if (clientPrivateJwk && clientPrivateJwk.kty === "EC" && clientPrivateJwk.alg === undefined) {
-      // @ts-ignore
-      clientPrivateJwk.alg = "ES384";
-    }
-  } // create initial state
-
+  await storage.unset(oldKey); // create initial state
 
   const stateKey = (0, lib_1.randomString)(16);
   const state = {
@@ -2632,12 +2607,12 @@ function onMessage(e) {
 
 exports.onMessage = onMessage;
 /**
- * The completeAuth function should only be called on the page that represents
+ * The ready function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
  * authorization server..
  */
 
-async function completeAuth(env) {
+async function ready(env, options = {}) {
   var _a, _b;
 
   const url = env.getUrl();
@@ -2656,7 +2631,7 @@ async function completeAuth(env) {
   // appending these parameters to the redirect url.
   // From client's point of view, this is not very reliable (because we can't
   // know how we have landed on this page - was it a redirect or was it loaded
-  // manually). However, if `completeAuth()` is being called, we can assume
+  // manually). However, if `ready()` is being called, we can assume
   // that the url comes from the auth server (otherwise the app won't work
   // anyway).
 
@@ -2753,7 +2728,12 @@ async function completeAuth(env) {
   if (!authorized && state.tokenUri) {
     (0, lib_1.assert)(code, "'code' url parameter is required");
     debug("Preparing to exchange the code for access token...");
-    const requestOptions = await buildTokenRequest(env, code, state);
+    const requestOptions = await buildTokenRequest(env, {
+      code,
+      state,
+      clientPublicKeySetUrl: options.clientPublicKeySetUrl,
+      privateKey: options.privateKey || state.clientPrivateJwk
+    });
     debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
     // includes an access token or a message indicating that the
     // authorization request has been denied.
@@ -2783,18 +2763,21 @@ async function completeAuth(env) {
   return client;
 }
 
-exports.completeAuth = completeAuth;
+exports.ready = ready;
 /**
  * Builds the token request options. Does not make the request, just
  * creates it's configuration and returns it in a Promise.
  */
 
-async function buildTokenRequest(env, code, state) {
+async function buildTokenRequest(env, {
+  code,
+  state,
+  clientPublicKeySetUrl,
+  privateKey
+}) {
   const {
     redirectUri,
     clientSecret,
-    clientPublicKeySetUrl,
-    clientPrivateJwk,
     tokenUri,
     clientId,
     codeVerifier
@@ -2819,12 +2802,13 @@ async function buildTokenRequest(env, code, state) {
   if (clientSecret) {
     requestOptions.headers.authorization = "Basic " + env.btoa(clientId + ":" + clientSecret);
     debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.authorization);
-  } else if (clientPrivateJwk) {
-    const clientPrivateKey = await security.importKey(clientPrivateJwk);
+  } // Asymmetric auth
+  else if (privateKey) {
+    const clientPrivateKey = privateKey.key || (await security.importKey(privateKey));
     const jwtHeaders = {
       typ: "JWT",
-      kid: clientPrivateJwk.kid,
-      jku: clientPublicKeySetUrl
+      kid: privateKey.kid,
+      jku: clientPublicKeySetUrl || state.clientPublicKeySetUrl
     };
     const jwtClaims = {
       iss: clientId,
@@ -2834,11 +2818,12 @@ async function buildTokenRequest(env, code, state) {
       exp: (0, lib_1.getTimeInFuture)(120) // two minutes in the future
 
     };
-    const clientAssertion = await security.signCompactJws(clientPrivateJwk.alg, clientPrivateKey, jwtHeaders, jwtClaims);
+    const clientAssertion = await security.signCompactJws(privateKey.alg, clientPrivateKey, jwtHeaders, jwtClaims);
     requestOptions.body += `&client_assertion_type=${encodeURIComponent("urn:ietf:params:oauth:client-assertion-type:jwt-bearer")}`;
     requestOptions.body += `&client_assertion=${encodeURIComponent(clientAssertion)}`;
     debug("Using state.clientPrivateJwk to add a client_assertion to the POST body");
-  } else {
+  } // Public client
+  else {
     debug("Public client detected; adding state.clientId to the POST body");
     requestOptions.body += `&client_id=${encodeURIComponent(clientId)}`;
   }
@@ -2853,27 +2838,6 @@ async function buildTokenRequest(env, code, state) {
 }
 
 exports.buildTokenRequest = buildTokenRequest;
-/**
- * @param env
- * @param [onSuccess]
- * @param [onError]
- */
-
-async function ready(env, onSuccess, onError) {
-  let task = completeAuth(env);
-
-  if (onSuccess) {
-    task = task.then(onSuccess);
-  }
-
-  if (onError) {
-    task = task.catch(onError);
-  }
-
-  return task;
-}
-
-exports.ready = ready;
 /**
  * This function can be used when you want to handle everything in one page
  * (no launch endpoint needed). You can think of it as if it does:
@@ -2902,16 +2866,16 @@ exports.ready = ready;
  *    expired access token, but it still means that the user will have to
  *    refresh the page twice to re-authorize.
  * @param env The adapter
- * @param options The authorize options
+ * @param authorizeOptions The authorize options
  */
 
-async function init(env, options) {
+async function init(env, authorizeOptions, readyOptions) {
   const url = env.getUrl();
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state"); // if `code` and `state` params are present we need to complete the auth flow
 
   if (code && state) {
-    return completeAuth(env);
+    return ready(env, readyOptions);
   } // Check for existing client state. If state is found, it means a client
   // instance have already been created in this session and we should try to
   // "revive" it.
@@ -2926,7 +2890,7 @@ async function init(env, options) {
   } // Otherwise try to launch
 
 
-  return authorize(env, options).then(() => {
+  return authorize(env, authorizeOptions).then(() => {
     // `init` promises a Client but that cannot happen in this case. The
     // browser will be redirected (unload the page and be redirected back
     // to it later and the same init function will be called again). On

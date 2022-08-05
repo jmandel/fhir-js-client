@@ -50,22 +50,39 @@ export declare function isInPopUp(): boolean;
  */
 export declare function onMessage(e: MessageEvent): void;
 /**
- * The completeAuth function should only be called on the page that represents
+ * The ready function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
  * authorization server..
  */
-export declare function completeAuth(env: fhirclient.Adapter): Promise<Client>;
+export declare function ready(env: fhirclient.Adapter, options?: fhirclient.ReadyOptions): Promise<Client>;
 /**
  * Builds the token request options. Does not make the request, just
  * creates it's configuration and returns it in a Promise.
  */
-export declare function buildTokenRequest(env: fhirclient.Adapter, code: string, state: fhirclient.ClientState): Promise<RequestInit>;
-/**
- * @param env
- * @param [onSuccess]
- * @param [onError]
- */
-export declare function ready(env: fhirclient.Adapter, onSuccess?: (client: Client) => any, onError?: (error: Error) => any): Promise<Client>;
+export declare function buildTokenRequest(env: fhirclient.Adapter, { code, state, clientPublicKeySetUrl, privateKey }: {
+    /**
+     * The `code` URL parameter received from the auth redirect
+     */
+    code: string;
+    /**
+     * The app state
+     */
+    state: fhirclient.ClientState;
+    /**
+     * If provided overrides the `clientPublicKeySetUrl` from the authorize
+     * options (if any). Used for `jku` token header in case of asymmetric auth.
+     */
+    clientPublicKeySetUrl?: string;
+    /**
+     * Can be a private JWK, or an object with alg, kid and key properties,
+     * where `key` is an un-extractable private CryptoKey object.
+     */
+    privateKey?: fhirclient.JWK | {
+        key: CryptoKey;
+        alg: "RS384" | "ES384";
+        kid: string;
+    };
+}): Promise<RequestInit>;
 /**
  * This function can be used when you want to handle everything in one page
  * (no launch endpoint needed). You can think of it as if it does:
@@ -94,6 +111,6 @@ export declare function ready(env: fhirclient.Adapter, onSuccess?: (client: Clie
  *    expired access token, but it still means that the user will have to
  *    refresh the page twice to re-authorize.
  * @param env The adapter
- * @param options The authorize options
+ * @param authorizeOptions The authorize options
  */
-export declare function init(env: fhirclient.Adapter, options: fhirclient.AuthorizeParams): Promise<Client | never>;
+export declare function init(env: fhirclient.Adapter, authorizeOptions: fhirclient.AuthorizeParams, readyOptions?: fhirclient.ReadyOptions): Promise<Client | never>;

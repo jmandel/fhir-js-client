@@ -19,8 +19,7 @@ declare namespace fhirclient {
          * will eventually be resolved with a Client instance that you can use
          * to query the fhir server.
          */
-        ready(): Promise<Client>;
-        ready(onSuccess: (client: Client) => any, onError?: (error: Error) => any): Promise<any>;
+        ready(options?: fhirclient.ReadyOptions): Promise<Client>;
 
         /**
          * Starts the [SMART Launch Sequence](http://hl7.org/fhir/smart-app-launch/#smart-launch-sequence).
@@ -607,6 +606,16 @@ declare namespace fhirclient {
          *    this setting
          */
         pkceMode?: PkceMode;
+    }
+
+    interface ReadyOptions {
+        privateKey?: JWK | {
+            key: CryptoKey
+            alg: "RS384" | "ES384"
+            kid: string
+        };
+        clientPublicKeySetUrl?: string; // for jku
+        // [key: string]: any; // Other options TBD
     }
 
     /**

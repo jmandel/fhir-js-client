@@ -147,7 +147,7 @@ describe("Browser tests", () => {
             });
 
             env.redirect("http://localhost/?code=123&state=" + state);
-            const client = await smart.completeAuth(env);
+            const client = await smart.ready(env);
 
             // make sure tha browser history was replaced
             expect(window.history._location).to.equal("http://localhost/");
@@ -214,7 +214,7 @@ describe("Browser tests", () => {
           });
 
           env.redirect("http://localhost/?code=123&state=" + state);
-          const client = await smart.completeAuth(env);
+          const client = await smart.ready(env);
 
           // make sure tha browser history was replaced
           expect(window.history._location).to.equal("http://localhost/");
@@ -283,7 +283,7 @@ describe("Browser tests", () => {
             });
 
             env.redirect("http://localhost/?code=123&state=" + key);
-            const client = await smart.completeAuth(env);
+            const client = await smart.ready(env);
 
             // make sure tha browser history was not replaced
             expect(window.history._location).to.equal("");
@@ -331,7 +331,7 @@ describe("Browser tests", () => {
             });
 
             env.redirect("http://localhost/");
-            const client = await smart.completeAuth(env);
+            const client = await smart.ready(env);
 
             expect(client.patient.id).to.equal("b2536dd3-bccd-4d22-8355-ab20acdf240b");
             expect(client.encounter.id).to.equal("e3ec2d15-4c27-4607-a45c-2f84962b0700");
@@ -370,7 +370,7 @@ describe("Browser tests", () => {
             });
 
             env.redirect("http://localhost/?state=" + key);
-            const client = await smart.completeAuth(env);
+            const client = await smart.ready(env);
 
             expect(client.patient.id).to.equal("b2536dd3-bccd-4d22-8355-ab20acdf240b");
             expect(client.encounter.id).to.equal("e3ec2d15-4c27-4607-a45c-2f84962b0700");
@@ -455,7 +455,7 @@ describe("Browser tests", () => {
             });
 
             env.redirect("http://localhost/?code=123&state=" + state);
-            const client = await smart.completeAuth(env);
+            const client = await smart.ready(env);
 
             expect(await Storage.get(smart.KEY), `must have set a state at ${smart.KEY}`).to.exist();
             expect(client.getPatientId()).to.equal("b2536dd3-bccd-4d22-8355-ab20acdf240b");
@@ -1260,32 +1260,32 @@ describe("Browser tests", () => {
             });
         });
 
-        describe("completeAuth", () => {
+        describe("ready", () => {
 
             it ("rejects with error and error_description from the url", async () => {
                 const env = new BrowserEnv();
                 env.redirect("http://localhost/?error=test-error");
-                await expect(smart.completeAuth(env))
+                await expect(smart.ready(env))
                     .to.reject(Error, "test-error");
                 env.redirect("http://localhost/?error_description=test-error-description");
-                await expect(smart.completeAuth(env))
+                await expect(smart.ready(env))
                     .to.reject(Error, "test-error-description");
                 env.redirect("http://localhost/?error=test-error&error_description=test-error-description");
-                await expect(smart.completeAuth(env))
+                await expect(smart.ready(env))
                     .to.reject(Error, "test-error: test-error-description");
             });
 
             it ("rejects with missing key", async () => {
                 const env = new BrowserEnv();
                 env.redirect("http://localhost/");
-                await expect(smart.completeAuth(env))
+                await expect(smart.ready(env))
                     .to.reject(Error, /^No 'state' parameter found/);
             });
 
             it ("rejects with empty state", async () => {
                 const env = new BrowserEnv();
                 env.redirect("http://localhost/?state=whatever");
-                await expect(smart.completeAuth(env))
+                await expect(smart.ready(env))
                     .to.reject(Error, /No state found/);
             });
 
@@ -1295,40 +1295,48 @@ describe("Browser tests", () => {
 
             it ("rejects with missing state.redirectUri", () => {
                 // @ts-ignore
-                expect(smart.buildTokenRequest(new BrowserEnv(), "whatever", {}))
+                expect(smart.buildTokenRequest(new BrowserEnv(), { code: "whatever", state: {} }))
                     .to.reject("Missing state.redirectUri");
             });
             it ("rejects with missing state.tokenUri", () => {
-                // @ts-ignore
-                expect(smart.buildTokenRequest(new BrowserEnv(), "whatever", {
-                    redirectUri: "whatever"
+                expect(smart.buildTokenRequest(new BrowserEnv(), {
+                    code: "whatever",
+                    // @ts-ignore
+                    state: {
+                        redirectUri: "whatever"
+                    }
                 })).to.reject("Missing state.tokenUri");
             });
             it ("rejects with missing state.clientId", () => {
-                // @ts-ignore
-                expect(smart.buildTokenRequest(new BrowserEnv(), "whatever", {
-                    redirectUri: "whatever",
-                    tokenUri: "whatever"
+                expect(smart.buildTokenRequest(new BrowserEnv(), {
+                    code: "whatever",
+                    // @ts-ignore
+                    state: {
+                        redirectUri: "whatever",
+                        tokenUri: "whatever"
+                    }
                 })).to.reject("Missing state.clientId");
             });
 
             it("uses state.codeVerifier", async () => {
-              const requestOptions = await smart.buildTokenRequest(
-                new BrowserEnv(),
-                "whatever",
-                {
-                  serverUrl: 'whatever',
-                  redirectUri: 'whatever',
-                  tokenUri: 'whatever',
-                  clientId: 'whatever',
-                  codeVerifier: 'whatever',
-                });
-
-              expect(requestOptions.body).to.exist();
-              expect(requestOptions.body).to.contain('&code_verifier=');
+                const requestOptions = await smart.buildTokenRequest(
+                    new BrowserEnv(),
+                    {
+                        code: "whatever",
+                        state: {
+                            serverUrl: 'whatever',
+                            redirectUri: 'whatever',
+                            tokenUri: 'whatever',
+                            clientId: 'whatever',
+                            codeVerifier: 'whatever',
+                        }
+                    }
+                );
+                expect(requestOptions.body).to.exist();
+                expect(requestOptions.body).to.contain('&code_verifier=');
             });
 
-    });
+        });
 
         describe("init", () => {
             it ("works in standalone mode", async () => {
@@ -1506,7 +1514,7 @@ describe("Browser tests", () => {
                         (global as any).window.name = "SMARTAuthPopup";
                     }
 
-                    smart.completeAuth(new BrowserEnv());
+                    smart.ready(new BrowserEnv());
                     resolve();
                 });
             });
@@ -1784,7 +1792,7 @@ describe("Browser tests", () => {
             popup.sessionStorage.setItem("SMART_KEY", '"TEST"');
             popup.sessionStorage.setItem("TEST", JSON.stringify({}));
 
-            smart.completeAuth(new BrowserEnv());
+            smart.ready(new BrowserEnv());
         });
 
         it ("authorize in frame returns control to parent", (next) => {
@@ -1801,7 +1809,7 @@ describe("Browser tests", () => {
             sessionStorage.setItem("SMART_KEY", '"TEST"');
             sessionStorage.setItem("TEST", JSON.stringify({}));
 
-            smart.completeAuth(new BrowserEnv());
+            smart.ready(new BrowserEnv());
         });
 
         it ("authorize in frame does not return control to parent if 'complete' is true", async () => {
@@ -1820,7 +1828,7 @@ describe("Browser tests", () => {
                 // completeInTarget: true
             }));
 
-            await expect(smart.completeAuth(new BrowserEnv())).to.reject();
+            await expect(smart.ready(new BrowserEnv())).to.reject();
         });
 
         describe("onMessage", () => {

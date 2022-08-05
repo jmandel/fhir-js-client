@@ -7,7 +7,7 @@ require("core-js/modules/es.typed-array.sort.js");
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.signCompactJws = exports.exportKey = exports.importKey = exports.generateKey = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = exports.base64urldecode = exports.base64urlencode = void 0;
+exports.signCompactJws = exports.importKey = exports.generateKey = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = exports.base64urldecode = exports.base64urlencode = void 0;
 
 const js_base64_1 = require("js-base64");
 
@@ -85,16 +85,6 @@ async function importKey(jwk) {
 }
 
 exports.importKey = importKey;
-
-async function exportKey(key) {
-  try {
-    return await subtle.exportKey("jwk", key);
-  } catch (e) {
-    throw new Error(`exportKey is not supported by this browser: ${e}`);
-  }
-}
-
-exports.exportKey = exportKey;
 
 async function signCompactJws(alg, privateKey, header, payload) {
   const jwtHeader = JSON.stringify(Object.assign(Object.assign({}, header), {

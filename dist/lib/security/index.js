@@ -1,6 +1,6 @@
 "use strict";
 
-let api;
+let api; // $lab:coverage:off$
 
 if (typeof IS_BROWSER != "undefined") {
   api = require("./browser");
@@ -8,4 +8,4 @@ if (typeof IS_BROWSER != "undefined") {
   api = require("./server");
 }
 
-module.exports = api;
+module.exports = api; // $lab:coverage:on$
