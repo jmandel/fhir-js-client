@@ -7,7 +7,7 @@ import ServerEnv      from "./mocks/ServerEnvironment";
 export const lab = Lab.script();
 const { it, describe } = lab;
 
-const { subtle } = require('node:crypto').webcrypto;
+try { var { subtle } = require('node:crypto').webcrypto; } catch {}
 
 const defaultState: fhirclient.ClientState = {
     serverUrl: 'https://server.example.org',
@@ -94,99 +94,101 @@ describe("smart", () => {
  
         });
 
-        it("works with ES384 CryptoKey instance", async () => {
-            const alg = "ES384"
-            const kid = "afb27c284f2d93959c18fa0320e32060"
-            const jku = "https://client.example.org/.well-known/jwks.json";
+        if (subtle) {
+            it("works with ES384 CryptoKey instance", async () => {
+                const alg = "ES384"
+                const kid = "afb27c284f2d93959c18fa0320e32060"
+                const jku = "https://client.example.org/.well-known/jwks.json";
 
-            const { privateKey, publicKey } = await subtle.generateKey({
-                name: "ECDSA",
-                namedCurve: "P-384"
-            }, false, ["sign", "verify"])
+                const { privateKey, publicKey } = await subtle.generateKey({
+                    name: "ECDSA",
+                    namedCurve: "P-384"
+                }, false, ["sign", "verify"])
 
-            const requestOptions = await smart.buildTokenRequest(defaultEnv(), {
-                code: "example-code",
-                state: defaultStateAsymmetricAuth,
-                clientPublicKeySetUrl: jku,
-                privateKey: {
-                    kid,
-                    alg,
-                    key: privateKey
-                }
+                const requestOptions = await smart.buildTokenRequest(defaultEnv(), {
+                    code: "example-code",
+                    state: defaultStateAsymmetricAuth,
+                    clientPublicKeySetUrl: jku,
+                    privateKey: {
+                        kid,
+                        alg,
+                        key: privateKey
+                    }
+                });
+
+                expect(requestOptions.body).to.exist();
+                expect(requestOptions.body).to.contain('&client_assertion=');
+                expect(requestOptions.body).to.contain('&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer');
+
+                const assertionMatch = (requestOptions.body as string).match(/client_assertion=(?<assertion>[^&]+)/);
+                expect(assertionMatch).not.to.be.null;
+
+                const assertion = assertionMatch?.groups?.assertion;
+                expect(assertion).to.exist;
+
+                const validated = await jose.compactVerify(assertion!, publicKey)
+                expect(validated).to.exist;
+                expect(validated.protectedHeader["jku"]).to.equal(jku);
+                expect(validated.protectedHeader["kid"]).to.equal(kid);
+                expect(validated.protectedHeader["typ"]).to.equal("JWT");
+
+                const payload: any = JSON.parse(new TextDecoder().decode(validated.payload));
+                expect(payload["aud"]).to.equal(defaultStateAsymmetricAuth.tokenUri);
+                expect(payload["iss"]).to.equal(defaultStateAsymmetricAuth.clientId);
+                expect(payload["sub"]).to.equal(defaultStateAsymmetricAuth.clientId);
+                expect(payload["exp"]).to.exist();
+                expect(payload["jti"]).to.exist();
             });
 
-            expect(requestOptions.body).to.exist();
-            expect(requestOptions.body).to.contain('&client_assertion=');
-            expect(requestOptions.body).to.contain('&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer');
+            it("works with RS384 CryptoKey instance", async () => {
+                const alg = "RS384"
+                const kid = "afb27c284f2d93959c18fa0320e32060"
+                const jku = "https://client.example.org/.well-known/jwks.json";
 
-            const assertionMatch = (requestOptions.body as string).match(/client_assertion=(?<assertion>[^&]+)/);
-            expect(assertionMatch).not.to.be.null;
+                const { privateKey, publicKey } = await subtle.generateKey({
+                    name: "RSASSA-PKCS1-v1_5",
+                    modulusLength: 4096,
+                    publicExponent: new Uint8Array([1, 0, 1]),
+                    hash: {
+                        name: 'SHA-384'
+                    }
+                }, false, ["sign", "verify"])
 
-            const assertion = assertionMatch?.groups?.assertion;
-            expect(assertion).to.exist;
+                const requestOptions = await smart.buildTokenRequest(defaultEnv(), {
+                    code: "example-code",
+                    state: defaultStateAsymmetricAuth,
+                    clientPublicKeySetUrl: jku,
+                    privateKey: {
+                        kid,
+                        alg,
+                        key: privateKey
+                    }
+                });
 
-            const validated = await jose.compactVerify(assertion!, publicKey)
-            expect(validated).to.exist;
-            expect(validated.protectedHeader["jku"]).to.equal(jku);
-            expect(validated.protectedHeader["kid"]).to.equal(kid);
-            expect(validated.protectedHeader["typ"]).to.equal("JWT");
+                expect(requestOptions.body).to.exist();
+                expect(requestOptions.body).to.contain('&client_assertion=');
+                expect(requestOptions.body).to.contain('&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer');
 
-            const payload: any = JSON.parse(new TextDecoder().decode(validated.payload));
-            expect(payload["aud"]).to.equal(defaultStateAsymmetricAuth.tokenUri);
-            expect(payload["iss"]).to.equal(defaultStateAsymmetricAuth.clientId);
-            expect(payload["sub"]).to.equal(defaultStateAsymmetricAuth.clientId);
-            expect(payload["exp"]).to.exist();
-            expect(payload["jti"]).to.exist();
-        });
+                const assertionMatch = (requestOptions.body as string).match(/client_assertion=(?<assertion>[^&]+)/);
+                expect(assertionMatch).not.to.be.null;
 
-        it("works with RS384 CryptoKey instance", async () => {
-            const alg = "RS384"
-            const kid = "afb27c284f2d93959c18fa0320e32060"
-            const jku = "https://client.example.org/.well-known/jwks.json";
+                const assertion = assertionMatch?.groups?.assertion;
+                expect(assertion).to.exist;
 
-            const { privateKey, publicKey } = await subtle.generateKey({
-                name: "RSASSA-PKCS1-v1_5",
-                modulusLength: 4096,
-                publicExponent: new Uint8Array([1, 0, 1]),
-                hash: {
-                    name: 'SHA-384'
-                }
-            }, false, ["sign", "verify"])
+                const validated = await jose.compactVerify(assertion!, publicKey)
+                expect(validated).to.exist;
+                expect(validated.protectedHeader["jku"]).to.equal(jku);
+                expect(validated.protectedHeader["kid"]).to.equal(kid);
+                expect(validated.protectedHeader["typ"]).to.equal("JWT");
 
-            const requestOptions = await smart.buildTokenRequest(defaultEnv(), {
-                code: "example-code",
-                state: defaultStateAsymmetricAuth,
-                clientPublicKeySetUrl: jku,
-                privateKey: {
-                    kid,
-                    alg,
-                    key: privateKey
-                }
+                const payload: any = JSON.parse(new TextDecoder().decode(validated.payload));
+                expect(payload["aud"]).to.equal(defaultStateAsymmetricAuth.tokenUri);
+                expect(payload["iss"]).to.equal(defaultStateAsymmetricAuth.clientId);
+                expect(payload["sub"]).to.equal(defaultStateAsymmetricAuth.clientId);
+                expect(payload["exp"]).to.exist();
+                expect(payload["jti"]).to.exist();
             });
-
-            expect(requestOptions.body).to.exist();
-            expect(requestOptions.body).to.contain('&client_assertion=');
-            expect(requestOptions.body).to.contain('&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer');
-
-            const assertionMatch = (requestOptions.body as string).match(/client_assertion=(?<assertion>[^&]+)/);
-            expect(assertionMatch).not.to.be.null;
-
-            const assertion = assertionMatch?.groups?.assertion;
-            expect(assertion).to.exist;
-
-            const validated = await jose.compactVerify(assertion!, publicKey)
-            expect(validated).to.exist;
-            expect(validated.protectedHeader["jku"]).to.equal(jku);
-            expect(validated.protectedHeader["kid"]).to.equal(kid);
-            expect(validated.protectedHeader["typ"]).to.equal("JWT");
-
-            const payload: any = JSON.parse(new TextDecoder().decode(validated.payload));
-            expect(payload["aud"]).to.equal(defaultStateAsymmetricAuth.tokenUri);
-            expect(payload["iss"]).to.equal(defaultStateAsymmetricAuth.clientId);
-            expect(payload["sub"]).to.equal(defaultStateAsymmetricAuth.clientId);
-            expect(payload["exp"]).to.exist();
-            expect(payload["jti"]).to.exist();
-        });
+        }
 
         it("fails with broken state.clientPrivateJwk", async () => {
             expect(smart.buildTokenRequest(
