@@ -256,7 +256,7 @@ export async function authorize(
         redirectUri,
         serverUrl,
         clientSecret,
-        clientPrivateJwk: clientPrivateJwk as fhirclient.JWK,
+        clientPrivateJwk,
         tokenResponse: {},
         key: stateKey,
         completeInTarget,
@@ -672,7 +672,7 @@ export async function buildTokenRequest(
     // Asymmetric auth
     else if (privateKey) {
 
-        const clientPrivateKey = privateKey.key || await security.importKey(privateKey)
+        const clientPrivateKey = privateKey.key || await security.importJWK(privateKey)
 
         const jwtHeaders = {
             typ: "JWT",

@@ -1,6 +1,6 @@
 import { encodeURL, decode, fromUint8Array } from "js-base64"
 import { fhirclient } from "../types"
-const crypto: Crypto = require("isomorphic-webcrypto").default
+const crypto: Crypto = global.crypto || require("isomorphic-webcrypto").default
 const subtle: SubtleCrypto = crypto.subtle
 
 interface PkcePair {
@@ -23,20 +23,22 @@ const ALGS = {
     } as RsaHashedKeyGenParams
 };
 
-export const base64urlencode = (input: Uint8Array | string) => {
+export const base64urlencode = (input: string | Uint8Array) => {
     if (typeof input == "string") {
         return encodeURL(input)
     }
     return fromUint8Array(input, true)
 }
 
-export const base64urldecode = decode
+export const base64urldecode = (input: string) => {
+    return decode(input)
+}
 
 export function randomBytes(count: number): Uint8Array {
     return crypto.getRandomValues(new Uint8Array(count));
 }
 
-export async function digestSha256(payload: string) {
+export async function digestSha256(payload: string): Promise<Uint8Array> {
     const prepared: ArrayBuffer = new Uint8Array(s2b(payload));
     const hash = await subtle.digest('SHA-256', prepared);
     return new Uint8Array(hash);
@@ -49,17 +51,21 @@ export const generatePKCEChallenge = async (entropy = 96): Promise<PkcePair> => 
     return { codeChallenge, codeVerifier }
 }
 
-export async function generateKey(jwsAlg: keyof typeof ALGS): Promise<CryptoKeyPair> {
-    try {
-        return await subtle.generateKey(ALGS[jwsAlg], true, ["sign"])
-    } catch (e) {
-        throw new Error(`The ${jwsAlg} is not supported by this browser: ${e}`)
+export async function importJWK(jwk: fhirclient.JWK): Promise<CryptoKey> {
+    if (!jwk.alg) {
+        throw new Error('The "alg" property of the JWK must be set to "ES384" or "RS384"')
     }
-}
-
-export async function importKey(jwk: fhirclient.JWK): Promise<CryptoKey> {
+    if (!Array.isArray(jwk.key_ops)) {
+        throw new Error('The "key_ops" property of the JWK must be an array containing "sign" or "verify" (or both)')
+    }
     try {
-        return await subtle.importKey("jwk", jwk, ALGS[jwk.alg], true, ['sign'])
+        return await subtle.importKey(
+            "jwk",
+            jwk,
+            ALGS[jwk.alg],
+            jwk.ext === true,
+            jwk.key_ops// || ['sign']
+        )
     } catch (e) {
         throw new Error(`The ${jwk.alg} is not supported by this browser: ${e}`)
     }

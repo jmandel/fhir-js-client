@@ -2,15 +2,13 @@ import {
   base64url,
   KeyLike,
   SignJWT,
-  GenerateKeyPairResult,
-  generateKeyPair,
-  importJWK,
-  exportJWK
+  importJWK as joseImportJWK
 } from "jose"
 import {
   randomBytes,
   createHash
 } from "crypto"
+import { fhirclient } from "../types";
 
 
 interface PkcePair {
@@ -18,19 +16,19 @@ interface PkcePair {
     codeVerifier: string;
 }
 
-declare const ALGS: {
-    ES384: EcKeyGenParams;
-    RS384: RsaHashedKeyGenParams;
-};
+// declare const ALGS: {
+//     ES384: EcKeyGenParams;
+//     RS384: RsaHashedKeyGenParams;
+// };
 
 type SupportedAlg = 'ES384' | 'RS384'
 
-export const base64urlencode = (input: Uint8Array | string) => base64url.encode(input);
-export const base64urldecode = (input: Uint8Array | string) => base64url.decode(input).toString();
+export const base64urlencode = (input: string | Uint8Array) => base64url.encode(input);
+export const base64urldecode = (input: string) => base64url.decode(input).toString();
 
 export { randomBytes }
 
-export async function digestSha256(payload: string | Buffer) {
+export async function digestSha256(payload: string) {
     const hash = createHash('sha256')
     hash.update(payload)
     return hash.digest()
@@ -43,12 +41,8 @@ export async function generatePKCEChallenge(entropy = 96): Promise<PkcePair> {
     return { codeChallenge, codeVerifier }
 }
 
-export async function generateKey(jwsAlg: SupportedAlg): Promise<GenerateKeyPairResult> {
-    return generateKeyPair(jwsAlg, { extractable: true })
-}
-
-export async function importKey(jwk: {alg: SupportedAlg}): Promise<KeyLike> {
-    return importJWK(jwk) as Promise<KeyLike>
+export async function importJWK(jwk: fhirclient.JWK): Promise<KeyLike> {
+    return joseImportJWK(jwk) as Promise<KeyLike>
 }
 
 export async function signCompactJws(alg: SupportedAlg, privateKey: KeyLike, header: any, payload: any): Promise<string> {
@@ -56,13 +50,16 @@ export async function signCompactJws(alg: SupportedAlg, privateKey: KeyLike, hea
 }
 
 // async function test(){
-//     const esk = await generateKey('ES384');
+
+//     const { generateKeyPair } = require("jose")
+
+//     const esk = await generateKeyPair("ES384", { extractable: true });
 //     console.log("ES384 privateKey:", esk.privateKey);
 //     const eskSigned = await new SignJWT({ iss: "issuer" }).setProtectedHeader({ alg: 'ES384', jwku: "test" }).sign(esk.privateKey);
 //     console.log("Signed ES384", eskSigned);
 //     console.log(JSON.stringify(await exportJWK(esk.publicKey)))
 
-//     const rsk = await generateKey('RS384');
+//     const rsk = await generateKeyPair('RS384', { extractable: true });
 //     console.log("RS384 privateKey:", rsk.privateKey);
 //     const rskSigned = await new SignJWT({ iss: "issuer" }).setProtectedHeader({ alg: 'RS384', jwku: "test" }).sign(rsk.privateKey);
 //     console.log("Signed RS384", rskSigned);

@@ -256,14 +256,24 @@ declare namespace fhirclient {
      */
     type FetchResult = Response | fhirclient.JsonObject | string | CombinedFetchResult
 
-    type JWK = {
-        kid: string;
-        kty: string,
-        [k: string]: string
-    } & (
-        { kty: "EC" , alg: "ES384", crv: "P-384"} | 
-        { kty: "RSA", alg: "RS384" }
-    );
+    interface ES384JWK extends JsonWebKey {
+        alg: "ES384"
+        crv: "P-384"
+        kty: "EC"
+        kid: string
+        key_ops: KeyUsage[]
+        [propName: string]: unknown
+    }
+
+    interface RS384JWK extends JsonWebKey {
+        alg: "RS384"
+        kty: "RSA"
+        kid: string
+        key_ops: KeyUsage[]
+        [propName: string]: unknown
+    }
+
+    type JWK = ES384JWK | RS384JWK;
 
     /**
      * Options that must contain an `url` property (String|URL).
@@ -549,7 +559,7 @@ declare namespace fhirclient {
          * `clientPrivateJwk` here. **Note: ONLY use this on the server**, as
          * the browsers are considered incapable of keeping a secret.
          */
-        clientPrivateJwk?: CryptoKey | JWK;
+        clientPrivateJwk?: JWK;
 
 
         /**
