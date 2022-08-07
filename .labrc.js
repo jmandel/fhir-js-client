@@ -79,7 +79,7 @@ module.exports = {
     threshold: 90,
 
     // -m, --timeout                   timeout for each test in milliseconds
-    timeout: 3000,
+    timeout: 5000,
 
     // -M, --context-timeout           timeout for before, after, beforeEach, afterEach in milliseconds
     contextTimeout: 1000,
