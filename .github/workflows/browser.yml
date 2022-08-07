@@ -1,5 +1,5 @@
 
-name: NodeJS Tests
+name: Browser Tests
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   pull_request:
     # branches: [ "*" ]
   workflow_dispatch:
-    branches: [ "*" ]
+    # branches: [ "*" ]
 
 jobs:
   build:
@@ -26,7 +26,7 @@ jobs:
 
       - run: npm ci --legacy-peer-deps
 
-      - run: npm run build --if-present
+      # - run: npm run build --if-present
 
-      - run: npm nightwatch
+      - run: npm run nightwatch
 
