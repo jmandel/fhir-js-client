@@ -1,12 +1,14 @@
-import { expect } from "@hapi/code";
-import * as Lab from "@hapi/lab";
-// import { webcrypto as crypto } from "node:crypto"
-// global.crypto = crypto
-try { global.crypto = require('node:crypto').webcrypto; } catch {}
-import * as serverSecurity from "../src/security/server"
+// @ts-ignore These tests cannot run without webcrypto
+if (+process.version.replace(/^v/, "").split(".").shift() < 15) return;
+
+global.crypto = require('node:crypto').webcrypto;
+
+import { expect }           from "@hapi/code";
+import { fhirclient }       from "../src/types";
+import * as jose            from 'jose';
+import * as Lab             from "@hapi/lab";
+import * as serverSecurity  from "../src/security/server"
 import * as browserSecurity from "../src/security/browser"
-import * as jose from 'jose';
-import { fhirclient } from "../src/types";
 
 export const lab = Lab.script();
 const { it, describe } = lab;
