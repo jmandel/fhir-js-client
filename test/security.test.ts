@@ -1,5 +1,5 @@
 // @ts-ignore These tests cannot run without webcrypto
-if (+process.version.replace(/^v/, "").split(".").shift() < 15) return;
+if (+process.version.replace(/^v/, "").split(".").shift() < 16) return;
 
 global.crypto = require('node:crypto').webcrypto;
 
