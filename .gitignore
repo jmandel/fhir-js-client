@@ -9,7 +9,7 @@
 node_modules
 .vscode
 test.html
-launch.html
+# launch.html
 trash
 post-launch/index.html
 test/coverage.html
