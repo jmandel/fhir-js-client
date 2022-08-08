@@ -11,7 +11,10 @@ chai.should();
 
 let server;
 const app = express()
-app.use("/", express.static(path.resolve(__dirname, "../../")));
+app.use("/", express.static(
+    process.env.GITHUB_WORKSPACE || // /home/runner/work/client-js/client-js
+    path.resolve(__dirname, "../../")
+));
 // console.log(path.resolve(__dirname, "../../"))
 
 
