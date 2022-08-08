@@ -3,6 +3,7 @@ const express        = require("express");
 const jose           = require('jose');
 const mockServer     = require("../mocks/mockServer2");
 const chaiAsPromised = require("chai-as-promised");
+const { default: fetch } = require("cross-fetch");
 
 chai.use(chaiAsPromised);
 chai.should();
@@ -13,9 +14,9 @@ app.use("/", express.static("."));
 
 
 const MOCK_PORT      = 3456
-const MOCK_URL       = `http://localhost:${MOCK_PORT}`
-const LAUNCH_URL     = "http://localhost:3000/test/specs/launch.html"
-const REDIRECT_URL   = "http://localhost:3000/test/specs/"
+const MOCK_URL       = `http://127.0.0.1:${MOCK_PORT}`
+const LAUNCH_URL     = "http://127.0.0.1:3000/test/specs/launch.html"
+const REDIRECT_URL   = "http://127.0.0.1:3000/test/specs/"
 const FHIR_URL       = `${MOCK_URL}/fhir/`
 const AUTHORIZE_URL  = `${MOCK_URL}/auth/authorize`
 const TOKEN_URL      = `${MOCK_URL}/auth/token`
@@ -346,10 +347,27 @@ function generateTokenResponse(state = {}) {
 
 describe("authorization", () => {
     before(() => {
-        return new Promise(resolve => {
-            server = app.listen(3000, "0.0.0.0", () => {
-                console.log("file server listening on:", server.address())
-                mockDataServer = mockServer.listen(MOCK_PORT, () => resolve(void 0));
+        return new Promise((resolve, reject) => {
+            server = app.listen(3000, "127.0.0.1", () => {
+                console.log("File server listening on port http://127.0.0.1:3000")
+                mockDataServer = mockServer.listen(MOCK_PORT, "127.0.0.1", () => {
+                    console.log("Mock server listening on port http://127.0.0.1:" + MOCK_PORT)
+                    // fetch("http://localhost:3000/dist/build/fhir-client.js")
+                    // console.log(typeof fetch)
+                    fetch(LAUNCH_URL)
+                    .then(res => {
+                        // console.log(res)
+                        if (res.ok) {
+                            resolve(void 0);
+                        } else {
+                            reject(new Error(res.statusText))
+                        }
+                    })
+                    .catch(e => {
+                        console.error(e)
+                        reject(e)
+                    })
+                })
             })
         });
     });
