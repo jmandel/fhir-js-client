@@ -1,11 +1,15 @@
-const chai = require("chai");
-const { urlencoded } = require("express");
-const jose = require('jose');
-const mockServer = require("../mocks/mockServer2");
+const chai           = require("chai");
+const express        = require("express");
+const jose           = require('jose');
+const mockServer     = require("../mocks/mockServer2");
 const chaiAsPromised = require("chai-as-promised")
 
 chai.use(chaiAsPromised);
 chai.should();
+
+let server;
+const app = express()
+app.use(express.static(__dirname + "/../../"))
 
 
 const MOCK_PORT      = 3456
@@ -343,7 +347,10 @@ function generateTokenResponse(state = {}) {
 describe("authorization", () => {
     before(() => {
         return new Promise(resolve => {
-            mockDataServer = mockServer.listen(MOCK_PORT, () => resolve(void 0));
+            server = app.listen(3000, () => {
+                // console.log("file server listening on :3000")
+                mockDataServer = mockServer.listen(MOCK_PORT, () => resolve(void 0));
+            })
         });
     });
     
@@ -355,7 +362,12 @@ describe("authorization", () => {
                     if (error) {
                         console.log("Error shutting down the mock-data server: ", error);
                     }
-                    resolve(void 0);
+                    server.close((error) => {
+                        if (error) {
+                            console.log("Error shutting down the file server: ", error);
+                        }
+                        resolve(void 0);
+                    });
                 });
             });
         }
@@ -653,7 +665,7 @@ describe("authorization", () => {
             
             // Mock token response -------------------------------------------------
             const tokenMock = mockServer.mock({ path: "/auth/token", method: "post" }, {
-                bodyParser: urlencoded({ extended: false }),
+                bodyParser: express.urlencoded({ extended: false }),
                 async handler(req, res) {
 
                     const clientKey = await jose.importJWK(clientPublicJwk, alg);
@@ -738,7 +750,7 @@ describe("authorization", () => {
 
             // Mock token response
             const tokenMock = mockServer.mock({ path: "/auth/token", method: "post" }, {
-                bodyParser: urlencoded({ extended: false }),
+                bodyParser: express.urlencoded({ extended: false }),
                 async handler(req, res) {
 
                     const clientKey = await jose.importJWK(publicJWK, alg);
