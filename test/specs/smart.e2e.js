@@ -15,7 +15,7 @@ app.use("/", express.static(
     process.env.GITHUB_WORKSPACE || // /home/runner/work/client-js/client-js
     path.resolve(__dirname, "../../")
 ));
-console.log(process.env)
+// console.log(process.env)
 
 
 const MOCK_PORT      = 3456
@@ -365,6 +365,7 @@ describe("authorization", () => {
                         if (res.ok) {
                             resolve(void 0);
                         } else {
+                            console.log(res)
                             reject(new Error(res.statusText))
                         }
                     })
