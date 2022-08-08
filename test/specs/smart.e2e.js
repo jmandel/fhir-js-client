@@ -347,8 +347,8 @@ function generateTokenResponse(state = {}) {
 describe("authorization", () => {
     before(() => {
         return new Promise(resolve => {
-            server = app.listen(3000, () => {
-                // console.log("file server listening on :3000")
+            server = app.listen(3000, "0.0.0.0", () => {
+                console.log("file server listening on:", server.address())
                 mockDataServer = mockServer.listen(MOCK_PORT, () => resolve(void 0));
             })
         });
