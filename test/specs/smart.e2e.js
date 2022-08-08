@@ -12,8 +12,7 @@ chai.should();
 let server;
 const app = express()
 app.use("/", express.static(
-    process.env.GITHUB_WORKSPACE || // /home/runner/work/client-js/client-js
-    path.resolve(__dirname, "../../")
+    process.env.GITHUB_WORKSPACE || path.resolve(__dirname, "../../")
 ));
 // console.log(process.env)
 
@@ -349,55 +348,83 @@ function generateTokenResponse(state = {}) {
     return resp
 }
 
+async function startFileServer() {
+    return new Promise((resolve, reject) => {
+        server = app.listen(3000, "127.0.0.1", () => {
+            console.log("File server listening on port http://127.0.0.1:3000");
+
+            fetch(LAUNCH_URL)
+            .then(res => {
+                if (res.ok) {
+                    resolve("http://127.0.0.1:3000");
+                } else {
+                    console.log(res)
+                    throw new Error(res.statusText)
+                }
+            })
+            .catch(e => {
+                console.error(e)
+                reject(e)
+            })
+        })
+    })
+}
+
+async function startMockServer() {
+    return new Promise(resolve => {
+        mockDataServer = mockServer.listen(MOCK_PORT, "127.0.0.1", () => {
+            console.log("Mock server listening on port http://127.0.0.1:" + MOCK_PORT)
+            resolve("http://127.0.0.1:" + MOCK_PORT);
+        })
+    });
+}
+
+async function stopFileServer() {
+    return new Promise((resolve, reject) => {
+        if (server && server.listening) {
+            server.close((error) => {
+                if (error) {
+                    console.log("Error shutting down the file server: ", error);
+                    reject(error)
+                } else {
+                    resolve(void 0);
+                }
+            });
+        } else {
+            resolve(void 0);
+        }
+    })
+}
+
+async function stopMockServer() {
+    return new Promise((resolve, reject) => {
+        if (mockDataServer && mockDataServer.listening) {
+            mockDataServer.close((error) => {
+                if (error) {
+                    console.log("Error shutting down the mock server: ", error);
+                    reject(error)
+                } else {
+                    resolve(void 0);
+                }
+            });
+        } else {
+            resolve(void 0);
+        }
+    })
+}
 
 describe("authorization", () => {
-    before(() => {
-        return new Promise((resolve, reject) => {
-            server = app.listen(3000, "127.0.0.1", () => {
-                console.log("File server listening on port http://127.0.0.1:3000")
-                mockDataServer = mockServer.listen(MOCK_PORT, "127.0.0.1", () => {
-                    console.log("Mock server listening on port http://127.0.0.1:" + MOCK_PORT)
-                    // fetch("http://localhost:3000/dist/build/fhir-client.js")
-                    // console.log(typeof fetch)
-                    fetch(LAUNCH_URL)
-                    .then(res => {
-                        // console.log(res)
-                        if (res.ok) {
-                            resolve(void 0);
-                        } else {
-                            console.log(res)
-                            reject(new Error(res.statusText))
-                        }
-                    })
-                    .catch(e => {
-                        console.error(e)
-                        reject(e)
-                    })
-                })
-            })
-        });
+    before(async () => {
+        if (!process.env.GITHUB_WORKSPACE) await startFileServer()
+        await startMockServer()
     });
     
-    after(() => {
-        browser.end()
-        if (mockDataServer && mockDataServer.listening) {
-            return new Promise(resolve => {
-                mockDataServer.close((error) => {
-                    if (error) {
-                        console.log("Error shutting down the mock-data server: ", error);
-                    }
-                    server.close((error) => {
-                        if (error) {
-                            console.log("Error shutting down the file server: ", error);
-                        }
-                        resolve(void 0);
-                    });
-                });
-            });
-        }
+    after(async () => {
+        await browser.end()
+        if (!process.env.GITHUB_WORKSPACE) await stopFileServer()
+        await stopMockServer()
     });
     
-    // afterEach(() => mockServer.clear());
     beforeEach(async () => mockServer.clear());
 
     
