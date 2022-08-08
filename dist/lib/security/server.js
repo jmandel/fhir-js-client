@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.signCompactJws = exports.importKey = exports.generateKey = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = exports.base64urldecode = exports.base64urlencode = void 0;
+exports.signCompactJws = exports.importJWK = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = exports.base64urldecode = exports.base64urlencode = void 0;
 
 const jose_1 = require("jose");
 
@@ -44,19 +44,11 @@ async function generatePKCEChallenge(entropy = 96) {
 
 exports.generatePKCEChallenge = generatePKCEChallenge;
 
-async function generateKey(jwsAlg) {
-  return (0, jose_1.generateKeyPair)(jwsAlg, {
-    extractable: true
-  });
-}
-
-exports.generateKey = generateKey;
-
-async function importKey(jwk) {
+async function importJWK(jwk) {
   return (0, jose_1.importJWK)(jwk);
 }
 
-exports.importKey = importKey;
+exports.importJWK = importJWK;
 
 async function signCompactJws(alg, privateKey, header, payload) {
   return new jose_1.SignJWT(payload).setProtectedHeader(Object.assign(Object.assign({}, header), {
@@ -65,12 +57,13 @@ async function signCompactJws(alg, privateKey, header, payload) {
 }
 
 exports.signCompactJws = signCompactJws; // async function test(){
-//     const esk = await generateKey('ES384');
+//     const { generateKeyPair } = require("jose")
+//     const esk = await generateKeyPair("ES384", { extractable: true });
 //     console.log("ES384 privateKey:", esk.privateKey);
 //     const eskSigned = await new SignJWT({ iss: "issuer" }).setProtectedHeader({ alg: 'ES384', jwku: "test" }).sign(esk.privateKey);
 //     console.log("Signed ES384", eskSigned);
 //     console.log(JSON.stringify(await exportJWK(esk.publicKey)))
-//     const rsk = await generateKey('RS384');
+//     const rsk = await generateKeyPair('RS384', { extractable: true });
 //     console.log("RS384 privateKey:", rsk.privateKey);
 //     const rskSigned = await new SignJWT({ iss: "issuer" }).setProtectedHeader({ alg: 'RS384', jwku: "test" }).sign(rsk.privateKey);
 //     console.log("Signed RS384", rskSigned);

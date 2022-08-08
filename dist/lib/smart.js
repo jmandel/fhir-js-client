@@ -241,7 +241,7 @@ async function authorize(env, params = {}) {
     redirectUri,
     serverUrl,
     clientSecret,
-    clientPrivateJwk: clientPrivateJwk,
+    clientPrivateJwk,
     tokenResponse: {},
     key: stateKey,
     completeInTarget,
@@ -621,7 +621,7 @@ async function buildTokenRequest(env, {
     debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.authorization);
   } // Asymmetric auth
   else if (privateKey) {
-    const clientPrivateKey = privateKey.key || (await security.importKey(privateKey));
+    const clientPrivateKey = privateKey.key || (await security.importJWK(privateKey));
     const jwtHeaders = {
       typ: "JWT",
       kid: privateKey.kid,

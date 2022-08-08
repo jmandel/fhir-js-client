@@ -7,11 +7,11 @@ require("core-js/modules/es.typed-array.sort.js");
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.signCompactJws = exports.importKey = exports.generateKey = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = exports.base64urldecode = exports.base64urlencode = void 0;
+exports.signCompactJws = exports.importJWK = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = exports.base64urldecode = exports.base64urlencode = void 0;
 
 const js_base64_1 = require("js-base64");
 
-const crypto = require("isomorphic-webcrypto").default;
+const crypto = global.crypto || require("isomorphic-webcrypto").default;
 
 const subtle = crypto.subtle;
 const ALGS = {
@@ -38,7 +38,12 @@ const base64urlencode = input => {
 };
 
 exports.base64urlencode = base64urlencode;
-exports.base64urldecode = js_base64_1.decode;
+
+const base64urldecode = input => {
+  return (0, js_base64_1.decode)(input);
+};
+
+exports.base64urldecode = base64urldecode;
 
 function randomBytes(count) {
   return crypto.getRandomValues(new Uint8Array(count));
@@ -66,25 +71,24 @@ const generatePKCEChallenge = async (entropy = 96) => {
 
 exports.generatePKCEChallenge = generatePKCEChallenge;
 
-async function generateKey(jwsAlg) {
-  try {
-    return await subtle.generateKey(ALGS[jwsAlg], true, ["sign"]);
-  } catch (e) {
-    throw new Error(`The ${jwsAlg} is not supported by this browser: ${e}`);
+async function importJWK(jwk) {
+  if (!jwk.alg) {
+    throw new Error('The "alg" property of the JWK must be set to "ES384" or "RS384"');
   }
-}
 
-exports.generateKey = generateKey;
+  if (!Array.isArray(jwk.key_ops)) {
+    throw new Error('The "key_ops" property of the JWK must be an array containing "sign" or "verify" (or both)');
+  }
 
-async function importKey(jwk) {
   try {
-    return await subtle.importKey("jwk", jwk, ALGS[jwk.alg], true, ['sign']);
+    return await subtle.importKey("jwk", jwk, ALGS[jwk.alg], jwk.ext === true, jwk.key_ops // || ['sign']
+    );
   } catch (e) {
     throw new Error(`The ${jwk.alg} is not supported by this browser: ${e}`);
   }
 }
 
-exports.importKey = importKey;
+exports.importJWK = importJWK;
 
 async function signCompactJws(alg, privateKey, header, payload) {
   const jwtHeader = JSON.stringify(Object.assign(Object.assign({}, header), {

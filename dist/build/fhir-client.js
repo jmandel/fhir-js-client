@@ -3713,11 +3713,11 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
-exports.signCompactJws = exports.importKey = exports.generateKey = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = exports.base64urldecode = exports.base64urlencode = void 0;
+exports.signCompactJws = exports.importJWK = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = exports.base64urldecode = exports.base64urlencode = void 0;
 
 var js_base64_1 = __webpack_require__(/*! js-base64 */ "./node_modules/js-base64/base64.js");
 
-var crypto = (__webpack_require__(/*! isomorphic-webcrypto */ "./node_modules/isomorphic-webcrypto/src/browser.mjs")["default"]);
+var crypto = __webpack_require__.g.crypto || (__webpack_require__(/*! isomorphic-webcrypto */ "./node_modules/isomorphic-webcrypto/src/browser.mjs")["default"]);
 
 var subtle = crypto.subtle;
 var ALGS = {
@@ -3744,7 +3744,12 @@ var base64urlencode = function base64urlencode(input) {
 };
 
 exports.base64urlencode = base64urlencode;
-exports.base64urldecode = js_base64_1.decode;
+
+var base64urldecode = function base64urldecode(input) {
+  return (0, js_base64_1.decode)(input);
+};
+
+exports.base64urldecode = base64urldecode;
 
 function randomBytes(count) {
   return crypto.getRandomValues(new Uint8Array(count));
@@ -3824,105 +3829,88 @@ var generatePKCEChallenge = /*#__PURE__*/function () {
 
 exports.generatePKCEChallenge = generatePKCEChallenge;
 
-function generateKey(_x2) {
-  return _generateKey.apply(this, arguments);
+function importJWK(_x2) {
+  return _importJWK.apply(this, arguments);
 }
 
-function _generateKey() {
-  _generateKey = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3(jwsAlg) {
+function _importJWK() {
+  _importJWK = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3(jwk) {
     return _regenerator.default.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            _context3.prev = 0;
-            _context3.next = 3;
-            return subtle.generateKey(ALGS[jwsAlg], true, ["sign"]);
+            if (jwk.alg) {
+              _context3.next = 2;
+              break;
+            }
 
-          case 3:
+            throw new Error('The "alg" property of the JWK must be set to "ES384" or "RS384"');
+
+          case 2:
+            if (Array.isArray(jwk.key_ops)) {
+              _context3.next = 4;
+              break;
+            }
+
+            throw new Error('The "key_ops" property of the JWK must be an array containing "sign" or "verify" (or both)');
+
+          case 4:
+            _context3.prev = 4;
+            _context3.next = 7;
+            return subtle.importKey("jwk", jwk, ALGS[jwk.alg], jwk.ext === true, jwk.key_ops // || ['sign']
+            );
+
+          case 7:
             return _context3.abrupt("return", _context3.sent);
 
-          case 6:
-            _context3.prev = 6;
-            _context3.t0 = _context3["catch"](0);
-            throw new Error("The ".concat(jwsAlg, " is not supported by this browser: ").concat(_context3.t0));
+          case 10:
+            _context3.prev = 10;
+            _context3.t0 = _context3["catch"](4);
+            throw new Error("The ".concat(jwk.alg, " is not supported by this browser: ").concat(_context3.t0));
 
-          case 9:
+          case 13:
           case "end":
             return _context3.stop();
         }
       }
-    }, _callee3, null, [[0, 6]]);
+    }, _callee3, null, [[4, 10]]);
   }));
-  return _generateKey.apply(this, arguments);
+  return _importJWK.apply(this, arguments);
 }
 
-exports.generateKey = generateKey;
+exports.importJWK = importJWK;
 
-function importKey(_x3) {
-  return _importKey.apply(this, arguments);
-}
-
-function _importKey() {
-  _importKey = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4(jwk) {
-    return _regenerator.default.wrap(function _callee4$(_context4) {
-      while (1) {
-        switch (_context4.prev = _context4.next) {
-          case 0:
-            _context4.prev = 0;
-            _context4.next = 3;
-            return subtle.importKey("jwk", jwk, ALGS[jwk.alg], true, ['sign']);
-
-          case 3:
-            return _context4.abrupt("return", _context4.sent);
-
-          case 6:
-            _context4.prev = 6;
-            _context4.t0 = _context4["catch"](0);
-            throw new Error("The ".concat(jwk.alg, " is not supported by this browser: ").concat(_context4.t0));
-
-          case 9:
-          case "end":
-            return _context4.stop();
-        }
-      }
-    }, _callee4, null, [[0, 6]]);
-  }));
-  return _importKey.apply(this, arguments);
-}
-
-exports.importKey = importKey;
-
-function signCompactJws(_x4, _x5, _x6, _x7) {
+function signCompactJws(_x3, _x4, _x5, _x6) {
   return _signCompactJws.apply(this, arguments);
 }
 
 function _signCompactJws() {
-  _signCompactJws = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5(alg, privateKey, header, payload) {
+  _signCompactJws = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4(alg, privateKey, header, payload) {
     var jwtHeader, jwtPayload, jwtAuthenticatedContent, signature;
-    return _regenerator.default.wrap(function _callee5$(_context5) {
+    return _regenerator.default.wrap(function _callee4$(_context4) {
       while (1) {
-        switch (_context5.prev = _context5.next) {
+        switch (_context4.prev = _context4.next) {
           case 0:
             jwtHeader = JSON.stringify(_objectSpread(_objectSpread({}, header), {}, {
               alg: alg
             }));
             jwtPayload = JSON.stringify(payload);
             jwtAuthenticatedContent = "".concat((0, exports.base64urlencode)(jwtHeader), ".").concat((0, exports.base64urlencode)(jwtPayload));
-            _context5.next = 5;
+            _context4.next = 5;
             return subtle.sign(_objectSpread(_objectSpread({}, privateKey.algorithm), {}, {
               hash: 'SHA-384'
             }), privateKey, s2b(jwtAuthenticatedContent));
 
           case 5:
-            signature = _context5.sent;
-            return _context5.abrupt("return", "".concat(jwtAuthenticatedContent, ".").concat((0, js_base64_1.fromUint8Array)(new Uint8Array(signature))));
+            signature = _context4.sent;
+            return _context4.abrupt("return", "".concat(jwtAuthenticatedContent, ".").concat((0, js_base64_1.fromUint8Array)(new Uint8Array(signature))));
 
           case 7:
           case "end":
-            return _context5.stop();
+            return _context4.stop();
         }
       }
-    }, _callee5);
+    }, _callee4);
   }));
   return _signCompactJws.apply(this, arguments);
 }
@@ -4949,7 +4937,7 @@ function _buildTokenRequest() {
             }
 
             _context3.next = 16;
-            return security.importKey(privateKey);
+            return security.importJWK(privateKey);
 
           case 16:
             _context3.t0 = _context3.sent;

@@ -361,7 +361,7 @@ function generateTokenResponse(state = {}) {
 async function startFileServer() {
     return new Promise((resolve, reject) => {
         server = app.listen(3000, "127.0.0.1", () => {
-            console.log("File server listening on port http://127.0.0.1:3000");
+            // console.log("File server listening on port http://127.0.0.1:3000");
 
             fetch(LAUNCH_URL)
             .then(res => {
@@ -383,7 +383,7 @@ async function startFileServer() {
 async function startMockServer() {
     return new Promise(resolve => {
         mockDataServer = mockServer.listen(MOCK_PORT, "127.0.0.1", () => {
-            console.log("Mock server listening on port http://127.0.0.1:" + MOCK_PORT)
+            // console.log("Mock server listening on port http://127.0.0.1:" + MOCK_PORT)
             resolve("http://127.0.0.1:" + MOCK_PORT);
         })
     });
@@ -689,26 +689,29 @@ describe("authorization", () => {
 
             const { publicKey, privateKey } = await jose.generateKeyPair(alg)
 
-            const clientPrivateJwk = await jose.exportJWK(privateKey)
+            const clientPrivateJwk = { ...await jose.exportJWK(privateKey), alg, key_ops: ["sign"] }
             const clientPublicJwk  = await jose.exportJWK(publicKey )
+
+            // console.log(clientPrivateJwk, clientPublicJwk)
             
             const redirectUrl = await authorize({
                 client_id: CLIENT_ID,
                 scope    : "patient/*.read",
                 clientPublicKeySetUrl: KEY_SET_URL,
-                clientPrivateJwk: { ...clientPrivateJwk, alg }
+                // @ts-ignore
+                clientPrivateJwk
             });
 
-            // Get the state parameter from the URL --------------------------------
+            // Get the state parameter from the URL ----------------------------
             const stateID = redirectUrl.searchParams.get("state");
 
-            // Get the state object from sessionStorage ----------------------------
+            // Get the state object from sessionStorage ------------------------
             /** @type {any} */
             const state = await execute(function(stateID) {
                 return JSON.parse(sessionStorage.getItem(stateID) || "null");
             }, stateID);
 
-            // Verify the state is properly initialized ----------------------------
+            // Verify the state is properly initialized ------------------------
             expect(state, `state should be stored at sessionStorage["${stateID}"]`).to.exist;
             expect(state.authorizeUri, `state.authorizeUri should be "${AUTHORIZE_URL}"`).to.equal(AUTHORIZE_URL)
             expect(state.tokenUri, `state.tokenUri should be "${TOKEN_URL}"`).to.equal(TOKEN_URL)
@@ -719,14 +722,14 @@ describe("authorization", () => {
             expect(state.scope, `state.scope should be "patient/*.read launch"`).to.equal("patient/*.read launch")
             expect(state.key, `state.key should be "${stateID}"`).to.equal(stateID)
             expect(state.tokenResponse, `state.tokenResponse should be initialized as an empty object`).to.deep.equal({})
-            expect(state.clientPrivateJwk, `The clientPrivateJwk object should be stored in state`).to.deep.equal({ ...clientPrivateJwk, alg })
+            expect(state.clientPrivateJwk, `The clientPrivateJwk object should be stored in state`).to.deep.equal(clientPrivateJwk)
             expect(state.clientPublicKeySetUrl, `The clientPublicKeySetUrl should be stored in state`).to.equal(KEY_SET_URL)
 
             
-            // Redirect ------------------------------------------------------------
+            // Redirect --------------------------------------------------------
             await navigate(`${REDIRECT_URL}?code=123&state=${stateID}`);
             
-            // Mock token response -------------------------------------------------
+            // Mock token response ---------------------------------------------
             const tokenMock = mockServer.mock({ path: "/auth/token", method: "post" }, {
                 bodyParser: express.urlencoded({ extended: false }),
                 async handler(req, res) {
