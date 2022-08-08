@@ -4,13 +4,15 @@ const jose           = require('jose');
 const mockServer     = require("../mocks/mockServer2");
 const chaiAsPromised = require("chai-as-promised");
 const { default: fetch } = require("cross-fetch");
+const path = require("path");
 
 chai.use(chaiAsPromised);
 chai.should();
 
 let server;
 const app = express()
-app.use("/", express.static("."));
+app.use("/", express.static(path.resolve(__dirname, "../../")));
+// console.log(path.resolve(__dirname, "../../"))
 
 
 const MOCK_PORT      = 3456
