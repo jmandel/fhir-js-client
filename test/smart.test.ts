@@ -10,27 +10,29 @@ const { it, describe } = lab;
 try { var { subtle } = require('node:crypto').webcrypto; } catch {}
 
 const defaultState: fhirclient.ClientState = {
-    serverUrl: 'https://server.example.org',
+    serverUrl  : 'https://server.example.org',
     redirectUri: 'https://client.example.org/after-auth',
-    tokenUri: 'https://server.example.org/token',
-    clientId: 'example-client-id',
+    tokenUri   : 'https://server.example.org/token',
+    clientId   : 'example-client-id',
 };
+
+const clientPrivateJwk: fhirclient.ES384JWK = {
+    "alg": "ES384",
+    "kty": "EC",
+    "crv": "P-384",
+    "d"  : "WcrTiYk8jbI-Sd1sKNpqGmELWGG08bf_y9SSlnC4cpAl5GRdHHN9gKYlPvMFqiJ5",
+    "x"  : "wcE8O55ro6aOuTf5Ty1k_IG4mTcuLiVercHouge1G5Ri-leevhev4uJzlHpi3U8r",
+    "y"  : "mLRgz8Giu6XA_AqG8bywqbygShmd8jowflrdx0KQtM5X4s4aqDeCRfcpexykp3aI",
+    "kid": "afb27c284f2d93959c18fa0320e32060",
+}
 
 const defaultStateAsymmetricAuth: fhirclient.ClientState = {
     ...defaultState,
     clientPublicKeySetUrl: "https://client.example.org/.well-known/jwks.json",
-    clientPrivateJwk: {
-        "kty": "EC",
-        "crv": "P-384",
-        "d": "WcrTiYk8jbI-Sd1sKNpqGmELWGG08bf_y9SSlnC4cpAl5GRdHHN9gKYlPvMFqiJ5",
-        "x": "wcE8O55ro6aOuTf5Ty1k_IG4mTcuLiVercHouge1G5Ri-leevhev4uJzlHpi3U8r",
-        "y": "mLRgz8Giu6XA_AqG8bywqbygShmd8jowflrdx0KQtM5X4s4aqDeCRfcpexykp3aI",
-        "kid": "afb27c284f2d93959c18fa0320e32060",
-        "alg": "ES384",
-    }
+    clientPrivateJwk
 };
 
-const defaultEnv = () => new ServerEnv();
+const defaultEnv = new ServerEnv();
 
 
 
@@ -39,7 +41,7 @@ describe("smart", () => {
 
     describe("buildTokenRequest", () => {
         it("uses state.clientSecret", async () => {
-            const requestOptions = await smart.buildTokenRequest(defaultEnv(), {
+            const requestOptions = await smart.buildTokenRequest(defaultEnv, {
                 code: "example-code",
                 state: {
                     ...defaultState,
@@ -52,19 +54,28 @@ describe("smart", () => {
             expect(authz).to.startWith("Basic ")
         });
 
-        it("generates an assertion with state.clientPrivateJwk", async () => {
-            const requestOptions = await smart.buildTokenRequest(defaultEnv(), {
+        it("throws without JWK.alg", async () => {
+            expect(smart.buildTokenRequest(defaultEnv, {
                 code: "example-code",
                 state: defaultStateAsymmetricAuth,
-                privateKey: {
-                    "kty": "EC",
-                    "crv": "P-384",
-                    "d": "WcrTiYk8jbI-Sd1sKNpqGmELWGG08bf_y9SSlnC4cpAl5GRdHHN9gKYlPvMFqiJ5",
-                    "x": "wcE8O55ro6aOuTf5Ty1k_IG4mTcuLiVercHouge1G5Ri-leevhev4uJzlHpi3U8r",
-                    "y": "mLRgz8Giu6XA_AqG8bywqbygShmd8jowflrdx0KQtM5X4s4aqDeCRfcpexykp3aI",
-                    "kid": "afb27c284f2d93959c18fa0320e32060",
-                    "alg": "ES384",
-                }
+                // @ts-ignore
+                privateKey: { ...clientPrivateJwk, alg: undefined }
+            })).to.reject('The "alg" property of the JWK must be set to "ES384" or "RS384"')
+        })
+
+        it("throws without 'sign' in key_ops", async () => {
+            expect(smart.buildTokenRequest(defaultEnv, {
+                code: "example-code",
+                state: defaultStateAsymmetricAuth,
+                privateKey: { ...clientPrivateJwk, key_ops: ["verify"] }
+            })).to.reject('The "key_ops" property of the JWK does not contain "sign"')
+        })
+
+        it("generates an assertion with state.clientPrivateJwk", async () => {
+            const requestOptions = await smart.buildTokenRequest(defaultEnv, {
+                code: "example-code",
+                state: defaultStateAsymmetricAuth,
+                privateKey: clientPrivateJwk
             });
 
             expect(requestOptions.body).to.exist();
@@ -105,7 +116,7 @@ describe("smart", () => {
                     namedCurve: "P-384"
                 }, false, ["sign", "verify"])
 
-                const requestOptions = await smart.buildTokenRequest(defaultEnv(), {
+                const requestOptions = await smart.buildTokenRequest(defaultEnv, {
                     code: "example-code",
                     state: defaultStateAsymmetricAuth,
                     clientPublicKeySetUrl: jku,
@@ -154,7 +165,7 @@ describe("smart", () => {
                     }
                 }, false, ["sign", "verify"])
 
-                const requestOptions = await smart.buildTokenRequest(defaultEnv(), {
+                const requestOptions = await smart.buildTokenRequest(defaultEnv, {
                     code: "example-code",
                     state: defaultStateAsymmetricAuth,
                     clientPublicKeySetUrl: jku,
@@ -191,22 +202,18 @@ describe("smart", () => {
         }
 
         it("fails with broken state.clientPrivateJwk", async () => {
-            expect(smart.buildTokenRequest(
-                defaultEnv(),
-                {
-                    code: "example-code",
-                    state: {
-                        ...defaultStateAsymmetricAuth
-                    },
-                    privateKey: { 
-                        alg: "RS384",
-                        kid: "whatever",
-                        kty: "RSA"
-                    }
-                })
-            ).to.reject();
+            expect(smart.buildTokenRequest(defaultEnv, {
+                code: "example-code",
+                state: {
+                    ...defaultStateAsymmetricAuth
+                },
+                privateKey: { 
+                    alg: "RS384",
+                    kid: "whatever",
+                    kty: "RSA"
+                }
+            })).to.reject();
         });
 
     });
-
 });

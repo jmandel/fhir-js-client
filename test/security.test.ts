@@ -105,7 +105,7 @@ describe("security", () => {
             "y": "mLRgz8Giu6XA_AqG8bywqbygShmd8jowflrdx0KQtM5X4s4aqDeCRfcpexykp3aI",
             "kid": "afb27c284f2d93959c18fa0320e32060",
             "alg": "ES384",
-            "key_ops": [ "sign" ]
+            // "key_ops": [ "sign" ]
         }
 
         const RS384_JWK = {
@@ -120,7 +120,7 @@ describe("security", () => {
             "dq": "F3vE6bDwdyNq3o3Oi_-XrprIgWPqMARPuRNdCqz4oSx5ixDFaXv6Iv8-WJtMM16EGNQNTC3HI5UbSIPavimeRg-WYc78Z_DP-2DVgouU3AYn2v8fn39ubvPC4LFdsT3HW_mO6x7D0aeIOk_zUHMAdFAjjTjYS4hSac6Cj7yDSZE",
             "qi": "S0_CM6gD7_QZYM4LURTT_zpiaG5WDsGhKzw67fBNfpvS79T4Y-C9ICLc9h2SFflMXRry9SiKNDOdBm1MqYXm4R5ExHxr1DYzoBOk6q6ejlo8iImnKt-BhEU-L21NZzKxJXuS3Bu6RPYtclRfbAQP_BwxjtM4kwXnewXhZQrKb1Y",
             "kid": "5f75856796f2270469566ceb84c204f6",
-            "key_ops": [ "sign" ]
+            // "key_ops": [ "sign" ]
         }
 
         it ("ES384 in the browser", async () => {
@@ -137,6 +137,62 @@ describe("security", () => {
 
         it ("RS384 on the server", async () => {
             await serverSecurity.importJWK(RS384_JWK as fhirclient.JWK)
+        })
+
+        it ("ES384 in the browser throws without 'sign' in key_ops", async () => {
+            expect(browserSecurity.importJWK({ ...ES384_JWK, key_ops: ["verify"] } as fhirclient.JWK)).to.reject('The "key_ops" property of the JWK does not contain "sign"')
+        })
+
+        it ("ES384 on the server throws without 'sign' in key_ops", async () => {
+            expect(serverSecurity.importJWK({ ...ES384_JWK, key_ops: ["verify"] } as fhirclient.JWK)).to.reject('The "key_ops" property of the JWK does not contain "sign"')
+        })
+
+        it ("RS384 in the browser throws without 'sign' in key_ops", async () => {
+            expect(browserSecurity.importJWK({ ...RS384_JWK, key_ops: ["verify"] } as fhirclient.JWK)).to.reject('The "key_ops" property of the JWK does not contain "sign"')
+        })
+
+        it ("RS384 on the server throws without 'sign' in key_ops", async () => {
+            expect(serverSecurity.importJWK({ ...RS384_JWK, key_ops: ["verify"] } as fhirclient.JWK)).to.reject('The "key_ops" property of the JWK does not contain "sign"')
+        })
+
+        it ("ES384 in the browser throws without JWK.alg", async () => {
+            // @ts-ignore
+            expect(browserSecurity.importJWK({ ...ES384_JWK, alg: undefined } as fhirclient.JWK)).to.reject('The "alg" property of the JWK must be set to "ES384" or "RS384"')
+        })
+
+        it ("ES384 on the server throws without JWK.alg", async () => {
+            // @ts-ignore
+            expect(serverSecurity.importJWK({ ...ES384_JWK, alg: undefined } as fhirclient.JWK)).to.reject('The "alg" property of the JWK must be set to "ES384" or "RS384"')
+        })
+
+        it ("RS384 in the browser throws without JWK.alg", async () => {
+            // @ts-ignore
+            expect(browserSecurity.importJWK({ ...RS384_JWK, alg: undefined } as fhirclient.JWK)).to.reject('The "alg" property of the JWK must be set to "ES384" or "RS384"')
+        })
+
+        it ("RS384 on the server throws without JWK.alg", async () => {
+            // @ts-ignore
+            expect(serverSecurity.importJWK({ ...RS384_JWK, alg: undefined } as fhirclient.JWK)).to.reject('The "alg" property of the JWK must be set to "ES384" or "RS384"')
+        })
+
+        it ("ES384 in the browser throws with bad JWK", async () => {
+            // @ts-ignore
+            expect(browserSecurity.importJWK({ ...ES384_JWK, kty: "x" } as fhirclient.JWK)).to.reject()
+        })
+
+        it ("ES384 on the server throws with bad JWK", async () => {
+            // @ts-ignore
+            expect(serverSecurity.importJWK({ ...ES384_JWK, kty: "x" } as fhirclient.JWK)).to.reject()
+        })
+
+        it ("RS384 in the browser throws with bad JWK", async () => {
+            // @ts-ignore
+            expect(browserSecurity.importJWK({ ...RS384_JWK, kty: "x" } as fhirclient.JWK)).to.reject()
+        })
+
+        it ("RS384 on the server throws with bad JWK", async () => {
+            // @ts-ignore
+            expect(serverSecurity.importJWK({ ...RS384_JWK, kty: "x" } as fhirclient.JWK)).to.reject()
         })
     })
 

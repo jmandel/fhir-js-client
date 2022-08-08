@@ -621,7 +621,12 @@ async function buildTokenRequest(env, {
     debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.authorization);
   } // Asymmetric auth
   else if (privateKey) {
-    const clientPrivateKey = privateKey.key || (await security.importJWK(privateKey));
+    const pk = privateKey.key || (await security.importJWK(privateKey));
+
+    if (isBrowser() && pk.extractable) {
+      console.warn("Your private key is extractable, and could be stolen via " + "cross-site scripting. Please generate an unextractable key " + "instead. If you registered a static credentials with an " + "EHR, consider (1) removing those credentials and registering " + "as a public client or (2) using this library server-side if " + "your application runs on a web server.");
+    }
+
     const jwtHeaders = {
       typ: "JWT",
       kid: privateKey.kid,
@@ -635,7 +640,7 @@ async function buildTokenRequest(env, {
       exp: (0, lib_1.getTimeInFuture)(120) // two minutes in the future
 
     };
-    const clientAssertion = await security.signCompactJws(privateKey.alg, clientPrivateKey, jwtHeaders, jwtClaims);
+    const clientAssertion = await security.signCompactJws(privateKey.alg, pk, jwtHeaders, jwtClaims);
     requestOptions.body += `&client_assertion_type=${encodeURIComponent("urn:ietf:params:oauth:client-assertion-type:jwt-bearer")}`;
     requestOptions.body += `&client_assertion=${encodeURIComponent(clientAssertion)}`;
     debug("Using state.clientPrivateJwk to add a client_assertion to the POST body");

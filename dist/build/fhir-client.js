@@ -3704,6 +3704,10 @@ __webpack_require__(/*! core-js/modules/es.regexp.exec.js */ "./node_modules/cor
 
 __webpack_require__(/*! core-js/modules/es.string.replace.js */ "./node_modules/core-js/modules/es.string.replace.js");
 
+__webpack_require__(/*! core-js/modules/es.array.includes.js */ "./node_modules/core-js/modules/es.array.includes.js");
+
+__webpack_require__(/*! core-js/modules/es.string.includes.js */ "./node_modules/core-js/modules/es.string.includes.js");
+
 __webpack_require__(/*! core-js/modules/es.array.concat.js */ "./node_modules/core-js/modules/es.array.concat.js");
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
@@ -3847,33 +3851,42 @@ function _importJWK() {
             throw new Error('The "alg" property of the JWK must be set to "ES384" or "RS384"');
 
           case 2:
-            if (Array.isArray(jwk.key_ops)) {
-              _context3.next = 4;
+            // Use of the "key_ops" member is OPTIONAL, unless the application requires its presence.
+            // https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3
+            // 
+            // In our case the app will only import private keys so we can assume "sign"
+            if (!Array.isArray(jwk.key_ops)) {
+              jwk.key_ops = ["sign"];
+            } // In this case the JWK has a "key_ops" array and "sign" is not listed
+
+
+            if (jwk.key_ops.includes("sign")) {
+              _context3.next = 5;
               break;
             }
 
-            throw new Error('The "key_ops" property of the JWK must be an array containing "sign" or "verify" (or both)');
+            throw new Error('The "key_ops" property of the JWK does not contain "sign"');
 
-          case 4:
-            _context3.prev = 4;
-            _context3.next = 7;
+          case 5:
+            _context3.prev = 5;
+            _context3.next = 8;
             return subtle.importKey("jwk", jwk, ALGS[jwk.alg], jwk.ext === true, jwk.key_ops // || ['sign']
             );
 
-          case 7:
+          case 8:
             return _context3.abrupt("return", _context3.sent);
 
-          case 10:
-            _context3.prev = 10;
-            _context3.t0 = _context3["catch"](4);
+          case 11:
+            _context3.prev = 11;
+            _context3.t0 = _context3["catch"](5);
             throw new Error("The ".concat(jwk.alg, " is not supported by this browser: ").concat(_context3.t0));
 
-          case 13:
+          case 14:
           case "end":
             return _context3.stop();
         }
       }
-    }, _callee3, null, [[4, 10]]);
+    }, _callee3, null, [[5, 11]]);
   }));
   return _importJWK.apply(this, arguments);
 }
@@ -4889,7 +4902,7 @@ function buildTokenRequest(_x3, _x4) {
 
 function _buildTokenRequest() {
   _buildTokenRequest = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3(env, _ref) {
-    var code, state, clientPublicKeySetUrl, privateKey, redirectUri, clientSecret, tokenUri, clientId, codeVerifier, requestOptions, clientPrivateKey, jwtHeaders, jwtClaims, clientAssertion;
+    var code, state, clientPublicKeySetUrl, privateKey, redirectUri, clientSecret, tokenUri, clientId, codeVerifier, requestOptions, pk, jwtHeaders, jwtClaims, clientAssertion;
     return _regenerator.default.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
@@ -4920,12 +4933,12 @@ function _buildTokenRequest() {
 
             requestOptions.headers.authorization = "Basic " + env.btoa(clientId + ":" + clientSecret);
             debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.authorization);
-            _context3.next = 30;
+            _context3.next = 31;
             break;
 
           case 11:
             if (!privateKey) {
-              _context3.next = 28;
+              _context3.next = 29;
               break;
             }
 
@@ -4943,7 +4956,12 @@ function _buildTokenRequest() {
             _context3.t0 = _context3.sent;
 
           case 17:
-            clientPrivateKey = _context3.t0;
+            pk = _context3.t0;
+
+            if (isBrowser() && pk.extractable) {
+              console.warn("Your private key is extractable, and could be stolen via " + "cross-site scripting. Please generate an unextractable key " + "instead. If you registered a static credentials with an " + "EHR, consider (1) removing those credentials and registering " + "as a public client or (2) using this library server-side if " + "your application runs on a web server.");
+            }
+
             jwtHeaders = {
               typ: "JWT",
               kid: privateKey.kid,
@@ -4957,22 +4975,22 @@ function _buildTokenRequest() {
               exp: (0, lib_1.getTimeInFuture)(120) // two minutes in the future
 
             };
-            _context3.next = 22;
-            return security.signCompactJws(privateKey.alg, clientPrivateKey, jwtHeaders, jwtClaims);
+            _context3.next = 23;
+            return security.signCompactJws(privateKey.alg, pk, jwtHeaders, jwtClaims);
 
-          case 22:
+          case 23:
             clientAssertion = _context3.sent;
             requestOptions.body += "&client_assertion_type=".concat(encodeURIComponent("urn:ietf:params:oauth:client-assertion-type:jwt-bearer"));
             requestOptions.body += "&client_assertion=".concat(encodeURIComponent(clientAssertion));
             debug("Using state.clientPrivateJwk to add a client_assertion to the POST body");
-            _context3.next = 30;
+            _context3.next = 31;
             break;
 
-          case 28:
+          case 29:
             debug("Public client detected; adding state.clientId to the POST body");
             requestOptions.body += "&client_id=".concat(encodeURIComponent(clientId));
 
-          case 30:
+          case 31:
             if (codeVerifier) {
               debug("Found state.codeVerifier, adding to the POST body"); // Note that the codeVerifier is ALREADY encoded properly  
 
@@ -4981,7 +4999,7 @@ function _buildTokenRequest() {
 
             return _context3.abrupt("return", requestOptions);
 
-          case 32:
+          case 33:
           case "end":
             return _context3.stop();
         }

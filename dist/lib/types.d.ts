@@ -258,10 +258,10 @@ declare namespace fhirclient {
 
     interface ES384JWK extends JsonWebKey {
         alg: "ES384"
-        crv: "P-384"
         kty: "EC"
+        crv: "P-384"
         kid: string
-        key_ops: KeyUsage[]
+        key_ops?: KeyUsage[]
         [propName: string]: unknown
     }
 
@@ -269,7 +269,7 @@ declare namespace fhirclient {
         alg: "RS384"
         kty: "RSA"
         kid: string
-        key_ops: KeyUsage[]
+        key_ops?: KeyUsage[]
         [propName: string]: unknown
     }
 

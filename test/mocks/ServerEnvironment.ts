@@ -1,6 +1,8 @@
-import { AbortController } from "abortcontroller-polyfill/dist/cjs-ponyfill";
+import { AbortController as AbortControllerPonyfill } from "abortcontroller-polyfill/dist/cjs-ponyfill";
 import ServerStorage       from "../../src/storage/ServerStorage";
 import { fhirclient }      from "../../src/types";
+
+const AbortController = global.AbortController || AbortControllerPonyfill
 
 export default class ServerEnvironment implements fhirclient.Adapter
 {

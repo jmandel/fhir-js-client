@@ -884,6 +884,74 @@ describe("authorization", () => {
             const stateID = redirectUrl.searchParams.get("state");
             await navigate(`${REDIRECT_URL}?code=123&state=${stateID}`);
             await ready(stateID).should.eventually.be.rejected;
+        });
+
+        it(alg + " throws without JWK.alg", async () => {
+
+            const { publicKey, privateKey } = await jose.generateKeyPair(alg)
+
+            const clientPrivateJwk = { ...await jose.exportJWK(privateKey), key_ops: ["sign"] }
+            const clientPublicJwk  = await jose.exportJWK(publicKey )
+
+            const redirectUrl = await authorize({
+                client_id: CLIENT_ID,
+                scope    : "patient/*.read",
+                clientPublicKeySetUrl: KEY_SET_URL,
+                // @ts-ignore
+                clientPrivateJwk
+            });
+
+            // Get the state parameter from the URL ----------------------------
+            const stateID = redirectUrl.searchParams.get("state");
+
+            // Redirect --------------------------------------------------------
+            await navigate(`${REDIRECT_URL}?code=123&state=${stateID}`);
+            
+            // Mock token response ---------------------------------------------
+            mockServer.mock({ path: "/auth/token", method: "post" }, {
+                bodyParser: express.urlencoded({ extended: false }),
+                async handler(req, res) {
+                    const clientKey = await jose.importJWK(clientPublicJwk, alg);
+                    await jose.compactVerify(req.body.client_assertion, clientKey);
+                    res.json(generateTokenResponse());
+                }
+            });
+        
+            await ready(stateID).should.eventually.be.rejectedWith('The "alg" property of the JWK must be set to "ES384" or "RS384"')
+        })
+
+        it(alg + " throws without 'sign' in key_ops", async () => {
+
+            const { publicKey, privateKey } = await jose.generateKeyPair(alg)
+
+            const clientPrivateJwk = { ...await jose.exportJWK(privateKey), alg, key_ops: ["verify"] }
+            const clientPublicJwk  = await jose.exportJWK(publicKey )
+
+            const redirectUrl = await authorize({
+                client_id: CLIENT_ID,
+                scope    : "patient/*.read",
+                clientPublicKeySetUrl: KEY_SET_URL,
+                // @ts-ignore
+                clientPrivateJwk
+            });
+
+            // Get the state parameter from the URL ----------------------------
+            const stateID = redirectUrl.searchParams.get("state");
+
+            // Redirect --------------------------------------------------------
+            await navigate(`${REDIRECT_URL}?code=123&state=${stateID}`);
+            
+            // Mock token response ---------------------------------------------
+            mockServer.mock({ path: "/auth/token", method: "post" }, {
+                bodyParser: express.urlencoded({ extended: false }),
+                async handler(req, res) {
+                    const clientKey = await jose.importJWK(clientPublicJwk, alg);
+                    await jose.compactVerify(req.body.client_assertion, clientKey);
+                    res.json(generateTokenResponse());
+                }
+            });
+        
+            await ready(stateID, { privateKey: clientPrivateJwk }).should.eventually.be.rejectedWith('The "key_ops" property of the JWK does not contain "sign"')
         })
     });
 
