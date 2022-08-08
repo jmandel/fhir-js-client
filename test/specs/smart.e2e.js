@@ -1,6 +1,7 @@
 const chai           = require("chai");
 const express        = require("express");
 const jose           = require('jose');
+const cors           = require("cors");
 const mockServer     = require("../mocks/mockServer2");
 const chaiAsPromised = require("chai-as-promised");
 const { default: fetch } = require("cross-fetch");
@@ -10,7 +11,16 @@ chai.use(chaiAsPromised);
 chai.should();
 
 let server;
-const app = express()
+const app = express();
+app.use(cors());
+app.use((req, res, next) => {
+    res.set({
+        "cache-control": "no-cache, no-store, must-revalidate",
+        "pragma"       : "no-cache",
+        "expires"      : "0"
+    });
+    next();
+});
 app.use("/", express.static(
     process.env.GITHUB_WORKSPACE || path.resolve(__dirname, "../../")
 ));
@@ -415,13 +425,15 @@ async function stopMockServer() {
 
 describe("authorization", () => {
     before(async () => {
-        if (!process.env.GITHUB_WORKSPACE) await startFileServer()
+        // if (!process.env.GITHUB_WORKSPACE)
+        await startFileServer()
         await startMockServer()
     });
     
     after(async () => {
         await browser.end()
-        if (!process.env.GITHUB_WORKSPACE) await stopFileServer()
+        // if (!process.env.GITHUB_WORKSPACE)
+        await stopFileServer()
         await stopMockServer()
     });
     

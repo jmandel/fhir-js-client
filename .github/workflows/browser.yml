@@ -24,12 +24,12 @@ jobs:
           node-version: 16.x
           cache: npm
 
-      - name: Serve Files
-        uses: Eun/http-server-action@v1
-        with:
-          directory: ${{ github.workspace }}
-          port: 3000
-          no-cache: true
+      # - name: Serve Files
+      #   uses: Eun/http-server-action@v1
+      #   with:
+      #     directory: ${{ github.workspace }}
+      #     port: 3000
+      #     no-cache: true
 
       - run: npm ci --legacy-peer-deps
 
