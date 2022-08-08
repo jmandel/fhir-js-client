@@ -15,7 +15,7 @@ app.use("/", express.static(
     process.env.GITHUB_WORKSPACE || // /home/runner/work/client-js/client-js
     path.resolve(__dirname, "../../")
 ));
-// console.log(path.resolve(__dirname, "../../"))
+console.log(process.env)
 
 
 const MOCK_PORT      = 3456
