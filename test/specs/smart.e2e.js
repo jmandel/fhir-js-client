@@ -3,14 +3,13 @@ const express        = require("express");
 const jose           = require('jose');
 const mockServer     = require("../mocks/mockServer2");
 const chaiAsPromised = require("chai-as-promised");
-const path = require("path");
 
 chai.use(chaiAsPromised);
 chai.should();
 
 let server;
 const app = express()
-app.use("/", express.static(path.resolve(__dirname, "../../")));
+app.use("/", express.static("."));
 
 
 const MOCK_PORT      = 3456
