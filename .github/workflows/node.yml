@@ -3,11 +3,11 @@ name: NodeJS Tests
 
 on:
   push:
-    # branches: [ "*" ]
+    branches: [ "*" ]
   pull_request:
-    # branches: [ "*" ]
+    branches: [ "*" ]
   workflow_dispatch:
-    # branches: [ "*" ]
+    branches: [ "*" ]
 
 jobs:
   build:
@@ -16,10 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [
-          16.x,
-          18.x
-        ]
+        node-version: [ 16.x, 18.x ]
 
     steps:
       

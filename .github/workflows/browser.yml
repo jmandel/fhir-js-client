@@ -3,11 +3,11 @@ name: Browser Tests
 
 on:
   push:
-    # branches: [ "*" ]
+    branches: [ "*" ]
   pull_request:
-    # branches: [ "*" ]
+    branches: [ "*" ]
   workflow_dispatch:
-    # branches: [ "*" ]
+    branches: [ "*" ]
 
 jobs:
   build:
@@ -23,13 +23,6 @@ jobs:
         with:
           node-version: 16.x
           cache: npm
-
-      # - name: Serve Files
-      #   uses: Eun/http-server-action@v1
-      #   with:
-      #     directory: ${{ github.workspace }}
-      #     port: 3000
-      #     no-cache: true
 
       - run: npm ci --legacy-peer-deps
 
