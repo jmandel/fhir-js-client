@@ -1,6 +1,6 @@
 {
   "name": "fhirclient",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "JavaScript client for Fast Healthcare Interoperability Resources",
   "author": "SMART Health IT <support@smarthealthit.org> (https://smarthealthit.org/)",
   "contributors": [
@@ -79,7 +79,9 @@
     "webpack-cli": "^4.10.0",
     "webpack-merge": "^5.8.0"
   },
-  "engine": "node >= 14",
+  "engines": {
+    "node": ">=14"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/smart-on-fhir/client-js.git"
