@@ -44,7 +44,7 @@ module.exports = {
     // file path to write test results
     // Note that the order of entries corresponds to the `reporter` above
     // (-o, --output)
-    output: ["stdout", "test/coverage.html", "lcov.info"],
+    output: ["stdout", "coverage/coverage.html", "coverage/lcov.info"],
 
     // Other -------------------------------------------------------------------
     // ignore a list of globals for the leak detection (comma separated)
