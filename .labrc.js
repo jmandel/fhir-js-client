@@ -38,13 +38,13 @@ module.exports = {
     // reporter type [console, html, json, tap, lcov, clover, junit]
     // Note that the order of entries corresponds to the `output` below
     // (-r, --reporter)
-    reporter: ["console", "html"],
+    reporter: ["console", "html", "lcov"],
 
     // output ------------------------------------------------------------------
     // file path to write test results
     // Note that the order of entries corresponds to the `reporter` above
     // (-o, --output)
-    output: ["stdout", "test/coverage.html"],
+    output: ["stdout", "test/coverage.html", "lcov.info"],
 
     // Other -------------------------------------------------------------------
     // ignore a list of globals for the leak detection (comma separated)

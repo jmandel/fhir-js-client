@@ -14,3 +14,4 @@ trash
 post-launch/index.html
 test/coverage.html
 .DS_Store
+lcov.info
