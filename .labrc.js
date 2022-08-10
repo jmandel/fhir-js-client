@@ -3,25 +3,25 @@ module.exports = {
     // coverage ----------------------------------------------------------------
 
     // enable code coverage analysis (-c, --coverage)
-    coverage: true,
+    // coverage: false,
 
     // set code coverage path (--coverage-path)
-    coveragePath: "src",
+    // coveragePath: "dist",
 
     // set code coverage excludes (--coverage-exclude)
-    coverageExclude: "lib/**.*",
+    // coverageExclude: "lib/**.*",
 
     // include all files in coveragePath in report (--coverage-all)
-    coverageAll: true,
+    // coverageAll: true,
 
     // --coverage-flat                 prevent recursive inclusion of all files in coveragePath in report
-    coverageFlat: false,
+    // coverageFlat: false,
 
     // --coverage-module               enable coverage on external module
-    coverageModule: true,
+    // coverageModule: true,
 
     // --coverage-pattern              file pattern to use for locating files for coverage
-    coveragePattern: "src/**.*",
+    // coveragePattern: "src/**.*",
 
     // sourcemaps --------------------------------------------------------------
 
@@ -38,18 +38,18 @@ module.exports = {
     // reporter type [console, html, json, tap, lcov, clover, junit]
     // Note that the order of entries corresponds to the `output` below
     // (-r, --reporter)
-    reporter: ["console", "html", "lcov"],
+    reporter: ["console"],
 
     // output ------------------------------------------------------------------
     // file path to write test results
     // Note that the order of entries corresponds to the `reporter` above
     // (-o, --output)
-    output: ["stdout", "coverage/coverage.html", "coverage/lcov.info"],
+    // output: ["stdout"],
 
     // Other -------------------------------------------------------------------
     // ignore a list of globals for the leak detection (comma separated)
     // (-I, --globals)
-    globals: "crypto", // "__core-js_shared__",
+    globals: "crypto,__coverage__", // "__core-js_shared__",
 
     // --bail                          exit the process with a non zero exit code on the first test failure
     bail: false,
@@ -76,7 +76,7 @@ module.exports = {
     silentSkips: false,
 
     // -t, --threshold                 code coverage threshold percentage
-    threshold: 90,
+    // threshold: 90,
 
     // -m, --timeout                   timeout for each test in milliseconds
     timeout: 5000,

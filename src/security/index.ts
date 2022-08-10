@@ -2,7 +2,7 @@ declare var IS_BROWSER: boolean;
 
 let api: any;
 
-// $lab:coverage:off$
+/* istanbul ignore next */
 if (typeof IS_BROWSER != "undefined") {
   api = require("./browser")
 } else {
@@ -10,4 +10,3 @@ if (typeof IS_BROWSER != "undefined") {
 }
 
 export = api
-// $lab:coverage:on$

@@ -32,7 +32,7 @@
   },
   "scripts": {
     "test-only": "lab ",
-    "test": "lab  --typescript test/*.test.ts",
+    "test": "nyc --cache false --reporter lcov --reporter html lab --typescript test/*.test.ts",
     "pack": "webpack",
     "build": "npm run clean && npm run build:module && npm run pack",
     "build:dev": "webpack --watch",
@@ -40,7 +40,8 @@
     "build:module": "cp src/types.d.ts dist/lib && tsc -p tsconfig.module.json && babel --env-name module -d dist/lib dist/lib",
     "doc": "typedoc src && touch docs/typedoc/.nojekyll",
     "clean": "rm -rf dist/build && rm -r dist/lib/*",
-    "nightwatch": "nightwatch --headless test/specs/*.js"
+    "nightwatch": "nightwatch --headless test/specs/*.js",
+    "coverage": "nyc npm run test"
   },
   "devDependencies": {
     "@babel/cli": "^7.18.6",
@@ -69,6 +70,7 @@
     "jsonwebtoken": "^8.5.1",
     "lab-transform-typescript": "^3.0.1",
     "nightwatch": "^2.3.0",
+    "nyc": "^15.1.0",
     "ts-loader": "^9.3.1",
     "ts-node": "^10.2.1",
     "tslint": "^5.20.1",
@@ -90,5 +92,8 @@
     "url": "https://github.com/smart-on-fhir/client-js/issues"
   },
   "homepage": "http://docs.smarthealthit.org/client-js/",
-  "types": "src/types.d.ts"
+  "types": "src/types.d.ts",
+  "nyc": {
+      "include": "src" 
+  }
 }
