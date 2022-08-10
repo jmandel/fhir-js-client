@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.5.0
+- Added `PKCE` support
+- Added support for asymmetric authentication
+- Passing `onSuccess` and `onError` callbacks to `FHIR.oauth2.ready` (which was previously deprecated) is no longer supported
+- IE10 is no longer supported
+- Supports NodeJS versions 14 to 18
+- Update all dependencies and dev tools. Zero audit issues at the time of release.
+- `.well-known/smart-configuration` is now the preferred source of metadata and `/metadata` is only fetched if smart-configuration is not found on the given server.
+- Fixed an issue that might prevent users from setting custom http headers (#153)
+- Added GitHub actions, e2e tests in headless browser and improved coverage reports
+
 ## v2.4.0
 - Added `patch` method to the client
 - Added `noRedirect` authorize option 
