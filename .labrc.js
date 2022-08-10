@@ -32,7 +32,7 @@ module.exports = {
     // javascript file that exports an array of objects ie.
     // [ { ext: ".js", transform: function (content, filename) { ... } } ]
     // (-T, --transform)
-    transform: "node_modules/lab-transform-typescript",
+    // transform: "node_modules/lab-transform-typescript",
 
     // reporters ---------------------------------------------------------------
     // reporter type [console, html, json, tap, lcov, clover, junit]
