@@ -75,6 +75,7 @@ This should be called on your `redirect_uri`. Returns a Promise that will eventu
 > Before version 2.5 `ready` was accepting optional `onSuccess` and `onError` callback functions. Since `v2.5` you will have to use the promise chain (`then` or `catch`) for that functionality.
 
 The `options` argument object is optional and could contain the following:
+
 |Name                 |Type    | Description
 |---------------------|--------|-----------
 |clientPublicKeySetUrl|`String`| If you have registered a confidential client and you host your public key online, you can pass your JWKS URL here. Note: ONLY use this on the server, as the browsers are considered incapable of keeping a secret. Note: This is the same option that can also be passed to `authorize`. If provided in both places, the one passed to `ready` takes precedence.
