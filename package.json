@@ -37,7 +37,7 @@
     "build": "npm run clean && npm run build:module && npm run pack",
     "build:dev": "webpack --watch",
     "build:module": "cp src/types.d.ts dist/lib && tsc -p tsconfig.module.json && babel --env-name module -d dist/lib dist/lib",
-    "doc": "typedoc src && touch docs/typedoc/.nojekyll",
+    "doc": "typedoc",
     "clean": "rm -rf dist/build && rm -r dist/lib/*",
     "nightwatch": "nightwatch --headless test/specs/*.js"
   },
