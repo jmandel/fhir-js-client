@@ -1,11 +1,5 @@
 "use strict";
 
-require("core-js/modules/es.array.sort.js");
-
-require("core-js/modules/es.array.flat.js");
-
-require("core-js/modules/es.array.unscopables.flat.js");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -822,7 +816,7 @@ class Client {
    * expired (or this fails for any other reason) it will be deleted from the
    * state, so that we don't enter into loops trying to re-authorize.
    *
-   * This method is typically called internally from [[Client.request]] if
+   * This method is typically called internally from [[request]] if
    * certain request fails with 401.
    *
    * @param requestOptions Any options to pass to the fetch call. Most of them

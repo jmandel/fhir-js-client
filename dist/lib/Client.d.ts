@@ -43,7 +43,7 @@ export default class Client {
          */
         read: fhirclient.RequestFunction<fhirclient.FHIR.Patient>;
         /**
-         * This is similar to [[Client.request]] but it makes requests in the
+         * This is similar to [[request]] but it makes requests in the
          * context of the current patient. For example, instead of doing
          * ```js
          * client.request("Observation?patient=" + client.patient.id)
@@ -255,7 +255,7 @@ export default class Client {
      * expired (or this fails for any other reason) it will be deleted from the
      * state, so that we don't enter into loops trying to re-authorize.
      *
-     * This method is typically called internally from [[Client.request]] if
+     * This method is typically called internally from [[request]] if
      * certain request fails with 401.
      *
      * @param requestOptions Any options to pass to the fetch call. Most of them

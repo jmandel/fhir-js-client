@@ -2085,7 +2085,7 @@ var Client = /*#__PURE__*/function () {
      * expired (or this fails for any other reason) it will be deleted from the
      * state, so that we don't enter into loops trying to re-authorize.
      *
-     * This method is typically called internally from [[Client.request]] if
+     * This method is typically called internally from [[request]] if
      * certain request fails with 401.
      *
      * @param requestOptions Any options to pass to the fetch call. Most of them
@@ -3963,13 +3963,14 @@ function utf8ToBinaryString(str) {
 "use strict";
 
 
-var api; // $lab:coverage:off$
+var api;
+/* istanbul ignore next */
 
 if (true) {
   api = __webpack_require__(/*! ./browser */ "./src/security/browser.ts");
 } else {}
 
-module.exports = api; // $lab:coverage:on$
+module.exports = api;
 
 /***/ }),
 

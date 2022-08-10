@@ -414,7 +414,7 @@ declare namespace fhirclient {
         key?: string;
 
         /**
-         * If `true`, the app requested to be initialized in the specified [[target]].
+         * If `true`, the app requested to be initialized in the specified [[AuthorizeParams.target]].
          * Otherwise, the app requested to be initialized in the window in which
          * [[authorize]] was called.
          */
@@ -588,18 +588,18 @@ declare namespace fhirclient {
 
         /**
          * The width of the authorization popup window. Only used in browsers
-         * and if the [[target]] option is set to "popup".
+         * and if the [[AuthorizeParams.target]] option is set to "popup".
          */
         width?: number;
 
         /**
          * The height of the authorization popup window. Only used in browsers
-         * and if the [[target]] option is set to "popup".
+         * and if the [[AuthorizeParams.target]] option is set to "popup".
          */
         height?: number;
 
         /**
-         * If `true`, the app will be initialized in the specified [[target]].
+         * If `true`, the app will be initialized in the specified [[AuthorizeParams.target]].
          * Otherwise, the app will be initialized in the window in which
          * [[authorize]] was called.
          */

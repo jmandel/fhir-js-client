@@ -2,8 +2,6 @@
 
 require("core-js/modules/es.typed-array.set.js");
 
-require("core-js/modules/es.typed-array.sort.js");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
