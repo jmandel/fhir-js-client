@@ -75,7 +75,7 @@ set(key: string, value: any): Promise<any> // returns the value
 unset(key: string): Promise<Boolean> // returns !!success
 ```
 
-The default storage implementation is [here](https://github.com/smart-on-fhir/client-js/tree/master/src/storage/ServerStorage.js).
+The default storage implementation is [here](https://github.com/smart-on-fhir/client-js/tree/master/src/storage/ServerStorage.ts).
 
 Once you have your custom storage, you can just pass it as third argument to the
 function that creates the SMART API:
