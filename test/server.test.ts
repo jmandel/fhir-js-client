@@ -226,6 +226,27 @@ describe("ServerStorage", () => {
 
 describe("NodeAdapter", () => {
 
+    it ("base64urlencode a string", () => {
+        // @ts-ignore
+        const env = new Adapter({})
+        const input = "This is a test"
+        expect(env.base64urlencode(input)).to.equal(Buffer.from(input).toString("base64url"))
+    })
+
+    it ("base64urlencode an Uint8Array", () => {
+        // @ts-ignore
+        const env = new Adapter({})
+        const input = "This is a test"
+        expect(env.base64urlencode(new TextEncoder().encode(input))).to.equal(Buffer.from(input).toString("base64url"))
+    })
+
+    it ("base64urldecode", () => {
+        // @ts-ignore
+        const env = new Adapter({})
+        const input = Buffer.from("test").toString("base64url")
+        expect(env.base64urldecode(input)).to.equal("test")
+    })
+
     it ("getUrl", () => {
         const map = [
             {

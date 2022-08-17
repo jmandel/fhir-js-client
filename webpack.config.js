@@ -21,11 +21,7 @@ const BASE_CONFIG = {
     },
     resolve: {
         extensions: [".ts", ".js"],
-    },
-    plugins: [
-        new DefinePlugin({ "IS_BROWSER": true }),
-    ]
- 
+    }
 };
 
 const PURE_DEV_BUILD = merge(BASE_CONFIG, {

@@ -1,6 +1,8 @@
 import { AbortController as AbortControllerPonyfill } from "abortcontroller-polyfill/dist/cjs-ponyfill";
 import ServerStorage       from "../../src/storage/ServerStorage";
 import { fhirclient }      from "../../src/types";
+import * as security       from "../../src/security/server"
+import { base64url }       from "jose"
 
 const AbortController = global.AbortController || AbortControllerPonyfill
 
@@ -13,6 +15,8 @@ export default class ServerEnvironment implements fhirclient.Adapter
     storage: any;
 
     options: fhirclient.JsonObject;
+
+    security = security;
 
     constructor(request?: any, response?: any, storage?: any)
     {
@@ -77,6 +81,16 @@ export default class ServerEnvironment implements fhirclient.Adapter
     atob(str: string): string
     {
         return Buffer.from(str, "base64").toString("ascii");
+    }
+
+    base64urlencode(input: string | Uint8Array)
+    {
+        return base64url.encode(input);
+    }
+
+    base64urldecode(input: string)
+    {
+        return base64url.decode(input).toString();
     }
 
     getAbortController()

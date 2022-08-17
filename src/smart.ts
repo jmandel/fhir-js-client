@@ -14,7 +14,6 @@ import {
 import Client from "./Client";
 import { SMART_KEY } from "./settings";
 import { fhirclient } from "./types";
-import * as security from "./security/index"
 
 const debug = _debug.extend("oauth2");
 
@@ -327,7 +326,7 @@ export async function authorize(
     }
 
     if (shouldIncludeChallenge(extensions.codeChallengeMethods.includes('S256'), pkceMode)) {
-        let codes = await security.generatePKCEChallenge()
+        let codes = await env.security.generatePKCEChallenge()
         Object.assign(state, codes);
         await storage.set(stateKey, state); // note that the challenge is ALREADY encoded properly  
         redirectParams.push("code_challenge=" + state.codeChallenge);
@@ -675,7 +674,9 @@ export async function buildTokenRequest(
     // Asymmetric auth
     else if (privateKey) {
 
-        const pk = privateKey.key || await security.importJWK(privateKey)
+        const pk = "key" in privateKey ?
+            privateKey.key as CryptoKey:
+            await env.security.importJWK(privateKey as fhirclient.JWK)
 
         if (isBrowser() && pk.extractable) {
             console.warn(
@@ -698,11 +699,11 @@ export async function buildTokenRequest(
             iss: clientId,
             sub: clientId,
             aud: tokenUri,
-            jti: security.base64urlencode(security.randomBytes(32)),
+            jti: env.base64urlencode(env.security.randomBytes(32)),
             exp: getTimeInFuture(120) // two minutes in the future
         };
         
-        const clientAssertion = await security.signCompactJws(privateKey.alg, pk, jwtHeaders, jwtClaims);
+        const clientAssertion = await env.security.signCompactJws(privateKey.alg, pk, jwtHeaders, jwtClaims);
         requestOptions.body += `&client_assertion_type=${encodeURIComponent("urn:ietf:params:oauth:client-assertion-type:jwt-bearer")}`;
         requestOptions.body += `&client_assertion=${encodeURIComponent(clientAssertion)}`;
         debug("Using state.clientPrivateJwk to add a client_assertion to the POST body")

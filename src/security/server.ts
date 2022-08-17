@@ -23,8 +23,6 @@ interface PkcePair {
 
 type SupportedAlg = 'ES384' | 'RS384'
 
-export const base64urlencode = (input: string | Uint8Array) => base64url.encode(input);
-export const base64urldecode = (input: string) => base64url.decode(input).toString();
 
 export { randomBytes }
 
@@ -36,12 +34,12 @@ export async function digestSha256(payload: string) {
 
 export async function generatePKCEChallenge(entropy = 96): Promise<PkcePair> {
     const inputBytes    = randomBytes(entropy)
-    const codeVerifier  = base64urlencode(inputBytes)
-    const codeChallenge = base64urlencode(await digestSha256(codeVerifier))
+    const codeVerifier  = base64url.encode(inputBytes)
+    const codeChallenge = base64url.encode(await digestSha256(codeVerifier))
     return { codeChallenge, codeVerifier }
 }
 
-export async function importJWK(jwk: fhirclient.JWK): Promise<KeyLike> {
+export async function importJWK(jwk: fhirclient.JWK): Promise<CryptoKey> {
     // alg is optional in JWK but we need it here!
     if (!jwk.alg) {
         throw new Error('The "alg" property of the JWK must be set to "ES384" or "RS384"')
@@ -60,7 +58,7 @@ export async function importJWK(jwk: fhirclient.JWK): Promise<KeyLike> {
         throw new Error('The "key_ops" property of the JWK does not contain "sign"')
     }
 
-    return joseImportJWK(jwk) as Promise<KeyLike>
+    return joseImportJWK(jwk) as Promise<CryptoKey>
 }
 
 export async function signCompactJws(alg: SupportedAlg, privateKey: KeyLike, header: any, payload: any): Promise<string> {

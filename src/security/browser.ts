@@ -23,13 +23,6 @@ const ALGS = {
     } as RsaHashedKeyGenParams
 };
 
-export const base64urlencode = (input: string | Uint8Array) => {
-    if (typeof input == "string") {
-        return encodeURL(input)
-    }
-    return fromUint8Array(input, true)
-}
-
 export const base64urldecode = (input: string) => {
     return decode(input)
 }
@@ -46,8 +39,8 @@ export async function digestSha256(payload: string): Promise<Uint8Array> {
 
 export const generatePKCEChallenge = async (entropy = 96): Promise<PkcePair> => {
     const inputBytes    = randomBytes(entropy)
-    const codeVerifier  = base64urlencode(inputBytes)
-    const codeChallenge = base64urlencode(await digestSha256(codeVerifier))
+    const codeVerifier  = fromUint8Array(inputBytes)
+    const codeChallenge = fromUint8Array(await digestSha256(codeVerifier))
     return { codeChallenge, codeVerifier }
 }
 
@@ -87,7 +80,7 @@ export async function signCompactJws(alg: keyof typeof ALGS, privateKey: CryptoK
 
     const jwtHeader  = JSON.stringify({ ...header, alg });
     const jwtPayload = JSON.stringify(payload);
-    const jwtAuthenticatedContent = `${base64urlencode(jwtHeader)}.${base64urlencode(jwtPayload)}`;
+    const jwtAuthenticatedContent = `${encodeURL(jwtHeader)}.${encodeURL(jwtPayload)}`;
 
     const signature = await subtle.sign(
         { ...privateKey.algorithm, hash: 'SHA-384' },

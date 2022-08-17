@@ -159,6 +159,16 @@ declare namespace fhirclient {
          * ASCII string to Base64
          */
         atob(str: string): string;
+        
+        /**
+         * ASCII string or Uint8Array to Base64URL
+         */
+        base64urlencode: (input: string | Uint8Array) => string
+
+        /**
+         * Base64Url to ASCII string
+         */
+        base64urldecode: (input: string) => string
 
         /**
          * Returns a reference to the AbortController class
@@ -173,6 +183,14 @@ declare namespace fhirclient {
          * optionally a storage or storage factory function.
          */
         getSmartApi(): SMART;
+
+        security: {
+            randomBytes: (count: number) => Uint8Array
+            digestSha256: (payload: string) => Promise<Uint8Array>
+            generatePKCEChallenge: (entropy?: number) => Promise<{ codeChallenge: string; codeVerifier: string }>
+            importJWK: (jwk: JWK) => Promise<CryptoKey>
+            signCompactJws: (alg: "ES384" | "RS384", privateKey: CryptoKey, header: any, payload: any) => Promise<string>
+        }
     }
 
     /**

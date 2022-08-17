@@ -3,6 +3,7 @@ import Client from "../Client";
 import BrowserStorage from "../storage/BrowserStorage";
 import { fhirclient } from "../types";
 import * as security from "../security/browser"
+import { encodeURL, decode, fromUint8Array } from "js-base64"
 
 /**
  * Browser Adapter
@@ -23,6 +24,8 @@ export default class BrowserAdapter implements fhirclient.Adapter
      * Environment-specific options
      */
     options: fhirclient.BrowserFHIRSettings;
+
+    security = security;
 
     /**
      * @param options Environment-specific options
@@ -139,6 +142,19 @@ export default class BrowserAdapter implements fhirclient.Adapter
     btoa(str: string): string
     {
         return window.btoa(str);
+    }
+
+    base64urlencode(input: string | Uint8Array)
+    {
+        if (typeof input == "string") {
+            return encodeURL(input)
+        }
+        return fromUint8Array(input, true)
+    }
+
+    base64urldecode(input: string)
+    {
+        return decode(input)
     }
 
     /**

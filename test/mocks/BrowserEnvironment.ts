@@ -3,11 +3,15 @@ const EventEmitter = require("events");
 import BrowserStorage      from "../../src/storage/BrowserStorage";
 import { fhirclient }      from "../../src/types";
 import { AbortController } from "abortcontroller-polyfill/dist/cjs-ponyfill";
+import * as security       from "../../src/security/server"
+import { base64url }       from "jose"
 
 
 export default class BrowserEnvironment extends EventEmitter implements fhirclient.Adapter
 {
     options: any;
+
+    security = security;
 
     constructor(options = {})
     {
@@ -62,6 +66,16 @@ export default class BrowserEnvironment extends EventEmitter implements fhirclie
     atob(str: string): string
     {
         return Buffer.from(str, "base64").toString("ascii");
+    }
+
+    base64urlencode(input: string | Uint8Array)
+    {
+        return base64url.encode(input);
+    }
+
+    base64urldecode(input: string)
+    {
+        return base64url.decode(input).toString();
     }
 
     getAbortController()

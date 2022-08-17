@@ -46,29 +46,29 @@ const { it, describe } = lab;
 // =============================================================================
 
 describe("security", () => {
-    describe("base64urlencode", () => {
-        it ("from string", () => {
-            const input = "This is a test"
-            const s = serverSecurity .base64urlencode(input)
-            const b = browserSecurity.base64urlencode(input)
-            expect(s).to.equal(b)
-        })
+    // describe("base64urlencode", () => {
+    //     it ("from string", () => {
+    //         const input = "This is a test"
+    //         const s = serverSecurity .base64urlencode(input)
+    //         const b = browserSecurity.base64urlencode(input)
+    //         expect(s).to.equal(b)
+    //     })
 
-        it ("from Uint8Array", () => {
-            const input = "This is a test"
-            const s = serverSecurity .base64urlencode(new TextEncoder().encode(input))
-            const b = browserSecurity.base64urlencode(new TextEncoder().encode(input))
-            expect(s).to.equal(b)
-        })
-    })
+    //     it ("from Uint8Array", () => {
+    //         const input = "This is a test"
+    //         const s = serverSecurity .base64urlencode(new TextEncoder().encode(input))
+    //         const b = browserSecurity.base64urlencode(new TextEncoder().encode(input))
+    //         expect(s).to.equal(b)
+    //     })
+    // })
 
-    it ("base64urldecode", () => {
-        const input = "This is a test"
-        const s = serverSecurity .base64urldecode(Buffer.from(input, "utf8").toString("base64url"))
-        const b = browserSecurity.base64urldecode(Buffer.from(input, "utf8").toString("base64url"))
-        expect(s).to.equal(b)
-        expect(s).to.equal(input)
-    })
+    // it ("base64urldecode", () => {
+    //     const input = "This is a test"
+    //     const s = serverSecurity .base64urldecode(Buffer.from(input, "utf8").toString("base64url"))
+    //     const b = browserSecurity.base64urldecode(Buffer.from(input, "utf8").toString("base64url"))
+    //     expect(s).to.equal(b)
+    //     expect(s).to.equal(input)
+    // })
 
     it ("randomBytes", () => {
         const s = serverSecurity .randomBytes(90)

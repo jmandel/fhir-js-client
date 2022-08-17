@@ -5,6 +5,8 @@ import ServerStorage from "../storage/ServerStorage";
 import { AbortController } from "abortcontroller-polyfill/dist/cjs-ponyfill";
 import { IncomingMessage, ServerResponse } from "http";
 import { TLSSocket } from "tls";
+import * as security from "../security/server"
+import { base64url } from "jose"
 
 
 interface NodeAdapterOptions {
@@ -27,6 +29,8 @@ export default class NodeAdapter implements fhirclient.Adapter
      * Environment-specific options
      */
     options: NodeAdapterOptions;
+
+    security = security;
 
     /**
      * @param options Environment-specific options
@@ -123,6 +127,16 @@ export default class NodeAdapter implements fhirclient.Adapter
         // The "global." makes Webpack understand that it doesn't have to
         // include the Buffer code in the bundle
         return global.Buffer.from(str, "base64").toString("ascii");
+    }
+
+    base64urlencode(input: string | Uint8Array)
+    {
+        return base64url.encode(input);
+    }
+
+    base64urldecode(input: string)
+    {
+        return base64url.decode(input).toString();
     }
 
     /**
