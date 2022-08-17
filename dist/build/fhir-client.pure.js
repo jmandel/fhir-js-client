@@ -1114,6 +1114,8 @@ const Client_1 = __webpack_require__(/*! ../Client */ "./src/Client.ts");
 const BrowserStorage_1 = __webpack_require__(/*! ../storage/BrowserStorage */ "./src/storage/BrowserStorage.ts");
 
 const security = __webpack_require__(/*! ../security/browser */ "./src/security/browser.ts");
+
+const js_base64_1 = __webpack_require__(/*! js-base64 */ "./node_modules/js-base64/base64.js");
 /**
  * Browser Adapter
  */
@@ -1133,6 +1135,7 @@ class BrowserAdapter {
      */
 
     this._storage = null;
+    this.security = security;
     this.options = {
       // Replaces the browser's current URL
       // using window.history.replaceState API or by reloading.
@@ -1242,6 +1245,18 @@ class BrowserAdapter {
 
   btoa(str) {
     return window.btoa(str);
+  }
+
+  base64urlencode(input) {
+    if (typeof input == "string") {
+      return (0, js_base64_1.encodeURL)(input);
+    }
+
+    return (0, js_base64_1.fromUint8Array)(input, true);
+  }
+
+  base64urldecode(input) {
+    return (0, js_base64_1.decode)(input);
   }
   /**
    * Creates and returns adapter-aware SMART api. Not that while the shape of
@@ -1987,7 +2002,7 @@ exports.assertJsonPatch = assertJsonPatch;
 Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
-exports.signCompactJws = exports.importJWK = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = exports.base64urldecode = exports.base64urlencode = void 0;
+exports.signCompactJws = exports.importJWK = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = void 0;
 
 const js_base64_1 = __webpack_require__(/*! js-base64 */ "./node_modules/js-base64/base64.js");
 
@@ -2009,22 +2024,6 @@ const ALGS = {
   }
 };
 
-const base64urlencode = input => {
-  if (typeof input == "string") {
-    return (0, js_base64_1.encodeURL)(input);
-  }
-
-  return (0, js_base64_1.fromUint8Array)(input, true);
-};
-
-exports.base64urlencode = base64urlencode;
-
-const base64urldecode = input => {
-  return (0, js_base64_1.decode)(input);
-};
-
-exports.base64urldecode = base64urldecode;
-
 function randomBytes(count) {
   return crypto.getRandomValues(new Uint8Array(count));
 }
@@ -2041,8 +2040,8 @@ exports.digestSha256 = digestSha256;
 
 const generatePKCEChallenge = async (entropy = 96) => {
   const inputBytes = randomBytes(entropy);
-  const codeVerifier = (0, exports.base64urlencode)(inputBytes);
-  const codeChallenge = (0, exports.base64urlencode)(await digestSha256(codeVerifier));
+  const codeVerifier = (0, js_base64_1.fromUint8Array)(inputBytes);
+  const codeChallenge = (0, js_base64_1.fromUint8Array)(await digestSha256(codeVerifier));
   return {
     codeChallenge,
     codeVerifier
@@ -2085,7 +2084,7 @@ async function signCompactJws(alg, privateKey, header, payload) {
     alg
   });
   const jwtPayload = JSON.stringify(payload);
-  const jwtAuthenticatedContent = `${(0, exports.base64urlencode)(jwtHeader)}.${(0, exports.base64urlencode)(jwtPayload)}`;
+  const jwtAuthenticatedContent = `${(0, js_base64_1.encodeURL)(jwtHeader)}.${(0, js_base64_1.encodeURL)(jwtPayload)}`;
   const signature = await subtle.sign({ ...privateKey.algorithm,
     hash: 'SHA-384'
   }, privateKey, s2b(jwtAuthenticatedContent));
@@ -2113,26 +2112,6 @@ function utf8ToBinaryString(str) {
     return String.fromCharCode(parseInt(p1, 16));
   });
 }
-
-/***/ }),
-
-/***/ "./src/security/index.ts":
-/*!*******************************!*\
-  !*** ./src/security/index.ts ***!
-  \*******************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-"use strict";
-
-
-let api;
-/* istanbul ignore next */
-
-if (true) {
-  api = __webpack_require__(/*! ./browser */ "./src/security/browser.ts");
-} else {}
-
-module.exports = api;
 
 /***/ }),
 
@@ -2216,9 +2195,6 @@ Object.defineProperty(exports, "KEY", ({
     return settings_1.SMART_KEY;
   }
 }));
-
-const security = __webpack_require__(/*! ./security/index */ "./src/security/index.ts");
-
 const debug = lib_1.debug.extend("oauth2");
 
 function isBrowser() {
@@ -2504,7 +2480,7 @@ async function authorize(env, params = {}) {
   }
 
   if (shouldIncludeChallenge(extensions.codeChallengeMethods.includes('S256'), pkceMode)) {
-    let codes = await security.generatePKCEChallenge();
+    let codes = await env.security.generatePKCEChallenge();
     Object.assign(state, codes);
     await storage.set(stateKey, state); // note that the challenge is ALREADY encoded properly  
 
@@ -2819,7 +2795,7 @@ async function buildTokenRequest(env, {
     debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.authorization);
   } // Asymmetric auth
   else if (privateKey) {
-    const pk = privateKey.key || (await security.importJWK(privateKey));
+    const pk = "key" in privateKey ? privateKey.key : await env.security.importJWK(privateKey);
 
     if (isBrowser() && pk.extractable) {
       console.warn("Your private key is extractable, and could be stolen via " + "cross-site scripting. Please generate an unextractable key " + "instead. If you registered a static credentials with an " + "EHR, consider (1) removing those credentials and registering " + "as a public client or (2) using this library server-side if " + "your application runs on a web server.");
@@ -2834,11 +2810,11 @@ async function buildTokenRequest(env, {
       iss: clientId,
       sub: clientId,
       aud: tokenUri,
-      jti: security.base64urlencode(security.randomBytes(32)),
+      jti: env.base64urlencode(env.security.randomBytes(32)),
       exp: (0, lib_1.getTimeInFuture)(120) // two minutes in the future
 
     };
-    const clientAssertion = await security.signCompactJws(privateKey.alg, pk, jwtHeaders, jwtClaims);
+    const clientAssertion = await env.security.signCompactJws(privateKey.alg, pk, jwtHeaders, jwtClaims);
     requestOptions.body += `&client_assertion_type=${encodeURIComponent("urn:ietf:params:oauth:client-assertion-type:jwt-bearer")}`;
     requestOptions.body += `&client_assertion=${encodeURIComponent(clientAssertion)}`;
     debug("Using state.clientPrivateJwk to add a client_assertion to the POST body");

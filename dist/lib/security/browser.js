@@ -5,7 +5,7 @@ require("core-js/modules/es.typed-array.set.js");
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.signCompactJws = exports.importJWK = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = exports.base64urldecode = exports.base64urlencode = void 0;
+exports.signCompactJws = exports.importJWK = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = void 0;
 
 const js_base64_1 = require("js-base64");
 
@@ -27,22 +27,6 @@ const ALGS = {
   }
 };
 
-const base64urlencode = input => {
-  if (typeof input == "string") {
-    return (0, js_base64_1.encodeURL)(input);
-  }
-
-  return (0, js_base64_1.fromUint8Array)(input, true);
-};
-
-exports.base64urlencode = base64urlencode;
-
-const base64urldecode = input => {
-  return (0, js_base64_1.decode)(input);
-};
-
-exports.base64urldecode = base64urldecode;
-
 function randomBytes(count) {
   return crypto.getRandomValues(new Uint8Array(count));
 }
@@ -59,8 +43,8 @@ exports.digestSha256 = digestSha256;
 
 const generatePKCEChallenge = async (entropy = 96) => {
   const inputBytes = randomBytes(entropy);
-  const codeVerifier = (0, exports.base64urlencode)(inputBytes);
-  const codeChallenge = (0, exports.base64urlencode)(await digestSha256(codeVerifier));
+  const codeVerifier = (0, js_base64_1.fromUint8Array)(inputBytes);
+  const codeChallenge = (0, js_base64_1.fromUint8Array)(await digestSha256(codeVerifier));
   return {
     codeChallenge,
     codeVerifier
@@ -103,7 +87,7 @@ async function signCompactJws(alg, privateKey, header, payload) {
     alg
   }));
   const jwtPayload = JSON.stringify(payload);
-  const jwtAuthenticatedContent = `${(0, exports.base64urlencode)(jwtHeader)}.${(0, exports.base64urlencode)(jwtPayload)}`;
+  const jwtAuthenticatedContent = `${(0, js_base64_1.encodeURL)(jwtHeader)}.${(0, js_base64_1.encodeURL)(jwtPayload)}`;
   const signature = await subtle.sign(Object.assign(Object.assign({}, privateKey.algorithm), {
     hash: 'SHA-384'
   }), privateKey, s2b(jwtAuthenticatedContent));

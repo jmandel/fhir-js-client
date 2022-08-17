@@ -1,6 +1,7 @@
 /// <reference types="node" />
 import { fhirclient } from "../types";
 import { IncomingMessage, ServerResponse } from "http";
+import * as security from "../security/server";
 interface NodeAdapterOptions {
     request: IncomingMessage;
     response: ServerResponse;
@@ -18,6 +19,7 @@ export default class NodeAdapter implements fhirclient.Adapter {
      * Environment-specific options
      */
     options: NodeAdapterOptions;
+    security: typeof security;
     /**
      * @param options Environment-specific options
      */
@@ -53,6 +55,8 @@ export default class NodeAdapter implements fhirclient.Adapter {
      * ASCII string to Base64
      */
     atob(str: string): string;
+    base64urlencode(input: string | Uint8Array): string;
+    base64urldecode(input: string): string;
     /**
      * Returns a reference to the AbortController constructor. In browsers,
      * AbortController will always be available as global (native or polyfilled)

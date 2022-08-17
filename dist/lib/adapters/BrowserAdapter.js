@@ -11,6 +11,8 @@ const Client_1 = require("../Client");
 const BrowserStorage_1 = require("../storage/BrowserStorage");
 
 const security = require("../security/browser");
+
+const js_base64_1 = require("js-base64");
 /**
  * Browser Adapter
  */
@@ -30,6 +32,7 @@ class BrowserAdapter {
      */
 
     this._storage = null;
+    this.security = security;
     this.options = Object.assign({
       // Replaces the browser's current URL
       // using window.history.replaceState API or by reloading.
@@ -138,6 +141,18 @@ class BrowserAdapter {
 
   btoa(str) {
     return window.btoa(str);
+  }
+
+  base64urlencode(input) {
+    if (typeof input == "string") {
+      return (0, js_base64_1.encodeURL)(input);
+    }
+
+    return (0, js_base64_1.fromUint8Array)(input, true);
+  }
+
+  base64urldecode(input) {
+    return (0, js_base64_1.decode)(input);
   }
   /**
    * Creates and returns adapter-aware SMART api. Not that while the shape of

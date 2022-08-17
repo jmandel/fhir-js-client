@@ -1,5 +1,6 @@
 import BrowserStorage from "../storage/BrowserStorage";
 import { fhirclient } from "../types";
+import * as security from "../security/browser";
 /**
  * Browser Adapter
  */
@@ -16,6 +17,7 @@ export default class BrowserAdapter implements fhirclient.Adapter {
      * Environment-specific options
      */
     options: fhirclient.BrowserFHIRSettings;
+    security: typeof security;
     /**
      * @param options Environment-specific options
      */
@@ -61,6 +63,8 @@ export default class BrowserAdapter implements fhirclient.Adapter {
      * Base64 to ASCII string
      */
     btoa(str: string): string;
+    base64urlencode(input: string | Uint8Array): string;
+    base64urldecode(input: string): string;
     /**
      * Creates and returns adapter-aware SMART api. Not that while the shape of
      * the returned object is well known, the arguments to this function are not.

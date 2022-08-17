@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.signCompactJws = exports.importJWK = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = exports.base64urldecode = exports.base64urlencode = void 0;
+exports.signCompactJws = exports.importJWK = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = void 0;
 
 const jose_1 = require("jose");
 
@@ -16,14 +16,6 @@ Object.defineProperty(exports, "randomBytes", {
   }
 });
 
-const base64urlencode = input => jose_1.base64url.encode(input);
-
-exports.base64urlencode = base64urlencode;
-
-const base64urldecode = input => jose_1.base64url.decode(input).toString();
-
-exports.base64urldecode = base64urldecode;
-
 async function digestSha256(payload) {
   const hash = (0, crypto_1.createHash)('sha256');
   hash.update(payload);
@@ -34,8 +26,8 @@ exports.digestSha256 = digestSha256;
 
 async function generatePKCEChallenge(entropy = 96) {
   const inputBytes = (0, crypto_1.randomBytes)(entropy);
-  const codeVerifier = (0, exports.base64urlencode)(inputBytes);
-  const codeChallenge = (0, exports.base64urlencode)(await digestSha256(codeVerifier));
+  const codeVerifier = jose_1.base64url.encode(inputBytes);
+  const codeChallenge = jose_1.base64url.encode(await digestSha256(codeVerifier));
   return {
     codeChallenge,
     codeVerifier

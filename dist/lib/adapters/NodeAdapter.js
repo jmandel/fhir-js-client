@@ -11,6 +11,10 @@ const Client_1 = require("../Client");
 const ServerStorage_1 = require("../storage/ServerStorage");
 
 const cjs_ponyfill_1 = require("abortcontroller-polyfill/dist/cjs-ponyfill");
+
+const security = require("../security/server");
+
+const jose_1 = require("jose");
 /**
  * Node Adapter - works with native NodeJS and with Express
  */
@@ -25,6 +29,7 @@ class NodeAdapter {
      * Holds the Storage instance associated with this instance
      */
     this._storage = null;
+    this.security = security;
     this.options = Object.assign({}, options);
   }
   /**
@@ -119,6 +124,14 @@ class NodeAdapter {
     // The "global." makes Webpack understand that it doesn't have to
     // include the Buffer code in the bundle
     return global.Buffer.from(str, "base64").toString("ascii");
+  }
+
+  base64urlencode(input) {
+    return jose_1.base64url.encode(input);
+  }
+
+  base64urldecode(input) {
+    return jose_1.base64url.decode(input).toString();
   }
   /**
    * Returns a reference to the AbortController constructor. In browsers,

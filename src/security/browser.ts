@@ -1,4 +1,4 @@
-import { encodeURL, decode, fromUint8Array } from "js-base64"
+import { encodeURL, fromUint8Array } from "js-base64"
 import { fhirclient } from "../types"
 const crypto: Crypto = global.crypto || require("isomorphic-webcrypto").default
 const subtle: SubtleCrypto = crypto.subtle
@@ -22,10 +22,6 @@ const ALGS = {
         }
     } as RsaHashedKeyGenParams
 };
-
-export const base64urldecode = (input: string) => {
-    return decode(input)
-}
 
 export function randomBytes(count: number): Uint8Array {
     return crypto.getRandomValues(new Uint8Array(count));

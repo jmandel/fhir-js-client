@@ -2517,6 +2517,8 @@ var Client_1 = __webpack_require__(/*! ../Client */ "./src/Client.ts");
 var BrowserStorage_1 = __webpack_require__(/*! ../storage/BrowserStorage */ "./src/storage/BrowserStorage.ts");
 
 var security = __webpack_require__(/*! ../security/browser */ "./src/security/browser.ts");
+
+var js_base64_1 = __webpack_require__(/*! js-base64 */ "./node_modules/js-base64/base64.js");
 /**
  * Browser Adapter
  */
@@ -2539,6 +2541,7 @@ var BrowserAdapter = /*#__PURE__*/function () {
      */
 
     this._storage = null;
+    this.security = security;
     this.options = _objectSpread({
       // Replaces the browser's current URL
       // using window.history.replaceState API or by reloading.
@@ -2656,6 +2659,20 @@ var BrowserAdapter = /*#__PURE__*/function () {
     key: "btoa",
     value: function btoa(str) {
       return window.btoa(str);
+    }
+  }, {
+    key: "base64urlencode",
+    value: function base64urlencode(input) {
+      if (typeof input == "string") {
+        return (0, js_base64_1.encodeURL)(input);
+      }
+
+      return (0, js_base64_1.fromUint8Array)(input, true);
+    }
+  }, {
+    key: "base64urldecode",
+    value: function base64urldecode(input) {
+      return (0, js_base64_1.decode)(input);
     }
     /**
      * Creates and returns adapter-aware SMART api. Not that while the shape of
@@ -3717,7 +3734,7 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
-exports.signCompactJws = exports.importJWK = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = exports.base64urldecode = exports.base64urlencode = void 0;
+exports.signCompactJws = exports.importJWK = exports.generatePKCEChallenge = exports.digestSha256 = exports.randomBytes = void 0;
 
 var js_base64_1 = __webpack_require__(/*! js-base64 */ "./node_modules/js-base64/base64.js");
 
@@ -3738,22 +3755,6 @@ var ALGS = {
     }
   }
 };
-
-var base64urlencode = function base64urlencode(input) {
-  if (typeof input == "string") {
-    return (0, js_base64_1.encodeURL)(input);
-  }
-
-  return (0, js_base64_1.fromUint8Array)(input, true);
-};
-
-exports.base64urlencode = base64urlencode;
-
-var base64urldecode = function base64urldecode(input) {
-  return (0, js_base64_1.decode)(input);
-};
-
-exports.base64urldecode = base64urldecode;
 
 function randomBytes(count) {
   return crypto.getRandomValues(new Uint8Array(count));
@@ -3805,8 +3806,8 @@ var generatePKCEChallenge = /*#__PURE__*/function () {
           case 0:
             entropy = _args.length > 0 && _args[0] !== undefined ? _args[0] : 96;
             inputBytes = randomBytes(entropy);
-            codeVerifier = (0, exports.base64urlencode)(inputBytes);
-            _context.t0 = (0, exports.base64urlencode);
+            codeVerifier = (0, js_base64_1.fromUint8Array)(inputBytes);
+            _context.t0 = (0, js_base64_1.fromUint8Array);
             _context.next = 6;
             return digestSha256(codeVerifier);
 
@@ -3908,7 +3909,7 @@ function _signCompactJws() {
               alg: alg
             }));
             jwtPayload = JSON.stringify(payload);
-            jwtAuthenticatedContent = "".concat((0, exports.base64urlencode)(jwtHeader), ".").concat((0, exports.base64urlencode)(jwtPayload));
+            jwtAuthenticatedContent = "".concat((0, js_base64_1.encodeURL)(jwtHeader), ".").concat((0, js_base64_1.encodeURL)(jwtPayload));
             _context4.next = 5;
             return subtle.sign(_objectSpread(_objectSpread({}, privateKey.algorithm), {}, {
               hash: 'SHA-384'
@@ -3951,26 +3952,6 @@ function utf8ToBinaryString(str) {
     return String.fromCharCode(parseInt(p1, 16));
   });
 }
-
-/***/ }),
-
-/***/ "./src/security/index.ts":
-/*!*******************************!*\
-  !*** ./src/security/index.ts ***!
-  \*******************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-"use strict";
-
-
-var api;
-/* istanbul ignore next */
-
-if (true) {
-  api = __webpack_require__(/*! ./browser */ "./src/security/browser.ts");
-} else {}
-
-module.exports = api;
 
 /***/ }),
 
@@ -4120,9 +4101,6 @@ Object.defineProperty(exports, "KEY", ({
     return settings_1.SMART_KEY;
   }
 }));
-
-var security = __webpack_require__(/*! ./security/index */ "./src/security/index.ts");
-
 var debug = lib_1.debug.extend("oauth2");
 
 function isBrowser() {
@@ -4513,7 +4491,7 @@ function _authorize() {
             }
 
             _context.next = 67;
-            return security.generatePKCEChallenge();
+            return env.security.generatePKCEChallenge();
 
           case 67:
             codes = _context.sent;
@@ -4934,29 +4912,32 @@ function _buildTokenRequest() {
 
             requestOptions.headers.authorization = "Basic " + env.btoa(clientId + ":" + clientSecret);
             debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.authorization);
-            _context3.next = 31;
+            _context3.next = 33;
             break;
 
           case 11:
             if (!privateKey) {
-              _context3.next = 29;
+              _context3.next = 31;
+              break;
+            }
+
+            if (!("key" in privateKey)) {
+              _context3.next = 16;
               break;
             }
 
             _context3.t0 = privateKey.key;
-
-            if (_context3.t0) {
-              _context3.next = 17;
-              break;
-            }
-
-            _context3.next = 16;
-            return security.importJWK(privateKey);
+            _context3.next = 19;
+            break;
 
           case 16:
+            _context3.next = 18;
+            return env.security.importJWK(privateKey);
+
+          case 18:
             _context3.t0 = _context3.sent;
 
-          case 17:
+          case 19:
             pk = _context3.t0;
 
             if (isBrowser() && pk.extractable) {
@@ -4972,26 +4953,26 @@ function _buildTokenRequest() {
               iss: clientId,
               sub: clientId,
               aud: tokenUri,
-              jti: security.base64urlencode(security.randomBytes(32)),
+              jti: env.base64urlencode(env.security.randomBytes(32)),
               exp: (0, lib_1.getTimeInFuture)(120) // two minutes in the future
 
             };
-            _context3.next = 23;
-            return security.signCompactJws(privateKey.alg, pk, jwtHeaders, jwtClaims);
+            _context3.next = 25;
+            return env.security.signCompactJws(privateKey.alg, pk, jwtHeaders, jwtClaims);
 
-          case 23:
+          case 25:
             clientAssertion = _context3.sent;
             requestOptions.body += "&client_assertion_type=".concat(encodeURIComponent("urn:ietf:params:oauth:client-assertion-type:jwt-bearer"));
             requestOptions.body += "&client_assertion=".concat(encodeURIComponent(clientAssertion));
             debug("Using state.clientPrivateJwk to add a client_assertion to the POST body");
-            _context3.next = 31;
+            _context3.next = 33;
             break;
 
-          case 29:
+          case 31:
             debug("Public client detected; adding state.clientId to the POST body");
             requestOptions.body += "&client_id=".concat(encodeURIComponent(clientId));
 
-          case 31:
+          case 33:
             if (codeVerifier) {
               debug("Found state.codeVerifier, adding to the POST body"); // Note that the codeVerifier is ALREADY encoded properly  
 
@@ -5000,7 +4981,7 @@ function _buildTokenRequest() {
 
             return _context3.abrupt("return", requestOptions);
 
-          case 33:
+          case 35:
           case "end":
             return _context3.stop();
         }

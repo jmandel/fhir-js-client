@@ -18,9 +18,6 @@ Object.defineProperty(exports, "KEY", {
     return settings_1.SMART_KEY;
   }
 });
-
-const security = require("./security/index");
-
 const debug = lib_1.debug.extend("oauth2");
 
 function isBrowser() {
@@ -306,7 +303,7 @@ async function authorize(env, params = {}) {
   }
 
   if (shouldIncludeChallenge(extensions.codeChallengeMethods.includes('S256'), pkceMode)) {
-    let codes = await security.generatePKCEChallenge();
+    let codes = await env.security.generatePKCEChallenge();
     Object.assign(state, codes);
     await storage.set(stateKey, state); // note that the challenge is ALREADY encoded properly  
 
@@ -621,7 +618,7 @@ async function buildTokenRequest(env, {
     debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.authorization);
   } // Asymmetric auth
   else if (privateKey) {
-    const pk = privateKey.key || (await security.importJWK(privateKey));
+    const pk = "key" in privateKey ? privateKey.key : await env.security.importJWK(privateKey);
 
     if (isBrowser() && pk.extractable) {
       console.warn("Your private key is extractable, and could be stolen via " + "cross-site scripting. Please generate an unextractable key " + "instead. If you registered a static credentials with an " + "EHR, consider (1) removing those credentials and registering " + "as a public client or (2) using this library server-side if " + "your application runs on a web server.");
@@ -636,11 +633,11 @@ async function buildTokenRequest(env, {
       iss: clientId,
       sub: clientId,
       aud: tokenUri,
-      jti: security.base64urlencode(security.randomBytes(32)),
+      jti: env.base64urlencode(env.security.randomBytes(32)),
       exp: (0, lib_1.getTimeInFuture)(120) // two minutes in the future
 
     };
-    const clientAssertion = await security.signCompactJws(privateKey.alg, pk, jwtHeaders, jwtClaims);
+    const clientAssertion = await env.security.signCompactJws(privateKey.alg, pk, jwtHeaders, jwtClaims);
     requestOptions.body += `&client_assertion_type=${encodeURIComponent("urn:ietf:params:oauth:client-assertion-type:jwt-bearer")}`;
     requestOptions.body += `&client_assertion=${encodeURIComponent(clientAssertion)}`;
     debug("Using state.clientPrivateJwk to add a client_assertion to the POST body");
