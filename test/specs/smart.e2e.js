@@ -4,38 +4,21 @@ const jose           = require('jose');
 const cors           = require("cors");
 const mockServer     = require("../mocks/mockServer2");
 const chaiAsPromised = require("chai-as-promised");
-const { default: fetch } = require("cross-fetch");
+// const { default: fetch } = require("cross-fetch");
 const path = require("path");
 
 chai.use(chaiAsPromised);
 chai.should();
 
-let server;
-const app = express();
-app.use(cors());
-app.use((req, res, next) => {
-    res.set({
-        "cache-control": "no-cache, no-store, must-revalidate",
-        "pragma"       : "no-cache",
-        "expires"      : "0"
-    });
-    next();
-});
-app.use("/", express.static(
-    process.env.GITHUB_WORKSPACE || path.resolve(__dirname, "../../")
-));
-// console.log(process.env)
+/**
+ * NOTE: These variables are NOT used! They are only declared here to avoid lint
+ * warnings. Instead, they should exist within the tested window scope at runtime
+ * @type {any}
+ */
+let FHIR, SMART_CLIENT, PRIVATE_KEY;
 
 
-const MOCK_PORT      = 3456
-const MOCK_URL       = `http://127.0.0.1:${MOCK_PORT}`
-const LAUNCH_URL     = "http://127.0.0.1:3000/test/specs/launch.html"
-const REDIRECT_URL   = "http://127.0.0.1:3000/test/specs/"
-const FHIR_URL       = `${MOCK_URL}/fhir/`
-const AUTHORIZE_URL  = `${MOCK_URL}/auth/authorize`
-const TOKEN_URL      = `${MOCK_URL}/auth/token`
-const INTROSPECT_URL = `${MOCK_URL}/auth/introspect`
-const REGISTER_URL   = `${MOCK_URL}/auth/register`
+
 const KEY_SET_URL    = "https://client.example.org/.well-known/jwks.json"
 const CLIENT_ID      = "my_web_app"
 const PATIENT_ID     = "b2536dd3-bccd-4d22-8355-ab20acdf240b"
@@ -43,71 +26,15 @@ const ENCOUNTER_ID   = "e3ec2d15-4c27-4607-a45c-2f84962b0700"
 const USER_ID        = "smart-Practitioner-71482713"
 const USER_TYPE      = "Practitioner"
 
-/**
- * NOTE: These variables are NOT used! They are only declared here to avoid lint
- * warnings. Instead, they should exist within the tested window scope at runtime
- * @type {any}
- */
-let FHIR, SMART_CLIENT;
 
-const MOCK_WELL_KNOWN_JSON = {
-    registration_endpoint : REGISTER_URL,
-    authorization_endpoint: AUTHORIZE_URL,
-    token_endpoint        : TOKEN_URL,
-    
-    // For PKCE
-    code_challenge_methods_supported: ["S256"],
-    
-    // Advertise support for SMART Confidential Clients with Asymmetric Keys
-    token_endpoint_auth_methods_supported: ["private_key_jwt"],
-    token_endpoint_auth_signing_alg_values_supported: ["RS384", "ES384"],
-    
-    scopes_supported: [
-        "system/*.rs" // For asymmetric auth
-    ]
-};
 
-const MOCK_CAPABILITY_STATEMENT = {
-    resourceType: "CapabilityStatement",
-    rest: [
-        {
-            mode: "server",
-            security: {
-                extension: [
-                    {
-                        url: "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris",
-                        extension: [
-                            {
-                                url: "authorize",
-                                valueUri: AUTHORIZE_URL
-                            },
-                            {
-                                url: "token",
-                                valueUri: TOKEN_URL
-                            },
-                            {
-                                url: "introspect",
-                                valueUri: INTROSPECT_URL
-                            }
-                        ]
-                    }
-                ]
-            },
-            resource: []
-        }
-    ]
-};
 
-let mockDataServer;
 
 function navigate(url) {
     return new Promise((resolve, reject) => {
         browser.url(url, result => {
-            if (result.error) {
-                reject(result.error)
-            } else {
-                resolve(result.value)
-            }
+            // @ts-ignore
+            result.error ? reject(result.error) : resolve(result.value)
         });
     })
 }
@@ -115,11 +42,8 @@ function navigate(url) {
 function execute(fn, ...args) {
     return new Promise((resolve, reject) => {
         browser.execute(fn, args, result => {
-            if (result.error) {
-                reject(result.error)
-            } else {
-                resolve(result.value)
-            }
+            // @ts-ignore
+            result.error ? reject(result.error) : resolve(result.value)
         });
     })
 }
@@ -138,154 +62,6 @@ function executeAsync(fn, ...args) {
 
         return result.value
     });
-}
-
-/**
- * 
- * @param {import("../../src/types").fhirclient.AuthorizeParams} authorizeParams 
- * @param {*} wellKnownJson 
- * @param {*} capabilityStatement 
- * @returns 
- */
-async function authorize(
-    authorizeParams,
-    wellKnownJson = MOCK_WELL_KNOWN_JSON,
-    capabilityStatement = MOCK_CAPABILITY_STATEMENT
-) {
-    
-    // Open the browser (Ignores url params!!!) --------------------------------
-    await navigate(LAUNCH_URL)
-    await execute(
-        `history.replaceState(null, "", "${LAUNCH_URL}?launch=123&iss=${
-        encodeURIComponent(FHIR_URL)}")`
-    );
-
-    // Mock .well-known/smart-configuration ------------------------------------
-    let mockWellKnownJson;
-    if (wellKnownJson) {
-        mockWellKnownJson = mockServer.mock("/fhir/.well-known/smart-configuration", {
-            body: wellKnownJson,
-            status: 200,
-            headers: {
-                "content-type" : "application/json",
-                "cache-control": "no-cache, no-store, must-revalidate",
-                "pragma"       : "no-cache",
-                "expires"      : "0"
-            }
-        });
-    }
-    
-    // Mock the metadata request -----------------------------------------------
-    let mockCapabilityStatement;
-    if (capabilityStatement) {
-        mockCapabilityStatement = mockServer.mock("/fhir/metadata", {
-            body: capabilityStatement,
-            status: 200,
-            headers: {
-                "content-type" : "application/json",
-                "cache-control": "no-cache, no-store, must-revalidate",
-                "pragma"       : "no-cache",
-                "expires"      : "0"
-            }
-        })
-    }
-
-    // Inject our authorize call into the page ---------------------------------
-    /** @type {any} */
-    const result = await executeAsync(function(authorizeParams, done) {
-        FHIR.oauth2.authorize({ ...authorizeParams, noRedirect: true }).then(
-            function(url) { done(url) },
-            function(err) { done({ error: err.toString() }) }
-        );
-    }, authorizeParams);
-
-    // Verify that .well-known/smart-configuration has been requested ----------
-    if (mockWellKnownJson) {
-        expect(
-            mockWellKnownJson._request?.url,
-            "/fhir/.well-known/smart-configuration should have been requested"
-        ).to.equal("/fhir/.well-known/smart-configuration");
-        expect(
-            mockWellKnownJson._response.statusCode,
-            "/fhir/.well-known/smart-configuration should reply with status 200"
-        ).to.equal(200);
-    }
-
-    // Verify that metadata has been requested (if needed) ---------------------
-    if (!wellKnownJson && capabilityStatement) {
-        expect(
-            mockCapabilityStatement._request?.url,
-            "/fhir/metadata should be requested"
-        ).to.equal("/fhir/metadata");
-        expect(
-            mockCapabilityStatement._response.statusCode,
-            "/fhir/metadata should reply with status 200"
-        ).to.equal(200);
-    }
-
-    // Return the URL to run assertions on it ----------------------------------
-    const url = new URL(result);
-
-    expect(url.searchParams.get("response_type"), "The redirect url should contain 'response_type=code'").to.equal("code")
-    expect(url.searchParams.get("scope"), "The redirect url should contain 'launch' in its scope parameter").to.contain("launch")
-    expect(url.searchParams.get("redirect_uri"), "The redirect url contains invalid redirect_uri parameter").to.equal(REDIRECT_URL)
-    expect(url.searchParams.get("aud"), "The redirect url contains invalid aud parameter").to.equal(FHIR_URL)
-    expect(url.searchParams.get("state"), "The redirect url must contains a state parameter ").to.exist
-    expect(url.searchParams.get("launch"), "The redirect url contains invalid launch parameter").to.equal("123")
-
-    return url
-}
-
-async function ready(stateID, options = {}) {
-    const result = await executeAsync(function(options, done) {
-        FHIR.oauth2.ready(options).then(
-            function(client) {
-                window.SMART_CLIENT = client;
-                done(client.state );
-            },
-            function(e) {
-                done({ error: e + "" });
-            }
-        );
-    }, options);
-
-    // console.log("result:", result)
-
-    expect(result, "FHIR.oauth2.ready should resolve with valid client instance").to.exist
-
-    if (result.error) {
-        throw new Error(result.error.replace(/^Error: /, ""))
-    }
-
-    expect(await browser.getCurrentUrl(), "the browser url should be replaced").to.equal(REDIRECT_URL);
-
-    const state = await execute(function(stateID) {
-        return JSON.parse(sessionStorage.getItem(stateID) || "null");
-    }, stateID);
-
-    expect(state, `State should exist in sessionStorage["${stateID}"]`).not.to.equal(null);
-
-    expect(
-        await execute(function() { return SMART_CLIENT?.getPatientId(); }),
-        `client.getPatientId() should return "${PATIENT_ID}"`
-    ).to.equal(PATIENT_ID);
-
-    expect(
-        await execute(function() { return SMART_CLIENT?.getEncounterId(); }),
-        `client.getEncounterId() should return "${ENCOUNTER_ID}"`
-    ).to.equal(ENCOUNTER_ID);
-
-    expect(
-        await execute(function() { return SMART_CLIENT?.getUserId(); }),
-        `client.getUserId() should return "${USER_ID}"`
-    ).to.equal(USER_ID);
-
-    expect(
-        await execute(function() { return SMART_CLIENT?.getUserType(); }),
-        `client.getUserType() should return "${USER_TYPE}"`
-    ).to.equal(USER_TYPE);
-
-    return state
 }
 
 async function assertThrows(fn, e) {
@@ -358,89 +134,308 @@ function generateTokenResponse(state = {}) {
     return resp
 }
 
-async function startFileServer() {
-    return new Promise((resolve, reject) => {
-        server = app.listen(3000, "127.0.0.1", () => {
-            // console.log("File server listening on port http://127.0.0.1:3000");
+async function startFileServer(context) {
+    return new Promise(resolve => {
+        const app = express();
+        app.use(cors());
+        app.use((req, res, next) => {
+            res.set({
+                "cache-control": "no-cache, no-store, must-revalidate",
+                "pragma"       : "no-cache",
+                "expires"      : "0"
+            });
+            next();
+        });
+        app.use("/", express.static(
+            process.env.GITHUB_WORKSPACE || path.resolve(__dirname, "../../")
+        ));
 
-            fetch(LAUNCH_URL)
-            .then(res => {
-                if (res.ok) {
-                    resolve("http://127.0.0.1:3000");
-                } else {
-                    console.log(res)
-                    throw new Error(res.statusText)
-                }
-            })
-            .catch(e => {
-                console.error(e)
-                reject(e)
-            })
+        context.fileServer = app.listen(0, "127.0.0.1", () => {
+            const address = context.fileServer.address()
+            context.FILE_SERVER_BASE_URL = "http://127.0.0.1:" + address.port
+            context.LAUNCH_URL   = context.FILE_SERVER_BASE_URL + "/test/specs/launch.html"
+            context.REDIRECT_URL = context.FILE_SERVER_BASE_URL + "/test/specs/"
+            console.log("File server listening on " + context.FILE_SERVER_BASE_URL);
+            resolve(context);
         })
     })
 }
 
-async function startMockServer() {
-    return new Promise(resolve => {
-        mockDataServer = mockServer.listen(MOCK_PORT, "127.0.0.1", () => {
-            // console.log("Mock server listening on port http://127.0.0.1:" + MOCK_PORT)
-            resolve("http://127.0.0.1:" + MOCK_PORT);
-        })
-    });
-}
-
-async function stopFileServer() {
+async function stopFileServer(context) {
     return new Promise((resolve, reject) => {
-        if (server && server.listening) {
-            server.close((error) => {
+        if (context.fileServer && context.fileServer.listening) {
+            context.fileServer.close((error) => {
                 if (error) {
                     console.log("Error shutting down the file server: ", error);
                     reject(error)
                 } else {
-                    resolve(void 0);
+                    resolve(context);
                 }
             });
         } else {
-            resolve(void 0);
+            resolve(context);
         }
     })
 }
 
-async function stopMockServer() {
+async function startMockServer(context) {
+    return new Promise(resolve => {
+        context.mockDataServer = mockServer.listen(context.mockDataServer, "127.0.0.1", () => {
+            context.MOCK_PORT = context.mockDataServer.address().port
+            context.MOCK_BASE_URL  = "http://127.0.0.1:" + context.MOCK_PORT
+            context.FHIR_URL       = `${context.MOCK_BASE_URL}/fhir/`
+            context.AUTHORIZE_URL  = `${context.MOCK_BASE_URL}/auth/authorize`
+            context.TOKEN_URL      = `${context.MOCK_BASE_URL}/auth/token`
+            context.INTROSPECT_URL = `${context.MOCK_BASE_URL}/auth/introspect`
+            context.REGISTER_URL   = `${context.MOCK_BASE_URL}/auth/register`
+            console.log("Mock server listening on " + context.MOCK_BASE_URL)
+            resolve(context);
+        })
+    });
+}
+
+async function stopMockServer(context) {
     return new Promise((resolve, reject) => {
-        if (mockDataServer && mockDataServer.listening) {
-            mockDataServer.close((error) => {
+        if (context.mockDataServer && context.mockDataServer.listening) {
+            context.mockDataServer.close((error) => {
                 if (error) {
                     console.log("Error shutting down the mock server: ", error);
                     reject(error)
                 } else {
-                    resolve(void 0);
+                    resolve(context);
                 }
             });
         } else {
-            resolve(void 0);
+            resolve(context);
         }
     })
 }
 
+function mockWellKnownJson(context) {
+    return {
+        registration_endpoint : context.REGISTER_URL,
+        authorization_endpoint: context.AUTHORIZE_URL,
+        token_endpoint        : context.TOKEN_URL,
+        
+        // For PKCE
+        code_challenge_methods_supported: ["S256"],
+        
+        // Advertise support for SMART Confidential Clients with Asymmetric Keys
+        token_endpoint_auth_methods_supported: ["private_key_jwt"],
+        token_endpoint_auth_signing_alg_values_supported: ["RS384", "ES384"],
+        
+        scopes_supported: [
+            "system/*.rs" // For asymmetric auth
+        ]
+    };
+}
+
+function mockCapabilityStatement(context) {
+    return {
+        resourceType: "CapabilityStatement",
+        rest: [
+            {
+                mode: "server",
+                security: {
+                    extension: [
+                        {
+                            url: "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris",
+                            extension: [
+                                {
+                                    url: "authorize",
+                                    valueUri: context.AUTHORIZE_URL
+                                },
+                                {
+                                    url: "token",
+                                    valueUri: context.TOKEN_URL
+                                },
+                                {
+                                    url: "introspect",
+                                    valueUri: context.INTROSPECT_URL
+                                }
+                            ]
+                        }
+                    ]
+                },
+                resource: []
+            }
+        ]
+    };
+}
+
 describe("authorization", () => {
+
+    const ctx = {};
+
+    let MOCK_WELL_KNOWN_JSON, MOCK_CAPABILITY_STATEMENT;
+
     before(async () => {
-        // if (!process.env.GITHUB_WORKSPACE)
-        await startFileServer()
-        await startMockServer()
+        await startFileServer(ctx)
+        await startMockServer(ctx)
+
+        MOCK_WELL_KNOWN_JSON = mockWellKnownJson(ctx)
+        MOCK_CAPABILITY_STATEMENT = mockCapabilityStatement(ctx)
     });
     
     after(async () => {
-        await browser.end()
-        // if (!process.env.GITHUB_WORKSPACE)
-        await stopFileServer()
-        await stopMockServer()
+        // browser.end()
+        await stopFileServer(ctx)
+        await stopMockServer(ctx)
     });
     
     beforeEach(async () => mockServer.clear());
 
     
-    // pkceMode = 'disabled' -----------------------------------------------
+
+    /**
+     * 
+     * @param {import("../../src/types").fhirclient.AuthorizeParams} authorizeParams 
+     * @param {*} wellKnownJson 
+     * @param {*} capabilityStatement 
+     * @returns 
+     */
+    async function authorize(
+        authorizeParams,
+        wellKnownJson = MOCK_WELL_KNOWN_JSON,
+        capabilityStatement = MOCK_CAPABILITY_STATEMENT
+    ) {
+        
+        // Open the browser (Ignores url params!!!) ----------------------------
+        await navigate(ctx.LAUNCH_URL)
+        await execute(
+            `history.replaceState(null, "", "${ctx.LAUNCH_URL}?launch=123&iss=${
+            encodeURIComponent(ctx.FHIR_URL)}")`
+        );
+
+        // Mock .well-known/smart-configuration --------------------------------
+        let mockWellKnownJson;
+        if (wellKnownJson) {
+            mockWellKnownJson = mockServer.mock("/fhir/.well-known/smart-configuration", {
+                body: wellKnownJson,
+                status: 200,
+                headers: {
+                    "content-type" : "application/json",
+                    "cache-control": "no-cache, no-store, must-revalidate",
+                    "pragma"       : "no-cache",
+                    "expires"      : "0"
+                }
+            });
+        }
+        
+        // Mock the metadata request -------------------------------------------
+        let mockCapabilityStatement;
+        if (capabilityStatement) {
+            mockCapabilityStatement = mockServer.mock("/fhir/metadata", {
+                body: capabilityStatement,
+                status: 200,
+                headers: {
+                    "content-type" : "application/json",
+                    "cache-control": "no-cache, no-store, must-revalidate",
+                    "pragma"       : "no-cache",
+                    "expires"      : "0"
+                }
+            })
+        }
+
+        // Inject our authorize call into the page -----------------------------
+        /** @type {any} */
+        const result = await executeAsync(function(authorizeParams, done) {
+            FHIR.oauth2.authorize({ ...authorizeParams, noRedirect: true }).then(
+                function(url) { done(url) },
+                function(err) { done({ error: err.toString() }) }
+            );
+        }, authorizeParams);
+
+        // Verify that .well-known/smart-configuration has been requested ------
+        if (mockWellKnownJson) {
+            expect(
+                mockWellKnownJson._request?.url,
+                "/fhir/.well-known/smart-configuration should have been requested"
+            ).to.equal("/fhir/.well-known/smart-configuration");
+            expect(
+                mockWellKnownJson._response.statusCode,
+                "/fhir/.well-known/smart-configuration should reply with status 200"
+            ).to.equal(200);
+        }
+
+        // Verify that metadata has been requested (if needed) -----------------
+        if (!wellKnownJson && capabilityStatement) {
+            expect(
+                mockCapabilityStatement._request?.url,
+                "/fhir/metadata should be requested"
+            ).to.equal("/fhir/metadata");
+            expect(
+                mockCapabilityStatement._response.statusCode,
+                "/fhir/metadata should reply with status 200"
+            ).to.equal(200);
+        }
+
+        // Return the URL to run assertions on it ------------------------------
+        const url = new URL(result);
+
+        expect(url.searchParams.get("response_type"), "The redirect url should contain 'response_type=code'").to.equal("code")
+        expect(url.searchParams.get("scope"), "The redirect url should contain 'launch' in its scope parameter").to.contain("launch")
+        expect(url.searchParams.get("redirect_uri"), "The redirect url contains invalid redirect_uri parameter").to.equal(ctx.REDIRECT_URL)
+        expect(url.searchParams.get("aud"), "The redirect url contains invalid aud parameter").to.equal(ctx.FHIR_URL)
+        expect(url.searchParams.get("state"), "The redirect url must contains a state parameter ").to.exist
+        expect(url.searchParams.get("launch"), "The redirect url contains invalid launch parameter").to.equal("123")
+
+        return url
+    }
+
+    async function ready(stateID, options = {}) {
+        const result = await executeAsync(function(options, done) {
+            FHIR.oauth2.ready(options).then(
+                function(client) {
+                    SMART_CLIENT = client;
+                    done(client.state );
+                },
+                function(e) {
+                    done({ error: e + "" });
+                }
+            );
+        }, options);
+    
+        // console.log("result:", result)
+    
+        expect(result, "FHIR.oauth2.ready should resolve with valid client instance").to.exist
+    
+        if (result.error) {
+            throw new Error(result.error.replace(/^Error: /, ""))
+        }
+    
+        expect(await browser.getCurrentUrl(), "the browser url should be replaced").to.equal(ctx.REDIRECT_URL);
+    
+        const state = await execute(function(stateID) {
+            return JSON.parse(sessionStorage.getItem(stateID) || "null");
+        }, stateID);
+    
+        expect(state, `State should exist in sessionStorage["${stateID}"]`).not.to.equal(null);
+    
+        expect(
+            await execute(function() { return SMART_CLIENT?.getPatientId(); }),
+            `client.getPatientId() should return "${PATIENT_ID}"`
+        ).to.equal(PATIENT_ID);
+    
+        expect(
+            await execute(function() { return SMART_CLIENT?.getEncounterId(); }),
+            `client.getEncounterId() should return "${ENCOUNTER_ID}"`
+        ).to.equal(ENCOUNTER_ID);
+    
+        expect(
+            await execute(function() { return SMART_CLIENT?.getUserId(); }),
+            `client.getUserId() should return "${USER_ID}"`
+        ).to.equal(USER_ID);
+    
+        expect(
+            await execute(function() { return SMART_CLIENT?.getUserType(); }),
+            `client.getUserType() should return "${USER_TYPE}"`
+        ).to.equal(USER_TYPE);
+    
+        return state
+    }
+    
+    // pkceMode = 'disabled' ---------------------------------------------------
 
     it("using pkceMode = 'disabled' does not include code_challenge, even if the server supports S256", async () => {
         const redirectUrl = await authorize({
@@ -472,7 +467,7 @@ describe("authorization", () => {
         expect(redirectUrl.searchParams.get("code_challenge_method"), "The redirect url should NOT have a code_challenge_method parameter").not.to.exist;
     });
 
-    // pkceMode = 'disabled' -----------------------------------------------
+    // pkceMode = 'disabled' ---------------------------------------------------
 
     it("using pkceMode = 'disabled' does not include code_challenge, even if the server supports S256", async () => {
         const redirectUrl = await authorize({
@@ -504,7 +499,7 @@ describe("authorization", () => {
         expect(redirectUrl.searchParams.get("code_challenge_method"), "The redirect url should NOT have a code_challenge_method parameter").not.to.exist;
     });
 
-    // pkceMode = 'unsafeV1' -----------------------------------------------
+    // pkceMode = 'unsafeV1' ---------------------------------------------------
 
     it("using pkceMode = 'unsafeV1' includes code_challenge", async () => {
         const redirectUrl = await authorize({
@@ -536,7 +531,7 @@ describe("authorization", () => {
         expect(redirectUrl.searchParams.get("code_challenge_method"), "The redirect url should include code_challenge_method parameter=S256").to.equal("S256");
     });
 
-    // pkceMode = 'required' -----------------------------------------------
+    // pkceMode = 'required' ---------------------------------------------------
     
     it("using pkceMode = 'required' includes code_challenge", async () => {
         const redirectUrl = await authorize({
@@ -569,7 +564,7 @@ describe("authorization", () => {
         );
     });
 
-    // pkceMode = 'ifSupported' --------------------------------------------
+    // pkceMode = 'ifSupported' ------------------------------------------------
 
     it("using pkceMode = 'ifSupported' includes code_challenge", async () => {
         const redirectUrl = await authorize({
@@ -652,11 +647,11 @@ describe("authorization", () => {
 
         // Verify the state is properly initialized ----------------------------
         expect(state, `state should be stored at sessionStorage["${stateID}"]`).to.exist
-        expect(state.authorizeUri, `state.authorizeUri should be "${AUTHORIZE_URL}"`).to.equal(AUTHORIZE_URL)
-        expect(state.tokenUri, `state.tokenUri should be "${TOKEN_URL}"`).to.equal(TOKEN_URL)
-        expect(state.redirectUri, `state.redirectUri should be "${REDIRECT_URL}"`).to.equal(REDIRECT_URL)
-        expect(state.serverUrl, `state.serverUrl should be "${FHIR_URL}"`).to.equal(FHIR_URL)
-        expect(state.registrationUri, `state.registrationUri should be "${REGISTER_URL}"`).to.equal(REGISTER_URL)
+        expect(state.authorizeUri, `state.authorizeUri should be "${ctx.AUTHORIZE_URL}"`).to.equal(ctx.AUTHORIZE_URL)
+        expect(state.tokenUri, `state.tokenUri should be "${ctx.TOKEN_URL}"`).to.equal(ctx.TOKEN_URL)
+        expect(state.redirectUri, `state.redirectUri should be "${ctx.REDIRECT_URL}"`).to.equal(ctx.REDIRECT_URL)
+        expect(state.serverUrl, `state.serverUrl should be "${ctx.FHIR_URL}"`).to.equal(ctx.FHIR_URL)
+        expect(state.registrationUri, `state.registrationUri should be "${ctx.REGISTER_URL}"`).to.equal(ctx.REGISTER_URL)
         expect(state.clientId, `state.clientId should be "${CLIENT_ID}"`).to.equal(CLIENT_ID)
         expect(state.scope, `state.scope should be "patient/*.read launch"`).to.equal("patient/*.read launch")
         expect(state.key, `state.key should be "${stateID}"`).to.equal(stateID)
@@ -670,7 +665,7 @@ describe("authorization", () => {
         }
 
         // Redirect ------------------------------------------------------------
-        await navigate(`${REDIRECT_URL}?code=123&state=${stateID}`);
+        await navigate(`${ctx.REDIRECT_URL}?code=123&state=${stateID}`);
 
         // Mock token response -------------------------------------------------
         mockServer.mock({ method: "post", path: "/auth/token" }, {
@@ -713,11 +708,11 @@ describe("authorization", () => {
 
             // Verify the state is properly initialized ------------------------
             expect(state, `state should be stored at sessionStorage["${stateID}"]`).to.exist;
-            expect(state.authorizeUri, `state.authorizeUri should be "${AUTHORIZE_URL}"`).to.equal(AUTHORIZE_URL)
-            expect(state.tokenUri, `state.tokenUri should be "${TOKEN_URL}"`).to.equal(TOKEN_URL)
-            expect(state.redirectUri, `state.redirectUri should be "${REDIRECT_URL}"`).to.equal(REDIRECT_URL)
-            expect(state.serverUrl, `state.serverUrl should be "${FHIR_URL}"`).to.equal(FHIR_URL)
-            expect(state.registrationUri, `state.registrationUri should be "${REGISTER_URL}"`).to.equal(REGISTER_URL)
+            expect(state.authorizeUri, `state.authorizeUri should be "${ctx.AUTHORIZE_URL}"`).to.equal(ctx.AUTHORIZE_URL)
+            expect(state.tokenUri, `state.tokenUri should be "${ctx.TOKEN_URL}"`).to.equal(ctx.TOKEN_URL)
+            expect(state.redirectUri, `state.redirectUri should be "${ctx.REDIRECT_URL}"`).to.equal(ctx.REDIRECT_URL)
+            expect(state.serverUrl, `state.serverUrl should be "${ctx.FHIR_URL}"`).to.equal(ctx.FHIR_URL)
+            expect(state.registrationUri, `state.registrationUri should be "${ctx.REGISTER_URL}"`).to.equal(ctx.REGISTER_URL)
             expect(state.clientId, `state.clientId should be "${CLIENT_ID}"`).to.equal(CLIENT_ID)
             expect(state.scope, `state.scope should be "patient/*.read launch"`).to.equal("patient/*.read launch")
             expect(state.key, `state.key should be "${stateID}"`).to.equal(stateID)
@@ -727,7 +722,7 @@ describe("authorization", () => {
 
             
             // Redirect --------------------------------------------------------
-            await navigate(`${REDIRECT_URL}?code=123&state=${stateID}`);
+            await navigate(`${ctx.REDIRECT_URL}?code=123&state=${stateID}`);
             
             // Mock token response ---------------------------------------------
             const tokenMock = mockServer.mock({ path: "/auth/token", method: "post" }, {
@@ -740,7 +735,7 @@ describe("authorization", () => {
                     expect(req.body.client_assertion_type, "proper client_assertion_type should be sent in the POST body").to.equal('urn:ietf:params:oauth:client-assertion-type:jwt-bearer');
                     expect(req.body.code, "proper code should be sent in the POST body").to.equal('123');
                     expect(req.body.grant_type, "proper grant_type should be sent in the POST body").to.equal('authorization_code');
-                    expect(req.body.redirect_uri, "proper redirect_uri should be sent in the POST body").to.equal(REDIRECT_URL);
+                    expect(req.body.redirect_uri, "proper redirect_uri should be sent in the POST body").to.equal(ctx.REDIRECT_URL);
                     expect(req.body.code_verifier, "proper code_verifier should be sent in the POST body").to.exist;
 
                     let validated = await jose.compactVerify(req.body.client_assertion, clientKey)
@@ -750,7 +745,7 @@ describe("authorization", () => {
                     expect(validated.protectedHeader.typ, "client_assertion jku header must be JWT").to.equal("JWT");
 
                     let payload = JSON.parse(new TextDecoder().decode(validated.payload));
-                    expect(payload.aud, `The validated token payload aud property should be "${TOKEN_URL}"`).to.equal(TOKEN_URL);
+                    expect(payload.aud, `The validated token payload aud property should be "${ctx.TOKEN_URL}"`).to.equal(ctx.TOKEN_URL);
                     expect(payload.iss, `The validated token payload iss property should be "${CLIENT_ID}"`).to.equal(CLIENT_ID);
                     expect(payload.sub, `The validated token payload sub property should be "${CLIENT_ID}"`).to.equal(CLIENT_ID);
                     expect(payload.exp, "The validated token payload exp property should exist").to.exist;
@@ -777,7 +772,7 @@ describe("authorization", () => {
 
             const stateID = redirectUrl.searchParams.get("state");
 
-            await navigate(`${REDIRECT_URL}?code=123&state=${stateID}`);
+            await navigate(`${ctx.REDIRECT_URL}?code=123&state=${stateID}`);
 
             // 1. Create a key pair within the tested window
             // 2. Export the public key as JWK to be used for virification later
@@ -806,7 +801,7 @@ describe("authorization", () => {
                     const publicJWK = await crypto.subtle.exportKey("jwk", publicKey);
                     const privateJWK = await crypto.subtle.exportKey("jwk", privateKey);
 
-                    window.PRIVATE_KEY = await crypto.subtle.importKey("jwk", privateJWK, algorithm, false, ["sign"])
+                    PRIVATE_KEY = await crypto.subtle.importKey("jwk", privateJWK, algorithm, false, ["sign"])
 
                     done(publicJWK)
                 } catch (e) {
@@ -825,7 +820,7 @@ describe("authorization", () => {
                     expect(req.body.client_assertion_type, "proper client_assertion_type should be sent in the POST body").to.equal('urn:ietf:params:oauth:client-assertion-type:jwt-bearer');
                     expect(req.body.code, "proper code should be sent in the POST body").to.equal('123');
                     expect(req.body.grant_type, "proper grant_type should be sent in the POST body").to.equal('authorization_code');
-                    expect(req.body.redirect_uri, "proper redirect_uri should be sent in the POST body").to.equal(REDIRECT_URL);
+                    expect(req.body.redirect_uri, "proper redirect_uri should be sent in the POST body").to.equal(ctx.REDIRECT_URL);
                     expect(req.body.code_verifier, "proper code_verifier should be sent in the POST body").to.exist;
 
                     let validated = await jose.compactVerify(req.body.client_assertion, clientKey)
@@ -835,7 +830,7 @@ describe("authorization", () => {
                     expect(validated.protectedHeader.typ, "client_assertion typ header must be JWT").to.equal("JWT");
 
                     let payload = JSON.parse(new TextDecoder().decode(validated.payload));
-                    expect(payload.aud, `The validated token payload aud property should be "${TOKEN_URL}"`).to.equal(TOKEN_URL);
+                    expect(payload.aud, `The validated token payload aud property should be "${ctx.TOKEN_URL}"`).to.equal(ctx.TOKEN_URL);
                     expect(payload.iss, `The validated token payload iss property should be "${CLIENT_ID}"`).to.equal(CLIENT_ID);
                     expect(payload.sub, `The validated token payload sub property should be "${CLIENT_ID}"`).to.equal(CLIENT_ID);
                     expect(payload.exp, "The validated token payload exp property should exist").to.exist;
@@ -852,11 +847,11 @@ describe("authorization", () => {
                     privateKey: {
                         alg: context.alg,
                         kid: context.kid,
-                        key: window.PRIVATE_KEY
+                        key: PRIVATE_KEY
                     }
                 }).then(
                     function(client) {
-                        window.SMART_CLIENT = client;
+                        SMART_CLIENT = client;
                         done(client.state);
                     },
                     function(e) {
@@ -879,10 +874,11 @@ describe("authorization", () => {
                 client_id: CLIENT_ID,
                 scope    : "patient/*.read",
                 clientPublicKeySetUrl: KEY_SET_URL,
+                // @ts-ignore
                 clientPrivateJwk: { ...clientPrivateJwk, kty: "bad", alg }
             });
             const stateID = redirectUrl.searchParams.get("state");
-            await navigate(`${REDIRECT_URL}?code=123&state=${stateID}`);
+            await navigate(`${ctx.REDIRECT_URL}?code=123&state=${stateID}`);
             await ready(stateID).should.eventually.be.rejected;
         });
 
@@ -905,7 +901,7 @@ describe("authorization", () => {
             const stateID = redirectUrl.searchParams.get("state");
 
             // Redirect --------------------------------------------------------
-            await navigate(`${REDIRECT_URL}?code=123&state=${stateID}`);
+            await navigate(`${ctx.REDIRECT_URL}?code=123&state=${stateID}`);
             
             // Mock token response ---------------------------------------------
             mockServer.mock({ path: "/auth/token", method: "post" }, {
@@ -939,7 +935,7 @@ describe("authorization", () => {
             const stateID = redirectUrl.searchParams.get("state");
 
             // Redirect --------------------------------------------------------
-            await navigate(`${REDIRECT_URL}?code=123&state=${stateID}`);
+            await navigate(`${ctx.REDIRECT_URL}?code=123&state=${stateID}`);
             
             // Mock token response ---------------------------------------------
             mockServer.mock({ path: "/auth/token", method: "post" }, {
@@ -964,7 +960,7 @@ describe("authorization", () => {
 
         const stateID = redirectUrl.searchParams.get("state");
 
-        await navigate(`${REDIRECT_URL}?code=123&state=${stateID}`);
+        await navigate(`${ctx.REDIRECT_URL}?code=123&state=${stateID}`);
 
         const tokenMock = mockServer.mock({ path: "/auth/token", method: "post" }, {
             body  : generateTokenResponse(),
