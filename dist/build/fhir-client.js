@@ -3661,9 +3661,7 @@ var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/inte
 
 var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js"));
 
-var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ "./node_modules/@babel/runtime/helpers/defineProperty.js"));
-
-var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/asyncToGenerator.js"));
+__webpack_require__(/*! core-js/modules/esnext.global-this.js */ "./node_modules/core-js/modules/esnext.global-this.js");
 
 __webpack_require__(/*! core-js/modules/es.array.iterator.js */ "./node_modules/core-js/modules/es.array.iterator.js");
 
@@ -3727,6 +3725,12 @@ __webpack_require__(/*! core-js/modules/es.string.includes.js */ "./node_modules
 
 __webpack_require__(/*! core-js/modules/es.array.concat.js */ "./node_modules/core-js/modules/es.array.concat.js");
 
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ "./node_modules/@babel/runtime/helpers/defineProperty.js"));
+
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/asyncToGenerator.js"));
+
+var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ "./node_modules/@babel/runtime/helpers/typeof.js"));
+
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
@@ -3738,8 +3742,7 @@ exports.signCompactJws = exports.importJWK = exports.generatePKCEChallenge = exp
 
 var js_base64_1 = __webpack_require__(/*! js-base64 */ "./node_modules/js-base64/base64.js");
 
-var crypto = __webpack_require__.g.crypto || (__webpack_require__(/*! isomorphic-webcrypto */ "./node_modules/isomorphic-webcrypto/src/browser.mjs")["default"]);
-
+var crypto = (typeof globalThis === "undefined" ? "undefined" : (0, _typeof2.default)(globalThis)) === "object" && globalThis.crypto ? globalThis.crypto : (__webpack_require__(/*! isomorphic-webcrypto */ "./node_modules/isomorphic-webcrypto/src/browser.mjs")["default"]);
 var subtle = crypto.subtle;
 var ALGS = {
   ES384: {
@@ -12084,6 +12087,24 @@ if (DESCRIPTORS && !FUNCTION_NAME_EXISTS) {
 
 /***/ }),
 
+/***/ "./node_modules/core-js/modules/es.global-this.js":
+/*!********************************************************!*\
+  !*** ./node_modules/core-js/modules/es.global-this.js ***!
+  \********************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var global = __webpack_require__(/*! ../internals/global */ "./node_modules/core-js/internals/global.js");
+
+// `globalThis` object
+// https://tc39.es/ecma262/#sec-globalthis
+$({ global: true }, {
+  globalThis: global
+});
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/modules/es.json.stringify.js":
 /*!***********************************************************!*\
   !*** ./node_modules/core-js/modules/es.json.stringify.js ***!
@@ -14923,6 +14944,18 @@ createTypedArrayConstructor('Uint8', function (init) {
     return init(this, data, byteOffset, length);
   };
 });
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/esnext.global-this.js":
+/*!************************************************************!*\
+  !*** ./node_modules/core-js/modules/esnext.global-this.js ***!
+  \************************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+// TODO: Remove from `core-js@4`
+__webpack_require__(/*! ../modules/es.global-this */ "./node_modules/core-js/modules/es.global-this.js");
 
 
 /***/ }),

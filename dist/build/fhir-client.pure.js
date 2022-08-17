@@ -2006,8 +2006,7 @@ exports.signCompactJws = exports.importJWK = exports.generatePKCEChallenge = exp
 
 const js_base64_1 = __webpack_require__(/*! js-base64 */ "./node_modules/js-base64/base64.js");
 
-const crypto = __webpack_require__.g.crypto || (__webpack_require__(/*! isomorphic-webcrypto */ "./node_modules/isomorphic-webcrypto/src/browser.mjs")["default"]);
-
+const crypto = typeof globalThis === "object" && globalThis.crypto ? globalThis.crypto : (__webpack_require__(/*! isomorphic-webcrypto */ "./node_modules/isomorphic-webcrypto/src/browser.mjs")["default"]);
 const subtle = crypto.subtle;
 const ALGS = {
   ES384: {

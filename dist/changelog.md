@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.5.1
+- No functional changes
+- Changed the architecture to avoid build issues #156
+
 ## v2.5.0
 - Added `PKCE` support
 - Added support for asymmetric authentication

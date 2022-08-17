@@ -9,8 +9,7 @@ exports.signCompactJws = exports.importJWK = exports.generatePKCEChallenge = exp
 
 const js_base64_1 = require("js-base64");
 
-const crypto = global.crypto || require("isomorphic-webcrypto").default;
-
+const crypto = typeof globalThis === "object" && globalThis.crypto ? globalThis.crypto : require("isomorphic-webcrypto").default;
 const subtle = crypto.subtle;
 const ALGS = {
   ES384: {

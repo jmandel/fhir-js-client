@@ -1,6 +1,10 @@
 import { encodeURL, fromUint8Array } from "js-base64"
 import { fhirclient } from "../types"
-const crypto: Crypto = global.crypto || require("isomorphic-webcrypto").default
+
+const crypto: Crypto = typeof globalThis === "object" && globalThis.crypto ?
+    globalThis.crypto :
+    require("isomorphic-webcrypto").default;
+
 const subtle: SubtleCrypto = crypto.subtle
 
 interface PkcePair {
