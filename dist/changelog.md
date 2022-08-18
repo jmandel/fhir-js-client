@@ -1,8 +1,8 @@
 # Changelog
 
 ## v2.5.1
-- No functional changes
-- Changed the architecture to avoid build issues #156
+- Changed the architecture to avoid build issues #156. Version `2.5.0` cannot be use for client-side builds (but works in NodeJS or if loaded as a bundle) and `v2.5.1` provides a fix for that.
+- No other changes
 
 ## v2.5.0
 - Added `PKCE` support
