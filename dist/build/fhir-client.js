@@ -3715,10 +3715,6 @@ __webpack_require__(/*! core-js/modules/es.typed-array.to-locale-string.js */ ".
 
 __webpack_require__(/*! core-js/modules/es.typed-array.to-string.js */ "./node_modules/core-js/modules/es.typed-array.to-string.js");
 
-__webpack_require__(/*! core-js/modules/es.regexp.exec.js */ "./node_modules/core-js/modules/es.regexp.exec.js");
-
-__webpack_require__(/*! core-js/modules/es.string.replace.js */ "./node_modules/core-js/modules/es.string.replace.js");
-
 __webpack_require__(/*! core-js/modules/es.array.includes.js */ "./node_modules/core-js/modules/es.array.includes.js");
 
 __webpack_require__(/*! core-js/modules/es.string.includes.js */ "./node_modules/core-js/modules/es.string.includes.js");
@@ -3776,7 +3772,7 @@ function _digestSha() {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            prepared = new Uint8Array(s2b(payload));
+            prepared = new TextEncoder().encode(payload);
             _context2.next = 3;
             return subtle.digest('SHA-256', prepared);
 
@@ -3809,14 +3805,14 @@ var generatePKCEChallenge = /*#__PURE__*/function () {
           case 0:
             entropy = _args.length > 0 && _args[0] !== undefined ? _args[0] : 96;
             inputBytes = randomBytes(entropy);
-            codeVerifier = (0, js_base64_1.fromUint8Array)(inputBytes);
+            codeVerifier = (0, js_base64_1.fromUint8Array)(inputBytes, true);
             _context.t0 = (0, js_base64_1.fromUint8Array);
             _context.next = 6;
             return digestSha256(codeVerifier);
 
           case 6:
             _context.t1 = _context.sent;
-            codeChallenge = (0, _context.t0)(_context.t1);
+            codeChallenge = (0, _context.t0)(_context.t1, true);
             return _context.abrupt("return", {
               codeChallenge: codeChallenge,
               codeVerifier: codeVerifier
@@ -3916,11 +3912,11 @@ function _signCompactJws() {
             _context4.next = 5;
             return subtle.sign(_objectSpread(_objectSpread({}, privateKey.algorithm), {}, {
               hash: 'SHA-384'
-            }), privateKey, s2b(jwtAuthenticatedContent));
+            }), privateKey, new TextEncoder().encode(jwtAuthenticatedContent));
 
           case 5:
             signature = _context4.sent;
-            return _context4.abrupt("return", "".concat(jwtAuthenticatedContent, ".").concat((0, js_base64_1.fromUint8Array)(new Uint8Array(signature))));
+            return _context4.abrupt("return", "".concat(jwtAuthenticatedContent, ".").concat((0, js_base64_1.fromUint8Array)(new Uint8Array(signature), true)));
 
           case 7:
           case "end":
@@ -3933,28 +3929,6 @@ function _signCompactJws() {
 }
 
 exports.signCompactJws = signCompactJws;
-
-function s2b(s) {
-  var b = new Uint8Array(s.length);
-  var bs = utf8ToBinaryString(s);
-
-  for (var i = 0; i < bs.length; i++) {
-    b[i] = bs.charCodeAt(i);
-  }
-
-  return b;
-} // UTF-8 to Binary String
-// Source: https://coolaj86.com/articles/sign-jwt-webcrypto-vanilla-js/
-// Because JavaScript has a strange relationship with strings
-// https://coolaj86.com/articles/base64-unicode-utf-8-javascript-and-you/
-
-
-function utf8ToBinaryString(str) {
-  // replaces any uri escape sequence, such as %0A, with binary escape, such as 0x0A
-  return encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (_, p1) {
-    return String.fromCharCode(parseInt(p1, 16));
-  });
-}
 
 /***/ }),
 
@@ -4503,8 +4477,8 @@ function _authorize() {
             return storage.set(stateKey, state);
 
           case 71:
-            // note that the challenge is ALREADY encoded properly  
-            redirectParams.push("code_challenge=" + state.codeChallenge);
+            redirectParams.push("code_challenge=" + state.codeChallenge); // note that the challenge is ALREADY encoded properly
+
             redirectParams.push("code_challenge_method=S256");
 
           case 73:
@@ -4644,7 +4618,8 @@ exports.onMessage = onMessage;
 /**
  * The ready function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
- * authorization server..
+ * authorization server, but this code will also be executed upon subsequent
+ * navigation or page refresh.
  */
 
 function ready(_x2) {
@@ -4915,12 +4890,12 @@ function _buildTokenRequest() {
 
             requestOptions.headers.authorization = "Basic " + env.btoa(clientId + ":" + clientSecret);
             debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.authorization);
-            _context3.next = 33;
+            _context3.next = 32;
             break;
 
           case 11:
             if (!privateKey) {
-              _context3.next = 31;
+              _context3.next = 30;
               break;
             }
 
@@ -4942,11 +4917,6 @@ function _buildTokenRequest() {
 
           case 19:
             pk = _context3.t0;
-
-            if (isBrowser() && pk.extractable) {
-              console.warn("Your private key is extractable, and could be stolen via " + "cross-site scripting. Please generate an unextractable key " + "instead. If you registered a static credentials with an " + "EHR, consider (1) removing those credentials and registering " + "as a public client or (2) using this library server-side if " + "your application runs on a web server.");
-            }
-
             jwtHeaders = {
               typ: "JWT",
               kid: privateKey.kid,
@@ -4960,22 +4930,22 @@ function _buildTokenRequest() {
               exp: (0, lib_1.getTimeInFuture)(120) // two minutes in the future
 
             };
-            _context3.next = 25;
+            _context3.next = 24;
             return env.security.signCompactJws(privateKey.alg, pk, jwtHeaders, jwtClaims);
 
-          case 25:
+          case 24:
             clientAssertion = _context3.sent;
             requestOptions.body += "&client_assertion_type=".concat(encodeURIComponent("urn:ietf:params:oauth:client-assertion-type:jwt-bearer"));
             requestOptions.body += "&client_assertion=".concat(encodeURIComponent(clientAssertion));
             debug("Using state.clientPrivateJwk to add a client_assertion to the POST body");
-            _context3.next = 33;
+            _context3.next = 32;
             break;
 
-          case 31:
+          case 30:
             debug("Public client detected; adding state.clientId to the POST body");
             requestOptions.body += "&client_id=".concat(encodeURIComponent(clientId));
 
-          case 33:
+          case 32:
             if (codeVerifier) {
               debug("Found state.codeVerifier, adding to the POST body"); // Note that the codeVerifier is ALREADY encoded properly  
 
@@ -4984,7 +4954,7 @@ function _buildTokenRequest() {
 
             return _context3.abrupt("return", requestOptions);
 
-          case 35:
+          case 34:
           case "end":
             return _context3.stop();
         }

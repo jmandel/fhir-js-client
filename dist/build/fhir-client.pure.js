@@ -2030,7 +2030,7 @@ function randomBytes(count) {
 exports.randomBytes = randomBytes;
 
 async function digestSha256(payload) {
-  const prepared = new Uint8Array(s2b(payload));
+  const prepared = new TextEncoder().encode(payload);
   const hash = await subtle.digest('SHA-256', prepared);
   return new Uint8Array(hash);
 }
@@ -2039,8 +2039,8 @@ exports.digestSha256 = digestSha256;
 
 const generatePKCEChallenge = async (entropy = 96) => {
   const inputBytes = randomBytes(entropy);
-  const codeVerifier = (0, js_base64_1.fromUint8Array)(inputBytes);
-  const codeChallenge = (0, js_base64_1.fromUint8Array)(await digestSha256(codeVerifier));
+  const codeVerifier = (0, js_base64_1.fromUint8Array)(inputBytes, true);
+  const codeChallenge = (0, js_base64_1.fromUint8Array)(await digestSha256(codeVerifier), true);
   return {
     codeChallenge,
     codeVerifier
@@ -2086,31 +2086,11 @@ async function signCompactJws(alg, privateKey, header, payload) {
   const jwtAuthenticatedContent = `${(0, js_base64_1.encodeURL)(jwtHeader)}.${(0, js_base64_1.encodeURL)(jwtPayload)}`;
   const signature = await subtle.sign({ ...privateKey.algorithm,
     hash: 'SHA-384'
-  }, privateKey, s2b(jwtAuthenticatedContent));
-  return `${jwtAuthenticatedContent}.${(0, js_base64_1.fromUint8Array)(new Uint8Array(signature))}`;
+  }, privateKey, new TextEncoder().encode(jwtAuthenticatedContent));
+  return `${jwtAuthenticatedContent}.${(0, js_base64_1.fromUint8Array)(new Uint8Array(signature), true)}`;
 }
 
 exports.signCompactJws = signCompactJws;
-
-function s2b(s) {
-  const b = new Uint8Array(s.length);
-  const bs = utf8ToBinaryString(s);
-
-  for (var i = 0; i < bs.length; i++) b[i] = bs.charCodeAt(i);
-
-  return b;
-} // UTF-8 to Binary String
-// Source: https://coolaj86.com/articles/sign-jwt-webcrypto-vanilla-js/
-// Because JavaScript has a strange relationship with strings
-// https://coolaj86.com/articles/base64-unicode-utf-8-javascript-and-you/
-
-
-function utf8ToBinaryString(str) {
-  // replaces any uri escape sequence, such as %0A, with binary escape, such as 0x0A
-  return encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (_, p1) {
-    return String.fromCharCode(parseInt(p1, 16));
-  });
-}
 
 /***/ }),
 
@@ -2481,9 +2461,9 @@ async function authorize(env, params = {}) {
   if (shouldIncludeChallenge(extensions.codeChallengeMethods.includes('S256'), pkceMode)) {
     let codes = await env.security.generatePKCEChallenge();
     Object.assign(state, codes);
-    await storage.set(stateKey, state); // note that the challenge is ALREADY encoded properly  
+    await storage.set(stateKey, state);
+    redirectParams.push("code_challenge=" + state.codeChallenge); // note that the challenge is ALREADY encoded properly
 
-    redirectParams.push("code_challenge=" + state.codeChallenge);
     redirectParams.push("code_challenge_method=S256");
   }
 
@@ -2599,7 +2579,8 @@ exports.onMessage = onMessage;
 /**
  * The ready function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
- * authorization server..
+ * authorization server, but this code will also be executed upon subsequent
+ * navigation or page refresh.
  */
 
 async function ready(env, options = {}) {
@@ -2795,11 +2776,6 @@ async function buildTokenRequest(env, {
   } // Asymmetric auth
   else if (privateKey) {
     const pk = "key" in privateKey ? privateKey.key : await env.security.importJWK(privateKey);
-
-    if (isBrowser() && pk.extractable) {
-      console.warn("Your private key is extractable, and could be stolen via " + "cross-site scripting. Please generate an unextractable key " + "instead. If you registered a static credentials with an " + "EHR, consider (1) removing those credentials and registering " + "as a public client or (2) using this library server-side if " + "your application runs on a web server.");
-    }
-
     const jwtHeaders = {
       typ: "JWT",
       kid: privateKey.kid,

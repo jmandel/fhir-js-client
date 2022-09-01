@@ -1,6 +1,6 @@
 {
   "name": "fhirclient",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "description": "JavaScript client for Fast Healthcare Interoperability Resources",
   "author": "SMART Health IT <support@smarthealthit.org> (https://smarthealthit.org/)",
   "contributors": [
@@ -62,7 +62,7 @@
     "babel-polyfill": "^6.26.0",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
-    "chromedriver": "^103.0.0",
+    "chromedriver": "^104.0.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "jsdom": "^20.0.0",

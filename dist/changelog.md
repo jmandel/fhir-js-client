@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.5.2
+- Fix base64url encoding for PKCE #158
+- Simplified the code and removed IE support for new SMART V2 features like PKCE and asymmetric authentication.
+
 ## v2.5.1
 - Changed the architecture to avoid build issues #156. Version `2.5.0` cannot be use for client-side builds (but works in NodeJS or if loaded as a bundle) and `v2.5.1` provides a fix for that.
 - No other changes

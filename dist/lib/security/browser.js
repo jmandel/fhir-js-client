@@ -33,7 +33,7 @@ function randomBytes(count) {
 exports.randomBytes = randomBytes;
 
 async function digestSha256(payload) {
-  const prepared = new Uint8Array(s2b(payload));
+  const prepared = new TextEncoder().encode(payload);
   const hash = await subtle.digest('SHA-256', prepared);
   return new Uint8Array(hash);
 }
@@ -42,8 +42,8 @@ exports.digestSha256 = digestSha256;
 
 const generatePKCEChallenge = async (entropy = 96) => {
   const inputBytes = randomBytes(entropy);
-  const codeVerifier = (0, js_base64_1.fromUint8Array)(inputBytes);
-  const codeChallenge = (0, js_base64_1.fromUint8Array)(await digestSha256(codeVerifier));
+  const codeVerifier = (0, js_base64_1.fromUint8Array)(inputBytes, true);
+  const codeChallenge = (0, js_base64_1.fromUint8Array)(await digestSha256(codeVerifier), true);
   return {
     codeChallenge,
     codeVerifier
@@ -89,28 +89,8 @@ async function signCompactJws(alg, privateKey, header, payload) {
   const jwtAuthenticatedContent = `${(0, js_base64_1.encodeURL)(jwtHeader)}.${(0, js_base64_1.encodeURL)(jwtPayload)}`;
   const signature = await subtle.sign(Object.assign(Object.assign({}, privateKey.algorithm), {
     hash: 'SHA-384'
-  }), privateKey, s2b(jwtAuthenticatedContent));
-  return `${jwtAuthenticatedContent}.${(0, js_base64_1.fromUint8Array)(new Uint8Array(signature))}`;
+  }), privateKey, new TextEncoder().encode(jwtAuthenticatedContent));
+  return `${jwtAuthenticatedContent}.${(0, js_base64_1.fromUint8Array)(new Uint8Array(signature), true)}`;
 }
 
 exports.signCompactJws = signCompactJws;
-
-function s2b(s) {
-  const b = new Uint8Array(s.length);
-  const bs = utf8ToBinaryString(s);
-
-  for (var i = 0; i < bs.length; i++) b[i] = bs.charCodeAt(i);
-
-  return b;
-} // UTF-8 to Binary String
-// Source: https://coolaj86.com/articles/sign-jwt-webcrypto-vanilla-js/
-// Because JavaScript has a strange relationship with strings
-// https://coolaj86.com/articles/base64-unicode-utf-8-javascript-and-you/
-
-
-function utf8ToBinaryString(str) {
-  // replaces any uri escape sequence, such as %0A, with binary escape, such as 0x0A
-  return encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (_, p1) {
-    return String.fromCharCode(parseInt(p1, 16));
-  });
-}

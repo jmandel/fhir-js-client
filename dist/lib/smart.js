@@ -305,9 +305,9 @@ async function authorize(env, params = {}) {
   if (shouldIncludeChallenge(extensions.codeChallengeMethods.includes('S256'), pkceMode)) {
     let codes = await env.security.generatePKCEChallenge();
     Object.assign(state, codes);
-    await storage.set(stateKey, state); // note that the challenge is ALREADY encoded properly  
+    await storage.set(stateKey, state);
+    redirectParams.push("code_challenge=" + state.codeChallenge); // note that the challenge is ALREADY encoded properly
 
-    redirectParams.push("code_challenge=" + state.codeChallenge);
     redirectParams.push("code_challenge_method=S256");
   }
 
@@ -423,7 +423,8 @@ exports.onMessage = onMessage;
 /**
  * The ready function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
- * authorization server..
+ * authorization server, but this code will also be executed upon subsequent
+ * navigation or page refresh.
  */
 
 async function ready(env, options = {}) {
@@ -619,11 +620,6 @@ async function buildTokenRequest(env, {
   } // Asymmetric auth
   else if (privateKey) {
     const pk = "key" in privateKey ? privateKey.key : await env.security.importJWK(privateKey);
-
-    if (isBrowser() && pk.extractable) {
-      console.warn("Your private key is extractable, and could be stolen via " + "cross-site scripting. Please generate an unextractable key " + "instead. If you registered a static credentials with an " + "EHR, consider (1) removing those credentials and registering " + "as a public client or (2) using this library server-side if " + "your application runs on a web server.");
-    }
-
     const jwtHeaders = {
       typ: "JWT",
       kid: privateKey.kid,
