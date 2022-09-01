@@ -328,8 +328,8 @@ export async function authorize(
     if (shouldIncludeChallenge(extensions.codeChallengeMethods.includes('S256'), pkceMode)) {
         let codes = await env.security.generatePKCEChallenge()
         Object.assign(state, codes);
-        await storage.set(stateKey, state); // note that the challenge is ALREADY encoded properly  
-        redirectParams.push("code_challenge=" + state.codeChallenge);
+        await storage.set(stateKey, state);
+        redirectParams.push("code_challenge=" + state.codeChallenge);// note that the challenge is ALREADY encoded properly
         redirectParams.push("code_challenge_method=S256");
     }
   
@@ -438,7 +438,8 @@ export function onMessage(e: MessageEvent) {
 /**
  * The ready function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
- * authorization server..
+ * authorization server, but this code will also be executed upon subsequent
+ * navigation or page refresh.
  */
 export async function ready(env: fhirclient.Adapter, options: fhirclient.ReadyOptions = {}): Promise<Client>
 {

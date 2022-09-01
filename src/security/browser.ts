@@ -32,7 +32,7 @@ export function randomBytes(count: number): Uint8Array {
 }
 
 export async function digestSha256(payload: string): Promise<Uint8Array> {
-    const prepared: ArrayBuffer = new Uint8Array(s2b(payload));
+    const prepared = new TextEncoder().encode(payload);
     const hash = await subtle.digest('SHA-256', prepared);
     return new Uint8Array(hash);
 }
@@ -85,27 +85,8 @@ export async function signCompactJws(alg: keyof typeof ALGS, privateKey: CryptoK
     const signature = await subtle.sign(
         { ...privateKey.algorithm, hash: 'SHA-384' },
         privateKey,
-        s2b(jwtAuthenticatedContent)
+        new TextEncoder().encode(jwtAuthenticatedContent)
     );
 
     return `${jwtAuthenticatedContent}.${fromUint8Array(new Uint8Array(signature), true)}`
 }
-
-function s2b ( s: string ) {
-    const b = new Uint8Array(s.length);
-    const bs = utf8ToBinaryString(s)
-    for ( var i = 0; i < bs.length; i++ ) b[i] = bs.charCodeAt(i);
-    return b;
-}
-
-// UTF-8 to Binary String
-// Source: https://coolaj86.com/articles/sign-jwt-webcrypto-vanilla-js/
-// Because JavaScript has a strange relationship with strings
-// https://coolaj86.com/articles/base64-unicode-utf-8-javascript-and-you/
-function utf8ToBinaryString(str: string) {
-    // replaces any uri escape sequence, such as %0A, with binary escape, such as 0x0A
-    return encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(_, p1) {
-        return String.fromCharCode(parseInt(p1, 16));
-    });
-}
-
