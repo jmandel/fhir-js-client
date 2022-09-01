@@ -39,8 +39,8 @@ export async function digestSha256(payload: string): Promise<Uint8Array> {
 
 export const generatePKCEChallenge = async (entropy = 96): Promise<PkcePair> => {
     const inputBytes    = randomBytes(entropy)
-    const codeVerifier  = fromUint8Array(inputBytes)
-    const codeChallenge = fromUint8Array(await digestSha256(codeVerifier))
+    const codeVerifier  = fromUint8Array(inputBytes, true)
+    const codeChallenge = fromUint8Array(await digestSha256(codeVerifier), true)
     return { codeChallenge, codeVerifier }
 }
 
@@ -88,7 +88,7 @@ export async function signCompactJws(alg: keyof typeof ALGS, privateKey: CryptoK
         s2b(jwtAuthenticatedContent)
     );
 
-    return `${jwtAuthenticatedContent}.${fromUint8Array(new Uint8Array(signature))}`
+    return `${jwtAuthenticatedContent}.${fromUint8Array(new Uint8Array(signature), true)}`
 }
 
 function s2b ( s: string ) {
