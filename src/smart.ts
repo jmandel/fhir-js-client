@@ -678,17 +678,6 @@ export async function buildTokenRequest(
             privateKey.key as CryptoKey:
             await env.security.importJWK(privateKey as fhirclient.JWK)
 
-        if (isBrowser() && pk.extractable) {
-            console.warn(
-                "Your private key is extractable, and could be stolen via " +
-                "cross-site scripting. Please generate an unextractable key " +
-                "instead. If you registered a static credentials with an " +
-                "EHR, consider (1) removing those credentials and registering " +
-                "as a public client or (2) using this library server-side if " +
-                "your application runs on a web server."
-            );
-        }
-
         const jwtHeaders = {
             typ: "JWT",
             kid: privateKey.kid,
