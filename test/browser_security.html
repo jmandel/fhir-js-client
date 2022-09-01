@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Request Examples</title>
+    </head>
+    <body>
+        <p style="text-align: center;">
+            This file will test crypto functionality in the current browser.
+            Look at the console output for details.
+        </p>
+        <script src="../dist/build/fhir-client.js"></script>
+        <script>
+        (function() {
+
+            var JWK_RS384 = {
+                "kty": "RSA",
+                "alg": "RS384",
+                "n": "1blEEASdKpdpTVP_WMqDwWLx7NXDch5SDNeCSBcq7exEfITtGC9IuJ7hKvVa786f0Zuf00Lhn1qcxYkV1jzzs61wU6X59zU_ApFDSKfrT3zi5YBnUh-ugOJ-Y0dTNc9NjuA624dMlqWtPRRoJdCAcXcseVla3EioYsYFPy2popLhhtO1o4tYelHCvp7n5k_mGDVPNLZA5zHh0XoY2BuSjp3OJXkbjOkZpGJSubLXRYnB9NzCPmfxjs_B2I_C9hlXqCXDju_Iwm5cygRcJJq1L5pvQGAKyrREH8lm8FLf4JneC2xeyTsu2Tl-NDE4cekLDjvfKqc3yVoij7vp8gDauw",
+                "e": "AQAB",
+                "d": "MFvsT6eLnHCILiwccg3YxDBMR2eTAsZjkG5PF1rOpuk4EejN8RP543RnxJ2hxvM87GPHRTkz7ifFo1jCbSh7iCNtcC_1IH-W01DlJZKBRwoeGQn11vo-NQGK0ZH4_Qr8JKEOEFBL_yZbzZ9JdYz5EzOBB7A1Q_TYzQi7dTEy2grx9Cr8X3sN4-PcdoiA3B2CVLngU6n3TqW0vXWeyN-Za9TvGKLhy64K9dM9-3S27DQ72-eCUENBfdmqfELP_PIsd1jX7bayoHrIt2_sgKa0bJtRMxnErCbienhnTJdrzxT3uESKgC-0BTe2H2SxS9r9fc6As3YX1dFq7bGy1QY5cQ",
+                "p": "_YkYFO422d-m9RBJNIzLQMD_uGMZkJJy__tMq5bg2sg-ITIhWA28NEgM4jymn9yQ1pDReYsPNBVqzyGrMWW0V9z-9am1LHmnjY-Lq1CzM9n9xc1Rfxifl3zIlFSWZgI7IFn8igViNjHWdHhAozM6n3v71dXeFjXnhC9mO4nHlFk",
+                "q": "180aTv4E507eGriXAGLIQlkNjeJerczLqu-ZrolmvBDpSLEWBFQj7NaJ0fIrGCFKrZ6lr0i3tfILxse4NuaE6YguZTwSFlV-IHvWT8M5Zt04klf8_h6JmzHKmiO-IF25_8YLf_RNdi2LwbWJyM0m3IeZQzda4asK4wf8l7pLFTM",
+                "dp": "xwjuH9hWtTnvvulXHur80UvyNNWPh0CBCVZF_VrIENksdTD-njrCKiT6AE1u3YbxKZCs8gbqG5BItm0PEQtvxZ5XhZICCfVDRU2QbyA-XpFeuP8TYHx7JRiv-kphe5l6w04BhHTvge4kFnElBTm9ZuCVdmycGcGdi9cOIeVrCZk",
+                "dq": "hYAl2V497FaXAlLVX3C80IbE4tR6m-xIxsuI-DeaLZgMqWKb6zueKeMiyZWV4UyfJT8y4ngK5m0BqgxdwuDispIDma8KxXRIHZJep2NvfFo4qBf0s8RyfmbUHn0kHmO9MCT1ckfRL93HSqOixG1dsCnWv4VcHKUyi_ah5b9iuY8",
+                "qi": "_OMRvREu62VD6pC5fT9qs_4AJD9qsX2qKyFxP4Vz5TGPf45_YN3NzsgnqOAGc8oM8NSbX_nu1zeOx5n7BRap1XfXRmUFa365pufzqgdJbXgJeDXCy7bNMM1KfBaplLaBDKfH7qSBbvvBDhKNm1KsJP7ZzyZdldMpQL9JUuC1LE4",
+                "key_ops": [ "sign" ],
+                "ext": true,
+                "kid": "ca8f54d25e1a8909851d16d89c8c0a87"
+            };
+
+            var JWK_ES384 = {
+                "kty": "EC",
+                "crv": "P-384",
+                "d": "WcrTiYk8jbI-Sd1sKNpqGmELWGG08bf_y9SSlnC4cpAl5GRdHHN9gKYlPvMFqiJ5",
+                "x": "wcE8O55ro6aOuTf5Ty1k_IG4mTcuLiVercHouge1G5Ri-leevhev4uJzlHpi3U8r",
+                "y": "mLRgz8Giu6XA_AqG8bywqbygShmd8jowflrdx0KQtM5X4s4aqDeCRfcpexykp3aI",
+                "kid": "afb27c284f2d93959c18fa0320e32060",
+                "alg": "ES384"
+            }
+
+            Promise.resolve()
+
+            .then(function() {
+                console.info("Inspecting window.FHIR")
+                console.log(FHIR)
+            })
+    
+            .then(function() {
+                console.info("Testing window.FHIR.utils.security.generatePKCEChallenge")
+                return FHIR.utils.security.generatePKCEChallenge()
+            }).then(console.log, console.error)
+
+            .then(function() {
+                console.info("Testing window.FHIR.utils.security.importKey with RS384")
+                return FHIR.utils.security.importKey(JWK_RS384)
+            }).then(console.log, console.error)
+
+            .then(function() {
+                console.info("Testing window.FHIR.utils.security.importKey with ES384")
+                return FHIR.utils.security.importKey(JWK_ES384)
+            }).then(console.log, console.error)
+        
+            .then(function() {
+                console.info("Testing window.FHIR.utils.security.generateKey with RS384")
+                return FHIR.utils.security.generateKey("RS384")
+            }).then(console.log, console.error)
+
+            .then(function() {
+                console.info("Testing window.FHIR.utils.security.generateKey with ES384")
+                return FHIR.utils.security.generateKey("ES384")
+            }).then(console.log, console.error)
+
+            .then(function() {
+                console.info("Testing window.FHIR.utils.security.signCompactJws with RS384")
+                return FHIR.utils.security.generateKey('RS384')
+                .then(function(key) { return FHIR.utils.security.signCompactJws(key.privateKey, {'jwku': 'sure'}, {iss: "issuer"}) })
+            }).then(console.log, console.error)
+
+            .then(function() {
+                console.info("Testing window.FHIR.utils.security.signCompactJws with ES384")
+                return FHIR.utils.security.generateKey('ES384')
+                .then(function(key) { return FHIR.utils.security.signCompactJws(key.privateKey, {'jwku': 'sure'}, {iss: "issuer"}) })
+            }).then(console.log, console.error)
+        })();
+        </script>
+    </body>
+</html>

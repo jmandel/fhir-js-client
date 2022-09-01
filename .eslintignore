@@ -1,0 +1,10 @@
+node_modules
+.eslintrc
+.nyc_output
+.vscode
+coverage
+build
+dist
+lib
+example
+trash

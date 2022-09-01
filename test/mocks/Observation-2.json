@@ -1,0 +1,52 @@
+{
+  "resourceType": "Observation",
+  "id": "6e5c3052-5eac-406a-9f28-9ade70685bbe",
+  "meta": {
+    "versionId": "2",
+    "lastUpdated": "2018-10-04T16:15:33.393-04:00",
+    "profile": [
+      "http://standardhealthrecord.org/fhir/StructureDefinition/shr-observation-Observation"
+    ],
+    "tag": [
+      {
+        "system": "https://smarthealthit.org/tags",
+        "code": "synthea-7-2017"
+      }
+    ]
+  },
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://hl7.org/fhir/observation-category",
+          "code": "laboratory"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "6082-2",
+        "display": "Codfish IgE Ab in Serum"
+      }
+    ],
+    "text": "Codfish IgE Ab in Serum"
+  },
+  "subject": {
+    "reference": "Patient/d0d0cde0-4b21-42f6-9c1e-bfa447d72059"
+  },
+  "context": {
+    "reference": "Encounter/ee455dbe-6d18-478b-8173-c6c6bb88affa"
+  },
+  "effectiveDateTime": "2013-03-03T22:01:02-05:00",
+  "issued": "2013-03-03T22:01:02-05:00",
+  "valueQuantity": {
+    "value": 0.19175482211470585,
+    "unit": "kU/L",
+    "system": "http://unitsofmeasure.org/",
+    "code": "kU/L"
+  }
+}

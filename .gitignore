@@ -7,3 +7,10 @@
 .#*
 *.swp
 node_modules
+.vscode
+# test.html
+trash
+post-launch/index.html
+.DS_Store
+coverage
+.nyc_output
