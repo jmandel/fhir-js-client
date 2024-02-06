@@ -12,8 +12,8 @@ A clear and concise description of what the bug is.
 
 **To Reproduce**
 Steps to reproduce the behavior. A few things to consider including:
-- What's the API endpoint are you hitting?
-- Is the server an open server or closed? 
+- Is the server an open server or closed?
+- What requests are you making, or what methods aren't working as expected.
 - What launch sequence are you using?
 
 **Expected behavior**
@@ -22,16 +22,17 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
+**Client-side (please complete the following information):**
+ - OS: [e.g. Windows, OS, iOS]
  - Browser [e.g. chrome, safari]
  - Version [e.g. 22]
+ - Front-end Framework(s) [e.g. React, jQuery]
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+**Server-side (please complete the following information):**
+ - Node version: [e.g. v21.6.0]
+ - OS: [e.g. OS, Unix]
+ - Framework [e.g. Express, HAPI, none]
+ - Framework Version [e.g. 22]
 
 **Additional context**
-Add any other context about the problem here.
+Add any other context about the problem here. If you have links to any deployed tools or webpages, they would be good to include.
