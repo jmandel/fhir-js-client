@@ -1,11 +1,12 @@
 {
   "name": "fhirclient",
-  "version": "2.5.2",
+  "version": "2.5.3",
   "description": "JavaScript client for Fast Healthcare Interoperability Resources",
   "author": "SMART Health IT <support@smarthealthit.org> (https://smarthealthit.org/)",
   "contributors": [
     "Josh Mandel <joshua.mandel@childrens.harvard.edu>",
-    "Vladimir Ignatov <vlad.ignatov@gmail.com>"
+    "Vladimir Ignatov <vlad.ignatov@gmail.com>",
+    "Dylan Phelan <dtphelan1@gmail.com>"
   ],
   "keywords": [
     "SMART",

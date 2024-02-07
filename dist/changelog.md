@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.5.3
+- [non-functional] Created bug and feature issue templates in #177
+- Added logic for using patientId & clientId URL parameters to in calls to `smart.authorize` in #178
+- [non-functional] Made documentation changes fixing small typos and removing unnecessary text in `docs/open_servers.md` in #178
+- [non-functional] Added an .nvmrc file suggesting node v14.21.3, lts/fermium, in #178
+
 ## v2.5.2
 - Fix base64url encoding for PKCE #158
 - Simplified the code and removed IE support for new SMART V2 features like PKCE and asymmetric authentication.
